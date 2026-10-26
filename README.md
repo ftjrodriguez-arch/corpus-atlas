@@ -29,6 +29,7 @@ Funciona en el navegador del ordenador, la tableta o el móvil, sin instalar nad
 - **Fichas en inglés y portugués** (1.801 fichas, traducción automática asistida pendiente de revisión).
 - **Revisión experta**: formulario «Proponer corrección» en cada ficha y lista de estructuras reconstruidas que necesitan revisión.
 - **Más lecciones** (pares craneales, cuello, tórax y respiración, vísceras abdominales) y **más casos** (parálisis de Bell, III par, hernia inguinal, ictus de la cerebral media).
+- **Línea alba e intersecciones tendinosas** (v23): el rafe medio entre los rectos, con el anillo umbilical, y las tres intersecciones tendinosas de cada recto, construidas sobre la superficie de los músculos del atlas.
 - **Recto y conducto anal** como estructuras propias (antes formaban parte del colon sigmoide del atlas), y uniones entre regiones de piel soldadas para eliminar grietas.
 - **Compartir vista**: un enlace abre el atlas exactamente en la misma vista (capas, cámara, cortes, estructura, marcha).
 - **Marcha patológica**: Trendelenburg, steppage, antiálgica, hemiparética, en tijera, parkinsoniana y rodilla rígida.
