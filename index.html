@@ -1,0 +1,1439 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Atlas anatómico 3D libre y gratuito en español: 4.700 estructuras del cuerpo humano masculino y femenino, disección por capas, orígenes e inserciones, rangos articulares y fichas clínicas.">
+<meta name="theme-color" content="#0d1117">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Corpus Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,500;0,600;1,400;1,500&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: visor anatómico — escenario 3D a la izquierda, panel de instrumentos a la derecha; en teléfono se apilan */
+:root{
+  /* Diseño deliberadamente oscuro (modo médico de alto contraste) */
+  --bg:#0b1014; --panel:#121a1f; --panel2:#18222a; --ink:#eef3f6; --muted:#a3b1bb; --line:#26343d;
+  --accent:#4fc3c9; --accent-ink:#061214; --accent-soft:#13343a;
+  --stage:#070b0e; --stage2:#17232b; --chip:rgba(14,21,26,.88);
+  --ok:#5fd394; --warn:#f2b257; --bad:#ff7b6e;
+  --sag:#4d8dff; --fro:#3fcf74; --tra:#ff5a52; --orig:#ff4d4d; --ins:#4d9bff;
+  --f-display:'Spectral', Georgia, 'Times New Roman', serif;
+  --f-ui:'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-mono:'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 var(--f-ui);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:10px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:10px;min-width:0}
+.brand b{font:italic 500 26px/1 var(--f-display);letter-spacing:-.01em}
+.brand span{font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:999px;font-weight:600;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+main{flex:1;min-height:0;display:grid;gap:10px;grid-template-rows:minmax(0,1.15fr) minmax(0,1fr)}
+@media (min-width:880px){ main{grid-template-columns:minmax(0,1fr) 410px;grid-template-rows:minmax(0,1fr)} }
+.stage{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);
+  background:radial-gradient(ellipse 70% 60% at 50% 38%,var(--stage2),var(--stage) 78%)}
+.stage.studio{background:#000}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;font:600 10.5px/1 var(--f-ui);letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 6px;border-radius:5px;background:var(--chip);color:var(--muted);border:1px solid var(--line)}
+.lbl.tag{font:500 13px/1.1 var(--f-display);letter-spacing:0;text-transform:none;color:var(--ink);transform:translate(10px,-50%);border-color:var(--accent)}
+.lbl.tag::before{content:"";position:absolute;left:-7px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--accent)}
+.hint{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none}
+.hint p{margin:0;font-size:12px;color:var(--muted);background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:5px 8px;max-width:62%}
+.quizbar{pointer-events:auto;font-weight:600;font-size:13px;background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:6px 10px}
+.loader{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(280px,80%);background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.bar{height:6px;border-radius:3px;background:var(--panel2);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.actbar{position:absolute;left:10px;right:10px;bottom:52px;background:var(--chip);border:1px solid var(--accent);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;z-index:3;backdrop-filter:blur(6px)}
+.actname{font:500 14px/1.2 var(--f-display);padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.actbtns{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none}.actbtns::-webkit-scrollbar{display:none}
+.actbtns button{flex:none;border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:5px 9px;font-size:12px;font-weight:600}
+.actbtns button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.conchip{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.legend{position:absolute;right:10px;top:52px;display:flex;flex-direction:column;gap:4px;font-size:12px;background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:6px 8px;pointer-events:none}
+.legend span{display:flex;align-items:center;gap:6px}
+.views{position:absolute;left:10px;right:10px;bottom:10px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.views::-webkit-scrollbar{display:none}
+.views button{flex:none}
+.views button{border:1px solid var(--line);background:var(--chip);border-radius:8px;padding:6px 9px;font-size:12px;font-weight:600}
+.views button:hover{border-color:var(--accent)}
+.views button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.lesson{border:1px solid var(--line);border-radius:10px;padding:11px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.lesson b{display:block;font:500 17px/1.2 var(--f-display)}
+.steps{display:flex;gap:4px}.steps i{flex:1;height:4px;border-radius:2px;background:var(--line)}.steps i.on{background:var(--accent)}
+.opt{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:9px 11px;font-size:13.5px;margin-bottom:6px}
+.opt.ok{border-color:var(--ok);color:var(--ok);font-weight:700}.opt.bad{border-color:var(--bad);color:var(--bad)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.ptop{padding:12px 12px 0;display:flex;flex-direction:column;gap:10px}
+.search{position:relative}
+.search input{width:100%;border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:9px 11px}
+.results{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;background:var(--panel);border:1px solid var(--line);border-radius:10px;max-height:300px;overflow:auto;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.results button{display:flex;justify-content:space-between;gap:8px;width:100%;text-align:left;border:0;background:transparent;padding:8px 11px;border-bottom:1px solid var(--line)}
+.results button:hover{background:var(--panel2)}
+.results small{color:var(--muted);white-space:nowrap}
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:transparent;padding:9px 2px 10px;font-weight:600;font-size:12.5px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.pbody{flex:1;overflow:auto;padding:14px 14px 18px;min-height:0}
+.view{display:flex;flex-direction:column;gap:14px}
+h2{font:500 21px/1.15 var(--f-display);margin:0;text-wrap:balance}
+h3{margin:0;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:7px 11px;font-size:13px;font-weight:600}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.5;cursor:default}
+.sys{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.sys:last-child{border-bottom:0}
+.dot{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.15);flex:none}
+.sys .nm{font-weight:600;min-width:0}
+.sys .nm small{font-weight:400;color:var(--muted);margin-left:4px;font-variant-numeric:tabular-nums}
+.sys .oprow{grid-column:2 / 4;display:flex;gap:8px;align-items:center}
+.rx{border:1px solid var(--line);background:var(--panel2);border-radius:6px;padding:2px 7px;font:700 11px var(--f-mono)}
+.rx[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.depth{grid-column:2 / 4;display:flex;gap:5px;flex-wrap:wrap}.depth button{border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:3px 9px;font-size:11.5px;font-weight:600;color:var(--muted)}
+.depth button[aria-pressed="true"]{border-color:var(--accent);color:var(--ink)}
+.lms{display:flex;flex-wrap:wrap;gap:5px}.lms button{border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:3px 9px;font-size:12px}
+.lms button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.ai{display:flex;flex-direction:column;gap:8px}.ai textarea{min-height:58px;font:13px var(--f-ui)}
+.aiout{font-size:13.5px;line-height:1.55;white-space:pre-wrap;background:var(--panel2);border-radius:8px;padding:10px;border:1px solid var(--line)}
+.sysgrp{margin-top:6px}
+input[type=range]{accent-color:var(--accent);width:100%}
+.sw{width:38px;height:22px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);position:relative;padding:0;flex:none}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--muted);transition:left .15s}
+.sw[aria-checked="true"]{background:var(--accent);border-color:var(--accent)}
+.sw[aria-checked="true"]::after{left:18px;background:var(--accent-ink)}
+.card{border:1px solid var(--line);border-radius:10px;padding:11px 12px;display:flex;flex-direction:column;gap:8px;background:var(--panel)}
+.plane-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.plane-h b{display:flex;align-items:center;gap:8px}
+.swatch{width:10px;height:10px;border-radius:2px}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px}
+body:not(.body-f) .femonly{display:none}
+body.body-f .maleonly,body.body-f #tab-sistemas > .row:first-child,body.body-f #tab-mov > :not(.femonly),body.body-f #lecBox{display:none}
+header{flex-wrap:wrap;gap:8px}
+.dis input[type=range]{width:100%;accent-color:var(--accent);margin:6px 0 2px}
+.disSteps{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin-bottom:8px}
+.disSteps button{border:0;background:none;padding:4px 0 0;font-size:10px;line-height:1.15;color:var(--muted);text-align:center;cursor:pointer;border-top:2px solid var(--line)}
+.disSteps button[aria-current="true"]{color:var(--ink);border-top-color:var(--accent);font-weight:700}
+.disNow{display:flex;flex-direction:column;gap:2px;margin-bottom:8px;font-size:13px}.disNow span{color:var(--muted);font-size:12.5px;line-height:1.4}
+@media (max-width:560px){.disSteps button{font-size:0}.disSteps button::after{content:attr(data-s);font-size:10px}}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th,.tbl td{text-align:left;padding:6px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tblwrap{overflow-x:auto}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600}
+.chips button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.readout{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.deg{font:600 40px/1 var(--f-mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.deg small{font-size:15px;color:var(--muted);font-weight:500}
+.status{font-size:12px;font-weight:700;padding:4px 8px;border-radius:6px;border:1px solid currentColor}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:6px 10px;font-size:13px;margin:0}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;min-width:0}
+.scale{position:relative;height:8px;border-radius:4px;background:var(--panel2);border:1px solid var(--line);overflow:hidden}
+.scale i{position:absolute;top:0;bottom:0;left:0;background:var(--ok);opacity:.35}
+.scale em{position:absolute;top:-3px;bottom:-3px;width:3px;background:var(--ink);border-radius:2px}
+.info-sys{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted)}
+.latin{font:italic 400 16px/1.2 var(--f-display);color:var(--muted)}
+.note{border-left:3px solid var(--accent);padding:6px 10px 6px 10px;background:var(--accent-soft);border-radius:0 8px 8px 0}
+.note h3{margin-bottom:3px;color:var(--accent)}
+.empty{border:1px dashed var(--line);border-radius:10px;padding:14px;color:var(--muted);font-size:13px}
+body.mode-stu .only-pro{display:none!important}
+body.mode-pro .only-stu{display:none!important}
+.field{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:7px 10px;font-size:13px;min-width:0}
+textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
+.link{border:0;background:none;padding:0;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:2px;font-size:inherit;text-align:left}
+.hrrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}.hrrow:last-child{border-bottom:0}
+.hrrow span{display:flex;flex-direction:column;min-width:0}.hrrow small{color:var(--muted);font-size:12px}
+.vrow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
+.vrow:last-child{border-bottom:0}
+.vrow span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.err{color:var(--bad);font-size:12.5px}
+.credit{font-size:11.5px;color:var(--muted);line-height:1.5}
+.credit a{color:var(--muted)}
+@media (prefers-reduced-motion: reduce){ .sw::after,.bar i{transition:none} }
+</style>
+
+<header>
+  <div class="brand"><b>Corpus</b><span>Atlas anatómico 3D</span></div>
+  <div class="seg" role="group" aria-label="Modo de uso">
+    <button id="m-stu" aria-pressed="true">Estudiante</button>
+    <button id="m-pro" aria-pressed="false">Profesional</button>
+  </div>
+  <div class="seg" role="group" aria-label="Cuerpo">
+    <button id="b-m" aria-pressed="true">Hombre</button>
+    <button id="b-f" aria-pressed="false">Mujer</button>
+  </div>
+</header>
+
+<main>
+  <section class="stage" id="stage" aria-label="Modelo 3D del cuerpo humano">
+    <canvas id="cv"></canvas>
+    <div class="labels" id="labels"></div>
+    <div class="hint">
+      <p id="hintTxt">Arrastra para girar · pellizca o rueda para acercar · dos dedos o clic derecho para desplazar · toca una estructura para identificarla</p>
+      <span class="quizbar" id="quizbar" hidden></span>
+    </div>
+    <div class="loader" id="loader" hidden><span id="loadTxt">Cargando…</span><div class="bar"><i id="loadBar"></i></div></div>
+    <div class="actbar" id="actbar" hidden>
+      <span class="actname" id="actName"></span>
+      <div class="actbtns">
+        <button id="aIso">Aislar 360°</button>
+        <button id="aExt">Extraer</button>
+        <button id="aHide">Ocultar</button>
+        <button id="aVec">Vectores O→I</button>
+        <button id="aCon">Simular contracción</button>
+        <button id="aAsk">Preguntar a la IA</button>
+      </div>
+    </div>
+    <div class="conchip" id="conChip" hidden></div>
+    <div class="legend" id="legend" hidden><span><i class="dot" style="background:var(--orig)"></i>Origen (proximal)</span><span><i class="dot" style="background:var(--ins)"></i>Inserción (distal)</span></div>
+    <div class="views">
+      <button data-view="ant">Anterior</button>
+      <button data-view="post">Posterior</button>
+      <button data-view="latd">Lateral D</button>
+      <button data-view="lati">Lateral I</button>
+      <button data-view="sup">Superior</button>
+      <button data-view="inf">Inferior</button>
+      <button data-view="reset">Restablecer</button>
+      <button id="xrayBtn" aria-pressed="false">Rayos X</button>
+      <button id="studioBtn" aria-pressed="false" title="Fondo negro e iluminación de estudio para ver fibras y relieves">Estudio</button>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <div class="ptop">
+      <div class="search">
+        <input id="q" type="search" placeholder="Buscar entre 4.715 estructuras: supraespinoso, LCA, nervio mediano…" autocomplete="off" aria-label="Buscar estructura">
+        <div class="results" id="results" hidden></div>
+      </div>
+      <div class="tabs" role="tablist">
+        <button role="tab" data-tab="sistemas" aria-selected="true">Capas</button>
+        <button role="tab" data-tab="planos" aria-selected="false">Planos</button>
+        <button role="tab" data-tab="mov" aria-selected="false">Movimiento</button>
+        <button role="tab" data-tab="estr" aria-selected="false">Ficha</button>
+        <button role="tab" data-tab="lec" aria-selected="false">Lecciones</button>
+      </div>
+    </div>
+    <div class="pbody">
+      <div class="view" id="tab-sistemas">
+        <div class="row">
+          <button class="btn" data-preset="osteo">Osteomuscular</button>
+          <button class="btn" data-preset="artro">Articular</button>
+          <button class="btn" data-preset="vasc">Vascular</button>
+          <button class="btn" data-preset="neuro">Nervioso</button>
+          <button class="btn" data-preset="visc">Vísceras</button>
+        </div>
+        <div class="card dis">
+          <h3>Disección por capas</h3>
+          <p class="muted small">Retira el cuerpo de fuera hacia dentro, como en la sala de disección. Cada paso descarga lo que necesita.</p>
+          <input type="range" id="disR" min="0" max="7" step="1" value="0" aria-label="Profundidad de disección">
+          <div class="disSteps" id="disSteps"></div>
+          <div class="disNow"><b id="disName">Piel</b><span id="disTxt"></span></div>
+          <div class="row"><button class="btn" id="disPrev" aria-label="Capa anterior">← Más superficial</button><button class="btn" id="disNext" aria-label="Capa siguiente">Más profunda →</button></div>
+        </div>
+        <p class="muted small">Cada capa se descarga al activarla por primera vez. El tamaño aparece junto al nombre.</p>
+        <div id="sysList"></div>
+        <button class="btn" id="unhide" hidden>Mostrar estructuras ocultas</button>
+        <p class="muted small femonly">Modelo femenino: Visible Human Female del Human Reference Atlas (HuBMAP). Incluye piel, mamas, pelvis femenina, columna, órganos y vasos; no incluye la musculatura del tronco ni de los miembros, que solo existe en el modelo masculino.</p>
+        <div class="card maleonly" id="hrCard">
+          <h3>Alta resolución · mallas originales</h3>
+          <p class="muted small">Sustituye las mallas ligeras de una región por las originales del atlas, sin reducir (compresión Draco). Úsalo para estudiar de cerca.</p>
+          <div id="hrList"></div>
+          <label class="chk"><input type="checkbox" id="autoHR"> Cargar automáticamente al acercar la cámara</label>
+        </div>
+        <div class="card">
+          <h3>Vistas guardadas</h3>
+          <p class="muted small">Guarda la cámara, las capas visibles, los planos de corte y las estructuras ocultas para volver a ellos o preparar una clase.</p>
+          <div class="row">
+            <input id="viewName" class="field" placeholder="Nombre, p. ej. Manguito rotador" autocomplete="off" aria-label="Nombre de la vista" style="flex:1 1 160px">
+            <button class="btn pri" id="viewSave">Guardar vista</button>
+          </div>
+          <div id="viewList"></div>
+        </div>
+        <div class="card">
+          <h3>Importar modelo .glb</h3>
+          <p class="muted small">Añade tus propias mallas (por ejemplo, un modelo de mayor resolución de una región). Se colocan en la escena tal como vienen y cada malla se puede seleccionar por su nombre.</p>
+          <input id="glbIn" type="file" accept=".glb,.gltf" class="small">
+          <p class="err" id="glbErr" hidden></p>
+        </div>
+        <p class="credit">Modelos 3D: <a href="https://github.com/Z-Anatomy/Models-of-human-anatomy" target="_blank" rel="noopener">Z-Anatomy</a> (CC BY-SA 4.0), derivados de BodyParts3D, Copyright© The Database Center for Life Science licensed by CC Attribution-Share Alike 2.1 Japan. Mallas optimizadas para la web y fichas en español redactadas para Corpus; distribuidas bajo CC BY-SA 4.0.</p>
+        <p class="credit">Modelo femenino: <a href="https://github.com/hubmapconsortium/ccf-3d-reference-object-library" target="_blank" rel="noopener">HuBMAP Human Reference Atlas, 3D Reference Object Library (Visible Human Female, v1.3)</a>, CC BY 4.0. Mallas reducidas y realineadas para Corpus; nombres y fichas en español añadidos.</p>
+      </div>
+
+      <div class="view" id="tab-planos" hidden>
+        <p class="muted">Posición anatómica: de pie, mirada al frente, palmas hacia delante. Cada plano tiene un eje perpendicular, y el movimiento ocurre en el plano girando alrededor de ese eje.</p>
+        <div id="planeCards"></div>
+        <div class="card">
+          <label class="chk"><input type="checkbox" id="axesChk"> Mostrar ejes de movimiento</label>
+          <label class="chk"><input type="checkbox" id="dirChk"> Mostrar términos de dirección</label>
+        </div>
+        <div class="tblwrap">
+          <table class="tbl">
+            <thead><tr><th>Plano</th><th>Eje</th><th>Movimientos</th></tr></thead>
+            <tbody>
+              <tr><td><b style="color:var(--sag)">Sagital</b></td><td>Frontal (mediolateral)</td><td>Flexión, extensión, dorsiflexión, flexión plantar</td></tr>
+              <tr><td><b style="color:var(--fro)">Frontal (coronal)</b></td><td>Sagital (anteroposterior)</td><td>Abducción, aducción, inclinación lateral, desviación radial/cubital, inversión, eversión</td></tr>
+              <tr><td><b style="color:var(--tra)">Transversal (horizontal)</b></td><td>Longitudinal (vertical)</td><td>Rotación interna/externa, pronación, supinación, rotación de tronco y cuello</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="view" id="tab-mov" hidden>
+        <p class="femonly card">El simulador de movimiento usa el esqueleto articulado del modelo masculino. <button class="btn" onclick="setBody('m')">Cambiar a hombre</button></p>
+        <div class="row" style="justify-content:space-between">
+          <h3>Articulación</h3>
+          <div class="seg" role="group" aria-label="Lado">
+            <button id="side-R" aria-pressed="true">Derecho</button>
+            <button id="side-L" aria-pressed="false">Izquierdo</button>
+          </div>
+        </div>
+        <div class="chips" id="jointChips"></div>
+        <h3>Movimiento</h3>
+        <div class="chips" id="moveChips"></div>
+        <div class="card">
+          <div class="readout">
+            <div class="deg" id="deg">0°<small></small></div>
+            <span class="status" id="status"></span>
+          </div>
+          <input type="range" id="angle" min="0" max="180" value="0" aria-label="Ángulo">
+          <div class="scale" aria-hidden="true"><i id="scaleOk"></i><em id="scaleMk"></em></div>
+          <div class="row">
+            <button class="btn pri" id="play">Animar rango</button>
+            <button class="btn" id="zero">Volver a 0°</button>
+            <button class="btn" id="focusJ">Enfocar articulación</button>
+          </div>
+        </div>
+        <dl class="kv" id="moveInfo"></dl>
+        <label class="chk"><input type="checkbox" id="agChk"> Resaltar en naranja los músculos agonistas</label>
+        <div class="note only-stu" id="moveTip"></div>
+        <div class="note only-pro" id="moveGon"></div>
+        <div class="card only-pro">
+          <h3>Registro de mediciones</h3>
+          <p class="muted small">Coloca el deslizador en el ángulo medido con el goniómetro y guárdalo. Cambia de lado arriba para comparar derecho e izquierdo.</p>
+          <div class="row">
+            <input id="patId" class="field" placeholder="Código de paciente" autocomplete="off" aria-label="Código de paciente" style="flex:1 1 140px">
+            <select id="logType" class="field" aria-label="Tipo de medición"><option>Activo</option><option>Pasivo</option></select>
+            <button class="btn pri" id="logSave">Guardar medición</button>
+          </div>
+          <p id="logMsg" class="small" aria-live="polite"></p>
+          <p id="cmp" style="font-size:13px"></p>
+          <div class="tblwrap"><table class="tbl" id="logTbl"></table></div>
+          <textarea id="csvOut" class="field" rows="4" hidden aria-label="CSV de mediciones"></textarea>
+          <div class="row"><button class="btn" id="logCsv">Copiar CSV</button><button class="btn" id="logClear">Borrar registro</button></div>
+          <p class="muted" style="font-size:12px">Las mediciones se guardan solo en este navegador. Usa códigos, no nombres, y copia el CSV para conservarlas en la historia clínica.</p>
+        </div>
+        <p class="muted" style="font-size:12px">Valores de referencia de rango articular activo en adultos (AAOS). Las mallas reales se deforman alrededor del centro articular calculado a partir de los huesos; los músculos que cruzan la articulación se curvan de forma aproximada.</p>
+      </div>
+
+      <div class="view" id="tab-lec" hidden><p class="femonly card">Las lecciones guiadas están construidas sobre el modelo masculino. <button class="btn" onclick="setBody('m')">Cambiar a hombre</button></p><div id="lecBox"></div></div>
+
+      <div class="view" id="tab-estr" hidden>
+        <div id="infoBox"></div>
+        <div class="card only-stu">
+          <h3>Práctica de identificación</h3>
+          <p class="muted small">Se te pedirá una estructura de las capas visibles. Tócala en el modelo.</p>
+          <select id="quizSys" class="field" aria-label="Capa para practicar"></select>
+          <div class="row">
+            <button class="btn pri" id="quizStart">Empezar</button>
+            <button class="btn" id="quizSkip" hidden>Saltar</button>
+            <button class="btn" id="quizStop" hidden>Terminar</button>
+          </div>
+          <p id="quizMsg" style="font-size:13px"></p>
+        </div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+<script>
+(function(){
+'use strict';
+if(!window.THREE||!THREE.GLTFLoader){document.getElementById('hintTxt').textContent='No se pudo cargar el motor 3D. Revisa tu conexión y recarga la página.';return;}
+const V3=THREE.Vector3, Q=THREE.Quaternion, D=THREE.MathUtils.degToRad;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const store={get(k,d){try{const v=localStorage.getItem('corpus3:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('corpus3:'+k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const cssVar=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim()||'#888';
+
+/* ───────── Capas ───────── */
+const SYS={
+ oseo:{n:'Huesos, cartílagos y dientes',c:'#ece2cb',mb:1.7,on:true,op:1,g:'Aparato locomotor'},
+ muscular:{n:'Músculos',c:'#a3392f',mb:3.2,on:true,op:1,g:'Aparato locomotor'},
+ insercion:{n:'Orígenes e inserciones',c:'#2f9e5b',mb:0.8,on:false,op:1,g:'Aparato locomotor',dbl:true},
+ articular:{n:'Ligamentos, cápsulas y discos',c:'#d3dde6',mb:0.8,on:false,op:1,g:'Aparato locomotor',dbl:true},
+ fascia:{n:'Fascias y retináculos',c:'#cdb594',mb:0.3,on:false,op:.7,g:'Aparato locomotor',dbl:true},
+ bolsas:{n:'Bolsas sinoviales y vainas',c:'#8fb7c9',mb:0.1,on:false,op:1,g:'Aparato locomotor'},
+ arterial:{n:'Arterias y corazón',c:'#c53a2f',mb:1.0,on:false,op:1,g:'Circulación'},
+ venoso:{n:'Venas',c:'#3f62ad',mb:0.5,on:false,op:1,g:'Circulación'},
+ linfatico:{n:'Ganglios y órganos linfáticos',c:'#6aa874',mb:0.3,on:false,op:1,g:'Circulación'},
+ nervioso_central:{n:'Encéfalo y médula espinal',c:'#e6c4b0',mb:0.8,on:false,op:1,g:'Sistema nervioso'},
+ nervioso_periferico:{n:'Nervios periféricos',c:'#e3c23f',mb:0.5,on:false,op:1,g:'Sistema nervioso'},
+ respiratorio:{n:'Respiratorio',c:'#d99b9b',mb:0.1,on:false,op:1,g:'Vísceras'},
+ digestivo:{n:'Digestivo',c:'#c98b67',mb:0.1,on:false,op:1,g:'Vísceras'},
+ urinario:{n:'Urinario',c:'#a65d4c',mb:0.1,on:false,op:1,g:'Vísceras'},
+ reproductor:{n:'Reproductor',c:'#c48aa0',mb:0.1,on:false,op:1,g:'Vísceras'},
+ endocrino:{n:'Endocrino',c:'#9a6bc2',mb:0.1,on:false,op:1,g:'Vísceras'},
+ piel:{n:'Piel y regiones',c:'#d29f82',mb:0.3,on:false,op:.35,g:'Superficie',dbl:true},
+ f_piel:{n:'Piel',c:'#d6a487',mb:0.2,on:true,op:.4,g:'Mujer · superficie',dbl:true,fem:1,base:'piel'},
+ f_mama:{n:'Mama y glándula mamaria',c:'#e9c79c',mb:0.5,on:true,op:1,g:'Mujer · superficie',dbl:true,fem:1,base:'reproductor'},
+ f_oseo:{n:'Pelvis, columna y rodilla',c:'#ece2cb',mb:0.6,on:true,op:1,g:'Mujer · aparato locomotor',fem:1,base:'oseo'},
+ f_articular:{n:'Ligamentos de la rodilla',c:'#d3dde6',mb:0.1,on:false,op:1,g:'Mujer · aparato locomotor',fem:1,base:'articular'},
+ f_muscular:{n:'Músculos del ojo y de la rodilla',c:'#a3392f',mb:0.1,on:false,op:1,g:'Mujer · aparato locomotor',fem:1,base:'muscular'},
+ f_reproductor:{n:'Aparato reproductor femenino',c:'#c78a85',mb:0.2,on:true,op:1,g:'Mujer · órganos',dbl:true,fem:1,base:'reproductor'},
+ f_visceras:{n:'Vísceras torácicas y abdominales',c:'#c98b67',mb:0.9,on:true,op:1,g:'Mujer · órganos',dbl:true,fem:1,base:'digestivo'},
+ f_vasos:{n:'Corazón y vasos sanguíneos',c:'#c53a2f',mb:0.4,on:true,op:1,g:'Mujer · órganos',dbl:true,fem:1,base:'arterial'},
+ f_nervioso:{n:'Encéfalo, médula y nervio óptico',c:'#d6b4ab',mb:0.9,on:false,op:1,g:'Mujer · sistema nervioso',dbl:true,fem:1,base:'nervioso_central'},
+ f_ojos:{n:'Ojos',c:'#eee7dc',mb:0.2,on:false,op:1,g:'Mujer · sistema nervioso',dbl:true,fem:1,base:'nervioso_central'},
+ importado:{n:'Modelos importados',c:'#9aa7b0',mb:0,on:true,op:1,g:'Importado',dbl:true}
+};
+const BS=k=>(SYS[k]&&SYS[k].base)||k;
+let BODY=store.get('body','m');const sexOk=k=>k==='importado'||!!(SYS[k]&&SYS[k].fem)===(BODY==='f');
+const saved=store.get('sys',null);
+if(saved) for(const k in saved) if(SYS[k]){SYS[k].on=!!saved[k].on;SYS[k].op=+saved[k].op||1;}
+for(const k in SYS){SYS[k].state='idle';SYS[k].group=null;SYS[k].count=0;}
+
+/* ───────── Escena ───────── */
+const stage=$('#stage'), cv=$('#cv');
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+renderer.localClippingEnabled=true;renderer.setClearColor(0x000000,0);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(30,1,0.01,40);
+if(THREE.RoomEnvironment){try{const pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromScene(new THREE.RoomEnvironment(),0.04).texture;}catch(e){}}
+scene.add(new THREE.HemisphereLight(0xf4f6ff,0x3d322c,scene.environment?0.35:0.8));
+const key=new THREE.DirectionalLight(0xfff6ec,scene.environment?0.85:1.15);key.position.set(1.4,2.6,2.6);scene.add(key);
+const rim=new THREE.DirectionalLight(0xc9dcff,0.6);rim.position.set(-2,1.8,-2.4);scene.add(rim);
+const rim2=new THREE.DirectionalLight(0xffe8d8,0);rim2.position.set(2.4,1.2,-2.0);scene.add(rim2);
+const fill=new THREE.DirectionalLight(0xffe3d0,0.35);fill.position.set(-2.2,0.6,1.6);scene.add(fill);
+const camLight=new THREE.DirectionalLight(0xffffff,0.25);scene.add(camLight);
+const body=new THREE.Group();scene.add(body);
+{const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');const gr=g.createRadialGradient(128,128,8,128,128,128);gr.addColorStop(0,'rgba(0,0,0,.55)');gr.addColorStop(.55,'rgba(0,0,0,.22)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,256,256);
+ const sh=new THREE.Mesh(new THREE.PlaneGeometry(0.75,0.6),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=0.001;sh.renderOrder=-1;scene.add(sh);}
+const clipArr=[];
+const lin=hex=>new THREE.Color(hex).convertSRGBToLinear();
+
+/* materiales compartidos por capa */
+const MAT={};
+function baseMat(kk,variant,noTint){
+  const s=SYS[kk];let col=s.c;const k=BS(kk);
+  if(k==='insercion') col=variant==='o'?cssVar('--orig'):cssVar('--ins');
+  const M=WET.includes(k)?THREE.MeshPhysicalMaterial:THREE.MeshStandardMaterial;
+  const m=new M({color:lin(col),roughness:k==='oseo'?.62:k==='muscular'?.42:.34,metalness:0,envMapIntensity:(k==='oseo'?.55:.5)*(STUDIO_U.value?0.32:1),
+    transparent:true,opacity:1,clippingPlanes:clipArr,side:s.dbl?THREE.DoubleSide:THREE.FrontSide});
+  if(WET.includes(k)){m.clearcoat=k.startsWith('nervioso')?0.25:0.65;m.clearcoatRoughness=0.28;}
+  if(k==='muscular'){m.sheen&&m.sheen.set&&0;}
+  const kind=k==='oseo'?'bone':k==='muscular'?'muscle':k==='piel'?'skin':k==='arterial'?'artery':k==='venoso'?'vein':k==='nervioso_periferico'?'nerve':'soft';
+  if(k!=='importado'){m.extensions={derivatives:true};m.onBeforeCompile=sh=>corpusShader(sh,kind,noTint);m.customProgramCacheKey=()=>'ck3_'+kind+(noTint?'_n':'');}
+  m.userData.baseSide=m.side;return m;
+}
+function matFor(k,ins,state){
+  const key=k+'|'+(ins||'')+'|'+(state||'');
+  if(MAT[key]) return MAT[key];
+  const m=baseMat(k,ins==='origen'?'o':'e',state==='ag');
+  if(state==='sel'){m.emissive=lin(cssVar('--accent'));m.emissiveIntensity=.5;}
+  if(state==='ag'){m.color=lin('#f0a040');m.emissive=lin('#ff6a00');m.emissiveIntensity=.45;}
+  if(state==='hint'){m.emissive=lin(cssVar('--accent'));m.emissiveIntensity=.6;}
+  if(state==='memb'){m.userData.memb=true;}
+  if(state==='ghost'){m.emissive=lin(cssVar('--accent'));m.emissiveIntensity=.25;m.userData.ghost=true;}
+  MAT[key]=m;syncMat(m,key);return m;
+}
+const XRAY_SYS=['muscular','fascia','piel'];/* en la mujer la piel también se aclara en rayos X */let xray=false;
+function syncMat(m,key){const [k,,st]=key.split('|');const s=SYS[k];let op=m.userData.ghost?.32:s.op;if(m.userData.memb)op=Math.min(op,.2);if(xray&&XRAY_SYS.includes(BS(k))&&!st)op=Math.min(op,.14);m.opacity=op;m.transparent=op<.99;m.depthWrite=op>=.99;
+  const want=clipArr.length?THREE.DoubleSide:m.userData.baseSide;if(m.side!==want){m.side=want;m.needsUpdate=true;}}
+function syncAllMats(){for(const key in MAT) syncMat(MAT[key],key);}
+let studio=false;const hemi=scene.children.find(o=>o.isHemisphereLight);const LBASE=null;
+function setStudio(on){studio=on;STUDIO_U.value=on?1:0;stage.classList.toggle('studio',on);$('#studioBtn').setAttribute('aria-pressed',on);store.set('studio',on);
+  if(hemi)hemi.intensity=on?0.12:(scene.environment?0.35:0.8);key.intensity=on?1.35:(scene.environment?0.85:1.15);rim.intensity=on?1.6:0.6;fill.intensity=on?0.12:0.35;camLight.intensity=on?0.1:0.25;
+  rim.color.set(on?0xdbe6ff:0xc9dcff);rim2.intensity=on?1.1:0;renderer.toneMappingExposure=on?1.15:1.05;
+  for(const k in MAT){MAT[k].envMapIntensity=(on?0.32:1)*(k.startsWith('oseo')?.55:.5);}}
+function setXray(on){xray=on;$('#xrayBtn').setAttribute('aria-pressed',on);syncAllMats();}
+
+/* ───────── Datos ───────── */
+let FEM_INFO={};let CAT={},INFO={mus:{},lig:{},bone:{},rest:{}},RIG=null,EX={lm:{},dep:{},reg:{}},SAMPLE=null;
+const DEPTH_OFF=new Set(store.get('depthOff',[]));
+const meshes=[];const byId={};
+const fam=n=>n.replace(/^(First|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|Ninth|Tenth|Eleventh|Twelfth) /,'').replace(/ of (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth) (rib|finger)/,' of $2').replace(/Vertebra [CTL]\d+/,'Vertebra');
+const parentName=en=>en.replace(/^.*?\b(head|part|belly|parts|heads) of (the )?/i,'');
+const mnorm=s=>norm(s).replace(/\bmuscles?\b/g,'').replace(/\s+/g,' ').trim();
+function infoFor(c){
+  const en=c.en;
+  if(c.sys.startsWith('f_')&&FEM_INFO[en]) return {kind:'gen',d:FEM_INFO[en]};
+  c={...c,sys:BS(c.sys)};
+  if(c.sys==='muscular'||c.sys==='fascia'||c.sys==='bolsas'||c.sys==='insercion'){
+    const d=INFO.mus[en]||INFO.mus[parentName(en)]||Object.entries(INFO.mus).find(([k])=>mnorm(k)===mnorm(en))?.[1];
+    if(d) return {kind:'mus',d};
+  }
+  if(c.sys==='articular'&&INFO.lig[en]) return {kind:'lig',d:INFO.lig[en]};
+  if(c.sys==='oseo'){const d=INFO.bone[en]||INFO.bone[fam(en)];if(d) return {kind:'bone',d};}
+  if(INFO.rest&&INFO.rest[en]) return {kind:'gen',d:INFO.rest[en]};
+  return null;
+}
+function entry(id){const r=CAT[id];return r?{id:r[0],en:r[1],es:r[2],la:r[3],sys:r[4],side:r[5],ins:r[6]}:null;}
+const SIDE_ES={derecho:'derecho',izquierdo:'izquierdo'};
+function label(c){return c.es+(c.side?` (${c.side})`:'')+(c.ins?` · ${c.ins}`:'');}
+
+/* ───────── Carga ───────── */
+const loader=new THREE.GLTFLoader();
+if(THREE.DRACOLoader){const dl=new THREE.DRACOLoader();dl.setDecoderPath('draco/');dl.setDecoderConfig({type:'wasm'});loader.setDRACOLoader(dl);}
+const loadQueue={active:0,parts:{}};
+/* Las capas se publican como glTF binario codificado en base64 (texto), y se decodifican aquí. */
+async function fetchB64(url,onProg){
+  const r=await fetch(url);if(!r.ok) throw new Error(url);
+  let txt;
+  if(r.body&&r.body.getReader){const rd=r.body.getReader(),parts=[];let n=0;const dec=new TextDecoder();
+    for(;;){const {done,value}=await rd.read();if(done)break;parts.push(dec.decode(value,{stream:true}));n+=value.length;onProg(n);}
+    parts.push(dec.decode());txt=parts.join('');}
+  else txt=await r.text();
+  const bin=atob(txt.trim());const out=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i);
+  return out.buffer;
+}
+function showLoad(){const ks=Object.keys(loadQueue.parts);if(!ks.length){$('#loader').hidden=true;return;}
+  let l=0,t=0;ks.forEach(k=>{l+=loadQueue.parts[k].l;t+=loadQueue.parts[k].t||(SYS[k]?SYS[k].mb*1e6:0);});
+  $('#loader').hidden=false;$('#loadTxt').textContent=`Cargando ${ks.map(k=>(loadQueue.parts[k].name||SYS[k].n).toLowerCase()).join(', ')} · ${(l/1e6).toFixed(1)} de ${(t/1e6).toFixed(1)} MB`;
+  $('#loadBar').style.width=Math.min(100,t?l/t*100:0)+'%';}
+function loadSys(k){
+  const s=SYS[k];if(s.promise) return s.promise;
+  s.state='loading';loadQueue.parts[k]={l:0,t:0};showLoad();renderSysList();
+  s.promise=new Promise((res)=>{
+    const onLoad=g=>{
+      const grp=new THREE.Group();grp.name=k;
+      g.scene.updateMatrixWorld(true);
+      g.scene.traverse(o=>{if(!o.isMesh)return;
+        const pa=o.geometry.attributes.position,n=pa.count,pos=new Float32Array(n*3),e=o.matrixWorld.elements;
+        for(let i=0;i<n;i++){const x=pa.getX(i),y=pa.getY(i),z=pa.getZ(i);
+          pos[i*3]=e[0]*x+e[4]*y+e[8]*z+e[12];pos[i*3+1]=e[1]*x+e[5]*y+e[9]*z+e[13];pos[i*3+2]=e[2]*x+e[6]*y+e[10]*z+e[14];}
+        const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+        const ix=o.geometry.index.array;geo.setIndex(new THREE.BufferAttribute(n<65536?new Uint16Array(ix):new Uint32Array(ix),1));
+        setVattr(geo,o.geometry.attributes.color);
+        geo.computeVertexNormals();geo.computeBoundingSphere();
+        const c=entry(o.name)||{id:o.name,en:o.name,es:o.name,la:'',sys:k,side:'',ins:''};
+        const m=new THREE.Mesh(geo,matFor(k,c.ins,MEMB.test(c.en)?'memb':''));m.userData={c,sys:k,state:''};
+        applyTint(m);if(HRGEO[c.id]) swapGeo(m,HRGEO[c.id]);
+        if(BS(k)==='muscular') addFiberDir(m);else if(TUBE_SYS.includes(BS(k))) addAxisDir(m);
+        grp.add(m);meshes.push(m);(byId[c.id]=m);
+        o.geometry.dispose();
+      });
+      s.group=grp;s.count=grp.children.length;body.add(grp);s.state='loaded';
+      delete loadQueue.parts[k];showLoad();
+      applySystems();renderSysList();
+      if(currentTab==='mov'){prepWeights();applyPose();applyAgonists();}
+      res(grp);
+    };
+    const fail=()=>{s.state='error';s.promise=null;delete loadQueue.parts[k];showLoad();renderSysList();res(null);};
+    fetchB64('m2/'+k+'.txt',(l)=>{if(loadQueue.parts[k]){loadQueue.parts[k].l=l/1.333;loadQueue.parts[k].t=s.mb*1e6;showLoad();}})
+      .then(buf=>loader.parse(buf,'',onLoad,fail)).catch(fail);
+  });
+  return s.promise;
+}
+
+/* Atributos horneados por vértice: R = oclusión ambiental, G = tendón/aponeurosis, B = cartílago articular */
+function setVattr(geo,src){const n=geo.attributes.position.count;let a;
+  if(src&&src.count===n){a=new Uint8Array(n*3);const s=src.array;if(s instanceof Uint8Array&&src.itemSize===3)a.set(s);else for(let i=0;i<n;i++){a[i*3]=Math.round(src.getX(i)*255);a[i*3+1]=Math.round(src.getY(i)*255);a[i*3+2]=Math.round(src.getZ(i)*255);}}
+  else{a=new Uint8Array(n*3);for(let i=0;i<n;i++)a[i*3]=235;}
+  geo.setAttribute('vattr',new THREE.BufferAttribute(a,3,true));if(geo.attributes.color)geo.deleteAttribute('color');
+  geo.setAttribute('vtint',new THREE.BufferAttribute(new Uint8Array(n*4),4,true));}
+/* Color propio de cada órgano o tejido (sRGB, peso de mezcla con el color de la capa) */
+const TINT=[
+ [/^(Sclera)/,'#f3efe6',1],[/^Iris/,'#5a3a1f',1],[/^Lens/,'#e6dcae',.9],[/^Cornea/,'#e9eef0',.6],[/^Retina|eyeball/i,'#efe7dd',.8],
+ [/tooth|incisor|canine|premolar|molar|dental/i,'#f2ecdc',1],[/costal cartilage|cartilage of|thyroid cartilage|cricoid|arytenoid|epiglott|nasal cartilage|septal cartilage|alar cartilage/i,'#c9d7dd',.9],
+ [/^Nipple|^Areola|areolar/i,'#9a5a48',1],[/mammary lob|lactiferous|mammary gland|lobule of mammary/i,'#e6b9a2',1],[/^Fat\b|adipose|fat of breast|subcutaneous fat/i,'#e8c77e',1],
+ [/uterine tube|fallopian|fimbria|infundibulum|ampulla of uterine|isthmus of uterine/i,'#d39a8f',1],[/vagina|cervix|cervical canal|ostium of uterus/i,'#c9827f',1],[/round ligament|broad ligament|uterosacral|cardinal ligament|suspensory ligament of ovary|ovarian ligament|mesovarium|mesosalpinx|pouch/i,'#d8c3b0',.9],
+ [/bronchopulmonary segment|lobe of (left|right)? ?lung|hilum of lung/i,'#c98a8a',1],[/^Pupil/i,'#111111',1],[/choroid|ciliary body/i,'#5a2a26',1],[/retina|ora serrata/i,'#c96f5e',.8],
+ [/taenia/i,'#d9b9a2',.9],[/gingiva|palate|uvula/i,'#d58d8c',.9],
+ [/omentum|mesenter|appendices epiploicae|fat body|adipose/i,'#e2c07c',.9],
+ [/^(?!.*(duct|artery|vein)).*(liver|hepat(ic)? lobe|caudate lobe|quadrate lobe|porta hepatis)/i,'#7a2d22',1],[/gallbladder|cystic duct|bile duct/i,'#56703c',1],[/^spleen/i,'#6c2a3a',1],
+ [/pancrea/i,'#d8ae86',1],[/stomach|pylor|cardia|fundus of stomach/i,'#cf8778',1],[/duoden|jejun|ileum|small intestine/i,'#d79583',1],
+ [/colon|cecum|caecum|rectum|appendix|anal canal|large intestine|sigmoid/i,'#c47f6a',1],[/esophag|oesophag|pharyn/i,'#c57e74',1],
+ [/tongue|lingual/i,'#c2656b',.9],[/parotid|submandibular gland|sublingual gland/i,'#d6a98a',1],
+ [/kidney|renal (cortex|medulla|pyramid|column|papilla)/i,'#8a3a2e',1],[/ureter|urinary bladder|urethra/i,'#d2a089',1],[/suprarenal|adrenal/i,'#c98e34',1],
+ [/thyroid gland|parathyroid/i,'#8c3c33',1],[/thymus/i,'#d9b6a0',1],[/pituitar|hypophys|pineal/i,'#c99a8a',1],
+ [/lung|lobe of (left|right) lung|pulmon/i,'#c98a8a',1],[/trache|bronch|laryn/i,'#d8cfc0',.9],
+ [/atrium|ventricle|heart|myocard|auricle of|papillary muscle|interventricular septum|valve/i,'#8d2e29',1],
+ [/cerebell/i,'#c79f96',1],[/gyrus|lobe of cerebrum|cerebral cortex|cerebrum|frontal lobe|parietal lobe|temporal lobe|occipital lobe|insula|cortex/i,'#d6b4ab',1],
+ [/thalamus|nucleus|caudate|putamen|globus|claustrum|amygdal|hippocamp/i,'#cfa49b',.8],[/spinal cord|medulla oblongata|pons|midbrain|brainstem|corpus callosum|white matter|tract/i,'#e6dacb',1],
+ [/testis|epididym/i,'#d9b9a6',1],[/ovary/i,'#d8b49e',1],[/uterus|uterine/i,'#c78a85',1],[/prostat/i,'#c58f78',1],[/penis|corpus cavernosum|corpus spongiosum|glans/i,'#c88d80',1]
+ ,[/\bvein|venous|vena|sinus\b/i,'#3f62ad',1,1],[/artery|arterial|aorta|trunk$/i,'#c53a2f',1,1]];
+const hexRGB=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+function tintFor(c){if(!c||c.sys==='importado'||c.sys==='insercion')return null;
+  if(BS(c.sys)==='muscular'&&!/tendon/i.test(c.en)){// cada músculo con un matiz levemente distinto, como en el cadáver fresco
+    let h=0;for(const ch of c.en)h=(h*31+ch.charCodeAt(0))|0;const f=0.88+((h>>>3)%100)/100*0.2,b=hexRGB(SYS.muscular.c);return [b[0]*f,b[1]*f*(0.97+((h>>>9)%7)/100),b[2]*f,255];}
+  for(const [re,col,w,fo] of TINT)if((!fo||c.sys.startsWith('f_'))&&re.test(c.en)){const [r,g,b]=hexRGB(col);return [r,g,b,Math.round(w*255)];}
+  return null;}
+function applyTint(m){const g=m.geometry,t=g.attributes.vtint;if(!t)return;const v=tintFor(m.userData.c);if(!v)return;const a=t.array,n=a.length/4;
+  for(let i=0;i<n;i++){a[i*4]=v[0];a[i*4+1]=v[1];a[i*4+2]=v[2];a[i*4+3]=v[3];}t.needsUpdate=true;}
+/* ───────── Alta resolución por región (mallas originales, Draco) ───────── */
+const HRGEO={};
+const HR={superior:{n:'Miembro superior',mb:4.3,tris:'1,64 M'},inferior:{n:'Miembro inferior',mb:3.9,tris:'1,43 M'},tronco:{n:'Tronco y vísceras',mb:5.6,tris:'2,73 M'},cabeza:{n:'Cabeza, cuello y encéfalo',mb:6.4,tris:'2,93 M'}};
+for(const k in HR){HR[k].state='idle';HR[k].ids=[];}
+let autoHR=store.get('autoHR',true);
+function swapGeo(m,g){const u=m.userData;if(u.rest){m.geometry.attributes.position.array.set(u.rest);m.geometry.attributes.normal.array.set(u.restN);m.geometry.attributes.position.needsUpdate=true;m.geometry.attributes.normal.needsUpdate=true;}
+  if(!u.lrGeo)u.lrGeo=m.geometry;m.geometry=g;applyTint(m);u.rest=null;u.restN=null;u.W={};deformed.delete(m);if(BS(u.sys)==='muscular')addFiberDir(m);else if(TUBE_SYS.includes(BS(u.sys)))addAxisDir(m);}
+function unswapGeo(m){const u=m.userData;if(!u.lrGeo)return;const hr=m.geometry;if(u.rest){hr.attributes.position.array.set(u.rest);}m.geometry=u.lrGeo;u.lrGeo=null;u.rest=null;u.restN=null;u.W={};deformed.delete(m);}
+function loadHR(r){const h=HR[r];if(h.state==='loaded'||h.state==='loading')return h.promise;h.state='loading';renderHR();
+  const parts=['loc','nv'];
+  h.promise=Promise.all(parts.map(lv=>{const key='hr_'+r+'_'+lv;loadQueue.parts[key]={l:0,t:0,name:h.n+' (alta resolución)'};showLoad();
+    return fetchB64('hr/'+r+'_'+lv+'.txt',l=>{if(loadQueue.parts[key]){loadQueue.parts[key].l=l/1.333;loadQueue.parts[key].t=h.mb*1e6/2;showLoad();}})
+      .then(buf=>new Promise((res,rej)=>loader.parse(buf,'',res,rej)))
+      .then(g=>{g.scene.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry;if(!geo.index)return;setVattr(geo,geo.attributes.color);geo.computeVertexNormals();geo.computeBoundingSphere();
+          HRGEO[o.name]=geo;h.ids.push(o.name);const m=byId[o.name];if(m)swapGeo(m,geo);});})
+      .finally(()=>{delete loadQueue.parts[key];showLoad();});}))
+    .then(()=>{h.state='loaded';renderHR();applyPose();},()=>{h.state='error';h.promise=null;renderHR();});
+  return h.promise;}
+function unloadHR(r){const h=HR[r];for(const id of h.ids){const m=byId[id];if(m)unswapGeo(m);const g=HRGEO[id];delete HRGEO[id];if(g)g.dispose();}h.ids=[];h.state='idle';h.promise=null;renderHR();applyPose();}
+function renderHR(){const el=$('#hrList');if(!el)return;
+  el.innerHTML=Object.entries(HR).map(([k,h])=>`<div class="hrrow"><span><b>${h.n}</b><small>${h.state==='loading'?'descargando…':h.state==='loaded'?h.tris+' triángulos activos':h.state==='error'?'error, toca para reintentar':h.mb.toString().replace('.',',')+' MB · '+h.tris+' triángulos'}</small></span><button class="sw" role="switch" aria-checked="${h.state==='loaded'||h.state==='loading'}" data-hr="${k}" aria-label="Alta resolución ${h.n}"></button></div>`).join('');
+  el.querySelectorAll('[data-hr]').forEach(b=>b.onclick=()=>{const k=b.dataset.hr;HR[k].state==='loaded'?unloadHR(k):loadHR(k);});}
+function regionAt(v){if(!RIG)return null;const sx=Math.abs(RIG.shoulder_R[0])*0.85;
+  if(v.y>1.47)return 'cabeza';if(Math.abs(v.x)>sx&&v.y>0.62)return 'superior';if(v.y<0.9)return 'inferior';return 'tronco';}
+let hrTick=0;
+function autoHRTick(dt){hrTick+=dt;if(hrTick<1)return;hrTick=0;if(BODY==='f'||!autoHR||orb.r>1.05)return;const r=regionAt(orb.tgt);if(r&&HR[r].state==='idle'){
+  const loaded=Object.keys(HR).filter(k=>HR[k].state==='loaded');if(loaded.length>=2)unloadHR(loaded[0]);loadHR(r);}}
+
+/* ───────── Materiales realistas (shaders) ───────── */
+function addFiberDir(m){const g=m.geometry;if(g.attributes.fdir)return;const a=g.attributes.position.array,n=a.length/3;
+  let cx=0,cy=0,cz=0;for(let i=0;i<n;i++){cx+=a[i*3];cy+=a[i*3+1];cz+=a[i*3+2];}cx/=n;cy/=n;cz/=n;
+  let xx=0,xy=0,xz=0,yy=0,yz=0,zz=0;const st=Math.max(1,n/3000|0);
+  for(let i=0;i<n;i+=st){const x=a[i*3]-cx,y=a[i*3+1]-cy,z=a[i*3+2]-cz;xx+=x*x;xy+=x*y;xz+=x*z;yy+=y*y;yz+=y*z;zz+=z*z;}
+  let v=[0.3,1,0.2];for(let k=0;k<25;k++){const w=[xx*v[0]+xy*v[1]+xz*v[2],xy*v[0]+yy*v[1]+yz*v[2],xz*v[0]+yz*v[1]+zz*v[2]];const l=Math.hypot(...w)||1;v=w.map(t=>t/l);}
+  const f=new Float32Array(n*3);for(let i=0;i<n;i++){f[i*3]=v[0];f[i*3+1]=v[1];f[i*3+2]=v[2];}g.setAttribute('fdir',new THREE.BufferAttribute(f,3));}
+const TUBE_SYS=['arterial','venoso','nervioso_periferico','linfatico'];
+/* dirección local del eje (vasos y nervios): PCA por celdas de 2 cm, suavizada con las celdas vecinas */
+function addAxisDir(m){const g=m.geometry;if(g.attributes.fdir)return;const a=g.attributes.position.array,n=a.length/3,C=0.02,cells=new Map();
+  const key=(x,y,z)=>x+','+y+','+z;const ci=new Int32Array(n*3);
+  for(let i=0;i<n;i++){const x=Math.floor(a[i*3]/C),y=Math.floor(a[i*3+1]/C),z=Math.floor(a[i*3+2]/C);ci[i*3]=x;ci[i*3+1]=y;ci[i*3+2]=z;const k=key(x,y,z);
+    let c=cells.get(k);if(!c){c={n:0,s:[0,0,0],q:[0,0,0,0,0,0]};cells.set(k,c);}c.n++;const px=a[i*3],py=a[i*3+1],pz=a[i*3+2];c.s[0]+=px;c.s[1]+=py;c.s[2]+=pz;c.q[0]+=px*px;c.q[1]+=px*py;c.q[2]+=px*pz;c.q[3]+=py*py;c.q[4]+=py*pz;c.q[5]+=pz*pz;}
+  for(const c of cells.values()){const k=c.n,mx=c.s[0]/k,my=c.s[1]/k,mz=c.s[2]/k;const xx=c.q[0]/k-mx*mx,xy=c.q[1]/k-mx*my,xz=c.q[2]/k-mx*mz,yy=c.q[3]/k-my*my,yz=c.q[4]/k-my*mz,zz=c.q[5]/k-mz*mz;
+    let v=[0.3,1,0.2];for(let t=0;t<16;t++){const w=[xx*v[0]+xy*v[1]+xz*v[2],xy*v[0]+yy*v[1]+yz*v[2],xz*v[0]+yz*v[1]+zz*v[2]];const l=Math.hypot(...w)||1;v=w.map(q=>q/l);}c.d=v;}
+  const f=new Float32Array(n*3);const memo=new Map();
+  for(let i=0;i<n;i++){const x=ci[i*3],y=ci[i*3+1],z=ci[i*3+2],k0=key(x,y,z);let r=memo.get(k0);
+    if(!r){const d0=cells.get(k0).d;r=[0,0,0];for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)for(let dz=-1;dz<=1;dz++){const c=cells.get(key(x+dx,y+dy,z+dz));if(!c)continue;
+      const sg=Math.sign(c.d[0]*d0[0]+c.d[1]*d0[1]+c.d[2]*d0[2])||1,w=c.n*(dx||dy||dz?0.5:1);r[0]+=c.d[0]*sg*w;r[1]+=c.d[1]*sg*w;r[2]+=c.d[2]*sg*w;}
+      const l=Math.hypot(...r)||1;r=r.map(q=>q/l);memo.set(k0,r);}
+    f[i*3]=r[0];f[i*3+1]=r[1];f[i*3+2]=r[2];}
+  g.setAttribute('fdir',new THREE.BufferAttribute(f,3));}
+const NOISE_GLSL=`
+float ckH(vec3 p){p=fract(p*0.3183099+.1);p*=17.0;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
+float ckN(vec3 x){vec3 i=floor(x);vec3 f=fract(x);f=f*f*(3.0-2.0*f);
+ return mix(mix(mix(ckH(i),ckH(i+vec3(1,0,0)),f.x),mix(ckH(i+vec3(0,1,0)),ckH(i+vec3(1,1,0)),f.x),f.y),mix(mix(ckH(i+vec3(0,0,1)),ckH(i+vec3(1,0,1)),f.x),mix(ckH(i+vec3(0,1,1)),ckH(i+vec3(1,1,1)),f.x),f.y),f.z);}
+float ckF(vec3 p){return 0.65*ckN(p)+0.35*ckN(p*2.07);}
+`;
+const STUDIO_U={value:0};
+function corpusShader(sh,kind,noTint){
+  sh.uniforms.ckStudio=STUDIO_U;
+  const SSS={bone:0.08,muscle:0.32,soft:0.22,skin:0.45,artery:0.38,vein:0.42,nerve:0.22}[kind];
+  const SSC={artery:'1.0,0.28,0.22',vein:'0.42,0.32,0.95',nerve:'1.0,0.86,0.55'}[kind]||'1.0,0.42,0.3';
+  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute vec3 fdir;\nattribute vec3 vattr;\nattribute vec4 vtint;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;')
+    .replace('#include <begin_vertex>','#include <begin_vertex>\nvObj=position;vFd=fdir;vVa=vattr;vTn=vtint;');
+  const P={bone:{fq:520.0,b:0.0022,c:[0.97,1.02],r:0.12},muscle:{fq:210.0,b:0.016,c:[0.9,1.03],r:0.2},soft:{fq:160.0,b:0.004,c:[0.97,1.02],r:0.0},artery:{fq:240.0,b:0.002,c:[0.95,1.03],r:0.08},vein:{fq:200.0,b:0.003,c:[0.93,1.04],r:0.06},nerve:{fq:900.0,b:0.007,c:[0.9,1.05],r:0.18},skin:{fq:900.0,b:0.0018,c:[0.985,1.015],r:0.1}}[kind];
+  const map=['muscle','artery','vein','nerve'].includes(kind)?'vec3 ckMap(vec3 p){vec3 f=normalize(vFd+1e-5);return (p-f*dot(p,f))+f*dot(p,f)*'+(kind==='nerve'?'0.03':kind==='muscle'?'0.07':'0.12')+';}':'vec3 ckMap(vec3 p){return p;}';
+  const h=`float ckAO=clamp(vVa.r*1.2,0.0,1.0);${kind==='skin'?'ckAO=mix(1.0,ckAO,0.3);':''}float ckTen=${kind==='muscle'?'smoothstep(0.15,0.75,vVa.g)':'0.0'};float ckCart=${kind==='bone'?'smoothstep(0.2,0.8,vVa.b)':'0.0'};float ckFq=${P.fq.toFixed(1)};float ckFw=length(fwidth(vObj))*ckFq;float ckAmp=1.0-smoothstep(0.12,0.5,ckFw);
+    float H0=ckF(ckMap(vObj)*ckFq);float H=mix(0.5,H0,ckAmp*(1.0+0.6*ckStudio));`+(noTint?'':'diffuseColor.rgb=mix(diffuseColor.rgb,pow(vTn.rgb,vec3(2.2)),vTn.a);');
+  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform float ckStudio;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;\n'+NOISE_GLSL+map)
+    .replace('#include <color_fragment>','#include <color_fragment>\n'+h+`diffuseColor.rgb*=mix(${P.c[0].toFixed(2)},${P.c[1].toFixed(2)},H);
+      ${kind==='bone'?'diffuseColor.rgb*=mix(vec3(0.90,0.88,0.83),vec3(1.03,1.02,1.0),ckN(vObj*22.0));':''}${kind==='skin'?'diffuseColor.rgb*=mix(vec3(0.95,0.93,0.94),vec3(1.03,1.0,0.97),ckN(vObj*14.0));':''}
+      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.80,0.76,0.66)*mix(0.95,1.04,H),ckTen);
+      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.66,0.76,0.84)*mix(0.97,1.03,H),ckCart*0.85);`)
+    .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\n'+(P.r?`roughnessFactor=clamp(roughnessFactor+(0.5-H)*${P.r.toFixed(2)},0.15,1.0);`:'')+`roughnessFactor=mix(roughnessFactor,0.30,ckTen);roughnessFactor=mix(roughnessFactor,0.22,ckCart);`)
+    .replace('#include <aomap_fragment>',`#include <aomap_fragment>
+      reflectedLight.indirectDiffuse*=ckAO;reflectedLight.indirectSpecular*=ckAO*ckAO;
+      reflectedLight.directDiffuse*=mix(1.0,ckAO,0.6);reflectedLight.directSpecular*=mix(1.0,ckAO,0.8);
+      {float ckRim=pow(1.0-clamp(abs(dot(normal,normalize(vViewPosition))),0.0,1.0),2.2);
+       reflectedLight.indirectDiffuse+=diffuseColor.rgb*vec3(${SSC})*ckRim*${SSS.toFixed(2)}*(1.0+0.8*ckStudio)*(0.4+0.6*ckAO);}`)
+    .replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
+      if(ckAmp>0.01){float ckE=0.25/ckFq;
+        vec3 ckG=vec3(ckF(ckMap(vObj+vec3(ckE,0,0))*ckFq),ckF(ckMap(vObj+vec3(0,ckE,0))*ckFq),ckF(ckMap(vObj+vec3(0,0,ckE))*ckFq))-vec3(H0);
+        ckG=(viewMatrix*vec4(ckG/ckE,0.0)).xyz;ckG-=normal*dot(ckG,normal);
+        normal=normalize(normal-ckG*${P.b.toFixed(3)}*ckAmp*(1.0+0.6*ckStudio)*(1.0-0.55*ckTen-0.8*ckCart));}`);
+}
+const WET=['arterial','venoso','digestivo','respiratorio','urinario','reproductor','endocrino','linfatico','nervioso_central','nervioso_periferico','bolsas'];
+
+/* ───────── Visibilidad ───────── */
+const hiddenIds=new Set();let patchFocus=null;
+function applySystems(){
+  for(const k in SYS){const s=SYS[k];if(s.group) s.group.visible=s.on&&sexOk(k);}
+  syncAllMats();
+  for(const m of meshes){let v=!hiddenIds.has(m.userData.c.id);
+    if(v&&patchFocus&&m.userData.sys==='insercion') v=patchFocus.has(m.userData.c.id);
+    if(v&&isoSet) v=isoSet.has(m.userData.c.id)||(BS(m.userData.sys)==='oseo'&&!isoOnly);
+    if(v&&DIS_EXC&&DIS_EXC.test(m.userData.c.en)) v=false;
+    if(v&&DIS_FLT&&DIS_FLT[m.userData.sys]&&!DIS_FLT[m.userData.sys].test(m.userData.c.en)) v=false;
+    if(v&&m.userData.sys==='muscular'&&DEPTH_OFF.size&&DEPTH_OFF.has(EX.dep[m.userData.c.id]||'')) v=false;
+    m.visible=v;}
+  $('#unhide').hidden=hiddenIds.size===0&&!isoSet&&!DIS_EXC;
+  $('#legend').hidden=!(SYS.insercion.on&&SYS.insercion.state==='loaded');
+  store.set('sys',Object.fromEntries(Object.entries(SYS).map(([k,v])=>[k,{on:v.on,op:v.op}])));
+}
+let isoSet=null;let DIS_FLT=null,DIS_EXC=null;
+function setOn(k,on){DIS_FLT=null;DIS_EXC=null;if(on&&!sexOk(k)){setBody(SYS[k].fem?'f':'m');}SYS[k].on=on;if(on&&SYS[k].state!=='loaded') loadSys(k);applySystems();renderSysList();}
+function renderSysList(){
+  const el=$('#sysList');el.innerHTML='';let lastG='';
+  for(const k in SYS){const s=SYS[k];if(k==='importado'&&s.state!=='loaded')continue;if(!sexOk(k))continue;
+    if(s.g!==lastG){lastG=s.g;const h=document.createElement('h3');h.className='sysgrp';h.textContent=s.g;el.appendChild(h);}
+    const st=s.state==='loaded'?`${s.count} estructuras`:s.state==='loading'?'descargando…':s.state==='error'?'error al descargar, toca para reintentar':`${s.mb.toString().replace('.',',')} MB`;
+    const row=document.createElement('div');row.className='sys';
+    row.innerHTML=`<span class="dot" style="background:${k==='insercion'?'linear-gradient(90deg,var(--orig) 50%,var(--ins) 50%)':s.c}"></span><span class="nm">${s.n}<small>${st}</small></span><button class="sw" role="switch" aria-checked="${s.on}" aria-label="Mostrar ${s.n}"></button><div class="oprow"><input type="range" min="0.05" max="1" step="0.05" value="${s.op}" aria-label="Opacidad ${s.n}"><button class="rx" aria-pressed="${!!s.rx}" title="Rayos X en esta capa">RX</button></div>${k==='muscular'?`<div class="depth">${[['s','Superficiales'],['i','Intermedios'],['p','Profundos']].map(([d,t])=>`<button data-d="${d}" aria-pressed="${!DEPTH_OFF.has(d)}">${t}</button>`).join('')}</div>`:''}`;
+    row.querySelector('.sw').onclick=()=>setOn(k,!s.on);
+    row.querySelector('input').oninput=e=>{s.op=+e.target.value;s.rx=false;applySystems();renderSysList();};
+    row.querySelector('.rx').onclick=()=>{if(s.rx){s.op=s.opPrev||1;s.rx=false;}else{s.opPrev=s.op;s.op=.15;s.rx=true;if(!s.on)setOn(k,true);}applySystems();renderSysList();};
+    row.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const d=b.dataset.d;DEPTH_OFF.has(d)?DEPTH_OFF.delete(d):DEPTH_OFF.add(d);store.set('depthOff',[...DEPTH_OFF]);applySystems();renderSysList();});
+    el.appendChild(row);}
+}
+const PRESETS={osteo:{oseo:1,muscular:1},artro:{oseo:1,articular:1,bolsas:1},vasc:{oseo:.35,arterial:1,venoso:1},neuro:{oseo:.35,nervioso_central:1,nervioso_periferico:1},visc:{oseo:.35,respiratorio:1,digestivo:1,urinario:1,reproductor:1,endocrino:1,arterial:1}};
+$$('[data-preset]').forEach(b=>b.onclick=()=>{const p=PRESETS[b.dataset.preset];
+  for(const k in SYS){SYS[k].on=k in p;if(k in p){SYS[k].op=p[k];if(SYS[k].state!=='loaded') loadSys(k);}}
+  isoSet=null;patchFocus=null;DIS_FLT=null;DIS_EXC=b.dataset.preset==='visc'?/^(Greater omentum)$/:null;applySystems();renderSysList();});
+$('#autoHR').checked=autoHR;$('#autoHR').onchange=e=>{autoHR=e.target.checked;store.set('autoHR',autoHR);};
+$('#unhide').onclick=()=>{hiddenIds.clear();DIS_EXC=null;isoSet=null;patchFocus=null;if(selected){selected.m.userData.ghost=false;refreshState(selected.m);}applySystems();};
+
+/* ───────── Cuerpo: hombre (Z-Anatomy) o mujer (Visible Human Female) ───────── */
+function setBody(b){if(b!==BODY){select(null);stopTools&&stopTools();}BODY=b;store.set('body',b);document.body.classList.toggle('body-f',b==='f');
+  $('#b-m').setAttribute('aria-pressed',b==='m');$('#b-f').setAttribute('aria-pressed',b==='f');
+  isoSet=null;patchFocus=null;DIS_FLT=null;DIS_EXC=null;disStage=-1;hiddenIds.clear();
+  if(b==='f'&&currentTab==='mov'){playing=false;}
+  for(const k in SYS) if(sexOk(k)&&SYS[k].on&&SYS[k].state!=='loaded'&&CAT_READY) loadSys(k);
+  applySystems();renderSysList();renderDis();if(b==='f')for(const k in HR)if(HR[k].state==='loaded')unloadHR(k);applyPose&&applyPose();}
+let CAT_READY=false;
+$('#b-m').onclick=()=>setBody('m');$('#b-f').onclick=()=>setBody('f');
+
+/* ───────── Disección capa por capa ───────── */
+const VN=['arterial','venoso','nervioso_periferico'];
+const DIS=[
+ {n:'Piel',s:'Piel',t:'Superficie corporal y regiones topográficas. Debajo esperan fascias, músculos y hueso.',on:{piel:1,nervioso_central:1},flt:{nervioso_central:/^(Sclera|Iris)\b/},dep:[]},
+ {n:'Fascias',s:'Fascia',t:'Fascia profunda, retináculos y tractos (iliotibial, toracolumbar). Envuelven y compartimentan los músculos.',on:{fascia:1,muscular:1,oseo:1},dep:[]},
+ {n:'Músculos superficiales',s:'Sup.',t:'Primer plano muscular con sus tendones nacarados y aponeurosis. Vasos y nervios asoman entre los vientres.',on:{muscular:1,oseo:1,arterial:1,venoso:1,nervioso_periferico:1},dep:[]},
+ {n:'Músculos intermedios',s:'Int.',t:'Se retira el plano superficial: aparecen los músculos del segundo plano y los paquetes vasculonerviosos.',on:{muscular:1,oseo:1,arterial:1,venoso:1,nervioso_periferico:1},dep:['s']},
+ {n:'Músculos profundos',s:'Prof.',t:'Solo los músculos pegados al hueso y a las cápsulas: rotadores, interóseos, transversoespinosos.',on:{muscular:1,oseo:1,arterial:1,venoso:1,nervioso_periferico:1,articular:1},dep:['s','i']},
+ {n:'Vasos y nervios',s:'V-N',t:'Sin músculos: el trayecto completo de arterias, venas y nervios periféricos sobre el esqueleto articulado.',on:{oseo:1,arterial:1,venoso:1,nervioso_periferico:1,articular:1},dep:[]},
+ {n:'Ligamentos y cápsulas',s:'Lig.',t:'Cápsulas articulares, ligamentos, discos y bolsas sinoviales. El cartílago articular se ve azulado y brillante.',on:{oseo:1,articular:1,bolsas:1},dep:[]},
+ {n:'Huesos',s:'Hueso',t:'Esqueleto: relieves óseos, superficies articulares y cartílago hialino.',on:{oseo:1},dep:[]}];
+const DIS_F=[
+ {n:'Piel',s:'Piel',t:'Superficie de la mujer del Visible Human Project: contorno, mamas y relieves.',on:{f_piel:1},dep:[]},
+ {n:'Mama',s:'Mama',t:'Glándula mamaria: lóbulos, conductos galactóforos, pezón y areola, envueltos en tejido adiposo.',on:{f_mama:1,f_oseo:1,f_visceras:1,f_reproductor:1,f_vasos:1},dep:[]},
+ {n:'Vísceras',s:'Vísc.',t:'Corazón, pulmones, hígado, intestino, riñones y vasos en su posición real.',on:{f_visceras:1,f_reproductor:1,f_vasos:1,f_oseo:1},dep:[]},
+ {n:'Pelvis femenina',s:'Pelvis',t:'Útero, ovarios, trompas, vagina y vejiga dentro de la pelvis ósea femenina.',on:{f_reproductor:1,f_oseo:1,f_vasos:1,f_visceras:1},flt:{f_visceras:/bladder|ureter|kidney|renal|ureteral/i},dep:[]},
+ {n:'Esqueleto y sistema nervioso',s:'Hueso',t:'Pelvis, columna, rodillas, médula espinal y encéfalo.',on:{f_oseo:1,f_articular:1,f_nervioso:1},dep:[]}];
+const DISL=()=>BODY==='f'?DIS_F:DIS;
+let disStage=-1;const FADE={};let fading=[];
+function fadeMat(k){if(!FADE[k]){FADE[k]=baseMat(k,'e');FADE[k].transparent=true;FADE[k].depthWrite=false;}return FADE[k];}
+function visNow(m){return m.visible&&m.parent&&m.parent.visible;}
+function setDissection(i){const D=DISL();i=Math.max(0,Math.min(D.length-1,i));const st=D[i];
+  const before=meshes.filter(visNow);
+  for(const k in SYS){if(k==='importado'||!sexOk(k))continue;const want=k in st.on;SYS[k].on=want;SYS[k].rx=false;
+    SYS[k].op=want?(k==='fascia'?.92:1):SYS[k].op;if(want&&SYS[k].state!=='loaded')loadSys(k);}
+  DEPTH_OFF.clear();st.dep.forEach(d=>DEPTH_OFF.add(d));store.set('depthOff',[...DEPTH_OFF]);
+  isoSet=null;patchFocus=null;DIS_FLT=st.flt||null;DIS_EXC=null;applySystems();renderSysList();
+  // crossfade: lo que desaparece se desvanece en lugar de cortarse
+  const gone=before.filter(m=>!visNow(m));
+  for(const f of fading){f.m.material=f.mat;}fading=[];
+  const grpOn=new Set();
+  for(const m of gone){const g=m.parent;if(!g.visible){grpOn.add(g);}fading.push({m,mat:m.material});m.material=fadeMat(m.userData.sys);m.visible=true;}
+  for(const g of grpOn){g.visible=true;for(const c of g.children)if(!gone.includes(c))c.visible=false;}
+  fadeT=0;disStage=i;renderDis();store.set('dis',i);}
+let fadeT=1;
+function fadeTick(dt){if(!fading.length)return;fadeT=Math.min(1,fadeT+dt/0.6);const op=1-fadeT*fadeT*(3-2*fadeT);
+  for(const k in FADE)FADE[k].opacity=op;
+  if(fadeT>=1){for(const f of fading)f.m.material=f.mat;fading=[];applySystems();}}
+function renderDis(){const el=$('#disSteps');if(!el)return;const DIS=DISL();$('#disR').max=DIS.length-1;el.style.gridTemplateColumns=`repeat(${DIS.length},1fr)`;
+  el.innerHTML=DIS.map((d,i)=>`<button data-i="${i}" data-s="${d.s}" aria-current="${i===disStage}" title="${d.n}">${d.n}</button>`).join('');
+  el.querySelectorAll('button').forEach(b=>b.onclick=()=>setDissection(+b.dataset.i));
+  const d=DIS[Math.max(0,disStage)];$('#disR').value=Math.max(0,disStage);$('#disName').textContent=disStage<0?'Elige una capa para empezar':d.n;$('#disTxt').textContent=disStage<0?'El modelo muestra ahora las capas que tengas activas abajo.':d.t;
+  $('#disPrev').disabled=disStage<=0;$('#disNext').disabled=disStage>=DIS.length-1;}
+$('#disR').oninput=e=>setDissection(+e.target.value);
+$('#disPrev').onclick=()=>setDissection(disStage-1);$('#disNext').onclick=()=>setDissection(disStage<0?0:disStage+1);
+
+/* ───────── Cámara orbital ───────── */
+const orb={tgt:new V3(0,0.88,0),r:3.5,th:0.42,ph:1.45,T:{tgt:new V3(0,0.88,0),r:3.5,th:0.42,ph:1.43}};
+const VIEWS={ant:[0,1.45],post:[Math.PI,1.45],latd:[-Math.PI/2,1.45],lati:[Math.PI/2,1.45],sup:[0,0.12],inf:[0,Math.PI-0.12]};
+function setView(v){if(v==='reset'){orb.T.th=0.42;orb.T.ph=1.45;orb.T.r=3.5;orb.T.tgt.set(0,0.88,0);return;}
+  const [th,ph]=VIEWS[v];let d=th-orb.th;d=Math.atan2(Math.sin(d),Math.cos(d));orb.T.th=orb.th+d;orb.T.ph=ph;}
+$$('[data-view]').forEach(b=>b.onclick=()=>setView(b.dataset.view));
+let hintDone=false;
+if(window.innerWidth<600) $('#hintTxt').textContent='Arrastra para girar · pellizca para acercar · toca para identificar';
+const ptrs=new Map();let downInfo=null,lastPinch=null;
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('pointerdown',e=>{spin=false;if(!hintDone){hintDone=true;setTimeout(()=>{if(!quiz.on&&!patchFocus)$('#hintTxt').hidden=true;},2500);}cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===1) downInfo={x:e.clientX,y:e.clientY,moved:0,btn:e.button,shift:e.shiftKey}; else if(downInfo) downInfo.moved=99;lastPinch=null;});
+cv.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;const p=ptrs.get(e.pointerId);const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
+  if(downInfo) downInfo.moved+=Math.abs(dx)+Math.abs(dy);
+  if(ptrs.size===1){ if(downInfo&&(downInfo.btn===2||downInfo.shift)) pan(dx,dy); else {orb.T.th-=dx*0.008;orb.T.ph=Math.min(Math.PI-0.05,Math.max(0.05,orb.T.ph-dy*0.008));} }
+  else if(ptrs.size===2){const [a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y),mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+    if(lastPinch){orb.T.r=Math.min(6,Math.max(0.12,orb.T.r*lastPinch.d/d));pan(mx-lastPinch.mx,my-lastPinch.my);}lastPinch={d,mx,my};}
+});
+const endPtr=e=>{if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);if(ptrs.size<2)lastPinch=null;
+  if(ptrs.size===0&&downInfo&&downInfo.moved<7&&downInfo.btn===0) pick(e.clientX,e.clientY);if(ptrs.size===0)downInfo=null;};
+cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);downInfo=null;});
+cv.addEventListener('wheel',e=>{e.preventDefault();const f=1+Math.sign(e.deltaY)*0.09;orb.T.r=Math.min(6,Math.max(0.12,orb.T.r*f));
+  if(f<1){const r=cv.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1),camera);
+    const n=camera.getWorldDirection(new V3());const pl=new THREE.Plane().setFromNormalAndCoplanarPoint(n,orb.T.tgt);const hit=new V3();if(ray.ray.intersectPlane(pl,hit)) orb.T.tgt.lerp(hit,0.09);}},{passive:false});
+function pan(dx,dy){const right=new V3().setFromMatrixColumn(camera.matrix,0),up=new V3().setFromMatrixColumn(camera.matrix,1);const k=orb.r*0.0011;orb.T.tgt.addScaledVector(right,-dx*k).addScaledVector(up,dy*k);}
+function focusOn(v,r){orb.T.tgt.copy(v);orb.T.r=r;}
+function focusMesh(m){m.geometry.computeBoundingSphere();const s=m.geometry.boundingSphere;focusOn(s.center.clone(),Math.max(0.25,s.radius*4.2));}
+
+/* ───────── Selección ───────── */
+const ray=new THREE.Raycaster();let selected=null;
+function visibleDeep(o){while(o){if(!o.visible)return false;o=o.parent;}return true;}
+function pick(cx,cy){
+  const r=cv.getBoundingClientRect();const ndc=new THREE.Vector2(((cx-r.left)/r.width)*2-1,-((cy-r.top)/r.height)*2+1);
+  ray.setFromCamera(ndc,camera);
+  const cand=meshes.filter(m=>visibleDeep(m)&&m.material.opacity>0.04);
+  const hits=ray.intersectObjects(cand,false).filter(h=>clipArr.every(pl=>pl.distanceToPoint(h.point)>=-0.0005));
+  if(!hits.length){if(!quiz.on)select(null);return;}
+  if(quiz.on){quizAnswer(hits[0].object);return;}
+  select(hits[0].object,hits[0].point);
+}
+const MEMB=/^(Pleura|Spinal dura|Pericardium|Peritoneum)$|cornea|conjunctiva|aqueous|vitreous|tear film|anterior chamber|posterior chamber/i;
+function setState(m,st){m.userData.state=st;m.material=matFor(m.userData.sys,m.userData.c.ins,st===''&&MEMB.test(m.userData.c.en)?'memb':st);}
+function refreshState(m){const u=m.userData;const st=u.sel&&u.ghost?'ghost':u.sel?'sel':u.hint?'hint':u.ag?'ag':'';if(st!==u.state) setState(m,st);}
+function select(m,point){
+  stopTools();clearLm();
+  if(selected){selected.m.userData.sel=false;selected.m.userData.ghost=false;refreshState(selected.m);}
+  if((patchFocus||isoSet)&&!lesson){patchFocus=null;isoSet=null;applySystems();}
+  selected=null;
+  if(!m){renderInfo();renderActbar();return;}
+  m.userData.sel=true;refreshState(m);
+  const local=point?m.worldToLocal(point.clone()):(m.geometry.computeBoundingSphere(),m.geometry.boundingSphere.center.clone());
+  selected={m,local};tagLabel.el.textContent=label(m.userData.c);
+  $('#hintTxt').hidden=true;renderActbar();
+  renderInfo();
+  if(window.innerWidth<880||currentTab!=='mov') showTab('estr');
+}
+function findMesh(id){return byId[id];}
+
+function patchesFor(c){
+  const own=[mnorm(c.en),mnorm(parentName(c.en))];
+  return Object.values(CAT).filter(r=>r[4]==='insercion'&&(!c.side||!r[5]||r[5]===c.side)&&(own.includes(mnorm(r[1]))||own.includes(mnorm(parentName(r[1]))))).map(r=>r[0]);
+}
+function row(k,v){return v?`<dt>${k}</dt><dd>${esc(v)}</dd>`:'';}
+function renderInfo(){
+  const box=$('#infoBox');
+  if(!selected){box.innerHTML='<div class="view"><div class="empty">Toca una estructura del modelo o búscala arriba para ver su ficha: nombre oficial en español y latín, origen, inserción, inervación, irrigación, acción, prueba muscular y relevancia clínica.</div>'+aiCard()+'</div>';bindAi(box);return;}
+  const m=selected.m,c=m.userData.c,s=SYS[m.userData.sys],inf=infoFor(c);
+  let body='';
+  if(inf&&inf.kind==='mus'){const d=inf.d;
+    body=`<dl class="kv">${row('Origen',d.origen)}${row('Inserción',d.insercion)}${row('Inervación',d.inervacion)}${row('Irrigación',d.irrigacion)}${row('Acción',d.accion)}</dl>`+(d.clinica?`<div class="note"><h3>Relevancia clínica</h3><p>${esc(d.clinica)}</p></div>`:'');}
+  else if(inf&&inf.kind==='lig'){const d=inf.d;
+    body=`<dl class="kv">${row('Tipo',d.tipo)}${row('Articulación',d.articulacion)}${row('Une',d.une)}${row('Función',d.funcion)}</dl>`+(d.clinica?`<div class="note"><h3>Relevancia clínica</h3><p>${esc(d.clinica)}</p></div>`:'');}
+  else if(inf&&inf.kind==='bone'){const d=inf.d;
+    body=`<p>${esc(d.descripcion||'')}</p><dl class="kv">${row('Tipo',d.tipo)}${row('Articula con',d.articula)}<dt class="only-pro">Referencias</dt><dd class="only-pro">${esc(d.referencias||'—')}</dd></dl>`+(d.clinica?`<div class="note"><h3>Relevancia clínica</h3><p>${esc(d.clinica)}</p></div>`:'');}
+  else if(inf&&inf.kind==='gen'){const d=inf.d,t=norm(d.tipo||'');
+    const L=/vena|seno|venos/.test(t)?['Se forma','Desemboca en','Tributarias','Drena']:/arteria|arterial/.test(t)?['Nace de','Continúa como','Ramas','Irriga']:/nervio|ramo|plexo|tronco|division|fasciculo|ganglio(?! linf)/.test(t)?['Origen','Termina','Ramas','Inerva']:/linf/.test(t)?['Origen','Drenaje eferente','Ramas','Región que drena']:/tracto|via|fascicul/.test(t)?['Origen','Destino','Ramas','Irrigación']:['Inserción proximal','Inserción distal','Ramas','Relación / irrigación'];
+    body=`<p>${esc(d.descripcion||'')}</p><dl class="kv">${row('Tipo',d.tipo)}${row(L[0],d.origen)}${row(L[1],d.destino)}${row(L[2],d.ramas)}${row(L[3],d.territorio)}${row('Función',d.funcion)}</dl>`+(d.clinica?`<div class="note"><h3>Relevancia clínica</h3><p>${esc(d.clinica)}</p></div>`:'');}
+  else body=`<p class="muted small">Estructura del atlas. Nombre en inglés: ${esc(c.en)}.</p>`;
+  body+=crossLinks(c,inf);
+  const reg=EX.reg[c.id];const dep={s:'Superficial',i:'Intermedio',p:'Profundo'}[EX.dep[c.id]];
+  let extra=`<dl class="kv">${row('Región',reg)}${dep?row('Plano muscular',dep):''}</dl>`;
+  if(inf&&inf.kind==='mus'){const d=inf.d;const mv=movesFor(c);
+    if(d.biomecanica) extra+=`<div class="card"><h3>Función biomecánica (plano / eje)</h3><p class="small">${esc(d.biomecanica)}</p>${mv.length?`<div class="chips" style="margin-top:4px">${mv.map(([j,v],i)=>`<button data-mv="${i}">${esc(v.n)} ${esc(j.n.toLowerCase())}</button>`).join('')}</div><p class="muted" style="font-size:11.5px">Toca un movimiento para verlo en el simulador.</p>`:''}</div>`;
+    if(d.prueba) extra+=`<div class="card"><h3>Prueba muscular manual</h3><p class="small">${esc(d.prueba)}</p></div>`;}
+  const lms=EX.lm[c.id]||[];
+  if(lms.length) extra+=`<div class="card"><h3>Accidentes óseos (${lms.length})</h3><div class="lms">${lms.map((l,i)=>`<button data-lm="${i}">${esc(l[0])}</button>`).join('')}</div><div class="row"><button class="btn" id="lmAll">Mostrar todos</button><button class="btn" id="lmNone">Ocultar marcas</button></div></div>`;
+  extra+=aiCard();
+  const patches=(m.userData.sys==='muscular')?patchesFor(c):[];
+  box.innerHTML=`<div class="view" style="gap:10px">
+    <span class="info-sys"><span class="dot" style="background:${m.userData.sys==='insercion'?(c.ins==='origen'?'var(--orig)':'var(--ins)'):s.c}"></span>${esc(s.n)}${c.side?' · lado '+c.side:''}</span>
+    <h2>${esc(c.es)}${c.ins?` <span class="muted" style="font-size:15px">(${c.ins})</span>`:''}</h2>
+    ${c.la?`<p class="latin">${esc(c.la)}</p>`:''}
+    ${body}
+    <div class="row">${patches.length?`<button class="btn pri" id="iPatch">Ver origen e inserción</button>`:''}<button class="btn" id="iFocus">Centrar</button><button class="btn" id="iIso">Aislar</button><button class="btn" id="iHide">Ocultar</button></div>
+    ${extra}
+    <p class="muted" style="font-size:11.5px">Término del atlas: ${esc(c.en)}</p></div>`;
+  box.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{const [j,v]=movesFor(c)[+b.dataset.mv];curJ=j;curM=v;angle=0;if(c.side)romSide=c.side==='izquierdo'?'L':'R';showTab('mov');renderROM();setSide(romSide);});
+  box.querySelectorAll('[data-lm]').forEach(b=>b.onclick=()=>{box.querySelectorAll('[data-lm]').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');showLm([lms[+b.dataset.lm]],true);});
+  if(lms.length){$('#lmAll').onclick=()=>showLm(lms,false);$('#lmNone').onclick=()=>{clearLm();box.querySelectorAll('[data-lm]').forEach(x=>x.setAttribute('aria-pressed','false'));};}
+  bindAi(box);
+  box.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>goTo(b.dataset.goto));
+  $('#iFocus').onclick=()=>focusMesh(m);
+  $('#iHide').onclick=()=>{hiddenIds.add(c.id);select(null);applySystems();};
+  $('#iIso').onclick=()=>{isoSet=new Set([c.id]);applySystems();focusMesh(m);};
+  if(patches.length) $('#iPatch').onclick=async()=>{
+    SYS.insercion.on=true;SYS.oseo.on=true;await loadSys('insercion');patchFocus=new Set(patches);isoSet=new Set([c.id,...patches]);
+    m.userData.ghost=true;refreshState(m);applySystems();renderSysList();focusMesh(m);
+    $('#hintTxt').hidden=false;$('#hintTxt').textContent='Rojo: origen · azul: inserción. Pulsa Mostrar estructuras ocultas en Capas para volver al modelo completo.';};
+}
+
+/* ───────── Enlaces entre sistemas ───────── */
+const expand=t=>(' '+norm(t).replace(/\bnn\.\s*/g,'nervios ').replace(/\bn\.\s*/g,'nervio ').replace(/\baa\.\s*/g,'arterias ').replace(/\ba\.\s*/g,'arteria ').replace(/\bvv\.\s*/g,'venas ').replace(/\bv\.\s*/g,'vena ').replace(/\bmm?\.\s*/g,'musculo ').replace(/[(),;:.]/g,' ').replace(/\bcubital(es)?\b/g,'ulnar$1').replace(/\bperone(o|a|os|as)\b/g,'fibular').replace(/\bdel musculo /g,'del ').replace(/\s+/g,' ')+' ');
+let NAMEIDX=null;
+function nameIndex(){if(NAMEIDX)return NAMEIDX;NAMEIDX={};
+  for(const r of Object.values(CAT)){if(!['nervioso_periferico','arterial','venoso'].includes(r[4])||r[6])continue;const k=expand(r[2]).trim();if(k.split(' ').length<2)continue;(NAMEIDX[k]=NAMEIDX[k]||[]).push(r);}
+  return NAMEIDX;}
+function findNamed(text,sys){const t=expand(text);const out=[];
+  for(const [k,rows] of Object.entries(nameIndex())){if(!rows.some(r=>sys.includes(r[4])))continue;
+    const sing=k.replace(/^(nervio|arteria|vena)s /,'$1 ');if(t.includes(' '+k+' ')||t.includes(' '+sing+' ')||t.includes(' '+k.replace(/^(nervio|arteria|vena) /,'$1s ')+' ')) out.push([k,rows]);}
+  out.sort((a,b)=>b[0].length-a[0].length);
+  const keep=[];for(const o of out){if(!keep.some(x=>x[0].includes(o[0])))keep.push(o);}return keep.slice(0,3);}
+function pickSide(rows,side){return (rows.find(r=>r[5]===side)||rows.find(r=>!r[5])||rows[0])[0];}
+function crossLinks(c,inf){
+  const links=[];
+  if(inf&&inf.kind==='mus'){
+    for(const [k,rows] of findNamed(inf.d.inervacion||'',['nervioso_periferico'])) links.push(['Nervio',rows[0][2],pickSide(rows,c.side)]);
+    for(const [k,rows] of findNamed(inf.d.irrigacion||'',['arterial'])) links.push(['Arteria',rows[0][2],pickSide(rows,c.side)]);}
+  if(c.sys==='nervioso_periferico'||c.sys==='arterial'){
+    const key=expand(c.es).trim();const field=c.sys==='arterial'?'irrigacion':'inervacion';
+    const ms=Object.entries(INFO.mus).filter(([en,d])=>d[field]&&expand(d[field]).includes(' '+key+' ')).slice(0,12);
+    for(const [en] of ms){const r=Object.values(CAT).find(x=>x[1]===en&&x[4]==='muscular'&&(!c.side||!x[5]||x[5]===c.side));if(r) links.push([c.sys==='arterial'?'Irriga':'Inerva',r[2],r[0]]);}}
+  if(!links.length) return '';
+  return `<div class="card"><h3>En el modelo 3D</h3><div style="display:flex;flex-direction:column;gap:4px">${links.map(([t,n,id])=>`<span class="small"><span class="muted">${t}:</span> <button class="link" data-goto="${id}">${esc(n)}</button></span>`).join('')}</div></div>`;
+}
+
+/* ───────── Búsqueda ───────── */
+let SEARCH=[];
+const PRI={muscular:0,oseo:1,articular:2,nervioso_periferico:3,arterial:4,venoso:5,fascia:6,bolsas:7,insercion:8};
+$('#q').addEventListener('input',e=>{
+  const q=norm(e.target.value.trim());const out=$('#results');
+  if(q.length<2){out.hidden=true;return;}
+  const seen=new Set(),all=[];
+  for(const r of SEARCH){if(r.k.includes(q)){const key=r.c[2]+'|'+r.c[4]+'|'+r.c[6];if(seen.has(key))continue;seen.add(key);all.push(r);}}
+  const ex=r=>{const e=norm(r.c[2]);return e===q?0:e.startsWith(q)?1:2;};
+  all.sort((a,b)=>ex(a)-ex(b)||(PRI[a.c[4]]??9)-(PRI[b.c[4]]??9)||(a.k.startsWith(q)?0:1)-(b.k.startsWith(q)?0:1)||a.c[2].length-b.c[2].length);
+  const res=all.slice(0,14).map(r=>r.c);
+  out.innerHTML=res.length?'':'<p class="muted" style="padding:10px">Sin resultados. Prueba con otro nombre, en latín o en inglés.</p>';
+  res.forEach(r=>{const b=document.createElement('button');b.innerHTML=`<span>${esc(r[2])}${r[6]?` <span class="muted">(${r[6]})</span>`:''}</span><small>${esc(SYS[r[4]]?.n||'')}${SYS[r[4]]?.fem?' · mujer':''}</small>`;
+    b.onclick=()=>{out.hidden=true;e.target.value='';goTo(r[0]);};out.appendChild(b);});
+  out.hidden=false;
+});
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('.search'))$('#results').hidden=true;});
+async function goTo(id){
+  let c=entry(id);if(!c)return;
+  const side=romSide==='L'?'izquierdo':'derecho';
+  if(c.side&&c.side!==side){const alt=Object.values(CAT).find(r=>r[1]===c.en&&r[5]===side&&r[4]===c.sys&&r[6]===c.ins);if(alt)c=entry(alt[0]);}
+  if(!sexOk(c.sys))setBody(SYS[c.sys].fem?'f':'m');
+  const s=SYS[c.sys];s.on=true;if(s.op<.3)s.op=1;renderSysList();await loadSys(c.sys);
+  hiddenIds.delete(c.id);applySystems();
+  const m=findMesh(c.id);if(!m)return;select(m,null);focusMesh(m);
+  if(!['muscular','oseo','piel','fascia'].includes(BS(c.sys))&&(BODY==='f'?SYS.f_piel.on:SYS.muscular.on)) setXray(true);
+}
+
+/* ───────── Planos, ejes, etiquetas ───────── */
+const planeCols={sag:'--sag',fro:'--fro',tra:'--tra'};
+const PLANES={
+  sag:{n:'Sagital',axis:'Frontal (mediolateral)',min:-0.32,max:0.32,pos:0,show:false,cut:false,desc:'Divide el cuerpo en derecha e izquierda.'},
+  fro:{n:'Frontal (coronal)',axis:'Sagital (anteroposterior)',min:-0.18,max:0.18,pos:0,show:false,cut:false,desc:'Divide el cuerpo en anterior y posterior.'},
+  tra:{n:'Transversal (horizontal)',axis:'Longitudinal (vertical)',min:0.02,max:1.74,pos:1.0,show:false,cut:false,desc:'Divide el cuerpo en superior e inferior.'}
+};
+const planeGroup=new THREE.Group();scene.add(planeGroup);
+for(const k in PLANES){const p=PLANES[k];
+  const geo=k==='sag'?new THREE.PlaneGeometry(0.62,1.9):k==='fro'?new THREE.PlaneGeometry(0.8,1.9):new THREE.PlaneGeometry(0.8,0.62);
+  if(k==='sag') geo.rotateY(Math.PI/2); if(k==='tra') geo.rotateX(-Math.PI/2);
+  const mat=new THREE.MeshBasicMaterial({transparent:true,opacity:.13,side:THREE.DoubleSide,depthWrite:false});
+  const mesh=new THREE.Mesh(geo,mat);const edge=new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({transparent:true,opacity:.75}));
+  const g=new THREE.Group();g.add(mesh,edge);planeGroup.add(g);p.g=g;p.mat=mat;p.emat=edge.material;
+  p.clip=k==='sag'?new THREE.Plane(new V3(-1,0,0),0):k==='fro'?new THREE.Plane(new V3(0,0,-1),0):new THREE.Plane(new V3(0,-1,0),1);}
+const savedP=store.get('planes',null);if(savedP) for(const k in savedP) if(PLANES[k]) Object.assign(PLANES[k],{pos:savedP[k].pos,show:savedP[k].show,cut:savedP[k].cut});
+const axisObjs=[];const axisGroup=new THREE.Group();scene.add(axisGroup);
+function axis(dir,len,cv_,lbl){const mat=new THREE.MeshBasicMaterial({depthTest:false,transparent:true});const g=new THREE.Group();
+  const c=new THREE.Mesh(new THREE.CylinderGeometry(0.003,0.003,len*2,8),mat);const h1=new THREE.Mesh(new THREE.ConeGeometry(0.013,0.045,14),mat);h1.position.y=len;const h2=h1.clone();h2.position.y=-len;h2.rotation.z=Math.PI;
+  g.add(c,h1,h2);g.position.set(0,0.9,0);g.quaternion.setFromUnitVectors(new V3(0,1,0),dir);g.traverse(o=>o.renderOrder=10);axisGroup.add(g);
+  axisObjs.push({mat,cv:cv_,label:lbl,tip:new V3(0,0.9,0).add(dir.clone().multiplyScalar(len+0.06))});}
+axis(new V3(1,0,0),0.4,'--sag','Eje frontal');axis(new V3(0,0,1),0.34,'--fro','Eje sagital');axis(new V3(0,1,0),0.95,'--tra','Eje longitudinal');
+function planeColors(){for(const k in PLANES){const c=new THREE.Color(cssVar(planeCols[k]));PLANES[k].mat.color.copy(c);PLANES[k].emat.color.copy(c);}axisObjs.forEach(a=>a.mat.color.set(cssVar(a.cv)));}
+function updatePlanes(){clipArr.length=0;
+  for(const k in PLANES){const p=PLANES[k];p.g.visible=p.show;
+    if(k==='sag'){p.g.position.set(p.pos,0.9,0);} if(k==='fro'){p.g.position.set(0,0.9,p.pos);} if(k==='tra'){p.g.position.set(0,p.pos,0);}
+    p.clip.constant=p.pos;if(p.cut) clipArr.push(p.clip);}
+  syncAllMats();
+  store.set('planes',Object.fromEntries(Object.entries(PLANES).map(([k,p])=>[k,{pos:p.pos,show:p.show,cut:p.cut}])));}
+const labelsEl=$('#labels');const labels=[];
+function addLabel(text,getPos,cls,group){const el=document.createElement('div');el.className='lbl '+(cls||'');el.textContent=text;el.hidden=true;labelsEl.appendChild(el);const L={el,getPos,group,show:false};labels.push(L);return L;}
+[['Superior',[0,1.82,0]],['Inferior',[0,-0.04,0]],['Anterior',[0,1.1,0.32]],['Posterior',[0,1.1,-0.32]],['Derecha',[-0.5,1.1,0]],['Izquierda',[0.5,1.1,0]],['Medial',[-0.05,0.6,0.12]],['Lateral',[-0.24,0.6,0.0]]].forEach(([t,p])=>addLabel(t,()=>new V3(...p),'','dir'));
+axisObjs.forEach(a=>addLabel(a.label,()=>a.tip,'','axis'));
+for(const k in PLANES){const p=PLANES[k];addLabel('Plano '+p.n.split(' ')[0].toLowerCase(),()=>k==='sag'?new V3(p.pos,1.82,0.28):k==='fro'?new V3(0.42,1.82,p.pos):new V3(0.44,p.pos,0.28),'','plane:'+k);}
+const tagLabel=addLabel('',()=>null,'tag','tag');
+function removeLabels(group){for(let i=labels.length-1;i>=0;i--) if(labels[i].group===group){labels[i].el.remove();labels.splice(i,1);}}
+let showAxes=store.get('axes',false),showDir=store.get('dir',false);
+function renderPlanes(){const wrap=$('#planeCards');wrap.innerHTML='';
+  for(const k in PLANES){const p=PLANES[k];const c=document.createElement('div');c.className='card';c.style.marginBottom='10px';
+    c.innerHTML=`<div class="plane-h"><b><span class="swatch" style="background:var(${planeCols[k]})"></span>Plano ${p.n.toLowerCase()}</b><button class="sw" role="switch" aria-checked="${p.show}" aria-label="Mostrar plano ${p.n}"></button></div>
+      <p class="muted small">${p.desc} Eje perpendicular: ${p.axis.toLowerCase()}.</p>
+      <input type="range" min="${p.min}" max="${p.max}" step="0.002" value="${p.pos}" aria-label="Posición del plano ${p.n}">
+      <label class="chk"><input type="checkbox" ${p.cut?'checked':''}> Cortar el modelo en este plano</label>`;
+    c.querySelector('.sw').onclick=e=>{p.show=!p.show;e.currentTarget.setAttribute('aria-checked',p.show);updatePlanes();};
+    c.querySelector('input[type=range]').oninput=e=>{p.pos=+e.target.value;updatePlanes();};
+    c.querySelector('input[type=checkbox]').onchange=e=>{p.cut=e.target.checked;if(p.cut&&!p.show){p.show=true;c.querySelector('.sw').setAttribute('aria-checked',true);}updatePlanes();};
+    wrap.appendChild(c);}}
+$('#axesChk').checked=showAxes;$('#dirChk').checked=showDir;
+$('#axesChk').onchange=e=>{showAxes=e.target.checked;store.set('axes',showAxes);};
+$('#dirChk').onchange=e=>{showDir=e.target.checked;store.set('dir',showDir);};
+
+/* ───────── Rig y deformación de mallas reales ───────── */
+let SEGS={},JOINTS={};
+const DEPTH={trunk:0,shoulder:1,elbow:2,fore:3,wrist:4,hip:1,knee:2,ankle:3,cervical:1};
+const PROX={shoulder:['trunk'],elbow:['shoulder','trunk'],fore:['elbow','shoulder','trunk'],wrist:['fore','elbow','shoulder','trunk'],hip:[],knee:['hip'],ankle:['knee','hip'],cervical:['trunk'],trunk:[]};
+function buildRig(){
+  const P=k=>new V3(...RIG[k]);
+  const off=(k,sx,dy,z)=>{const v=P(k);return new V3(v.x*sx,v.y+dy,z);};
+  SEGS={spineLow:[P('pelvis'),P('l3')],spineUp:[P('l3'),P('c7')],head:[P('c7'),P('headtop')]};
+  for(const S of ['R','L']){
+    Object.assign(SEGS,{['clav_'+S]:[P('c7'),P('shoulder_'+S)],['arm_'+S]:[P('shoulder_'+S),P('elbow_'+S)],['fore_'+S]:[P('elbow_'+S),P('wrist_'+S)],['hand_'+S]:[P('wrist_'+S),P('hand_'+S)],
+      ['pelv_'+S]:[P('pelvis'),P('hip_'+S)],
+      ['flank_'+S]:[off('shoulder_'+S,.8,-.07,-.02),off('hip_'+S,1.65,.16,-.01)],['chest_'+S]:[off('shoulder_'+S,.5,-.05,.09),off('hip_'+S,.9,.17,.08)],['back_'+S]:[off('shoulder_'+S,.5,-.04,-.11),off('hip_'+S,.9,.17,-.11)],
+      ['iliac_'+S]:[off('hip_'+S,1.55,.11,-.02),off('hip_'+S,.45,.09,-.1)],['thigh_'+S]:[P('hip_'+S),P('knee_'+S)],['leg_'+S]:[P('knee_'+S),P('ankle_'+S)],['foot_'+S]:[P('ankle_'+S),P('toe_'+S)],['heel_'+S]:[P('ankle_'+S),P('heel_'+S)]});
+    const up=(a,b)=>P(a).sub(P(b)).normalize();
+    JOINTS['shoulder_'+S]={pivot:P('shoulder_'+S),child:['arm_','fore_','hand_'].map(x=>x+S),long:up('shoulder_'+S,'elbow_'+S),blend:.03};
+    JOINTS['elbow_'+S]={pivot:P('elbow_'+S),child:['fore_'+S,'hand_'+S],blend:.025};
+    JOINTS['fore_'+S]={pivot:P('elbow_'+S),child:['fore_'+S,'hand_'+S],long:up('elbow_'+S,'wrist_'+S),blend:.025,twist:P('wrist_'+S).distanceTo(P('elbow_'+S))};
+    JOINTS['wrist_'+S]={pivot:P('wrist_'+S),child:['hand_'+S],blend:.014};
+    JOINTS['hip_'+S]={pivot:P('hip_'+S),child:['thigh_','leg_','foot_','heel_'].map(x=>x+S),long:up('hip_'+S,'knee_'+S),blend:.04};
+    JOINTS['knee_'+S]={pivot:P('knee_'+S),child:['leg_'+S,'foot_'+S,'heel_'+S],blend:.03};
+    JOINTS['ankle_'+S]={pivot:P('ankle_'+S),child:['foot_'+S,'heel_'+S],blend:.02};
+  }
+  JOINTS.cervical={pivot:P('c7').lerp(P('c3'),.35),child:['head'],blend:.035};
+  JOINTS.trunk={pivot:P('l3'),child:['spineUp','head','clav_R','arm_R','fore_R','hand_R','clav_L','arm_L','fore_L','hand_L'],blend:.05};
+}
+const _ab=new V3(),_ap=new V3();
+function segDist(px,py,pz,a,b){const abx=b.x-a.x,aby=b.y-a.y,abz=b.z-a.z;const apx=px-a.x,apy=py-a.y,apz=pz-a.z;
+  let t=(apx*abx+apy*aby+apz*abz)/(abx*abx+aby*aby+abz*abz);t=t<0?0:t>1?1:t;const dx=apx-abx*t,dy=apy-aby*t,dz=apz-abz*t;return Math.sqrt(dx*dx+dy*dy+dz*dz);}
+function weightsFor(m,jn){
+  const u=m.userData;u.W=u.W||{};if(jn in u.W) return u.W[jn];
+  const J=JOINTS[jn],child=J.child.map(k=>SEGS[k]),other=Object.keys(SEGS).filter(k=>!J.child.includes(k)).map(k=>SEGS[k]);
+  const sph=m.geometry.boundingSphere,c=sph.center;
+  let dc=Infinity,dp=Infinity;for(const s of child) dc=Math.min(dc,segDist(c.x,c.y,c.z,s[0],s[1]));for(const s of other) dp=Math.min(dp,segDist(c.x,c.y,c.z,s[0],s[1]));
+  if(dc-dp>sph.radius*2+J.blend+.02){u.W[jn]=null;return null;}
+  const pos=(u.rest||m.geometry.attributes.position.array),n=pos.length/3,W=new Float32Array(n);let any=false;
+  for(let i=0;i<n;i++){const x=pos[i*3],y=pos[i*3+1],z=pos[i*3+2];let a=Infinity,b=Infinity;
+    for(const s of child){const d=segDist(x,y,z,s[0],s[1]);if(d<a)a=d;}
+    for(const s of other){const d=segDist(x,y,z,s[0],s[1]);if(d<b)b=d;}
+    let w=(b-a)/(2*J.blend)+.5;w=w<0?0:w>1?1:w*w*(3-2*w);
+    if(J.twist&&w>0){const t=((x-J.pivot.x)*-J.long.x+(y-J.pivot.y)*-J.long.y+(z-J.pivot.z)*-J.long.z)/J.twist;w*=t<0?0:t>1?1:t;}
+    W[i]=w;if(w>0.001)any=true;}
+  u.W[jn]=any?W:null;return u.W[jn];
+}
+function prepWeights(){}
+const deformed=new Set();
+function qOf(jn,comp){const J=JOINTS[jn];const long=J.long||new V3(0,1,0);
+  const qx=new Q().setFromAxisAngle(new V3(1,0,0),D(comp.x)),qy=new Q().setFromAxisAngle(long,D(comp.y)),qz=new Q().setFromAxisAngle(new V3(0,0,1),D(comp.z));
+  return qx.multiply(qy).multiply(qz);}
+function deform(active){
+  // active: [{jn,q}] sorted distal→proximal
+  const ops=active.map(a=>{const q=a.q;let ang=2*Math.acos(Math.min(1,Math.abs(q.w)));const s=Math.sqrt(Math.max(0,1-q.w*q.w));
+    let ax=s>1e-6?new V3(q.x/s,q.y/s,q.z/s):new V3(1,0,0);if(q.w<0){ax.negate();}return {jn:a.jn,ang,ax,p:JOINTS[a.jn].pivot};}).filter(o=>o.ang>1e-4);
+  const touched=new Set();
+  for(const m of meshes){
+    if(!ops.length) break;
+    const Ws=ops.map(o=>weightsFor(m,o.jn));if(Ws.every(w=>!w)) continue;
+    const u=m.userData,g=m.geometry,pa=g.attributes.position,na=g.attributes.normal;
+    if(!u.rest){u.rest=pa.array.slice();u.restN=na.array.slice();}
+    const R=u.rest,RN=u.restN,P=pa.array,N=na.array,n=R.length/3;
+    for(let i=0;i<n;i++){let x=R[i*3],y=R[i*3+1],z=R[i*3+2],nx=RN[i*3],ny=RN[i*3+1],nz=RN[i*3+2];
+      for(let k=0;k<ops.length;k++){const W=Ws[k];if(!W)continue;const w=W[i];if(w<0.001)continue;const o=ops[k],th=o.ang*w,c=Math.cos(th),s=Math.sin(th),kx=o.ax.x,ky=o.ax.y,kz=o.ax.z;
+        let vx=x-o.p.x,vy=y-o.p.y,vz=z-o.p.z;let d=kx*vx+ky*vy+kz*vz;
+        let rx=vx*c+(ky*vz-kz*vy)*s+kx*d*(1-c),ry=vy*c+(kz*vx-kx*vz)*s+ky*d*(1-c),rz=vz*c+(kx*vy-ky*vx)*s+kz*d*(1-c);
+        x=rx+o.p.x;y=ry+o.p.y;z=rz+o.p.z;
+        d=kx*nx+ky*ny+kz*nz;rx=nx*c+(ky*nz-kz*ny)*s+kx*d*(1-c);ry=ny*c+(kz*nx-kx*nz)*s+ky*d*(1-c);rz=nz*c+(kx*ny-ky*nx)*s+kz*d*(1-c);nx=rx;ny=ry;nz=rz;}
+      P[i*3]=x;P[i*3+1]=y;P[i*3+2]=z;N[i*3]=nx;N[i*3+1]=ny;N[i*3+2]=nz;}
+    pa.needsUpdate=true;na.needsUpdate=true;g.computeBoundingSphere();touched.add(m);
+  }
+  for(const m of deformed){if(!touched.has(m)){const u=m.userData,g=m.geometry;g.attributes.position.array.set(u.rest);g.attributes.normal.array.set(u.restN);g.attributes.position.needsUpdate=true;g.attributes.normal.needsUpdate=true;g.computeBoundingSphere();}}
+  deformed.clear();touched.forEach(m=>deformed.add(m));
+}
+
+/* ───────── Rango articular ───────── */
+const PL_N={sag:'Sagital',fro:'Frontal',tra:'Transversal'},AX_N={sag:'Frontal (mediolateral)',fro:'Sagital (anteroposterior)',tra:'Longitudinal (vertical)'};
+const ROM=[
+ {id:'hombro',n:'Hombro',node:'shoulder',sided:true,R:0.2,moves:[
+  {n:'Flexión',ax:'x',sg:-1,max:180,pl:'sag',dir:[0,-1,0],ag:['Clavicular part of deltoid muscle','Clavicular head of pectoralis major muscle','Coracobrachialis muscle','Long head of biceps brachii','Short head of biceps brachii'],gon:['Acromion, cara lateral','Línea media axilar del tronco','Línea media lateral del húmero hacia el epicóndilo lateral'],pos:'Supino o sedestación, palma hacia medial',ef:'Firme (cápsula posterior y ligamento coracohumeral)'},
+  {n:'Extensión',ax:'x',sg:1,max:60,pl:'sag',dir:[0,-1,0],ag:['Scapular spinal part of deltoid muscle','Latissimus dorsi muscle','Teres major muscle','Long head of triceps brachii'],gon:['Acromion, cara lateral','Línea media axilar del tronco','Línea media lateral del húmero'],pos:'Prono, codo extendido',ef:'Firme (cápsula anterior)'},
+  {n:'Abducción',ax:'z',sg:-1,max:180,pl:'fro',dir:[0,-1,0],ag:['Acromial part of deltoid muscle','Supraspinatus muscle','Serratus anterior muscle','Descending part of trapezius muscle','Ascending part of trapezius muscle'],gon:['Cara anterior del acromion','Paralelo al esternón','Línea media anterior del húmero'],pos:'Supino o sedestación, rotación externa',ef:'Firme'},
+  {n:'Rotación interna',ax:'y',sg:1,max:70,pl:'tra',dir:[0,0,1],help:{elbow:['x',-90]},ag:['Subscapularis muscle','Sternocostal head of pectoralis major muscle','Latissimus dorsi muscle','Teres major muscle','Clavicular part of deltoid muscle'],gon:['Olécranon','Perpendicular al suelo','Borde cubital del antebrazo hacia la apófisis estiloides'],pos:'AAOS: supino, hombro a 90° de abducción y codo a 90° (aquí con el brazo junto al tronco)',ef:'Firme'},
+  {n:'Rotación externa',ax:'y',sg:-1,max:90,pl:'tra',dir:[0,0,1],help:{elbow:['x',-90]},ag:['Infraspinatus muscle','Teres minor muscle','Scapular spinal part of deltoid muscle'],gon:['Olécranon','Perpendicular al suelo','Borde cubital del antebrazo'],pos:'AAOS: supino, hombro a 90° de abducción y codo a 90°',ef:'Firme (cápsula anterior y ligamentos glenohumerales)'}]},
+ {id:'codo',n:'Codo',node:'elbow',sided:true,R:0.15,moves:[
+  {n:'Flexión',ax:'x',sg:-1,max:150,pl:'sag',dir:[0,-1,0],ag:['Brachialis muscle','Long head of biceps brachii','Short head of biceps brachii','Brachioradialis muscle'],gon:['Epicóndilo lateral','Línea media lateral del húmero hacia el acromion','Línea media lateral del radio hacia la estiloides radial'],pos:'Supino, antebrazo en supinación',ef:'Blando (contacto de masas musculares) o duro'}]},
+ {id:'antebrazo',n:'Antebrazo',node:'fore',sided:true,R:0.08,moves:[
+  {n:'Pronación',ax:'y',sg:1,off:90,max:80,pl:'tra',dir:[0,0,1],help:{elbow:['x',-90]},ag:['Superficial head of pronator teres','Deep head of pronator teres','Pronator quadratus'],gon:['Lateral a la estiloides cubital','Paralelo al húmero','Dorso de la muñeca, proximal a la estiloides'],pos:'Sedestación, codo a 90° junto al tronco, 0° = pulgar hacia arriba',ef:'Duro (contacto radio-cúbito) o firme'},
+  {n:'Supinación',ax:'y',sg:-1,off:90,max:80,pl:'tra',dir:[0,0,1],help:{elbow:['x',-90]},ag:['Supinator','Long head of biceps brachii','Short head of biceps brachii'],gon:['Medial a la estiloides cubital','Paralelo al húmero','Cara palmar de la muñeca, proximal a la estiloides'],pos:'Sedestación, codo a 90° junto al tronco, 0° = pulgar hacia arriba',ef:'Firme'}]},
+ {id:'muneca',n:'Muñeca',node:'wrist',sided:true,R:0.08,moves:[
+  {n:'Flexión',ax:'x',sg:-1,max:80,pl:'sag',dir:[0,-1,0],ag:['Flexor carpi radialis','Humeral head of flexor carpi ulnaris','Ulnar head of flexor carpi ulnaris','Palmaris longus muscle'],gon:['Piramidal, cara lateral','Línea media del cúbito','Línea media del 5.º metacarpiano'],pos:'Antebrazo apoyado en pronación',ef:'Firme'},
+  {n:'Extensión',ax:'x',sg:1,max:70,pl:'sag',dir:[0,-1,0],ag:['Extensor carpi radialis longus','Extensor carpi radialis brevis','Humeral head of extensor carpi ulnaris','Ulnar head of extensor carpi ulnaris'],gon:['Piramidal, cara lateral','Línea media del cúbito','Línea media del 5.º metacarpiano'],pos:'Antebrazo apoyado en pronación',ef:'Firme'},
+  {n:'Desviación radial',ax:'z',sg:-1,max:20,pl:'fro',dir:[0,-1,0],ag:['Flexor carpi radialis','Extensor carpi radialis longus','Extensor carpi radialis brevis','Abductor pollicis longus'],gon:['Dorso de la muñeca, sobre el hueso grande','Línea media dorsal del antebrazo','Línea media del 3.er metacarpiano'],pos:'Antebrazo en pronación sobre la mesa',ef:'Duro (contacto óseo)'},
+  {n:'Desviación cubital',ax:'z',sg:1,max:30,pl:'fro',dir:[0,-1,0],ag:['Humeral head of flexor carpi ulnaris','Ulnar head of flexor carpi ulnaris','Humeral head of extensor carpi ulnaris','Ulnar head of extensor carpi ulnaris'],gon:['Dorso de la muñeca, sobre el hueso grande','Línea media dorsal del antebrazo','Línea media del 3.er metacarpiano'],pos:'Antebrazo en pronación sobre la mesa',ef:'Firme'}]},
+ {id:'cadera',n:'Cadera',node:'hip',sided:true,R:0.22,moves:[
+  {n:'Flexión',ax:'x',sg:-1,max:120,pl:'sag',dir:[0,-1,0],helpFn:t=>({knee:['x',Math.min(t,110)]}),ag:['Psoas major','Iliacus muscle','Rectus femoris muscle','Sartorius muscle','Tensor fasciae latae'],gon:['Trocánter mayor','Línea media lateral de la pelvis','Línea media lateral del fémur hacia el epicóndilo lateral'],pos:'Supino, rodilla flexionada',ef:'Blando (contacto muslo-abdomen)'},
+  {n:'Extensión',ax:'x',sg:1,max:30,pl:'sag',dir:[0,-1,0],ag:['Gluteus maximus muscle','Long head of biceps femoris','Semitendinosus muscle','Semimembranosus muscle','Adductor magnus'],gon:['Trocánter mayor','Línea media lateral de la pelvis','Línea media lateral del fémur'],pos:'Prono, rodilla extendida',ef:'Firme (cápsula anterior, ligamento iliofemoral)'},
+  {n:'Abducción',ax:'z',sg:-1,max:45,pl:'fro',dir:[0,-1,0],ag:['Gluteus medius muscle','Gluteus minimus muscle','Tensor fasciae latae'],gon:['EIAS del lado medido','Línea entre ambas EIAS','Línea media anterior del fémur hacia el centro de la rótula'],pos:'Supino',ef:'Firme (aductores, cápsula medial)'},
+  {n:'Aducción',ax:'z',sg:1,max:30,pl:'fro',dir:[0,-1,0],ag:['Adductor longus','Adductor brevis','Adductor magnus','Gracilis muscle','Pectineus muscle'],gon:['EIAS del lado medido','Línea entre ambas EIAS','Línea media anterior del fémur'],pos:'Supino, pierna contraria en abducción',ef:'Firme'},
+  {n:'Rotación interna',ax:'y',sg:1,max:45,pl:'tra',dir:[0,0,-1],help:{hip:['x',-90],knee:['x',90]},ag:['Gluteus minimus muscle','Gluteus medius muscle','Tensor fasciae latae'],gon:['Centro de la rótula','Perpendicular al suelo','Cresta tibial hacia el punto medio de los maléolos'],pos:'Sedestación, cadera y rodilla a 90°',ef:'Firme'},
+  {n:'Rotación externa',ax:'y',sg:-1,max:45,pl:'tra',dir:[0,0,-1],help:{hip:['x',-90],knee:['x',90]},ag:['Piriformis muscle','Obturator internus','Obturator externus','Superior gemellus muscle','Inferior gemellus muscle','Quadratus femoris muscle','Gluteus maximus muscle'],gon:['Centro de la rótula','Perpendicular al suelo','Cresta tibial hacia el punto medio de los maléolos'],pos:'Sedestación, cadera y rodilla a 90°',ef:'Firme'}]},
+ {id:'rodilla',n:'Rodilla',node:'knee',sided:true,R:0.2,moves:[
+  {n:'Flexión',ax:'x',sg:1,max:135,pl:'sag',dir:[0,-1,0],helpFn:t=>({hip:['x',-Math.min(t*0.6,80)]}),ag:['Long head of biceps femoris','Short head of biceps femoris','Semitendinosus muscle','Semimembranosus muscle','Medial head of gastrocnemius','Lateral head of gastrocnemius','Popliteus muscle','Gracilis muscle','Sartorius muscle'],gon:['Epicóndilo lateral del fémur','Línea media lateral del fémur hacia el trocánter mayor','Línea media lateral del peroné hacia el maléolo lateral'],pos:'Supino, cadera flexionada',ef:'Blando (contacto pantorrilla-muslo)'}]},
+ {id:'tobillo',n:'Tobillo y pie',node:'ankle',sided:true,R:0.1,moves:[
+  {n:'Dorsiflexión',ax:'x',sg:-1,max:20,pl:'sag',dir:[0,0,1],ag:['Tibialis anterior muscle','Extensor digitorum longus','Extensor hallucis longus','Fibularis tertius muscle'],gon:['Maléolo lateral','Línea media lateral del peroné','Paralelo al 5.º metatarsiano'],pos:'Sedestación, rodilla a 90°',ef:'Firme (tendón calcáneo)'},
+  {n:'Flexión plantar',ax:'x',sg:1,max:50,pl:'sag',dir:[0,0,1],ag:['Medial head of gastrocnemius','Lateral head of gastrocnemius','Soleus muscle','Tibialis posterior muscle','Fibularis longus muscle','Fibularis brevis muscle','Flexor hallucis longus','Flexor digitorum longus','Plantaris muscle','Calcaneal tendon'],gon:['Maléolo lateral','Línea media lateral del peroné','Paralelo al 5.º metatarsiano'],pos:'Sedestación, rodilla a 90°',ef:'Firme o duro'},
+  {n:'Inversión',ax:'z',sg:1,max:35,pl:'fro',dir:[0,-1,0],ag:['Tibialis anterior muscle','Tibialis posterior muscle'],gon:['Cara anterior del tobillo, entre los maléolos','Línea media anterior de la tibia','Línea media anterior del 2.º metatarsiano'],pos:'Sedestación, rodilla a 90°',ef:'Firme'},
+  {n:'Eversión',ax:'z',sg:-1,max:15,pl:'fro',dir:[0,-1,0],ag:['Fibularis longus muscle','Fibularis brevis muscle','Fibularis tertius muscle'],gon:['Cara anterior del tobillo, entre los maléolos','Línea media anterior de la tibia','Línea media anterior del 2.º metatarsiano'],pos:'Sedestación, rodilla a 90°',ef:'Duro o firme'}]},
+ {id:'cervical',n:'Columna cervical',node:'cervical',sided:false,R:0.14,moves:[
+  {n:'Flexión',ax:'x',sg:1,max:45,pl:'sag',dir:[0,1,0],ag:['Sternocleidomastoid muscle','Longus colli muscle','Longus capitis muscle','Scalenus anterior muscle'],gon:['Conducto auditivo externo','Perpendicular al suelo','Base de las fosas nasales'],pos:'Sedestación, columna dorsal apoyada',ef:'Firme'},
+  {n:'Extensión',ax:'x',sg:-1,max:45,pl:'sag',dir:[0,1,0],ag:['Splenius capitis muscle','Splenius colli muscle','Descending part of trapezius muscle','Semispinalis colli muscle','Longissimus capitis muscle','Rectus posterior major capitis muscle'],gon:['Conducto auditivo externo','Perpendicular al suelo','Base de las fosas nasales'],pos:'Sedestación',ef:'Firme o duro'},
+  {n:'Inclinación lateral',ax:'z',sg:1,max:45,pl:'fro',dir:[0,1,0],ag:['Scalenus anterior muscle','Scalenus medius muscle','Scalenus posterior muscle','Sternocleidomastoid muscle','Levator scapulae'],gon:['Apófisis espinosa de C7','Paralelo a la columna torácica','Protuberancia occipital externa'],pos:'Sedestación',ef:'Firme'},
+  {n:'Rotación',ax:'y',sg:-1,max:60,pl:'tra',dir:[0,0,1],ag:['Sternocleidomastoid muscle','Splenius capitis muscle','Obliquus inferior capitis muscle'],gon:['Centro del vértice del cráneo','Paralelo a la línea entre ambos acromiones','Línea de la nariz'],pos:'Sedestación',ef:'Firme'}]},
+ {id:'tronco',n:'Columna toracolumbar',node:'trunk',sided:false,R:0.3,moves:[
+  {n:'Flexión',ax:'x',sg:1,max:80,pl:'sag',dir:[0,1,0],ag:['Rectus abdominis muscle','External abdominal oblique muscle','Internal abdominal oblique muscle','Psoas major'],gon:['Medición clínica preferente con cinta (prueba de Schober) o inclinómetro',null,null],pos:'Bipedestación, rodillas extendidas',ef:'Firme'},
+  {n:'Extensión',ax:'x',sg:-1,max:25,pl:'sag',dir:[0,1,0],ag:['Iliocostalis lumborum muscle','Iliocostalis thoracis muscle','Longissimus thoracis muscle','Spinalis thoracis muscle','Multifidus lumborum muscle','Quadratus lumborum muscle'],gon:['Inclinómetro en T12–L1 y S1',null,null],pos:'Bipedestación',ef:'Duro (contacto de apófisis espinosas)'},
+  {n:'Inclinación lateral',ax:'z',sg:1,max:35,pl:'fro',dir:[0,1,0],ag:['Quadratus lumborum muscle','External abdominal oblique muscle','Internal abdominal oblique muscle','Iliocostalis lumborum muscle'],gon:['Apófisis espinosa de S1','Perpendicular al suelo','Apófisis espinosa de C7'],pos:'Bipedestación',ef:'Firme'},
+  {n:'Rotación',ax:'y',sg:-1,max:45,pl:'tra',dir:[0,0,1],ag:['External abdominal oblique muscle','Internal abdominal oblique muscle','Multifidus lumborum muscle','Rotatores'],gon:['Centro del vértice del cráneo','Paralelo a la línea entre ambas crestas ilíacas','Línea entre ambos acromiones'],pos:'Sedestación para fijar la pelvis',ef:'Firme'}]}
+];
+let romSide=store.get('side','R'),curJ=ROM[0],curM=ROM[0].moves[0],angle=0,playing=false,playT=0,agOn=store.get('agon',true);
+const arcLine=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({depthTest:false,transparent:true}));
+const arcFan=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshBasicMaterial({depthTest:false,transparent:true,opacity:.28,side:THREE.DoubleSide}));
+const arcRays=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({depthTest:false,transparent:true}));
+[arcLine,arcFan,arcRays].forEach(o=>{o.renderOrder=20;o.frustumCulled=false;scene.add(o);o.visible=false;});
+const SIDED=['shoulder','elbow','fore','wrist','hip','knee','ankle'];
+const jname=k=>SIDED.includes(k)?k+'_'+romSide:k;
+const sideSign=()=>romSide==='L'?-1:1;
+function comps(t){const c={};const add=(k,ax,deg)=>{c[k]=c[k]||{x:0,y:0,z:0};c[k][ax]+=deg;};
+  const flip=ax=>(ax==='x'?1:sideSign());const help=curM.helpFn?curM.helpFn(angle):(curM.help||{});
+  for(const k in help){const [ax,d]=help[k];add(k,ax,d*flip(ax));}
+  add(curJ.node,curM.ax,(curM.sg*t+(curM.off||0))*flip(curM.ax));return c;}
+function applyPose(){
+  if(!RIG) return;
+  const active=(currentTab==='mov'||contraction)?Object.entries(comps(angle)).map(([k,cm])=>({k,jn:jname(k),q:qOf(jname(k),cm)})):[];
+  active.sort((a,b)=>DEPTH[b.k]-DEPTH[a.k]);
+  deform(active);updateArc(active);
+}
+function updateArc(active){
+  if((currentTab!=='mov'&&!contraction)||!RIG){[arcLine,arcFan,arcRays].forEach(o=>o.visible=false);return;}
+  const k=curJ.node,J=JOINTS[jname(k)];
+  const proxK=PROX[k].filter(p=>active.find(a=>a.k===p));
+  // pivot: apply proximal rotations (distal→proximal); parent rotation: product proximal-first
+  const piv=J.pivot.clone();
+  for(const pk of proxK){const a=active.find(x=>x.k===pk);const pv=JOINTS[a.jn].pivot;piv.sub(pv).applyQuaternion(a.q).add(pv);}
+  const pq=new Q();[...proxK].reverse().forEach(pk=>pq.multiply(active.find(x=>x.k===pk).q));
+  const base=comps(0)[k],full=comps(angle)[k];
+  const N=40,pts=[],dir=new V3(...curM.dir),R=curJ.R;
+  for(let i=0;i<=N;i++){const f=i/N;const cm={x:base.x+(full.x-base.x)*f,y:base.y+(full.y-base.y)*f,z:base.z+(full.z-base.z)*f};
+    const q=pq.clone().multiply(qOf(jname(k),cm));pts.push(piv.clone().add(dir.clone().applyQuaternion(q).multiplyScalar(R)));}
+  arcLine.geometry.setFromPoints(pts);
+  const fan=[];for(let i=0;i<N;i++) fan.push(piv.x,piv.y,piv.z,pts[i].x,pts[i].y,pts[i].z,pts[i+1].x,pts[i+1].y,pts[i+1].z);
+  arcFan.geometry.setAttribute('position',new THREE.Float32BufferAttribute(fan,3));arcFan.geometry.computeBoundingSphere();
+  arcRays.geometry.setFromPoints([piv,piv.clone().add(pts[0].clone().sub(piv).multiplyScalar(1.25)),piv,piv.clone().add(pts[N].clone().sub(piv).multiplyScalar(1.25))]);
+  const col=new THREE.Color(cssVar(angle>curM.max?'--warn':'--ok'));
+  [arcLine,arcFan,arcRays].forEach(o=>{o.material.color.copy(col);o.visible=true;});
+}
+const enEs=en=>{const r=Object.values(CAT).find(x=>x[1]===en&&x[4]==='muscular');return r?r[2]:(INFO.mus[en]?.es||en);};
+function renderROM(){
+  $('#jointChips').innerHTML='';ROM.forEach(j=>{const b=document.createElement('button');b.textContent=j.n;b.setAttribute('aria-pressed',j===curJ);b.onclick=()=>{curJ=j;curM=j.moves[0];angle=0;stopPlay();renderROM();};$('#jointChips').appendChild(b);});
+  $('#moveChips').innerHTML='';curJ.moves.forEach(mv=>{const b=document.createElement('button');b.textContent=mv.n;b.setAttribute('aria-pressed',mv===curM);b.onclick=()=>{curM=mv;angle=0;stopPlay();renderROM();};$('#moveChips').appendChild(b);});
+  const sideTxt=curJ.sided?(romSide==='R'?'derecho':'izquierdo'):(curM.ax==='x'?'':romSide==='R'?'hacia la derecha':'hacia la izquierda');
+  $('#angle').max=Math.round(curM.max*1.25);$('#angle').value=angle;
+  const ag=curM.ag.filter(en=>Object.values(CAT).some(r=>r[1]===en));
+  $('#moveInfo').innerHTML=`<dt>Plano</dt><dd><b style="color:var(${planeCols[curM.pl]})">${PL_N[curM.pl]}</b></dd><dt>Eje</dt><dd>${AX_N[curM.pl]}</dd><dt>Referencia</dt><dd style="font-family:var(--f-mono)">0–${curM.max}°</dd>${sideTxt?`<dt>Lado</dt><dd>${sideTxt}</dd>`:''}<dt>Agonistas</dt><dd>${ag.map(en=>`<button class="link" data-agon="${esc(en)}">${esc(enEs(en))}</button>`).join(', ')||'—'}</dd>`;
+  $('#moveInfo').querySelectorAll('[data-agon]').forEach(b=>b.onclick=()=>{const side=curJ.sided?(romSide==='R'?'derecho':'izquierdo'):'derecho';const r=Object.values(CAT).find(x=>x[1]===b.dataset.agon&&x[4]==='muscular'&&(!x[5]||x[5]===side));if(r)goTo(r[0]);});
+  const pair={sag:'flexión y extensión',fro:'abducción, aducción e inclinaciones',tra:'rotaciones'}[curM.pl];
+  $('#moveTip').innerHTML=`<h3>Cómo razonarlo</h3><p>La ${curM.n.toLowerCase()} ocurre en el plano ${PL_N[curM.pl].toLowerCase()} alrededor del eje ${AX_N[curM.pl].split(' ')[0].toLowerCase()}, perpendicular a ese plano. En este plano ocurren las ${pair}.</p>`;
+  const g=curM.gon;
+  $('#moveGon').innerHTML=`<h3>Goniometría</h3><dl class="kv" style="margin-top:4px"><dt>Posición</dt><dd>${curM.pos}</dd><dt>${g[1]?'Fulcro':'Método'}</dt><dd>${g[0]}</dd>${g[1]?`<dt>Brazo fijo</dt><dd>${g[1]}</dd><dt>Brazo móvil</dt><dd>${g[2]}</dd>`:''}<dt>Sensación final</dt><dd>${curM.ef}</dd></dl>`;
+  updateReadout();applyPose();applyAgonists();renderLog();
+}
+function applyAgonists(){
+  const ens=(currentTab==='mov'&&agOn)?curM.ag:[];const sideName=romSide==='R'?'derecho':'izquierdo';
+  for(const m of meshes){if(m.userData.sys!=='muscular')continue;const c=m.userData.c;
+    const want=ens.includes(c.en)&&(!curJ.sided||!c.side||c.side===sideName);if(!!m.userData.ag!==want){m.userData.ag=want;refreshState(m);}}
+}
+function updateReadout(){const over=angle>curM.max;$('#deg').innerHTML=`${Math.round(angle)}°<small> / ${curM.max}°</small>`;
+  const st=$('#status');st.textContent=over?'Por encima de la referencia':angle===0?'Posición de partida':'Dentro del rango de referencia';st.style.color=over?'var(--warn)':angle===0?'var(--muted)':'var(--ok)';
+  const mx=curM.max*1.25;$('#scaleOk').style.width=(curM.max/mx*100)+'%';$('#scaleMk').style.left=`calc(${Math.min(100,angle/mx*100)}% - 1.5px)`;}
+let poseRaf=0;function schedulePose(){if(poseRaf)return;poseRaf=requestAnimationFrame(()=>{poseRaf=0;applyPose();});}
+$('#angle').addEventListener('input',e=>{stopPlay();angle=+e.target.value;updateReadout();schedulePose();});
+$('#zero').onclick=()=>{stopPlay();angle=0;$('#angle').value=0;updateReadout();applyPose();};
+function stopPlay(){playing=false;$('#play').textContent='Animar rango';}
+$('#play').onclick=()=>{playing=!playing;playT=0;$('#play').textContent=playing?'Detener':'Animar rango';};
+$('#focusJ').onclick=()=>{if(!RIG)return;const J=JOINTS[jname(curJ.node)];focusOn(J.pivot.clone(),Math.max(0.7,curJ.R*6));setView({sag:romSide==='R'?'latd':'lati',fro:'ant',tra:'ant'}[curM.pl]);};
+function setSide(s){romSide=s;store.set('side',s);$('#side-R').setAttribute('aria-pressed',s==='R');$('#side-L').setAttribute('aria-pressed',s==='L');renderROM();}
+$('#side-R').onclick=()=>setSide('R');$('#side-L').onclick=()=>setSide('L');
+$('#agChk').checked=agOn;$('#agChk').onchange=e=>{agOn=e.target.checked;store.set('agon',agOn);applyAgonists();};
+
+/* ───────── Registro de mediciones ───────── */
+let LOG=store.get('log',[]);if(!Array.isArray(LOG))LOG=[];
+$('#patId').value=store.get('pat','');
+$('#patId').addEventListener('input',e=>{store.set('pat',e.target.value.trim());renderLog();});
+const pad=n=>String(n).padStart(2,'0');
+const fdate=iso=>{const d=new Date(iso);return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;};
+function sideLabel(e){return e.s==='R'?(e.sided?'Derecho':'Hacia la derecha'):e.s==='L'?(e.sided?'Izquierdo':'Hacia la izquierda'):'—';}
+$('#logSave').onclick=()=>{const p=$('#patId').value.trim();
+  if(!p){$('#logMsg').textContent='Escribe un código de paciente antes de guardar.';$('#logMsg').style.color='var(--bad)';$('#patId').focus();return;}
+  const e={t:new Date().toISOString(),p,jid:curJ.id,j:curJ.n,m:curM.n,s:(curJ.sided||curM.ax!=='x')?romSide:'',sided:curJ.sided,a:Math.round(angle),ref:curM.max,ty:$('#logType').value};
+  LOG.unshift(e);LOG=LOG.slice(0,500);store.set('log',LOG);$('#logMsg').textContent=`Guardado: ${e.j}, ${e.m.toLowerCase()}, ${e.a}°.`;$('#logMsg').style.color='var(--ok)';renderLog();};
+function renderLog(){const p=$('#patId').value.trim();const rows=LOG.filter(e=>!p||e.p===p).slice(0,30);const tb=$('#logTbl');
+  if(!rows.length) tb.innerHTML=`<tbody><tr><td class="muted">${p?'Sin mediciones para este paciente.':'Aún no hay mediciones guardadas.'} Ajusta el ángulo con el deslizador y pulsa Guardar medición.</td></tr></tbody>`;
+  else tb.innerHTML='<thead><tr><th>Fecha</th><th>Paciente</th><th>Movimiento</th><th>Lado</th><th>Tipo</th><th style="text-align:right">Ángulo</th><th style="text-align:right">% ref.</th><th></th></tr></thead><tbody>'+
+    rows.map(e=>`<tr><td>${fdate(e.t)}</td><td>${esc(e.p)}</td><td>${esc(e.j)} · ${esc(e.m.toLowerCase())}</td><td>${sideLabel(e)}</td><td>${esc(e.ty)}</td><td style="text-align:right;font-family:var(--f-mono)">${e.a}°</td><td style="text-align:right;font-family:var(--f-mono);color:${e.a>=e.ref*0.9?'var(--ok)':'var(--warn)'}">${Math.round(e.a/e.ref*100)}%</td><td><button class="link" data-del="${e.t}">Borrar</button></td></tr>`).join('')+'</tbody>';
+  tb.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{LOG=LOG.filter(x=>x.t!==b.dataset.del);store.set('log',LOG);renderLog();});
+  const cmp=$('#cmp'),ty=$('#logType').value;
+  if(p&&curJ.sided){const last=s=>LOG.find(e=>e.p===p&&e.jid===curJ.id&&e.m===curM.n&&e.s===s&&e.ty===ty);const r=last('R'),l=last('L');
+    if(r&&l){const d=Math.abs(r.a-l.a),pct=Math.round(d/Math.max(r.a,l.a,1)*100);cmp.innerHTML=`<b>${curJ.n}, ${curM.n.toLowerCase()} (${ty.toLowerCase()}):</b> derecho ${r.a}° · izquierdo ${l.a}° · diferencia <b style="color:${pct>10?'var(--warn)':'var(--ok)'}">${d}° (${pct} %)</b>`;}
+    else cmp.textContent=`Para comparar lados, guarda una medición ${ty.toLowerCase()} de ${curM.n.toLowerCase()} en cada lado para este paciente.`;}
+  else cmp.textContent=p?'La comparación de lados aplica a articulaciones de las extremidades.':'Escribe un código de paciente para ver su historial y comparar lados.';}
+$('#logType').onchange=renderLog;
+$('#logCsv').onclick=async()=>{const p=$('#patId').value.trim();const rows=LOG.filter(e=>!p||e.p===p);
+  const csv=['fecha,paciente,articulacion,movimiento,lado,tipo,angulo_grados,referencia_grados'].concat(rows.map(e=>[e.t,e.p,e.j,e.m,sideLabel(e),e.ty,e.a,e.ref].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))).join('\n');
+  try{await navigator.clipboard.writeText(csv);$('#logMsg').textContent=`${rows.length} mediciones copiadas como CSV.`;$('#logMsg').style.color='var(--ok)';}
+  catch(err){const ta=$('#csvOut');ta.hidden=false;ta.value=csv;ta.select();$('#logMsg').textContent='Copia el texto seleccionado.';$('#logMsg').style.color='var(--muted)';}};
+let clearArm=0;
+$('#logClear').onclick=()=>{const p=$('#patId').value.trim();
+  if(Date.now()-clearArm>4000){clearArm=Date.now();$('#logClear').textContent=p?`Confirmar: borrar todo de ${p}`:'Confirmar: borrar todo el registro';setTimeout(()=>{$('#logClear').textContent='Borrar registro';},4000);return;}
+  LOG=p?LOG.filter(e=>e.p!==p):[];store.set('log',LOG);clearArm=0;$('#logClear').textContent='Borrar registro';renderLog();};
+
+/* ───────── Pestañas y modo ───────── */
+let currentTab='sistemas';
+function showTab(t){currentTab=t;$$('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));['sistemas','planos','mov','estr','lec'].forEach(x=>$('#tab-'+x).hidden=x!==t);
+  applyPose();applyAgonists();store.set('tab',t);}
+$$('.tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+function setMode(m){document.body.classList.toggle('mode-pro',m==='pro');document.body.classList.toggle('mode-stu',m!=='pro');$('#m-stu').setAttribute('aria-pressed',m!=='pro');$('#m-pro').setAttribute('aria-pressed',m==='pro');store.set('mode',m);if(m==='pro'&&quiz.on)stopQuiz();}
+$('#m-stu').onclick=()=>setMode('stu');$('#m-pro').onclick=()=>setMode('pro');
+
+/* ───────── Práctica ───────── */
+const quiz={on:false,target:null,ok:0,n:0};
+const qs=$('#quizSys');
+qs.innerHTML='<option value="">Todas las capas visibles</option>'+Object.keys(SYS).filter(k=>k!=='piel').map(k=>`<option value="${k}">${SYS[k].n}</option>`).join('');
+qs.value=store.get('quizSys','');
+let QSTAT=store.get('qstat',{});
+function quizStatLine(){const k=qs.value||'todos',s=QSTAT[k];return s&&s.n?` · histórico en esta capa: ${Math.round(s.ok/s.n*100)} % de ${s.n}`:'';}
+qs.onchange=async()=>{store.set('quizSys',qs.value);if(quiz.on){if(qs.value){setOn(qs.value,true);await loadSys(qs.value);}nextQ();}};
+function nextQ(){const sel=qs.value;const pool=meshes.filter(m=>visibleDeep(m)&&m.material.opacity>0.1&&(!sel||m.userData.sys===sel)&&m.userData.c.es&&!m.userData.c.ins);
+  if(!pool.length){$('#quizMsg').textContent='Activa al menos una capa para practicar.';stopQuiz();return;}
+  quiz.target=pool[Math.random()*pool.length|0].userData.c;$('#quizbar').textContent='Toca: '+label(quiz.target);$('#quizbar').hidden=false;}
+async function startQuiz(){if(qs.value){setOn(qs.value,true);await loadSys(qs.value);}quiz.on=true;quiz.ok=0;quiz.n=0;select(null);$('#quizStart').hidden=true;$('#quizSkip').hidden=false;$('#quizStop').hidden=false;$('#quizMsg').textContent='Puntuación: 0 de 0';nextQ();}
+function stopQuiz(){quiz.on=false;$('#quizbar').hidden=true;$('#quizStart').hidden=false;$('#quizSkip').hidden=true;$('#quizStop').hidden=true;}
+function quizAnswer(m){quiz.n++;const c=m.userData.c,t=quiz.target;const ok=c.en===t.en&&c.side===t.side;if(ok)quiz.ok++;
+  const k=qs.value||'todos';QSTAT[k]=QSTAT[k]||{ok:0,n:0};QSTAT[k].n++;if(ok)QSTAT[k].ok++;store.set('qstat',QSTAT);
+  $('#quizMsg').innerHTML=(ok?`<b style="color:var(--ok)">Correcto.</b> `:`<b style="color:var(--bad)">Eso es ${esc(label(c))}.</b> Buscabas ${esc(label(t))}. `)+`Puntuación: ${quiz.ok} de ${quiz.n}${quizStatLine()}`;
+  if(!ok){const tm=findMesh(t.id);if(tm){tm.userData.hint=true;refreshState(tm);setTimeout(()=>{tm.userData.hint=false;refreshState(tm);},1500);}}
+  nextQ();}
+$('#quizStart').onclick=startQuiz;$('#quizStop').onclick=stopQuiz;$('#quizSkip').onclick=()=>{quiz.n++;$('#quizMsg').textContent=`Era ${label(quiz.target)}. Puntuación: ${quiz.ok} de ${quiz.n}`;nextQ();};
+
+/* ───────── Vistas guardadas ───────── */
+let VIEWS_SAVED=store.get('views',[]);if(!Array.isArray(VIEWS_SAVED))VIEWS_SAVED=[];
+function snapshot(name){return {n:name,cam:{t:orb.T.tgt.toArray(),r:orb.T.r,th:orb.T.th,ph:orb.T.ph},sys:Object.fromEntries(Object.entries(SYS).map(([k,v])=>[k,{on:v.on,op:v.op}])),
+  planes:Object.fromEntries(Object.entries(PLANES).map(([k,p])=>[k,{pos:p.pos,show:p.show,cut:p.cut}])),hidden:[...hiddenIds]};}
+function loadView(v){orb.T.tgt.fromArray(v.cam.t);orb.T.r=v.cam.r;orb.T.th=v.cam.th;orb.T.ph=v.cam.ph;
+  for(const k in v.sys) if(SYS[k]){SYS[k].on=v.sys[k].on;SYS[k].op=v.sys[k].op;if(SYS[k].on) loadSys(k);}
+  for(const k in v.planes) if(PLANES[k]) Object.assign(PLANES[k],v.planes[k]);
+  hiddenIds.clear();(v.hidden||[]).forEach(h=>hiddenIds.add(h));isoSet=null;patchFocus=null;
+  renderSysList();applySystems();renderPlanes();updatePlanes();}
+function renderViews(){const el=$('#viewList');
+  if(!VIEWS_SAVED.length){el.innerHTML='<p class="muted small" style="margin-top:6px">Aún no hay vistas guardadas.</p>';return;}
+  el.innerHTML=VIEWS_SAVED.map((v,i)=>`<div class="vrow"><span>${esc(v.n)}</span><div class="row"><button class="btn" data-vload="${i}">Abrir</button><button class="link" data-vdel="${i}">Borrar</button></div></div>`).join('');
+  el.querySelectorAll('[data-vload]').forEach(b=>b.onclick=()=>loadView(VIEWS_SAVED[+b.dataset.vload]));
+  el.querySelectorAll('[data-vdel]').forEach(b=>b.onclick=()=>{VIEWS_SAVED.splice(+b.dataset.vdel,1);store.set('views',VIEWS_SAVED);renderViews();});}
+$('#viewSave').onclick=()=>{const name=$('#viewName').value.trim()||`Vista ${VIEWS_SAVED.length+1}`;VIEWS_SAVED.unshift(snapshot(name));VIEWS_SAVED=VIEWS_SAVED.slice(0,30);store.set('views',VIEWS_SAVED);$('#viewName').value='';renderViews();};
+$('#viewName').addEventListener('keydown',e=>{if(e.key==='Enter')$('#viewSave').click();});
+
+/* ───────── Herramientas sobre la selección ───────── */
+let isoOnly=false,spin=false,contraction=null;const vecGroup=new THREE.Group();scene.add(vecGroup);const extracted=new Set();
+function movesFor(c){const own=[c.en,parentName(c.en)];const out=[];
+  for(const j of ROM) for(const mv of j.moves){const i=mv.ag.findIndex(a=>own.includes(a)||mnorm(a)===mnorm(c.en)||mnorm(a)===mnorm(parentName(c.en)));if(i>=0)out.push([j,mv,i]);}
+  return out.sort((a,b)=>a[2]-b[2]);}
+function renderActbar(){const bar=$('#actbar');if(!selected||lesson){bar.hidden=true;return;}
+  const c=selected.m.userData.c;bar.hidden=false;$('#actName').textContent=label(c);
+  const isMus=selected.m.userData.sys==='muscular';
+  $('#aVec').hidden=!isMus;$('#aCon').hidden=!(isMus&&movesFor(c).length);$('#aAsk').hidden=!SAMPLE;
+  $('#aIso').setAttribute('aria-pressed',isoOnly);$('#aExt').setAttribute('aria-pressed',extracted.has(selected.m));
+  $('#aVec').setAttribute('aria-pressed',vecGroup.children.length>0);$('#aCon').setAttribute('aria-pressed',!!contraction);}
+function stopTools(){$('#hintTxt').hidden=true;if(isoOnly){isoOnly=false;isoSet=null;spin=false;applySystems();}
+  removeLabels('vec');
+  if(vecGroup.children.length){vecGroup.clear();patchFocus=null;isoSet=null;if(selected){selected.m.userData.ghost=false;refreshState(selected.m);}applySystems();$('#legend').hidden=true;}
+  if(contraction){contraction=null;angle=0;$('#conChip').hidden=true;applyPose();}}
+$('#aIso').onclick=()=>{if(!selected)return;if(isoOnly){isoOnly=false;isoSet=null;spin=false;}else{isoOnly=true;isoSet=new Set([selected.m.userData.c.id]);spin=true;focusMesh(selected.m);}applySystems();renderActbar();};
+$('#aHide').onclick=()=>{if(!selected)return;hiddenIds.add(selected.m.userData.c.id);select(null);applySystems();};
+$('#aExt').onclick=()=>{if(!selected)return;const m=selected.m;
+  if(extracted.has(m)){m.userData.offT=new V3();extracted.delete(m);}
+  else{m.geometry.computeBoundingSphere();const c=m.geometry.boundingSphere.center;const d=new V3(c.x,0,c.z);if(d.length()<0.02)d.set(0,0,1);d.normalize();d.y=0.15;m.userData.offT=d.normalize().multiplyScalar(0.18);extracted.add(m);}
+  renderActbar();};
+$('#aAsk').onclick=()=>{showTab('estr');setTimeout(()=>{const q=$('#aiQ');if(q){q.focus();q.scrollIntoView({block:'center'});}},50);};
+function centroid(meshes_){const s=new V3();let n=0;for(const m of meshes_){const a=m.geometry.attributes.position.array;for(let i=0;i<a.length;i+=9){s.x+=a[i];s.y+=a[i+1];s.z+=a[i+2];n++;}}return n?s.multiplyScalar(1/n):null;}
+function pca(m){const a=m.geometry.attributes.position.array,n=a.length/3,c=centroid([m]);let xx=0,xy=0,xz=0,yy=0,yz=0,zz=0;
+  for(let i=0;i<n;i++){const x=a[i*3]-c.x,y=a[i*3+1]-c.y,z=a[i*3+2]-c.z;xx+=x*x;xy+=x*y;xz+=x*z;yy+=y*y;yz+=y*z;zz+=z*z;}
+  let v=new V3(0,1,0);for(let k=0;k<30;k++){v=new V3(xx*v.x+xy*v.y+xz*v.z,xy*v.x+yy*v.y+yz*v.z,xz*v.x+yz*v.y+zz*v.z).normalize();}
+  let lo=Infinity,hi=-Infinity;for(let i=0;i<n;i++){const t=(a[i*3]-c.x)*v.x+(a[i*3+1]-c.y)*v.y+(a[i*3+2]-c.z)*v.z;if(t<lo)lo=t;if(t>hi)hi=t;}
+  const A=c.clone().addScaledVector(v,lo*0.92),B=c.clone().addScaledVector(v,hi*0.92);return A.y>B.y?[A,B]:[B,A];}
+function marker(p,col,txt){const g=new THREE.Group();const s=new THREE.Mesh(new THREE.SphereGeometry(0.009,20,14),new THREE.MeshBasicMaterial({color:col,depthTest:false,transparent:true}));
+  const halo=new THREE.Mesh(new THREE.SphereGeometry(0.018,20,14),new THREE.MeshBasicMaterial({color:col,depthTest:false,transparent:true,opacity:.25}));g.add(s,halo);g.position.copy(p);g.renderOrder=30;g.traverse(o=>o.renderOrder=30);vecGroup.add(g);
+  const L=addLabel(txt,()=>g.parent?g.position:null,'',`vec`);L.el.style.borderColor=col;return g;}
+$('#aVec').onclick=async()=>{if(!selected)return;if(vecGroup.children.length){stopTools();renderActbar();return;}
+  const m=selected.m,c=m.userData.c;const ids=patchesFor(c);let O=null,I=null,approx=false;
+  if(ids.length){SYS.insercion.on=true;SYS.oseo.on=true;await loadSys('insercion');patchFocus=new Set(ids);
+    const pm=ids.map(findMesh).filter(Boolean);O=centroid(pm.filter(x=>x.userData.c.ins==='origen'));I=centroid(pm.filter(x=>x.userData.c.ins==='inserción'));}
+  if(!O||!I){[O,I]=pca(m);approx=true;}
+  marker(O,cssVar('--orig'),approx?'Origen (aprox.)':'Origen');marker(I,cssVar('--ins'),approx?'Inserción (aprox.)':'Inserción');
+  const dir=O.clone().sub(I);const len=dir.length();dir.normalize();
+  const shaft=new THREE.Mesh(new THREE.CylinderGeometry(0.0025,0.0025,len*0.86,10),new THREE.MeshBasicMaterial({color:0xffd34d,depthTest:false,transparent:true}));
+  shaft.position.copy(I.clone().addScaledVector(dir,len*0.43));shaft.quaternion.setFromUnitVectors(new V3(0,1,0),dir);
+  const head=new THREE.Mesh(new THREE.ConeGeometry(0.009,0.026,16),new THREE.MeshBasicMaterial({color:0xffd34d,depthTest:false,transparent:true}));
+  head.position.copy(I.clone().addScaledVector(dir,len*0.86+0.012));head.quaternion.copy(shaft.quaternion);[shaft,head].forEach(o=>{o.renderOrder=31;vecGroup.add(o);});
+  m.userData.ghost=true;refreshState(m);isoSet=new Set([c.id,...ids]);applySystems();$('#legend').hidden=false;focusMesh(m);
+  $('#hintTxt').hidden=false;$('#hintTxt').textContent=`Vector de tracción (amarillo): la inserción se acerca al origen al contraerse. Longitud ${(len*100).toFixed(1)} cm${approx?' (estimada por la forma del músculo)':''}.`;
+  renderActbar();};
+$('#aCon').onclick=()=>{if(!selected)return;if(contraction){stopTools();renderActbar();return;}
+  const c=selected.m.userData.c;const mv=movesFor(c)[0];if(!mv)return;
+  curJ=mv[0];curM=mv[1];if(c.side)romSide=c.side==='izquierdo'?'L':'R';
+  contraction={t:0,c};$('#conChip').hidden=false;renderROM();renderActbar();
+  const J=JOINTS[jname(curJ.node)];if(J) focusOn(J.pivot.clone().lerp(selected.m.geometry.boundingSphere.center,.5),Math.max(0.8,curJ.R*6));};
+function tickContraction(dt){if(!contraction)return;contraction.t+=dt;const T=2.4,ph=(contraction.t%(2*T))/T;
+  const conc=ph<1;const f=conc?ph:2-ph;angle=curM.max*(0.5-0.5*Math.cos(Math.PI*f));
+  $('#conChip').textContent=`${conc?'Contracción concéntrica':'Fase excéntrica'} · ${curM.n} ${curJ.n.toLowerCase()} · ${Math.round(angle)}°`;
+  applyPose();if(contraction.t>4*T){contraction.t=0;}}
+
+/* ───────── Lecciones guiadas ───────── */
+let LESSONS=[],lesson=null,lstep=0,lhl=[];
+function renderLessons(){
+  const box=$('#lecBox');
+  if(!lesson){box.innerHTML=`<div class="view"><p class="muted small">Recorridos por región: cada paso muestra solo las estructuras que explica, con el resto del esqueleto como referencia.</p>${LESSONS.map((l,i)=>`<div class="lesson"><div><b>${esc(l.t)}</b><span class="muted small">${esc(l.r)} · ${l.steps.length} pasos</span></div><button class="btn pri" data-les="${i}">Empezar</button></div>`).join('')}</div>`;
+    box.querySelectorAll('[data-les]').forEach(b=>b.onclick=()=>{lesson=LESSONS[+b.dataset.les];lstep=0;showStep();});return;}
+  const n=lesson.steps.length;
+  if(lstep>=n){const q=lesson.q;
+    box.innerHTML=`<div class="view"><div class="steps">${lesson.steps.map(()=>'<i class="on"></i>').join('')}</div><h3>${esc(lesson.t)} · repaso</h3><h2>${esc(q.p)}</h2><div id="qOpts">${q.o.map((o,i)=>`<button class="opt" data-o="${i}">${esc(o)}</button>`).join('')}</div><p id="qRes" class="small"></p><div class="row"><button class="btn" id="lBack">Volver al último paso</button><button class="btn pri" id="lExit">Terminar lección</button></div></div>`;
+    box.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{const i=+b.dataset.o;box.querySelectorAll('[data-o]').forEach(x=>{x.disabled=true;if(+x.dataset.o===q.a)x.classList.add('ok');});if(i!==q.a)b.classList.add('bad');$('#qRes').textContent=i===q.a?'Correcto.':'La respuesta correcta está marcada en verde.';});
+    $('#lBack').onclick=()=>{lstep=n-1;showStep();};$('#lExit').onclick=exitLesson;return;}
+  const st=lesson.steps[lstep];
+  box.innerHTML=`<div class="view"><div class="steps">${lesson.steps.map((_,i)=>`<i class="${i<=lstep?'on':''}"></i>`).join('')}</div>
+    <h3>${esc(lesson.t)} · paso ${lstep+1} de ${n}</h3><h2>${esc(st.t)}</h2><p>${esc(st.x)}</p>
+    <div class="card"><h3>En pantalla</h3><div style="display:flex;flex-direction:column;gap:4px">${[...new Set(st.show)].map(en=>{const r=Object.values(CAT).find(x=>x[1]===en&&x[4]!=='insercion'&&(!x[5]||x[5]==='derecho'))||Object.values(CAT).find(x=>x[1]===en);return r?`<button class="link small" data-goto="${r[0]}">${esc(r[2])}</button>`:'';}).join('')}</div></div>
+    <div class="row"><button class="btn" id="lPrev" ${lstep?'':'disabled'}>Anterior</button><button class="btn pri" id="lNext">${lstep===n-1?'Repaso final':'Siguiente'}</button><button class="btn" id="lExit">Salir</button></div></div>`;
+  box.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>{const m=findMesh(b.dataset.goto);if(m){select(m,null);focusMesh(m);showTab('lec');}});
+  $('#lPrev').onclick=()=>{lstep--;showStep();};$('#lNext').onclick=()=>{lstep++;showStep();};$('#lExit').onclick=exitLesson;
+}
+function clearLessonHl(){lhl.forEach(m=>{m.userData.hint=false;refreshState(m);});lhl=[];}
+async function showStep(){
+  renderLessons();renderActbar();clearLessonHl();if(!lesson||lstep>=lesson.steps.length) return;
+  const st=lesson.steps[lstep];
+  const rows=Object.values(CAT).filter(r=>st.show.includes(r[1])&&(!r[5]||r[5]==='derecho'));
+  const need=[...new Set(rows.map(r=>r[4]))];
+  await Promise.all(need.map(k=>{SYS[k].on=true;if(SYS[k].op<.3)SYS[k].op=1;return loadSys(k);}));
+  if(!lesson||lesson.steps[lstep]!==st) return;
+  SYS.oseo.on=true;setXray(false);
+  isoSet=new Set(rows.map(r=>r[0]));patchFocus=null;applySystems();renderSysList();
+  const box=new THREE.Box3();
+  for(const r of rows){const m=findMesh(r[0]);if(!m)continue;if(r[4]!=='oseo'||rows.every(x=>x[4]==='oseo')){m.userData.hint=true;refreshState(m);lhl.push(m);}m.geometry.computeBoundingBox();box.union(m.geometry.boundingBox);}
+  if(!box.isEmpty()){const sz=box.getSize(new V3()).length();focusOn(box.getCenter(new V3()),Math.max(0.35,sz*2.1));}
+  setView(st.view||'ant');
+}
+function exitLesson(){clearLessonHl();lesson=null;isoSet=null;applySystems();renderLessons();}
+$('#xrayBtn').onclick=()=>setXray(!xray);$('#studioBtn').onclick=()=>setStudio(!studio);if(store.get('studio',false))setStudio(true);
+
+/* ───────── Importar .glb ───────── */
+$('#glbIn').addEventListener('change',e=>{const f=e.target.files[0];$('#glbErr').hidden=true;if(!f)return;
+  const rd=new FileReader();rd.onload=()=>loader.parse(rd.result,'',g=>{const s=SYS.importado;const grp=s.group||new THREE.Group();
+    g.scene.updateMatrixWorld(true);let n=0;
+    g.scene.traverse(o=>{if(!o.isMesh)return;n++;const geo=o.geometry.clone();geo.applyMatrix4(o.matrixWorld);if(!geo.attributes.normal)geo.computeVertexNormals();geo.computeBoundingSphere();
+      const id='imp'+Date.now()+'_'+n;const c={id,en:o.name||('Malla '+n),es:o.name||('Malla importada '+n),la:'',sys:'importado',side:'',ins:''};CAT[id]=[id,c.en,c.es,'','importado','',''];
+      const m=new THREE.Mesh(geo,matFor('importado','',''));m.userData={c,sys:'importado',state:''};grp.add(m);meshes.push(m);byId[id]=m;});
+    if(!s.group){s.group=grp;body.add(grp);}s.state='loaded';s.count=grp.children.length;s.on=true;applySystems();renderSysList();},
+    ()=>{$('#glbErr').textContent='No se pudo leer el archivo. Comprueba que sea un .glb válido.';$('#glbErr').hidden=false;});
+  rd.readAsArrayBuffer(f);});
+
+/* ───────── Asistente IA ───────── */
+let aiCtl=null,aiTurns=[],aiFor=null;
+function aiContext(){if(!selected)return 'No hay ninguna estructura seleccionada.';const m=selected.m,c=m.userData.c,inf=infoFor(c);
+  return JSON.stringify({estructura:c.es,latin:c.la,lado:c.side,sistema:SYS[m.userData.sys].n,region:EX.reg[c.id]||null,ficha:inf?inf.d:null},null,0).slice(0,6000);}
+function aiCard(){if(!SAMPLE)return '';const nm=selected?esc(selected.m.userData.c.es):'anatomía';
+  return `<div class="card ai"><h3>Asistente IA</h3><p class="muted small">Responde con la ficha de esta estructura como contexto. Usa tu cuenta de Claude; verifica lo clínico en fuentes primarias.</p>
+   <div class="chips">${['Explícamelo como a un estudiante','Lesiones típicas y cómo se exploran','Hazme 3 preguntas de examen'].map(t=>`<button data-aiq="${t}">${t}</button>`).join('')}</div>
+   <textarea id="aiQ" class="field" placeholder="Pregunta sobre ${nm}…"></textarea>
+   <div class="row"><button class="btn pri" id="aiSend">Preguntar</button><button class="btn" id="aiStop" hidden>Detener</button></div>
+   <div class="aiout" id="aiOut" hidden></div></div>`;}
+function bindAi(root){if(!SAMPLE)return;root.querySelectorAll('[data-aiq]').forEach(b=>b.onclick=()=>{$('#aiQ').value=b.dataset.aiq;askAi();});
+  $('#aiSend').onclick=askAi;$('#aiStop').onclick=()=>aiCtl&&aiCtl.abort();
+  $('#aiQ').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey))askAi();});}
+const AI_ERR={not_granted:'El asistente no tiene permiso en esta vista.',sampling_disabled:'Claude no está disponible para esta cuenta.',rate_limited:'Demasiadas preguntas seguidas. Inténtalo en un momento.',refused:'Claude no respondió a esa pregunta. Prueba a reformularla.',session_expired:'Tu sesión expiró. Vuelve a iniciar sesión.',prompt_too_large:'La pregunta es demasiado larga.'};
+async function askAi(){const q=$('#aiQ').value.trim();if(!q||!SAMPLE)return;const out=$('#aiOut');out.hidden=false;out.textContent='Pensando…';
+  const key=selected?selected.m.userData.c.id:'';if(aiFor!==key){aiTurns=[];aiFor=key;}
+  const rules='Eres un asistente de anatomía y biomecánica para estudiantes y profesionales de la salud. Responde en español, con precisión de libro de texto (Rouvière, Netter, Kapandji, Daniels), de forma clara y breve (máximo 180 palabras salvo que se pida más). Si algo es incierto, dilo. Contexto de la estructura seleccionada en el atlas 3D: '+aiContext();
+  aiTurns.push({role:'user',content:q});const turns=[{role:'user',content:rules},...aiTurns.slice(-6)];
+  aiCtl=new AbortController();$('#aiStop').hidden=false;$('#aiSend').disabled=true;
+  try{const {text}=await SAMPLE(turns,{cache:false,signal:aiCtl.signal,onText:({text})=>{out.textContent=text;}});aiTurns.push({role:'assistant',content:text});$('#aiQ').value='';}
+  catch(e){aiTurns.pop();out.textContent=(e&&e.text)||'';if(e&&e.code!=='cancelled'){const p=document.createElement('p');p.className='err';p.textContent=AI_ERR[e.code]||'No se pudo obtener respuesta. Inténtalo de nuevo.';out.appendChild(p);if(['not_granted','sampling_disabled'].includes(e.code)){SAMPLE=null;renderActbar();}}}
+  finally{$('#aiStop').hidden=true;$('#aiSend').disabled=false;}}
+(async()=>{try{if(window.claude&&claude.use){const s=await claude.use('sample');if(s){SAMPLE=s;renderInfo();renderActbar();}}}catch(e){}})();
+
+/* ───────── Accidentes óseos ───────── */
+const lmGroup=new THREE.Group();scene.add(lmGroup);
+function clearLm(){lmGroup.clear();removeLabels('lm');}
+function showLm(list,focus){clearLm();if(SYS.muscular.on)setXray(true);for(const [es,en,p] of list){const v=new V3(...p);
+  const s=new THREE.Mesh(new THREE.SphereGeometry(0.0045,14,10),new THREE.MeshBasicMaterial({color:0xffd34d,depthTest:false,transparent:true}));s.position.copy(v);s.renderOrder=32;lmGroup.add(s);
+  const L=addLabel(es,()=>v,'','lm');L.on=true;L.pos=v;}
+  if(focus&&list.length===1) focusOn(new V3(...list[0][2]),0.35);}
+
+/* ───────── Bucle ───────── */
+function resize(){const r=stage.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix();}
+new ResizeObserver(resize).observe(stage);
+const mq=window.matchMedia('(prefers-color-scheme: dark)');mq.addEventListener&&mq.addEventListener('change',()=>setTimeout(()=>{planeColors();for(const k in MAT)delete MAT[k];meshes.forEach(m=>setState(m,m.userData.state));applySystems();},30));
+let last=performance.now();
+function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;const k=1-Math.pow(0.0008,dt);
+  orb.th+=(orb.T.th-orb.th)*k;orb.ph+=(orb.T.ph-orb.ph)*k;orb.r+=(orb.T.r-orb.r)*k;orb.tgt.lerp(orb.T.tgt,k);
+  camera.position.set(orb.tgt.x+orb.r*Math.sin(orb.ph)*Math.sin(orb.th),orb.tgt.y+orb.r*Math.cos(orb.ph),orb.tgt.z+orb.r*Math.sin(orb.ph)*Math.cos(orb.th));camera.lookAt(orb.tgt);
+  camLight.position.copy(camera.position);
+  if(spin) orb.T.th+=dt*0.5;
+  for(const m of meshes){const t=m.userData.offT;if(t){m.position.lerp(t,1-Math.pow(0.002,dt));if(m.position.distanceTo(t)<1e-4){m.position.copy(t);if(t.lengthSq()===0)m.userData.offT=null;}}}
+  tickContraction(dt);autoHRTick(dt);fadeTick(dt);
+  if(playing&&currentTab==='mov'){playT+=dt;angle=curM.max*(0.5-0.5*Math.cos(playT*1.4));$('#angle').value=Math.round(angle);updateReadout();applyPose();}
+  axisGroup.visible=showAxes;
+  renderer.render(scene,camera);
+  const r=cv.getBoundingClientRect();
+  for(const L of labels){let p=null,show=false;
+    if(L.group==='vec'){const gp=L.getPos();show=!!gp;p=gp?gp.clone():null;}
+    else if(L.group==='lm'){show=L.on;p=L.on?L.pos:null;}
+    else if(L.group==='dir') show=showDir; else if(L.group==='axis') show=showAxes; else if(L.group.startsWith('plane:')) show=PLANES[L.group.slice(6)].show;
+    else if(L.group==='tag'&&selected&&visibleDeep(selected.m)){show=true;p=selected.m.localToWorld(selected.local.clone());}
+    if(show){p=p||L.getPos();const v=p.clone().project(camera);if(v.z>1)show=false;else{L.el.style.left=((v.x+1)/2*r.width)+'px';L.el.style.top=((1-v.y)/2*r.height)+'px';}}
+    if(L.show!==show){L.el.hidden=!show;L.show=show;}}
+  requestAnimationFrame(frame);}
+
+/* ───────── Inicio ───────── */
+setMode(store.get('mode','stu'));
+renderSysList();renderHR();renderDis();planeColors();renderPlanes();updatePlanes();renderInfo();renderViews();
+resize();requestAnimationFrame(frame);
+window.__corpus={orb,HR,loadHR,setDissection,SYS};
+Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.json').then(r=>{if(!r.ok)throw new Error(n);return r.json();}))).then(([cat,info,rig,les,ex,fem])=>{
+  cat=cat.concat(fem.cat);FEM_INFO=fem.info;CAT_READY=true;
+  LESSONS=les;EX=ex;
+  for(const r of cat) CAT[r[0]]=r;INFO=info;RIG=rig;buildRig();
+  SEARCH=cat.map(r=>({k:norm(r[2]+' | '+r[3]+' | '+r[1]),c:r}));
+  setSide(romSide);renderLessons();showTab(store.get('tab','sistemas'));
+  setBody(BODY);
+  for(const k in SYS) if(SYS[k].on&&sexOk(k)&&SYS[k].state==='idle') loadSys(k);
+}).catch(()=>{$('#hintTxt').textContent='No se pudieron cargar los datos del atlas. Recarga la página para intentarlo de nuevo.';});
+})();
+</script>
+
+
+<script>
+/* Descarga completa para estudiar sin conexión (solo en la versión publicada en la web) */
+(()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
+ const FILES=["hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/articular.txt", "m2/bolsas.txt", "m2/digestivo.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/insercion.txt", "m2/linfatico.txt", "m2/muscular.txt", "m2/nervioso_central.txt", "m2/nervioso_periferico.txt", "m2/oseo.txt", "m2/piel.txt", "m2/reproductor.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/venoso.txt"];const box=document.createElement('div');box.className='card';
+ box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 47 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
+ const host=document.querySelector('#hrCard');if(host)host.after(box);
+ const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v12');
+   for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
+   txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
+})();
+</script>
+<script>
+if('serviceWorker' in navigator&&location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
