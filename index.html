@@ -154,6 +154,31 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .gloEx .ph img{width:100%;height:100%;object-fit:cover;display:block}
 .gloChips{display:flex;flex-wrap:wrap;gap:5px}.gloChips button,.gloChips span{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:2px 9px;font-size:12px}.gloChips button:hover{border-color:var(--accent)}
 .gloZoom{position:absolute;inset:0;z-index:40;background:rgba(0,0,0,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px}.gloZoom img{max-width:100%;max-height:80%;border-radius:10px}.gloZoom p{color:#eee;font-size:13px;text-align:center}
+.phy{position:absolute;inset:0;pointer-events:none;z-index:6}
+.phy .phycard{pointer-events:auto;position:absolute;left:12px;right:12px;bottom:12px;max-width:560px;margin:0 auto;background:rgba(14,16,22,.78);color:#eef1f6;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:12px 14px 10px;backdrop-filter:blur(12px) saturate(1.2);-webkit-backdrop-filter:blur(12px);box-shadow:0 12px 40px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:7px}
+.phy h2{font:500 20px/1.15 var(--f-display);color:#fff}
+.phy p{font-size:13.2px;line-height:1.5;color:#d6dbe4;max-height:22vh;overflow:auto}
+.phyhead{display:flex;justify-content:space-between;align-items:center}.phykick{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#ff8a8a;font-weight:700}
+.phyx{border:0;background:rgba(255,255,255,.08);color:#fff;border-radius:999px;width:28px;height:28px}
+.phyctl{display:flex;align-items:center;gap:8px;justify-content:space-between}.phyctl .btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);color:#fff}.phyctl .btn.pri{background:#ff4d5e;border-color:#ff4d5e}
+.phydots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}.phydots button{width:9px;height:9px;padding:0;border-radius:50%;border:0;background:rgba(255,255,255,.25)}.phydots button[aria-current="true"]{background:#ff4d5e;width:22px;border-radius:5px}
+.phyopt{display:flex;gap:6px;flex-wrap:wrap}.phyopt button{border:1px solid rgba(255,255,255,.14);background:transparent;color:#cfd5df;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:600}.phyopt button[aria-pressed="true"]{background:#fff;color:#111}
+#phyInset{position:absolute;left:12px;top:12px;width:270px;height:140px;border-radius:12px;border:1px solid rgba(255,255,255,.14);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+#phyInset.big{width:340px;height:220px}
+.phyPhase{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.phyPhase b{background:#ff4d5e;color:#fff;font-size:11.5px;padding:3px 10px;border-radius:999px;letter-spacing:.02em}
+.phyPhase > span{display:contents}.phyPhase span span{font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.06);color:#dfe4ec;border:1px solid rgba(255,255,255,.12)}.phyPhase span .op{border-color:#57e39a;color:#9ff0c4}.phyPhase span .cl{border-color:#ff7b7b;color:#ffb4b4}
+.phycard.docked{position:static;margin:0;max-width:none;background:linear-gradient(160deg,#1a1216,#11141b);box-shadow:none}
+.phycard.docked p{max-height:none;font-size:13.8px}
+body.phy-on.phy-dock .pbody > .view{display:none!important}
+.phymore{display:none;align-self:flex-start;border:0;background:none;color:#ff8a8a;font-weight:700;font-size:12px;padding:0}
+@media (max-width:879px){.phycard:not(.open) #phyText{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;max-height:none}.phycard.open #phyText{max-height:26vh}.phymore{display:block}.phyPhase span span{display:none}.phyopt button{padding:2px 8px;font-size:11px}.phyctl .btn{padding:6px 10px}}
+.lbl.phyl{background:rgba(14,16,22,.82);color:#fff;border-color:rgba(255,255,255,.2);text-transform:none;letter-spacing:0;font:600 11.5px/1 var(--f-ui);padding:5px 8px;border-radius:999px}
+body.phy-on .actbar,body.phy-on .views,body.phy-on #hintTxt{display:none!important}
+@media (max-width:879px){#phyInset{width:200px;height:104px;left:8px;top:8px}#phyInset.big{width:230px;height:150px}.phy .phycard{left:6px;right:6px;bottom:6px;padding:9px 10px 8px}.phy h2{font-size:16.5px}.phy p{font-size:12.2px;max-height:15vh}}
+.phystart{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px;background:linear-gradient(120deg,rgba(255,77,94,.16),rgba(61,108,255,.14));text-align:left;width:100%}
+.phystart b{display:block;font:500 17px/1.2 var(--f-display)}.phystart small{color:var(--muted);font-size:12px}
+.phystart .ic{flex:none;width:42px;height:42px;border-radius:12px;background:#ff4d5e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px}
 body:not(.body-f) .femonly{display:none}
 body:not(.body-w) .wonly{display:none}
 body.body-f .maleonly,body.body-f #tab-sistemas > .presets,body.body-f #tab-mov > :not(.femonly),body.body-f #lecBox{display:none}
@@ -313,6 +338,18 @@ details.more > .card{margin-bottom:10px}
   <section class="stage" id="stage" aria-label="Modelo 3D del cuerpo humano">
     <canvas id="cv" tabindex="0" role="img" aria-label="Modelo 3D interactivo del cuerpo humano. Flechas para girar, más y menos para acercar, 1 a 6 para las vistas, X para rayos X."></canvas>
     <svg class="pinsvg" id="pinSvg" aria-hidden="true"></svg>
+    <div class="phy" id="phyBox" hidden>
+      <canvas id="phyInset" hidden aria-hidden="true"></canvas>
+      <div class="phycard" role="region" aria-label="Fisiología en acción">
+        <div class="phyhead"><span class="phykick"><span id="phyKick">Corazón y circulación</span> · <span id="phyNum">1 / 7</span></span><button class="phyx" id="phyClose" aria-label="Cerrar">✕</button></div>
+        <h2 id="phyTitle">Corazón en acción</h2>
+        <div class="phyPhase"><b id="phyPhase">Diástole</b><span id="phyValves"></span></div>
+        <p id="phyText"></p><button class="phymore" id="phyMore">Leer más</button>
+        <div class="phyctl"><button class="btn" id="phyPrev">← Anterior</button><div class="phydots" id="phyDots"></div><button class="btn pri" id="phyNext">Siguiente</button></div>
+        <div class="phyopt"><button id="phyPlay" aria-pressed="false">Pausa</button><button id="phySlow" aria-pressed="false">Cámara lenta</button><button id="phySound" aria-pressed="false">Sonido</button></div>
+      </div>
+    </div>
+
     <div class="labels" id="labels"></div>
     <div class="laser" id="laser" hidden></div>
     <div class="hint">
@@ -465,6 +502,7 @@ details.more > .card{margin-bottom:10px}
         <div class="card" id="animCard">
           <h3>Fisiología animada</h3>
           <p class="muted small">El modelo se mueve para mostrar la función: el ciclo cardiaco con la apertura y el cierre de las válvulas, y la mecánica de la respiración.</p>
+          <button class="phystart" data-phy="0"><span class="ic">♥</span><span><b>Corazón y circulación en acción</b><small>Recorrido de la sangre, válvulas, sistema eléctrico y ECG, intercambio gaseoso y perfusión, en 7 pasos.</small></span></button>
           <div class="row"><button class="btn" id="animHeart" aria-pressed="false">Latido cardiaco</button><button class="btn" id="animBreath" aria-pressed="false">Respiración</button></div>
           <label class="chk"><input type="checkbox" id="animCut"> Corte de cuatro cámaras (latido)</label>
           <label class="chk"><input type="checkbox" id="animSlow"> Cámara lenta</label>
@@ -530,7 +568,7 @@ details.more > .card{margin-bottom:10px}
         <p class="muted" style="font-size:12px">Valores de referencia de rango articular activo en adultos (AAOS). Las mallas reales se deforman alrededor del centro articular calculado a partir de los huesos; los músculos que cruzan la articulación se curvan de forma aproximada.</p>
       </div>
 
-      <div class="view" id="tab-lec" hidden><p class="femonly card">Las lecciones guiadas usan la musculatura completa. <button class="btn" onclick="setBody('f')">Ver el modelo femenino completo</button></p><div id="caseBox" class="maleonly"></div><h3 class="sect maleonly">Lecciones guiadas</h3><div id="lecBox"></div>
+      <div class="view" id="tab-lec" hidden><p class="femonly card">Las lecciones guiadas usan la musculatura completa. <button class="btn" onclick="setBody('f')">Ver el modelo femenino completo</button></p><button class="phystart" style="margin-bottom:4px" data-phy="0"><span class="ic">♥</span><span><b>Corazón y circulación en acción</b><small>Recorrido de la sangre, válvulas, sistema eléctrico y ECG, intercambio gaseoso y perfusión, en 7 pasos.</small></span></button><div id="caseBox" class="maleonly"></div><h3 class="sect maleonly">Lecciones guiadas</h3><div id="lecBox"></div>
 <h3 class="sect">Practicar y repasar</h3>
         <div class="card only-stu">
           <h3>Práctica de identificación</h3>
@@ -924,6 +962,7 @@ float ckN(vec3 x){vec3 i=floor(x);vec3 f=fract(x);f=f*f*(3.0-2.0*f);
  return mix(mix(mix(ckH(i),ckH(i+vec3(1,0,0)),f.x),mix(ckH(i+vec3(0,1,0)),ckH(i+vec3(1,1,0)),f.x),f.y),mix(mix(ckH(i+vec3(0,0,1)),ckH(i+vec3(1,0,1)),f.x),mix(ckH(i+vec3(0,1,1)),ckH(i+vec3(1,1,1)),f.x),f.y),f.z);}
 float ckF(vec3 p){return 0.65*ckN(p)+0.35*ckN(p*2.07);}
 `;
+const FLOW_U={value:new THREE.Vector4(0.02,1.29,0.02,0)},FLOWON_U={value:0};
 const STUDIO_U={value:0},ATLAS_U={value:0},LITE_U={value:0},CUT_U={value:0},IMG_U={value:0},SLAB_U={value:new THREE.Vector4(0,-1,0,0)},SLABON_U={value:0};
 /* gris por tejido para el modo imagen médica: [TC, RM T1] */
 const GRAYK={bone:[0.97,0.16],oseo:[0.97,0.16],muscle:[0.46,0.33],muscular:[0.46,0.33],insercion:[0.6,0.12],articular:[0.56,0.2],fascia:[0.5,0.28],bolsas:[0.42,0.35],
@@ -946,7 +985,7 @@ const ATLAS_COL={
    diffuseColor.rgb=c;}`,
  nerve:`if(ckAtlas>0.5){diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.82,0.58,0.12)*mix(0.86,1.08,H),0.78);}`};
 function corpusShader(sh,kind,noTint,gk){
-  sh.uniforms.ckStudio=STUDIO_U;sh.uniforms.ckAtlas=ATLAS_U;sh.uniforms.ckLite=LITE_U;sh.uniforms.ckCut=CUT_U;sh.uniforms.ckImg=IMG_U;sh.uniforms.ckSlab=SLAB_U;sh.uniforms.ckSlabOn=SLABON_U;gk=gk||[0.5,0.45];
+  sh.uniforms.ckStudio=STUDIO_U;sh.uniforms.ckAtlas=ATLAS_U;sh.uniforms.ckLite=LITE_U;sh.uniforms.ckCut=CUT_U;sh.uniforms.ckImg=IMG_U;sh.uniforms.ckSlab=SLAB_U;sh.uniforms.ckSlabOn=SLABON_U;sh.uniforms.ckFlow=FLOW_U;sh.uniforms.ckFlowOn=FLOWON_U;gk=gk||[0.5,0.45];
   const SSS={bone:0.08,muscle:0.32,soft:0.22,visc:0.3,skin:0.45,artery:0.38,vein:0.42,nerve:0.22}[kind];
   const SSC={artery:'1.0,0.28,0.22',vein:'0.42,0.32,0.95',nerve:'1.0,0.86,0.55'}[kind]||'1.0,0.42,0.3';
   sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute vec3 fdir;\nattribute vec3 vattr;\nattribute vec4 vtint;\nvarying vec3 vWp;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;')
@@ -955,7 +994,7 @@ function corpusShader(sh,kind,noTint,gk){
   const map=['muscle','artery','vein','nerve'].includes(kind)?'vec3 ckMap(vec3 p){vec3 f=normalize(vFd+1e-5);return (p-f*dot(p,f))+f*dot(p,f)*'+(kind==='nerve'?'0.03':kind==='muscle'?'0.07':'0.12')+';}':'vec3 ckMap(vec3 p){return p;}';
   const h=`float ckAO=clamp(vVa.r*1.2,0.0,1.0);${kind==='skin'?'ckAO=mix(1.0,ckAO,0.3);':''}float ckTen=${kind==='muscle'?'smoothstep(0.15,0.75,vVa.g)':'0.0'};float ckCart=${kind==='bone'?'smoothstep(0.2,0.8,vVa.b)':'0.0'};float ckSt=0.5;float ckFa=0.0;float ckFq=${P.fq.toFixed(1)};float ckFw=length(fwidth(vObj))*ckFq;float ckAmp=1.0-smoothstep(0.12,0.5,ckFw);
     float H0=ckF(ckMap(vObj)*ckFq);float H=mix(0.5,H0,ckAmp*(1.0+0.6*ckStudio));`+(noTint?'':'diffuseColor.rgb=mix(diffuseColor.rgb,pow(vTn.rgb,vec3(2.2)),vTn.a);');
-  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform float ckStudio;\nuniform float ckAtlas;\nuniform float ckLite;\nuniform float ckCut;\nuniform float ckImg;\nuniform vec4 ckSlab;\nuniform float ckSlabOn;\nvarying vec3 vWp;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;\n'+NOISE_GLSL+map)
+  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform float ckStudio;\nuniform float ckAtlas;\nuniform float ckLite;\nuniform float ckCut;\nuniform float ckImg;\nuniform vec4 ckSlab;\nuniform float ckSlabOn;\nuniform vec4 ckFlow;\nuniform float ckFlowOn;\nvarying vec3 vWp;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;\n'+NOISE_GLSL+map)
     .replace('#include <color_fragment>','#include <color_fragment>\n'+h+`diffuseColor.rgb*=mix(${P.c[0].toFixed(2)},${P.c[1].toFixed(2)},H);
       ${kind==='bone'?'diffuseColor.rgb*=mix(vec3(0.90,0.88,0.83),vec3(1.03,1.02,1.0),ckN(vObj*22.0));':''}${kind==='skin'?'diffuseColor.rgb*=mix(vec3(0.95,0.93,0.94),vec3(1.03,1.0,0.97),ckN(vObj*14.0));':''}
       diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.80,0.76,0.66)*mix(0.95,1.04,H),ckTen);
@@ -974,6 +1013,7 @@ function corpusShader(sh,kind,noTint,gk){
         ckG=(viewMatrix*vec4(ckG/ckE,0.0)).xyz;ckG-=normal*dot(ckG,normal);
         normal=normalize(normal-ckG*${P.b.toFixed(3)}*ckAmp*(1.0+0.6*ckStudio)*${kind==='bone'?'(1.0-0.75*ckAtlas)':'(1.0-1.0*ckAtlas)'}*(1.0-0.55*ckTen-0.8*ckCart));}`).replace('#include <dithering_fragment>',`#include <dithering_fragment>
       if(ckSlabOn>0.5&&gl_FrontFacing&&dot(ckSlab.xyz,vWp)+ckSlab.w>0.006)discard;
+      ${(kind==='artery'||kind==='vein')?`if(ckFlowOn>0.5){float ckD=distance(vWp,ckFlow.xyz);float ckP=ckD*60.0${kind==='artery'?'-':'+'}ckFlow.w*13.0;float ckB=pow(0.5+0.5*sin(ckP),8.0);gl_FragColor.rgb=gl_FragColor.rgb*0.75+vec3(${kind==='artery'?'1.0,0.42,0.32':'0.42,0.62,1.0'})*ckB*0.85;}`:''}
       ${kind==='skin'?`if(ckAtlas>0.5&&ckCut<0.5&&ckImg<0.5){if(!gl_FrontFacing)discard;float fr=pow(1.0-clamp(abs(dot(normal,normalize(vViewPosition))),0.0,1.0),1.6);gl_FragColor=vec4(mix(vec3(0.16,0.165,0.17),vec3(0.62,0.63,0.65),fr),clamp((0.14+0.66*fr)*min(1.0,diffuseColor.a*2.6),0.0,0.92));}`:''}
       {float ckG=ckImg>1.5?${gk[1].toFixed(2)}:${gk[0].toFixed(2)};
        if(ckCut>0.5&&!gl_FrontFacing){vec3 cc=ckImg>0.5?vec3(ckG*mix(0.9,1.06,H)):pow(max(diffuseColor.rgb*mix(0.82,1.0,H),vec3(0.0)),vec3(0.4545));gl_FragColor=vec4(cc*0.97,max(diffuseColor.a,0.0));}
@@ -1245,6 +1285,7 @@ $('#q').addEventListener('input',e=>{
   out.innerHTML=res.length?'':'<p class="muted" style="padding:10px">Sin resultados. Prueba con otro nombre, en latín o en inglés.</p>';
   {const qo=gKey(e.target.value);const oh=ORG.filter(o=>[o.es,o.en,o.pt].some(n=>gKey(n).startsWith(qo)||gKey(n).includes(' '+qo))).slice(0,2);
     if(oh.length&&!res.length)out.innerHTML='';
+    if(/^(cora|circul|valvul|valv|ecg|electrocard|sinus|nodo|nodul|latid|sangr|interc|perfus|hemat|cardi)/.test(qo)){const b=document.createElement('button');b.innerHTML=`<span><span class="muted">${TL('Animación:','Animation:','Animação:')}</span> ${TL('Corazón y circulación en acción','Heart and circulation in action','Coração e circulação em ação')}</span><small>7 ${TL('pasos','steps','passos')}</small>`;b.onclick=()=>{out.hidden=true;e.target.value='';phyStart(phyStepFor(qo));};out.appendChild(b);if(!res.length&&!oh.length)out.querySelectorAll('p').forEach(x=>x.remove());}
     oh.forEach(o=>{const b=document.createElement('button');b.innerHTML=`<span><span class="muted">${TL('Órgano completo:','Whole organ:','Órgão inteiro:')}</span> ${esc(oT(o))}</span><small>${o.parts.length} ${TL('piezas','parts','peças')}</small>`;b.onclick=()=>{out.hidden=true;e.target.value='';showOrgan(o);};out.appendChild(b);});}
   if(GLO){const qq=gKey(e.target.value);const gh=GLO.filter(g=>g.k.split(' | ').some(n=>n.startsWith(qq))).map(g=>[(gKey(gT(g)).startsWith(qq)?0:gKey(g.t).startsWith(qq)?1:2)*100+gT(g).length,g]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]).slice(0,3);
     if(gh.length&&!res.length)out.innerHTML='';
@@ -1937,7 +1978,7 @@ const trW=w=>{const D=I18N&&I18N.ui[LANG]||{};return D[w]??w;};
 const PREF=['Mostrar','Opacidad','Alta resolución','Posición del plano'];
 function trText(t){if(LANG==='es'||!I18N)return null;const D=I18N.ui[LANG]||{};const k=t.trim();if(!k)return null;
   if(D[k]!=null)return t.replace(k,D[k]);for(const p of PREF){if(k.startsWith(p+' ')&&D[p]){const rest=k.slice(p.length+1);return t.replace(k,D[p]+' '+(D[rest]??(I18N.names&&LANG==='pt'&&I18N.names[rest])??rest));}}for(const [re,to] of RX[LANG]||[]){if(re.test(k))return t.replace(k,k.replace(re,to));}return null;}
-const SKIP_TR=el=>el&&el.closest&&el.closest('#gloList,#gloQuiz,#gloCat,#gloCount,#gloAZ,.gloZoom,#infoBox .kv dd,#infoBox > .view > p:not(.muted),.latin,#caseBox p,#caseBox li,#srsA,.refs,script,style');
+const SKIP_TR=el=>el&&el.closest&&el.closest('.phycard,#gloList,#gloQuiz,#gloCat,#gloCount,#gloAZ,.gloZoom,#infoBox .kv dd,#infoBox > .view > p:not(.muted),.latin,#caseBox p,#caseBox li,#srsA,.refs,script,style');
 function trNode(root){if(!root)return;const walk=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;
   const list=[];while((n=walk.nextNode()))list.push(n);
   for(const t of list){const p=t.parentElement;if(!p||SKIP_TR(p))continue;let o=_orig.get(t);
@@ -2235,6 +2276,9 @@ function renderGlo(){if(!GLO)return;const q=$('#gloQ').value.trim();let L=gloFil
   if(more>0){const b=document.createElement('button');b.className='btn';b.style.margin='10px 0';b.textContent=TL(`Mostrar ${Math.min(more,200)} más (quedan ${more})`,`Show ${Math.min(more,200)} more (${more} left)`,`Mostrar mais ${Math.min(more,200)} (restam ${more})`);b.onclick=()=>{gloLim+=200;renderGlo();};$('#gloList').appendChild(b);}
   gloWire();}
 function gloExLabel(x){const R=gloResolve(x);if(R&&R.org)return oT(R.org);if(LANG==='es'||!R)return x.txt;if(R.lm)return LANG==='pt'&&R.lm[3]?R.lm[3]:R.lm[1];return nameL(CAT[R.id])||x.txt;}
+
+function gloPhy(g){const t=gKey(g.t);const hit=(g.ej||[]).some(x=>x.org==='corazon')||/(circulacion|valvul|valva|nodo sinusal|nodulo|haz de his|purkinje|electrocardiograma|intercambio gaseoso|hematosis|perfusion|capilar|arteria$|^vena$|alveol|surfactante|difusion alveolar)/.test(t);
+  if(!hit)return '';const st=phyStepFor(t);return `<button class="phystart" data-phyg="${st}"><span class="ic">♥</span><span><b>${TL('Verlo en acción','See it in action','Ver em ação')}</b><small>${esc(pTx(PHY_STEPS[st])[0])}</small></span></button>`;}
 function gloCard(g){const other=[['ES',g.t],['EN',g.en],['PT',g.pt]].filter(([l,n])=>n&&l.toLowerCase()!==LANG);
   const lbl=(es,en,pt)=>`<h3>${TL(es,en,pt)}</h3>`;
   const ex=(g.ej||[]).map((x,k)=>{const key=g.i+':'+k,img=GLO_IMG.get(key);return `<button data-gex="${k}" title="${esc(TL('Ver en 3D y fotografiar','Show in 3D and photograph','Ver em 3D e fotografar'))}"><span class="ph" data-ph="${key}">${img?`<img src="${img}" alt="">`:TL('Ver en 3D','Show in 3D','Ver em 3D')}</span><span>${esc(gloExLabel(x))}</span></button>`;}).join('');
@@ -2245,12 +2289,14 @@ function gloCard(g){const other=[['ES',g.t],['EN',g.en],['PT',g.pt]].filter(([l,
     ${g.etim?`<p class="small"><span class="muted">${TL('Etimología','Etymology','Etimologia')}:</span> <i>${esc(TL(g.etim,g.etim_en||g.etim,g.etim_pt||g.etim))}</i></p>`:''}
     ${(g.sin||[]).length&&LANG==='es'?`<div>${lbl('Sinónimos','Synonyms','Sinônimos')}<div class="gloChips" style="margin-top:5px">${g.sin.map(x=>`<span>${esc(x)}</span>`).join('')}</div></div>`:''}
     ${ex?`<div>${lbl('Ejemplos en el modelo 3D','Examples on the 3D model','Exemplos no modelo 3D')}<div class="gloEx" style="margin-top:6px">${ex}</div>${(g.ej||[]).length>1?`<button class="btn" data-gall style="margin-top:8px">${TL('Fotografiar todos los ejemplos','Photograph all examples','Fotografar todos os exemplos')}</button>`:''}</div>`:''}
+    ${gloPhy(g)}
     ${rel?`<div>${lbl('Términos relacionados','Related terms','Termos relacionados')}<div class="gloChips" style="margin-top:5px">${rel}</div></div>`:''}
   </div>`;}
 function gloWire(){const box=$('#gloList');
   box.querySelectorAll('[data-ph]').forEach(ph=>{if(ph.querySelector('img'))return;const [gi,k]=ph.dataset.ph.split(':').map(Number);const g=GLO[gi];gloDB.get(gPhKey(g,k)).then(u=>{if(u&&!ph.querySelector('img')){GLO_IMG.set(ph.dataset.ph,u);ph.innerHTML=`<img src="${u}" alt="">`;}});});
   box.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{const i=+b.dataset.g;gloOpen=gloOpen===i?-1:i;renderGlo();if(gloOpen>=0)gloScroll(i);});
   box.querySelectorAll('[data-grel]').forEach(b=>b.onclick=()=>gloOpenTerm(+b.dataset.grel));
+  box.querySelectorAll('[data-phyg]').forEach(b=>b.onclick=()=>{if(isPhone())setSheet('peek');phyStart(+b.dataset.phyg);});
   const card=box.querySelector('.gloCard');if(!card)return;const g=GLO[+card.dataset.gc];
   card.querySelectorAll('[data-gex]').forEach(b=>b.onclick=()=>{const k=+b.dataset.gex,key=g.i+':'+k;if(GLO_IMG.has(key)&&b.dataset.shown)gloZoom(GLO_IMG.get(key),gloExLabel(g.ej[k]));else gloShow(g,k).then(()=>{b.dataset.shown=1;});});
   const all=card.querySelector('[data-gall]');if(all)all.onclick=async()=>{if(gloBusy)return;all.disabled=true;for(let k=0;k<g.ej.length;k++)await gloShow(g,k);all.disabled=false;if(isPhone())setSheet('half');};}
@@ -2332,6 +2378,255 @@ function gloZoom(url,txt){const z=document.createElement('div');z.className='glo
   z.onclick=e=>{if(e.target===z||e.target.tagName==='BUTTON')z.remove();};$('#stage').appendChild(z);}
 $('#gloQ').addEventListener('input',()=>{gloOpen=-1;gloLim=150;renderGlo();const L=GLO&&gloFilter();if(L&&L.length&&$('#gloQ').value.trim()&&gKey(gT(L[0]))===gKey($('#gloQ').value)){gloOpen=L[0].i;renderGlo();}});
 $('#gloCat').addEventListener('change',()=>{gloOpen=-1;gloLetter='';gloLim=150;renderGlo();});
+
+/* ───────── Fisiología en acción: corazón, válvulas, conducción y circulación ───────── */
+const PHY={on:false,step:0,t:0,slow:false,sound:false,paused:false,grp:new THREE.Group(),ms:[],C:null,dAV:null,saved:null,routes:[],pts:null,cond:[],lastPh:0,ac:null,sp:0};
+scene.add(PHY.grp);
+const PV3=a=>new V3(a[0],a[1],a[2]);
+const PHY_T=0.86; /* duración del ciclo cardiaco (s) a ~70 lpm */
+/* Recorridos (coordenadas del modelo, en metros) */
+const PR={
+  svc:[[-0.016,1.392,0.020],[-0.016,1.366,0.020],[-0.017,1.340,0.024],[-0.019,1.318,0.032]],
+  ivc:[[-0.014,1.180,0.016],[-0.014,1.222,0.018],[-0.016,1.262,0.026],[-0.020,1.290,0.034]],
+  rh:[[-0.021,1.302,0.038],[-0.006,1.290,0.040],[0.004,1.282,0.040],[0.016,1.266,0.052],[0.028,1.262,0.060],[0.034,1.282,0.062],[0.035,1.304,0.058],[0.034,1.320,0.053],[0.031,1.338,0.046],[0.027,1.348,0.026],[0.025,1.347,0.012]],
+  lpa:[[0.040,1.343,0.000],[0.058,1.334,-0.014],[0.074,1.326,-0.024],[0.092,1.318,-0.030]],
+  rpa:[[0.008,1.342,0.004],[-0.012,1.338,-0.001],[-0.028,1.333,-0.006],[-0.046,1.328,-0.010]],
+  pv:[[[-0.050,1.326,-0.012],[-0.032,1.322,-0.007],[-0.014,1.316,-0.002],[0.004,1.310,0.004]],
+      [[-0.034,1.292,-0.030],[-0.020,1.295,-0.024],[-0.004,1.300,-0.012],[0.008,1.304,0.000]],
+      [[0.066,1.322,-0.016],[0.052,1.320,-0.010],[0.040,1.314,-0.002],[0.030,1.308,0.004]],
+      [[0.064,1.290,-0.030],[0.050,1.293,-0.022],[0.038,1.298,-0.010],[0.028,1.304,0.000]]],
+  lh:[[0.020,1.305,0.008],[0.030,1.290,0.010],[0.040,1.276,0.020],[0.050,1.260,0.034],[0.052,1.252,0.044],[0.040,1.262,0.044],[0.026,1.282,0.038],[0.015,1.302,0.033],[0.012,1.318,0.030],[0.011,1.338,0.026],[0.012,1.358,0.020],[0.016,1.366,0.004],[0.017,1.360,-0.016],[0.016,1.335,-0.028],[0.015,1.290,-0.034],[0.014,1.230,-0.036],[0.014,1.200,-0.035]]
+};
+/* Sistema de conducción */
+const PC={
+  sa:[-0.027,1.336,0.033],av:[0.003,1.291,0.026],bif:[0.020,1.276,0.040],apex:[0.046,1.244,0.054],
+  inter:[[-0.027,1.336,0.033],[-0.022,1.318,0.034],[-0.012,1.302,0.030],[0.003,1.291,0.026]],
+  bach:[[-0.027,1.336,0.033],[-0.010,1.330,0.024],[0.010,1.322,0.012],[0.030,1.316,0.004]],
+  his:[[0.003,1.291,0.026],[0.012,1.284,0.033],[0.020,1.276,0.040]],
+  rbb:[[0.020,1.276,0.040],[0.024,1.262,0.050],[0.034,1.250,0.056],[0.046,1.244,0.054]],
+  lbb:[[0.020,1.276,0.040],[0.032,1.270,0.036],[0.042,1.256,0.042],[0.046,1.244,0.054]],
+  pk:[[[0.046,1.244,0.054],[0.030,1.248,0.068],[0.008,1.258,0.070],[-0.010,1.274,0.062]],
+      [[0.046,1.244,0.054],[0.064,1.252,0.040],[0.074,1.270,0.026],[0.074,1.292,0.016]],
+      [[0.046,1.244,0.054],[0.058,1.250,0.058],[0.066,1.266,0.056],[0.064,1.288,0.050]],
+      [[0.046,1.244,0.054],[0.044,1.252,0.020],[0.050,1.268,0.004],[0.060,1.286,-0.004]]]
+};
+const PHY_LBL={
+  ra:[[-0.034,1.300,0.048],'Aurícula derecha','Right atrium','Átrio direito'],rv:[[0.016,1.256,0.074],'Ventrículo derecho','Right ventricle','Ventrículo direito'],
+  la:[[0.034,1.318,-0.020],'Aurícula izquierda','Left atrium','Átrio esquerdo'],lv:[[0.074,1.268,0.040],'Ventrículo izquierdo','Left ventricle','Ventrículo esquerdo'],
+  svc:[[-0.016,1.384,0.020],'Vena cava superior','Superior vena cava','Veia cava superior'],ivc:[[-0.014,1.200,0.017],'Vena cava inferior','Inferior vena cava','Veia cava inferior'],
+  pt:[[0.040,1.352,0.056],'Tronco pulmonar','Pulmonary trunk','Tronco pulmonar'],ao:[[0.004,1.366,0.030],'Aorta','Aorta','Aorta'],
+  pv:[[-0.048,1.326,-0.012],'Venas pulmonares','Pulmonary veins','Veias pulmonares'],
+  tri:[[0.000,1.286,0.040],'Válvula tricúspide','Tricuspid valve','Valva tricúspide'],mit:[[0.032,1.286,0.004],'Válvula mitral','Mitral valve','Valva mitral'],
+  aov:[[0.010,1.318,0.032],'Válvula aórtica','Aortic valve','Valva aórtica'],pvv:[[0.036,1.320,0.058],'Válvula pulmonar','Pulmonary valve','Valva pulmonar'],
+  sa:[PC.sa,'Nódulo sinusal (marcapasos)','Sinoatrial node (pacemaker)','Nó sinoatrial (marca-passo)'],avn:[PC.av,'Nódulo auriculoventricular','Atrioventricular node','Nó atrioventricular'],
+  his:[[0.012,1.284,0.033],'Haz de His','Bundle of His','Feixe de His'],rbb:[[0.030,1.252,0.060],'Rama derecha','Right bundle branch','Ramo direito'],
+  lbb:[[0.044,1.258,0.038],'Rama izquierda','Left bundle branch','Ramo esquerdo'],pk:[[0.072,1.282,0.022],'Fibras de Purkinje','Purkinje fibres','Fibras de Purkinje'],
+  lungR:[[-0.075,1.300,0.000],'Pulmón derecho','Right lung','Pulmão direito'],lungL:[[0.105,1.300,0.000],'Pulmón izquierdo','Left lung','Pulmão esquerdo']
+};
+const GVRX=/^(Superior vena cava|Inferior vena cava \(thoracic part\)|Pulmonary trunk|Bifurcation of pulmonary trunk|(Left|Right) pulmonary artery|Ascending aorta|Thoracic aorta|(Right|Left) (superior|inferior) pulmonary vein|Brachiocephalic trunk|Left common carotid artery|Left subclavian artery)$/;
+const PHY_STEPS=[
+ {id:'anat',es:['El corazón y sus grandes vasos','Cuatro cavidades: dos aurículas que reciben la sangre y dos ventrículos que la impulsan. Las venas cavas traen la sangre pobre en oxígeno del cuerpo; las venas pulmonares, la sangre oxigenada de los pulmones. Del ventrículo derecho sale el tronco pulmonar y del izquierdo la aorta. El corazón late unas 70 veces por minuto y bombea unos 5 litros por minuto.'],
+  en:['The heart and great vessels','Four chambers: two atria receive blood and two ventricles pump it. The venae cavae bring oxygen-poor blood from the body; the pulmonary veins bring oxygenated blood from the lungs. The pulmonary trunk leaves the right ventricle and the aorta leaves the left. The heart beats about 70 times a minute and pumps about 5 litres a minute.'],
+  pt:['O coração e os grandes vasos','Quatro cavidades: dois átrios que recebem o sangue e dois ventrículos que o impulsionam. As veias cavas trazem o sangue pobre em oxigênio do corpo; as veias pulmonares, o sangue oxigenado dos pulmões. Do ventrículo direito sai o tronco pulmonar e do esquerdo, a aorta. O coração bate cerca de 70 vezes por minuto e bombeia cerca de 5 litros por minuto.']},
+ {id:'flow',es:['El recorrido de la sangre','Azul: sangre venosa, pobre en oxígeno. Rojo: sangre arterial, oxigenada. Cavas → aurícula derecha → válvula tricúspide → ventrículo derecho → válvula pulmonar → arterias pulmonares → pulmones. De vuelta: venas pulmonares → aurícula izquierda → válvula mitral → ventrículo izquierdo → válvula aórtica → aorta → todo el cuerpo. El corte frontal deja ver el interior de las cavidades.'],
+  en:['The path of the blood','Blue: venous, oxygen-poor blood. Red: arterial, oxygenated blood. Venae cavae → right atrium → tricuspid valve → right ventricle → pulmonary valve → pulmonary arteries → lungs. Back again: pulmonary veins → left atrium → mitral valve → left ventricle → aortic valve → aorta → the whole body. The frontal cut shows the inside of the chambers.'],
+  pt:['O trajeto do sangue','Azul: sangue venoso, pobre em oxigênio. Vermelho: sangue arterial, oxigenado. Cavas → átrio direito → valva tricúspide → ventrículo direito → valva pulmonar → artérias pulmonares → pulmões. De volta: veias pulmonares → átrio esquerdo → valva mitral → ventrículo esquerdo → valva aórtica → aorta → todo o corpo. O corte frontal mostra o interior das cavidades.']},
+ {id:'valv',es:['Cómo trabajan las válvulas','Vista desde arriba, sin las aurículas. Las válvulas se abren y se cierran por diferencias de presión, sin músculo propio. En la sístole ventricular se cierran la tricúspide y la mitral (primer ruido, «lub») y se abren la aórtica y la pulmonar; al relajarse los ventrículos se cierran la aórtica y la pulmonar (segundo ruido, «dub») y se abren las auriculoventriculares para llenar los ventrículos. Activa «Sonido» para oír los ruidos.'],
+  en:['How the valves work','Seen from above, without the atria. Valves open and close because of pressure differences; they have no muscle of their own. In ventricular systole the tricuspid and mitral close (first sound, “lub”) and the aortic and pulmonary open; when the ventricles relax, the aortic and pulmonary close (second sound, “dub”) and the atrioventricular valves open to fill the ventricles. Turn on “Sound” to hear them.'],
+  pt:['Como funcionam as valvas','Vista de cima, sem os átrios. As valvas abrem e fecham por diferenças de pressão, sem músculo próprio. Na sístole ventricular fecham a tricúspide e a mitral (primeira bulha, «tum») e abrem a aórtica e a pulmonar; quando os ventrículos relaxam, fecham a aórtica e a pulmonar (segunda bulha, «tá») e abrem as atrioventriculares para encher os ventrículos. Ative «Som» para ouvi-las.']},
+ {id:'cond',es:['El sistema eléctrico del corazón','El nódulo sinusal, en la aurícula derecha junto a la vena cava superior, es el marcapasos natural: genera unos 70 impulsos por minuto. El impulso recorre las aurículas (onda P del ECG), se frena en el nódulo auriculoventricular para que los ventrículos se llenen, baja por el haz de His y sus ramas por el tabique y se reparte por las fibras de Purkinje: los ventrículos se contraen desde la punta hacia arriba (complejo QRS). La onda T es la recuperación eléctrica.'],
+  en:['The electrical system of the heart','The sinoatrial node, in the right atrium next to the superior vena cava, is the natural pacemaker: it fires about 70 impulses a minute. The impulse spreads over the atria (P wave on the ECG), is delayed at the atrioventricular node so the ventricles can fill, runs down the bundle of His and its branches along the septum and spreads through the Purkinje fibres: the ventricles contract from the apex upwards (QRS complex). The T wave is electrical recovery.'],
+  pt:['O sistema elétrico do coração','O nó sinoatrial, no átrio direito junto à veia cava superior, é o marca-passo natural: gera cerca de 70 impulsos por minuto. O impulso percorre os átrios (onda P do ECG), é retardado no nó atrioventricular para que os ventrículos se encham, desce pelo feixe de His e seus ramos no septo e se distribui pelas fibras de Purkinje: os ventrículos se contraem do ápice para cima (complexo QRS). A onda T é a recuperação elétrica.']},
+ {id:'lung',es:['Circulación pulmonar e intercambio gaseoso','El ventrículo derecho envía la sangre venosa a los pulmones por las arterias pulmonares (son arterias, pero llevan sangre pobre en oxígeno). En los capilares que rodean los alvéolos el oxígeno pasa del aire a la sangre y el dióxido de carbono sale de la sangre al aire, por difusión a través de una membrana de menos de una milésima de milímetro. La sangre ya oxigenada vuelve por las venas pulmonares a la aurícula izquierda.'],
+  en:['Pulmonary circulation and gas exchange','The right ventricle sends venous blood to the lungs through the pulmonary arteries (they are arteries but carry oxygen-poor blood). In the capillaries around the alveoli oxygen moves from the air into the blood and carbon dioxide moves from the blood into the air, by diffusion across a membrane less than a thousandth of a millimetre thick. Oxygenated blood returns through the pulmonary veins to the left atrium.'],
+  pt:['Circulação pulmonar e troca gasosa','O ventrículo direito envia o sangue venoso aos pulmões pelas artérias pulmonares (são artérias, mas levam sangue pobre em oxigênio). Nos capilares ao redor dos alvéolos o oxigênio passa do ar para o sangue e o dióxido de carbono sai do sangue para o ar, por difusão através de uma membrana com menos de um milésimo de milímetro. O sangue oxigenado volta pelas veias pulmonares ao átrio esquerdo.']},
+ {id:'body',es:['Circulación sistémica y perfusión','Arterias (rojo): llevan la sangre desde el corazón hacia los órganos; tienen paredes gruesas y elásticas y en ellas se palpa el pulso. Venas (azul): devuelven la sangre al corazón, con baja presión y válvulas que impiden el reflujo; los músculos de las piernas las ayudan a bombear. Entre ambas están los capilares, donde la sangre cede oxígeno y nutrientes a las células y recoge dióxido de carbono: eso es la perfusión. Las ondas muestran el sentido del flujo.'],
+  en:['Systemic circulation and perfusion','Arteries (red) carry blood from the heart to the organs; their walls are thick and elastic and you can feel the pulse in them. Veins (blue) return blood to the heart at low pressure, with valves that prevent backflow; leg muscles help pump it. Between them are the capillaries, where blood gives oxygen and nutrients to the cells and picks up carbon dioxide: that is perfusion. The waves show the direction of flow.'],
+  pt:['Circulação sistêmica e perfusão','Artérias (vermelho) levam o sangue do coração aos órgãos; têm paredes grossas e elásticas e nelas se palpa o pulso. Veias (azul) devolvem o sangue ao coração, com baixa pressão e válvulas que impedem o refluxo; os músculos das pernas ajudam a bombeá-lo. Entre elas estão os capilares, onde o sangue cede oxigênio e nutrientes às células e recolhe dióxido de carbono: isso é a perfusão. As ondas mostram o sentido do fluxo.']},
+ {id:'loop',es:['La doble circulación','Dos circuitos en serie que se recorren en algo menos de un minuto. Circulación menor o pulmonar: corazón derecho → pulmones → corazón izquierdo, para oxigenar la sangre. Circulación mayor o sistémica: corazón izquierdo → todo el cuerpo → corazón derecho, para llevar oxígeno a los tejidos. Por eso el ventrículo izquierdo, que vence la presión de todo el cuerpo, tiene la pared unas tres veces más gruesa que el derecho.'],
+  en:['The double circulation','Two circuits in series, completed in a little under a minute. Pulmonary (lesser) circulation: right heart → lungs → left heart, to oxygenate the blood. Systemic (greater) circulation: left heart → whole body → right heart, to deliver oxygen to the tissues. That is why the left ventricle, which works against the pressure of the whole body, has a wall about three times thicker than the right.'],
+  pt:['A dupla circulação','Dois circuitos em série, percorridos em pouco menos de um minuto. Circulação pulmonar (pequena): coração direito → pulmões → coração esquerdo, para oxigenar o sangue. Circulação sistêmica (grande): coração esquerdo → todo o corpo → coração direito, para levar oxigênio aos tecidos. Por isso o ventrículo esquerdo, que vence a pressão de todo o corpo, tem a parede cerca de três vezes mais grossa que o direito.']}
+];
+const pTx=st=>LANG==='en'?st.en:LANG==='pt'?st.pt:st.es;
+/* Partículas de sangre */
+const PHY_N=260;
+const phyPtsGeo=new THREE.BufferGeometry();
+phyPtsGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(PHY_N*3),3));
+phyPtsGeo.setAttribute('pcol',new THREE.BufferAttribute(new Float32Array(PHY_N*3),3));
+phyPtsGeo.setAttribute('palpha',new THREE.BufferAttribute(new Float32Array(PHY_N),1));
+const phyPtsMat=new THREE.ShaderMaterial({uniforms:{uScale:{value:600},uSize:{value:0.0034}},transparent:true,depthWrite:false,depthTest:true,
+  vertexShader:'attribute vec3 pcol;attribute float palpha;varying vec3 vC;varying float vA;uniform float uScale;uniform float uSize;void main(){vC=pcol;vA=palpha;vec4 mv=modelViewMatrix*vec4(position,1.0);gl_PointSize=max(2.0,uSize*uScale/-mv.z);gl_Position=projectionMatrix*mv;}',
+  fragmentShader:'varying vec3 vC;varying float vA;void main(){vec2 d=gl_PointCoord-0.5;float r=length(d)*2.0;if(r>1.0)discard;float core=1.0-smoothstep(0.0,1.0,r);float hi=1.0-smoothstep(0.0,0.45,length(d-vec2(-0.12,-0.12))*2.0);gl_FragColor=vec4(vC*(0.75+0.35*core)+vec3(0.5)*hi*0.6,vA*(0.35+0.65*core));}'});
+const phyPts=new THREE.Points(phyPtsGeo,phyPtsMat);phyPts.frustumCulled=false;phyPts.renderOrder=40;
+const C_VEN=new THREE.Color(0x3d6cff),C_ART=new THREE.Color(0xff3b3b);
+function phyCurve(arr){return new THREE.CatmullRomCurve3(arr.map(PV3),false,'centripetal');}
+function phyBuildRoutes(){const R=[];const cat=(...a)=>{const o=[];for(const s of a)for(const p of s){const l=o[o.length-1];if(!l||Math.hypot(l[0]-p[0],l[1]-p[1],l[2]-p[2])>1e-4)o.push(p);}return o;};
+  R.push({c:phyCurve(cat(PR.svc,PR.rh,PR.lpa)),k:'v',w:1,pul:true},{c:phyCurve(cat(PR.ivc,PR.rh,PR.rpa)),k:'v',w:1,pul:true},{c:phyCurve(cat(PR.svc,PR.rh,PR.rpa)),k:'v',w:.6,pul:true},{c:phyCurve(cat(PR.ivc,PR.rh,PR.lpa)),k:'v',w:.6,pul:true});
+  for(const pv of PR.pv)R.push({c:phyCurve(cat(pv,PR.lh)),k:'a',w:.8,pul:true});
+  for(const r of R)r.len=r.c.getLength();return R;}
+/* Tubos de los recorridos y del sistema de conducción */
+function phyTube(arr,col,r,op,depth){const c=phyCurve(arr);const m=new THREE.Mesh(new THREE.TubeGeometry(c,Math.max(12,arr.length*10),r,8,false),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op,depthTest:depth!==false,depthWrite:false}));m.renderOrder=35;m.userData.curve=c;return m;}
+function phyGlow(col,size){const cv2=document.createElement('canvas');cv2.width=cv2.height=64;const g=cv2.getContext('2d');const gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(0.25,col);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv2),transparent:true,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));s.scale.setScalar(size);s.renderOrder=45;return s;}
+function phyBuildCond(){const out=[];const add=(arr,t0,t1)=>{const tb=phyTube(arr,0xffd400,0.00065,0.8,false);PHY.grp.add(tb);const sp=phyGlow('rgba(255,220,90,0.9)',0.012);PHY.grp.add(sp);out.push({tb,sp,t0,t1});};
+  add(PC.inter,0.00,0.07);add(PC.bach,0.00,0.06);add(PC.his,0.07,0.13);add(PC.rbb,0.13,0.155);add(PC.lbb,0.13,0.15);for(const p of PC.pk)add(p,0.155,0.18);
+  const sa=phyGlow('rgba(255,210,80,1)',0.02);sa.position.copy(PV3(PC.sa));PHY.grp.add(sa);const av=phyGlow('rgba(255,210,80,1)',0.016);av.position.copy(PV3(PC.av));PHY.grp.add(av);
+  out.sa=sa;out.av=av;return out;}
+/* Ciclo cardiaco: fases (fracción del ciclo) */
+const phyAtr=ph=>ph>=0.05&&ph<0.17?Math.sin(Math.PI*(ph-0.05)/0.12):0;
+const phyVen=ph=>ph>=0.17&&ph<0.47?Math.sin(Math.PI*(ph-0.17)/0.30):0;
+const phyAVclosed=ph=>ph>=0.165&&ph<0.49;
+const phySLopen=ph=>ph>=0.20&&ph<0.465;
+function phyECG(ph){const g=(x,m,w)=>Math.exp(-((x-m)*(x-m))/(2*w*w));return 0.14*g(ph,0.04,0.018)-0.08*g(ph,0.135,0.006)+1.0*g(ph,0.15,0.007)-0.22*g(ph,0.165,0.007)+0.28*g(ph,0.38,0.035);}
+function phyHeartPose(ph){const a=phyAtr(ph),v=phyVen(ph),sa=1-0.06*a,sv=1-0.075*v,close=phyAVclosed(ph)?1:0,open=phySLopen(ph)?1:0;
+  for(const o of PHY.ms){const m=o.m;
+    if(o.k==='atr')xf(m,PHY.C,sa,sa,sa);else if(o.k==='ven')xf(m,PHY.C,sv,sv,sv);
+    else if(o.k==='av'){const s=1-0.12*close;_v.copy(PHY.dAV).multiplyScalar(0.004*close);xf(m,o.c,s,s,s,_v);}
+    else if(o.k==='sl'){const s=1+0.14*open;_v.set(0,0.003*open,0);xf(m,o.c,s,s,s,_v);}
+    else if(o.k==='lung'){}}}
+/* Sonidos cardiacos sintetizados */
+function phyThump(f,dur,vol){try{if(!PHY.ac)PHY.ac=new (window.AudioContext||window.webkitAudioContext)();const ac=PHY.ac,t=ac.currentTime;const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(f*1.6,t);o.frequency.exponentialRampToValueAtTime(f,t+dur*0.6);
+  g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.012);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+dur+0.02);}catch(e){}}
+/* Inserto 2D (ECG, alvéolo, capilar, circuito) */
+const phyCv=()=>$('#phyInset');
+function phyInsetSize(){const c=phyCv();if(!c)return null;const r=c.getBoundingClientRect(),d=Math.min(2,window.devicePixelRatio||1);const W=Math.round(r.width*d),H=Math.round(r.height*d);if(c.width!==W||c.height!==H){c.width=W;c.height=H;}const g=c.getContext('2d');g.setTransform(d,0,0,d,0,0);return {g,w:r.width,h:r.height};}
+const PHY_TXT=(es,en,pt)=>TL(es,en,pt);
+function phyDrawECG(ph,tot){const S=phyInsetSize();if(!S)return;const {g,w,h}=S;g.clearRect(0,0,w,h);
+  g.fillStyle='rgba(8,20,16,0.92)';g.fillRect(0,0,w,h);g.strokeStyle='rgba(80,200,140,0.12)';g.lineWidth=1;for(let x=0;x<w;x+=12){g.beginPath();g.moveTo(x,22);g.lineTo(x,h-6);g.stroke();}for(let y=22;y<h-6;y+=12){g.beginPath();g.moveTo(0,y);g.lineTo(w,y);g.stroke();}
+  const span=2.4,base=h*0.68,amp=h*0.42;g.strokeStyle='#5dffa8';g.lineWidth=2;g.shadowColor='#5dffa8';g.shadowBlur=6;g.beginPath();
+  for(let x=0;x<=w;x+=1.5){const cyc=tot-span*(1-x/w);const p=((cyc%1)+1)%1;const y=base-phyECG(p)*amp;x?g.lineTo(x,y):g.moveTo(x,y);}g.stroke();g.shadowBlur=0;
+  g.fillStyle='#5dffa8';g.beginPath();g.arc(w-2,base-phyECG(ph)*amp,3.5,0,7);g.fill();
+  g.font='600 11px system-ui,sans-serif';g.fillStyle='rgba(220,255,235,0.92)';g.fillText(PHY_TXT('ECG · 70 lpm','ECG · 70 bpm','ECG · 70 bpm'),10,15);
+  const ev=ph<0.09?PHY_TXT('Onda P: despolarización auricular','P wave: atrial depolarisation','Onda P: despolarização atrial'):ph<0.13?PHY_TXT('Pausa en el nódulo AV','Pause at the AV node','Pausa no nó AV'):ph<0.19?PHY_TXT('QRS: despolarización ventricular','QRS: ventricular depolarisation','QRS: despolarização ventricular'):ph<0.32?PHY_TXT('Segmento ST: ventrículos contraídos','ST segment: ventricles contracted','Segmento ST: ventrículos contraídos'):ph<0.46?PHY_TXT('Onda T: repolarización ventricular','T wave: ventricular repolarisation','Onda T: repolarização ventricular'):PHY_TXT('Diástole: reposo eléctrico','Diastole: electrical rest','Diástole: repouso elétrico');
+  if(w<250){g.font='600 10px system-ui,sans-serif';g.fillText(ev,10,h-8);}else{g.textAlign='right';g.fillText(ev,w-10,15);g.textAlign='left';}}
+function phyDrawGas(t){const S=phyInsetSize();if(!S)return;const {g,w,h}=S;g.clearRect(0,0,w,h);
+  const bg=g.createLinearGradient(0,0,0,h);bg.addColorStop(0,'rgba(14,22,36,0.94)');bg.addColorStop(1,'rgba(10,14,24,0.94)');g.fillStyle=bg;g.fillRect(0,0,w,h);
+  const ax=w*0.5,ay=h*0.42,ar=Math.min(w,h)*0.27*(1+0.05*Math.sin(t*2*Math.PI/5));
+  const ag=g.createRadialGradient(ax,ay-ar*0.3,ar*0.2,ax,ay,ar);ag.addColorStop(0,'rgba(190,225,255,0.35)');ag.addColorStop(1,'rgba(120,170,230,0.18)');g.fillStyle=ag;g.beginPath();g.arc(ax,ay,ar,0,7);g.fill();g.strokeStyle='rgba(170,210,255,0.8)';g.lineWidth=1.5;g.stroke();
+  const cy=ay+ar+h*0.1,ch=h*0.13;const cg=g.createLinearGradient(0,0,w,0);cg.addColorStop(0,'rgba(70,100,255,0.55)');cg.addColorStop(0.5,'rgba(170,70,170,0.45)');cg.addColorStop(1,'rgba(255,60,60,0.6)');g.fillStyle=cg;
+  g.beginPath();g.roundRect?g.roundRect(8,cy-ch/2,w-16,ch,ch/2):g.rect(8,cy-ch/2,w-16,ch);g.fill();
+  for(let i=0;i<9;i++){const x=((t*42+i*(w/9))%(w-24))+12;const k=Math.min(1,Math.max(0,(x-w*0.3)/(w*0.4)));g.fillStyle=`rgb(${Math.round(70+185*k)},${Math.round(90-40*k)},${Math.round(230-170*k)})`;g.beginPath();g.ellipse(x,cy,9,ch*0.34,0,0,7);g.fill();}
+  g.font='600 10px system-ui,sans-serif';
+  for(let i=0;i<6;i++){const u=((t*0.55+i/6)%1);const x=ax-ar*0.5+i*ar*0.2;const y=ay+ar*0.2+u*(cy-ay-ar*0.2);g.fillStyle=`rgba(255,120,120,${1-u*0.6})`;g.fillText('O₂',x,y);}
+  for(let i=0;i<4;i++){const u=((t*0.45+i/4)%1);const x=ax+ar*0.15+i*ar*0.18;const y=cy-6-u*(cy-ay-ar*0.1);g.fillStyle=`rgba(200,200,215,${1-u*0.6})`;g.fillText('CO₂',x,y);}
+  g.font='600 11px system-ui,sans-serif';g.fillStyle='rgba(225,236,255,0.95)';g.fillText(PHY_TXT('Alvéolo (aire)','Alveolus (air)','Alvéolo (ar)'),10,16);g.fillText(PHY_TXT('Capilar pulmonar','Pulmonary capillary','Capilar pulmonar'),10,h-8);
+  if(w>=250){g.textAlign='right';g.fillText(PHY_TXT('venosa → arterial','venous → arterial','venoso → arterial'),w-10,h-8);g.textAlign='left';}}
+function phyDrawPerf(t){const S=phyInsetSize();if(!S)return;const {g,w,h}=S;g.clearRect(0,0,w,h);g.fillStyle='rgba(22,14,16,0.94)';g.fillRect(0,0,w,h);
+  for(let i=0;i<6;i++){const x=18+i*(w-36)/5,y=i%2?h*0.22:h*0.78;g.fillStyle='rgba(240,190,170,0.18)';g.strokeStyle='rgba(240,190,170,0.5)';g.beginPath();g.ellipse(x,y,w*0.07,h*0.12,0,0,7);g.fill();g.stroke();g.fillStyle='rgba(240,190,170,0.6)';g.beginPath();g.arc(x,y,3,0,7);g.fill();}
+  const cy=h*0.5,ch=h*0.17;const cg=g.createLinearGradient(0,0,w,0);cg.addColorStop(0,'rgba(255,60,60,0.65)');cg.addColorStop(0.5,'rgba(170,70,170,0.45)');cg.addColorStop(1,'rgba(70,100,255,0.6)');g.fillStyle=cg;g.beginPath();g.roundRect?g.roundRect(4,cy-ch/2,w-8,ch,ch/2):g.rect(4,cy-ch/2,w-8,ch);g.fill();
+  for(let i=0;i<9;i++){const x=((t*40+i*(w/9))%(w-20))+10;const k=Math.min(1,Math.max(0,(x-w*0.25)/(w*0.5)));g.fillStyle=`rgb(${Math.round(255-185*k)},${Math.round(50+40*k)},${Math.round(60+170*k)})`;g.beginPath();g.ellipse(x,cy,9,ch*0.32,0,0,7);g.fill();}
+  g.font='600 10px system-ui,sans-serif';for(let i=0;i<5;i++){const u=((t*0.5+i/5)%1);const x=w*0.2+i*w*0.13;const up=i%2;const y=up?cy-ch/2-u*h*0.18:cy+ch/2+u*h*0.18+8;g.fillStyle=`rgba(255,130,130,${1-u*0.7})`;g.fillText('O₂',x,y);}
+  for(let i=0;i<3;i++){const u=((t*0.4+i/3)%1);const x=w*0.32+i*w*0.18;const y=(i%2?h*0.25:h*0.75)+(i%2?1:-1)*u*(h*0.2);g.fillStyle=`rgba(205,205,220,${0.4+0.6*u})`;g.fillText('CO₂',x,y);}
+  g.font='600 11px system-ui,sans-serif';g.fillStyle='rgba(255,236,236,0.95)';g.fillText(PHY_TXT('Arteriola','Arteriole','Arteríola'),8,14);g.textAlign='right';g.fillText(PHY_TXT('Vénula','Venule','Vênula'),w-8,14);g.textAlign='center';g.fillText(PHY_TXT('Capilar · células del tejido','Capillary · tissue cells','Capilar · células do tecido'),w/2,h-6);g.textAlign='left';}
+function phyDrawLoop(t){const S=phyInsetSize();if(!S)return;const {g,w,h}=S;g.clearRect(0,0,w,h);g.fillStyle='rgba(12,14,20,0.94)';g.fillRect(0,0,w,h);
+  const cx=w/2,top=h*0.17,bot=h*0.83,hx=w*0.12,hy=h*0.13;
+  const loop=(y0,y1,colL,colR,dir)=>{const lx=w*0.18,rx=w*0.82;g.lineWidth=6;g.lineCap='round';
+    g.strokeStyle=colL;g.beginPath();g.moveTo(cx-hx,y0);g.lineTo(lx,y0);g.lineTo(lx,y1);g.lineTo(cx-hx*0.6,y1);g.stroke();
+    g.strokeStyle=colR;g.beginPath();g.moveTo(cx+hx,y0);g.lineTo(rx,y0);g.lineTo(rx,y1);g.lineTo(cx+hx*0.6,y1);g.stroke();};
+  const B='#4170ff',R='#ff4545';
+  g.fillStyle='rgba(120,200,255,0.18)';g.strokeStyle='rgba(150,210,255,0.6)';g.lineWidth=1.5;g.beginPath();g.ellipse(cx,top,w*0.16,h*0.08,0,0,7);g.fill();g.stroke();
+  g.fillStyle='rgba(255,170,150,0.15)';g.strokeStyle='rgba(255,180,160,0.6)';g.beginPath();g.ellipse(cx,bot,w*0.2,h*0.08,0,0,7);g.fill();g.stroke();
+  /* pulmonar: lado derecho del corazón (izq. del dibujo) azul subiendo; vuelta roja por la derecha */
+  g.lineWidth=6;g.lineCap='round';g.strokeStyle=B;g.beginPath();g.moveTo(cx-hx*0.5,h*0.42);g.lineTo(w*0.2,h*0.42);g.lineTo(w*0.2,top);g.lineTo(cx-w*0.16,top);g.stroke();
+  g.strokeStyle=R;g.beginPath();g.moveTo(cx+w*0.16,top);g.lineTo(w*0.8,top);g.lineTo(w*0.8,h*0.42);g.lineTo(cx+hx*0.5,h*0.42);g.stroke();
+  g.strokeStyle=R;g.beginPath();g.moveTo(cx+hx*0.5,h*0.58);g.lineTo(w*0.8,h*0.58);g.lineTo(w*0.8,bot);g.lineTo(cx+w*0.2,bot);g.stroke();
+  g.strokeStyle=B;g.beginPath();g.moveTo(cx-w*0.2,bot);g.lineTo(w*0.2,bot);g.lineTo(w*0.2,h*0.58);g.lineTo(cx-hx*0.5,h*0.58);g.stroke();
+  /* corazón */
+  g.fillStyle='#2a1518';g.strokeStyle='rgba(255,140,140,0.7)';g.lineWidth=1.5;g.beginPath();g.roundRect?g.roundRect(cx-hx,h*0.5-hy,hx*2,hy*2,8):g.rect(cx-hx,h*0.5-hy,hx*2,hy*2);g.fill();g.stroke();
+  g.strokeStyle='rgba(255,140,140,0.5)';g.beginPath();g.moveTo(cx,h*0.5-hy);g.lineTo(cx,h*0.5+hy);g.moveTo(cx-hx,h*0.5);g.lineTo(cx+hx,h*0.5);g.stroke();
+  g.font='600 9px system-ui,sans-serif';g.textAlign='center';g.fillStyle='#9fb6ff';g.fillText(PHY_TXT('AD','RA','AD'),cx-hx/2,h*0.5-hy/3);g.fillText(PHY_TXT('VD','RV','VD'),cx-hx/2,h*0.5+hy/1.6);g.fillStyle='#ffaaaa';g.fillText(PHY_TXT('AI','LA','AE'),cx+hx/2,h*0.5-hy/3);g.fillText(PHY_TXT('VI','LV','VE'),cx+hx/2,h*0.5+hy/1.6);
+  /* puntos moviéndose */
+  const path=[[cx-hx*0.5,h*0.42,B],[w*0.2,h*0.42,B],[w*0.2,top,B],[cx-w*0.16,top,B],[cx+w*0.16,top,R],[w*0.8,top,R],[w*0.8,h*0.42,R],[cx+hx*0.5,h*0.42,R],[cx+hx*0.5,h*0.58,R],[w*0.8,h*0.58,R],[w*0.8,bot,R],[cx+w*0.2,bot,R],[cx-w*0.2,bot,B],[w*0.2,bot,B],[w*0.2,h*0.58,B],[cx-hx*0.5,h*0.58,B]];
+  const segL=[];let L=0;for(let i=0;i<path.length;i++){const a=path[i],b=path[(i+1)%path.length];const l=Math.hypot(b[0]-a[0],b[1]-a[1]);segL.push(l);L+=l;}
+  for(let k=0;k<26;k++){let d=((t*60+k*L/26)%L);let i=0;while(d>segL[i]){d-=segL[i];i=(i+1)%path.length;}const a=path[i],b=path[(i+1)%path.length],u=d/segL[i];
+    const inLung=i===3,inBody=i===11;g.fillStyle=inLung?(u<0.5?B:R):inBody?(u<0.5?R:B):a[2];g.beginPath();g.arc(a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u,3.2,0,7);g.fill();}
+  g.font='600 11px system-ui,sans-serif';g.fillStyle='rgba(225,240,255,0.95)';g.fillText(PHY_TXT('Pulmones · circulación menor','Lungs · pulmonary circuit','Pulmões · pequena circulação'),cx,top+4);
+  g.fillStyle='rgba(255,230,225,0.95)';g.fillText(PHY_TXT('Cuerpo · circulación mayor','Body · systemic circuit','Corpo · grande circulação'),cx,bot+4);g.textAlign='left';
+  g.font='600 9.5px system-ui,sans-serif';g.fillStyle='#9fb6ff';g.fillText(PHY_TXT('Arteria pulmonar','Pulmonary artery','Artéria pulmonar'),w*0.2+6,h*0.3);g.fillText(PHY_TXT('Venas cavas','Venae cavae','Veias cavas'),w*0.2+6,h*0.72);
+  g.textAlign='right';g.fillStyle='#ffaaaa';g.fillText(PHY_TXT('Venas pulmonares','Pulmonary veins','Veias pulmonares'),w*0.8-6,h*0.3);g.fillText(PHY_TXT('Aorta','Aorta','Aorta'),w*0.8-6,h*0.72);g.textAlign='left';}
+/* Entrar, salir y pasos */
+
+function phyStepFor(q){q=gKey(q||'');return /valv/.test(q)?2:/(sinus|nodo|nodul|his|purkinje|ecg|electrocard|marcapas|conduc)/.test(q)?3:/(interc|hemat|alveol|gaseos|pulmonar)/.test(q)?4:/(perfus|capilar|arteria|vena|sistemic)/.test(q)?5:/(circulacion mayor|circulacion menor|doble circ)/.test(q)?6:/(sangr|recorr|flujo|circul)/.test(q)?1:0;}
+
+function phyPlace(){const card=$('.phycard');if(!card)return;const dock=!isPhone()&&PHY.on;document.body.classList.toggle('phy-dock',dock);
+  if(dock){const pb=$('.pbody');if(card.parentElement!==pb){pb.prepend(card);pb.scrollTop=0;}card.classList.add('docked');}
+  else{const box=$('#phyBox');if(card.parentElement!==box)box.appendChild(card);card.classList.remove('docked');card.style.bottom=isPhone()&&PHY.on?(SHEET.peek+8)+'px':'';if(isPhone()&&PHY.on&&sheetState!=='peek')setSheet('peek');}}
+window.addEventListener('resize',()=>{if(PHY.on)phyPlace();});
+function phyFocus(c,r){const v=c.clone();if(isPhone()){r*=1.6;v.y-=r*0.07;}focusOn(v,r);}
+async function phyStart(stepIdx){if(PHY.on){phyGo(stepIdx||0);return;}
+  if(typeof stopAnim==='function')stopAnim();select(null);clearLm();if(gait&&gait.on)setGait(false);if(BODY==='vh')setBody('m');
+  PHY.orb={th:orb.T.th,ph:orb.T.ph,r:orb.T.r,tgt:orb.T.tgt.clone()};PHY.saved={sys:Object.fromEntries(Object.keys(SYS).map(k=>[k,{on:SYS[k].on,op:SYS[k].op}])),studio,planes:Object.fromEntries(Object.keys(PLANES).map(k=>[k,{cut:PLANES[k].cut,show:PLANES[k].show,pos:PLANES[k].pos}]))};
+  if(!studio&&!lite)setStudio(true);
+  PHY.on=true;$('#phyBox').hidden=false;document.body.classList.add('phy-on');phyPlace();$('#phyTitle').textContent=TL('Cargando corazón y vasos…','Loading heart and vessels…','Carregando coração e vasos…');
+  const need=['arterial','venoso','respiratorio'];for(const k of need){SYS[k].on=true;SYS[k].op=1;}renderSysList();await Promise.all(need.map(k=>loadSys(k)));if(!PHY.on)return;
+  const pick=rx=>meshes.filter(m=>rx.test(m.userData.c.en)&&need.includes(BS(m.userData.sys)));
+  const g={};for(const k in HRX)g[k]=pick(HRX[k]);PHY.heart=[...g.atr,...g.ven,...g.av,...g.sl];PHY.atr=g.atr;PHY.valves=[...g.av,...g.sl];PHY.ven=g.ven.filter(m=>/ventricle$/.test(m.userData.c.en));
+  PHY.gv=pick(GVRX);PHY.lungs=[...pick(BRX.lung),...pick(BRX.br)];
+  PHY.C=centerOf(g.ven);PHY.dAV=centerOf(g.atr).sub(PHY.C).normalize();FLOW_U.value.set(PHY.C.x,PHY.C.y,PHY.C.z,0);
+  PHY.ms=[...g.atr.map(m=>({m,k:'atr'})),...g.ven.map(m=>({m,k:'ven'})),...g.av.map(m=>({m,k:'av',c:centerOf([m])})),...g.sl.map(m=>({m,k:'sl',c:centerOf([m])}))];
+  PHY.LC=(()=>{const b=new THREE.Box3();for(const m of pick(BRX.lung)){m.geometry.computeBoundingBox();b.union(m.geometry.boundingBox);}return b.isEmpty()?PHY.C.clone():b.getCenter(new V3());})();
+  PHY.routes=phyBuildRoutes();PHY.parts=[];for(let i=0;i<PHY_N;i++){const r=Math.floor(Math.random()*PHY.routes.length);PHY.parts.push({r,u:Math.random(),j:new V3((Math.random()-.5)*0.004,(Math.random()-.5)*0.004,(Math.random()-.5)*0.004),s:0.85+Math.random()*0.3});}
+  PHY.grp.add(phyPts);PHY.lines=[];for(const r of [PR.svc.concat(PR.rh,PR.lpa),PR.ivc.concat(PR.rh,PR.rpa)]){}
+  PHY.cond=phyBuildCond();
+  PHY.lbl={};for(const k in PHY_LBL){const [p,es,en,pt]=PHY_LBL[k];const L=addLabel(TL(es,en,pt),()=>PV3(p),'phyl','phy');L.on=false;L.pos=PV3(p);PHY.lbl[k]=L;}
+  PHY.t=0;phyGo(stepIdx||0);}
+function phyLabels(keys){for(const k in PHY.lbl)PHY.lbl[k].on=keys.includes(k);}
+function phyIso(list,onlyThese){isoOnly=true;isoSet=new Set(list.map(m=>m.userData.c.id));hiddenIds.clear();applySystems();}
+function phyCut(on,pos){for(const k in PLANES){PLANES[k].cut=on&&k==='fro';PLANES[k].show=false;}if(on)PLANES.fro.pos=pos;updatePlanes();renderPlanes();}
+function phyGo(i){i=Math.max(0,Math.min(PHY_STEPS.length-1,i));PHY.step=i;const st=PHY_STEPS[i];const [ti,tx]=pTx(st);
+  $('#phyTitle').textContent=ti;$('#phyText').textContent=tx;$('#phyNum').textContent=`${i+1} / ${PHY_STEPS.length}`;$('#phyKick').textContent=TL('Corazón y circulación','Heart and circulation','Coração e circulação');$('#phyPrev').textContent=TL('← Anterior','← Previous','← Anterior');$('#phySlow').textContent=TL('Cámara lenta','Slow motion','Câmera lenta');$('#phySound').textContent=TL('Sonido','Sound','Som');$('#phyPlay').textContent=PHY.paused?TL('Reanudar','Resume','Retomar'):TL('Pausa','Pause','Pausa');$('#phyMore').textContent=$('.phycard').classList.contains('open')?TL('Leer menos','Show less','Ler menos'):TL('Leer más','Read more','Ler mais');
+  $('#phyDots').innerHTML=PHY_STEPS.map((s,k)=>`<button data-pd="${k}" aria-label="${esc(pTx(s)[0])}" aria-current="${k===i}"></button>`).join('');$('#phyDots').querySelectorAll('[data-pd]').forEach(b=>b.onclick=()=>phyGo(+b.dataset.pd));
+  $('#phyPrev').disabled=i===0;$('#phyNext').textContent=i===PHY_STEPS.length-1?TL('Terminar','Finish','Concluir'):TL('Siguiente','Next','Próximo');
+  phyResetPose();for(const k of ['arterial','venoso','respiratorio']){SYS[k].on=true;SYS[k].op=1;}
+  for(const k in SYS)if(!['arterial','venoso','respiratorio'].includes(k)&&PHY.saved.sys[k])SYS[k].on=st.id==='body'?(k==='oseo'):false;
+  if(st.id==='body'){SYS.respiratorio.on=false;SYS.oseo.on=true;SYS.oseo.op=0.25;}
+  renderSysList();FLOWON_U.value=0;phyCut(false);
+  const heartGV=[...PHY.heart,...PHY.gv];phyPts.visible=false;PHY.cond.forEach(c=>{c.tb.visible=false;c.sp.visible=false;});PHY.cond.sa.visible=PHY.cond.av.visible=false;
+  const ins=$('#phyInset');ins.hidden=true;ins.classList.toggle('big',st.id==='loop');
+  if(st.id==='anat'){phyIso(heartGV);phyFocus(PHY.C.clone().add(new V3(0,0.03,0)),0.46);orb.T.ph=1.45;orb.T.th=0.35;phyLabels(['ra','rv','la','lv','svc','ivc','pt','ao','pv']);}
+  else if(st.id==='flow'){phyIso(heartGV);phyCut(true,0.034);phyFocus(PHY.C.clone().add(new V3(0,0.025,0)),0.44);orb.T.ph=1.42;orb.T.th=0.0;phyPts.visible=true;PHY.flt=null;phyLabels(['ra','rv','la','lv','svc','ivc','pt','ao','pv','tri','mit']);}
+  else if(st.id==='valv'){phyIso([...PHY.ven,...PHY.valves]);const c=centerOf(PHY.valves);phyFocus(c,0.24);orb.T.th=0.15;orb.T.ph=0.42;phyLabels(['tri','mit','aov','pvv']);}
+  else if(st.id==='cond'){SYS.arterial.op=0.28;SYS.venoso.op=0.28;phyIso(heartGV);phyFocus(PHY.C.clone().add(new V3(0,0.01,0)),0.40);orb.T.ph=1.45;orb.T.th=0.15;PHY.cond.forEach(c=>{c.tb.visible=true;});PHY.cond.sa.visible=PHY.cond.av.visible=true;phyLabels(['sa','avn','his','rbb','lbb','pk']);ins.hidden=false;}
+  else if(st.id==='lung'){SYS.respiratorio.op=0.5;phyIso([...heartGV,...PHY.lungs]);phyFocus(PHY.LC.clone(),0.62);orb.T.ph=1.45;orb.T.th=0.0;phyPts.visible=true;phyLabels(['lungR','lungL','pt','pv','ra','la']);ins.hidden=false;}
+  else if(st.id==='body'){isoOnly=false;isoSet=null;hiddenIds.clear();applySystems();FLOWON_U.value=1;phyFocus(new V3(0,0.95,0),2.2);orb.T.ph=1.45;orb.T.th=0.0;phyLabels([]);ins.hidden=false;}
+  else if(st.id==='loop'){SYS.respiratorio.op=0.4;phyIso([...heartGV,...PHY.lungs]);phyFocus(PHY.LC.clone(),0.7);orb.T.ph=1.45;orb.T.th=0.3;phyPts.visible=true;phyLabels(['lungR','lungL','svc','ivc','ao']);ins.hidden=false;}
+  $('#phyValves').hidden=!['anat','flow','valv','cond'].includes(st.id);
+  applySystems();}
+function phyResetPose(){for(const o of PHY.ms){o.m.scale.set(1,1,1);o.m.position.set(0,0,0);}for(const m of PHY.lungs||[]){m.scale.set(1,1,1);m.position.set(0,0,0);}}
+function phyStop(){if(!PHY.on)return;PHY.on=false;phyResetPose();FLOWON_U.value=0;
+  PHY.grp.clear();removeLabels('phy');PHY.cond=[];$('#phyBox').hidden=true;document.body.classList.remove('phy-on');phyPlace();
+  const s=PHY.saved;if(s){for(const k in s.sys)if(SYS[k]){SYS[k].on=s.sys[k].on;SYS[k].op=s.sys[k].op;}for(const k in s.planes){Object.assign(PLANES[k],s.planes[k]);}updatePlanes();renderPlanes();if(studio!==s.studio)setStudio(s.studio);}
+  isoOnly=false;isoSet=null;applySystems();renderSysList();if(PHY.orb){orb.T.th=PHY.orb.th;orb.T.ph=PHY.orb.ph;orb.T.r=PHY.orb.r;orb.T.tgt.copy(PHY.orb.tgt);}}
+function phyTick(dt){if(!PHY.on||!PHY.ms.length)return;const sp=(PHY.slow?0.3:1)*(PHY.paused?0:1);PHY.t+=dt*sp;
+  const tot=PHY.t/PHY_T,ph=((tot%1)+1)%1,st=PHY_STEPS[PHY.step].id;
+  if(PHY.sound&&!PHY.paused){if(PHY.lastPh<0.165&&ph>=0.165)phyThump(55,0.16,0.55);if(PHY.lastPh<0.465&&ph>=0.465)phyThump(75,0.11,0.35);}
+  PHY.lastPh=ph;
+  if(st!=='body')phyHeartPose(ph);
+  if(st==='anat'&&!PHY.paused)orb.T.th+=dt*0.22;
+  /* respiración en el paso pulmonar */
+  if((st==='lung'||st==='loop')&&PHY.lungs){const T=5,tt=PHY.t%T,b=tt<2?0.5-0.5*Math.cos(Math.PI*tt/2):0.5+0.5*Math.cos(Math.PI*(tt-2)/3);for(const m of PHY.lungs){if(PHY.heart.includes(m))continue;xf(m,PHY.LC,1+0.03*b,1+0.06*b,1+0.035*b);}}
+  /* partículas */
+  if(phyPts.visible){const pos=phyPtsGeo.attributes.position.array,col=phyPtsGeo.attributes.pcol.array,al=phyPtsGeo.attributes.palpha.array;
+    const v=phyVen(ph),a=phyAtr(ph);const flowK=(0.18+1.6*v+0.4*a)*sp;const q=new V3();
+    for(let i=0;i<PHY_N;i++){const P=PHY.parts[i],R=PHY.routes[P.r];P.u+=dt*flowK*P.s*0.05/R.len;if(P.u>1){P.u-=1;P.r=Math.floor(Math.random()*PHY.routes.length);}
+      R.c.getPointAt(Math.min(1,P.u),q);q.add(P.j);pos[i*3]=q.x;pos[i*3+1]=q.y;pos[i*3+2]=q.z;
+      const c=R.k==='v'?C_VEN:C_ART;col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;al[i]=Math.min(1,P.u*10,(1-P.u)*10);}
+    phyPtsGeo.attributes.position.needsUpdate=true;phyPtsGeo.attributes.pcol.needsUpdate=true;phyPtsGeo.attributes.palpha.needsUpdate=true;
+    const r=cv.getBoundingClientRect();phyPtsMat.uniforms.uScale.value=(r.height*renderer.getPixelRatio())/(2*Math.tan(camera.fov*Math.PI/360));}
+  /* sistema de conducción */
+  if(st==='cond'){const q=new V3();for(const c of PHY.cond){const on=ph>=c.t0&&ph<c.t1+0.02;c.sp.visible=ph>=c.t0&&ph<=c.t1;if(c.sp.visible){c.tb.userData.curve.getPointAt(Math.min(1,(ph-c.t0)/(c.t1-c.t0)),q);c.sp.position.copy(q);}
+      c.tb.material.opacity=on?1:0.7;c.tb.material.color.setHex(on?0xfff6b0:0xffc400);}
+    const saP=ph<0.03?1:0;PHY.cond.sa.scale.setScalar(0.016+0.02*saP+0.004*Math.sin(PHY.t*8));const avP=ph>=0.07&&ph<0.13?1:0;PHY.cond.av.scale.setScalar(0.013+0.012*avP);
+    phyDrawECG(ph,tot);}
+  else if(st==='lung')phyDrawGas(PHY.t);else if(st==='body'){phyDrawPerf(PHY.t);FLOW_U.value.w=PHY.t;}else if(st==='loop')phyDrawLoop(PHY.t);
+  const chip=$('#phyPhase');if(chip){chip.textContent=ph<0.05?TL('Diástole','Diastole','Diástole'):ph<0.17?TL('Sístole auricular','Atrial systole','Sístole atrial'):ph<0.47?TL('Sístole ventricular','Ventricular systole','Sístole ventricular'):TL('Diástole','Diastole','Diástole');
+    const vs=$('#phyValves');if(vs)vs.innerHTML=`<span class="${phyAVclosed(ph)?'cl':'op'}">${TL('Tricúspide y mitral','Tricuspid & mitral','Tricúspide e mitral')}: ${phyAVclosed(ph)?TL('cerradas','closed','fechadas'):TL('abiertas','open','abertas')}</span><span class="${phySLopen(ph)?'op':'cl'}">${TL('Aórtica y pulmonar','Aortic & pulmonary','Aórtica e pulmonar')}: ${phySLopen(ph)?TL('abiertas','open','abertas'):TL('cerradas','closed','fechadas')}</span>`;}}
+$('#phyClose').onclick=phyStop;$('#phyMore').onclick=()=>{const c=$('.phycard');c.classList.toggle('open');$('#phyMore').textContent=c.classList.contains('open')?TL('Leer menos','Show less','Ler menos'):TL('Leer más','Read more','Ler mais');};$('#phyPrev').onclick=()=>phyGo(PHY.step-1);$('#phyNext').onclick=()=>{if(PHY.step>=PHY_STEPS.length-1)phyStop();else phyGo(PHY.step+1);};
+$('#phyPlay').onclick=()=>{PHY.paused=!PHY.paused;$('#phyPlay').setAttribute('aria-pressed',PHY.paused);$('#phyPlay').textContent=PHY.paused?TL('Reanudar','Resume','Retomar'):TL('Pausa','Pause','Pausa');};
+$('#phySlow').onclick=()=>{PHY.slow=!PHY.slow;$('#phySlow').setAttribute('aria-pressed',PHY.slow);};
+$('#phySound').onclick=()=>{PHY.sound=!PHY.sound;$('#phySound').setAttribute('aria-pressed',PHY.sound);if(PHY.sound)phyThump(55,0.12,0.3);};
+$$('[data-phy]').forEach(b=>b.onclick=()=>phyStart(+b.dataset.phy||0));
+
 /* ───────── Accidentes óseos ───────── */
 const lmGroup=new THREE.Group();scene.add(lmGroup);
 function clearLm(){lmGroup.clear();removeLabels('lm');}
@@ -2359,11 +2654,12 @@ function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;const k=1-M
   for(const L of labels){let p=null,show=false;
     if(L.group==='vec'){const gp=L.getPos();show=!!gp;p=gp?gp.clone():null;}
     else if(L.group==='lm'){show=L.on;p=L.on?L.pos:null;}
+    else if(L.group==='phy'){show=PHY.on&&L.on;p=show?L.pos:null;}
     else if(L.group==='dir') show=showDir; else if(L.group==='axis') show=showAxes; else if(L.group.startsWith('plane:')) show=PLANES[L.group.slice(6)].show;
     else if(L.group==='tag'&&selected&&visibleDeep(selected.m)){show=true;p=selected.m.localToWorld(selected.local.clone());}
     if(show){p=p||L.getPos();const v=p.clone().project(camera);if(v.z>1)show=false;else{L.el.style.left=((v.x+1)/2*r.width)+'px';L.el.style.top=((1-v.y)/2*r.height)+'px';}}
     if(L.show!==show){L.el.hidden=!show;L.show=show;}}
-  layoutPins(r);animTick&&animTick(dt);
+  layoutPins(r);animTick&&animTick(dt);phyTick(dt);
   requestAnimationFrame(frame);}
 
 /* ───────── Inicio ───────── */
@@ -2398,7 +2694,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 53 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v36');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v37');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();
