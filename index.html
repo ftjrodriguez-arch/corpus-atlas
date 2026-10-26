@@ -173,6 +173,11 @@ input[type=range]{accent-color:var(--accent);width:100%}
 body.phy-on.phy-dock .pbody > .view{display:none!important}
 .phymore{display:none;align-self:flex-start;border:0;background:none;color:#ff8a8a;font-weight:700;font-size:12px;padding:0}
 @media (max-width:879px){.phycard:not(.open) #phyText{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;max-height:none}.phycard.open #phyText{max-height:26vh}.phymore{display:block}.phyPhase span span{display:none}.phyopt button{padding:2px 8px;font-size:11px}.phyctl .btn{padding:6px 10px}}
+.phytours{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.phytour{display:flex;gap:10px;align-items:center;text-align:left;border:1px solid var(--line);border-radius:12px;padding:10px;background:linear-gradient(135deg,color-mix(in srgb,var(--c) 22%,transparent),transparent 70%)}
+.phytour:hover{border-color:var(--c)}.phytour .ic{flex:none;width:34px;height:34px;border-radius:10px;background:var(--c);color:#111;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700}
+.phytour b{display:block;font:500 15px/1.2 var(--f-display)}.phytour small{color:var(--muted);font-size:11.5px}
+.phykick{color:var(--phyc,#ff8a8a)!important}.phyctl .btn.pri{background:var(--phyc,#ff4d5e)!important;border-color:var(--phyc,#ff4d5e)!important;color:#111!important}.phydots button[aria-current="true"]{background:var(--phyc,#ff4d5e)!important}
 .lbl.phyl{background:rgba(14,16,22,.82);color:#fff;border-color:rgba(255,255,255,.2);text-transform:none;letter-spacing:0;font:600 11.5px/1 var(--f-ui);padding:5px 8px;border-radius:999px}
 body.phy-on .actbar,body.phy-on .views,body.phy-on #hintTxt{display:none!important}
 @media (max-width:879px){#phyInset{width:200px;height:104px;left:8px;top:8px}#phyInset.big{width:230px;height:150px}.phy .phycard{left:6px;right:6px;bottom:6px;padding:9px 10px 8px}.phy h2{font-size:16.5px}.phy p{font-size:12.2px;max-height:15vh}}
@@ -502,7 +507,7 @@ details.more > .card{margin-bottom:10px}
         <div class="card" id="animCard">
           <h3>Fisiología animada</h3>
           <p class="muted small">El modelo se mueve para mostrar la función: el ciclo cardiaco con la apertura y el cierre de las válvulas, y la mecánica de la respiración.</p>
-          <button class="phystart" data-phy="0"><span class="ic">♥</span><span><b>Corazón y circulación en acción</b><small>Recorrido de la sangre, válvulas, sistema eléctrico y ECG, intercambio gaseoso y perfusión, en 7 pasos.</small></span></button>
+          <div class="phyhost"></div>
           <div class="row"><button class="btn" id="animHeart" aria-pressed="false">Latido cardiaco</button><button class="btn" id="animBreath" aria-pressed="false">Respiración</button></div>
           <label class="chk"><input type="checkbox" id="animCut"> Corte de cuatro cámaras (latido)</label>
           <label class="chk"><input type="checkbox" id="animSlow"> Cámara lenta</label>
@@ -568,7 +573,7 @@ details.more > .card{margin-bottom:10px}
         <p class="muted" style="font-size:12px">Valores de referencia de rango articular activo en adultos (AAOS). Las mallas reales se deforman alrededor del centro articular calculado a partir de los huesos; los músculos que cruzan la articulación se curvan de forma aproximada.</p>
       </div>
 
-      <div class="view" id="tab-lec" hidden><p class="femonly card">Las lecciones guiadas usan la musculatura completa. <button class="btn" onclick="setBody('f')">Ver el modelo femenino completo</button></p><button class="phystart" style="margin-bottom:4px" data-phy="0"><span class="ic">♥</span><span><b>Corazón y circulación en acción</b><small>Recorrido de la sangre, válvulas, sistema eléctrico y ECG, intercambio gaseoso y perfusión, en 7 pasos.</small></span></button><div id="caseBox" class="maleonly"></div><h3 class="sect maleonly">Lecciones guiadas</h3><div id="lecBox"></div>
+      <div class="view" id="tab-lec" hidden><p class="femonly card">Las lecciones guiadas usan la musculatura completa. <button class="btn" onclick="setBody('f')">Ver el modelo femenino completo</button></p><div class="phyhost" style="margin-bottom:6px"></div><div id="caseBox" class="maleonly"></div><h3 class="sect maleonly">Lecciones guiadas</h3><div id="lecBox"></div>
 <h3 class="sect">Practicar y repasar</h3>
         <div class="card only-stu">
           <h3>Práctica de identificación</h3>
@@ -1285,7 +1290,7 @@ $('#q').addEventListener('input',e=>{
   out.innerHTML=res.length?'':'<p class="muted" style="padding:10px">Sin resultados. Prueba con otro nombre, en latín o en inglés.</p>';
   {const qo=gKey(e.target.value);const oh=ORG.filter(o=>[o.es,o.en,o.pt].some(n=>gKey(n).startsWith(qo)||gKey(n).includes(' '+qo))).slice(0,2);
     if(oh.length&&!res.length)out.innerHTML='';
-    if(/^(cora|circul|valvul|valv|ecg|electrocard|sinus|nodo|nodul|latid|sangr|interc|perfus|hemat|cardi)/.test(qo)){const b=document.createElement('button');b.innerHTML=`<span><span class="muted">${TL('Animación:','Animation:','Animação:')}</span> ${TL('Corazón y circulación en acción','Heart and circulation in action','Coração e circulação em ação')}</span><small>7 ${TL('pasos','steps','passos')}</small>`;b.onclick=()=>{out.hidden=true;e.target.value='';phyStart(phyStepFor(qo));};out.appendChild(b);if(!res.length&&!oh.length)out.querySelectorAll('p').forEach(x=>x.remove());}
+    {const tf=qo.length>=3&&phyTourFor(qo);if(tf){const T=TOURS[tf[0]];const b=document.createElement('button');b.innerHTML=`<span><span class="muted">${TL('En acción:','In action:','Em ação:')}</span> ${esc(tN(T))} · ${esc(pTx(T.steps[tf[1]])[0])}</span><small>${T.steps.length} ${TL('pasos','steps','passos')}</small>`;b.onclick=()=>{out.hidden=true;e.target.value='';phyStart(tf[0],tf[1]);};out.appendChild(b);if(!res.length&&!oh.length)out.querySelectorAll('p').forEach(x=>x.remove());}}
     oh.forEach(o=>{const b=document.createElement('button');b.innerHTML=`<span><span class="muted">${TL('Órgano completo:','Whole organ:','Órgão inteiro:')}</span> ${esc(oT(o))}</span><small>${o.parts.length} ${TL('piezas','parts','peças')}</small>`;b.onclick=()=>{out.hidden=true;e.target.value='';showOrgan(o);};out.appendChild(b);});}
   if(GLO){const qq=gKey(e.target.value);const gh=GLO.filter(g=>g.k.split(' | ').some(n=>n.startsWith(qq))).map(g=>[(gKey(gT(g)).startsWith(qq)?0:gKey(g.t).startsWith(qq)?1:2)*100+gT(g).length,g]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]).slice(0,3);
     if(gh.length&&!res.length)out.innerHTML='';
@@ -1991,7 +1996,7 @@ function trNode(root){if(!root)return;const walk=document.createTreeWalker(root,
 let trPending=false;const trObs=new MutationObserver(()=>{if(trPending||LANG==='es')return;trPending=true;requestAnimationFrame(()=>{trPending=false;trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}finally{if(LANG!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});}});});
 async function setLang(l){if(!['es','en','pt'].includes(l))l='es';
   if(l!=='es'&&!I18N){try{I18N=await (await fetch('data/i18n.json')).json();}catch(e){l='es';}}
-  LANG=l;store.set('lang',l);document.documentElement.lang=l;loadInfoTr(l);loadContentTr(l);
+  LANG=l;store.set('lang',l);document.documentElement.lang=l;loadInfoTr(l);loadContentTr(l);if(typeof renderPhyTours==='function')renderPhyTours();
   $$('#langSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===l));
   if(typeof SEARCH!=='undefined'&&SEARCH.length)buildSearch();
   if(selected)renderInfo();if(typeof renderSysList==='function')renderSysList();
@@ -2277,8 +2282,7 @@ function renderGlo(){if(!GLO)return;const q=$('#gloQ').value.trim();let L=gloFil
   gloWire();}
 function gloExLabel(x){const R=gloResolve(x);if(R&&R.org)return oT(R.org);if(LANG==='es'||!R)return x.txt;if(R.lm)return LANG==='pt'&&R.lm[3]?R.lm[3]:R.lm[1];return nameL(CAT[R.id])||x.txt;}
 
-function gloPhy(g){const t=gKey(g.t);const hit=(g.ej||[]).some(x=>x.org==='corazon')||/(circulacion|valvul|valva|nodo sinusal|nodulo|haz de his|purkinje|electrocardiograma|intercambio gaseoso|hematosis|perfusion|capilar|arteria$|^vena$|alveol|surfactante|difusion alveolar)/.test(t);
-  if(!hit)return '';const st=phyStepFor(t);return `<button class="phystart" data-phyg="${st}"><span class="ic">♥</span><span><b>${TL('Verlo en acción','See it in action','Ver em ação')}</b><small>${esc(pTx(PHY_STEPS[st])[0])}</small></span></button>`;}
+function gloPhy(g){const t=gKey(g.t);let tf=phyTourFor(t);if(!tf&&(g.ej||[]).some(x=>x.org==='corazon'))tf=['heart',0];if(!tf)return '';const T=TOURS[tf[0]];return `<button class="phystart" data-phyg="${tf[0]}|${tf[1]}" style="--c:${T.col}"><span class="ic" style="background:${T.col}">${T.ic}</span><span><b>${TL('Verlo en acción','See it in action','Ver em ação')}</b><small>${esc(tN(T))} · ${esc(pTx(T.steps[tf[1]])[0])}</small></span></button>`;}
 function gloCard(g){const other=[['ES',g.t],['EN',g.en],['PT',g.pt]].filter(([l,n])=>n&&l.toLowerCase()!==LANG);
   const lbl=(es,en,pt)=>`<h3>${TL(es,en,pt)}</h3>`;
   const ex=(g.ej||[]).map((x,k)=>{const key=g.i+':'+k,img=GLO_IMG.get(key);return `<button data-gex="${k}" title="${esc(TL('Ver en 3D y fotografiar','Show in 3D and photograph','Ver em 3D e fotografar'))}"><span class="ph" data-ph="${key}">${img?`<img src="${img}" alt="">`:TL('Ver en 3D','Show in 3D','Ver em 3D')}</span><span>${esc(gloExLabel(x))}</span></button>`;}).join('');
@@ -2296,7 +2300,7 @@ function gloWire(){const box=$('#gloList');
   box.querySelectorAll('[data-ph]').forEach(ph=>{if(ph.querySelector('img'))return;const [gi,k]=ph.dataset.ph.split(':').map(Number);const g=GLO[gi];gloDB.get(gPhKey(g,k)).then(u=>{if(u&&!ph.querySelector('img')){GLO_IMG.set(ph.dataset.ph,u);ph.innerHTML=`<img src="${u}" alt="">`;}});});
   box.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{const i=+b.dataset.g;gloOpen=gloOpen===i?-1:i;renderGlo();if(gloOpen>=0)gloScroll(i);});
   box.querySelectorAll('[data-grel]').forEach(b=>b.onclick=()=>gloOpenTerm(+b.dataset.grel));
-  box.querySelectorAll('[data-phyg]').forEach(b=>b.onclick=()=>{if(isPhone())setSheet('peek');phyStart(+b.dataset.phyg);});
+  box.querySelectorAll('[data-phyg]').forEach(b=>b.onclick=()=>{if(isPhone())setSheet('peek');const [t,k]=b.dataset.phyg.split('|');phyStart(t,+k);});
   const card=box.querySelector('.gloCard');if(!card)return;const g=GLO[+card.dataset.gc];
   card.querySelectorAll('[data-gex]').forEach(b=>b.onclick=()=>{const k=+b.dataset.gex,key=g.i+':'+k;if(GLO_IMG.has(key)&&b.dataset.shown)gloZoom(GLO_IMG.get(key),gloExLabel(g.ej[k]));else gloShow(g,k).then(()=>{b.dataset.shown=1;});});
   const all=card.querySelector('[data-gall]');if(all)all.onclick=async()=>{if(gloBusy)return;all.disabled=true;for(let k=0;k<g.ej.length;k++)await gloShow(g,k);all.disabled=false;if(isPhone())setSheet('half');};}
@@ -2544,89 +2548,315 @@ function phyDrawLoop(t){const S=phyInsetSize();if(!S)return;const {g,w,h}=S;g.cl
   g.fillStyle='rgba(255,230,225,0.95)';g.fillText(PHY_TXT('Cuerpo · circulación mayor','Body · systemic circuit','Corpo · grande circulação'),cx,bot+4);g.textAlign='left';
   g.font='600 9.5px system-ui,sans-serif';g.fillStyle='#9fb6ff';g.fillText(PHY_TXT('Arteria pulmonar','Pulmonary artery','Artéria pulmonar'),w*0.2+6,h*0.3);g.fillText(PHY_TXT('Venas cavas','Venae cavae','Veias cavas'),w*0.2+6,h*0.72);
   g.textAlign='right';g.fillStyle='#ffaaaa';g.fillText(PHY_TXT('Venas pulmonares','Pulmonary veins','Veias pulmonares'),w*0.8-6,h*0.3);g.fillText(PHY_TXT('Aorta','Aorta','Aorta'),w*0.8-6,h*0.72);g.textAlign='left';}
+/* ───── Más órganos: respiración, digestión, riñón y sistema nervioso ───── */
+const MX=a=>[-a[0],a[1],a[2]];
+const CANAL=[[0,1.555,-0.026],[0,1.540,-0.004],[0,1.506,-0.008],[0,1.480,-0.010],[0,1.452,-0.022],[0,1.420,-0.033],[0,1.375,-0.045],[0,1.314,-0.047],[0,1.257,-0.043],[0,1.198,-0.033],[0,1.139,-0.017],[0,1.104,-0.009],[0,1.075,-0.004],[0,1.043,-0.003],[0,1.015,-0.004]];
+const canalTo=y=>CANAL.filter(p=>p[1]>=y-0.001);
+const FEMR=[[-0.0335,1.0773,-0.0214],[-0.0655,1.03,-0.0132],[-0.0799,0.9886,-0.0024],[-0.079,0.943,0.016],[-0.0673,0.892,0.0337],[-0.0622,0.8505,0.042],[-0.0609,0.8037,0.0407],[-0.0618,0.7474,0.036],[-0.0627,0.701,0.0368],[-0.0651,0.6325,0.0416]];
+const FEML=FEMR.map(MX);
+const PR2={
+  /* aire */
+  airUp:[[0,1.560,0.108],[0,1.571,0.080],[0,1.573,0.052],[0,1.566,0.030],[0,1.552,0.016],[0,1.533,0.014],[0,1.505,0.016],[0,1.482,0.012],[0,1.458,0.011],[0,1.442,0.009],[0,1.411,0.002],[0,1.381,-0.007],[0,1.372,-0.011]],
+  airR:[[-0.001,1.3704,-0.0113],[-0.0074,1.3593,-0.0144],[-0.0138,1.3482,-0.017],[-0.0249,1.3277,-0.0177],[-0.0311,1.3177,-0.0204]],
+  airRU:[[-0.0138,1.3486,-0.017],[-0.0236,1.3508,-0.0178],[-0.0298,1.3554,-0.0133],[-0.045,1.375,-0.008],[-0.06,1.40,0.0]],
+  airRL:[[-0.0311,1.3177,-0.0204],[-0.0437,1.2971,-0.0259],[-0.0499,1.2711,-0.0358],[-0.0524,1.2588,-0.0452],[-0.065,1.235,-0.05]],
+  airRM:[[-0.0311,1.3177,-0.0204],[-0.042,1.305,0.002],[-0.06,1.29,0.03]],
+  airL:[[-0.001,1.3704,-0.0113],[0.0131,1.3524,-0.0139],[0.0268,1.3355,-0.0182],[0.042,1.3216,-0.022]],
+  airLU:[[0.042,1.3216,-0.022],[0.0573,1.3328,-0.0169],[0.0726,1.3247,-0.0066],[0.0834,1.3143,0.0015],[0.09,1.36,0.01]],
+  airLL:[[0.042,1.3216,-0.022],[0.0575,1.3112,-0.0207],[0.0672,1.2992,-0.0195],[0.0752,1.2861,-0.0172],[0.085,1.25,-0.03]],
+  phrR:[[-0.004,1.555,-0.025],[0,1.540,-0.004],[0,1.493,-0.008],[-0.022,1.488,0.000],[-0.030,1.430,0.010],[-0.036,1.350,0.020],[-0.042,1.270,0.024],[-0.050,1.205,0.012]],
+  /* digestivo */
+  bolus:[[0,1.529,0.075],[0,1.528,0.060],[0,1.516,0.045],[0,1.505,0.030],[0,1.488,0.012],[0.0003,1.465,0.001],[0.001,1.4336,-0.0063],[0.0012,1.4018,-0.0159],[0.0004,1.3742,-0.0214],[0.0009,1.3474,-0.0283],[0.0016,1.3217,-0.0297],[0.002,1.291,-0.0255],[0.0009,1.2616,-0.0144],[0.0011,1.2353,-0.0043],[0.0073,1.2067,0.0101],
+    [0.030,1.205,0.020],[0.0685,1.1996,0.0153],[0.0664,1.1852,0.0242],[0.0553,1.1651,0.046],[0.054,1.1531,0.0582],[0.0469,1.1402,0.064],[0.0324,1.1347,0.0709],[0.0033,1.1314,0.0664],[-0.002,1.1183,0.0735],
+    [-0.025,1.126,0.045],[-0.0488,1.1311,0.0223],[-0.0425,1.1236,0.0243],[-0.0415,1.113,0.0274],[-0.042,1.0977,0.0259],[-0.0512,1.0753,0.0215],[-0.0477,1.0654,0.0235],[-0.0379,1.0616,0.0283],[-0.0082,1.0772,0.0375],[0.0045,1.0757,0.0396],[0.022,1.074,0.045]],
+  jej:[[0.022,1.074,0.045],[0.0827,1.0743,0.0383],[0.07,1.05,0.05],[0.02,1.04,0.062],[-0.04,1.03,0.06],[-0.06,1.0,0.05],[0.0,0.99,0.065],[0.06,0.98,0.06],[0.07,0.95,0.05],[0.0,0.945,0.06],[-0.05,0.94,0.05],[-0.07,0.93,0.03],[-0.0886,0.932,0.017]],
+  colon:[[-0.0886,0.932,0.017],[-0.0848,0.952,0.0129],[-0.0884,0.9886,0.014],[-0.0865,1.0264,0.0145],[-0.0863,1.0669,0.0132],[-0.0779,1.1056,0.0152],[-0.0763,1.0934,0.0385],[-0.0406,1.0941,0.0499],[0.0003,1.0889,0.0643],[0.0364,1.0894,0.0543],[0.0714,1.1059,0.0317],[0.0887,1.1194,0.0277],[0.0911,1.1168,0.0129],[0.0882,1.0612,0.0099],[0.0934,0.9971,0.0065],[0.0919,0.9669,0.0137],[0.0734,0.9413,0.0084],[0.0466,0.9231,-0.001],[0.0322,0.906,-0.0362],[0.0128,0.9132,-0.0508],[-0.0115,0.9161,-0.0493],[-0.0233,0.9033,-0.0442],[0.0151,0.8879,-0.0535],[0.0046,0.8752,-0.0544],[-0.003,0.8515,-0.0536],[-0.0097,0.8285,-0.047],[-0.002,0.816,-0.050],[-0.002,0.804,-0.060]],
+  bile:[[-0.0521,1.1206,0.0762],[-0.0506,1.1269,0.0657],[-0.0504,1.1355,0.0498],[-0.0424,1.1489,0.038],[-0.0228,1.1588,0.039],[-0.0142,1.1349,0.0386],[-0.0317,1.1167,0.039],[-0.0456,1.1055,0.0387],[-0.0552,1.0923,0.0327],[-0.0512,1.085,0.0215]],
+  panc:[[0.0591,1.1438,0.0028],[0.0358,1.1333,0.0142],[0.0158,1.1259,0.0341],[-0.0141,1.1174,0.0349],[-0.027,1.1113,0.0305],[-0.0435,1.091,0.0342],[-0.0512,1.085,0.0215]],
+  /* urinario */
+  bloodR:[[0.007,1.15,0.012],[0.007,1.10,0.024],[-0.015,1.098,0.012],[-0.035,1.097,0.002],[-0.050,1.096,-0.004]],
+  bloodL:[[0.007,1.15,0.012],[0.008,1.10,0.024],[0.025,1.103,0.008],[0.040,1.106,-0.006],[0.055,1.108,-0.014]],
+  urR:[[-0.050,1.096,-0.006],[-0.0316,1.081,-0.0022],[-0.0296,1.0568,0.0029],[-0.0313,1.0323,0.0074],[-0.0322,1.0098,0.0135],[-0.0324,0.9856,0.0168],[-0.034,0.9681,0.0056],[-0.0362,0.9463,-0.0088],[-0.038,0.9264,-0.016],[-0.0383,0.9022,-0.0228],[-0.0269,0.8825,-0.0265],[-0.012,0.862,-0.016],[0,0.845,-0.010],[0,0.828,-0.012],[0,0.8106,-0.005],[0,0.8111,0.0518],[0,0.7961,0.0737],[0,0.755,0.0851]],
+  urL:[[0.055,1.108,-0.016],[0.0363,1.097,-0.0105],[0.031,1.0721,0.0002],[0.0294,1.0473,0.0089],[0.0286,1.0208,0.0163],[0.0292,0.9965,0.0184],[0.0306,0.9764,0.0113],[0.0328,0.9548,-0.0071],[0.0362,0.9313,-0.0232],[0.0398,0.9078,-0.031],[0.0343,0.8843,-0.0306],[0.014,0.862,-0.016],[0,0.845,-0.010],[0,0.828,-0.012],[0,0.8106,-0.005],[0,0.8111,0.0518],[0,0.7961,0.0737],[0,0.755,0.0851]],
+  /* nervioso: vía motora (hemisferio derecho → pierna izquierda) */
+  motor:[[-0.012,1.697,-0.012],[-0.016,1.672,-0.006],[-0.020,1.640,-0.004],[-0.016,1.612,-0.004],[-0.011,1.590,-0.004],[-0.008,1.570,-0.010],[-0.004,1.552,-0.022],[0.003,1.540,-0.026],[0.005,1.520,-0.010],
+    ...CANAL.slice(3).map(p=>[0.004,p[1],p[2]]),[0.004,1.050,-0.002],[0.016,1.060,-0.008],...FEML.slice(0)],
+  /* arco reflejo rotuliano (pierna izquierda) */
+  reflexIn:[[0.085,0.405,0.020],[0.072,0.52,0.030],...FEML.slice().reverse(),[0.016,1.060,-0.008],[0.004,1.045,-0.010]],
+  reflexOut:[[0.004,1.045,-0.010],[0.003,1.050,0.000],[0.016,1.060,-0.008],...FEML,[0.085,0.68,0.040],[0.105,0.66,0.046]],
+  /* vía sensitiva (pierna izquierda → hemisferio derecho) */
+  sens:[[0.085,0.405,0.020],[0.072,0.52,0.030],...FEML.slice().reverse(),[0.016,1.060,-0.008],[0.003,1.050,-0.012],...CANAL.slice(3).reverse().map(p=>[0.002,p[1],p[2]-0.006]),[0.003,1.540,-0.030],[0.0,1.552,-0.026],[-0.006,1.575,-0.014],[-0.010,1.600,-0.010],[-0.012,1.625,-0.010],[-0.025,1.650,-0.020],[-0.017,1.691,-0.038]]
+};
+const LB2={
+  nose:[[0,1.575,0.095],'Fosas nasales','Nasal cavity','Fossas nasais'],phar:[[0,1.545,0.030],'Faringe','Pharynx','Faringe'],lar:[[0,1.497,0.022],'Laringe y epiglotis','Larynx and epiglottis','Laringe e epiglote'],
+  tra:[[0,1.420,0.004],'Tráquea','Trachea','Traqueia'],bro:[[0.030,1.335,-0.018],'Bronquios principales','Main bronchi','Brônquios principais'],
+  lungR:[[-0.085,1.300,0.010],'Pulmón derecho (3 lóbulos)','Right lung (3 lobes)','Pulmão direito (3 lobos)'],lungL:[[0.105,1.300,0.010],'Pulmón izquierdo (2 lóbulos)','Left lung (2 lobes)','Pulmão esquerdo (2 lobos)'],
+  dia:[[0.0,1.205,0.06],'Diafragma','Diaphragm','Diafragma'],ic:[[0.11,1.33,0.06],'Músculos intercostales','Intercostal muscles','Músculos intercostais'],
+  med:[[-0.004,1.556,-0.025],'Bulbo raquídeo: centro respiratorio','Medulla: respiratory centre','Bulbo: centro respiratório'],phr:[[-0.036,1.35,0.02],'Nervio frénico (C3–C5)','Phrenic nerve (C3–C5)','Nervo frênico (C3–C5)'],
+  mouth:[[0,1.527,0.07],'Boca y lengua','Mouth and tongue','Boca e língua'],eso:[[0.002,1.33,-0.03],'Esófago','Oesophagus','Esôfago'],sto:[[0.07,1.18,0.06],'Estómago','Stomach','Estômago'],
+  duo:[[-0.055,1.08,0.03],'Duodeno','Duodenum','Duodeno'],liv:[[-0.06,1.20,0.06],'Hígado','Liver','Fígado'],gb:[[-0.06,1.12,0.08],'Vesícula biliar','Gallbladder','Vesícula biliar'],
+  pan:[[0.04,1.14,0.02],'Páncreas','Pancreas','Pâncreas'],jej:[[0.02,0.99,0.075],'Intestino delgado','Small intestine','Intestino delgado'],
+  col:[[-0.095,1.02,0.02],'Colon ascendente','Ascending colon','Cólon ascendente'],tcol:[[0.0,1.105,0.07],'Colon transverso','Transverse colon','Cólon transverso'],dcol:[[0.10,1.0,0.01],'Colon descendente','Descending colon','Cólon descendente'],
+  rec:[[0.0,0.86,-0.06],'Recto','Rectum','Reto'],
+  kidR:[[-0.075,1.095,-0.006],'Riñón derecho','Right kidney','Rim direito'],kidL:[[0.08,1.11,-0.017],'Riñón izquierdo','Left kidney','Rim esquerdo'],
+  ure:[[-0.042,0.97,0.0],'Uréter','Ureter','Ureter'],bla:[[0.03,0.855,-0.01],'Vejiga','Urinary bladder','Bexiga'],uret:[[0,0.78,0.08],'Uretra','Urethra','Uretra'],ao2:[[0.012,1.15,0.02],'Aorta abdominal','Abdominal aorta','Aorta abdominal'],
+  m1:[[-0.012,1.697,-0.012],'Corteza motora (giro precentral)','Motor cortex (precentral gyrus)','Córtex motor (giro pré-central)'],dec:[[0.002,1.540,-0.026],'Decusación de las pirámides','Pyramidal decussation','Decussação das pirâmides'],
+  cord:[[0.004,1.25,-0.045],'Médula espinal','Spinal cord','Medula espinal'],ah:[[0.004,1.05,-0.002],'Asta anterior L2–L4','Anterior horn L2–L4','Corno anterior L2–L4'],fem:[[0.08,0.94,0.016],'Nervio femoral','Femoral nerve','Nervo femoral'],
+  quad:[[0.12,0.66,0.046],'Cuádriceps','Quadriceps','Quadríceps'],pat:[[0.085,0.405,0.020],'Tendón rotuliano (martillo)','Patellar tendon (hammer)','Tendão patelar (martelo)'],
+  thal:[[-0.012,1.625,-0.010],'Tálamo','Thalamus','Tálamo'],s1:[[-0.017,1.691,-0.038],'Corteza sensitiva (giro poscentral)','Sensory cortex (postcentral gyrus)','Córtex sensitivo (giro pós-central)'],dc:[[0.003,1.30,-0.052],'Cordones posteriores','Dorsal columns','Funículos posteriores']
+};
+const TX=(es,en,pt)=>({es,en,pt});
+const TOURS={
+ heart:{n:TX('Corazón y circulación','Heart and circulation','Coração e circulação'),ic:'♥',col:'#ff4d5e',need:['arterial','venoso','respiratorio'],steps:PHY_STEPS,heart:true},
+ resp:{n:TX('Respiración','Breathing','Respiração'),ic:'◌',col:'#38bdf8',need:['respiratorio','muscular','oseo','arterial','venoso','nervioso_central','digestivo'],steps:[
+  {id:'rway',es:['Las vías respiratorias','El aire entra por la nariz, donde se calienta, humedece y filtra; pasa por la faringe y la laringe (la epiglotis cierra la laringe al tragar) y baja por la tráquea, que se divide en los bronquios principales derecho e izquierdo. Estos se ramifican unas 23 veces hasta los bronquiolos y unos 300 millones de alvéolos. Las partículas claras muestran el aire entrando en la inspiración y saliendo en la espiración.'],
+   en:['The airways','Air enters through the nose, where it is warmed, humidified and filtered; it passes through the pharynx and larynx (the epiglottis closes the larynx when swallowing) and down the trachea, which divides into the right and left main bronchi. These branch about 23 times down to the bronchioles and some 300 million alveoli. The light particles show air coming in on inspiration and leaving on expiration.'],
+   pt:['As vias respiratórias','O ar entra pelo nariz, onde é aquecido, umidificado e filtrado; passa pela faringe e pela laringe (a epiglote fecha a laringe ao engolir) e desce pela traqueia, que se divide nos brônquios principais direito e esquerdo. Eles se ramificam cerca de 23 vezes até os bronquíolos e uns 300 milhões de alvéolos. As partículas claras mostram o ar entrando na inspiração e saindo na expiração.']},
+  {id:'mech',es:['La mecánica respiratoria','El diafragma es el principal músculo inspiratorio: al contraerse desciende 1–2 cm y los intercostales externos elevan las costillas. El tórax se agranda, la presión dentro de los pulmones baja por debajo de la atmosférica y el aire entra. En reposo la espiración es pasiva: el diafragma se relaja, sube, y la elasticidad del pulmón expulsa el aire. Cada respiración tranquila mueve unos 500 mL (volumen corriente), unas 12–16 veces por minuto.'],
+   en:['Breathing mechanics','The diaphragm is the main inspiratory muscle: when it contracts it descends 1–2 cm and the external intercostals raise the ribs. The chest enlarges, the pressure inside the lungs falls below atmospheric and air flows in. At rest expiration is passive: the diaphragm relaxes and rises, and the elastic recoil of the lung pushes air out. Each quiet breath moves about 500 mL (tidal volume), 12–16 times a minute.'],
+   pt:['A mecânica respiratória','O diafragma é o principal músculo inspiratório: ao se contrair desce 1–2 cm e os intercostais externos elevam as costelas. O tórax aumenta, a pressão dentro dos pulmões cai abaixo da atmosférica e o ar entra. Em repouso a expiração é passiva: o diafragma relaxa, sobe, e a elasticidade do pulmão expulsa o ar. Cada respiração tranquila move cerca de 500 mL (volume corrente), 12–16 vezes por minuto.']},
+  {id:'gas',es:['Intercambio gaseoso','En los alvéolos el oxígeno pasa a la sangre de los capilares pulmonares y el dióxido de carbono pasa al aire, por difusión, siguiendo la diferencia de presiones parciales. La superficie de intercambio es de unos 70 m², como media pista de tenis. La sangre venosa (azul) llega por las arterias pulmonares y sale oxigenada (roja) por las venas pulmonares.'],
+   en:['Gas exchange','In the alveoli oxygen passes into the blood of the pulmonary capillaries and carbon dioxide passes into the air, by diffusion down the partial-pressure gradients. The exchange surface is about 70 m², half a tennis court. Venous blood (blue) arrives through the pulmonary arteries and leaves oxygenated (red) through the pulmonary veins.'],
+   pt:['Troca gasosa','Nos alvéolos o oxigênio passa para o sangue dos capilares pulmonares e o dióxido de carbono passa para o ar, por difusão, seguindo a diferença de pressões parciais. A superfície de troca tem cerca de 70 m², meia quadra de tênis. O sangue venoso (azul) chega pelas artérias pulmonares e sai oxigenado (vermelho) pelas veias pulmonares.']},
+  {id:'ctrl',es:['El control de la respiración','Respiramos sin pensar gracias a los centros respiratorios del bulbo raquídeo y la protuberancia, que envían impulsos rítmicos por el nervio frénico (raíces C3, C4 y C5) al diafragma. Los quimiorreceptores detectan sobre todo el aumento de CO₂ en la sangre: si sube, respiramos más rápido y profundo. Por eso una lesión medular por encima de C3 deja sin respiración espontánea.'],
+   en:['Control of breathing','We breathe without thinking thanks to the respiratory centres of the medulla and pons, which send rhythmic impulses through the phrenic nerve (roots C3, C4 and C5) to the diaphragm. Chemoreceptors mainly sense a rise in blood CO₂: when it rises we breathe faster and deeper. That is why a spinal cord injury above C3 abolishes spontaneous breathing.'],
+   pt:['O controle da respiração','Respiramos sem pensar graças aos centros respiratórios do bulbo e da ponte, que enviam impulsos rítmicos pelo nervo frênico (raízes C3, C4 e C5) ao diafragma. Os quimiorreceptores detectam sobretudo o aumento de CO₂ no sangue: se ele sobe, respiramos mais rápido e mais fundo. Por isso uma lesão medular acima de C3 abole a respiração espontânea.']}]},
+ dig:{n:TX('Digestión','Digestion','Digestão'),ic:'◒',col:'#f59e0b',need:['digestivo','urinario'],steps:[
+  {id:'swal',es:['Boca, deglución y esófago','La digestión empieza en la boca: los dientes trituran, la saliva (1–1,5 L al día) humedece y su amilasa empieza a digerir el almidón. La lengua empuja el bolo hacia la faringe; la epiglotis cierra la vía aérea y el esófago lo lleva al estómago en unos 8 segundos mediante ondas de contracción, el peristaltismo, que funcionan incluso cabeza abajo.'],
+   en:['Mouth, swallowing and oesophagus','Digestion starts in the mouth: the teeth grind, saliva (1–1.5 L a day) moistens the food and its amylase starts to digest starch. The tongue pushes the bolus into the pharynx; the epiglottis closes the airway and the oesophagus carries it to the stomach in about 8 seconds by waves of contraction, peristalsis, which work even upside down.'],
+   pt:['Boca, deglutição e esôfago','A digestão começa na boca: os dentes trituram, a saliva (1–1,5 L por dia) umedece e sua amilase começa a digerir o amido. A língua empurra o bolo para a faringe; a epiglote fecha a via aérea e o esôfago o leva ao estômago em cerca de 8 segundos por ondas de contração, o peristaltismo, que funcionam até de cabeça para baixo.']},
+  {id:'stom',es:['El estómago','El estómago guarda el alimento y lo mezcla con el jugo gástrico: ácido clorhídrico (pH 1,5–3,5), que mata microbios, y pepsina, que empieza a digerir las proteínas. Sus tres capas musculares lo amasan hasta formar el quimo, que pasa al duodeno poco a poco a través del píloro durante 2 a 4 horas.'],
+   en:['The stomach','The stomach stores food and mixes it with gastric juice: hydrochloric acid (pH 1.5–3.5), which kills microbes, and pepsin, which starts digesting proteins. Its three muscle layers knead it into chyme, which passes into the duodenum little by little through the pylorus over 2 to 4 hours.'],
+   pt:['O estômago','O estômago armazena o alimento e o mistura com o suco gástrico: ácido clorídrico (pH 1,5–3,5), que mata micróbios, e pepsina, que começa a digerir as proteínas. Suas três camadas musculares o amassam até formar o quimo, que passa ao duodeno aos poucos através do piloro durante 2 a 4 horas.']},
+  {id:'glands',es:['Hígado, vesícula y páncreas','En el duodeno el quimo recibe dos secreciones. La bilis (verde), fabricada por el hígado y almacenada en la vesícula, emulsiona las grasas. El jugo pancreático (amarillo) neutraliza el ácido con bicarbonato y aporta las enzimas que digieren proteínas, grasas y azúcares. Ambos conductos desembocan juntos en la ampolla de Vater.'],
+   en:['Liver, gallbladder and pancreas','In the duodenum the chyme receives two secretions. Bile (green), made by the liver and stored in the gallbladder, emulsifies fats. Pancreatic juice (yellow) neutralises the acid with bicarbonate and supplies the enzymes that digest proteins, fats and sugars. Both ducts open together at the ampulla of Vater.'],
+   pt:['Fígado, vesícula e pâncreas','No duodeno o quimo recebe duas secreções. A bile (verde), produzida pelo fígado e armazenada na vesícula, emulsiona as gorduras. O suco pancreático (amarelo) neutraliza o ácido com bicarbonato e fornece as enzimas que digerem proteínas, gorduras e açúcares. Os dois ductos desembocam juntos na ampola de Vater.']},
+  {id:'abs',es:['Intestino delgado: absorción','El intestino delgado mide unos 6 metros y es donde se absorbe casi todo. Sus pliegues, vellosidades y microvellosidades multiplican la superficie hasta unos 30 m². Azúcares y aminoácidos pasan a los capilares y llegan al hígado por la vena porta; las grasas entran en los vasos linfáticos (quilíferos). El recorrido dura de 3 a 5 horas.'],
+   en:['Small intestine: absorption','The small intestine is about 6 metres long and is where almost everything is absorbed. Its folds, villi and microvilli multiply the surface to about 30 m². Sugars and amino acids enter the capillaries and reach the liver through the portal vein; fats enter the lymphatic vessels (lacteals). The journey takes 3 to 5 hours.'],
+   pt:['Intestino delgado: absorção','O intestino delgado mede cerca de 6 metros e é onde quase tudo é absorvido. Suas pregas, vilosidades e microvilosidades multiplicam a superfície até cerca de 30 m². Açúcares e aminoácidos passam aos capilares e chegam ao fígado pela veia porta; as gorduras entram nos vasos linfáticos (lácteos). O trajeto dura de 3 a 5 horas.']},
+  {id:'colon',es:['Intestino grueso y recto','El colon absorbe agua y sales y sus bacterias (la microbiota) fermentan la fibra y producen vitaminas como la K. El contenido avanza despacio, de 12 a 48 horas: colon ascendente, transverso, descendente y sigmoide, hasta el recto. Al llenarse el recto se activa el reflejo de la defecación, controlado por los esfínteres anales interno (involuntario) y externo (voluntario).'],
+   en:['Large intestine and rectum','The colon absorbs water and salts, and its bacteria (the microbiota) ferment fibre and make vitamins such as K. Contents move slowly, over 12 to 48 hours: ascending, transverse, descending and sigmoid colon, down to the rectum. When the rectum fills the defecation reflex is triggered, controlled by the internal (involuntary) and external (voluntary) anal sphincters.'],
+   pt:['Intestino grosso e reto','O cólon absorve água e sais e suas bactérias (a microbiota) fermentam a fibra e produzem vitaminas como a K. O conteúdo avança devagar, de 12 a 48 horas: cólon ascendente, transverso, descendente e sigmoide, até o reto. Ao encher o reto ativa-se o reflexo da defecação, controlado pelos esfíncteres anais interno (involuntário) e externo (voluntário).']}]},
+ uri:{n:TX('Riñón y vías urinarias','Kidney and urinary tract','Rim e vias urinárias'),ic:'◖',col:'#a78bfa',need:['urinario','arterial','venoso','oseo'],steps:[
+  {id:'filt',es:['El riñón filtra la sangre','Los riñones reciben una quinta parte de la sangre que bombea el corazón, unos 1,2 L por minuto, por las arterias renales que salen de la aorta. Cada riñón tiene alrededor de un millón de nefronas: en el glomérulo se filtran unos 180 L de plasma al día y los túbulos reabsorben el 99 % del agua, la glucosa y las sales que el cuerpo necesita. Además regulan la presión arterial y producen eritropoyetina.'],
+   en:['The kidney filters the blood','The kidneys receive a fifth of the blood the heart pumps, about 1.2 L a minute, through the renal arteries that branch from the aorta. Each kidney has about a million nephrons: the glomeruli filter some 180 L of plasma a day and the tubules reabsorb 99% of the water, glucose and salts the body needs. They also regulate blood pressure and make erythropoietin.'],
+   pt:['O rim filtra o sangue','Os rins recebem um quinto do sangue bombeado pelo coração, cerca de 1,2 L por minuto, pelas artérias renais que saem da aorta. Cada rim tem cerca de um milhão de néfrons: nos glomérulos filtram-se uns 180 L de plasma por dia e os túbulos reabsorvem 99 % da água, da glicose e dos sais de que o corpo precisa. Também regulam a pressão arterial e produzem eritropoetina.']},
+  {id:'urine',es:['De la orina a la vejiga','Lo que no se reabsorbe forma la orina, 1 a 2 litros al día. Se recoge en la pelvis renal y baja por los uréteres, de unos 25–30 cm, empujada por ondas peristálticas, no solo por la gravedad. Los uréteres entran oblicuos en la vejiga, lo que impide que la orina vuelva hacia los riñones.'],
+   en:['From urine to bladder','Whatever is not reabsorbed becomes urine, 1 to 2 litres a day. It collects in the renal pelvis and runs down the ureters, about 25–30 cm long, pushed by peristaltic waves, not just by gravity. The ureters enter the bladder obliquely, which stops urine flowing back to the kidneys.'],
+   pt:['Da urina à bexiga','O que não é reabsorvido forma a urina, 1 a 2 litros por dia. Ela se acumula na pelve renal e desce pelos ureteres, de uns 25–30 cm, empurrada por ondas peristálticas, não só pela gravidade. Os ureteres entram obliquamente na bexiga, o que impede que a urina volte aos rins.']},
+  {id:'void',es:['Vejiga y micción','La vejiga es un músculo hueco (el detrusor) que almacena 300–500 mL. Cuando se distiende envía señales a la médula sacra (S2–S4) y al cerebro; en la micción el detrusor se contrae y se relajan el esfínter interno (involuntario) y el externo (voluntario). La uretra femenina mide unos 4 cm y la masculina unos 20 cm.'],
+   en:['Bladder and urination','The bladder is a hollow muscle (the detrusor) that stores 300–500 mL. As it stretches it sends signals to the sacral cord (S2–S4) and the brain; during urination the detrusor contracts and the internal (involuntary) and external (voluntary) sphincters relax. The female urethra is about 4 cm long and the male about 20 cm.'],
+   pt:['Bexiga e micção','A bexiga é um músculo oco (o detrusor) que armazena 300–500 mL. Quando se distende envia sinais à medula sacral (S2–S4) e ao cérebro; na micção o detrusor se contrai e relaxam o esfíncter interno (involuntário) e o externo (voluntário). A uretra feminina mede cerca de 4 cm e a masculina cerca de 20 cm.']}]},
+ neuro:{n:TX('Movimiento y reflejos','Movement and reflexes','Movimento e reflexos'),ic:'ϟ',col:'#facc15',need:['nervioso_central','nervioso_periferico','muscular','oseo'],steps:[
+  {id:'motor',es:['La orden de moverse','Para extender la rodilla izquierda, las neuronas de la corteza motora del hemisferio derecho envían el impulso por la vía corticoespinal: cápsula interna, tronco del encéfalo y, en el bulbo, la decusación de las pirámides, donde cruza al otro lado. Baja por la médula hasta el asta anterior de L2–L4, donde la segunda neurona lo lleva por el nervio femoral al cuádriceps. Viaja a unos 60 m/s.'],
+   en:['The command to move','To straighten the left knee, neurons in the motor cortex of the right hemisphere send the impulse down the corticospinal pathway: internal capsule, brainstem and, in the medulla, the pyramidal decussation, where it crosses to the other side. It runs down the cord to the anterior horn at L2–L4, where the second neuron carries it through the femoral nerve to the quadriceps. It travels at about 60 m/s.'],
+   pt:['A ordem de se mover','Para estender o joelho esquerdo, os neurônios do córtex motor do hemisfério direito enviam o impulso pela via corticoespinal: cápsula interna, tronco encefálico e, no bulbo, a decussação das pirâmides, onde cruza para o outro lado. Desce pela medula até o corno anterior de L2–L4, onde o segundo neurônio o leva pelo nervo femoral ao quadríceps. Viaja a cerca de 60 m/s.']},
+  {id:'reflex',es:['El reflejo rotuliano','Un golpe en el tendón rotuliano estira el cuádriceps. Los husos musculares envían el impulso por el nervio femoral a la médula (L3–L4), donde hace sinapsis directamente con la motoneurona: es un reflejo monosináptico. La respuesta vuelve por el mismo nervio y el cuádriceps se contrae en unos 20–30 milisegundos, sin pasar por el cerebro. Explorarlo informa del estado de las raíces L3–L4 y de la vía piramidal.'],
+   en:['The knee-jerk reflex','A tap on the patellar tendon stretches the quadriceps. The muscle spindles send the impulse through the femoral nerve to the cord (L3–L4), where it synapses directly on the motor neuron: a monosynaptic reflex. The response returns along the same nerve and the quadriceps contracts in about 20–30 milliseconds, without involving the brain. Testing it tells you about the L3–L4 roots and the pyramidal pathway.'],
+   pt:['O reflexo patelar','Um golpe no tendão patelar estira o quadríceps. Os fusos musculares enviam o impulso pelo nervo femoral à medula (L3–L4), onde faz sinapse diretamente com o motoneurônio: é um reflexo monossináptico. A resposta volta pelo mesmo nervo e o quadríceps se contrai em cerca de 20–30 milissegundos, sem passar pelo cérebro. Examiná-lo informa sobre as raízes L3–L4 e a via piramidal.']},
+  {id:'sens',es:['La sensibilidad llega al cerebro','El tacto y la posición de la pierna izquierda suben por el nervio femoral, entran en la médula por la raíz posterior y ascienden por los cordones posteriores del mismo lado. En el bulbo cruzan al otro lado, hacen escala en el tálamo y llegan a la corteza sensitiva del giro poscentral derecho, donde se vuelven conscientes. El dolor y la temperatura cruzan antes, ya en la médula.'],
+   en:['Sensation reaches the brain','Touch and position from the left leg travel up the femoral nerve, enter the cord through the posterior root and ascend in the dorsal columns on the same side. In the medulla they cross to the other side, relay in the thalamus and reach the sensory cortex of the right postcentral gyrus, where they become conscious. Pain and temperature cross earlier, in the cord itself.'],
+   pt:['A sensibilidade chega ao cérebro','O tato e a posição da perna esquerda sobem pelo nervo femoral, entram na medula pela raiz posterior e ascendem pelos funículos posteriores do mesmo lado. No bulbo cruzam para o outro lado, fazem escala no tálamo e chegam ao córtex sensitivo do giro pós-central direito, onde se tornam conscientes. A dor e a temperatura cruzam antes, já na medula.']}]}
+};
+const tN=t=>TL(t.n.es,t.n.en,t.n.pt);
+let PHY_TOUR='heart';
+const curTour=()=>TOURS[PHY_TOUR];
+const curSteps=()=>curTour().steps;
+/* Rutas genéricas de partículas */
+const COLS={air:new THREE.Color(0xbdf3ff),airOut:new THREE.Color(0x9aa4b2),bolus:new THREE.Color(0xf2b45a),bile:new THREE.Color(0x5bd16a),panc:new THREE.Color(0xffe04a),urine:new THREE.Color(0xffd84a),art:C_ART,ven:C_VEN,imp:new THREE.Color(0xfff27a),aff:new THREE.Color(0x7ad8ff)};
+function phyRoutes(defs){const R=[];for(const d of defs){const c=phyCurve(d.p);R.push({c,len:c.getLength(),col:d.col,w:d.w||1,mode:d.mode||'flow',sp:d.sp||1});}return R;}
+function phyParts(R,n){const tw=R.reduce((a,r)=>a+r.w,0);PHY.parts=[];for(let i=0;i<n;i++){let x=Math.random()*tw,r=0;while(x>R[r].w&&r<R.length-1){x-=R[r].w;r++;}PHY.parts.push({r,u:Math.random(),u0:Math.random(),j:new V3((Math.random()-.5)*0.004,(Math.random()-.5)*0.004,(Math.random()-.5)*0.004),s:0.8+Math.random()*0.4});}}
+const BREATH=t=>{const T=5,tt=((t%T)+T)%T;return tt<2?0.5-0.5*Math.cos(Math.PI*tt/2):0.5+0.5*Math.cos(Math.PI*(tt-2)/3);};
+/* Impulsos nerviosos: tubo brillante + chispa que recorre */
+function phyNerve(arr,col,t0,t1,rad){const tb=phyTube(arr,col,rad||0.0016,0.85,false);PHY.grp.add(tb);const sp=phyGlow('rgba(255,240,120,1)',0.03);PHY.grp.add(sp);sp.visible=false;PHY.imps.push({tb,sp,t0,t1});return tb;}
+/* Inserts nuevos */
+function phyDrawSpiro(t){const S=phyInsetSize();if(!S)return;const {g,w,h}=S;g.clearRect(0,0,w,h);g.fillStyle='rgba(8,16,26,0.94)';g.fillRect(0,0,w,h);
+  g.strokeStyle='rgba(120,190,255,0.12)';for(let x=0;x<w;x+=14){g.beginPath();g.moveTo(x,22);g.lineTo(x,h-6);g.stroke();}
+  const base=h*0.82,amp=h*0.55,span=12;g.strokeStyle='#38bdf8';g.lineWidth=2;g.shadowColor='#38bdf8';g.shadowBlur=6;g.beginPath();
+  for(let x=0;x<=w;x+=1.5){const tt=t-span*(1-x/w);const y=base-BREATH(tt)*amp;x?g.lineTo(x,y):g.moveTo(x,y);}g.stroke();g.shadowBlur=0;
+  g.fillStyle='#38bdf8';g.beginPath();g.arc(w-2,base-BREATH(t)*amp,3.5,0,7);g.fill();
+  const tt=((t%5)+5)%5;g.font='600 11px system-ui,sans-serif';g.fillStyle='rgba(220,240,255,0.95)';g.fillText(PHY_TXT('Volumen pulmonar','Lung volume','Volume pulmonar'),10,15);
+  g.font='600 10.5px system-ui,sans-serif';g.fillText(tt<2?PHY_TXT('Inspiración · el diafragma se contrae','Inspiration · the diaphragm contracts','Inspiração · o diafragma contrai'):PHY_TXT('Espiración pasiva · el diafragma se relaja','Passive expiration · the diaphragm relaxes','Expiração passiva · o diafragma relaxa'),10,h-6);
+  g.fillStyle='rgba(180,220,255,0.7)';g.font='600 10px system-ui,sans-serif';g.fillText(PHY_TXT('≈ 500 mL','≈ 500 mL','≈ 500 mL'),8,base-amp*0.5);}
+function phyDrawVilli(t){const S=phyInsetSize();if(!S)return;const {g,w,h}=S;g.clearRect(0,0,w,h);g.fillStyle='rgba(26,18,10,0.94)';g.fillRect(0,0,w,h);
+  const n=4;for(let i=0;i<n;i++){const x=w*(0.14+i*0.24),top=h*0.28,bot=h*0.88,vw=w*0.09;g.fillStyle='rgba(240,170,140,0.35)';g.strokeStyle='rgba(255,190,160,0.8)';g.lineWidth=1.5;g.beginPath();g.moveTo(x-vw,bot);g.lineTo(x-vw,top+vw);g.arc(x,top+vw,vw,Math.PI,0);g.lineTo(x+vw,bot);g.fill();g.stroke();
+    g.strokeStyle='#ff5050';g.lineWidth=2;g.beginPath();g.moveTo(x-vw*0.55,bot);g.lineTo(x-vw*0.55,top+vw*1.2);g.stroke();g.strokeStyle='#4f7dff';g.beginPath();g.moveTo(x+vw*0.55,bot);g.lineTo(x+vw*0.55,top+vw*1.2);g.stroke();
+    g.strokeStyle='#f5f0c8';g.lineWidth=2.4;g.beginPath();g.moveTo(x,bot);g.lineTo(x,top+vw*1.4);g.stroke();
+    for(let k=0;k<3;k++){const u=((t*0.5+k/3+i*0.2)%1);g.fillStyle=k%2?'#ffd34d':'#ff9a5a';g.beginPath();g.arc(x-vw*1.4+u*vw*0.8,top+vw*0.6+k*10,2.6,0,7);g.fill();}}
+  for(let k=0;k<14;k++){const x=((t*25+k*w/14)%w);g.fillStyle=k%3?'#ffb35a':'#ffe08a';g.beginPath();g.arc(x,h*0.18+Math.sin(k)*6,3,0,7);g.fill();}
+  g.font='600 11px system-ui,sans-serif';g.fillStyle='rgba(255,240,225,0.95)';g.fillText(PHY_TXT('Luz intestinal: nutrientes','Gut lumen: nutrients','Luz intestinal: nutrientes'),10,14);
+  g.font='600 9.5px system-ui,sans-serif';g.fillStyle='#ff8a8a';g.fillText(PHY_TXT('capilar → vena porta','capillary → portal vein','capilar → veia porta'),8,h-4);g.textAlign='right';g.fillStyle='#f5f0c8';g.fillText(PHY_TXT('quilífero (grasas)','lacteal (fats)','lácteo (gorduras)'),w-8,h-4);g.textAlign='left';}
+function phyDrawNephron(t){const S=phyInsetSize();if(!S)return;const {g,w,h}=S;g.clearRect(0,0,w,h);g.fillStyle='rgba(18,14,28,0.94)';g.fillRect(0,0,w,h);
+  const gx=w*0.18,gy=h*0.42,gr=h*0.2;g.strokeStyle='rgba(200,180,255,0.8)';g.lineWidth=2;g.beginPath();g.arc(gx,gy,gr,0.25*Math.PI,1.75*Math.PI);g.stroke();
+  g.strokeStyle='#ff5050';g.lineWidth=3;g.beginPath();g.moveTo(4,gy-gr*0.4);for(let a=0;a<6.3;a+=0.3)g.lineTo(gx+Math.cos(a*2)*gr*0.45,gy+Math.sin(a*3)*gr*0.45);g.stroke();
+  const tube=[[gx+gr*0.9,gy-gr*0.5],[w*0.42,gy-gr*0.6],[w*0.5,gy-gr*0.2],[w*0.55,h*0.9],[w*0.65,h*0.9],[w*0.68,gy-gr*0.3],[w*0.82,gy-gr*0.6],[w*0.88,h*0.2],[w*0.92,h*0.95]];
+  g.strokeStyle='rgba(200,180,255,0.75)';g.lineWidth=5;g.lineJoin='round';g.beginPath();tube.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.stroke();
+  const L=[];let tl=0;for(let i=1;i<tube.length;i++){const l=Math.hypot(tube[i][0]-tube[i-1][0],tube[i][1]-tube[i-1][1]);L.push(l);tl+=l;}
+  for(let k=0;k<16;k++){let d=((t*30+k*tl/16)%tl),i=0;while(d>L[i]){d-=L[i];i++;}const a=tube[i],b=tube[i+1],u=d/L[i];const f=(i+u)/(tube.length-1);g.fillStyle=`rgba(${Math.round(150+105*f)},${Math.round(200+20*f)},${Math.round(255-200*f)},1)`;g.beginPath();g.arc(a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u,2.6,0,7);g.fill();}
+  for(let k=0;k<5;k++){const u=((t*0.6+k/5)%1);const x=w*(0.45+k*0.08),y=gy+u*h*0.25;g.fillStyle=`rgba(120,220,255,${1-u})`;g.fillText('H₂O',x,y);}
+  g.font='600 11px system-ui,sans-serif';g.fillStyle='rgba(235,230,255,0.95)';g.fillText(PHY_TXT('Nefrona','Nephron','Néfron'),10,14);g.font='600 9.5px system-ui,sans-serif';g.fillText(PHY_TXT('glomérulo: filtra','glomerulus: filters','glomérulo: filtra'),6,h-6);
+  g.textAlign='right';g.fillText(PHY_TXT('túbulos: reabsorben → orina','tubules: reabsorb → urine','túbulos: reabsorvem → urina'),w-6,h-6);g.textAlign='left';}
+function phyDrawArc(t,ph){const S=phyInsetSize();if(!S)return;const {g,w,h}=S;g.clearRect(0,0,w,h);g.fillStyle='rgba(20,18,8,0.94)';g.fillRect(0,0,w,h);
+  const cx=w*0.72,cy=h*0.45,r=h*0.3;g.fillStyle='rgba(240,240,230,0.12)';g.strokeStyle='rgba(240,240,230,0.6)';g.lineWidth=1.5;g.beginPath();g.ellipse(cx,cy,r*1.25,r,0,0,7);g.fill();g.stroke();
+  g.fillStyle='rgba(160,160,170,0.55)';g.beginPath();g.moveTo(cx,cy-r*0.6);g.bezierCurveTo(cx+r*0.7,cy-r*0.9,cx+r*0.3,cy,cx+r*0.6,cy+r*0.7);g.lineTo(cx-r*0.6,cy+r*0.7);g.bezierCurveTo(cx-r*0.3,cy,cx-r*0.7,cy-r*0.9,cx,cy-r*0.6);g.fill();
+  const aff=[[10,h*0.25],[w*0.4,h*0.25],[cx-r*1.0,cy-r*0.55],[cx-r*0.35,cy-r*0.45],[cx-r*0.2,cy+r*0.4]];const eff=[[cx-r*0.2,cy+r*0.4],[cx-r*1.0,cy+r*0.55],[w*0.4,h*0.75],[10,h*0.75]];
+  const dr=(P,c,on)=>{g.strokeStyle=c;g.lineWidth=on?3.5:2;g.beginPath();P.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.stroke();};
+  const pa=Math.min(1,ph/0.45),pe=Math.max(0,Math.min(1,(ph-0.5)/0.4));dr(aff,'#7ad8ff',ph<0.5);dr(eff,'#ffd34d',ph>=0.5&&ph<0.95);
+  const pt=(P,u)=>{const L=[];let T=0;for(let i=1;i<P.length;i++){const l=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);L.push(l);T+=l;}let d=u*T,i=0;while(i<L.length-1&&d>L[i]){d-=L[i];i++;}const a=P[i],b=P[i+1],v=d/L[i];return [a[0]+(b[0]-a[0])*v,a[1]+(b[1]-a[1])*v];};
+  if(ph<0.5){const p=pt(aff,pa);g.fillStyle='#fff';g.beginPath();g.arc(p[0],p[1],4,0,7);g.fill();}else if(ph<0.95){const p=pt(eff,pe);g.fillStyle='#fff';g.beginPath();g.arc(p[0],p[1],4,0,7);g.fill();}
+  g.font='600 10px system-ui,sans-serif';g.fillStyle='#7ad8ff';g.fillText(PHY_TXT('aferente (huso muscular)','afferent (muscle spindle)','aferente (fuso muscular)'),8,h*0.25-6);g.fillStyle='#ffd34d';g.fillText(PHY_TXT('eferente (motoneurona)','efferent (motor neuron)','eferente (motoneurônio)'),8,h*0.75+14);
+  g.fillStyle='rgba(240,240,230,0.9)';g.textAlign='center';g.fillText(PHY_TXT('Médula L3–L4','Cord L3–L4','Medula L3–L4'),cx,h-6);g.textAlign='left';g.font='600 11px system-ui,sans-serif';g.fillText(PHY_TXT('Arco reflejo monosináptico','Monosynaptic reflex arc','Arco reflexo monossináptico'),10,14);}
 /* Entrar, salir y pasos */
-
 function phyStepFor(q){q=gKey(q||'');return /valv/.test(q)?2:/(sinus|nodo|nodul|his|purkinje|ecg|electrocard|marcapas|conduc)/.test(q)?3:/(interc|hemat|alveol|gaseos|pulmonar)/.test(q)?4:/(perfus|capilar|arteria|vena|sistemic)/.test(q)?5:/(circulacion mayor|circulacion menor|doble circ)/.test(q)?6:/(sangr|recorr|flujo|circul)/.test(q)?1:0;}
-
+function phyTourFor(q){q=gKey(q||'');
+  if(/(respir|diafragm|bronqu|traque|ventilac|espirom|volumen corriente|inspir|espir|frenic|laring|faring)/.test(q))return ['resp',/(diafragm|mecanic|inspir|espir|espirom|volumen corriente|ventilac)/.test(q)?1:/(frenic|control|bulbo)/.test(q)?3:/(alveol|interc|hemat|gaseos)/.test(q)?2:0];
+  if(/(digest|estomag|gastric|esofag|deglu|peristal|intestin|duoden|yeyun|colon|recto|defeca|bilis|biliar|vesicula|pancrea|absorc|vellos|quimo|bolo)/.test(q))return ['dig',/(estomag|gastric|quimo|piloro)/.test(q)?1:/(bilis|biliar|vesicula|pancrea|higad)/.test(q)?2:/(intestino delgado|absorc|vellos|duoden|yeyun)/.test(q)?3:/(colon|recto|defeca|intestino grueso)/.test(q)?4:0];
+  if(/(rinon|renal|nefron|glomer|filtrac|orina|ureter|vejiga|miccion|uretra|diures)/.test(q))return ['uri',/(ureter|orina)/.test(q)?1:/(vejiga|miccion|uretra|detrusor)/.test(q)?2:0];
+  if(/(reflej|rotulian|motoneur|piramidal|corticoesp|motor|sensibil|sensitiv|cordones posteriores|arco reflejo|impulso nervioso|nervio femoral)/.test(q))return ['neuro',/(reflej|rotulian|arco)/.test(q)?1:/(sensibil|sensitiv|cordones|tacto|propiocep)/.test(q)?2:0];
+  if(/(cora|circul|valv|ecg|electrocard|sinus|nodo|nodul|latid|sangr|perfus|cardi|sistole|diastole)/.test(q))return ['heart',phyStepFor(q)];
+  return null;}
 function phyPlace(){const card=$('.phycard');if(!card)return;const dock=!isPhone()&&PHY.on;document.body.classList.toggle('phy-dock',dock);
   if(dock){const pb=$('.pbody');if(card.parentElement!==pb){pb.prepend(card);pb.scrollTop=0;}card.classList.add('docked');}
   else{const box=$('#phyBox');if(card.parentElement!==box)box.appendChild(card);card.classList.remove('docked');card.style.bottom=isPhone()&&PHY.on?(SHEET.peek+8)+'px':'';if(isPhone()&&PHY.on&&sheetState!=='peek')setSheet('peek');}}
 window.addEventListener('resize',()=>{if(PHY.on)phyPlace();});
 function phyFocus(c,r){const v=c.clone();if(isPhone()){r*=1.6;v.y-=r*0.07;}focusOn(v,r);}
-async function phyStart(stepIdx){if(PHY.on){phyGo(stepIdx||0);return;}
-  if(typeof stopAnim==='function')stopAnim();select(null);clearLm();if(gait&&gait.on)setGait(false);if(BODY==='vh')setBody('m');
-  PHY.orb={th:orb.T.th,ph:orb.T.ph,r:orb.T.r,tgt:orb.T.tgt.clone()};PHY.saved={sys:Object.fromEntries(Object.keys(SYS).map(k=>[k,{on:SYS[k].on,op:SYS[k].op}])),studio,planes:Object.fromEntries(Object.keys(PLANES).map(k=>[k,{cut:PLANES[k].cut,show:PLANES[k].show,pos:PLANES[k].pos}]))};
+const pick2=(rx,need)=>meshes.filter(m=>rx.test(m.userData.c.en)&&(!need||need.includes(BS(m.userData.sys)))&&!m.userData.c.ins);
+async function phyStart(a,b){let tour='heart',step=0;if(typeof a==='string'){tour=a;step=b||0;}else step=a||0;
+  if(PHY.on&&PHY_TOUR===tour){phyGo(step);return;}if(PHY.on)phyStop();PHY_TOUR=tour;const T=curTour();
+  if(typeof stopAnim==='function')stopAnim();select(null);clearLm();if(gait&&gait.on)setGait(false);if(BODY==='vh'||(BODY==='f'&&tour!=='heart'))setBody('m');
+  PHY.orb={th:orb.T.th,ph:orb.T.ph,r:orb.T.r,tgt:orb.T.tgt.clone()};
+  PHY.saved={sys:Object.fromEntries(Object.keys(SYS).map(k=>[k,{on:SYS[k].on,op:SYS[k].op}])),studio,planes:Object.fromEntries(Object.keys(PLANES).map(k=>[k,{cut:PLANES[k].cut,show:PLANES[k].show,pos:PLANES[k].pos}])),depth:new Set(DEPTH_OFF)};
   if(!studio&&!lite)setStudio(true);
-  PHY.on=true;$('#phyBox').hidden=false;document.body.classList.add('phy-on');phyPlace();$('#phyTitle').textContent=TL('Cargando corazón y vasos…','Loading heart and vessels…','Carregando coração e vasos…');
-  const need=['arterial','venoso','respiratorio'];for(const k of need){SYS[k].on=true;SYS[k].op=1;}renderSysList();await Promise.all(need.map(k=>loadSys(k)));if(!PHY.on)return;
-  const pick=rx=>meshes.filter(m=>rx.test(m.userData.c.en)&&need.includes(BS(m.userData.sys)));
-  const g={};for(const k in HRX)g[k]=pick(HRX[k]);PHY.heart=[...g.atr,...g.ven,...g.av,...g.sl];PHY.atr=g.atr;PHY.valves=[...g.av,...g.sl];PHY.ven=g.ven.filter(m=>/ventricle$/.test(m.userData.c.en));
-  PHY.gv=pick(GVRX);PHY.lungs=[...pick(BRX.lung),...pick(BRX.br)];
-  PHY.C=centerOf(g.ven);PHY.dAV=centerOf(g.atr).sub(PHY.C).normalize();FLOW_U.value.set(PHY.C.x,PHY.C.y,PHY.C.z,0);
-  PHY.ms=[...g.atr.map(m=>({m,k:'atr'})),...g.ven.map(m=>({m,k:'ven'})),...g.av.map(m=>({m,k:'av',c:centerOf([m])})),...g.sl.map(m=>({m,k:'sl',c:centerOf([m])}))];
-  PHY.LC=(()=>{const b=new THREE.Box3();for(const m of pick(BRX.lung)){m.geometry.computeBoundingBox();b.union(m.geometry.boundingBox);}return b.isEmpty()?PHY.C.clone():b.getCenter(new V3());})();
-  PHY.routes=phyBuildRoutes();PHY.parts=[];for(let i=0;i<PHY_N;i++){const r=Math.floor(Math.random()*PHY.routes.length);PHY.parts.push({r,u:Math.random(),j:new V3((Math.random()-.5)*0.004,(Math.random()-.5)*0.004,(Math.random()-.5)*0.004),s:0.85+Math.random()*0.3});}
-  PHY.grp.add(phyPts);PHY.lines=[];for(const r of [PR.svc.concat(PR.rh,PR.lpa),PR.ivc.concat(PR.rh,PR.rpa)]){}
-  PHY.cond=phyBuildCond();
-  PHY.lbl={};for(const k in PHY_LBL){const [p,es,en,pt]=PHY_LBL[k];const L=addLabel(TL(es,en,pt),()=>PV3(p),'phyl','phy');L.on=false;L.pos=PV3(p);PHY.lbl[k]=L;}
-  PHY.t=0;phyGo(stepIdx||0);}
+  PHY.on=true;$('#phyBox').hidden=false;document.body.classList.add('phy-on');document.body.style.setProperty('--phyc',T.col);phyPlace();$('#phyTitle').textContent=TL('Cargando modelos…','Loading models…','Carregando modelos…');$('#phyText').textContent='';
+  for(const k of T.need){SYS[k].on=true;SYS[k].op=1;}renderSysList();await Promise.all(T.need.map(k=>loadSys(k)));if(!PHY.on)return;
+  PHY.ms=[];PHY.heart=[];PHY.lungs=[];PHY.gv=[];PHY.imps=[];PHY.cond=[];PHY.lbl={};
+  if(T.heart||tour==='resp'){const need=['arterial','venoso','respiratorio'];if(tour==='resp')for(const k of need){SYS[k].on=true;}await Promise.all(need.map(k=>loadSys(k)));
+    const g={};for(const k in HRX)g[k]=pick2(HRX[k],need);PHY.heart=[...g.atr,...g.ven,...g.av,...g.sl];PHY.atr=g.atr;PHY.valves=[...g.av,...g.sl];PHY.ven=g.ven.filter(m=>/ventricle$/.test(m.userData.c.en));
+    PHY.gv=pick2(GVRX,need);PHY.lungs=[...pick2(BRX.lung),...pick2(BRX.br)];PHY.lungOnly=pick2(BRX.lung);
+    PHY.C=centerOf(g.ven);PHY.dAV=centerOf(g.atr).sub(PHY.C).normalize();FLOW_U.value.set(PHY.C.x,PHY.C.y,PHY.C.z,0);
+    PHY.ms=[...g.atr.map(m=>({m,k:'atr'})),...g.ven.map(m=>({m,k:'ven'})),...g.av.map(m=>({m,k:'av',c:centerOf([m])})),...g.sl.map(m=>({m,k:'sl',c:centerOf([m])}))];
+    PHY.LC=(()=>{const b=new THREE.Box3();for(const m of PHY.lungOnly){m.geometry.computeBoundingBox();b.union(m.geometry.boundingBox);}return b.isEmpty()?PHY.C.clone():b.getCenter(new V3());})();}
+  if(T.heart){PHY.cond=phyBuildCond();PHY.routesHeart=phyBuildRoutes();}
+  PHY.grp.add(phyPts);
+  const L=Object.assign({},T.heart?PHY_LBL:{},T.heart?{}:LB2,tour==='resp'?{pt:PHY_LBL.pt,pv:PHY_LBL.pv}:{});
+  for(const k in L){const [p,es,en,pt]=L[k];const lb=addLabel(TL(es,en,pt),()=>PV3(p),'phyl','phy');lb.on=false;lb.pos=PV3(p);PHY.lbl[k]=lb;}
+  PHY.t=0;phyGo(step);}
 function phyLabels(keys){for(const k in PHY.lbl)PHY.lbl[k].on=keys.includes(k);}
-function phyIso(list,onlyThese){isoOnly=true;isoSet=new Set(list.map(m=>m.userData.c.id));hiddenIds.clear();applySystems();}
+function phyIso(list){isoOnly=true;isoSet=new Set(list.map(m=>m.userData.c.id));hiddenIds.clear();applySystems();}
 function phyCut(on,pos){for(const k in PLANES){PLANES[k].cut=on&&k==='fro';PLANES[k].show=false;}if(on)PLANES.fro.pos=pos;updatePlanes();renderPlanes();}
-function phyGo(i){i=Math.max(0,Math.min(PHY_STEPS.length-1,i));PHY.step=i;const st=PHY_STEPS[i];const [ti,tx]=pTx(st);
-  $('#phyTitle').textContent=ti;$('#phyText').textContent=tx;$('#phyNum').textContent=`${i+1} / ${PHY_STEPS.length}`;$('#phyKick').textContent=TL('Corazón y circulación','Heart and circulation','Coração e circulação');$('#phyPrev').textContent=TL('← Anterior','← Previous','← Anterior');$('#phySlow').textContent=TL('Cámara lenta','Slow motion','Câmera lenta');$('#phySound').textContent=TL('Sonido','Sound','Som');$('#phyPlay').textContent=PHY.paused?TL('Reanudar','Resume','Retomar'):TL('Pausa','Pause','Pausa');$('#phyMore').textContent=$('.phycard').classList.contains('open')?TL('Leer menos','Show less','Ler menos'):TL('Leer más','Read more','Ler mais');
-  $('#phyDots').innerHTML=PHY_STEPS.map((s,k)=>`<button data-pd="${k}" aria-label="${esc(pTx(s)[0])}" aria-current="${k===i}"></button>`).join('');$('#phyDots').querySelectorAll('[data-pd]').forEach(b=>b.onclick=()=>phyGo(+b.dataset.pd));
-  $('#phyPrev').disabled=i===0;$('#phyNext').textContent=i===PHY_STEPS.length-1?TL('Terminar','Finish','Concluir'):TL('Siguiente','Next','Próximo');
-  phyResetPose();for(const k of ['arterial','venoso','respiratorio']){SYS[k].on=true;SYS[k].op=1;}
-  for(const k in SYS)if(!['arterial','venoso','respiratorio'].includes(k)&&PHY.saved.sys[k])SYS[k].on=st.id==='body'?(k==='oseo'):false;
-  if(st.id==='body'){SYS.respiratorio.on=false;SYS.oseo.on=true;SYS.oseo.op=0.25;}
-  renderSysList();FLOWON_U.value=0;phyCut(false);
-  const heartGV=[...PHY.heart,...PHY.gv];phyPts.visible=false;PHY.cond.forEach(c=>{c.tb.visible=false;c.sp.visible=false;});PHY.cond.sa.visible=PHY.cond.av.visible=false;
-  const ins=$('#phyInset');ins.hidden=true;ins.classList.toggle('big',st.id==='loop');
-  if(st.id==='anat'){phyIso(heartGV);phyFocus(PHY.C.clone().add(new V3(0,0.03,0)),0.46);orb.T.ph=1.45;orb.T.th=0.35;phyLabels(['ra','rv','la','lv','svc','ivc','pt','ao','pv']);}
-  else if(st.id==='flow'){phyIso(heartGV);phyCut(true,0.034);phyFocus(PHY.C.clone().add(new V3(0,0.025,0)),0.44);orb.T.ph=1.42;orb.T.th=0.0;phyPts.visible=true;PHY.flt=null;phyLabels(['ra','rv','la','lv','svc','ivc','pt','ao','pv','tri','mit']);}
-  else if(st.id==='valv'){phyIso([...PHY.ven,...PHY.valves]);const c=centerOf(PHY.valves);phyFocus(c,0.24);orb.T.th=0.15;orb.T.ph=0.42;phyLabels(['tri','mit','aov','pvv']);}
-  else if(st.id==='cond'){SYS.arterial.op=0.28;SYS.venoso.op=0.28;phyIso(heartGV);phyFocus(PHY.C.clone().add(new V3(0,0.01,0)),0.40);orb.T.ph=1.45;orb.T.th=0.15;PHY.cond.forEach(c=>{c.tb.visible=true;});PHY.cond.sa.visible=PHY.cond.av.visible=true;phyLabels(['sa','avn','his','rbb','lbb','pk']);ins.hidden=false;}
-  else if(st.id==='lung'){SYS.respiratorio.op=0.5;phyIso([...heartGV,...PHY.lungs]);phyFocus(PHY.LC.clone(),0.62);orb.T.ph=1.45;orb.T.th=0.0;phyPts.visible=true;phyLabels(['lungR','lungL','pt','pv','ra','la']);ins.hidden=false;}
-  else if(st.id==='body'){isoOnly=false;isoSet=null;hiddenIds.clear();applySystems();FLOWON_U.value=1;phyFocus(new V3(0,0.95,0),2.2);orb.T.ph=1.45;orb.T.th=0.0;phyLabels([]);ins.hidden=false;}
-  else if(st.id==='loop'){SYS.respiratorio.op=0.4;phyIso([...heartGV,...PHY.lungs]);phyFocus(PHY.LC.clone(),0.7);orb.T.ph=1.45;orb.T.th=0.3;phyPts.visible=true;phyLabels(['lungR','lungL','svc','ivc','ao']);ins.hidden=false;}
-  $('#phyValves').hidden=!['anat','flow','valv','cond'].includes(st.id);
+function phyClearImps(){for(const i of PHY.imps){PHY.grp.remove(i.tb);PHY.grp.remove(i.sp);i.tb.geometry.dispose();}PHY.imps=[];}
+function phyShowOnly(keep,opMap){for(const k in SYS){if(!PHY.saved.sys[k])continue;SYS[k].on=keep.includes(k);if(SYS[k].on)SYS[k].op=(opMap&&opMap[k])||1;}renderSysList();}
+function phyGo(i){const steps=curSteps(),T=curTour();i=Math.max(0,Math.min(steps.length-1,i));PHY.step=i;const st=steps[i];const [ti,tx]=pTx(st);
+  $('#phyTitle').textContent=ti;$('#phyText').textContent=tx;$('#phyNum').textContent=`${i+1} / ${steps.length}`;$('#phyKick').textContent=tN(T);
+  $('#phyPrev').textContent=TL('← Anterior','← Previous','← Anterior');$('#phySlow').textContent=TL('Cámara lenta','Slow motion','Câmera lenta');$('#phySound').textContent=TL('Sonido','Sound','Som');$('#phyPlay').textContent=PHY.paused?TL('Reanudar','Resume','Retomar'):TL('Pausa','Pause','Pausa');$('#phyMore').textContent=$('.phycard').classList.contains('open')?TL('Leer menos','Show less','Ler menos'):TL('Leer más','Read more','Ler mais');
+  $('#phyDots').innerHTML=steps.map((s,k)=>`<button data-pd="${k}" aria-label="${esc(pTx(s)[0])}" aria-current="${k===i}"></button>`).join('');$('#phyDots').querySelectorAll('[data-pd]').forEach(b=>b.onclick=()=>phyGo(+b.dataset.pd));
+  $('#phyPrev').disabled=i===0;$('#phyNext').textContent=i===steps.length-1?TL('Terminar','Finish','Concluir'):TL('Siguiente','Next','Próximo');
+  $('#phySound').hidden=!T.heart;$('#phyPhase').parentElement.hidden=!T.heart;
+  phyResetPose();phyClearImps();FLOWON_U.value=0;phyCut(false);phyPts.visible=false;PHY.cond.forEach&&PHY.cond.forEach(c=>{c.tb.visible=false;c.sp.visible=false;});if(PHY.cond.sa){PHY.cond.sa.visible=PHY.cond.av.visible=false;}
+  if(PHY.saved.depth){DEPTH_OFF.clear();PHY.saved.depth.forEach(d=>DEPTH_OFF.add(d));}
+  const ins=$('#phyInset');ins.hidden=true;ins.classList.toggle('big',st.id==='loop');PHY.inset=null;PHY.routes=null;
+  try{if(T.heart){phyGoHeart(st,ins);}
+  else if(PHY_TOUR==='resp')phyGoResp(st,ins);else if(PHY_TOUR==='dig')phyGoDig(st,ins);else if(PHY_TOUR==='uri')phyGoUri(st,ins);else if(PHY_TOUR==='neuro')phyGoNeuro(st,ins);}catch(e){console.error('phyGo',e&&e.stack);}
+  if(PHY.routes){phyParts(PHY.routes,PHY.nParts||PHY_N);phyPts.visible=true;}else phyPts.visible=false;
   applySystems();}
-function phyResetPose(){for(const o of PHY.ms){o.m.scale.set(1,1,1);o.m.position.set(0,0,0);}for(const m of PHY.lungs||[]){m.scale.set(1,1,1);m.position.set(0,0,0);}}
-function phyStop(){if(!PHY.on)return;PHY.on=false;phyResetPose();FLOWON_U.value=0;
+function phyGoHeart(st,ins){for(const k of ['arterial','venoso','respiratorio']){SYS[k].on=true;SYS[k].op=1;}
+  phyShowOnly(st.id==='body'?['arterial','venoso','oseo']:['arterial','venoso','respiratorio'],st.id==='body'?{oseo:0.25}:null);
+  const heartGV=[...PHY.heart,...PHY.gv];const useHeartRoutes=()=>{PHY.routes=PHY.routesHeart.map(r=>({c:r.c,len:r.len,col:r.k==='v'?C_VEN:C_ART,w:r.w,mode:'heart',sp:1}));};
+  if(st.id==='anat'){phyIso(heartGV);phyFocus(PHY.C.clone().add(new V3(0,0.03,0)),0.46);orb.T.ph=1.45;orb.T.th=0.35;phyLabels(['ra','rv','la','lv','svc','ivc','pt','ao','pv']);}
+  else if(st.id==='flow'){phyIso(heartGV);phyCut(true,0.034);phyFocus(PHY.C.clone().add(new V3(0,0.025,0)),0.44);orb.T.ph=1.42;orb.T.th=0.0;useHeartRoutes();phyLabels(['ra','rv','la','lv','svc','ivc','pt','ao','pv','tri','mit']);}
+  else if(st.id==='valv'){phyIso([...PHY.ven,...PHY.valves]);const c=centerOf(PHY.valves);phyFocus(c,0.24);orb.T.th=0.15;orb.T.ph=0.42;phyLabels(['tri','mit','aov','pvv']);}
+  else if(st.id==='cond'){SYS.arterial.op=0.28;SYS.venoso.op=0.28;phyIso(heartGV);phyFocus(PHY.C.clone().add(new V3(0,0.01,0)),0.40);orb.T.ph=1.45;orb.T.th=0.15;PHY.cond.forEach(c=>{c.tb.visible=true;});PHY.cond.sa.visible=PHY.cond.av.visible=true;phyLabels(['sa','avn','his','rbb','lbb','pk']);ins.hidden=false;PHY.inset='ecg';}
+  else if(st.id==='lung'){SYS.respiratorio.op=0.5;phyIso([...heartGV,...PHY.lungs]);phyFocus(PHY.LC.clone(),0.62);orb.T.ph=1.45;orb.T.th=0.0;useHeartRoutes();phyLabels(['lungR','lungL','pt','pv','ra','la']);ins.hidden=false;PHY.inset='gas';PHY.breath=true;}
+  else if(st.id==='body'){isoOnly=false;isoSet=null;hiddenIds.clear();FLOWON_U.value=1;phyFocus(new V3(0,0.95,0),2.2);orb.T.ph=1.45;orb.T.th=0.0;phyLabels([]);ins.hidden=false;PHY.inset='perf';}
+  else if(st.id==='loop'){SYS.respiratorio.op=0.4;phyIso([...heartGV,...PHY.lungs]);phyFocus(PHY.LC.clone(),0.7);orb.T.ph=1.45;orb.T.th=0.3;useHeartRoutes();phyLabels(['lungR','lungL','svc','ivc','ao']);ins.hidden=false;PHY.inset='loop';PHY.breath=true;}
+  $('#phyValves').hidden=!['anat','flow','valv','cond'].includes(st.id);PHY.breath=['lung','loop'].includes(st.id);}
+function phyGoResp(st,ins){PHY.breath=true;const airDefs=(out)=>[{p:[...PR2.airUp,...PR2.airR.slice(1),...PR2.airRL.slice(1)],col:'air',w:1,mode:'tidal'},{p:[...PR2.airUp,...PR2.airR.slice(1,3),...PR2.airRU],col:'air',w:.7,mode:'tidal'},{p:[...PR2.airUp,...PR2.airR.slice(1),...PR2.airRM.slice(1)],col:'air',w:.5,mode:'tidal'},{p:[...PR2.airUp,...PR2.airL.slice(1),...PR2.airLU.slice(1)],col:'air',w:.7,mode:'tidal'},{p:[...PR2.airUp,...PR2.airL.slice(1),...PR2.airLL.slice(1)],col:'air',w:.9,mode:'tidal'}];
+  const lungs=PHY.lungs,airway=pick2(/^(Trachea|Laryngopharynx|Oropharynx|Nasopharynx|Mucosa of nasal cavity|Epiglottis|Pharynx)$|bronch/i);
+  if(st.id==='rway'){phyShowOnly(['respiratorio','digestivo','oseo'],{respiratorio:1,oseo:0.18});SYS.respiratorio.op=1;loadSys('digestivo');
+    phyIso([...lungs,...airway]);SYS.respiratorio.op=0.35;phyFocus(new V3(0,1.42,0.0),0.85);orb.T.ph=1.45;orb.T.th=0.45;PHY.routes=phyRoutes(airDefs());PHY.nParts=240;phyLabels(['nose','phar','lar','tra','bro','lungR','lungL']);}
+  else if(st.id==='mech'){phyShowOnly(['respiratorio','muscular','oseo'],{respiratorio:0.7,oseo:0.55});const dia=pick2(/^(Diaphragm|External intercostal muscles|Internal intercostal muscles)$/);const ribs=meshes.filter(m=>BS(m.userData.sys)==='oseo'&&/Rib|Sternum|Vertebra T|Costal cartilage/i.test(m.userData.c.en));
+    phyIso([...PHY.lungOnly,...dia,...ribs]);isoOnly=true;phyFocus(new V3(0,1.27,0.0),0.85);orb.T.ph=1.35;orb.T.th=0.6;phyLabels(['dia','ic','lungR','lungL']);ins.hidden=false;PHY.inset='spiro';PHY.dia=dia.filter(m=>/Diaphragm/.test(m.userData.c.en));PHY.ribs=ribs;}
+  else if(st.id==='gas'){phyShowOnly(['respiratorio','arterial','venoso'],{respiratorio:0.45});const heartGV=[...PHY.heart,...PHY.gv];phyIso([...heartGV,...PHY.lungs]);phyFocus(PHY.LC.clone(),0.62);orb.T.ph=1.45;orb.T.th=0;
+    PHY.routes=PHY.routesHeartR||(PHY.routesHeartR=phyBuildRoutes().map(r=>({c:r.c,len:r.len,col:r.k==='v'?C_VEN:C_ART,w:r.w,mode:'heart',sp:1})));phyLabels(['lungR','lungL','pt','pv']);ins.hidden=false;PHY.inset='gas';}
+  else if(st.id==='ctrl'){phyShowOnly(['respiratorio','muscular','nervioso_central','oseo'],{respiratorio:0.3,oseo:0.2});const dia=pick2(/^Diaphragm$/);const bs=pick2(/^(Medulla oblongata|Pons|Midbrain|Pyramid of medulla oblongata|Olive)$/);const vt=meshes.filter(m=>BS(m.userData.sys)==='oseo'&&/^(Atlas|Axis|Vertebra [CT]\d)/.test(m.userData.c.en));
+    phyIso([...dia,...bs,...PHY.lungOnly,...vt]);phyFocus(new V3(0,1.38,0),0.95);orb.T.ph=1.45;orb.T.th=0.75;PHY.dia=dia;
+    phyNerve(PR2.phrR,0xffd400,0,0.25);phyNerve(PR2.phrR.map(MX),0xffd400,0,0.25);phyLabels(['med','phr','dia']);}
+}
+function phyGoDig(st,ins){phyShowOnly(['digestivo','urinario'],{});const all=meshes.filter(m=>BS(m.userData.sys)==='digestivo'&&!/omentum|Mesocolon|taenia|Meso-appendix/i.test(m.userData.c.en));
+  const D=s=>({p:PR2[s],col:s==='bile'?'bile':s==='panc'?'panc':'bolus',w:1,mode:'flow',sp:s==='bolus'?1:0.8});
+  if(st.id==='swal'){SYS.digestivo.op=0.55;phyIso(all);phyFocus(new V3(0,1.37,0.0),0.85);orb.T.ph=1.45;orb.T.th=1.0;PHY.routes=phyRoutes([{p:PR2.bolus.slice(0,17),col:'bolus',w:1,mode:'bolus',sp:1.2}]);PHY.nParts=60;phyLabels(['mouth','phar','eso','sto']);}
+  else if(st.id==='stom'){SYS.digestivo.op=0.5;phyIso(all);phyFocus(new V3(0.03,1.16,0.04),0.38);orb.T.ph=1.45;orb.T.th=0.25;PHY.routes=phyRoutes([{p:PR2.bolus.slice(13,30),col:'bolus',w:1,mode:'flow',sp:0.45}]);PHY.nParts=120;PHY.churn=pick2(/^Stomach$/);phyLabels(['eso','sto','duo']);}
+  else if(st.id==='glands'){SYS.digestivo.op=0.45;phyIso(all);phyFocus(new V3(-0.01,1.13,0.04),0.36);orb.T.ph=1.45;orb.T.th=0.2;PHY.routes=phyRoutes([D('bile'),D('panc'),{p:PR2.bolus.slice(23),col:'bolus',w:1.2,mode:'flow',sp:0.6}]);PHY.nParts=200;phyLabels(['liv','gb','pan','duo','sto']);}
+  else if(st.id==='abs'){SYS.digestivo.op=0.5;phyIso(all);phyFocus(new V3(0,1.0,0.05),0.52);orb.T.ph=1.45;orb.T.th=0;PHY.routes=phyRoutes([{p:PR2.jej,col:'bolus',w:1,mode:'flow',sp:0.5}]);PHY.nParts=160;phyLabels(['jej','duo','col']);ins.hidden=false;PHY.inset='villi';}
+  else if(st.id==='colon'){SYS.digestivo.op=0.5;phyIso(all);phyFocus(new V3(0,0.99,0.0),0.6);orb.T.ph=1.45;orb.T.th=0;PHY.routes=phyRoutes([{p:PR2.colon,col:'bolus',w:1,mode:'flow',sp:0.45}]);PHY.nParts=180;phyLabels(['col','tcol','dcol','rec']);}
+}
+function phyGoUri(st,ins){phyShowOnly(['urinario','arterial','venoso','oseo'],{oseo:0.2});const uri=meshes.filter(m=>BS(m.userData.sys)==='urinario');const vas=pick2(/^(Abdominal aorta|Inferior vena cava \(abdominal part\)|Renal artery|Renal vein|Left renal vein|Right renal artery|Left renal artery|Right renal vein)$/);
+  const pel=meshes.filter(m=>BS(m.userData.sys)==='oseo'&&/Hip bone|Sacrum|Coccyx|Vertebra L/.test(m.userData.c.en));
+  if(st.id==='filt'){SYS.urinario.op=0.6;phyIso([...uri,...vas,...pel]);phyFocus(new V3(0,1.08,0),0.42);orb.T.ph=1.45;orb.T.th=Math.PI;PHY.routes=phyRoutes([{p:PR2.bloodR,col:'art',w:1,mode:'flow',sp:0.8},{p:PR2.bloodL,col:'art',w:1,mode:'flow',sp:0.8}]);PHY.nParts=140;phyLabels(['kidR','kidL','ao2']);ins.hidden=false;PHY.inset='nephron';}
+  else if(st.id==='urine'){SYS.urinario.op=0.55;phyIso([...uri,...pel]);phyFocus(new V3(0,0.97,0),0.62);orb.T.ph=1.45;orb.T.th=0;PHY.routes=phyRoutes([{p:PR2.urR.slice(0,13),col:'urine',w:1,mode:'peri',sp:0.6},{p:PR2.urL.slice(0,13),col:'urine',w:1,mode:'peri',sp:0.6}]);PHY.nParts=120;phyLabels(['kidR','kidL','ure','bla']);}
+  else if(st.id==='void'){SYS.urinario.op=0.55;phyIso([...uri,...pel]);phyFocus(new V3(0,0.84,0.02),0.36);orb.T.ph=1.5;orb.T.th=-1.2;PHY.routes=phyRoutes([{p:PR2.urR.slice(12),col:'urine',w:1,mode:'void',sp:0.9}]);PHY.nParts=90;PHY.blad=pick2(/^Urinary bladder$/);phyLabels(['bla','uret']);}
+}
+function phyGoNeuro(st,ins){phyShowOnly(['nervioso_central','nervioso_periferico','muscular','oseo'],{oseo:0.2,muscular:0.35,nervioso_periferico:0.4});
+  const quadL=meshes.filter(m=>/^(Rectus femoris muscle|Vastus lateralis muscle|Vastus medialis muscle|Vastus intermedius muscle)$/.test(m.userData.c.en)&&m.userData.c.side==='izquierdo'&&BS(m.userData.sys)==='muscular');
+  const brain=meshes.filter(m=>BS(m.userData.sys)==='nervioso_central'&&!/eyeball|Cornea|Iris|Lens|Retina|Sclera|Vitreous|Zonular|lacrimal|Cochlea|Vestibule$|Tympanic|Auditory/i.test(m.userData.c.en));
+  const fem=meshes.filter(m=>/^Femoral nerve$/.test(m.userData.c.en)&&m.userData.c.side==='izquierdo');const bones=meshes.filter(m=>BS(m.userData.sys)==='oseo'&&/Femur|Patella|Tibia|Fibula|Hip bone|Sacrum|Vertebra|Skull|Frontal|Parietal|Occipital|Temporal|Atlas|Axis|Sphenoid/.test(m.userData.c.en));
+  phyIso([...brain,...fem,...quadL,...bones]);PHY.quad=quadL;SYS.nervioso_central.op=0.35;
+  if(st.id==='motor'){phyNerve(PR2.motor,0xffd400,0,0.7);phyFocus(new V3(0.03,1.12,0),2.35);orb.T.ph=1.45;orb.T.th=0.55;phyLabels(['m1','dec','cord','ah','fem','quad']);}
+  else if(st.id==='reflex'){phyNerve(PR2.reflexIn,0x7ad8ff,0,0.42);phyNerve(PR2.reflexOut,0xffd400,0.5,0.9);phyFocus(new V3(0.06,0.72,0.02),1.15);orb.T.ph=1.45;orb.T.th=0.9;phyLabels(['pat','fem','ah','quad']);ins.hidden=false;PHY.inset='arc';}
+  else if(st.id==='sens'){phyNerve(PR2.sens,0x7ad8ff,0,0.75);phyFocus(new V3(0.03,1.05,0),2.5);orb.T.ph=1.45;orb.T.th=0.55;phyLabels(['pat','fem','dc','thal','s1']);}
+}
+function phyResetPose(){for(const o of PHY.ms){o.m.scale.set(1,1,1);o.m.position.set(0,0,0);}for(const m of [...(PHY.lungs||[]),...(PHY.dia||[]),...(PHY.churn||[]),...(PHY.blad||[]),...(PHY.quad||[]),...(PHY.ribs||[])]){m.scale.set(1,1,1);m.position.set(0,0,0);}PHY.dia=null;PHY.churn=null;PHY.blad=null;PHY.ribs=null;PHY.breath=false;}
+function phyStop(){if(!PHY.on)return;phyResetPose();for(const m of PHY.quad||[]){m.userData.hint=false;refreshState(m);}PHY.quad=null;PHY.on=false;FLOWON_U.value=0;phyClearImps();
   PHY.grp.clear();removeLabels('phy');PHY.cond=[];$('#phyBox').hidden=true;document.body.classList.remove('phy-on');phyPlace();
-  const s=PHY.saved;if(s){for(const k in s.sys)if(SYS[k]){SYS[k].on=s.sys[k].on;SYS[k].op=s.sys[k].op;}for(const k in s.planes){Object.assign(PLANES[k],s.planes[k]);}updatePlanes();renderPlanes();if(studio!==s.studio)setStudio(s.studio);}
+  const s=PHY.saved;if(s){for(const k in s.sys)if(SYS[k]){SYS[k].on=s.sys[k].on;SYS[k].op=s.sys[k].op;}for(const k in s.planes){Object.assign(PLANES[k],s.planes[k]);}updatePlanes();renderPlanes();if(studio!==s.studio)setStudio(s.studio);if(s.depth){DEPTH_OFF.clear();s.depth.forEach(d=>DEPTH_OFF.add(d));}}
   isoOnly=false;isoSet=null;applySystems();renderSysList();if(PHY.orb){orb.T.th=PHY.orb.th;orb.T.ph=PHY.orb.ph;orb.T.r=PHY.orb.r;orb.T.tgt.copy(PHY.orb.tgt);}}
-function phyTick(dt){if(!PHY.on||!PHY.ms.length)return;const sp=(PHY.slow?0.3:1)*(PHY.paused?0:1);PHY.t+=dt*sp;
-  const tot=PHY.t/PHY_T,ph=((tot%1)+1)%1,st=PHY_STEPS[PHY.step].id;
-  if(PHY.sound&&!PHY.paused){if(PHY.lastPh<0.165&&ph>=0.165)phyThump(55,0.16,0.55);if(PHY.lastPh<0.465&&ph>=0.465)phyThump(75,0.11,0.35);}
-  PHY.lastPh=ph;
-  if(st!=='body')phyHeartPose(ph);
-  if(st==='anat'&&!PHY.paused)orb.T.th+=dt*0.22;
-  /* respiración en el paso pulmonar */
-  if((st==='lung'||st==='loop')&&PHY.lungs){const T=5,tt=PHY.t%T,b=tt<2?0.5-0.5*Math.cos(Math.PI*tt/2):0.5+0.5*Math.cos(Math.PI*(tt-2)/3);for(const m of PHY.lungs){if(PHY.heart.includes(m))continue;xf(m,PHY.LC,1+0.03*b,1+0.06*b,1+0.035*b);}}
+function phyTick(dt){if(!PHY.on||!PHY.saved)return;arcLine.visible=arcFan.visible=arcRays.visible=false;const steps=curSteps();if(!steps[PHY.step])return;const sp=(PHY.slow?0.3:1)*(PHY.paused?0:1);PHY.t+=dt*sp;
+  const tot=PHY.t/PHY_T,ph=((tot%1)+1)%1,st=steps[PHY.step].id,T=curTour();
+  if(T.heart){if(PHY.sound&&!PHY.paused){if(PHY.lastPh<0.165&&ph>=0.165)phyThump(55,0.16,0.55);if(PHY.lastPh<0.465&&ph>=0.465)phyThump(75,0.11,0.35);}
+    PHY.lastPh=ph;if(st!=='body')phyHeartPose(ph);if(st==='anat'&&!PHY.paused)orb.T.th+=dt*0.22;}
+  else if(PHY_TOUR==='resp'&&(st==='gas'))phyHeartPose(ph);
+  const b=BREATH(PHY.t);const db=BREATH(PHY.t+0.05)-b;
+  if(PHY.breath&&PHY.lungs){for(const m of (PHY.lungOnly||PHY.lungs)){if(PHY.heart.includes(m))continue;xf(m,PHY.LC,1+0.03*b,1+0.06*b,1+0.035*b);}}
+  if(PHY.dia){for(const m of PHY.dia){m.position.set(0,-0.014*b,0);}}
+  if(PHY.ribs){for(const m of PHY.ribs){if(/Rib|Costal|Sternum/.test(m.userData.c.en)){m.position.set(0,0.003*b,0.004*b);}}}
+  if(PHY.churn){const k=0.5+0.5*Math.sin(PHY.t*2.2);for(const m of PHY.churn){const c=centerOf([m]);xf(m,c,1+0.025*k,1-0.02*k,1+0.02*(1-k));}}
+  if(PHY.blad){const f=((PHY.t*0.12)%1);const s=0.85+0.3*Math.min(1,f*1.4);for(const m of PHY.blad){const c=centerOf([m]);xf(m,c,s,s,s);}}
   /* partículas */
-  if(phyPts.visible){const pos=phyPtsGeo.attributes.position.array,col=phyPtsGeo.attributes.pcol.array,al=phyPtsGeo.attributes.palpha.array;
-    const v=phyVen(ph),a=phyAtr(ph);const flowK=(0.18+1.6*v+0.4*a)*sp;const q=new V3();
-    for(let i=0;i<PHY_N;i++){const P=PHY.parts[i],R=PHY.routes[P.r];P.u+=dt*flowK*P.s*0.05/R.len;if(P.u>1){P.u-=1;P.r=Math.floor(Math.random()*PHY.routes.length);}
-      R.c.getPointAt(Math.min(1,P.u),q);q.add(P.j);pos[i*3]=q.x;pos[i*3+1]=q.y;pos[i*3+2]=q.z;
-      const c=R.k==='v'?C_VEN:C_ART;col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;al[i]=Math.min(1,P.u*10,(1-P.u)*10);}
+  if(phyPts.visible&&PHY.routes&&PHY.parts){const pos=phyPtsGeo.attributes.position.array,col=phyPtsGeo.attributes.pcol.array,al=phyPtsGeo.attributes.palpha.array;const q=new V3();const n=PHY.parts.length;
+    const v=phyVen(ph),a=phyAtr(ph);const heartK=(0.18+1.6*v+0.4*a)*sp;
+    for(let i=0;i<PHY_N;i++){if(i>=n){al[i]=0;continue;}const P=PHY.parts[i],R=PHY.routes[P.r];let u,c=COLS[R.col]||R.col,alpha=1;
+      if(R.mode==='heart'){P.u+=dt*heartK*P.s*0.05/R.len;if(P.u>1){P.u-=1;}u=P.u;alpha=Math.min(1,u*10,(1-u)*10);}
+      else if(R.mode==='tidal'){u=Math.min(1,P.u0*0.6+0.42*b);c=db>=0?COLS.air:COLS.airOut;alpha=0.25+0.75*Math.min(1,(1-u)*6,u*8);}
+      else if(R.mode==='bolus'){const cyc=(PHY.t*0.12*R.sp)%1;u=Math.max(0,Math.min(1,cyc+(P.u0-0.5)*0.03));alpha=cyc>0.98?0:1;}
+      else if(R.mode==='peri'){const wave=0.6+0.8*Math.max(0,Math.sin(PHY.t*2.4-P.u*12));P.u+=dt*sp*0.02*R.sp*wave*P.s/R.len*1.5;if(P.u>1)P.u-=1;u=P.u;alpha=Math.min(1,u*8,(1-u)*8);}
+      else if(R.mode==='void'){const f=((PHY.t*0.12)%1);if(f<0.8){u=0.05+P.u0*0.15;alpha=0.8;}else{u=Math.min(1,0.1+(f-0.8)/0.2*(0.3+P.u0));alpha=1-((f-0.8)/0.2)*0.3;}}
+      else{P.u+=dt*sp*0.02*R.sp*P.s/R.len*1.5;if(P.u>1)P.u-=1;u=P.u;alpha=Math.min(1,u*8,(1-u)*8);}
+      R.c.getPointAt(Math.max(0,Math.min(1,u)),q);q.add(P.j);pos[i*3]=q.x;pos[i*3+1]=q.y;pos[i*3+2]=q.z;col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;al[i]=alpha;}
     phyPtsGeo.attributes.position.needsUpdate=true;phyPtsGeo.attributes.pcol.needsUpdate=true;phyPtsGeo.attributes.palpha.needsUpdate=true;
-    const r=cv.getBoundingClientRect();phyPtsMat.uniforms.uScale.value=(r.height*renderer.getPixelRatio())/(2*Math.tan(camera.fov*Math.PI/360));}
-  /* sistema de conducción */
-  if(st==='cond'){const q=new V3();for(const c of PHY.cond){const on=ph>=c.t0&&ph<c.t1+0.02;c.sp.visible=ph>=c.t0&&ph<=c.t1;if(c.sp.visible){c.tb.userData.curve.getPointAt(Math.min(1,(ph-c.t0)/(c.t1-c.t0)),q);c.sp.position.copy(q);}
+    const r=cv.getBoundingClientRect();phyPtsMat.uniforms.uScale.value=(r.height*renderer.getPixelRatio())/(2*Math.tan(camera.fov*Math.PI/360));phyPtsMat.uniforms.uSize.value=T.heart||PHY_TOUR==='resp'&&st==='gas'?0.0034:PHY_TOUR==='dig'?0.0045:0.004;}
+  /* impulsos nerviosos */
+  if(PHY.imps.length){const per=PHY_TOUR==='resp'?5:2.4;const f=((PHY.t/per)%1);const q=new V3();let any=false;
+    for(const im of PHY.imps){const on=f>=im.t0&&f<=im.t1;im.sp.visible=on;im.tb.material.opacity=on?1:0.5;if(on){any=true;im.tb.userData.curve.getPointAt((f-im.t0)/(im.t1-im.t0),q);im.sp.position.copy(q);}}
+    if(PHY.quad){const fire=PHY_TOUR==='neuro'&&((steps[PHY.step].id==='motor'&&f>0.7&&f<0.95)||(steps[PHY.step].id==='reflex'&&f>0.9));for(const m of PHY.quad){if(m.userData.hint!==fire){m.userData.hint=fire;refreshState(m);}}}
+    if(PHY.dia&&PHY_TOUR==='resp'){}}
+  /* corazón: conducción */
+  if(T.heart&&st==='cond'){const q=new V3();for(const c of PHY.cond){const on=ph>=c.t0&&ph<c.t1+0.02;c.sp.visible=ph>=c.t0&&ph<=c.t1;if(c.sp.visible){c.tb.userData.curve.getPointAt(Math.min(1,(ph-c.t0)/(c.t1-c.t0)),q);c.sp.position.copy(q);}
       c.tb.material.opacity=on?1:0.7;c.tb.material.color.setHex(on?0xfff6b0:0xffc400);}
-    const saP=ph<0.03?1:0;PHY.cond.sa.scale.setScalar(0.016+0.02*saP+0.004*Math.sin(PHY.t*8));const avP=ph>=0.07&&ph<0.13?1:0;PHY.cond.av.scale.setScalar(0.013+0.012*avP);
-    phyDrawECG(ph,tot);}
-  else if(st==='lung')phyDrawGas(PHY.t);else if(st==='body'){phyDrawPerf(PHY.t);FLOW_U.value.w=PHY.t;}else if(st==='loop')phyDrawLoop(PHY.t);
-  const chip=$('#phyPhase');if(chip){chip.textContent=ph<0.05?TL('Diástole','Diastole','Diástole'):ph<0.17?TL('Sístole auricular','Atrial systole','Sístole atrial'):ph<0.47?TL('Sístole ventricular','Ventricular systole','Sístole ventricular'):TL('Diástole','Diastole','Diástole');
-    const vs=$('#phyValves');if(vs)vs.innerHTML=`<span class="${phyAVclosed(ph)?'cl':'op'}">${TL('Tricúspide y mitral','Tricuspid & mitral','Tricúspide e mitral')}: ${phyAVclosed(ph)?TL('cerradas','closed','fechadas'):TL('abiertas','open','abertas')}</span><span class="${phySLopen(ph)?'op':'cl'}">${TL('Aórtica y pulmonar','Aortic & pulmonary','Aórtica e pulmonar')}: ${phySLopen(ph)?TL('abiertas','open','abertas'):TL('cerradas','closed','fechadas')}</span>`;}}
-$('#phyClose').onclick=phyStop;$('#phyMore').onclick=()=>{const c=$('.phycard');c.classList.toggle('open');$('#phyMore').textContent=c.classList.contains('open')?TL('Leer menos','Show less','Ler menos'):TL('Leer más','Read more','Ler mais');};$('#phyPrev').onclick=()=>phyGo(PHY.step-1);$('#phyNext').onclick=()=>{if(PHY.step>=PHY_STEPS.length-1)phyStop();else phyGo(PHY.step+1);};
+    const saP=ph<0.03?1:0;PHY.cond.sa.scale.setScalar(0.016+0.02*saP+0.004*Math.sin(PHY.t*8));const avP=ph>=0.07&&ph<0.13?1:0;PHY.cond.av.scale.setScalar(0.013+0.012*avP);}
+  const I=PHY.inset;if(I==='ecg')phyDrawECG(ph,tot);else if(I==='gas')phyDrawGas(PHY.t);else if(I==='perf'){phyDrawPerf(PHY.t);FLOW_U.value.w=PHY.t;}else if(I==='loop')phyDrawLoop(PHY.t);
+  else if(I==='spiro')phyDrawSpiro(PHY.t);else if(I==='villi')phyDrawVilli(PHY.t);else if(I==='nephron')phyDrawNephron(PHY.t);else if(I==='arc')phyDrawArc(PHY.t,((PHY.t/2.4)%1));
+  if(T.heart){const chip=$('#phyPhase');if(chip){chip.textContent=ph<0.05?TL('Diástole','Diastole','Diástole'):ph<0.17?TL('Sístole auricular','Atrial systole','Sístole atrial'):ph<0.47?TL('Sístole ventricular','Ventricular systole','Sístole ventricular'):TL('Diástole','Diastole','Diástole');
+    const vs=$('#phyValves');if(vs)vs.innerHTML=`<span class="${phyAVclosed(ph)?'cl':'op'}">${TL('Tricúspide y mitral','Tricuspid & mitral','Tricúspide e mitral')}: ${phyAVclosed(ph)?TL('cerradas','closed','fechadas'):TL('abiertas','open','abertas')}</span><span class="${phySLopen(ph)?'op':'cl'}">${TL('Aórtica y pulmonar','Aortic & pulmonary','Aórtica e pulmonar')}: ${phySLopen(ph)?TL('abiertas','open','abertas'):TL('cerradas','closed','fechadas')}</span>`;}}}
+$('#phyClose').onclick=phyStop;$('#phyMore').onclick=()=>{const c=$('.phycard');c.classList.toggle('open');$('#phyMore').textContent=c.classList.contains('open')?TL('Leer menos','Show less','Ler menos'):TL('Leer más','Read more','Ler mais');};
+$('#phyPrev').onclick=()=>phyGo(PHY.step-1);$('#phyNext').onclick=()=>{if(PHY.step>=curSteps().length-1)phyStop();else phyGo(PHY.step+1);};
 $('#phyPlay').onclick=()=>{PHY.paused=!PHY.paused;$('#phyPlay').setAttribute('aria-pressed',PHY.paused);$('#phyPlay').textContent=PHY.paused?TL('Reanudar','Resume','Retomar'):TL('Pausa','Pause','Pausa');};
 $('#phySlow').onclick=()=>{PHY.slow=!PHY.slow;$('#phySlow').setAttribute('aria-pressed',PHY.slow);};
 $('#phySound').onclick=()=>{PHY.sound=!PHY.sound;$('#phySound').setAttribute('aria-pressed',PHY.sound);if(PHY.sound)phyThump(55,0.12,0.3);};
-$$('[data-phy]').forEach(b=>b.onclick=()=>phyStart(+b.dataset.phy||0));
+function renderPhyTours(){const html=`<div class="phytours">${Object.entries(TOURS).map(([k,t])=>`<button class="phytour" data-tour="${k}" style="--c:${t.col}"><span class="ic">${t.ic}</span><span><b>${esc(tN(t))}</b><small>${t.steps.length} ${TL('pasos','steps','passos')}</small></span></button>`).join('')}</div>`;
+  $$('.phyhost').forEach(h=>{h.innerHTML=`<h3 style="margin-bottom:8px">${TL('Fisiología en acción','Physiology in action','Fisiologia em ação')}</h3>`+html;h.querySelectorAll('[data-tour]').forEach(b=>b.onclick=()=>{if(isPhone())setSheet('peek');phyStart(b.dataset.tour,0);});});}
+renderPhyTours();
 
+PHY.imps=PHY.imps||[];
 /* ───────── Accidentes óseos ───────── */
 const lmGroup=new THREE.Group();scene.add(lmGroup);
 function clearLm(){lmGroup.clear();removeLabels('lm');}
@@ -2694,7 +2924,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 53 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v37');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v38');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();
