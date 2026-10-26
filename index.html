@@ -2191,8 +2191,8 @@ async function askAi(){const q=$('#aiQ').value.trim();if(!q||!SAMPLE)return;cons
 
 
 /* ───────── Glosario médico ───────── */
-var gloBusy=false,GLO_FAIL=false;let GLO=null,GLO_P=null,gloOpen=-1,gloLetter='';const GLO_IMG=new Map();
-const GLO_CAT={'Osteología':['Osteology','Osteologia'],'Huesos del cuerpo':['Bones of the body','Ossos do corpo'],'Artrología':['Arthrology','Artrologia'],'Miología':['Myology','Miologia'],'Tejidos':['Tissues','Tecidos'],'Posición y dirección':['Position and direction','Posição e direção'],'Planos y ejes':['Planes and axes','Planos e eixos'],'Movimientos':['Movements','Movimentos'],'Regiones del cuerpo':['Body regions','Regiões do corpo'],'Términos clínicos':['Clinical terms','Termos clínicos'],'Semiología':['Semiology','Semiologia'],'Raíces y afijos':['Roots and affixes','Raízes e afixos'],'Angiología':['Angiology','Angiologia'],'Neuroanatomía':['Neuroanatomy','Neuroanatomia'],'Esplacnología':['Splanchnology','Esplancnologia'],'Generalidades':['General terms','Generalidades'],'Imagenología':['Medical imaging','Imagenologia'],'Embriología':['Embryology','Embriologia'],'Histología':['Histology','Histologia']};
+var gloBusy=false,GLO_FAIL=false,gloLim=150;let GLO=null,GLO_P=null,gloOpen=-1,gloLetter='';const GLO_IMG=new Map();
+const GLO_CAT={'Osteología':['Osteology','Osteologia'],'Huesos del cuerpo':['Bones of the body','Ossos do corpo'],'Artrología':['Arthrology','Artrologia'],'Miología':['Myology','Miologia'],'Tejidos':['Tissues','Tecidos'],'Posición y dirección':['Position and direction','Posição e direção'],'Planos y ejes':['Planes and axes','Planos e eixos'],'Movimientos':['Movements','Movimentos'],'Regiones del cuerpo':['Body regions','Regiões do corpo'],'Términos clínicos':['Clinical terms','Termos clínicos'],'Semiología':['Semiology','Semiologia'],'Raíces y afijos':['Roots and affixes','Raízes e afixos'],'Angiología':['Angiology','Angiologia'],'Neuroanatomía':['Neuroanatomy','Neuroanatomia'],'Esplacnología':['Splanchnology','Esplancnologia'],'Generalidades':['General terms','Generalidades'],'Imagenología':['Medical imaging','Imagenologia'],'Embriología':['Embryology','Embriologia'],'Histología':['Histology','Histologia'],'Fisiología':['Physiology','Fisiologia'],'Anatomía topográfica':['Topographic anatomy','Anatomia topográfica'],'Pruebas ortopédicas':['Orthopaedic tests','Testes ortopédicos'],'Exploración neurológica':['Neurological examination','Exame neurológico'],'Enfermedades y lesiones':['Diseases and injuries','Doenças e lesões'],'Patología general':['General pathology','Patologia geral'],'Farmacología básica':['Basic pharmacology','Farmacologia básica']};
 const gCat=c=>{const t=GLO_CAT[c];return t?TL(c,t[0],t[1]):c;};
 const gT=g=>TL(g.t,g.en||g.t,g.pt||g.t),gD=g=>TL(g.def,g.def_en||g.def,g.def_pt||g.def);
 const gKey=s=>norm(s).replace(/[^a-z0-9]+/g,' ').trim();
@@ -2210,10 +2210,13 @@ function renderGlo(){if(!GLO)return;const q=$('#gloQ').value.trim();let L=gloFil
   const first=g=>norm(gT(g)).replace(/^[^a-z]+/,'').charAt(0).toUpperCase();
   const have=new Set(L.map(first));if(q)gloLetter='';
   $('#gloAZ').innerHTML=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'].map(c=>`<button data-az="${c}" aria-pressed="${gloLetter===c}" ${have.has(c)?'':'disabled'}>${c}</button>`).join('');
-  $('#gloAZ').querySelectorAll('[data-az]').forEach(b=>b.onclick=()=>{gloLetter=gloLetter===b.dataset.az?'':b.dataset.az;renderGlo();});
+  $('#gloAZ').querySelectorAll('[data-az]').forEach(b=>b.onclick=()=>{gloLim=150;gloLetter=gloLetter===b.dataset.az?'':b.dataset.az;renderGlo();});
   if(gloLetter)L=L.filter(g=>first(g)===gloLetter);
   $('#gloCount').textContent=TL(`${L.length} de ${GLO.length} términos`,`${L.length} of ${GLO.length} terms`,`${L.length} de ${GLO.length} termos`);
+  const oi=L.findIndex(g=>g.i===gloOpen);if(oi>=gloLim)gloLim=oi+20;const more=L.length-gloLim;L=L.slice(0,gloLim);
   $('#gloList').innerHTML=L.map(g=>`<button class="gloRow" data-g="${g.i}" aria-expanded="${g.i===gloOpen}"><b>${esc(gT(g))}</b><small>${esc(gCat(g.cat))}</small></button>${g.i===gloOpen?gloCard(g):''}`).join('')||`<p class="muted">${TL('Sin resultados. Prueba otra palabra, en español, inglés o portugués.','No results. Try another word, in Spanish, English or Portuguese.','Sem resultados. Tente outra palavra, em espanhol, inglês ou português.')}</p>`;
+  if(!q&&!$('#gloCat').value&&!gloLetter&&gloOpen<0){const d=new Date(),n=(d.getFullYear()*372+d.getMonth()*31+d.getDate())*7919%GLO.length,g=GLO[n];const c=document.createElement('div');c.className='card';c.style.marginBottom='10px';c.innerHTML=`<h3>${TL('Término del día','Term of the day','Termo do dia')}</h3><button class="link" data-g="${g.i}" style="text-align:left;font:500 18px/1.2 var(--f-display)">${esc(gT(g))}</button><p class="small muted">${esc(gD(g).slice(0,160))}${gD(g).length>160?'…':''}</p>`;$('#gloList').prepend(c);}
+  if(more>0){const b=document.createElement('button');b.className='btn';b.style.margin='10px 0';b.textContent=TL(`Mostrar ${Math.min(more,200)} más (quedan ${more})`,`Show ${Math.min(more,200)} more (${more} left)`,`Mostrar mais ${Math.min(more,200)} (restam ${more})`);b.onclick=()=>{gloLim+=200;renderGlo();};$('#gloList').appendChild(b);}
   gloWire();}
 function gloExLabel(x){const R=gloResolve(x);if(LANG==='es'||!R)return x.txt;if(R.lm)return R.lm[1];return nameL(CAT[R.id])||x.txt;}
 function gloCard(g){const other=[['ES',g.t],['EN',g.en],['PT',g.pt]].filter(([l,n])=>n&&l.toLowerCase()!==LANG);
@@ -2299,8 +2302,8 @@ function gloSnap(p,mark){try{renderer.render(scene,camera);const W=cv.width,H=cv
   return o.toDataURL('image/jpeg',0.86);}catch(e){console.warn('snap',e);return null;}}
 function gloZoom(url,txt){const z=document.createElement('div');z.className='gloZoom';z.innerHTML=`<img src="${url}" alt=""><p>${esc(txt)}</p><div class="row"><a class="btn" download="corpus-${gKey(txt).replace(/ /g,'-')}.jpg" href="${url}">${TL('Guardar foto','Save photo','Salvar foto')}</a><button class="btn">${TL('Cerrar','Close','Fechar')}</button></div>`;
   z.onclick=e=>{if(e.target===z||e.target.tagName==='BUTTON')z.remove();};$('#stage').appendChild(z);}
-$('#gloQ').addEventListener('input',()=>{gloOpen=-1;renderGlo();const L=GLO&&gloFilter();if(L&&L.length&&$('#gloQ').value.trim()&&gKey(gT(L[0]))===gKey($('#gloQ').value)){gloOpen=L[0].i;renderGlo();}});
-$('#gloCat').addEventListener('change',()=>{gloOpen=-1;gloLetter='';renderGlo();});
+$('#gloQ').addEventListener('input',()=>{gloOpen=-1;gloLim=150;renderGlo();const L=GLO&&gloFilter();if(L&&L.length&&$('#gloQ').value.trim()&&gKey(gT(L[0]))===gKey($('#gloQ').value)){gloOpen=L[0].i;renderGlo();}});
+$('#gloCat').addEventListener('change',()=>{gloOpen=-1;gloLetter='';gloLim=150;renderGlo();});
 /* ───────── Accidentes óseos ───────── */
 const lmGroup=new THREE.Group();scene.add(lmGroup);
 function clearLm(){lmGroup.clear();removeLabels('lm');}
@@ -2367,7 +2370,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 53 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v33');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v34');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();
