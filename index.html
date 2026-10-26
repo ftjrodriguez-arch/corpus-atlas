@@ -660,7 +660,7 @@ function baseMat(kk,variant,noTint){
     transparent:true,opacity:1,clippingPlanes:clipArr,side:s.dbl?THREE.DoubleSide:THREE.FrontSide});
   if(WET.includes(k)){m.clearcoat=k.startsWith('nervioso')?0.25:0.65;m.clearcoatRoughness=0.28;}
   if(k==='muscular'){m.sheen&&m.sheen.set&&0;}
-  const kind=k==='oseo'?'bone':k==='muscular'?'muscle':(k==='piel'||(SYS[k]&&SYS[k].base==='piel'))?'skin':k==='arterial'?'artery':k==='venoso'?'vein':k==='nervioso_periferico'?'nerve':'soft';
+  const kind=k==='oseo'?'bone':k==='muscular'?'muscle':(k==='piel'||(SYS[k]&&SYS[k].base==='piel'))?'skin':k==='arterial'?'artery':k==='venoso'?'vein':k==='nervioso_periferico'?'nerve':['digestivo','urinario','respiratorio','reproductor','endocrino'].includes(k)?'visc':'soft';
   if(k!=='importado'){m.extensions={derivatives:true};const gk=GRAYK[k]||GRAYK[kind]||GRAYK.soft;m.onBeforeCompile=sh=>corpusShader(sh,kind,noTint,gk);m.customProgramCacheKey=()=>'ck4_'+kind+(noTint?'_n':'')+gk.join('_');}
   m.userData.baseSide=m.side;return m;
 }
@@ -915,14 +915,18 @@ const ATLAS_COL={
    diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.58,0.66,0.74),ckCart*0.8);}`,
  artery:`if(ckAtlas>0.5){diffuseColor.rgb*=vec3(0.82,0.62,0.62);}`,
  vein:`if(ckAtlas>0.5){diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.03,0.13,0.30)*mix(0.85,1.1,H),0.75);}`,
+ visc:`if(ckAtlas>0.5){vec3 c=diffuseColor.rgb;float ckM1=ckN(vObj*90.0),ckM2=ckN(vObj*260.0);ckSt=0.6*ckM1+0.4*ckM2;ckFa=1.0;
+   float fat=smoothstep(0.03,0.12,c.g-c.b)*smoothstep(0.0,0.05,c.r-c.g+0.04)*step(0.25,c.g);
+   c*=mix(0.8,1.1,ckSt);if(fat>0.0){float lob=ckN(vObj*380.0);ckSt=mix(ckSt,lob,fat);c=mix(c,c*mix(0.68,1.12,smoothstep(0.25,0.75,lob)),fat);}
+   diffuseColor.rgb=c;}`,
  nerve:`if(ckAtlas>0.5){diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.72,0.56,0.16)*mix(0.85,1.08,H),0.6);}`};
 function corpusShader(sh,kind,noTint,gk){
   sh.uniforms.ckStudio=STUDIO_U;sh.uniforms.ckAtlas=ATLAS_U;sh.uniforms.ckLite=LITE_U;sh.uniforms.ckCut=CUT_U;sh.uniforms.ckImg=IMG_U;sh.uniforms.ckSlab=SLAB_U;sh.uniforms.ckSlabOn=SLABON_U;gk=gk||[0.5,0.45];
-  const SSS={bone:0.08,muscle:0.32,soft:0.22,skin:0.45,artery:0.38,vein:0.42,nerve:0.22}[kind];
+  const SSS={bone:0.08,muscle:0.32,soft:0.22,visc:0.3,skin:0.45,artery:0.38,vein:0.42,nerve:0.22}[kind];
   const SSC={artery:'1.0,0.28,0.22',vein:'0.42,0.32,0.95',nerve:'1.0,0.86,0.55'}[kind]||'1.0,0.42,0.3';
   sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute vec3 fdir;\nattribute vec3 vattr;\nattribute vec4 vtint;\nvarying vec3 vWp;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;')
     .replace('#include <begin_vertex>','#include <begin_vertex>\nvWp=(modelMatrix*vec4(transformed,1.0)).xyz;vObj=position;vFd=fdir;vVa=vattr;vTn=vtint;');
-  const P={bone:{fq:520.0,b:0.0022,c:[0.97,1.02],r:0.12},muscle:{fq:210.0,b:0.016,c:[0.9,1.03],r:0.2},soft:{fq:160.0,b:0.004,c:[0.97,1.02],r:0.0},artery:{fq:240.0,b:0.002,c:[0.95,1.03],r:0.08},vein:{fq:200.0,b:0.003,c:[0.93,1.04],r:0.06},nerve:{fq:900.0,b:0.007,c:[0.9,1.05],r:0.18},skin:{fq:900.0,b:0.0018,c:[0.985,1.015],r:0.1}}[kind];
+  const P={bone:{fq:520.0,b:0.0022,c:[0.97,1.02],r:0.12},muscle:{fq:210.0,b:0.016,c:[0.9,1.03],r:0.2},soft:{fq:160.0,b:0.004,c:[0.97,1.02],r:0.0},visc:{fq:160.0,b:0.003,c:[0.96,1.03],r:0.05},artery:{fq:240.0,b:0.002,c:[0.95,1.03],r:0.08},vein:{fq:200.0,b:0.003,c:[0.93,1.04],r:0.06},nerve:{fq:900.0,b:0.007,c:[0.9,1.05],r:0.18},skin:{fq:900.0,b:0.0018,c:[0.985,1.015],r:0.1}}[kind];
   const map=['muscle','artery','vein','nerve'].includes(kind)?'vec3 ckMap(vec3 p){vec3 f=normalize(vFd+1e-5);return (p-f*dot(p,f))+f*dot(p,f)*'+(kind==='nerve'?'0.03':kind==='muscle'?'0.07':'0.12')+';}':'vec3 ckMap(vec3 p){return p;}';
   const h=`float ckAO=clamp(vVa.r*1.2,0.0,1.0);${kind==='skin'?'ckAO=mix(1.0,ckAO,0.3);':''}float ckTen=${kind==='muscle'?'smoothstep(0.15,0.75,vVa.g)':'0.0'};float ckCart=${kind==='bone'?'smoothstep(0.2,0.8,vVa.b)':'0.0'};float ckSt=0.5;float ckFa=0.0;float ckFq=${P.fq.toFixed(1)};float ckFw=length(fwidth(vObj))*ckFq;float ckAmp=1.0-smoothstep(0.12,0.5,ckFw);
     float H0=ckF(ckMap(vObj)*ckFq);float H=mix(0.5,H0,ckAmp*(1.0+0.6*ckStudio));`+(noTint?'':'diffuseColor.rgb=mix(diffuseColor.rgb,pow(vTn.rgb,vec3(2.2)),vTn.a);');
@@ -939,7 +943,7 @@ function corpusShader(sh,kind,noTint,gk){
       {float ckRim=pow(1.0-clamp(abs(dot(normal,normalize(vViewPosition))),0.0,1.0),2.2);
        reflectedLight.indirectDiffuse+=diffuseColor.rgb*vec3(${SSC})*ckRim*${SSS.toFixed(2)}*(1.0+0.8*ckStudio)*(1.0-0.55*ckAtlas)*(0.4+0.6*ckAO);}`)
     .replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
-      ${kind==='muscle'?`if(ckAtlas>0.5&&ckLite<0.5&&ckFa>0.01){vec2 dH=vec2(dFdx(ckSt),dFdy(ckSt))*0.0016*ckFa*(1.0-0.7*ckTen);vec3 sx=dFdx(-vViewPosition),sy=dFdy(-vViewPosition);vec3 ckR1=cross(sy,normal),ckR2=cross(normal,sx);float ckDt=dot(sx,ckR1);vec3 ckGr=sign(ckDt)*(dH.x*ckR1+dH.y*ckR2);normal=normalize(abs(ckDt)*normal-ckGr);}`:''}
+      ${(kind==='muscle'||kind==='visc')?`if(ckAtlas>0.5&&ckLite<0.5&&ckFa>0.01){vec2 dH=vec2(dFdx(ckSt),dFdy(ckSt))*${kind==='visc'?'0.0007':'0.0016'}*ckFa*(1.0-0.7*ckTen);vec3 sx=dFdx(-vViewPosition),sy=dFdy(-vViewPosition);vec3 ckR1=cross(sy,normal),ckR2=cross(normal,sx);float ckDt=dot(sx,ckR1);vec3 ckGr=sign(ckDt)*(dH.x*ckR1+dH.y*ckR2);normal=normalize(abs(ckDt)*normal-ckGr);}`:''}
       if(ckAmp>0.01&&ckLite<0.5){float ckE=0.25/ckFq;
         vec3 ckG=vec3(ckF(ckMap(vObj+vec3(ckE,0,0))*ckFq),ckF(ckMap(vObj+vec3(0,ckE,0))*ckFq),ckF(ckMap(vObj+vec3(0,0,ckE))*ckFq))-vec3(H0);
         ckG=(viewMatrix*vec4(ckG/ckE,0.0)).xyz;ckG-=normal*dot(ckG,normal);
@@ -2214,7 +2218,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 53 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v27');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v28');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();
