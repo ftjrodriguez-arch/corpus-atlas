@@ -1243,6 +1243,9 @@ $('#q').addEventListener('input',e=>{
   all.sort((a,b)=>ex(a)-ex(b)||(PRI[a.c[4]]??9)-(PRI[b.c[4]]??9)||(a.k.startsWith(q)?0:1)-(b.k.startsWith(q)?0:1)||a.c[2].length-b.c[2].length);
   const res=all.slice(0,14).map(r=>r.c);
   out.innerHTML=res.length?'':'<p class="muted" style="padding:10px">Sin resultados. Prueba con otro nombre, en latín o en inglés.</p>';
+  {const qo=gKey(e.target.value);const oh=ORG.filter(o=>[o.es,o.en,o.pt].some(n=>gKey(n).startsWith(qo)||gKey(n).includes(' '+qo))).slice(0,2);
+    if(oh.length&&!res.length)out.innerHTML='';
+    oh.forEach(o=>{const b=document.createElement('button');b.innerHTML=`<span><span class="muted">${TL('Órgano completo:','Whole organ:','Órgão inteiro:')}</span> ${esc(oT(o))}</span><small>${o.parts.length} ${TL('piezas','parts','peças')}</small>`;b.onclick=()=>{out.hidden=true;e.target.value='';showOrgan(o);};out.appendChild(b);});}
   if(GLO){const qq=gKey(e.target.value);const gh=GLO.filter(g=>g.k.split(' | ').some(n=>n.startsWith(qq))).map(g=>[(gKey(gT(g)).startsWith(qq)?0:gKey(g.t).startsWith(qq)?1:2)*100+gT(g).length,g]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]).slice(0,3);
     if(gh.length&&!res.length)out.innerHTML='';
     gh.forEach(g=>{const b=document.createElement('button');b.innerHTML=`<span><span class="muted">${TL('Glosario:','Glossary:','Glossário:')}</span> ${esc(gT(g))}</span><small>${esc(gCat(g.cat))}</small>`;b.onclick=()=>{out.hidden=true;e.target.value='';gloOpenTerm(g.i);};out.appendChild(b);});}else if(!GLO_FAIL)gloLoad();
@@ -2190,6 +2193,19 @@ async function askAi(){const q=$('#aiQ').value.trim();if(!q||!SAMPLE)return;cons
 (async()=>{try{if(window.claude&&claude.use){const s=await claude.use('sample');if(s){SAMPLE=s;renderInfo();renderActbar();}}}catch(e){}})();
 
 
+
+/* Órganos completos (agrupaciones de piezas del atlas) */
+let ORG=[];fetch('data/organs.json').then(r=>r.ok?r.json():[]).then(o=>{ORG=o;}).catch(()=>{});
+const oT=o=>TL(o.es,o.en,o.pt);
+function orgIds(o){const want=new Set(o.parts),ids=[];for(const id in CAT){const r=CAT[id];if(want.has(r[1])&&!r[6]&&sexOk(r[4]))ids.push(id);}return ids;}
+async function showOrgan(o){if(!o)return;select(null);clearLm();
+  let ids=orgIds(o);if(!ids.length&&o.body&&BODY!==o.body){setBody(o.body);ids=orgIds(o);}
+  if(!ids.length){toast(TL('Este órgano no está disponible en el modelo actual.','This organ is not available in the current model.','Este órgão não está disponível no modelo atual.'));return;}
+  const syss=[...new Set(ids.map(id=>CAT[id][4]))];for(const k of syss){SYS[k].on=true;if(SYS[k].op<.3)SYS[k].op=1;}renderSysList();await Promise.all(syss.map(k=>loadSys(k)));
+  ids.forEach(id=>hiddenIds.delete(id));isoOnly=true;isoSet=new Set(ids);applySystems();
+  const box=new THREE.Box3();for(const id of ids){const m=findMesh(id);if(!m)continue;m.updateMatrixWorld();m.geometry.computeBoundingBox();box.union(m.geometry.boundingBox.clone().applyMatrix4(m.matrixWorld));}
+  if(!box.isEmpty()){const sp=box.getBoundingSphere(new THREE.Sphere());focusOn(sp.center,Math.max(0.18,sp.radius*3.2));}
+  toast(TL(`${o.es}: ${ids.length} estructuras aisladas. «Mostrar todo» devuelve el resto del cuerpo.`,`${o.en}: ${ids.length} structures isolated. “Show all” brings back the rest of the body.`,`${o.pt}: ${ids.length} estruturas isoladas. «Mostrar tudo» traz de volta o resto do corpo.`));}
 /* ───────── Glosario médico ───────── */
 var gloBusy=false,GLO_FAIL=false,gloLim=150;let GLO=null,GLO_P=null,gloOpen=-1,gloLetter='';const GLO_IMG=new Map();
 const GLO_CAT={'Osteología':['Osteology','Osteologia'],'Huesos del cuerpo':['Bones of the body','Ossos do corpo'],'Artrología':['Arthrology','Artrologia'],'Miología':['Myology','Miologia'],'Tejidos':['Tissues','Tecidos'],'Posición y dirección':['Position and direction','Posição e direção'],'Planos y ejes':['Planes and axes','Planos e eixos'],'Movimientos':['Movements','Movimentos'],'Regiones del cuerpo':['Body regions','Regiões do corpo'],'Términos clínicos':['Clinical terms','Termos clínicos'],'Semiología':['Semiology','Semiologia'],'Raíces y afijos':['Roots and affixes','Raízes e afixos'],'Angiología':['Angiology','Angiologia'],'Neuroanatomía':['Neuroanatomy','Neuroanatomia'],'Esplacnología':['Splanchnology','Esplancnologia'],'Generalidades':['General terms','Generalidades'],'Imagenología':['Medical imaging','Imagenologia'],'Embriología':['Embryology','Embriologia'],'Histología':['Histology','Histologia'],'Fisiología':['Physiology','Fisiologia'],'Anatomía topográfica':['Topographic anatomy','Anatomia topográfica'],'Pruebas ortopédicas':['Orthopaedic tests','Testes ortopédicos'],'Exploración neurológica':['Neurological examination','Exame neurológico'],'Enfermedades y lesiones':['Diseases and injuries','Doenças e lesões'],'Patología general':['General pathology','Patologia geral'],'Farmacología básica':['Basic pharmacology','Farmacologia básica']};
@@ -2218,7 +2234,7 @@ function renderGlo(){if(!GLO)return;const q=$('#gloQ').value.trim();let L=gloFil
   if(!q&&!$('#gloCat').value&&!gloLetter&&gloOpen<0){const d=new Date(),n=(d.getFullYear()*372+d.getMonth()*31+d.getDate())*7919%GLO.length,g=GLO[n];const c=document.createElement('div');c.className='card';c.style.marginBottom='10px';c.innerHTML=`<h3>${TL('Término del día','Term of the day','Termo do dia')}</h3><button class="link" data-g="${g.i}" style="text-align:left;font:500 18px/1.2 var(--f-display)">${esc(gT(g))}</button><p class="small muted">${esc(gD(g).slice(0,160))}${gD(g).length>160?'…':''}</p>`;$('#gloList').prepend(c);}
   if(more>0){const b=document.createElement('button');b.className='btn';b.style.margin='10px 0';b.textContent=TL(`Mostrar ${Math.min(more,200)} más (quedan ${more})`,`Show ${Math.min(more,200)} more (${more} left)`,`Mostrar mais ${Math.min(more,200)} (restam ${more})`);b.onclick=()=>{gloLim+=200;renderGlo();};$('#gloList').appendChild(b);}
   gloWire();}
-function gloExLabel(x){const R=gloResolve(x);if(LANG==='es'||!R)return x.txt;if(R.lm)return LANG==='pt'&&R.lm[3]?R.lm[3]:R.lm[1];return nameL(CAT[R.id])||x.txt;}
+function gloExLabel(x){const R=gloResolve(x);if(R&&R.org)return oT(R.org);if(LANG==='es'||!R)return x.txt;if(R.lm)return LANG==='pt'&&R.lm[3]?R.lm[3]:R.lm[1];return nameL(CAT[R.id])||x.txt;}
 function gloCard(g){const other=[['ES',g.t],['EN',g.en],['PT',g.pt]].filter(([l,n])=>n&&l.toLowerCase()!==LANG);
   const lbl=(es,en,pt)=>`<h3>${TL(es,en,pt)}</h3>`;
   const ex=(g.ej||[]).map((x,k)=>{const key=g.i+':'+k,img=GLO_IMG.get(key);return `<button data-gex="${k}" title="${esc(TL('Ver en 3D y fotografiar','Show in 3D and photograph','Ver em 3D e fotografar'))}"><span class="ph" data-ph="${key}">${img?`<img src="${img}" alt="">`:TL('Ver en 3D','Show in 3D','Ver em 3D')}</span><span>${esc(gloExLabel(x))}</span></button>`;}).join('');
@@ -2241,6 +2257,7 @@ function gloWire(){const box=$('#gloList');
 function gloScroll(i){const el=$('#gloList').querySelector(`[data-g="${i}"]`);if(el)el.scrollIntoView({block:'start',behavior:'smooth'});}
 function gloOpenTerm(i){if(!GLO)return gloLoad().then(()=>gloOpenTerm(i));showTab('glo');$('#gloQ').value='';$('#gloCat').value='';gloLetter='';gloOpen=i;renderGlo();setTimeout(()=>gloScroll(i),30);}
 function gloResolve(x){const side=romSide==='L'?'izquierdo':'derecho';
+  if(x.org){const o=ORG.find(o=>o.id===x.org);return o?{org:o}:null;}
   if(x.lm){let best=null;for(const id in EX.lm){const e=EX.lm[id].find(l=>l[1]===x.lm);if(!e)continue;const r=CAT[id];if(!best||(r&&r[5]===side))best={id,lm:e};}return best;}
   if(x.s){const rs=Object.values(CAT).filter(r=>r[1]===x.s);if(!rs.length)return null;const ok=r=>r[4]!=='insercion'&&sexOk(r[4]);
     const r=rs.find(r=>ok(r)&&(!r[5]||r[5]===side))||rs.find(ok)||rs.find(r=>r[4]!=='insercion')||rs[0];return {id:r[0]};}
@@ -2300,7 +2317,7 @@ function gloLinkify(txt,g){try{if(!GLO_RX||GLO_RX.l!==LANG){const m=new Map();co
 const gSleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function gloShow(g,k){const x=g.ej[k],R=gloResolve(x);if(!R){toast(TL('Esta estructura no está disponible en el modelo actual.','This structure is not available in the current model.','Esta estrutura não está disponível no modelo atual.'));return;}
   gloBusy=true;try{if(isPhone()&&sheetState!=='peek')setSheet('peek');
-    clearLm();await goTo(R.id);if(R.lm)showLm([R.lm],true);
+    clearLm();if(R.org)await showOrgan(R.org);else{await goTo(R.id);if(R.lm)showLm([R.lm],true);}
     await gSleep(1500);const url=gloSnap(R.lm?new V3(...R.lm[2]):orb.T.tgt.clone(),!!R.lm);
     if(url){const key=g.i+':'+k;GLO_IMG.set(key,url);gloDB.set(gPhKey(g,k),url);const ph=$('#gloList').querySelector(`[data-ph="${key}"]`);if(ph)ph.innerHTML=`<img src="${url}" alt="${esc(gloExLabel(x))}">`;}
   }finally{gloBusy=false;}}
@@ -2381,7 +2398,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 53 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v35');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v36');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();

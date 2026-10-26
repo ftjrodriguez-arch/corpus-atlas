@@ -1,7 +1,7 @@
 /* Corpus — service worker: funciona sin conexión una vez descargado. */
-const V='corpus-v35';
+const V='corpus-v36';
 const CORE=['./','index.html','manifest.webmanifest','icons/icon.svg','icons/icon-192.png',
- 'data/catalog.json','data/info.json','data/rig.json','data/lessons.json','data/extras.json','data/fem.json','data/cases.json','data/glossary.json',
+ 'data/catalog.json','data/info.json','data/rig.json','data/lessons.json','data/extras.json','data/fem.json','data/cases.json','data/glossary.json','data/organs.json',
  'draco/draco_wasm_wrapper.js','draco/draco_decoder.wasm','draco/draco_decoder.js',
  'm2/oseo.txt','m2/muscular.txt'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()));});
