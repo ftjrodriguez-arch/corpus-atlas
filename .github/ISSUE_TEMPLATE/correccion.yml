@@ -1,0 +1,30 @@
+name: Corrección anatómica
+description: Propón una corrección a una ficha, un nombre o un dato del atlas
+title: "Corrección: "
+labels: ["corrección"]
+body:
+  - type: input
+    id: estructura
+    attributes:
+      label: Estructura
+      description: Nombre en el atlas (y su id si lo ves en la ficha)
+    validations:
+      required: true
+  - type: textarea
+    id: correccion
+    attributes:
+      label: ¿Qué hay que corregir?
+    validations:
+      required: true
+  - type: textarea
+    id: fuente
+    attributes:
+      label: Fuente que lo respalda
+      description: Libro, artículo o guía, con página si es posible
+    validations:
+      required: true
+  - type: input
+    id: perfil
+    attributes:
+      label: Tu perfil (opcional)
+      description: p. ej. anatomista, fisioterapeuta, médico, estudiante de 3.º

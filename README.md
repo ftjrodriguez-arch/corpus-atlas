@@ -13,6 +13,11 @@ Funciona en el navegador del ordenador, la tableta o el móvil, sin instalar nad
 - **Disección por capas**: de la piel al hueso, paso a paso.
 - **Fichas en español** con nombre latino: origen, inserción, inervación, irrigación, acción, biomecánica por plano y eje, prueba muscular manual (Daniels) y nota clínica.
 - **Movimiento**: rangos articulares de referencia (AAOS), simulador con deformación del modelo, agonistas, goniometría y registro de mediciones.
+- **Idiomas**: español, inglés y portugués (interfaz y nombres de las 4.715 estructuras; las fichas detalladas, por ahora en español).
+- **Casos clínicos**: 14 casos (lesiones nerviosas, manguito rotador, LCA, esguince de tobillo, tendón calcáneo, Trendelenburg…) que resaltan la estructura lesionada y los músculos afectados.
+- **Repaso espaciado** (Leitner) por región o sistema, y práctica de identificación.
+- **Compartir vista**: un enlace abre el atlas exactamente en la misma vista (capas, cámara, cortes, estructura, marcha).
+- **Marcha patológica**: Trendelenburg, steppage, antiálgica, hemiparética, en tijera, parkinsoniana y rodilla rígida.
 - **Ciclo de la marcha**: las 8 fases de Perry animadas sobre el modelo, con ángulos de cadera, rodilla y tobillo y los músculos activos (concéntrica, excéntrica, isométrica).
 - **Planos y ejes** (sagital, frontal, transversal) con cortes, vista de rayos X, modo estudio, relieves óseos, lecciones guiadas y práctica de identificación.
 - **Alta resolución** por regiones con las mallas originales del atlas.
@@ -45,10 +50,12 @@ No hace falta compilar nada: es una sola página (`index.html`) con three.js.
 
 ## Cómo contribuir
 
+Cada ficha tiene un botón **«Proponer corrección»** que abre aquí una propuesta pública con la ficha actual ya rellenada: solo hay que escribir la corrección y su fuente.
+
 Este proyecto es un regalo para la humanidad y mejora con cada aporte:
 
 - **Anatomistas, médicos, fisioterapeutas**: revisen las fichas (`data/info.json`, `data/fem.json`) y abran un *issue* o *pull request* con correcciones.
-- **Traductores**: ayuden a llevar el atlas al portugués, inglés y otras lenguas.
+- **Traductores**: revisen el inglés y el portugués (`data/i18n.json`) y ayuden a traducir las fichas.
 - **Desarrolladores**: rendimiento, accesibilidad, nuevas lecciones.
 - **Docentes**: compartan cómo lo usan en clase.
 

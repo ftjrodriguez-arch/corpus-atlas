@@ -125,6 +125,10 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .plane-h b{display:flex;align-items:center;gap:8px}
 .swatch{width:10px;height:10px;border-radius:2px}
 .chk{display:flex;align-items:center;gap:6px;font-size:13px}
+.toast{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--accent);color:var(--ink);padding:8px 14px;border-radius:10px;font-size:13px;z-index:30;max-width:90%;text-align:center}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.refs{font-size:11.5px;color:var(--muted);line-height:1.45}.refs b{color:var(--ink);font-weight:600}
+.patchips{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0}.patchips button{border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:3px 10px;font-size:12px;color:var(--muted)}.patchips button[aria-pressed="true"]{border-color:var(--accent);color:var(--ink)}
 .gait input[type=range]{width:100%;accent-color:var(--accent);margin:8px 0 2px}
 .gaitBar{display:flex;height:22px;border-radius:6px;overflow:hidden;font-size:10px;margin-bottom:8px}
 .gaitBar span{display:flex;align-items:center;justify-content:center;color:var(--ink);border-right:1px solid var(--bg);white-space:nowrap;overflow:hidden;cursor:pointer;opacity:.55}
@@ -185,6 +189,11 @@ textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
     <button id="m-stu" aria-pressed="true">Estudiante</button>
     <button id="m-pro" aria-pressed="false">Profesional</button>
   </div>
+  <div class="seg" role="group" aria-label="Idioma" id="langSeg">
+    <button data-lang="es" aria-pressed="true" title="Español">ES</button>
+    <button data-lang="en" aria-pressed="false" title="English">EN</button>
+    <button data-lang="pt" aria-pressed="false" title="Português">PT</button>
+  </div>
   <div class="seg" role="group" aria-label="Cuerpo">
     <button id="b-m" aria-pressed="true">Hombre</button>
     <button id="b-f" aria-pressed="false">Mujer</button>
@@ -193,7 +202,7 @@ textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
 
 <main>
   <section class="stage" id="stage" aria-label="Modelo 3D del cuerpo humano">
-    <canvas id="cv"></canvas>
+    <canvas id="cv" tabindex="0" role="img" aria-label="Modelo 3D interactivo del cuerpo humano. Flechas para girar, más y menos para acercar, 1 a 6 para las vistas, X para rayos X."></canvas>
     <div class="labels" id="labels"></div>
     <div class="hint">
       <p id="hintTxt">Arrastra para girar · pellizca o rueda para acercar · dos dedos o clic derecho para desplazar · toca una estructura para identificarla</p>
@@ -223,7 +232,9 @@ textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
       <button data-view="reset">Restablecer</button>
       <button id="xrayBtn" aria-pressed="false">Rayos X</button>
       <button id="studioBtn" aria-pressed="false" title="Fondo negro e iluminación de estudio para ver fibras y relieves">Estudio</button>
+      <button id="shareBtn" title="Copia un enlace que abre el atlas exactamente en esta vista">Compartir vista</button>
     </div>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
   </section>
 
   <aside class="panel">
@@ -266,6 +277,7 @@ textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
           <p class="muted small">Sustituye las mallas ligeras de una región por las originales del atlas, sin reducir (compresión Draco). Úsalo para estudiar de cerca.</p>
           <div id="hrList"></div>
           <label class="chk"><input type="checkbox" id="autoHR"> Cargar automáticamente al acercar la cámara</label>
+          <label class="chk"><input type="checkbox" id="liteChk"> Modo ligero para móviles modestos (menos resolución y efectos)</label>
         </div>
         <div class="card">
           <h3>Vistas guardadas</h3>
@@ -311,6 +323,8 @@ textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
           <div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">Ciclo de la marcha</h3><button class="btn" id="gaitBtn" aria-pressed="false">Ver marcha</button></div>
           <p class="muted small" id="gaitIntro">Marcha normal a velocidad libre con ángulos de referencia de la literatura (Perry; Winter). Se resaltan los músculos activos de ambos miembros inferiores en cada fase.</p>
           <div id="gaitBody" hidden>
+            <div class="patchips" id="gaitPats" role="group" aria-label="Patrón de marcha"></div>
+            <p class="small" id="gaitPatTxt" hidden></p>
             <input type="range" id="gaitR" min="0" max="99" step="1" value="0" aria-label="Porcentaje del ciclo de la marcha">
             <div class="gaitBar" id="gaitBar" aria-hidden="true"></div>
             <div class="row" style="justify-content:space-between;align-items:baseline"><b id="gaitPhase"></b><span class="mono" id="gaitPct"></span></div>
@@ -365,10 +379,10 @@ textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
         <p class="muted" style="font-size:12px">Valores de referencia de rango articular activo en adultos (AAOS). Las mallas reales se deforman alrededor del centro articular calculado a partir de los huesos; los músculos que cruzan la articulación se curvan de forma aproximada.</p>
       </div>
 
-      <div class="view" id="tab-lec" hidden><p class="femonly card">Las lecciones guiadas están construidas sobre el modelo masculino. <button class="btn" onclick="setBody('m')">Cambiar a hombre</button></p><div id="lecBox"></div></div>
+      <div class="view" id="tab-lec" hidden><p class="femonly card">Las lecciones guiadas están construidas sobre el modelo masculino. <button class="btn" onclick="setBody('m')">Cambiar a hombre</button></p><div id="lecBox"></div><div id="caseBox" class="maleonly"></div></div>
 
       <div class="view" id="tab-estr" hidden>
-        <div id="infoBox"></div>
+        <div id="infoBox" aria-live="polite"></div>
         <div class="card only-stu">
           <h3>Práctica de identificación</h3>
           <p class="muted small">Se te pedirá una estructura de las capas visibles. Tócala en el modelo.</p>
@@ -379,6 +393,20 @@ textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
             <button class="btn" id="quizStop" hidden>Terminar</button>
           </div>
           <p id="quizMsg" style="font-size:13px"></p>
+        </div>
+        <div class="card" id="srsCard">
+          <h3>Repaso espaciado</h3>
+          <p class="muted small">Tarjetas que vuelven cuando estás a punto de olvidarlas (sistema Leitner: 1, 3, 7, 14 y 30 días). Tu progreso se guarda en este dispositivo.</p>
+          <select id="srsDeck" class="field" aria-label="Mazo de repaso"></select>
+          <select id="srsMode" class="field" aria-label="Tipo de pregunta"><option value="id">Identificar: ¿qué estructura es?</option><option value="oi">Músculos: origen, inserción e inervación</option></select>
+          <p class="small" id="srsStat"></p>
+          <div class="row"><button class="btn pri" id="srsStart">Empezar repaso</button><button class="btn" id="srsStop" hidden>Terminar</button></div>
+          <div id="srsBox" hidden>
+            <p id="srsQ" style="font-size:14px;margin:8px 0"></p>
+            <div id="srsA" hidden></div>
+            <div class="row" id="srsRevealRow"><button class="btn pri" id="srsReveal">Mostrar respuesta</button></div>
+            <div class="row" id="srsGrade" hidden><button class="btn" data-g="0">No lo sabía</button><button class="btn" data-g="1">Dudé</button><button class="btn pri" data-g="2">Lo sabía</button></div>
+          </div>
         </div>
       </div>
     </div>
@@ -488,6 +516,9 @@ const XRAY_SYS=['muscular','fascia','piel'];/* en la mujer la piel también se a
 function syncMat(m,key){const [k,,st]=key.split('|');const s=SYS[k];let op=m.userData.ghost?.32:s.op;if(m.userData.memb)op=Math.min(op,.2);if(xray&&XRAY_SYS.includes(BS(k))&&!st)op=Math.min(op,.14);m.opacity=op;m.transparent=op<.99;m.depthWrite=op>=.99;
   const want=clipArr.length?THREE.DoubleSide:m.userData.baseSide;if(m.side!==want){m.side=want;m.needsUpdate=true;}}
 function syncAllMats(){for(const key in MAT) syncMat(MAT[key],key);}
+const autoLite=(navigator.deviceMemory&&navigator.deviceMemory<=3)||((navigator.hardwareConcurrency||8)<=4&&matchMedia('(pointer:coarse)').matches);
+let lite=store.get('lite',null);if(lite===null)lite=!!autoLite;
+function setLite(on){lite=on;store.set('lite',on);LITE_U.value=on?1:0;renderer.setPixelRatio(on?1:Math.min(window.devicePixelRatio||1,2));if(on){autoHR=false;store.set('autoHR',false);const a=$('#autoHR');if(a)a.checked=false;}const c=$('#liteChk');if(c)c.checked=on;if(typeof resize==='function')resize();}
 let studio=false;const hemi=scene.children.find(o=>o.isHemisphereLight);const LBASE=null;
 function setStudio(on){studio=on;STUDIO_U.value=on?1:0;stage.classList.toggle('studio',on);$('#studioBtn').setAttribute('aria-pressed',on);store.set('studio',on);
   if(hemi)hemi.intensity=on?0.12:(scene.environment?0.35:0.8);key.intensity=on?1.35:(scene.environment?0.85:1.15);rim.intensity=on?1.6:0.6;fill.intensity=on?0.12:0.35;camLight.intensity=on?0.1:0.25;
@@ -515,7 +546,7 @@ function infoFor(c){
   if(INFO.rest&&INFO.rest[en]) return {kind:'gen',d:INFO.rest[en]};
   return null;
 }
-function entry(id){const r=CAT[id];return r?{id:r[0],en:r[1],es:r[2],la:r[3],sys:r[4],side:r[5],ins:r[6]}:null;}
+function entry(id){const r=CAT[id];return r?{id:r[0],en:r[1],es:nameL(r),la:r[3],sys:r[4],side:SIDE_L(r[5]),ins:r[6],esES:r[2]}:null;}
 const SIDE_ES={derecho:'derecho',izquierdo:'izquierdo'};
 function label(c){return c.es+(c.side?` (${c.side})`:'')+(c.ins?` · ${c.ins}`:'');}
 
@@ -664,9 +695,9 @@ float ckN(vec3 x){vec3 i=floor(x);vec3 f=fract(x);f=f*f*(3.0-2.0*f);
  return mix(mix(mix(ckH(i),ckH(i+vec3(1,0,0)),f.x),mix(ckH(i+vec3(0,1,0)),ckH(i+vec3(1,1,0)),f.x),f.y),mix(mix(ckH(i+vec3(0,0,1)),ckH(i+vec3(1,0,1)),f.x),mix(ckH(i+vec3(0,1,1)),ckH(i+vec3(1,1,1)),f.x),f.y),f.z);}
 float ckF(vec3 p){return 0.65*ckN(p)+0.35*ckN(p*2.07);}
 `;
-const STUDIO_U={value:0};
+const STUDIO_U={value:0},LITE_U={value:0};
 function corpusShader(sh,kind,noTint){
-  sh.uniforms.ckStudio=STUDIO_U;
+  sh.uniforms.ckStudio=STUDIO_U;sh.uniforms.ckLite=LITE_U;
   const SSS={bone:0.08,muscle:0.32,soft:0.22,skin:0.45,artery:0.38,vein:0.42,nerve:0.22}[kind];
   const SSC={artery:'1.0,0.28,0.22',vein:'0.42,0.32,0.95',nerve:'1.0,0.86,0.55'}[kind]||'1.0,0.42,0.3';
   sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute vec3 fdir;\nattribute vec3 vattr;\nattribute vec4 vtint;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;')
@@ -675,7 +706,7 @@ function corpusShader(sh,kind,noTint){
   const map=['muscle','artery','vein','nerve'].includes(kind)?'vec3 ckMap(vec3 p){vec3 f=normalize(vFd+1e-5);return (p-f*dot(p,f))+f*dot(p,f)*'+(kind==='nerve'?'0.03':kind==='muscle'?'0.07':'0.12')+';}':'vec3 ckMap(vec3 p){return p;}';
   const h=`float ckAO=clamp(vVa.r*1.2,0.0,1.0);${kind==='skin'?'ckAO=mix(1.0,ckAO,0.3);':''}float ckTen=${kind==='muscle'?'smoothstep(0.15,0.75,vVa.g)':'0.0'};float ckCart=${kind==='bone'?'smoothstep(0.2,0.8,vVa.b)':'0.0'};float ckFq=${P.fq.toFixed(1)};float ckFw=length(fwidth(vObj))*ckFq;float ckAmp=1.0-smoothstep(0.12,0.5,ckFw);
     float H0=ckF(ckMap(vObj)*ckFq);float H=mix(0.5,H0,ckAmp*(1.0+0.6*ckStudio));`+(noTint?'':'diffuseColor.rgb=mix(diffuseColor.rgb,pow(vTn.rgb,vec3(2.2)),vTn.a);');
-  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform float ckStudio;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;\n'+NOISE_GLSL+map)
+  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform float ckStudio;\nuniform float ckLite;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;\n'+NOISE_GLSL+map)
     .replace('#include <color_fragment>','#include <color_fragment>\n'+h+`diffuseColor.rgb*=mix(${P.c[0].toFixed(2)},${P.c[1].toFixed(2)},H);
       ${kind==='bone'?'diffuseColor.rgb*=mix(vec3(0.90,0.88,0.83),vec3(1.03,1.02,1.0),ckN(vObj*22.0));':''}${kind==='skin'?'diffuseColor.rgb*=mix(vec3(0.95,0.93,0.94),vec3(1.03,1.0,0.97),ckN(vObj*14.0));':''}
       diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.80,0.76,0.66)*mix(0.95,1.04,H),ckTen);
@@ -687,7 +718,7 @@ function corpusShader(sh,kind,noTint){
       {float ckRim=pow(1.0-clamp(abs(dot(normal,normalize(vViewPosition))),0.0,1.0),2.2);
        reflectedLight.indirectDiffuse+=diffuseColor.rgb*vec3(${SSC})*ckRim*${SSS.toFixed(2)}*(1.0+0.8*ckStudio)*(0.4+0.6*ckAO);}`)
     .replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
-      if(ckAmp>0.01){float ckE=0.25/ckFq;
+      if(ckAmp>0.01&&ckLite<0.5){float ckE=0.25/ckFq;
         vec3 ckG=vec3(ckF(ckMap(vObj+vec3(ckE,0,0))*ckFq),ckF(ckMap(vObj+vec3(0,ckE,0))*ckFq),ckF(ckMap(vObj+vec3(0,0,ckE))*ckFq))-vec3(H0);
         ckG=(viewMatrix*vec4(ckG/ckE,0.0)).xyz;ckG-=normal*dot(ckG,normal);
         normal=normalize(normal-ckG*${P.b.toFixed(3)}*ckAmp*(1.0+0.6*ckStudio)*(1.0-0.55*ckTen-0.8*ckCart));}`);
@@ -738,7 +769,7 @@ function setBody(b){if(b!==BODY){select(null);stopTools&&stopTools();}BODY=b;sto
   isoSet=null;patchFocus=null;DIS_FLT=null;DIS_EXC=null;disStage=-1;hiddenIds.clear();
   if(b==='f'&&currentTab==='mov'){playing=false;}
   for(const k in SYS) if(sexOk(k)&&SYS[k].on&&SYS[k].state!=='loaded'&&CAT_READY) loadSys(k);
-  applySystems();renderSysList();renderDis();if(b==='f')for(const k in HR)if(HR[k].state==='loaded')unloadHR(k);applyPose&&applyPose();}
+  applySystems();renderSysList();renderDis();if(CAT_READY)renderSrsDecks();if(b==='f')for(const k in HR)if(HR[k].state==='loaded')unloadHR(k);applyPose&&applyPose();}
 let CAT_READY=false;
 $('#b-m').onclick=()=>setBody('m');$('#b-f').onclick=()=>setBody('f');
 
@@ -880,13 +911,18 @@ function renderInfo(){
     <span class="info-sys"><span class="dot" style="background:${m.userData.sys==='insercion'?(c.ins==='origen'?'var(--orig)':'var(--ins)'):s.c}"></span>${esc(s.n)}${c.side?' · lado '+c.side:''}</span>
     <h2>${esc(c.es)}${c.ins?` <span class="muted" style="font-size:15px">(${c.ins})</span>`:''}</h2>
     ${c.la?`<p class="latin">${esc(c.la)}</p>`:''}
+    ${LANG!=='es'?'<p class="muted small">Ficha disponible por ahora solo en español.</p>':''}
     ${body}
     <div class="row">${patches.length?`<button class="btn pri" id="iPatch">Ver origen e inserción</button>`:''}<button class="btn" id="iFocus">Centrar</button><button class="btn" id="iIso">Aislar</button><button class="btn" id="iHide">Ocultar</button></div>
     ${extra}
-    <p class="muted" style="font-size:11.5px">Término del atlas: ${esc(c.en)}</p></div>`;
+    ${refsFor(inf,c)}
+    <div class="row"><button class="btn" id="iShare">Compartir esta estructura</button><button class="btn" id="iFix" title="Abre una propuesta de corrección pública en GitHub">Proponer corrección</button></div>
+    <p class="muted" style="font-size:11.5px">Término del atlas: ${esc(c.en)} · id ${esc(c.id)}</p></div>`;
   box.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{const [j,v]=movesFor(c)[+b.dataset.mv];curJ=j;curM=v;angle=0;if(c.side)romSide=c.side==='izquierdo'?'L':'R';showTab('mov');renderROM();setSide(romSide);});
   box.querySelectorAll('[data-lm]').forEach(b=>b.onclick=()=>{box.querySelectorAll('[data-lm]').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');showLm([lms[+b.dataset.lm]],true);});
   if(lms.length){$('#lmAll').onclick=()=>showLm(lms,false);$('#lmNone').onclick=()=>{clearLm();box.querySelectorAll('[data-lm]').forEach(x=>x.setAttribute('aria-pressed','false'));};}
+  $('#iShare').onclick=()=>$('#shareBtn').click();
+  $('#iFix').onclick=()=>window.open(reviewURL(c,inf),'_blank','noopener');
   bindAi(box);
   box.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>goTo(b.dataset.goto));
   $('#iFocus').onclick=()=>focusMesh(m);
@@ -935,7 +971,7 @@ $('#q').addEventListener('input',e=>{
   all.sort((a,b)=>ex(a)-ex(b)||(PRI[a.c[4]]??9)-(PRI[b.c[4]]??9)||(a.k.startsWith(q)?0:1)-(b.k.startsWith(q)?0:1)||a.c[2].length-b.c[2].length);
   const res=all.slice(0,14).map(r=>r.c);
   out.innerHTML=res.length?'':'<p class="muted" style="padding:10px">Sin resultados. Prueba con otro nombre, en latín o en inglés.</p>';
-  res.forEach(r=>{const b=document.createElement('button');b.innerHTML=`<span>${esc(r[2])}${r[6]?` <span class="muted">(${r[6]})</span>`:''}</span><small>${esc(SYS[r[4]]?.n||'')}${SYS[r[4]]?.fem?' · mujer':''}</small>`;
+  res.forEach(r=>{const b=document.createElement('button');b.innerHTML=`<span>${esc(nameL(r))}${r[6]?` <span class="muted">(${r[6]})</span>`:''}</span><small>${esc(SYS[r[4]]?.n||'')}${SYS[r[4]]?.fem?' · mujer':''}</small>`;
     b.onclick=()=>{out.hidden=true;e.target.value='';goTo(r[0]);};out.appendChild(b);});
   out.hidden=false;
 });
@@ -1215,32 +1251,69 @@ const GAIT_M=[
  [['Adductor longus','Adductor magnus','Gracilis muscle'],[[0,10],[50,65]],'Aductores',{0:'iso',50:'con'},'Estabilizan la cadera en el contacto y contribuyen a la flexión de cadera al inicio del balanceo.'],
  [['Sartorius muscle'],[[55,75]],'Sartorio',{55:'con'},'Colabora en la flexión de cadera y rodilla en el balanceo inicial.']];
 const TY={exc:'excéntrica',con:'concéntrica',iso:'isométrica'};
-const gait={on:false,play:true,p:0,slow:false,last:0};
+/* Marcha patológica: modificadores sobre la marcha normal. Lado afectado: derecho. */
+const sw=(p,a,b)=>{p=((p%100)+100)%100;if(p<a||p>b)return 0;const t=(p-a)/(b-a);return Math.sin(Math.PI*t);};
+const GAIT_P={
+ normal:{n:'Normal',t:''},
+ trend:{n:'Trendelenburg',weak:['Gluteus medius muscle','Gluteus minimus muscle'],t:'<b>Debilidad del glúteo medio derecho</b> (p. ej. lesión del nervio glúteo superior, artrosis o prótesis de cadera). En el apoyo monopodal derecho la pelvis cae hacia el lado izquierdo (signo de Trendelenburg); aquí se muestra la forma <b>compensada (Duchenne)</b>: el tronco se inclina hacia el lado débil para acercar el centro de masas a la cadera y reducir el momento aductor.',
+  mod:(S,p,A)=>{const st=S==='R'?sw(p,2,50):sw(p,52,100);A.trunkZ=(A.trunkZ||0)+(S==='R'?9:0)*st;if(S==='R')A.hipZ=(A.hipZ||0)+3*sw(p,10,45);}},
+ steppage:{n:'Steppage (pie caído)',weak:['Tibialis anterior muscle','Extensor digitorum longus','Extensor hallucis longus','Fibularis tertius muscle'],t:'<b>Pie caído derecho</b> por debilidad de los dorsiflexores (lesión del nervio peroneo común en la cabeza del peroné, radiculopatía L4–L5, polineuropatía). El pie cuelga en flexión plantar durante el balanceo; para no arrastrar los dedos, la cadera y la rodilla se flexionan en exceso («marcha de gallo»). El contacto inicial se hace con el antepié o con todo el pie, con un golpe audible.',
+  mod:(S,p,A)=>{if(S!=='R')return;const s=sw(p,58,100);A.ankle=A.ankle*(1-s)+(-20)*s;A.hip+=18*sw(p,60,98);A.knee+=28*sw(p,60,95);if(p<8||p>97)A.ankle=-10;}},
+ antalgic:{n:'Antiálgica',warp:true,t:'<b>Dolor en el miembro inferior derecho</b> (artrosis, fractura, esguince). La fase de apoyo del lado doloroso se acorta y el paso del lado sano también, para descargar cuanto antes; la rodilla se mantiene algo flexionada y el tronco puede inclinarse hacia el lado doloroso para reducir la carga articular.',
+  mod:(S,p,A)=>{if(S!=='R')return;A.knee+=8*sw(p,0,45);A.trunkZ=(A.trunkZ||0)+5*sw(p,2,45);}},
+ hemi:{n:'Hemiparética (circunducción)',weak:['Tibialis anterior muscle','Gluteus medius muscle','Psoas major','Iliacus muscle'],spastic:['Soleus muscle','Medial head of gastrocnemius','Lateral head of gastrocnemius','Rectus femoris muscle'],t:'<b>Hemiparesia derecha</b> tras un ictus. Patrón extensor espástico del miembro inferior (rodilla rígida en extensión y pie equino por espasticidad del tríceps sural y del recto femoral): para avanzar, la pierna describe un semicírculo hacia fuera (circunducción) con elevación de la hemipelvis. El miembro superior queda en patrón flexor (hombro aducido, codo, muñeca y dedos flexionados) y no balancea.',
+  mod:(S,p,A)=>{if(S!=='R')return;A.knee=Math.min(A.knee,12);A.ankle=Math.min(A.ankle,-8);const s=sw(p,58,100);A.hip=A.hip*0.75;A.hipZ=(A.hipZ||0)+16*s;A.trunkZ=(A.trunkZ||0)-5*s;A.armFix=1;}},
+ scissor:{n:'En tijera',spastic:['Adductor longus','Adductor magnus','Adductor brevis','Gracilis muscle','Medial head of gastrocnemius','Lateral head of gastrocnemius','Soleus muscle'],t:'<b>Diplejía espástica</b> (parálisis cerebral, lesión medular). La espasticidad de los aductores cruza las rodillas por delante de la línea media en cada paso; caderas y rodillas permanecen flexionadas y el pie apoya en equino (de puntillas). Pasos cortos y con gran gasto energético.',
+  mod:(S,p,A)=>{A.hip+=10;A.knee=A.knee*0.75+18;A.ankle=Math.min(A.ankle,-12);A.hipZ=(A.hipZ||0)-11;A.hipY=(A.hipY||0)+8;}},
+ parkinson:{n:'Parkinsoniana',speed:1.5,t:'<b>Enfermedad de Parkinson</b>. Postura en flexión de tronco, cuello, caderas y rodillas; pasos cortos y arrastrados (hipocinesia) con poca extensión de cadera, despegue débil y braceo casi ausente. Puede acelerarse involuntariamente (festinación) o bloquearse (congelación), sobre todo al girar o atravesar puertas.',
+  mod:(S,p,A)=>{A.hip=10+(A.hip-10)*0.45;A.knee=12+A.knee*0.45;A.ankle=A.ankle*0.35;A.trunkX=22;A.armScale=0.15;A.elbow=45;}},
+ stiff:{n:'Rodilla rígida',t:'<b>Rodilla derecha rígida en extensión</b> (artrodesis, ortesis, espasticidad del recto femoral). Sin la flexión de ~60° del balanceo la pierna es funcionalmente «larga»: se compensa con circunducción, elevación de la hemipelvis o elevándose sobre la punta del pie contrario (vaulting).',
+  mod:(S,p,A)=>{if(S==='R'){A.knee=Math.min(A.knee,6);A.hipZ=(A.hipZ||0)+9*sw(p,58,100);}else{const s=sw(p+50,58,100);A.ankle-=10*s;}}}};
+function patAngles(S,p){const pat=GAIT_P[gait.pat]||GAIT_P.normal;let q=p;
+  if(pat.warp&&S==='R'){q=((p%100)+100)%100;q=q<50?q*1.2:60+(q-50)*0.8;}
+  const A=gAngles(q);A.p=q;if(pat.mod)pat.mod(S,((q%100)+100)%100,A);return A;}
+function setGaitPattern(k){gait.pat=GAIT_P[k]?k:'normal';const pat=GAIT_P[gait.pat];
+  $('#gaitPats').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p===gait.pat));
+  $('#gaitPatTxt').hidden=!pat.t;$('#gaitPatTxt').innerHTML=pat.t+(pat.weak?`<br><span class="muted">Músculos débiles resaltados en turquesa${pat.spastic?'; espásticos en naranja':''}.</span>`:pat.spastic?'<br><span class="muted">Músculos espásticos resaltados en naranja.</span>':'');
+  gaitUpdate();}
+function renderGaitPats(){$('#gaitPats').innerHTML=Object.entries(GAIT_P).map(([k,v])=>`<button data-p="${k}" aria-pressed="${k===gait.pat}">${v.n}</button>`).join('');
+  $('#gaitPats').querySelectorAll('button').forEach(b=>b.onclick=()=>setGaitPattern(b.dataset.p));}
+const gait={on:false,play:true,p:0,slow:false,last:0,pat:'normal'};
 function gInterp(arr,p){p=((p%100)+100)%100;for(let i=1;i<arr.length;i++){if(p<=arr[i][0]){const [a,va]=arr[i-1],[b,vb]=arr[i];const t=(p-a)/(b-a),s=t*t*(3-2*t);return va+(vb-va)*s;}}return arr[arr.length-1][1];}
 function gAngles(p){return {hip:gInterp(GAIT_K.hip,p),knee:gInterp(GAIT_K.knee,p),ankle:gInterp(GAIT_K.ankle,p)};}
 function gPhase(p){p=((p%100)+100)%100;return GAIT_PH.find(f=>p>=f[0]&&p<f[1])||GAIT_PH[GAIT_PH.length-1];}
 function gActive(p){p=((p%100)+100)%100;const out=[];for(const m of GAIT_M){for(const [a,b] of m[1]){if(p>=a&&p<b){let ty='';for(const k of Object.keys(m[3]).map(Number).sort((x,y)=>x-y))if(p>=k)ty=m[3][k];if(!ty)ty=Object.values(m[3])[0];out.push({m,ty});break;}}}return out;}
-function gaitActive(){const R=gAngles(gait.p),L=gAngles(gait.p+50),out=[];
+function gaitActive(){const R=patAngles('R',gait.p),L=patAngles('L',gait.p+50),out=[];
   const add=(k,S,cm)=>{const jn=k+'_'+S;if(JOINTS[jn])out.push({k,jn,q:qOf(jn,cm)});};
-  for(const [S,A] of [['R',R],['L',L]]){add('hip',S,{x:-A.hip,y:0,z:0});add('knee',S,{x:A.knee,y:0,z:0});add('ankle',S,{x:-A.ankle,y:0,z:0});
-    const sh=(A===R?L:R).hip;add('shoulder',S,{x:-(sh-10)*0.55,y:0,z:0});add('elbow',S,{x:-(18+Math.max(0,sh-10)*0.35),y:0,z:0});}
+  for(const [S,A] of [['R',R],['L',L]]){const sg=S==='R'?1:-1;
+    add('hip',S,{x:-A.hip,y:(A.hipY||0)*sg,z:-(A.hipZ||0)*sg});add('knee',S,{x:A.knee,y:0,z:0});add('ankle',S,{x:-A.ankle,y:0,z:0});
+    const O=A===R?L:R,sh=O.hip,sc=A.armScale??1;
+    if(A.armFix&&S==='R'){add('shoulder',S,{x:-5,y:50,z:0});add('elbow',S,{x:-75,y:0,z:0});add('wrist',S,{x:-40,y:0,z:0});}
+    else{add('shoulder',S,{x:-(sh-10)*0.55*sc,y:0,z:0});add('elbow',S,{x:-(A.elbow??(18+Math.max(0,sh-10)*0.35)),y:0,z:0});}}
+  const tz=(R.trunkZ||0)+(L.trunkZ||0),tx=Math.max(R.trunkX||0,L.trunkX||0);
+  if(tz||tx){out.push({k:'trunk',jn:'trunk',q:qOf('trunk',{x:tx,y:0,z:tz})});if(tx)out.push({k:'cervical',jn:'cervical',q:qOf('cervical',{x:-tx*0.4,y:0,z:0})});}
   return out;}
-function renderGait(){if(!gait.on)return;const p=gait.p,ph=gPhase(p),R=gAngles(p),L=gAngles(p+50);
+function renderGait(){if(!gait.on)return;const p=gait.p,ph=gPhase(p),R=patAngles('R',p),L=patAngles('L',p+50);
   $('#gaitR').value=Math.floor(p);$('#gaitPhase').textContent=ph[2]+' (derecho)';$('#gaitPct').textContent=Math.round(p)+' % del ciclo';$('#gaitGoal').textContent=ph[4];
   $('#gaitBar').querySelectorAll('span').forEach(s=>s.setAttribute('aria-current',s.dataset.k===ph[3]));
   const f=v=>(v>=0?'':'−')+Math.abs(Math.round(v))+'°';
   $('#gaitAng').innerHTML=`<tr><td>Derecho</td><td>${f(R.hip)}</td><td>${f(R.knee)}</td><td>${f(R.ankle)}</td></tr><tr><td>Izquierdo <small class="muted">(${gPhase(p+50)[2].toLowerCase()})</small></td><td>${f(L.hip)}</td><td>${f(L.knee)}</td><td>${f(L.ankle)}</td></tr>`;
   const act=gActive(p);$('#gaitMus').innerHTML='<h4 class="small" style="margin:8px 0 2px">Músculos activos · miembro derecho</h4>'+(act.map(({m,ty})=>`<div class="gm"><span>${m[2]}<br><small style="text-align:left;display:block">${m[4]}</small></span><span class="ty ${ty}">${TY[ty]}</span></div>`).join('')||'<p class="muted small">Balanceo pasivo: casi sin actividad muscular en este instante.</p>');}
 function gaitAgonists(){const ensR=new Set(),ensL=new Set();if(gait.on){gActive(gait.p).forEach(({m})=>m[0].forEach(e=>ensR.add(e)));gActive(gait.p+50).forEach(({m})=>m[0].forEach(e=>ensL.add(e)));}
-  for(const m of meshes){if(m.userData.sys!=='muscular')continue;const c=m.userData.c;const want=gait.on&&currentTab==='mov'&&((c.side!=='izquierdo'&&ensR.has(c.en))||(c.side!=='derecho'&&ensL.has(c.en)));if(!!m.userData.ag!==want){m.userData.ag=want;refreshState(m);}}}
+  const pat=GAIT_P[gait.pat]||{},weak=new Set(gait.on&&currentTab==='mov'?pat.weak||[]:[]),spa=new Set(gait.on&&currentTab==='mov'?pat.spastic||[]:[]);
+  const bil=gait.pat==='scissor'||gait.pat==='parkinson';
+  for(const m of meshes){if(m.userData.sys!=='muscular')continue;const c=m.userData.c;const sideOk=bil||c.side!=='izquierdo';
+    const wk=weak.has(c.en)&&sideOk,sp=spa.has(c.en)&&sideOk;if(!!m.userData.hint!==wk){m.userData.hint=wk;refreshState(m);}
+    if(sp){if(!m.userData.ag){m.userData.ag=true;refreshState(m);}continue;}
+    const want=!wk&&gait.on&&currentTab==='mov'&&((c.side!=='izquierdo'&&ensR.has(c.en))||(c.side!=='derecho'&&ensL.has(c.en)));if(!!m.userData.ag!==want){m.userData.ag=want;refreshState(m);}}}
 function setGait(on){gait.on=on;$('#gaitBtn').setAttribute('aria-pressed',on);$('#gaitBtn').textContent=on?'Salir de la marcha':'Ver marcha';$('#gaitBody').hidden=!on;$('#gaitIntro').hidden=on;
   if(on){stopPlay();gait.play=true;$('#gaitPlay').textContent='Pausa';if(!SYS.muscular.on)setOn('muscular',true);
     $('#gaitBar').innerHTML=GAIT_PH.map(f=>`<span data-k="${f[3]}" style="flex:${f[1]-f[0]};background:${f[0]<50?'color-mix(in srgb,var(--accent) 45%,var(--panel2))':'var(--panel2)'}" title="${f[2]}">${f[1]-f[0]>=10?f[3]:''}</span>`).join('');
     $('#gaitBar').querySelectorAll('span').forEach((s,i)=>s.onclick=()=>{gait.p=GAIT_PH[i][0]+0.5;gait.play=false;$('#gaitPlay').textContent='Reproducir';gaitUpdate();});
-    renderGait();}
+    renderGaitPats();setGaitPattern(gait.pat);renderGait();}
   applyPose();gait.on?gaitAgonists():(gaitAgonists(),applyAgonists());}
 function gaitUpdate(){renderGait();applyPose();gaitAgonists();}
-function gaitTick(dt){if(!gait.on||!gait.play||currentTab!=='mov')return;gait.p=(gait.p+dt*100/(gait.slow?4.4:1.1))%100;gait.last+=dt;
+function gaitTick(dt){if(!gait.on||!gait.play||currentTab!=='mov')return;gait.p=(gait.p+dt*100*((GAIT_P[gait.pat]||{}).speed||1)/(gait.slow?4.4:1.1))%100;gait.last+=dt;
   if(gait.last>(gait.slow?0.03:0.045)){gait.last=0;gaitUpdate();}}
 $('#gaitBtn').onclick=()=>setGait(!gait.on);
 $('#gaitR').oninput=e=>{gait.p=+e.target.value;gait.play=false;$('#gaitPlay').textContent='Reproducir';gaitUpdate();};
@@ -1306,6 +1379,151 @@ function quizAnswer(m){quiz.n++;const c=m.userData.c,t=quiz.target;const ok=c.en
   if(!ok){const tm=findMesh(t.id);if(tm){tm.userData.hint=true;refreshState(tm);setTimeout(()=>{tm.userData.hint=false;refreshState(tm);},1500);}}
   nextQ();}
 $('#quizStart').onclick=startQuiz;$('#quizStop').onclick=stopQuiz;$('#quizSkip').onclick=()=>{quiz.n++;$('#quizMsg').textContent=`Era ${label(quiz.target)}. Puntuación: ${quiz.ok} de ${quiz.n}`;nextQ();};
+
+/* ───────── Bibliografía y revisión abierta ───────── */
+const REFS={
+ mus:['Moore KL, Dalley AF, Agur AMR. <i>Anatomía con orientación clínica</i>. 9.ª ed. Wolters Kluwer; 2022.','Netter FH. <i>Atlas de anatomía humana</i>. 8.ª ed. Elsevier; 2023.','Kendall FP et al. <i>Músculos: pruebas funcionales, postura y dolor</i>. 5.ª ed. Marbán; 2007.','Avers D, Brown M. <i>Daniels y Worthingham. Técnicas de balance muscular</i>. 10.ª ed. Elsevier; 2019.','Kapandji AI. <i>Fisiología articular</i>. 6.ª ed. Panamericana; 2012.'],
+ lig:['Moore KL, Dalley AF, Agur AMR. <i>Anatomía con orientación clínica</i>. 9.ª ed. 2022.','Rouvière H, Delmas A. <i>Anatomía humana descriptiva, topográfica y funcional</i>. 11.ª ed. Elsevier Masson; 2005.','Kapandji AI. <i>Fisiología articular</i>. 6.ª ed. 2012.','Magee DJ. <i>Ortopedia</i> (valoración). 6.ª ed. Elsevier; 2014.'],
+ bone:['Moore KL, Dalley AF, Agur AMR. <i>Anatomía con orientación clínica</i>. 9.ª ed. 2022.','Rouvière H, Delmas A. <i>Anatomía humana</i>. 11.ª ed. 2005.','Netter FH. <i>Atlas de anatomía humana</i>. 8.ª ed. 2023.'],
+ gen:['Moore KL, Dalley AF, Agur AMR. <i>Anatomía con orientación clínica</i>. 9.ª ed. 2022.','Standring S (ed.). <i>Gray’s Anatomy</i>. 42.ª ed. Elsevier; 2020.','FIPAT. <i>Terminologia Anatomica</i>. 2.ª ed. 2019.']};
+function refsFor(inf,c){const k=inf?inf.kind:'gen';const list=REFS[k]||REFS.gen;
+  return `<details class="refs"><summary>Bibliografía de referencia</summary><p>Ficha redactada a partir de la bibliografía anatómica y clínica estándar; verifica siempre los datos en las fuentes:</p><ol>${list.map(r=>`<li>${r}</li>`).join('')}</ol><p>Nomenclatura: Terminologia Anatomica (FIPAT). Modelo: ${c.sys.startsWith('f_')?'HuBMAP Human Reference Atlas (Visible Human Female), CC BY 4.0':'Z-Anatomy / BodyParts3D, CC BY-SA 4.0'}.</p></details>`;}
+const REPO='https://github.com/ftjrodriguez-arch/corpus-atlas';
+function reviewURL(c,inf){const d=inf?inf.d:{};const lines=Object.entries(d).filter(([,v])=>v&&typeof v==='string').map(([k,v])=>`- **${k}**: ${v}`).join('\n').slice(0,4500);
+  const body=`**Estructura:** ${c.es} (${c.la||'—'})\n**Término del atlas:** ${c.en} · id \`${c.id}\` · capa ${c.sys}${c.side?' · lado '+c.side:''}\n\n### ¿Qué hay que corregir?\n(escribe aquí la corrección)\n\n### Fuente que lo respalda\n(libro, artículo o guía, con página si es posible)\n\n### Tu perfil (opcional)\n(p. ej. anatomista, fisioterapeuta, estudiante de 3.º)\n\n---\n<details><summary>Ficha actual</summary>\n\n${lines}\n</details>`;
+  return `${REPO}/issues/new?labels=correcci%C3%B3n&title=${encodeURIComponent('Corrección: '+c.es)}&body=${encodeURIComponent(body)}`;}
+
+/* ───────── Enlaces para compartir una vista exacta ───────── */
+const PUBLIC_URL='https://ftjrodriguez-arch.github.io/corpus-atlas/';
+const r3=x=>Math.round(x*1000)/1000;
+function shareState(){const v=snapshot('');delete v.n;v.cam={t:v.cam.t.map(r3),r:r3(v.cam.r),th:r3(v.cam.th),ph:r3(v.cam.ph)};
+  v.sys=Object.fromEntries(Object.entries(v.sys).filter(([k])=>sexOk(k)&&k!=='importado').map(([k,o])=>[k,[o.on?1:0,r3(o.op)]]));
+  v.planes=Object.fromEntries(Object.entries(v.planes).filter(([,p])=>p.show||p.cut).map(([k,p])=>[k,{pos:r3(p.pos),show:p.show,cut:p.cut}]));
+  v.b=BODY;if(xray)v.x=1;if(studio)v.st=1;if(selected)v.sel=selected.m.userData.c.id;if(disStage>=0)v.d=disStage;if(currentTab!=='sistemas')v.tab=currentTab;
+  if(gait.on)v.g=[Math.round(gait.p),gait.pat];if(DIS_FLT)v.df=1;if(typeof LANG!=='undefined'&&LANG!=='es')v.l=LANG;if(!v.hidden.length)delete v.hidden;return v;}
+const b64u=str=>btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const unb64u=str=>decodeURIComponent(escape(atob(str.replace(/-/g,'+').replace(/_/g,'/'))));
+function shareLink(){const base=/github\.io$|^localhost$|^127\./.test(location.hostname)?location.origin+location.pathname:PUBLIC_URL;return base+'#v='+b64u(JSON.stringify(shareState()));}
+function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,3800);}
+$('#shareBtn').onclick=async()=>{const url=shareLink();let ok=false;
+  try{if(navigator.share&&matchMedia('(pointer:coarse)').matches){await navigator.share({title:'Corpus · Atlas anatómico 3D',url});return;}}catch(e){}
+  try{await navigator.clipboard.writeText(url);ok=true;}catch(e){}
+  if(!ok){const ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();try{ok=document.execCommand('copy');}catch(e){}ta.remove();}
+  toast(ok?'Enlace copiado: quien lo abra verá el atlas exactamente así.':'No se pudo copiar automáticamente: '+url);};
+async function applyShared(v){
+  if(v.l&&typeof setLang==='function')setLang(v.l);
+  if(v.b&&v.b!==BODY)setBody(v.b);
+  const sys={};for(const k in (v.sys||{})){const o=v.sys[k];sys[k]={on:!!o[0],op:o[1]};}
+  for(const k in SYS)if(sexOk(k)&&k!=='importado'&&!(k in sys))sys[k]={on:false,op:SYS[k].op};
+  const planes={};for(const k in PLANES)planes[k]=(v.planes||{})[k]||{pos:PLANES[k].pos,show:false,cut:false};
+  loadView({cam:v.cam,sys,planes,hidden:v.hidden||[]});orb.tgt.copy(orb.T.tgt);orb.r=orb.T.r;orb.th=orb.T.th;orb.ph=orb.T.ph;
+  if(v.x)setXray(true);if(v.st)setStudio(true);
+  if(typeof v.d==='number'){disStage=v.d;if(v.df){const st=DISL()[v.d];DIS_FLT=st&&st.flt||null;applySystems();}renderDis();}
+  if(v.tab)showTab(v.tab);
+  if(v.g){showTab('mov');setGait(true);gait.p=v.g[0];if(v.g[1])setGaitPattern(v.g[1]);gait.play=false;$('#gaitPlay').textContent='Reproducir';gaitUpdate();}
+  if(v.sel){const c=entry(v.sel);if(c){await loadSys(c.sys);const m=findMesh(c.id);if(m)select(m,null);}}
+}
+function readHash(){const h=location.hash.match(/#v=([A-Za-z0-9_-]+)/);if(!h)return null;try{return JSON.parse(unb64u(h[1]));}catch(e){return null;}}
+
+/* ───────── Repaso espaciado (Leitner) ───────── */
+let SRS=store.get('srs',{});if(!SRS||typeof SRS!=='object')SRS={};
+const SRS_DAYS=[0,1,3,7,14,30],DAY=864e5;
+const srs={on:false,cur:null,queue:[],done:0,newCount:0};
+function srsDecks(){const out=[];if(BODY==='m'){const regs=[...new Set(Object.values(EX.reg||{}))].sort();regs.forEach(r=>out.push(['r:'+r,'Región · '+r]));}
+  for(const k in SYS){if(!sexOk(k)||k==='insercion'||k==='importado')continue;out.push(['s:'+k,(BODY==='f'?'Mujer · ':'Sistema · ')+SYS[k].n]);}return out;}
+function srsPool(){const deck=$('#srsDeck').value,mode=$('#srsMode').value,seen=new Set(),pool=[];
+  for(const id in CAT){const r=CAT[id];const c=entry(id);if(!c||c.ins||!sexOk(c.sys)||c.sys==='insercion')continue;
+    if(deck.startsWith('r:')&&EX.reg[id]!==deck.slice(2))continue;if(deck.startsWith('s:')&&c.sys!==deck.slice(2))continue;
+    if(mode==='oi'){if(BS(c.sys)!=='muscular')continue;const inf=infoFor(c);if(!inf||inf.kind!=='mus'||!inf.d.origen)continue;}
+    if(c.side==='izquierdo')continue;const key=c.en;if(seen.has(key))continue;seen.add(key);pool.push(c);}return pool;}
+function srsKey(c){return $('#srsMode').value+':'+c.en;}
+function srsStat(){if(!$('#srsDeck').options.length)return;const pool=srsPool(),now=Date.now();let due=0,nw=0,learned=0;
+  for(const c of pool){const e=SRS[srsKey(c)];if(!e)nw++;else{if(e.due<=now)due++;if(e.b>=4)learned++;}}
+  $('#srsStat').textContent=pool.length?`${pool.length} tarjetas · ${due} pendientes hoy · ${nw} nuevas · ${learned} dominadas`:'Este mazo no tiene tarjetas de este tipo.';}
+function renderSrsDecks(){const d=$('#srsDeck'),cur=d.value;d.innerHTML=srsDecks().map(([v,n])=>`<option value="${esc(v)}">${esc(n)}</option>`).join('');if([...d.options].some(o=>o.value===cur))d.value=cur;srsStat();}
+function srsNext(){if(srs.cur&&srs.cur.m){srs.cur.m.userData.hint=false;refreshState(srs.cur.m);}
+  const now=Date.now(),pool=srsPool();const due=pool.filter(c=>{const e=SRS[srsKey(c)];return e&&e.due<=now;}).sort((a,b)=>SRS[srsKey(a)].due-SRS[srsKey(b)].due);
+  let c=due[0];if(!c&&srs.newCount<15){const nw=pool.filter(c=>!SRS[srsKey(c)]);c=nw[Math.floor(Math.random()*nw.length)];if(c)srs.newCount++;}
+  if(!c){$('#srsQ').innerHTML=`<b>¡Repaso terminado!</b> Has revisado ${srs.done} tarjetas. Vuelve mañana para las siguientes.`;$('#srsA').hidden=true;$('#srsRevealRow').hidden=true;$('#srsGrade').hidden=true;srsStat();return;}
+  srs.cur={c};showCard(c);}
+async function showCard(c){const mode=$('#srsMode').value;$('#srsA').hidden=true;$('#srsGrade').hidden=true;$('#srsRevealRow').hidden=false;
+  $('#srsQ').innerHTML=mode==='id'?'¿Qué estructura está resaltada en el modelo?':`<b>${esc(c.es)}</b>: ¿origen, inserción e inervación?`;
+  const s=SYS[c.sys];if(!s.on){s.on=true;renderSysList();}await loadSys(c.sys);applySystems();
+  const m=findMesh(c.id);if(!m)return;srs.cur.m=m;hiddenIds.delete(c.id);isoSet=new Set([c.id]);applySystems();m.userData.hint=true;refreshState(m);focusMesh(m);
+  }
+$('#srsReveal').onclick=()=>{const c=srs.cur&&srs.cur.c;if(!c)return;const inf=infoFor(c),mode=$('#srsMode').value;
+  let h=`<p style="font-size:15px;margin:4px 0"><b>${esc(c.es)}</b>${c.la?` <i class="muted">${esc(c.la)}</i>`:''}</p>`;
+  if(inf&&inf.kind==='mus'&&(mode==='oi'||true)){const d=inf.d;h+=`<dl class="kv">${row('Origen',d.origen)}${row('Inserción',d.insercion)}${mode==='oi'?row('Inervación',d.inervacion):''}</dl>`;}
+  else if(inf&&inf.d&&inf.d.descripcion)h+=`<p class="small">${esc(inf.d.descripcion)}</p>`;
+  $('#srsA').innerHTML=h;$('#srsA').hidden=false;$('#srsRevealRow').hidden=true;$('#srsGrade').hidden=false;};
+$('#srsGrade').querySelectorAll('button').forEach(b=>b.onclick=()=>{const c=srs.cur&&srs.cur.c;if(!c)return;const g=+b.dataset.g,k=srsKey(c),e=SRS[k]||{b:0,due:0};
+  e.b=g===0?1:g===1?Math.max(1,e.b):Math.min(5,e.b+1);e.due=Date.now()+SRS_DAYS[e.b]*DAY+(g===0?60e3:0);SRS[k]=e;store.set('srs',SRS);srs.done++;srsNext();});
+$('#srsStart').onclick=()=>{if(quiz.on)stopQuiz();srs.on=true;srs.done=0;srs.newCount=0;select(null);$('#srsBox').hidden=false;$('#srsStart').hidden=true;$('#srsStop').hidden=false;srsNext();};
+$('#srsStop').onclick=()=>{srs.on=false;isoSet=null;applySystems();if(srs.cur&&srs.cur.m){srs.cur.m.userData.hint=false;refreshState(srs.cur.m);}srs.cur=null;$('#srsBox').hidden=true;$('#srsStart').hidden=false;$('#srsStop').hidden=true;srsStat();};
+$('#srsDeck').onchange=srsStat;$('#srsMode').onchange=srsStat;
+
+/* ───────── Idiomas: español, inglés, portugués ───────── */
+let LANG=store.get('lang',null)||(/^pt/i.test(navigator.language||'')?'pt':/^en/i.test(navigator.language||'')?'en':'es');
+let I18N=null;const _orig=new WeakMap(),_origA=new WeakMap();
+const nameL=r=>LANG==='en'?r[1]:LANG==='pt'&&I18N&&I18N.names[r[2]]||r[2];
+const SIDE_L=sd=>sd;
+const RX={en:[[/^(\d+) estructuras$/,'$1 structures'],[/^(\d+) % del ciclo$/,'$1 % of the cycle'],[/^ ?(\d+) de (\d+) archivos$/,' $1 of $2 files'],[/^Cargando (.*)$/,'Loading $1'],[/^Puntuación: (\d+) de (\d+)(.*)$/,'Score: $1 of $2$3'],[/^(.*) \(derecho\)$/,(m,a)=>trW(a)+' (right)'],[/^(.*) triángulos$/,'$1 triangles'],[/^Región · (.*)$/,'Region · $1'],[/^Sistema · (.*)$/,'System · $1'],[/^Mujer · (.*)$/,'Female · $1'],[/^(\d+) tarjetas · (\d+) pendientes hoy · (\d+) nuevas · (\d+) dominadas$/,'$1 cards · $2 due today · $3 new · $4 mastered'],[/^lado (izquierdo|derecho)$/,(m,a)=>a==='izquierdo'?'left side':'right side']],
+ pt:[[/^(\d+) estructuras$/,'$1 estruturas'],[/^(\d+) % del ciclo$/,'$1 % do ciclo'],[/^ ?(\d+) de (\d+) archivos$/,' $1 de $2 arquivos'],[/^Cargando (.*)$/,'Carregando $1'],[/^Puntuación: (\d+) de (\d+)(.*)$/,'Pontuação: $1 de $2$3'],[/^(.*) \(derecho\)$/,(m,a)=>trW(a)+' (direito)'],[/^(.*) triángulos$/,'$1 triângulos'],[/^Región · (.*)$/,'Região · $1'],[/^Sistema · (.*)$/,'Sistema · $1'],[/^Mujer · (.*)$/,'Mulher · $1'],[/^(\d+) tarjetas · (\d+) pendientes hoy · (\d+) nuevas · (\d+) dominadas$/,'$1 cartões · $2 para hoje · $3 novos · $4 dominados'],[/^lado (izquierdo|derecho)$/,(m,a)=>a==='izquierdo'?'lado esquerdo':'lado direito']]};
+const trW=w=>{const D=I18N&&I18N.ui[LANG]||{};return D[w]??w;};
+const PREF=['Mostrar','Opacidad','Alta resolución','Posición del plano'];
+function trText(t){if(LANG==='es'||!I18N)return null;const D=I18N.ui[LANG]||{};const k=t.trim();if(!k)return null;
+  if(D[k]!=null)return t.replace(k,D[k]);for(const p of PREF){if(k.startsWith(p+' ')&&D[p]){const rest=k.slice(p.length+1);return t.replace(k,D[p]+' '+(D[rest]??(I18N.names&&LANG==='pt'&&I18N.names[rest])??rest));}}for(const [re,to] of RX[LANG]||[]){if(re.test(k))return t.replace(k,k.replace(re,to));}return null;}
+const SKIP_TR=el=>el&&el.closest&&el.closest('#infoBox .kv dd,#infoBox > .view > p:not(.muted),.latin,#caseBox p,#caseBox li,#srsA,.refs,script,style');
+function trNode(root){if(!root)return;const walk=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;
+  const list=[];while((n=walk.nextNode()))list.push(n);
+  for(const t of list){const p=t.parentElement;if(!p||SKIP_TR(p))continue;let o=_orig.get(t);
+    if(o==null||(t.nodeValue!==o&&t.nodeValue!==t.__tr)){o=t.nodeValue;_orig.set(t,o);}
+    const tr=LANG==='es'?null:trText(o);const want=tr??o;if(t.nodeValue!==want){t.__tr=want;t.nodeValue=want;}}
+  const els=root.querySelectorAll?[root,...root.querySelectorAll('[placeholder],[aria-label],[title]')]:[];
+  for(const el of els){if(!el.getAttribute)continue;let o=_origA.get(el);if(!o){o={};_origA.set(el,o);}
+    for(const a of ['placeholder','aria-label','title']){const v=el.getAttribute(a);if(v==null)continue;if(o[a]==null||(v!==o[a]&&v!==o['_'+a]))o[a]=v;
+      const tr=LANG==='es'?null:trText(o[a]);const want=tr??o[a];if(v!==want){o['_'+a]=want;el.setAttribute(a,want);}}}}
+let trPending=false;const trObs=new MutationObserver(()=>{if(trPending||LANG==='es')return;trPending=true;requestAnimationFrame(()=>{trPending=false;trObs.disconnect();trNode(document.body);trObs.observe(document.body,{childList:true,subtree:true,characterData:true});});});
+async function setLang(l){if(!['es','en','pt'].includes(l))l='es';
+  if(l!=='es'&&!I18N){try{I18N=await (await fetch('data/i18n.json')).json();}catch(e){l='es';}}
+  LANG=l;store.set('lang',l);document.documentElement.lang=l;
+  $$('#langSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===l));
+  if(typeof SEARCH!=='undefined'&&SEARCH.length)buildSearch();
+  if(selected)renderInfo();if(typeof renderSysList==='function')renderSysList();
+  trObs.disconnect();trNode(document.body);if(l!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});
+  if(typeof tagLabel!=='undefined'&&selected)tagLabel.el.textContent=label(selected.m.userData.c);}
+$$('#langSeg button').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+function buildSearch(){SEARCH=Object.values(CAT).map(r=>({k:norm([r[2],r[3],r[1],I18N&&I18N.names[r[2]]||''].join(' | ')),c:r}));}
+
+/* ───────── Casos clínicos ───────── */
+let CASES=[],caseOn=null;
+function caseIds(names,side){const out=[];for(const en of names||[]){let r=Object.values(CAT).filter(x=>x[1]===en&&!x[6]&&!String(x[4]).startsWith('f_'));
+  if(!r.length)r=Object.values(CAT).filter(x=>x[1]===en&&!String(x[4]).startsWith('f_'));
+  const pick=r.filter(x=>!x[5]||x[5]===side);(pick.length?pick:r.slice(0,1)).forEach(x=>out.push(x[0]));}return out;}
+function clearCase(){if(!caseOn)return;for(const id of caseOn.all){const m=findMesh(id);if(m){m.userData.hint=false;m.userData.ag=false;refreshState(m);}}caseOn=null;isoSet=null;applySystems();}
+async function openCase(i){const cs=CASES[i];if(!cs)return;if(BODY!=='m')setBody('m');clearCase();select(null);if(gait.on)setGait(false);
+  const side=cs.side||'derecho',L=caseIds(cs.lesion,side),A=caseIds(cs.afectados,side),R=caseIds(cs.relacionados,side),all=[...new Set([...L,...A,...R])];
+  const need=[...new Set(all.map(id=>CAT[id][4]))];for(const k of need){SYS[k].on=true;if(SYS[k].op<.3)SYS[k].op=1;}SYS.oseo.on=true;renderSysList();
+  await Promise.all([...need,'oseo'].map(k=>loadSys(k)));
+  caseOn={cs,all};isoSet=new Set(all);hiddenIds.clear();applySystems();
+  for(const id of L){const m=findMesh(id);if(m){m.userData.hint=true;refreshState(m);}}
+  for(const id of A){if(L.includes(id))continue;const m=findMesh(id);if(m){m.userData.ag=true;refreshState(m);}}
+  const box=new THREE.Box3();for(const id of [...L,...A]){const m=findMesh(id);if(m){m.geometry.computeBoundingBox();box.union(m.geometry.boundingBox);}}
+  if(!box.isEmpty()){const c=box.getCenter(new V3()),sz=box.getSize(new V3()).length();focusOn(c,Math.max(0.5,sz*1.6));}
+  setView({anterior:'ant',posterior:'post',lateral:side==='izquierdo'?'lati':'latd',medial:side==='izquierdo'?'latd':'lati'}[cs.camara]||'ant');
+  renderCases(i);}
+function renderCases(open){const el=$('#caseBox');if(!el)return;
+  if(open==null){el.innerHTML=`<div class="card"><h3>Casos clínicos</h3><p class="muted small">Cada caso resalta en el modelo la estructura lesionada (turquesa) y los músculos que pierden su función (naranja), con la explicación anatómica, los signos y las pruebas.</p>${CASES.map((c,i)=>`<div class="lesson"><div><b>${esc(c.titulo)}</b><span class="muted small">${esc(c.region)}</span></div><button class="btn" data-case="${i}">Abrir</button></div>`).join('')}</div>`;
+    el.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>openCase(+b.dataset.case));return;}
+  const c=CASES[open];const nm=en=>{const r=Object.values(CAT).find(x=>x[1]===en);return r?(entry(r[0])||{}).es||r[2]:en;};
+  el.innerHTML=`<div class="card"><button class="link" id="caseBack">← Todos los casos</button><h3 style="margin-top:6px">${esc(c.titulo)}</h3>
+   <p><b>Presentación.</b> ${esc(c.presentacion)}</p><p><b>Anatomía.</b> ${esc(c.anatomia)}</p>
+   <dl class="kv"><dt>Lesión</dt><dd>${c.lesion.map(e=>`<span style="color:var(--accent)">${esc(nm(e))}</span>`).join(', ')}</dd><dt>Afectados</dt><dd>${c.afectados.map(e=>`<span style="color:#f0a040">${esc(nm(e))}</span>`).join(', ')}</dd></dl>
+   <h4 class="small" style="margin:8px 0 2px">Signos</h4><ul class="small">${c.signos.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+   <h4 class="small" style="margin:8px 0 2px">Pruebas clínicas</h4><ul class="small">${c.pruebas.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+   <p class="small"><b>Fisioterapia.</b> ${esc(c.fisioterapia)}</p>
+   <div class="row"><button class="btn" id="caseClose">Cerrar caso</button><button class="btn" id="caseShare">Compartir</button></div></div>`;
+  $('#caseBack').onclick=()=>{clearCase();renderCases();};$('#caseClose').onclick=()=>{clearCase();renderCases();};$('#caseShare').onclick=()=>$('#shareBtn').click();}
 
 /* ───────── Vistas guardadas ───────── */
 let VIEWS_SAVED=store.get('views',[]);if(!Array.isArray(VIEWS_SAVED))VIEWS_SAVED=[];
@@ -1393,7 +1611,7 @@ function renderLessons(){
   const st=lesson.steps[lstep];
   box.innerHTML=`<div class="view"><div class="steps">${lesson.steps.map((_,i)=>`<i class="${i<=lstep?'on':''}"></i>`).join('')}</div>
     <h3>${esc(lesson.t)} · paso ${lstep+1} de ${n}</h3><h2>${esc(st.t)}</h2><p>${esc(st.x)}</p>
-    <div class="card"><h3>En pantalla</h3><div style="display:flex;flex-direction:column;gap:4px">${[...new Set(st.show)].map(en=>{const r=Object.values(CAT).find(x=>x[1]===en&&x[4]!=='insercion'&&(!x[5]||x[5]==='derecho'))||Object.values(CAT).find(x=>x[1]===en);return r?`<button class="link small" data-goto="${r[0]}">${esc(r[2])}</button>`:'';}).join('')}</div></div>
+    <div class="card"><h3>En pantalla</h3><div style="display:flex;flex-direction:column;gap:4px">${[...new Set(st.show)].map(en=>{const r=Object.values(CAT).find(x=>x[1]===en&&x[4]!=='insercion'&&(!x[5]||x[5]==='derecho'))||Object.values(CAT).find(x=>x[1]===en);return r?`<button class="link small" data-goto="${r[0]}">${esc(nameL(r))}</button>`:'';}).join('')}</div></div>
     <div class="row"><button class="btn" id="lPrev" ${lstep?'':'disabled'}>Anterior</button><button class="btn pri" id="lNext">${lstep===n-1?'Repaso final':'Siguiente'}</button><button class="btn" id="lExit">Salir</button></div></div>`;
   box.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>{const m=findMesh(b.dataset.goto);if(m){select(m,null);focusMesh(m);showTab('lec');}});
   $('#lPrev').onclick=()=>{lstep--;showStep();};$('#lNext').onclick=()=>{lstep++;showStep();};$('#lExit').onclick=exitLesson;
@@ -1414,7 +1632,15 @@ async function showStep(){
   setView(st.view||'ant');
 }
 function exitLesson(){clearLessonHl();lesson=null;isoSet=null;applySystems();renderLessons();}
-$('#xrayBtn').onclick=()=>setXray(!xray);$('#studioBtn').onclick=()=>setStudio(!studio);if(store.get('studio',false))setStudio(true);
+$('#xrayBtn').onclick=()=>setXray(!xray);$('#liteChk').onchange=e=>setLite(e.target.checked);setLite(lite);
+/* Teclado: flechas giran, +/− acercan, 1–6 vistas, X rayos X, E estudio, Esc deselecciona, / busca */
+document.addEventListener('keydown',e=>{const t=e.target;if(t&&(/INPUT|TEXTAREA|SELECT/.test(t.tagName)||t.isContentEditable))return;if(e.ctrlKey||e.metaKey||e.altKey)return;
+  const k=e.key;let hit=true;
+  if(k==='ArrowLeft')orb.T.th-=0.25;else if(k==='ArrowRight')orb.T.th+=0.25;else if(k==='ArrowUp')orb.T.ph=Math.max(0.1,orb.T.ph-0.2);else if(k==='ArrowDown')orb.T.ph=Math.min(Math.PI-0.1,orb.T.ph+0.2);
+  else if(k==='+'||k==='=')orb.T.r=Math.max(0.15,orb.T.r*0.82);else if(k==='-'||k==='_')orb.T.r=Math.min(6,orb.T.r/0.82);
+  else if('123456'.includes(k)&&k.length===1)setView(['ant','post','latd','lati','sup','inf'][+k-1]);
+  else if(k==='x'||k==='X')setXray(!xray);else if(k==='e'||k==='E')setStudio(!studio);else if(k==='Escape')select(null);else if(k==='/'){$('#q').focus();}else hit=false;
+  if(hit)e.preventDefault();});$('#studioBtn').onclick=()=>setStudio(!studio);if(store.get('studio',false))setStudio(true);
 
 /* ───────── Importar .glb ───────── */
 $('#glbIn').addEventListener('change',e=>{const f=e.target.files[0];$('#glbErr').hidden=true;if(!f)return;
@@ -1488,14 +1714,17 @@ function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;const k=1-M
 setMode(store.get('mode','stu'));
 renderSysList();renderHR();renderDis();planeColors();renderPlanes();updatePlanes();renderInfo();renderViews();
 resize();requestAnimationFrame(frame);
-window.__corpus={orb,HR,loadHR,setDissection,SYS,setGait,gait,showTab};
+window.__corpus={orb,HR,loadHR,setDissection,SYS,setGait,gait,showTab,setGaitPattern,shareLink,applyShared};
+fetch('data/cases.json').then(r=>r.ok?r.json():[]).then(c=>{CASES=c;renderCases();}).catch(()=>{});
 Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.json').then(r=>{if(!r.ok)throw new Error(n);return r.json();}))).then(([cat,info,rig,les,ex,fem])=>{
   cat=cat.concat(fem.cat);FEM_INFO=fem.info;CAT_READY=true;
   LESSONS=les;EX=ex;
   for(const r of cat) CAT[r[0]]=r;INFO=info;RIG=rig;buildRig();
-  SEARCH=cat.map(r=>({k:norm(r[2]+' | '+r[3]+' | '+r[1]),c:r}));
+  buildSearch();if(LANG!=='es')setLang(LANG);
   setSide(romSide);renderLessons();showTab(store.get('tab','sistemas'));
+  const shared=readHash();if(shared&&shared.b)BODY=shared.b;
   setBody(BODY);
+  if(shared)applyShared(shared);
   for(const k in SYS) if(SYS[k].on&&sexOk(k)&&SYS[k].state==='idle') loadSys(k);
 }).catch(()=>{$('#hintTxt').textContent='No se pudieron cargar los datos del atlas. Recarga la página para intentarlo de nuevo.';});
 })();
@@ -1508,7 +1737,7 @@ Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 47 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v13');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v14');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();
