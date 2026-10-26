@@ -26,7 +26,7 @@ Funciona en el navegador del ordenador, la tableta o el móvil, sin instalar nad
 - **Estilo atlas** (v22, predeterminado en equipos capaces): fondo negro, piel translúcida tipo «fantasma» con contorno, músculo rojo de tejido fresco con fibras finas, tendones nacarados, hueso marfil y sombreado de contacto más marcado (botón «Atlas»).
 - **Etiquetas sobre el modelo** con líneas guía, **guardar la vista como imagen PNG** y **modo clase** para proyector (etiquetas grandes y puntero láser).
 - **Fisiología animada**: latido cardiaco (sístole, diástole, apertura y cierre valvular) y respiración (diafragma y pulmones).
-- **Fichas en inglés y portugués** (1.801 fichas, traducción automática asistida pendiente de revisión).
+- **Fichas, lecciones y casos en inglés y portugués** (1.801 fichas, 22 lecciones y 32 casos; traducción automática asistida pendiente de revisión).
 - **Revisión experta**: formulario «Proponer corrección» en cada ficha y lista de estructuras reconstruidas que necesitan revisión.
 - **Más lecciones** (pares craneales, cuello, tórax y respiración, vísceras abdominales) y **más casos** (parálisis de Bell, III par, hernia inguinal, ictus de la cerebral media).
 - **Línea alba e intersecciones tendinosas** (v23): el rafe medio entre los rectos, con el anillo umbilical, y las tres intersecciones tendinosas de cada recto, construidas sobre la superficie de los músculos del atlas.

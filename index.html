@@ -1908,19 +1908,19 @@ function trNode(root){if(!root)return;const walk=document.createTreeWalker(root,
   const list=[];while((n=walk.nextNode()))list.push(n);
   for(const t of list){const p=t.parentElement;if(!p||SKIP_TR(p))continue;let o=_orig.get(t);
     if(o==null||(t.nodeValue!==o&&t.nodeValue!==t.__tr)){o=t.nodeValue;_orig.set(t,o);}
-    const tr=LANG==='es'?null:trText(o);const want=tr??o;if(t.nodeValue!==want){t.__tr=want;t.nodeValue=want;}}
+    let tr=null;try{tr=LANG==='es'?null:trText(o);}catch(e){}const want=tr??o;if(t.nodeValue!==want){t.__tr=want;t.nodeValue=want;}}
   const els=root.querySelectorAll?[root,...root.querySelectorAll('[placeholder],[aria-label],[title]')]:[];
   for(const el of els){if(!el.getAttribute)continue;let o=_origA.get(el);if(!o){o={};_origA.set(el,o);}
     for(const a of ['placeholder','aria-label','title']){const v=el.getAttribute(a);if(v==null)continue;if(o[a]==null||(v!==o[a]&&v!==o['_'+a]))o[a]=v;
       const tr=LANG==='es'?null:trText(o[a]);const want=tr??o[a];if(v!==want){o['_'+a]=want;el.setAttribute(a,want);}}}}
-let trPending=false;const trObs=new MutationObserver(()=>{if(trPending||LANG==='es')return;trPending=true;requestAnimationFrame(()=>{trPending=false;trObs.disconnect();trNode(document.body);trObs.observe(document.body,{childList:true,subtree:true,characterData:true});});});
+let trPending=false;const trObs=new MutationObserver(()=>{if(trPending||LANG==='es')return;trPending=true;requestAnimationFrame(()=>{trPending=false;trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}finally{if(LANG!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});}});});
 async function setLang(l){if(!['es','en','pt'].includes(l))l='es';
   if(l!=='es'&&!I18N){try{I18N=await (await fetch('data/i18n.json')).json();}catch(e){l='es';}}
-  LANG=l;store.set('lang',l);document.documentElement.lang=l;loadInfoTr(l);
+  LANG=l;store.set('lang',l);document.documentElement.lang=l;loadInfoTr(l);loadContentTr(l);
   $$('#langSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===l));
   if(typeof SEARCH!=='undefined'&&SEARCH.length)buildSearch();
   if(selected)renderInfo();if(typeof renderSysList==='function')renderSysList();
-  trObs.disconnect();trNode(document.body);if(l!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});
+  trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}if(l!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});
   if(typeof tagLabel!=='undefined'&&selected)tagLabel.el.textContent=label(selected.m.userData.c);}
 $$('#langSeg button').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
 function buildSearch(){SEARCH=Object.values(CAT).map(r=>({k:norm([r[2],r[3],r[1],I18N&&I18N.names[r[2]]||''].join(' | ')),c:r}));}
@@ -1967,7 +1967,13 @@ $$('[data-w]').forEach(b=>b.onclick=()=>{const w=b.dataset.w;closeWelcome();
   else if(w==='study'){showTab('lec');if(isPhone())setSheet('full');}});
 
 /* ───────── Casos clínicos ───────── */
-let CASES=[],caseOn=null;
+const TL=(es,en,pt)=>LANG==='en'?en:LANG==='pt'?pt:es;
+let CASES=[],caseOn=null,CASES_ES=null,LESSONS_ES=null;const CONTENT_TR={};
+async function loadContentTr(l){try{let d={les:LESSONS_ES,cas:CASES_ES};
+  if(l!=='es'){d=CONTENT_TR[l];if(!d){const [a,b]=await Promise.all(['lessons','cases'].map(n=>fetch('data/'+n+'_'+l+'.json').then(r=>r.ok?r.json():null).catch(()=>null)));d=CONTENT_TR[l]={les:a,cas:b};}}
+  if(LANG!==l)return;
+  if(d.les&&d.les.length&&!lesson){LESSONS=d.les;if(typeof renderLessons==='function')renderLessons();}
+  if(d.cas&&d.cas.length&&!caseOn){CASES=d.cas;renderCases();}}catch(e){}}
 function caseIds(names,side){const out=[];for(const en of names||[]){let r=Object.values(CAT).filter(x=>x[1]===en&&!x[6]&&sexOk(x[4]));
   if(!r.length)r=Object.values(CAT).filter(x=>x[1]===en&&sexOk(x[4]));
   const pick=r.filter(x=>!x[5]||x[5]===side);(pick.length?pick:r.slice(0,1)).forEach(x=>out.push(x[0]));}return out;}
@@ -1981,20 +1987,20 @@ async function openCase(i){const cs=CASES[i];if(!cs)return;if(cs.body&&BODY!==cs
   applySystems();
   for(const id of L){const m=findMesh(id);if(m){m.userData.hint=true;refreshState(m);}}
   for(const id of A){if(L.includes(id))continue;const m=findMesh(id);if(m){m.userData.ag=true;refreshState(m);}}
-  const box=new THREE.Box3();for(const id of [...L,...A]){const m=findMesh(id);if(m){m.geometry.computeBoundingBox();box.union(m.geometry.boundingBox);}}
+  const box=new THREE.Box3();for(const id of (cs.foco?caseIds(cs.foco,side):[...L,...A])){const m=findMesh(id);if(m){m.geometry.computeBoundingBox();box.union(m.geometry.boundingBox);}}
   if(!box.isEmpty()){const c=box.getCenter(new V3()),sz=box.getSize(new V3()).length();focusOn(c,Math.max(0.5,sz*1.6));}
   setView({anterior:'ant',posterior:'post',superior:'sup',inferior:'inf',lateral:side==='izquierdo'?'lati':'latd',medial:side==='izquierdo'?'latd':'lati'}[cs.camara]||'ant');
   renderCases(i);}
 function renderCases(open){const el=$('#caseBox');if(!el)return;
-  if(open==null){el.innerHTML=`<div class="card"><h3>Casos clínicos</h3><p class="muted small">Cada caso resalta en el modelo la estructura lesionada (turquesa) y los músculos que pierden su función (naranja), con la explicación anatómica, los signos y las pruebas.</p>${CASES.map((c,i)=>`<div class="lesson"><div><b>${esc(c.titulo)}</b><span class="muted small">${esc(c.region)}</span></div><button class="btn" data-case="${i}">Abrir</button></div>`).join('')}</div>`;
+  if(open==null){el.innerHTML=`<div class="card"><h3>Casos clínicos</h3><p class="muted small">${TL('Cada caso resalta en el modelo la estructura lesionada (turquesa) y los músculos que pierden su función (naranja), con la explicación anatómica, los signos y las pruebas.','Each case highlights the injured structure (turquoise) and the muscles that lose function (orange) on the model, with the anatomical explanation, signs and tests.','Cada caso destaca no modelo a estrutura lesionada (turquesa) e os músculos que perdem a função (laranja), com a explicação anatômica, os sinais e os testes.')}</p>${CASES.map((c,i)=>`<div class="lesson"><div><b>${esc(c.titulo)}</b><span class="muted small">${esc(c.region)}</span></div><button class="btn" data-case="${i}">Abrir</button></div>`).join('')}</div>`;
     el.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>openCase(+b.dataset.case));return;}
   const c=CASES[open];const nm=en=>{const r=Object.values(CAT).find(x=>x[1]===en);return r?(entry(r[0])||{}).es||r[2]:en;};
   el.innerHTML=`<div class="card"><button class="link" id="caseBack">← Todos los casos</button><h3 style="margin-top:6px">${esc(c.titulo)}</h3>
-   <p><b>Presentación.</b> ${esc(c.presentacion)}</p><p><b>Anatomía.</b> ${esc(c.anatomia)}</p>
+   <p><b>${TL('Presentación.','Presentation.','Apresentação.')}</b> ${esc(c.presentacion)}</p><p><b>${TL('Anatomía.','Anatomy.','Anatomia.')}</b> ${esc(c.anatomia)}</p>
    <dl class="kv"><dt>Lesión</dt><dd>${c.lesion.map(e=>`<span style="color:var(--accent)">${esc(nm(e))}</span>`).join(', ')}</dd><dt>Afectados</dt><dd>${c.afectados.map(e=>`<span style="color:#f0a040">${esc(nm(e))}</span>`).join(', ')}</dd></dl>
    <h4 class="small" style="margin:8px 0 2px">Signos</h4><ul class="small">${c.signos.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
    <h4 class="small" style="margin:8px 0 2px">Pruebas clínicas</h4><ul class="small">${c.pruebas.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
-   <p class="small"><b>Fisioterapia.</b> ${esc(c.fisioterapia)}</p>
+   <p class="small"><b>${TL('Fisioterapia.','Physiotherapy.','Fisioterapia.')}</b> ${esc(c.fisioterapia)}</p>
    <div class="row"><button class="btn" id="caseClose">Cerrar caso</button><button class="btn" id="caseShare">Compartir</button></div></div>`;
   $('#caseBack').onclick=()=>{clearCase();renderCases();};$('#caseClose').onclick=()=>{clearCase();renderCases();};$('#caseShare').onclick=()=>$('#shareBtn').click();}
 
@@ -2074,19 +2080,19 @@ function tickContraction(dt){if(!contraction)return;contraction.t+=dt;const T=2.
 let LESSONS=[],lesson=null,lstep=0,lhl=[];
 function renderLessons(){
   const box=$('#lecBox');
-  if(!lesson){box.innerHTML=`<div class="view"><p class="muted small">Recorridos por región: cada paso muestra solo las estructuras que explica, con el resto del esqueleto como referencia.</p>${LESSONS.map((l,i)=>`<div class="lesson"><div><b>${esc(l.t)}</b><span class="muted small">${esc(l.r)} · ${l.steps.length} pasos</span></div><button class="btn pri" data-les="${i}">Empezar</button></div>`).join('')}</div>`;
+  if(!lesson){box.innerHTML=`<div class="view"><p class="muted small">Recorridos por región: cada paso muestra solo las estructuras que explica, con el resto del esqueleto como referencia.</p>${LESSONS.map((l,i)=>`<div class="lesson"><div><b>${esc(l.t)}</b><span class="muted small">${esc(l.r)} · ${l.steps.length} ${TL('pasos','steps','passos')}</span></div><button class="btn pri" data-les="${i}">Empezar</button></div>`).join('')}</div>`;
     box.querySelectorAll('[data-les]').forEach(b=>b.onclick=()=>{lesson=LESSONS[+b.dataset.les];lstep=0;if(lesson.body&&BODY!==lesson.body)setBody(lesson.body);else if(!lesson.body&&BODY==='vh')setBody('m');showStep();});return;}
   const n=lesson.steps.length;
   if(lstep>=n){const QS=Array.isArray(lesson.q)?lesson.q:[lesson.q];let ok=0,done=0;
-    box.innerHTML=`<div class="view"><div class="steps">${lesson.steps.map(()=>'<i class="on"></i>').join('')}</div><h3>${esc(lesson.t)} · repaso</h3>${QS.map((q,j)=>`<div class="lq" data-q="${j}"><h2>${esc(q.p)}</h2><div>${q.o.map((o,i)=>`<button class="opt" data-o="${i}">${esc(o)}</button>`).join('')}</div><p class="small qres"></p></div>`).join('')}<p id="qRes" class="small"></p><div class="row"><button class="btn" id="lBack">Volver al último paso</button><button class="btn pri" id="lExit">Terminar lección</button></div></div>`;
+    box.innerHTML=`<div class="view"><div class="steps">${lesson.steps.map(()=>'<i class="on"></i>').join('')}</div><h3>${esc(lesson.t)} · ${TL('repaso','review','revisão')}</h3>${QS.map((q,j)=>`<div class="lq" data-q="${j}"><h2>${esc(q.p)}</h2><div>${q.o.map((o,i)=>`<button class="opt" data-o="${i}">${esc(o)}</button>`).join('')}</div><p class="small qres"></p></div>`).join('')}<p id="qRes" class="small"></p><div class="row"><button class="btn" id="lBack">Volver al último paso</button><button class="btn pri" id="lExit">Terminar lección</button></div></div>`;
     box.querySelectorAll('.lq').forEach(w=>{const q=QS[+w.dataset.q];w.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{const i=+b.dataset.o;w.querySelectorAll('[data-o]').forEach(x=>{x.disabled=true;if(+x.dataset.o===q.a)x.classList.add('ok');});if(i!==q.a)b.classList.add('bad');else ok++;done++;
       w.querySelector('.qres').textContent=i===q.a?'Correcto.':'La respuesta correcta está marcada en verde.';if(QS.length>1&&done===QS.length)$('#qRes').innerHTML=`<b>Resultado: ${ok} de ${QS.length}</b>`;});});
     $('#lBack').onclick=()=>{lstep=n-1;showStep();};$('#lExit').onclick=exitLesson;return;}
   const st=lesson.steps[lstep];
   box.innerHTML=`<div class="view"><div class="steps">${lesson.steps.map((_,i)=>`<i class="${i<=lstep?'on':''}"></i>`).join('')}</div>
-    <h3>${esc(lesson.t)} · paso ${lstep+1} de ${n}</h3><h2>${esc(st.t)}</h2><p>${esc(st.x)}</p>
+    <h3>${esc(lesson.t)} · ${TL('paso','step','passo')} ${lstep+1} ${TL('de','of','de')} ${n}</h3><h2>${esc(st.t)}</h2><p>${esc(st.x)}</p>
     <div class="card"><h3>En pantalla</h3><div style="display:flex;flex-direction:column;gap:4px">${[...new Set(st.show)].map(en=>{const r=Object.values(CAT).find(x=>x[1]===en&&x[4]!=='insercion'&&(!x[5]||x[5]==='derecho'))||Object.values(CAT).find(x=>x[1]===en);return r?`<button class="link small" data-goto="${r[0]}">${esc(nameL(r))}</button>`:'';}).join('')}</div></div>
-    <div class="row"><button class="btn" id="lPrev" ${lstep?'':'disabled'}>Anterior</button><button class="btn pri" id="lNext">${lstep===n-1?'Repaso final':'Siguiente'}</button><button class="btn" id="lExit">Salir</button></div></div>`;
+    <div class="row"><button class="btn" id="lPrev" ${lstep?'':'disabled'}>Paso anterior</button><button class="btn pri" id="lNext">${lstep===n-1?'Repaso final':'Siguiente'}</button><button class="btn" id="lExit">Salir</button></div></div>`;
   box.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>{const m=findMesh(b.dataset.goto);if(m){select(m,null);focusMesh(m);showTab('lec');}});
   $('#lPrev').onclick=()=>{lstep--;showStep();};$('#lNext').onclick=()=>{lstep++;showStep();};$('#lExit').onclick=exitLesson;
 }
@@ -2191,11 +2197,11 @@ setMode(store.get('mode','stu'));
 renderSysList();renderHR();renderDis();planeColors();renderPlanes();updatePlanes();renderInfo();renderViews();
 resize();requestAnimationFrame(frame);
 window.__corpus={orb,HR,loadHR,setDissection,SYS,setGait,gait,showTab,setGaitPattern,shareLink,applyShared};
-fetch('data/cases.json').then(r=>r.ok?r.json():[]).then(c=>{CASES=c;renderCases();}).catch(()=>{});
+fetch('data/cases.json').then(r=>r.ok?r.json():[]).then(c=>{CASES=c;CASES_ES=c;renderCases();if(LANG!=='es')loadContentTr(LANG);}).catch(()=>{});
 Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.json').then(r=>{if(!r.ok)throw new Error(n);return r.json();}))).then(([cat,rig,les,ex,fem])=>{
   fetch('data/info.json').then(r=>r.json()).then(info=>{INFO=info;INFO_READY=true;if(selected)renderInfo();if(LANG!=='es')loadInfoTr(LANG);}).catch(()=>{});
   cat=cat.concat(fem.cat,fem.full||[]);FEM_INFO=fem.info;FEM_OVR=fem.ovr||[];FEM_ONLY=new Set(fem.fonly||[]);CAT_READY=true;
-  LESSONS=les;EX=ex;
+  LESSONS=les;LESSONS_ES=les;EX=ex;
   for(const r of cat) CAT[r[0]]=r;RIG=rig;buildRig();
   buildSearch();if(LANG!=='es')setLang(LANG);
   setSide(romSide);renderLessons();showTab(store.get('tab','sistemas'));
@@ -2218,7 +2224,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 53 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v30');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v31');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();

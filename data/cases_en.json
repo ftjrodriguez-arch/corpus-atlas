@@ -1,0 +1,1267 @@
+[
+{
+"id": "radial-canal-torsion",
+"titulo": "Radial nerve injury in the spiral groove (wrist drop)",
+"region": "upper limb",
+"side": "derecho",
+"presentacion": "34-year-old man with a right humeral shaft fracture after a motorcycle fall. On examination he cannot extend the wrist or fingers and reports tingling over the dorsum of the first web space.",
+"anatomia": "The radial nerve winds around the posterior surface of the humeral shaft in the radial groove (spiral groove), in direct contact with the bone, which is why it is injured in fractures of the middle third. The branches to the triceps usually leave before the groove, so elbow extension is almost always preserved. Below it, the extensors of the wrist, fingers and thumb, the brachioradialis and the supinator are denervated. The superficial sensory branch explains the hypoesthesia over the dorsum of the first web space.",
+"lesion": [
+"Radial nerve",
+"Superficial branch of radial nerve"
+],
+"afectados": [
+"Brachioradialis muscle",
+"Extensor carpi radialis longus",
+"Extensor carpi radialis brevis",
+"Extensor digitorum",
+"Extensor digiti minimi",
+"Humeral head of extensor carpi ulnaris",
+"Ulnar head of extensor carpi ulnaris",
+"Supinator",
+"Abductor pollicis longus",
+"Extensor pollicis brevis",
+"Extensor pollicis longus",
+"Extensor indicis"
+],
+"relacionados": [
+"Humerus",
+"Lateral head of triceps brachii",
+"Medial head of triceps brachii"
+],
+"signos": [
+"Wrist drop: inability to extend the wrist",
+"Inability to extend the metacarpophalangeal joints and the thumb",
+"Elbow extension preserved",
+"Hypoesthesia over the dorsum of the first web space (anatomical snuffbox)",
+"Weak grip due to loss of the tenodesis effect of the extensors"
+],
+"pruebas": [
+"Manual muscle testing of the wrist and finger extensors (Kendall), with the wrist passively stabilized",
+"Thumb extension test: the patient cannot lift the thumb off the table plane with the palm resting flat",
+"Sensory examination in the territory of the superficial branch of the radial nerve",
+"Electromyography and nerve conduction study at 3–4 weeks to estimate prognosis"
+],
+"fisioterapia": "Dynamic wrist and finger extension splint to preserve function and avoid overstretching of the extensors, with daily passive mobilization. During reinnervation, which usually begins with the brachioradialis, electrical stimulation and progressive strengthening are added.",
+"camara": "posterior"
+},
+{
+"id": "tunel-carpiano",
+"titulo": "Carpal tunnel syndrome",
+"region": "upper limb",
+"side": "derecho",
+"presentacion": "52-year-old woman, office worker, with nocturnal paresthesias in the thumb, index and middle fingers of the right hand that improve with shaking the hand. In recent months she drops objects and notices a flatter thenar eminence.",
+"anatomia": "The carpal tunnel is formed by the carpal bones and the flexor retinaculum, and the median nerve and the tendons of the long flexors of the fingers and thumb pass through it. Any increase in pressure within the tunnel (tenosynovitis, edema, pregnancy, hypothyroidism) compresses the nerve. The palmar branch of the median nerve passes over the retinaculum, so sensation in the central palm is preserved, and this finding helps localize the lesion. The recurrent motor branch supplies the lateral thenar muscles and the first two lumbricals.",
+"lesion": [
+"Median nerve"
+],
+"afectados": [
+"Abductor pollicis brevis",
+"Opponens pollicis muscle",
+"Superficial head of flexor pollicis brevis",
+"Lumbrical muscles of hand"
+],
+"relacionados": [
+"Flexor retinaculum of wrist",
+"Palmar branch of median nerve",
+"Flexor pollicis longus",
+"Scaphoid bone"
+],
+"signos": [
+"Nocturnal paresthesias in the median nerve territory (from the thumb to the radial half of the ring finger)",
+"Sensation over the thenar eminence preserved (palmar branch intact)",
+"Thenar eminence atrophy in advanced stages",
+"Weakness of thumb abduction and opposition",
+"Clumsiness in fine pinch"
+],
+"pruebas": [
+"Tinel sign: percussion over the flexor retinaculum reproduces the paresthesias",
+"Phalen test: maximal wrist flexion for 60 s that provokes the symptoms",
+"Durkan carpal compression test: direct pressure over the tunnel for 30 s",
+"Thumb abduction strength (abductor pollicis brevis) against resistance",
+"Nerve conduction study: increased distal latency of the median nerve"
+],
+"fisioterapia": "Night orthosis with the wrist in neutral position, nerve and tendon gliding exercises, and ergonomic education. If there is progressive motor deficit, surgical release is indicated, followed by early mobilization and scar care.",
+"camara": "anterior"
+},
+{
+"id": "cubital-codo",
+"titulo": "Ulnar nerve injury at the elbow (claw hand)",
+"region": "upper limb",
+"side": "derecho",
+"presentacion": "45-year-old man who habitually rests his elbow on the car window. He reports tingling in the little finger and the ulnar half of the ring finger, clumsiness buttoning, and loss of bulk between the first and second metacarpals.",
+"anatomia": "The ulnar nerve passes behind the medial epicondyle of the humerus, in the ulnar groove, and enters the forearm through the cubital tunnel, between the two heads of flexor carpi ulnaris. There it is superficial and exposed to pressure and stretch with sustained elbow flexion. It supplies flexor carpi ulnaris, the medial half of flexor digitorum profundus and almost all the intrinsic muscles of the hand. The ulnar claw (hyperextension of the metacarpophalangeal joints and flexion of the interphalangeal joints of the 4th and 5th fingers) appears from paralysis of the 3rd and 4th lumbricals and the interossei; in a high lesion the claw is less marked than in a distal one because flexor digitorum profundus is also weak (ulnar paradox).",
+"lesion": [
+"Ulnar nerve"
+],
+"afectados": [
+"Humeral head of flexor carpi ulnaris",
+"Ulnar head of flexor carpi ulnaris",
+"Flexor digitorum profundus",
+"Abductor digiti minimi of hand",
+"Flexor digiti minimi of hand",
+"Opponens digiti minimi muscle of hand",
+"Dorsal interossei muscles of hand",
+"Palmar interossei muscles",
+"Lumbrical muscles of hand",
+"Oblique head of adductor pollicis",
+"Transverse head of adductor pollicis",
+"Deep head of flexor pollicis brevis"
+],
+"relacionados": [
+"Humerus",
+"Ulna",
+"Ulnar collateral ligament",
+"Dorsal branch of ulnar nerve"
+],
+"signos": [
+"Ulnar claw hand in the 4th and 5th fingers",
+"Atrophy of the first dorsal interosseous space and of the hypothenar eminence",
+"Hypoesthesia of the little finger and the ulnar half of the ring finger, including the dorsum (the dorsal branch arises above the wrist)",
+"Wartenberg sign: the little finger rests in abduction",
+"Weakness of finger abduction and adduction"
+],
+"pruebas": [
+"Froment sign: when holding a paper between thumb and index finger, the interphalangeal joint of the thumb flexes (flexor pollicis longus substitutes for the adductor)",
+"Elbow flexion test: maximal flexion with the wrist extended for 1 min reproduces the paresthesias",
+"Tinel sign in the ulnar groove, behind the medial epicondyle",
+"Interossei test: index finger abduction against resistance (first dorsal interosseous)",
+"Conduction study with focal slowing at the elbow"
+],
+"fisioterapia": "Avoid sustained flexion and leaning on the elbow (night splint in relative extension), with nerve gliding techniques. Anti-claw orthosis that blocks metacarpophalangeal hyperextension and strengthening of the intrinsic muscles during recovery.",
+"camara": "medial"
+},
+{
+"id": "axilar-cuello-quirurgico",
+"titulo": "Axillary nerve injury (fracture of the surgical neck of the humerus)",
+"region": "upper limb",
+"side": "derecho",
+"presentacion": "68-year-old woman with a fracture of the surgical neck of the right humerus after falling on her arm. Weeks later she cannot lift her arm away from the trunk, the shoulder contour is flattened and she has an area of anesthesia over the lateral aspect of the arm.",
+"anatomia": "The axillary nerve leaves the axilla through the quadrangular space together with the posterior circumflex humeral artery and wraps around the surgical neck of the humerus from behind, in contact with the bone. That is why it is injured in fractures of this area and in anterior dislocations of the shoulder. It supplies the deltoid and teres minor, and through the superior lateral cutaneous nerve of the arm the skin over the lateral aspect of the shoulder (\"regimental badge area\"). Abduction beyond the first few degrees is severely limited, although the supraspinatus can initiate it.",
+"lesion": [
+"Axillary nerve",
+"Superior lateral brachial cutaneous nerve"
+],
+"afectados": [
+"Clavicular part of deltoid muscle",
+"Acromial part of deltoid muscle",
+"Scapular spinal part of deltoid muscle",
+"Teres minor muscle"
+],
+"relacionados": [
+"Humerus",
+"Posterior circumflex humeral artery",
+"Long head of triceps brachii",
+"Teres major muscle"
+],
+"signos": [
+"Deltoid atrophy with flattened shoulder and prominent acromion",
+"Loss of shoulder abduction strength (beyond about 15°)",
+"Weakness of shoulder flexion, extension and external rotation",
+"Hypoesthesia over the lateral aspect of the shoulder (\"regimental badge area\")"
+],
+"pruebas": [
+"Manual muscle testing of the three portions of the deltoid (Kendall)",
+"Sensory testing in the \"regimental badge area,\" over the deltoid insertion",
+"Deltoid extension lag sign",
+"Deltoid electromyography at 3–4 weeks"
+],
+"fisioterapia": "After the fracture has healed, passive and active-assisted mobilization to avoid glenohumeral stiffness, and electrical stimulation of the deltoid. Progressive strengthening of the deltoid and the rotator cuff when signs of reinnervation appear.",
+"camara": "posterior"
+},
+{
+"id": "toracico-largo-escapula-alada",
+"titulo": "Long thoracic nerve injury (winged scapula)",
+"region": "trunk",
+"side": "derecho",
+"presentacion": "28-year-old man who, after several weeks carrying a heavy backpack, notices that the medial border of the right scapula protrudes when pushing against a wall. He has difficulty raising the arm above the head and reports no sensory deficit.",
+"anatomia": "The long thoracic nerve arises from the C5–C7 roots, pierces the middle scalene and descends along the lateral surface of the chest wall over serratus anterior, superficial and with a long course. It is vulnerable to compression (backpacks), stretching and surgery (mastectomy with axillary dissection). Serratus anterior holds the scapula against the thorax and rotates it upward together with the trapezius. Without it, the medial border and inferior angle separate from the chest wall. It is a purely motor nerve, so there is no sensory disturbance.",
+"lesion": [
+"Long thoracic nerve"
+],
+"afectados": [
+"Serratus anterior muscle",
+"Scapula"
+],
+"relacionados": [
+"Scalenus medius muscle",
+"Descending part of trapezius muscle",
+"Rhomboid major muscle",
+"Fifth rib"
+],
+"signos": [
+"Medial winged scapula: the medial border and inferior angle separate from the thorax",
+"Medial displacement of the scapula",
+"Difficulty with flexion and abduction above 90° due to lack of upward rotation",
+"Normal sensation"
+],
+"pruebas": [
+"Wall push-up test: the winging becomes more pronounced",
+"Resisted shoulder flexion at 90° while observing the medial border of the scapula",
+"Differential diagnosis with lateral winged scapula due to accessory nerve injury (trapezius)",
+"Serratus anterior electromyography"
+],
+"fisioterapia": "Avoid loading the shoulder and stretching the nerve; consider a scapular orthosis. Progressive strengthening of serratus anterior (push-up plus, punching) and scapulothoracic motor control during reinnervation.",
+"camara": "posterior"
+},
+{
+"id": "peroneo-comun-pie-caido",
+"titulo": "Common fibular (peroneal) nerve injury at the fibular head (foot drop)",
+"region": "lower limb",
+"side": "derecho",
+"presentacion": "40-year-old man whose poorly padded hip spica cast has just been removed. He cannot lift the tip of the right foot, drags his toes when walking and has hypoesthesia over the dorsum of the foot.",
+"anatomia": "The common fibular (peroneal) nerve winds around the lateral side of the neck of the fibula, just below its head, in a very superficial position and fixed against the bone. That is why it is injured by casts, by crossing the legs, in fractures of the fibular neck or in varus injuries of the knee. There it divides into the deep fibular nerve (muscles of the anterior compartment and extensor digitorum brevis) and the superficial one (fibularis longus and brevis and the skin of the dorsum of the foot). Its involvement produces a deficit of dorsiflexion and eversion, with inversion preserved (tibialis posterior, supplied by the tibial nerve).",
+"lesion": [
+"Common fibular nerve",
+"Deep fibular nerve",
+"Superficial fibular nerve"
+],
+"afectados": [
+"Tibialis anterior muscle",
+"Extensor hallucis longus",
+"Extensor digitorum longus",
+"Fibularis tertius muscle",
+"Extensor digitorum brevis",
+"Extensor hallucis brevis",
+"Fibularis longus muscle",
+"Fibularis brevis muscle"
+],
+"relacionados": [
+"Fibula",
+"Long head of biceps femoris",
+"Tibialis posterior muscle"
+],
+"signos": [
+"Foot drop: deficit of ankle dorsiflexion and toe extension",
+"Steppage gait (exaggerated hip and knee flexion to avoid dragging the foot)",
+"Weakness of foot eversion, with inversion preserved",
+"Hypoesthesia of the dorsum of the foot and the lateral aspect of the leg; first interdigital space (deep fibular nerve)"
+],
+"pruebas": [
+"Manual muscle testing of tibialis anterior and extensor hallucis longus (Kendall)",
+"Heel-walking test: the patient cannot do it",
+"Tinel sign over the neck of the fibula",
+"Differentiate from an L5 radiculopathy: in it, inversion (tibialis posterior) and hip abduction (gluteus medius) are also weak",
+"Conduction study with block at the level of the fibular head"
+],
+"fisioterapia": "Anti-equinus orthosis (rigid or dynamic) for gait and prevention of triceps surae shortening with stretching. Electrical stimulation and progressive strengthening of the dorsiflexors and evertors as they are reinnervated.",
+"camara": "lateral"
+},
+{
+"id": "nervio-femoral",
+"titulo": "Femoral nerve injury",
+"region": "lower limb",
+"side": "derecho",
+"presentacion": "60-year-old anticoagulated woman who develops a retroperitoneal hematoma in the iliopsoas muscle. She has groin pain, the right knee gives way when climbing stairs and she notices hypoesthesia over the anteromedial aspect of the thigh and leg.",
+"anatomia": "The femoral nerve (L2–L4) descends between the psoas and iliacus muscles and enters the thigh under the inguinal ligament, lateral to the femoral artery. It can be compressed in the iliac fossa (iliopsoas hematoma, pelvic or hip surgery). It supplies iliacus, sartorius, pectineus and the quadriceps, and its terminal sensory branch is the saphenous nerve. Loss of the quadriceps prevents locking the knee in extension during stance phase, and loss of iliacus weakens hip flexion (the psoas, supplied by direct branches from the plexus, is partly preserved).",
+"lesion": [
+"Femoral nerve",
+"Saphenous nerve"
+],
+"afectados": [
+"Iliacus muscle",
+"Sartorius muscle",
+"Pectineus muscle",
+"Rectus femoris muscle",
+"Vastus lateralis muscle",
+"Vastus intermedius muscle",
+"Vastus medialis muscle"
+],
+"relacionados": [
+"Inguinal ligament",
+"Femoral artery",
+"Psoas major",
+"Patella"
+],
+"signos": [
+"Weakness of knee extension: the knee gives way under load and when climbing stairs",
+"Patellar reflex diminished or absent",
+"Weakness of hip flexion",
+"Hypoesthesia of the anterior thigh and the medial aspect of the leg (saphenous nerve)",
+"Quadriceps atrophy"
+],
+"pruebas": [
+"Manual muscle testing of the quadriceps and iliopsoas (Kendall)",
+"Patellar reflex (L4)",
+"Femoral nerve stretch test: in the prone position, knee flexion with hip extension reproduces the pain",
+"Test of rising from a chair or stepping up a stair with one leg",
+"Electromyography and imaging (CT) of the iliac fossa"
+],
+"fisioterapia": "Orthosis or cane to give the knee security in gait and electrical stimulation of the quadriceps. Progressive closed-chain strengthening and retraining of gait and stairs when reinnervation appears.",
+"camara": "anterior"
+},
+{
+"id": "ciatica",
+"titulo": "Sciatica / sciatic nerve involvement",
+"region": "lower limb",
+"side": "derecho",
+"presentacion": "42-year-old man with low back pain radiating down the posterior thigh and the lateral aspect of the right leg to the foot, worse when sitting and coughing. He reports tingling over the dorsum of the foot and some weakness when walking on his heels.",
+"anatomia": "The sciatic nerve is formed from the L4–S3 roots and leaves the pelvis through the greater sciatic foramen, usually below the piriformis. It descends along the posterior thigh, where it supplies the hamstrings and the hamstring portion of adductor magnus, and in the popliteal fossa it divides into the tibial and common fibular nerves. The most frequent cause of sciatica is an L4–L5 or L5–S1 disc herniation compressing the L5 or S1 root; less often the nerve is entrapped at the gluteal level (piriformis syndrome) or injured in hip surgery or dislocation. The pattern of deficit depends on the level: radicular (dermatome and myotome) or trunk (everything distal to the lesion).",
+"lesion": [
+"Sciatic nerve",
+"Tibial nerve",
+"Common fibular nerve"
+],
+"afectados": [
+"Long head of biceps femoris",
+"Short head of biceps femoris",
+"Semitendinosus muscle",
+"Semimembranosus muscle",
+"Adductor magnus",
+"Medial head of gastrocnemius",
+"Lateral head of gastrocnemius",
+"Soleus muscle",
+"Tibialis posterior muscle",
+"Tibialis anterior muscle",
+"Extensor hallucis longus",
+"Fibularis longus muscle"
+],
+"relacionados": [
+"Piriformis muscle",
+"Intervertebral disc L4-L5",
+"Intervertebral disc L5-S1",
+"Sacrum"
+],
+"signos": [
+"Pain radiating down the posterior thigh below the knee",
+"Paresthesias in the L5 dermatome (dorsum of the foot, big toe) or S1 (lateral border and sole of the foot)",
+"Weakness of big toe extension and dorsiflexion (L5) or of plantar flexion (S1)",
+"Achilles reflex diminished in S1 involvement",
+"Antalgic posture and paravertebral muscle spasm"
+],
+"pruebas": [
+"Straight leg raise test (Lasègue): radicular pain between 30° and 70°",
+"Slump test: neural tension in sitting with trunk flexion and knee extension",
+"Bragard sign: ankle dorsiflexion sensitizes the Lasègue test",
+"Neurological examination by myotomes, dermatomes and reflexes (patellar L4, Achilles S1)",
+"FAIR test (hip flexion, adduction and internal rotation) when piriformis syndrome is suspected"
+],
+"fisioterapia": "Education and maintenance of activity, with therapeutic exercise, neural mobilization techniques and lumbopelvic motor control. Red flags (cauda equina syndrome, progressive motor deficit) require urgent referral.",
+"camara": "posterior"
+},
+{
+"id": "manguito-supraespinoso",
+"titulo": "Rotator cuff tear (supraspinatus) and subacromial impingement",
+"region": "upper limb",
+"side": "derecho",
+"presentacion": "58-year-old man, a painter, with pain over the lateral aspect of the right shoulder that worsens when raising the arm and at night when lying on that side. He has a painful arc between 60° and 120° of abduction and has difficulty holding the arm elevated.",
+"anatomia": "The supraspinatus tendon runs through the subacromial space, between the humeral head and the coracoacromial arch (acromion and coracoacromial ligament), separated from it by the subacromial-subdeltoid bursa. In abduction and flexion this space narrows, and acromial morphology, acromioclavicular osteophytes or scapular dyskinesis favor impingement. Degeneration of the tendon in its critical zone, near the insertion on the greater tubercle, ends in partial or complete tears, sometimes extending to the infraspinatus. Without the depressor effect of the cuff, the deltoid displaces the humeral head upward and worsens the impingement.",
+"lesion": [
+"Supraspinatus muscle",
+"Subacromial bursa"
+],
+"afectados": [
+"Supraspinatus muscle",
+"Infraspinatus muscle",
+"Acromial part of deltoid muscle",
+"Subdeltoid bursa"
+],
+"relacionados": [
+"Coraco-acromial ligament",
+"Scapula",
+"Humerus",
+"Articular capsule of glenohumeral joint"
+],
+"signos": [
+"Painful arc between 60° and 120° of abduction",
+"Pain over the lateral aspect of the shoulder radiating toward the deltoid insertion",
+"Night pain when lying on the affected shoulder",
+"Weakness of abduction and external rotation in tears",
+"Passive range of motion preserved (unlike adhesive capsulitis)"
+],
+"pruebas": [
+"Jobe test (empty can): resisted abduction at 90° in the scapular plane with internal rotation",
+"Neer test: maximal passive flexion with internal rotation provokes subacromial pain",
+"Hawkins-Kennedy test: flexion to 90° and forced internal rotation",
+"Drop arm sign: the patient cannot lower the arm slowly from abduction",
+"Resisted external rotation test and external rotation lag sign (infraspinatus)"
+],
+"fisioterapia": "Progressive therapeutic exercise of the rotator cuff and scapular stabilizers, with control of load and pain. In surgically repaired tears a phased protocol is followed: protection, passive and active mobility, and strengthening.",
+"camara": "lateral"
+},
+{
+"id": "epicondilalgia-lateral",
+"titulo": "Lateral epicondylalgia (tennis elbow)",
+"region": "upper limb",
+"side": "derecho",
+"presentacion": "45-year-old woman who works with a computer mouse and plays padel, with pain over the lateral aspect of the right elbow for three months. The pain appears when gripping objects, turning a doorknob and lifting a cup with the arm extended.",
+"anatomia": "The extensors of the wrist and fingers originate from the lateral epicondyle of the humerus through the common extensor tendon. Extensor carpi radialis brevis, in the deep part of that origin, bears a great deal of load when stabilizing the wrist in extension during gripping. Repeated overload produces a degenerative (angiofibroblastic) tendinopathy, not an acute inflammation. It must be distinguished from entrapment of the posterior interosseous nerve in the supinator (radial tunnel syndrome) and from radiohumeral joint pathology.",
+"lesion": [
+"Extensor carpi radialis brevis",
+"Common extensor tendon"
+],
+"afectados": [
+"Extensor carpi radialis brevis",
+"Extensor carpi radialis longus",
+"Extensor digitorum",
+"Humeral head of extensor carpi ulnaris",
+"Supinator"
+],
+"relacionados": [
+"Humerus",
+"Radial collateral ligament",
+"Annular ligament of radius",
+"Deep branch of radial nerve"
+],
+"signos": [
+"Tenderness on palpation over the lateral epicondyle or just distal to it",
+"Pain with resisted wrist extension",
+"Decreased grip strength without pain",
+"No neurological deficit"
+],
+"pruebas": [
+"Cozen test: resisted wrist extension with the fist closed and the elbow extended",
+"Mill test: passive stretching of the extensors (elbow extended, pronation and wrist flexion)",
+"Maudsley test: resisted extension of the middle finger",
+"Pain-free grip dynamometry compared with the healthy side",
+"Palpation of the radial tunnel and resisted supination to rule out compression of the posterior interosseous nerve"
+],
+"fisioterapia": "Load management and progressive exercise of the wrist extensors (isometric, then eccentric-concentric), combined with manual therapy and a counterforce brace if useful. Correct the sports technique and the ergonomics of the workstation.",
+"camara": "lateral"
+},
+{
+"id": "lca-triada",
+"titulo": "Anterior cruciate ligament tear (with unhappy triad as a variant)",
+"region": "lower limb",
+"side": "derecho",
+"presentacion": "22-year-old female soccer player who, while pivoting with the foot planted, feels a pop in the right knee and cannot continue playing. Within a few hours the knee swells markedly (hemarthrosis) and she then has a sensation of instability, that the knee \"gives way.\"",
+"anatomia": "The anterior cruciate ligament runs from the medial surface of the lateral femoral condyle to the anterior intercondylar area of the tibia. It prevents anterior translation of the tibia relative to the femur and controls internal rotation. It typically tears in non-contact deceleration and pivoting mechanisms, with valgus and rotation of the knee and the foot fixed. In the \"unhappy triad\" (O'Donoghue) a blow in valgus and external rotation also injures the tibial collateral ligament and the medial meniscus, attached to it; in acute injuries, however, the lateral meniscus is more often damaged. Loss of the ligament is accompanied by quadriceps inhibition, and the hamstrings act as dynamic stabilizers.",
+"lesion": [
+"Anterior cruciate ligament",
+"Superficial part of tibial collateral ligament",
+"Medial meniscus"
+],
+"afectados": [
+"Deep part of tibial collateral ligament",
+"Vastus medialis muscle",
+"Rectus femoris muscle",
+"Vastus lateralis muscle",
+"Semitendinosus muscle",
+"Long head of biceps femoris"
+],
+"relacionados": [
+"Femur",
+"Tibia",
+"Posterior cruciate ligament",
+"Lateral meniscus"
+],
+"signos": [
+"Audible pop and immediate effusion (hemarthrosis) in the first hours",
+"Instability or giving way of the knee on turning",
+"In the triad: pain at the medial joint line and along the course of the tibial collateral, with valgus opening",
+"Quadriceps atrophy or inhibition",
+"Possible joint locking if there is a bucket-handle meniscal tear"
+],
+"pruebas": [
+"Lachman test: anterior translation of the tibia at 20–30° of flexion without a firm endpoint (the most sensitive)",
+"Anterior drawer test at 90° of flexion",
+"Pivot shift test: jerk from anterolateral subluxation of the tibia (the most specific)",
+"Valgus stress test at 0° and 30° for the tibial collateral",
+"McMurray test and Thessaly test for the menisci"
+],
+"fisioterapia": "Early recovery of full extension, effusion control and quadriceps reactivation; then progressive strengthening, proprioception and neuromuscular control, with or without reconstruction. Return to sport after graft reconstruction is based on functional criteria (9 to 12 months).",
+"camara": "anterior"
+},
+{
+"id": "esguince-tobillo-lateral",
+"titulo": "Lateral ankle sprain (anterior talofibular ligament)",
+"region": "lower limb",
+"side": "derecho",
+"presentacion": "19-year-old basketball player who lands on an opponent's foot and twists the right ankle inward. He has pain and swelling in front of and below the lateral malleolus, with bruising, and can bear weight on the foot with difficulty.",
+"anatomia": "The lateral ligament complex of the ankle is formed by the anterior talofibular, calcaneofibular and posterior talofibular ligaments. The typical mechanism is inversion with plantar flexion; in that position the anterior talofibular ligament is taut and vertical and is the first (and often the only) one to tear. If the force continues the calcaneofibular is injured, and rarely the posterior talofibular. The fibularis (peroneal) muscles are dynamic stabilizers against inversion, and their delayed activation together with proprioceptive deficit explains chronic instability.",
+"lesion": [
+"Anterior talofibular ligament",
+"Calcaneofibular ligament"
+],
+"afectados": [
+"Posterior talofibular ligament",
+"Fibularis longus muscle",
+"Fibularis brevis muscle",
+"Anterior tibiofibular ligament"
+],
+"relacionados": [
+"Fibula",
+"Talus",
+"Calcaneus",
+"Fifth metatarsal bone"
+],
+"signos": [
+"Anterolateral pain and swelling of the ankle, with ecchymosis",
+"Tenderness on palpation over the anterior talofibular ligament, in front of the lateral malleolus",
+"Pain with passive inversion and plantar flexion",
+"Sensation of instability and recurrent sprains in chronic cases"
+],
+"pruebas": [
+"Ottawa rules: radiograph if there is bony tenderness at the posterior edge or tip of the malleoli, at the base of the 5th metatarsal or at the navicular, or inability to bear weight for four steps",
+"Anterior drawer test of the ankle (anterior talofibular ligament), best at 4–5 days",
+"Talar tilt test in varus (calcaneofibular ligament)",
+"Squeeze test and external rotation test to rule out a syndesmosis injury",
+"Single-leg balance and Star Excursion Balance Test to assess proprioception"
+],
+"fisioterapia": "Early protected weight bearing with functional support (taping or orthosis) and edema control. Progressive mobility exercise, strengthening of the fibularis muscles and proprioceptive and neuromuscular training to prevent recurrences.",
+"camara": "lateral"
+},
+{
+"id": "tendon-calcaneo",
+"titulo": "Achilles tendinopathy / calcaneal tendon rupture",
+"region": "lower limb",
+"side": "derecho",
+"presentacion": "44-year-old man, a recreational runner, with months of pain and morning stiffness in the right Achilles tendon. During a padel match he feels a \"blow\" in the calf and since then cannot rise onto his toes on that foot.",
+"anatomia": "The calcaneal tendon is the common insertion of the gastrocnemius and the soleus (triceps surae) on the calcaneal tuberosity. Its midportion, 2 to 6 cm above the insertion, is poorly vascularized and is where tendinopathy and most ruptures are concentrated. Ruptures occur from a sudden eccentric load (jump, sprint start) on a degenerated tendon, often in middle-aged men with intermittent sporting activity. Insertional tendinopathy is frequently accompanied by retrocalcaneal bursitis. The deep plantar flexors (tibialis posterior, long flexors and fibularis muscles) can maintain a weak plantar flexion, which can delay the diagnosis.",
+"lesion": [
+"Calcaneal tendon"
+],
+"afectados": [
+"Medial head of gastrocnemius",
+"Lateral head of gastrocnemius",
+"Soleus muscle",
+"Plantaris muscle"
+],
+"relacionados": [
+"Calcaneus",
+"Subtendinous calcaneal bursa",
+"Subcutaneous calcaneal bursa",
+"Flexor hallucis longus"
+],
+"signos": [
+"Tendinopathy: pain and fusiform thickening 2 to 6 cm above the insertion, with morning stiffness",
+"Rupture: pop and a sensation of being kicked in the calf",
+"Palpable defect (axe-blow) along the course of the tendon",
+"Inability to rise onto the toes on one leg",
+"Increased passive dorsiflexion at rest compared with the healthy side"
+],
+"pruebas": [
+"Thompson test: when squeezing the calf in the prone position there is no plantar flexion (complete rupture)",
+"Matles test: with the knees at 90° in prone, the affected foot falls into neutral or dorsiflexion",
+"Painful arc sign of the tendon: the thickening moves with ankle motion in midportion tendinopathy",
+"Single-leg heel raises: number of repetitions and pain (VISA-A scale)",
+"Ultrasound to assess the tendinopathy and the gap between the tendon ends"
+],
+"fisioterapia": "In tendinopathy, a progressive loading program (isometrics and eccentric or heavy slow resistance) with activity modification. In rupture, functional or surgical treatment with an equinus boot and early progressive weight bearing, and gradual return to running and jumping.",
+"camara": "posterior"
+},
+{
+"id": "gluteo-medio-trendelenburg",
+"titulo": "Gluteus medius weakness (Trendelenburg sign)",
+"region": "lower limb",
+"side": "derecho",
+"presentacion": "63-year-old woman who underwent a right hip replacement through a lateral approach. When walking, the pelvis drops to the left side at each stance on the right leg and she leans the trunk to the right; she also reports pain over the lateral aspect of the hip.",
+"anatomia": "Gluteus medius and gluteus minimus originate from the external surface of the ilium and insert on the greater trochanter. They are the main abductors of the hip and, during single-leg stance, they prevent the pelvis from dropping toward the side of the swinging leg. They are supplied by the superior gluteal nerve (L4–S1), which exits above the piriformis together with tensor fasciae latae. Weakness can be due to a nerve injury (misplaced intramuscular injection, lateral surgical approach), to a gluteal tendinopathy or tear, or to an alteration of the lever arm (coxa vara, dislocation). The Trendelenburg sign appears on the side opposite the weak hip.",
+"lesion": [
+"Gluteus medius muscle",
+"Superior gluteal nerve"
+],
+"afectados": [
+"Gluteus medius muscle",
+"Gluteus minimus muscle",
+"Tensor fasciae latae"
+],
+"relacionados": [
+"Hip bone",
+"Femur",
+"Trochanteric bursa of gluteus medius muscle",
+"Iliotibial tract"
+],
+"signos": [
+"Trendelenburg sign: the pelvis drops to the contralateral side in single-leg stance on the affected leg",
+"Compensated Trendelenburg or Duchenne gait: trunk lean toward the affected side",
+"Weakness of hip abduction",
+"Tenderness on palpation at the greater trochanter if there is gluteal tendinopathy"
+],
+"pruebas": [
+"Trendelenburg test: single-leg stance for 30 s observing the level of the pelvis",
+"Manual muscle testing of gluteus medius in side-lying, with the hip in slight extension and external rotation (Kendall)",
+"Sustained single-leg stance for 30 s, which reproduces the trochanteric pain (gluteal tendinopathy)",
+"FADER-R test (flexion, adduction, external rotation with resisted internal rotation) for gluteal tendinopathy"
+],
+"fisioterapia": "Progressive strengthening of the hip abductors, starting with isometrics without tendon compression and progressing to loads in single-leg stance and closed chain. Gait retraining, with a contralateral cane if needed, and avoiding adducted postures (crossing the legs).",
+"camara": "posterior"
+},
+{
+"id": "mama-axila",
+"titulo": "Breast cancer and axillary lymphatic drainage",
+"region": "breast · female",
+"side": "izquierdo",
+"body": "f",
+"presentacion": "52-year-old woman with a hard, painless nodule in the upper outer quadrant of the left breast and a palpable lymph node in the axilla on the same side.",
+"anatomia": "About 75% of the lymph from the breast drains to the axillary nodes, especially from the outer quadrants: first to the pectoral (anterior) nodes, then to the central and apical ones, and from there to the supraclavicular nodes. The inner quadrants also drain to the parasternal nodes, alongside the internal thoracic artery. The suspensory ligaments (of Cooper) attach the gland to the skin: when the tumor infiltrates them, the skin retracts. In axillary dissection the long thoracic nerve (winged scapula) and the thoracodorsal nerve (latissimus dorsi) can be injured.",
+"lesion": [
+"Lobes of mammary gland",
+"Lactiferous ducts",
+"Suspensory ligaments of breast"
+],
+"afectados": [
+"Anterior axillary nodes",
+"Central axillary nodes",
+"Lateral axillary nodes",
+"Posterior axillary nodes",
+"Apical axillary nodes",
+"Interpectoral nodes",
+"Parasternal nodes",
+"Supraclavicular nodes"
+],
+"relacionados": [
+"Pectoralis minor muscle",
+"Sternocostal head of pectoralis major muscle",
+"Long thoracic nerve",
+"Thoracodorsal nerve",
+"Lateral thoracic artery",
+"Axillary artery"
+],
+"signos": [
+"Hard, irregular, poorly mobile nodule",
+"Skin or nipple retraction (infiltration of Cooper ligaments)",
+"Peau d'orange from lymphatic blockage",
+"Hard axillary lymph node"
+],
+"pruebas": [
+"Systematic breast and axillary examination by quadrants",
+"Mammography and ultrasound; core needle biopsy",
+"Sentinel lymph node biopsy to stage the axilla",
+"After surgery: arm circumferences to detect lymphedema and the winged scapula test (wall push)"
+],
+"fisioterapia": "Early shoulder mobilization after surgery, manual lymphatic drainage, bandaging and exercises for lymphedema, and strengthening of serratus anterior if there is long thoracic nerve injury.",
+"camara": "anterior"
+},
+{
+"id": "prolapso",
+"titulo": "Pelvic organ prolapse after several deliveries",
+"region": "pelvis · female",
+"side": "derecho",
+"body": "f",
+"presentacion": "58-year-old woman, with three vaginal deliveries, who notices a bulge in the vagina at the end of the day, a sensation of heaviness and urine leakage when coughing.",
+"anatomia": "The bladder, uterus and rectum are supported by two systems: the suspension of the cardinal and uterosacral ligaments (level I), the attachment of the vagina to the tendinous arches (level II) and the support of the pelvic diaphragm and perineal body (level III). Childbirth can tear or denervate the levator ani and stretch the ligaments; with menopause and repeated abdominal pressure, the urogenital hiatus widens and the organs descend: the bladder through the anterior wall (cystocele), the uterus along the vaginal axis (hysterocele) and the rectum through the posterior wall (rectocele).",
+"lesion": [
+"Pubococcygeus muscle",
+"Pubo-analis muscle",
+"Iliococcygeus muscle",
+"Cardinal ligament",
+"Uterosacral ligament",
+"Perineal body"
+],
+"afectados": [
+"Urinary bladder",
+"Cervix of uterus",
+"Body of uterus",
+"Vagina",
+"Rectum"
+],
+"relacionados": [
+"Hip bone",
+"Sacrum",
+"Coccyx",
+"Tendinous arch of levator ani",
+"Coccygeus muscle"
+],
+"signos": [
+"Vaginal bulge that increases on standing and with exertion",
+"Sensation of pelvic heaviness",
+"Stress urinary incontinence",
+"Difficulty emptying the rectum (rectocele)"
+],
+"pruebas": [
+"Examination at rest and with Valsalva maneuver; POP-Q classification",
+"Vaginal palpation of the levator ani contraction (Oxford scale)",
+"Pelvic floor ultrasound to assess levator avulsion",
+"Cough test for stress incontinence"
+],
+"fisioterapia": "Supervised pelvic floor muscle training (maximal and endurance contractions, 'the knack' before coughing), biofeedback, control of intra-abdominal pressure and a pessary if necessary.",
+"camara": "medial",
+"solo": true,
+"cut": {
+"p": "sag",
+"pos": 0.002
+}
+},
+{
+"id": "endometriosis",
+"titulo": "Deep endometriosis with pelvic pain",
+"region": "pelvis · female",
+"side": "derecho",
+"body": "f",
+"presentacion": "29-year-old woman with severe dysmenorrhea for years, pain with deep sexual intercourse and pain on defecation during menstruation.",
+"anatomia": "Endometrial tissue outside the uterus implants mainly on the peritoneum of the rectouterine pouch (of Douglas), the uterosacral ligaments, the ovaries (endometriomas) and the anterior wall of the rectum. That is why pain appears with deep penetration, which presses on the pouch, and with defecation. Uterosacral nodules can entrap the ureter, which passes a few centimeters from the cervix under the uterine artery.",
+"lesion": [
+"Uterosacral ligament",
+"Ovary"
+],
+"afectados": [
+"Rectum",
+"Ureter",
+"Vesico-uterine pouch"
+],
+"relacionados": [
+"Body of uterus",
+"Cervix of uterus",
+"Broad ligament of uterus",
+"Ampulla of uterine tube",
+"Uterine artery",
+"Sacrum"
+],
+"signos": [
+"Progressive dysmenorrhea",
+"Deep dyspareunia",
+"Catamenial dyschezia (pain on defecation during menses)",
+"Painful nodule in the pouch on vaginal examination",
+"Infertility"
+],
+"pruebas": [
+"Vaginal and rectovaginal examination: nodularity of the uterosacral ligaments",
+"Transvaginal ultrasound (endometriomas, deep nodules)",
+"Pelvic magnetic resonance imaging for lesion mapping",
+"Laparoscopy with biopsy (confirmation)"
+],
+"fisioterapia": "Pain education, therapeutic exercise, relaxation and manual therapy of the pelvic floor for pain-related secondary hypertonia, in coordination with hormonal or surgical treatment.",
+"camara": "medial",
+"solo": true,
+"cut": {
+"p": "sag",
+"pos": 0.002
+}
+},
+{
+"id": "cintura-pelvica",
+"titulo": "Pelvic girdle pain and rectus diastasis in pregnancy",
+"region": "pelvis and abdomen · female",
+"side": "derecho",
+"body": "f",
+"presentacion": "33-year-old woman, 30 weeks pregnant, with pain over the pubic symphysis and in the buttocks when walking, climbing stairs or turning over in bed. After delivery she notices a bulge in the midline of the abdomen when sitting up.",
+"anatomia": "Relaxin and estrogens increase the laxity of the ligaments of the pubic symphysis and the sacroiliac joints to widen the birth canal: the symphysis can separate a few millimeters. Weight gain and the anterior displacement of the center of gravity load these joints. The growing uterus stretches the abdominal wall: the linea alba thins and the rectus abdominis muscles separate (diastasis), while the obliques and transversus lose effectiveness.",
+"lesion": [
+"Pubic symphysis",
+"Anterior sacro-iliac ligament",
+"Posterior sacro-iliac ligament",
+"Linea alba"
+],
+"afectados": [
+"Rectus abdominis muscle",
+"Transversus abdominis muscle"
+],
+"relacionados": [
+"Hip bone",
+"Sacrum",
+"Interosseous sacro-iliac ligament",
+"Iliolumbar ligament"
+],
+"signos": [
+"Pain at the symphysis and the sacroiliac joints when bearing weight on one leg",
+"Antalgic gait and pain when turning over in bed",
+"Midline bulge when sitting up (diastasis)"
+],
+"pruebas": [
+"Active straight leg raise test (ASLR)",
+"Posterior pelvic pain provocation test (P4) and palpation of the symphysis",
+"Measurement of the inter-rectus distance with the fingers or with ultrasound"
+],
+"fisioterapia": "Information and adaptation of activities, pelvic belt, motor control exercises of the transversus and pelvic floor, and progressive recovery of the abdominal wall after delivery.",
+"camara": "anterior",
+"solo": true
+},
+{
+"id": "desgarro-perineal",
+"titulo": "Third-degree perineal tear and anal incontinence",
+"region": "perineum · female",
+"side": "derecho",
+"body": "f",
+"presentacion": "31-year-old woman, six weeks after a forceps delivery, reports passing gas involuntarily and urgency to defecate. A third-degree perineal tear was repaired at delivery.",
+"anatomia": "The perineal body is the anchor point of the bulbospongiosus, the transverse perineal muscles and the external anal sphincter. Tears are graded by depth: 1st skin, 2nd perineal muscles (perineal body), 3rd anal sphincter (3a less than 50% of the external, 3b more than 50%, 3c also the internal) and 4th anal canal mucosa. Injury to the sphincter, and sometimes to the pudendal nerve through stretching, explains the incontinence.",
+"lesion": [
+"Perineal body",
+"External anal sphincter"
+],
+"afectados": [
+"Bulbospongiosus muscle",
+"Superficial transverse perineal muscle",
+"Anal canal"
+],
+"relacionados": [
+"Vagina",
+"Pudendal nerve",
+"Rectum",
+"Ischiocavernosus muscle"
+],
+"signos": [
+"Incontinence of gas or stool and defecatory urgency",
+"Shortened anogenital distance or perineal scar",
+"Weak resting anal tone or voluntary contraction"
+],
+"pruebas": [
+"Inspection and digital rectal examination with voluntary contraction (modified Oxford scale)",
+"Endoanal ultrasound: sphincter defect",
+"Anorectal manometry",
+"Wexner incontinence score"
+],
+"fisioterapia": "Pelvic floor rehabilitation with biofeedback, sphincter strength and endurance training, urgency work and perineal scar massage once healed.",
+"camara": "inferior",
+"solo": true
+},
+{
+"id": "pudendo",
+"titulo": "Pudendal nerve neuralgia (cyclists)",
+"region": "perineum · female",
+"side": "derecho",
+"body": "f",
+"presentacion": "45-year-old woman, a cyclist, with burning pain in the vulva and perineum that worsens when sitting, improves when standing and does not wake her at night.",
+"anatomia": "The pudendal nerve (S2–S4) leaves the pelvis through the greater sciatic foramen, wraps around the ischial spine between the sacrospinous and sacrotuberous ligaments, and re-enters through the lesser sciatic foramen into the pudendal canal (of Alcock), in the lateral wall of the ischioanal fossa. There it can be compressed when sitting. It supplies the skin of the perineum and vulva, the external anal sphincter and the muscles of the perineum.",
+"lesion": [
+"Pudendal nerve"
+],
+"afectados": [
+"External anal sphincter",
+"Bulbospongiosus muscle",
+"Ischiocavernosus muscle",
+"Superficial transverse perineal muscle"
+],
+"relacionados": [
+"Sacrospinous ligament",
+"Sacrotuberous ligament",
+"Hip bone",
+"Sacrum",
+"Internal pudendal artery",
+"Obturator internus"
+],
+"signos": [
+"Burning perineal or vulvar pain that worsens when sitting (Nantes criteria)",
+"Improves when standing or sitting on the toilet",
+"No objective sensory deficit in most"
+],
+"pruebas": [
+"Painful palpation of the ischial spine through the vagina",
+"Image-guided pudendal nerve block (diagnostic)",
+"Sphincter electromyography and pudendal motor latency"
+],
+"fisioterapia": "Avoid prolonged sitting and adapt the saddle, pain education, manual therapy of the pelvic floor muscles and obturator internus, and relaxation exercises.",
+"camara": "inferior",
+"solo": true
+},
+{
+"id": "bell",
+"titulo": "Peripheral facial palsy (Bell palsy)",
+"region": "head",
+"side": "derecho",
+"presentacion": "38-year-old woman who on waking cannot close the right eye, the corner of her mouth droops and she notices food accumulating in the cheek. She has no other deficits.",
+"anatomia": "The facial nerve (VII) leaves the brainstem at the cerebellopontine angle, runs through the facial canal of the temporal bone, where it becomes inflamed and compressed in Bell palsy, and exits through the stylomastoid foramen to divide in the parotid into its branches for the muscles of facial expression. A peripheral lesion paralyzes the entire hemiface, including the forehead; in a central lesion (stroke) the forehead is spared because its nucleus receives fibers from both hemispheres.",
+"lesion": [
+"Facial nerve (VII)"
+],
+"afectados": [
+"Orbicularis oris muscle",
+"Zygomaticus major muscle",
+"Platysma"
+],
+"relacionados": [
+"Parotid gland",
+"Pons",
+"Temporal bone"
+],
+"signos": [
+"Inability to close the eye (Bell sign: the globe rolls upward)",
+"Effacement of the forehead wrinkles and the nasolabial fold",
+"Deviation of the mouth toward the healthy side",
+"Sometimes hyperacusis and loss of taste in the anterior two thirds of the tongue"
+],
+"pruebas": [
+"House-Brackmann scale",
+"Examination of the forehead: distinguishes peripheral from central lesion",
+"Otoscopy (rule out herpes zoster oticus)",
+"Electroneurography if there is no recovery at 3 weeks"
+],
+"fisioterapia": "Eye protection, neuromuscular reeducation in front of a mirror with selective exercises and biofeedback, avoiding intense electrical stimulation and mass movements that promote synkinesis.",
+"camara": "lateral"
+},
+{
+"id": "tercer-par",
+"titulo": "Third cranial nerve palsy from a posterior communicating artery aneurysm",
+"region": "head",
+"side": "derecho",
+"presentacion": "55-year-old hypertensive man with severe sudden-onset headache, drooping of the right eyelid and double vision. The right pupil is dilated and does not react to light.",
+"anatomia": "The oculomotor nerve (III) leaves the midbrain between the posterior cerebral and superior cerebellar arteries and runs alongside the posterior communicating artery. Its parasympathetic fibers for the pupil travel on the surface of the nerve, so an external compression (aneurysm, uncal herniation) dilates the pupil, whereas diabetic ischemia usually spares it. It supplies the superior, inferior and medial recti, the inferior oblique and the levator palpebrae.",
+"lesion": [
+"Oculomotor nerve (III)"
+],
+"afectados": [
+"Midbrain"
+],
+"relacionados": [
+"Posterior cerebral artery",
+"Basilar artery",
+"Internal carotid artery",
+"Trochlear nerve (IV)"
+],
+"signos": [
+"Ptosis of the eyelid",
+"Eye deviated down and out (unopposed action of the lateral rectus and superior oblique)",
+"Non-reactive mydriasis",
+"Diplopia"
+],
+"pruebas": [
+"Examination of ocular motility in the nine positions of gaze",
+"Direct and consensual pupillary light reflex",
+"Urgent CT or MR angiography: a third nerve palsy with pupil involvement is an aneurysm until proven otherwise"
+],
+"fisioterapia": "After neurovascular treatment: alternating occlusion for diplopia, oculomotor exercises and adaptation of activities of daily living.",
+"camara": "inferior"
+},
+{
+"id": "hernia-inguinal",
+"titulo": "Indirect inguinal hernia",
+"region": "abdomen",
+"side": "derecho",
+"presentacion": "28-year-old man who notices a bulge in the right groin when lifting weight, which goes down into the scrotum and disappears when lying down.",
+"anatomia": "The inguinal canal crosses the abdominal wall obliquely above the inguinal ligament, from the deep ring (lateral to the inferior epigastric vessels) to the superficial ring. The indirect hernia enters through the deep ring, lateral to the epigastric vessels, following the spermatic cord; the direct hernia pushes through the floor of the canal (Hesselbach triangle), medial to those vessels. The internal oblique and transversus form the roof and the conjoint tendon reinforces the posterior wall.",
+"lesion": [
+"Inguinal ligament",
+"Inferior epigastric artery"
+],
+"afectados": [
+"Transversus abdominis muscle",
+"Rectus abdominis muscle"
+],
+"relacionados": [
+"Inferior epigastric vein",
+"Hip bone",
+"Ilio-inguinal nerve"
+],
+"signos": [
+"Inguinal bulge that increases with coughing and exertion",
+"Reducible when lying down",
+"May descend into the scrotum (indirect)",
+"Sudden, irreducible, painful bulge: strangulation, surgical emergency"
+],
+"pruebas": [
+"Examination standing with cough: impulse felt on the finger introduced through the superficial ring",
+"Abdominal wall ultrasound in doubtful cases"
+],
+"fisioterapia": "After repair (hernioplasty): early mobilization, progressive control of intra-abdominal pressure, strengthening of the transversus abdominis and gradual return to loading.",
+"camara": "anterior"
+},
+{
+"id": "ictus-acm",
+"titulo": "Left middle cerebral artery stroke",
+"region": "brain",
+"side": "izquierdo",
+"presentacion": "67-year-old man with atrial fibrillation who suddenly cannot move the right arm and face and cannot speak fluently, although he understands what is said to him.",
+"anatomia": "The middle cerebral artery supplies the lateral surface of the hemisphere: the motor and sensory cortex of the face and upper limb (precentral and postcentral gyri), Broca area in the dominant hemisphere and, through its deep lenticulostriate branches, the internal capsule. Its occlusion in the left hemisphere produces right hemiparesis and hemihypoesthesia predominantly of the face and arm, and aphasia; the leg is less affected because its cortex depends on the anterior cerebral artery.",
+"lesion": [
+"Middle cerebral artery (M1-segment)",
+"Middle cerebral artery (M3 segment)"
+],
+"afectados": [
+"Precentral gyrus",
+"Postcentral gyrus",
+"Putamen",
+"Caudate nucleus"
+],
+"relacionados": [
+"Internal carotid artery",
+"Anterior cerebral artery",
+"Posterior cerebral artery",
+"Basilar artery"
+],
+"signos": [
+"Right hemiparesis predominantly of the face and arm",
+"Central facial palsy (forehead spared)",
+"Expressive aphasia (Broca)",
+"Gaze deviation toward the side of the lesion"
+],
+"pruebas": [
+"NIHSS scale",
+"Urgent head CT to rule out hemorrhage and CT angiography to locate the occlusion (thrombolysis or thrombectomy)",
+"Swallowing assessment before giving food"
+],
+"fisioterapia": "Early mobilization and sitting, positioning of the plegic shoulder, task-oriented therapy, constraint-induced movement therapy in later phases and speech therapy for aphasia.",
+"camara": "lateral",
+"solo": true
+},
+{
+"id": "fascitis-plantar",
+"titulo": "Plantar fasciitis",
+"region": "foot",
+"side": "derecho",
+"presentacion": "45-year-old woman who walks many hours at work, with stabbing pain in the right heel on the first steps in the morning that improves with walking and worsens at the end of the day.",
+"anatomia": "The plantar aponeurosis originates from the medial tubercle of the calcaneus and extends to the proximal phalanges. At toe-off, extension of the toes tenses it and raises the arch (windlass mechanism). Repeated loading, shortening of the triceps surae and flat or cavus foot produce degeneration (fasciosis) at its origin.",
+"lesion": [
+"Plantar aponeurosis"
+],
+"afectados": [
+"Abductor hallucis",
+"Flexor digitorum brevis",
+"Quadratus plantae muscle"
+],
+"relacionados": [
+"Calcaneus",
+"Medial head of gastrocnemius",
+"Soleus muscle",
+"Long plantar ligament"
+],
+"signos": [
+"Pain at the medial tubercle of the calcaneus",
+"Maximal pain on the first steps after rest",
+"Shortening of the triceps surae"
+],
+"pruebas": [
+"Palpation of the medial origin of the aponeurosis",
+"Windlass test (passive extension of the big toe reproduces the pain)",
+"Ultrasound: thickness greater than 4 mm at the origin"
+],
+"fisioterapia": "Specific stretching of the aponeurosis and triceps surae, strengthening of the intrinsic muscles and progressive loading (heel raises with the big toe in extension), insoles and education on load.",
+"camara": "inferior"
+},
+{
+"id": "radiculopatia-l5",
+"titulo": "L4–L5 disc herniation with L5 radiculopathy",
+"region": "lumbar spine",
+"side": "izquierdo",
+"presentacion": "38-year-old man with low back pain radiating down the lateral aspect of the left leg to the dorsum of the foot, with tingling in the big toe, after lifting a heavy box.",
+"anatomia": "The nucleus pulposus of the L4–L5 disc herniates in a posterolateral direction, where the posterior longitudinal ligament is weakest, and compresses the L5 root in the lateral recess. L5 supplies extensor hallucis longus, tibialis anterior (together with L4), gluteus medius and sensation of the dorsum of the foot.",
+"lesion": [
+"Nucleus pulposus L4-L5",
+"Intervertebral disc L4-L5"
+],
+"afectados": [
+"Extensor hallucis longus",
+"Tibialis anterior muscle",
+"Gluteus medius muscle"
+],
+"relacionados": [
+"Vertebra L4",
+"Vertebra L5",
+"Sciatic nerve",
+"Common fibular nerve",
+"Posterior longitudinal ligament"
+],
+"signos": [
+"Radicular pain in the L5 dermatome (lateral aspect of the leg and dorsum of the foot)",
+"Weakness of big toe extension",
+"Difficulty heel-walking",
+"Patellar and Achilles reflexes preserved"
+],
+"pruebas": [
+"Positive straight leg raise (Lasègue) between 30° and 70°",
+"Manual muscle testing of extensor hallucis longus",
+"Sensation of the dorsum of the foot",
+"MRI if there is progressive deficit or red flags (cauda equina)"
+],
+"fisioterapia": "Education and maintenance of activity, motor control and progressive loading exercises, neurodynamic techniques and mobilization; urgent referral if progressive weakness or sphincter disturbance appears.",
+"camara": "lateral",
+"foco": [
+"Intervertebral disc L4-L5",
+"Vertebra L4",
+"Vertebra L5"
+]
+},
+{
+"id": "radiculopatia-c6",
+"titulo": "C5–C6 disc herniation with C6 radiculopathy",
+"region": "cervical spine",
+"side": "derecho",
+"presentacion": "47-year-old woman with neck pain radiating to the right arm as far as the thumb and index finger, with tingling, worse on turning and tilting the head to that side.",
+"anatomia": "In the cervical spine each root exits above the vertebra of its number: the C5–C6 herniation compresses the C6 root. This supplies biceps brachii and brachioradialis (with C5) and the radial extensors of the wrist, and carries sensation from the radial border of the forearm, the thumb and the index finger.",
+"lesion": [
+"Nucleus pulposus C5-C6",
+"Intervertebral disc C5-C6"
+],
+"afectados": [
+"Brachioradialis muscle",
+"Extensor carpi radialis longus",
+"Extensor carpi radialis brevis"
+],
+"relacionados": [
+"Vertebra C5",
+"Vertebra C6",
+"Roots of brachial plexus",
+"Musculocutaneous nerve",
+"Radial nerve"
+],
+"signos": [
+"Pain and paresthesias in the C6 dermatome (thumb and index finger)",
+"Diminished biceps or brachioradialis reflex",
+"Weakness of elbow flexion and wrist extension"
+],
+"pruebas": [
+"Spurling test (extension, rotation and side-bending with axial compression)",
+"Cervical distraction test (relieves the pain)",
+"Upper limb neurodynamic test (ULNT1)",
+"Reflexes and manual muscle testing by myotomes"
+],
+"fisioterapia": "Education, mobilization and exercises for the cervical and thoracic spine, neurodynamic techniques, deep neck flexor exercise and adaptation of postures; most improve within weeks.",
+"camara": "lateral",
+"foco": [
+"Intervertebral disc C5-C6",
+"Vertebra C5",
+"Vertebra C6"
+]
+},
+{
+"id": "de-quervain",
+"titulo": "De Quervain tenosynovitis",
+"region": "wrist",
+"side": "derecho",
+"presentacion": "32-year-old woman, with a three-month-old baby, with pain over the radial border of the right wrist when lifting the child and turning the hand.",
+"anatomia": "Abductor pollicis longus and extensor pollicis brevis pass together through the first extensor compartment, under the extensor retinaculum over the radial styloid process. Thickening of the sheath and retinaculum from repeated use with the thumb in abduction and the wrist in deviation produces pain when the tendons glide.",
+"lesion": [
+"Abductor pollicis longus",
+"Extensor pollicis brevis"
+],
+"afectados": [
+"Extensor retinaculum of wrist"
+],
+"relacionados": [
+"Radius",
+"Superficial branch of radial nerve",
+"Brachioradialis muscle"
+],
+"signos": [
+"Pain and swelling over the radial styloid",
+"Pain on abducting and extending the thumb against resistance",
+"Occasional crepitus"
+],
+"pruebas": [
+"Finkelstein/Eichhoff test (ulnar deviation with the thumb in flexion)",
+"Palpation of the first extensor compartment",
+"Ultrasound: thickening of the sheath"
+],
+"fisioterapia": "Thumb and wrist orthosis, modification of how the baby is carried, progressive tendon loading and, if it persists, injection by the physician.",
+"camara": "anterior"
+},
+{
+"id": "piramidal",
+"titulo": "Piriformis syndrome",
+"region": "gluteal",
+"side": "derecho",
+"presentacion": "41-year-old man, a runner, with deep right gluteal pain radiating down the posterior thigh when sitting for a long time, without low back pain.",
+"anatomia": "The sciatic nerve leaves the pelvis through the greater sciatic foramen, usually below the piriformis; in some people it passes through it or one of its divisions passes above it. Hypertrophy or spasm of the piriformis and the deep rotators can irritate it in the subgluteal space (deep gluteal syndrome).",
+"lesion": [
+"Piriformis muscle"
+],
+"afectados": [
+"Sciatic nerve"
+],
+"relacionados": [
+"Gluteus maximus muscle",
+"Obturator internus",
+"Quadratus femoris muscle",
+"Sacrum",
+"Hip bone"
+],
+"signos": [
+"Deep gluteal pain that worsens when sitting",
+"Tenderness on palpation of the piriformis",
+"No lumbar radicular signs"
+],
+"pruebas": [
+"FAIR test (hip flexion, adduction and internal rotation)",
+"Freiberg and Pace tests",
+"Rule out a lumbar origin (Lasègue, reflexes)"
+],
+"fisioterapia": "Stretching and strengthening of the hip rotators and abductors, sciatic nerve mobilization techniques, adaptation of sitting and of training.",
+"camara": "posterior"
+},
+{
+"id": "menisco-medial",
+"titulo": "Medial meniscus tear",
+"region": "knee",
+"side": "derecho",
+"presentacion": "29-year-old man who, while pivoting playing soccer with the foot planted, felt pain on the inner side of the right knee; since then he has had locking and the knee swells the day after playing sport.",
+"anatomia": "The medial meniscus, C-shaped, is attached to the capsule and the tibial collateral ligament, so it moves less than the lateral one and is injured more often in twisting with the knee flexed and loaded. Its outer third is vascularized (red zone) and can heal; the inner third cannot.",
+"lesion": [
+"Medial meniscus"
+],
+"afectados": [
+"Vastus medialis muscle"
+],
+"relacionados": [
+"Femur",
+"Tibia",
+"Anterior meniscotibial ligament (Medial meniscus)",
+"Posterior meniscotibial ligament (Medial meniscus)",
+"Anterior cruciate ligament"
+],
+"signos": [
+"Pain at the medial joint line",
+"Delayed joint effusion (hours)",
+"Locking or catching sensation",
+"Pain on squatting"
+],
+"pruebas": [
+"McMurray test",
+"Thessaly test",
+"Tenderness on palpation of the medial joint line",
+"Magnetic resonance imaging"
+],
+"fisioterapia": "Effusion control, recovery of mobility and of the quadriceps, progressive loading exercise and neuromuscular control; surgery (suture or partial meniscectomy) if there is true locking.",
+"camara": "anterior"
+},
+{
+"id": "femoropatelar",
+"titulo": "Patellofemoral pain syndrome",
+"region": "knee",
+"side": "derecho",
+"presentacion": "19-year-old woman, a runner, with diffuse pain around the right patella when going downstairs, squatting and when sitting for a long time with the knees bent.",
+"anatomia": "The patella glides in the femoral trochlea guided by the quadriceps (with the vastus medialis obliquus), the patellar retinacula and the iliotibial band. Excessive loads, weakness of the hip abductors and lateral rotators and dynamic valgus increase pressure in the patellofemoral joint.",
+"lesion": [
+"Patella",
+"Lateral patellar retinaculum",
+"Medial patellar retinaculum"
+],
+"afectados": [
+"Vastus medialis muscle",
+"Gluteus medius muscle",
+"Rectus femoris muscle"
+],
+"relacionados": [
+"Femur",
+"Iliotibial tract",
+"Tensor fasciae latae",
+"Vastus lateralis muscle"
+],
+"signos": [
+"Anterior knee pain with squatting, stairs and prolonged sitting",
+"Dynamic valgus in the single-leg squat",
+"No effusion or locking"
+],
+"pruebas": [
+"Single-leg squat (valgus control)",
+"Pain on patellar compression",
+"Strength of the hip abductors and lateral rotators"
+],
+"fisioterapia": "Education and load adjustment, hip and quadriceps strengthening, running retraining and, in the short term, taping or a patellar sleeve.",
+"camara": "anterior"
+},
+{
+"id": "capsulitis",
+"titulo": "Adhesive capsulitis (frozen shoulder)",
+"region": "shoulder",
+"side": "izquierdo",
+"presentacion": "54-year-old diabetic woman with progressive pain in the left shoulder for four months and great difficulty combing her hair and fastening her bra; external rotation is severely limited.",
+"anatomia": "The capsule of the glenohumeral joint, with the coracohumeral ligament and the rotator interval, becomes inflamed and fibrosed and loses volume. The loss of mobility is capsular: external rotation more than abduction more than internal rotation, both active and passive.",
+"lesion": [
+"Articular capsule of glenohumeral joint",
+"Coracohumeral ligament"
+],
+"afectados": [
+"Subscapularis muscle",
+"Supraspinatus muscle",
+"Infraspinatus muscle"
+],
+"relacionados": [
+"Scapula",
+"Humerus",
+"Superior glenohumeral ligament",
+"Middle glenohumeral ligament",
+"Inferior glenohumeral ligament"
+],
+"signos": [
+"Night pain",
+"Active and passive limitation of external rotation",
+"Phases: painful, stiff and recovery (1–3 years)"
+],
+"pruebas": [
+"Passive external rotation less than 50% of the healthy side",
+"Normal radiograph (rules out osteoarthritis and calcifications)",
+"Ultrasound: thickening of the coracohumeral ligament"
+],
+"fisioterapia": "Education about the natural course, mobility exercises within tolerance in the painful phase and progressive capsular stretching in the stiff phase; intra-articular injection or hydrodilatation prescribed by the physician.",
+"camara": "anterior"
+}
+]

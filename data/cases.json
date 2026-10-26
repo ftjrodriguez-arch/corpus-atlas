@@ -1043,7 +1043,12 @@
 "Resonancia si hay déficit progresivo o signos de alarma (cauda equina)"
 ],
 "fisioterapia": "Educación y mantenimiento de la actividad, ejercicios de control motor y de carga progresiva, técnicas neurodinámicas y movilización; derivación urgente si aparece debilidad progresiva o alteración de esfínteres.",
-"camara": "posterior"
+"camara": "lateral",
+"foco": [
+"Intervertebral disc L4-L5",
+"Vertebra L4",
+"Vertebra L5"
+]
 },
 {
 "id": "radiculopatia-c6",
@@ -1080,7 +1085,12 @@
 "Reflejos y balance muscular por miotomas"
 ],
 "fisioterapia": "Educación, movilización y ejercicios para la columna cervical y torácica, técnicas neurodinámicas, ejercicio de los flexores profundos del cuello y adaptación de posturas; la mayoría mejora en semanas.",
-"camara": "lateral"
+"camara": "lateral",
+"foco": [
+"Intervertebral disc C5-C6",
+"Vertebra C5",
+"Vertebra C6"
+]
 },
 {
 "id": "de-quervain",

@@ -1,0 +1,1919 @@
+[
+{
+"id": "manguito",
+"t": "Rotator cuff",
+"r": "Shoulder",
+"steps": [
+{
+"t": "The reference bones",
+"x": "The scapula and humerus form the glenohumeral joint. The glenoid cavity is shallow: stability depends largely on the rotator cuff muscles.",
+"show": [
+"Scapula",
+"Humerus"
+],
+"view": "latd"
+},
+{
+"t": "Supraspinatus",
+"x": "It arises from the supraspinous fossa, passes under the acromion and inserts on the superior facet of the greater tubercle. It initiates abduction and is the most frequently injured tendon.",
+"show": [
+"Supraspinatus muscle"
+],
+"view": "post"
+},
+{
+"t": "Infraspinatus and teres minor",
+"x": "They occupy the posterior surface of the scapula and insert on the middle and inferior facets of the greater tubercle. They are the external rotators of the shoulder.",
+"show": [
+"Infraspinatus muscle",
+"Teres minor muscle"
+],
+"view": "post"
+},
+{
+"t": "Subscapularis",
+"x": "It occupies the subscapular fossa, on the anterior surface of the scapula, and inserts on the lesser tubercle. It is the main internal rotator.",
+"show": [
+"Subscapularis muscle"
+],
+"view": "ant"
+},
+{
+"t": "Capsule and ligaments",
+"x": "The glenohumeral capsule is reinforced by the glenohumeral and coracohumeral ligaments. The coracoacromial ligament forms the roof of the subacromial space, where the supraspinatus is impinged.",
+"show": [
+"Articular capsule of glenohumeral joint",
+"Superior glenohumeral ligament",
+"Middle glenohumeral ligament",
+"Inferior glenohumeral ligament",
+"Coracohumeral ligament",
+"Coraco-acromial ligament"
+],
+"view": "ant"
+},
+{
+"t": "Innervation",
+"x": "The suprascapular nerve supplies supraspinatus and infraspinatus; the axillary nerve supplies teres minor and the deltoid. An axillary nerve injury after dislocation leaves anesthesia over the lateral aspect of the arm.",
+"show": [
+"Suprascapular nerve",
+"Axillary nerve",
+"Supraspinatus muscle",
+"Infraspinatus muscle",
+"Teres minor muscle"
+],
+"view": "post"
+}
+],
+"q": {
+"p": "Which rotator cuff muscle is the main internal rotator of the shoulder?",
+"o": [
+"Subscapularis",
+"Infraspinatus",
+"Teres minor",
+"Supraspinatus"
+],
+"a": 0
+}
+},
+{
+"id": "carpo",
+"t": "Carpal tunnel",
+"r": "Wrist and hand",
+"steps": [
+{
+"t": "The bony floor",
+"x": "The carpal bones form a channel concave toward the palmar side. Its borders are the scaphoid and trapezium laterally, and the pisiform and hamate medially.",
+"show": [
+"Scaphoid bone",
+"Lunate bone",
+"Triquetrum bone",
+"Pisiform bone",
+"Trapezium bone",
+"Trapezoid bone",
+"Capitate bone",
+"Hamate bone"
+],
+"view": "ant"
+},
+{
+"t": "The roof: flexor retinaculum",
+"x": "The flexor retinaculum closes the channel and turns it into an inextensible osteofibrous tunnel. Any increase in volume within it compresses its contents.",
+"show": [
+"Flexor retinaculum of wrist"
+],
+"view": "ant"
+},
+{
+"t": "The tendons that pass through it",
+"x": "Four tendons of flexor digitorum superficialis, four of flexor digitorum profundus and flexor pollicis longus pass through, surrounded by synovial sheaths.",
+"show": [
+"Flexor digitorum profundus",
+"Humero-ulnar head of flexor digitorum superficialis",
+"Radial head of flexor digitorum superficialis",
+"Flexor pollicis longus"
+],
+"view": "ant"
+},
+{
+"t": "The median nerve",
+"x": "It is the most superficial structure in the tunnel and the one that is compressed. It gives off the palmar digital nerves for the thumb, index, middle and the lateral half of the ring finger.",
+"show": [
+"Median nerve",
+"Common palmar digital branches of median nerve"
+],
+"view": "ant"
+},
+{
+"t": "Thenar muscles",
+"x": "The recurrent branch of the median nerve supplies abductor pollicis brevis, opponens pollicis and the superficial head of flexor pollicis brevis. Their atrophy indicates advanced compression.",
+"show": [
+"Abductor pollicis brevis",
+"Opponens pollicis muscle",
+"Superficial head of flexor pollicis brevis"
+],
+"view": "ant"
+}
+],
+"q": {
+"p": "Which nerve is compressed in carpal tunnel syndrome?",
+"o": [
+"Median nerve",
+"Ulnar nerve",
+"Radial nerve",
+"Musculocutaneous nerve"
+],
+"a": 0
+}
+},
+{
+"id": "rodilla",
+"t": "Ligaments of the knee",
+"r": "Knee",
+"steps": [
+{
+"t": "Bones",
+"x": "The femur articulates with the tibia and the patella. The fibula does not take part in the knee joint, but serves as an anchor for the fibular collateral ligament.",
+"show": [
+"Femur",
+"Tibia",
+"Fibula",
+"Patella"
+],
+"view": "ant"
+},
+{
+"t": "Cruciate ligaments",
+"x": "The anterior cruciate prevents the tibia from sliding forward; the posterior, backward. They are examined with the Lachman and drawer tests.",
+"show": [
+"Anterior cruciate ligament",
+"Posterior cruciate ligament"
+],
+"view": "ant"
+},
+{
+"t": "Collateral ligaments",
+"x": "The tibial collateral resists valgus and is attached to the medial meniscus; the fibular collateral resists varus and is extracapsular.",
+"show": [
+"Superficial part of tibial collateral ligament",
+"Deep part of tibial collateral ligament",
+"Fibular collateral ligament"
+],
+"view": "ant"
+},
+{
+"t": "Menisci",
+"x": "C-shaped fibrocartilages that distribute load. The medial one, less mobile because of its attachment to the tibial collateral, is injured more often.",
+"show": [
+"Medial meniscus",
+"Lateral meniscus"
+],
+"view": "sup"
+},
+{
+"t": "Extensor mechanism",
+"x": "The patellar ligament joins the patella to the tibial tuberosity, and the retinacula stabilize it at the sides.",
+"show": [
+"Medial patellar retinaculum",
+"Lateral patellar retinaculum",
+"Patella"
+],
+"view": "ant"
+}
+],
+"q": {
+"p": "Which structure prevents anterior displacement of the tibia on the femur?",
+"o": [
+"Anterior cruciate ligament",
+"Posterior cruciate ligament",
+"Tibial collateral ligament",
+"Lateral meniscus"
+],
+"a": 0
+}
+},
+{
+"id": "tobillo",
+"t": "Lateral ankle sprain",
+"r": "Ankle",
+"steps": [
+{
+"t": "Bones",
+"x": "The tibiofibular mortise embraces the talus. The lateral malleolus descends lower than the medial one, which favors inversion sprains.",
+"show": [
+"Tibia",
+"Fibula",
+"Talus",
+"Calcaneus"
+],
+"view": "latd"
+},
+{
+"t": "Anterior talofibular ligament",
+"x": "It runs from the lateral malleolus to the neck of the talus and is tensed in plantar flexion and inversion. It is the first and most frequently injured.",
+"show": [
+"Anterior talofibular ligament"
+],
+"view": "latd"
+},
+{
+"t": "Calcaneofibular and posterior talofibular ligaments",
+"x": "The calcaneofibular ligament is injured in moderate sprains; the posterior talofibular, the strongest, only in severe ones.",
+"show": [
+"Calcaneofibular ligament",
+"Posterior talofibular ligament"
+],
+"view": "latd"
+},
+{
+"t": "Syndesmosis",
+"x": "The tibiofibular ligaments join the tibia and fibula. Their injury, the high ankle sprain, takes longer to heal.",
+"show": [
+"Anterior tibiofibular ligament",
+"Posterior tibiofibular ligament"
+],
+"view": "latd"
+},
+{
+"t": "Dynamic stabilizers",
+"x": "The fibularis longus and brevis evert the foot and protect against inversion; their tendons pass under the fibular retinacula.",
+"show": [
+"Fibularis longus muscle",
+"Fibularis brevis muscle",
+"Superior fibular retinaculum",
+"Inferior fibular retinaculum"
+],
+"view": "latd"
+}
+],
+"q": {
+"p": "Which is the most frequently injured ligament in a lateral ankle sprain?",
+"o": [
+"Anterior talofibular",
+"Calcaneofibular",
+"Posterior talofibular",
+"Anterior tibiofibular"
+],
+"a": 0
+}
+},
+{
+"id": "plexo",
+"t": "Brachial plexus",
+"r": "Neck and axilla",
+"steps": [
+{
+"t": "Roots",
+"x": "The anterior rami of C5 to T1 form the roots of the plexus, which emerge between the anterior and middle scalenes.",
+"show": [
+"Roots of brachial plexus",
+"Scalenus anterior muscle",
+"Scalenus medius muscle"
+],
+"view": "ant"
+},
+{
+"t": "Trunks",
+"x": "C5 and C6 form the upper trunk, C7 the middle and C8–T1 the lower. Erb palsy affects the upper trunk.",
+"show": [
+"Superior trunk of brachial plexus",
+"Middle trunk of brachial plexus",
+"Inferior trunk of brachial plexus"
+],
+"view": "ant"
+},
+{
+"t": "Divisions and cords",
+"x": "Each trunk divides into anterior and posterior divisions. The posterior divisions form the posterior cord, origin of the axillary and radial nerves.",
+"show": [
+"Anterior division of superior trunk of brachial plexus",
+"Anterior division of middle trunk of brachial plexus",
+"Anterior division of inferior trunk of brachial plexus",
+"Posterior division of superior trunk of brachial plexus",
+"Posterior division of middle trunk of brachial plexus",
+"Posterior division of inferior trunk of brachial plexus",
+"Posterior cord of brachial plexus"
+],
+"view": "ant"
+},
+{
+"t": "Terminal branches",
+"x": "The musculocutaneous, median, ulnar, axillary and radial nerves supply the entire upper limb.",
+"show": [
+"Musculocutaneous nerve",
+"Median nerve",
+"Muscular branches of ulnar nerve",
+"Deep branch of ulnar nerve",
+"Axillary nerve",
+"Radial nerve"
+],
+"view": "ant"
+},
+{
+"t": "Collateral branches",
+"x": "The long thoracic nerve supplies serratus anterior: its injury produces a winged scapula. The suprascapular nerve supplies supraspinatus and infraspinatus.",
+"show": [
+"Long thoracic nerve",
+"Suprascapular nerve",
+"Serratus anterior muscle"
+],
+"view": "latd"
+}
+],
+"q": {
+"p": "Which nerve arises from the posterior cord of the brachial plexus?",
+"o": [
+"Radial nerve",
+"Median nerve",
+"Musculocutaneous nerve",
+"Ulnar nerve"
+],
+"a": 0
+}
+},
+{
+"id": "femoral",
+"t": "Femoral triangle",
+"r": "Thigh",
+"steps": [
+{
+"t": "Boundaries",
+"x": "The inguinal ligament forms the base; the sartorius, the lateral border, and adductor longus, the medial border.",
+"show": [
+"Inguinal ligament",
+"Sartorius muscle",
+"Adductor longus"
+],
+"view": "ant"
+},
+{
+"t": "Floor",
+"x": "The iliopsoas laterally and the pectineus medially form the floor of the triangle.",
+"show": [
+"Psoas major",
+"Iliacus muscle",
+"Pectineus muscle"
+],
+"view": "ant"
+},
+{
+"t": "Contents: nerve, artery and vein",
+"x": "From lateral to medial: femoral nerve, femoral artery and femoral vein. The femoral pulse is palpated at the mid-inguinal point and the vein lies just medial to it.",
+"show": [
+"Femoral nerve",
+"Femoral artery",
+"Femoral vein"
+],
+"view": "ant"
+},
+{
+"t": "Great saphenous vein",
+"x": "It ascends along the medial aspect of the thigh and drains into the femoral vein through the saphenous opening. It is used as a graft in coronary surgery.",
+"show": [
+"Great saphenous vein",
+"Femoral vein"
+],
+"view": "ant"
+}
+],
+"q": {
+"p": "What is the order from lateral to medial in the femoral triangle?",
+"o": [
+"Nerve, artery, vein",
+"Artery, nerve, vein",
+"Vein, artery, nerve",
+"Nerve, vein, artery"
+],
+"a": 0
+}
+},
+{
+"id": "lumbar",
+"t": "Lumbar spine and disc",
+"r": "Spine",
+"steps": [
+{
+"t": "Lumbar vertebrae and sacrum",
+"x": "Five large-bodied vertebrae bear the greatest axial load and form the lumbar lordosis over the sacrum.",
+"show": [
+"Vertebra L1",
+"Vertebra L2",
+"Vertebra L3",
+"Vertebra L4",
+"Vertebra L5",
+"Sacrum"
+],
+"view": "latd"
+},
+{
+"t": "Intervertebral discs",
+"x": "The nucleus pulposus, surrounded by the annulus fibrosus, distributes the load. L4–L5 and L5–S1 account for most herniations.",
+"show": [
+"Nucleus pulposus L1-L2",
+"Nucleus pulposus L2-L3",
+"Nucleus pulposus L3-L4",
+"Nucleus pulposus L4-L5",
+"Nucleus pulposus L5-S1"
+],
+"view": "latd"
+},
+{
+"t": "Ligaments",
+"x": "The anterior longitudinal ligament limits extension; the posterior, weaker at the lumbar level, explains why herniations are posterolateral. The ligamenta flava, interspinous and supraspinous ligaments limit flexion.",
+"show": [
+"Anterior longitudinal ligament",
+"Posterior longitudinal ligament",
+"Ligamenta flava",
+"Interspinous ligaments",
+"Supraspinous ligament"
+],
+"view": "latd"
+},
+{
+"t": "Sciatic nerve",
+"x": "It arises from L4 to S3 and descends through the gluteal region and the posterior thigh. Compression of its roots by a herniation produces sciatica.",
+"show": [
+"Sciatic nerve",
+"Vertebra L4",
+"Vertebra L5",
+"Sacrum"
+],
+"view": "post"
+}
+],
+"q": {
+"p": "At which levels do most lumbar disc herniations occur?",
+"o": [
+"L4–L5 and L5–S1",
+"L1–L2 and L2–L3",
+"L2–L3 and L3–L4",
+"T12–L1"
+],
+"a": 0
+}
+},
+{
+"id": "extensor",
+"t": "Quadriceps and knee extension",
+"r": "Thigh",
+"steps": [
+{
+"t": "The four heads",
+"x": "Rectus femoris, vastus lateralis, vastus medialis and vastus intermedius converge in the quadriceps tendon. Only rectus femoris also crosses the hip.",
+"show": [
+"Rectus femoris muscle",
+"Vastus lateralis muscle",
+"Vastus medialis muscle",
+"Vastus intermedius muscle"
+],
+"view": "ant"
+},
+{
+"t": "Patella and patellar ligament",
+"x": "The patella, a sesamoid bone, increases the lever arm of the quadriceps. The patellar ligament transmits the force to the tibial tuberosity.",
+"show": [
+"Patella",
+"Tibia"
+],
+"view": "ant"
+},
+{
+"t": "Innervation",
+"x": "The femoral nerve (L2–L4) supplies the entire quadriceps. The patellar reflex tests L3–L4.",
+"show": [
+"Femoral nerve",
+"Rectus femoris muscle",
+"Vastus medialis muscle"
+],
+"view": "ant"
+}
+],
+"q": {
+"p": "Which head of the quadriceps crosses two joints?",
+"o": [
+"Rectus femoris",
+"Vastus lateralis",
+"Vastus medialis",
+"Vastus intermedius"
+],
+"a": 0
+}
+},
+{
+"id": "suelo_f",
+"t": "Female pelvis and pelvic floor",
+"r": "Pelvis · female",
+"body": "f",
+"both": true,
+"steps": [
+{
+"t": "The female bony pelvis",
+"x": "The two hip bones, the sacrum and the coccyx form a ring closed anteriorly at the pubic symphysis. In women the pelvis is wider and lower, the pelvic inlet is oval, the ischial spines are farther apart and the pubic arch exceeds 80°: all of this widens the birth canal.",
+"show": [
+"Hip bone",
+"Sacrum",
+"Coccyx",
+"Pubic symphysis"
+],
+"view": "sup"
+},
+{
+"t": "Sacrospinous and sacrotuberous ligaments",
+"x": "They join the sacrum to the ischial spine (sacrospinous) and to the ischial tuberosity (sacrotuberous). They convert the sciatic notches into the greater and lesser sciatic foramina, through which the pudendal vessels and nerve pass toward the perineum.",
+"show": [
+"Sacrospinous ligament",
+"Sacrotuberous ligament",
+"Hip bone",
+"Sacrum",
+"Coccyx"
+],
+"view": "post"
+},
+{
+"t": "Walls of the pelvis",
+"x": "The obturator internus lines the lateral wall and its thickened fascia forms the tendinous arch of the levator ani, a band from the pubis to the ischial spine where the pelvic floor is anchored. The piriformis closes the posterior wall.",
+"show": [
+"Obturator internus",
+"Piriformis muscle",
+"Tendinous arch of levator ani",
+"Hip bone",
+"Sacrum"
+],
+"view": "sup"
+},
+{
+"t": "The pelvic diaphragm",
+"x": "The levator ani (pubococcygeus, puboanal/puborectalis and iliococcygeus) and the coccygeus form a funnel-shaped hammock that supports the viscera. In the midline it leaves the urogenital hiatus, through which the urethra and vagina pass. The puborectalis sling pulls the rectum forward and forms the anorectal angle, key to continence.",
+"show": [
+"Pubococcygeus muscle",
+"Pubo-analis muscle",
+"Iliococcygeus muscle",
+"Coccygeus muscle",
+"Tendinous arch of levator ani",
+"Hip bone",
+"Sacrum",
+"Coccyx"
+],
+"view": "sup"
+},
+{
+"t": "The pelvic viscera",
+"x": "From front to back: bladder, uterus with the vagina, and rectum. The uterus is usually in anteversion (tilted forward over the bladder) and anteflexion. Between the uterus and rectum lies the rectouterine pouch (of Douglas), the lowest point of the peritoneal cavity.",
+"show": [
+"Urinary bladder",
+"Body of uterus",
+"Fundus of uterus",
+"Cervix of uterus",
+"Vagina",
+"Rectum",
+"Anal canal",
+"Ovary",
+"Ampulla of uterine tube",
+"Hip bone",
+"Sacrum"
+],
+"view": "lati",
+"cut": {
+"p": "sag",
+"pos": 0.002
+}
+},
+{
+"t": "The supports of the uterus",
+"x": "The uterus is suspended by the cardinal (Mackenrodt) and uterosacral ligaments, which fix the cervix to the pelvic walls; the round ligament keeps it in anteversion and the broad ligament is a peritoneal fold that carries the vessels. Their weakening, together with that of the levator ani, produces prolapse.",
+"show": [
+"Cardinal ligament",
+"Uterosacral ligament",
+"Round ligament of uterus",
+"Broad ligament of uterus",
+"Ligament of ovary",
+"Suspensory ligament of ovary",
+"Body of uterus",
+"Cervix of uterus",
+"Vagina",
+"Hip bone",
+"Sacrum"
+],
+"view": "sup"
+},
+{
+"t": "The perineum",
+"x": "Below the pelvic diaphragm, the superficial perineal space contains the crura of the clitoris with the ischiocavernosus, the vestibular bulbs with the bulbospongiosus, the Bartholin glands and the superficial transverse perineal muscle. All converge on the perineal body, together with the external anal sphincter.",
+"show": [
+"Ischiocavernosus muscle",
+"Bulbospongiosus muscle",
+"Superficial transverse perineal muscle",
+"Perineal body",
+"External anal sphincter",
+"Crus of clitoris",
+"Bulb of vestibule",
+"Greater vestibular gland",
+"Hip bone",
+"Sacrum",
+"Coccyx",
+"Pubic symphysis"
+],
+"view": "inf"
+},
+{
+"t": "Vessels and nerves",
+"x": "The uterine artery, a branch of the internal iliac, crosses over the ureter (\"water under the bridge\"), a critical detail in hysterectomy. The pudendal nerve and vessels leave the pelvis through the greater sciatic foramen and enter the perineum through the lesser one, wrapping around the ischial spine: this is where the pudendal block is performed in obstetrics.",
+"show": [
+"Internal iliac artery",
+"Uterine artery",
+"Ureter",
+"Internal pudendal artery",
+"Pudendal nerve",
+"Body of uterus",
+"Hip bone",
+"Sacrum"
+],
+"view": "lati",
+"cut": {
+"p": "sag",
+"pos": 0.002
+}
+}
+],
+"q": [
+{
+"p": "Which muscle forms the anorectal angle and is key to fecal continence?",
+"o": [
+"Puborectalis (puboanal)",
+"Iliococcygeus",
+"Obturator internus",
+"Piriformis"
+],
+"a": 0
+},
+{
+"p": "Which structure does the uterine artery cross above, next to the cervix?",
+"o": [
+"The ureter",
+"The urethra",
+"The pudendal nerve",
+"The round ligament"
+],
+"a": 0
+},
+{
+"p": "What is the lowest point of the peritoneal cavity in women?",
+"o": [
+"Rectouterine pouch (of Douglas)",
+"Vesicouterine pouch",
+"Ischioanal fossa",
+"Retropubic space"
+],
+"a": 0
+},
+{
+"p": "At which bony landmark is the pudendal nerve block performed?",
+"o": [
+"Ischial spine",
+"Ischial tuberosity",
+"Sacral promontory",
+"Iliac crest"
+],
+"a": 0
+},
+{
+"p": "Which ligaments mainly support the cervix, and their injury favors prolapse?",
+"o": [
+"Cardinal and uterosacral",
+"Round",
+"Suspensory ligaments of the ovary",
+"Broad"
+],
+"a": 0
+}
+],
+"only": true
+},
+{
+"id": "corazon",
+"t": "The heart from the inside",
+"r": "Thorax",
+"both": true,
+"steps": [
+{
+"t": "Position and great vessels",
+"x": "The heart occupies the middle mediastinum, with two thirds to the left of the midline and the apex pointing down, forward and to the left. It receives the venae cavae in the right atrium and the four pulmonary veins in the left; the pulmonary trunk and the ascending aorta leave the ventricles.",
+"show": [
+"Right atrium",
+"Right ventricle",
+"Left atrium",
+"Left ventricle",
+"Superior vena cava",
+"Inferior vena cava (thoracic part)",
+"Ascending aorta",
+"Aortic arch",
+"Pulmonary trunk",
+"Right superior pulmonary vein",
+"Left superior pulmonary vein",
+"Right inferior pulmonary vein",
+"Left inferior pulmonary vein"
+],
+"view": "ant"
+},
+{
+"t": "The coronary arteries",
+"x": "They arise from the aortic sinuses, just above the aortic valve. The right coronary runs in the right atrioventricular groove; the left divides into the anterior interventricular (left anterior descending) artery, which supplies the anterior part of the septum, and the circumflex. Venous blood returns through the coronary sinus to the right atrium.",
+"show": [
+"Right atrium",
+"Right ventricle",
+"Left atrium",
+"Left ventricle",
+"Right coronary artery",
+"Left coronary artery",
+"Anterior interventricular artery",
+"Circumflex artery of heart",
+"Great cardiac vein",
+"Coronary sinus"
+],
+"view": "ant"
+},
+{
+"t": "Four-chamber section",
+"x": "A frontal section opens the four cavities. The walls of the left ventricle are about three times thicker than those of the right, because they propel blood into the systemic circulation at higher pressure. The interventricular septum separates the two ventricles.",
+"show": [
+"Right atrium",
+"Right ventricle",
+"Left atrium",
+"Left ventricle"
+],
+"view": "ant",
+"cut": {
+"p": "fro",
+"pos": 0.03
+}
+},
+{
+"t": "Atrioventricular valves",
+"x": "The tricuspid (right, three leaflets) and mitral (left, two leaflets: anterior and posterior) open in diastole to fill the ventricles and close in systole: their closure produces the first heart sound. The leaflets are held by chordae tendineae to the papillary muscles, which contract to prevent them from prolapsing into the atria.",
+"show": [
+"Inferior leaflet of right atrioventricular valve",
+"Septal leaflet of right atrioventricular valve",
+"Posterior leaflet of left atrioventricular valve",
+"Inferior papillary muscle of right ventricle",
+"Anterior papillary muscle of right ventricle",
+"Septal papillary muscle of right ventricle",
+"Inferior papillary muscle of left ventricle",
+"Right ventricle",
+"Left ventricle",
+"Anterior leaflet of left atrioventricular valve",
+"Anterior leaflet of right atrioventricular valve",
+"Anterior papillary muscle of left ventricle"
+],
+"view": "ant",
+"cut": {
+"p": "fro",
+"pos": 0.03
+}
+},
+{
+"t": "Semilunar valves",
+"x": "The pulmonary and aortic valves each have three semilunar cusps. They close at the end of systole and produce the second sound. The coronary arteries arise behind the right and left coronary cusps of the aorta; the third is the non-coronary cusp.",
+"show": [
+"Left coronary leaflet",
+"Non-coronary leaflet",
+"Right coronary leaflet",
+"Anterior semilunar leaflet of pulmonary valve",
+"Left semilunar leaflet of pulmonary valve",
+"Right semilunar leaflet of pulmonary valve",
+"Ascending aorta",
+"Pulmonary trunk",
+"Right coronary artery",
+"Left coronary artery"
+],
+"view": "sup"
+},
+{
+"t": "The path of the blood",
+"x": "Venae cavae → right atrium → tricuspid valve → right ventricle → pulmonary valve → lungs → pulmonary veins → left atrium → mitral valve → left ventricle → aortic valve → aorta. Activate the vein and artery layer to follow it on the model.",
+"show": [
+"Right atrium",
+"Right ventricle",
+"Left atrium",
+"Left ventricle",
+"Inferior leaflet of right atrioventricular valve",
+"Septal leaflet of right atrioventricular valve",
+"Posterior leaflet of left atrioventricular valve",
+"Left coronary leaflet",
+"Non-coronary leaflet",
+"Right coronary leaflet",
+"Anterior semilunar leaflet of pulmonary valve",
+"Left semilunar leaflet of pulmonary valve",
+"Right semilunar leaflet of pulmonary valve",
+"Pulmonary trunk",
+"Ascending aorta",
+"Superior vena cava",
+"Inferior vena cava (thoracic part)",
+"Anterior leaflet of left atrioventricular valve",
+"Anterior leaflet of right atrioventricular valve",
+"Anterior papillary muscle of left ventricle"
+],
+"view": "ant",
+"cut": {
+"p": "fro",
+"pos": 0.035
+}
+}
+],
+"q": [
+{
+"p": "Which structures hold the leaflets of the atrioventricular valves?",
+"o": [
+"The chordae tendineae and the papillary muscles",
+"The interventricular septum",
+"The aortic sinuses",
+"The fibrous ring of the pulmonary valve"
+],
+"a": 0
+},
+{
+"p": "What produces the first heart sound?",
+"o": [
+"Closure of the mitral and tricuspid valves",
+"Closure of the aortic and pulmonary valves",
+"Atrial contraction",
+"Opening of the aortic valve"
+],
+"a": 0
+},
+{
+"p": "Where do the coronary arteries arise?",
+"o": [
+"From the aortic sinuses, above the aortic valve",
+"From the pulmonary trunk",
+"From the aortic arch",
+"Directly from the left ventricle"
+],
+"a": 0
+},
+{
+"p": "Why is the wall of the left ventricle thicker?",
+"o": [
+"Because it pumps into the systemic circulation, at higher pressure",
+"Because it receives a larger volume of blood",
+"Because it contains the mitral valve",
+"Because it is closer to the pericardium"
+],
+"a": 0
+}
+],
+"only": true
+},
+{
+"id": "cerebro",
+"t": "The brain from the inside: nuclei and ventricles",
+"r": "Head",
+"both": true,
+"steps": [
+{
+"t": "Brainstem and cerebellum",
+"x": "The brainstem (midbrain, pons and medulla oblongata) joins the brain to the spinal cord and contains the cranial nerve nuclei and vital centers. The cerebellum, behind it, coordinates movement; its tonsils can herniate through the foramen magnum when intracranial pressure rises.",
+"show": [
+"Midbrain",
+"Pons",
+"Medulla oblongata",
+"Pyramid of medulla oblongata",
+"Tonsil of cerebellum",
+"Superior cerebellar peduncle",
+"Lingula of cerebellum"
+],
+"view": "lati"
+},
+{
+"t": "The ventricular system",
+"x": "The lateral ventricles, one in each hemisphere, communicate through the interventricular foramina with the third ventricle, between the two thalami; this continues through the cerebral aqueduct to the fourth ventricle, in front of the cerebellum. The choroid plexus produces cerebrospinal fluid (about 500 ml a day). Its obstruction causes hydrocephalus.",
+"show": [
+"Lateral ventricle",
+"Third ventricle",
+"Aqueduct of midbrain",
+"Fourth ventricle",
+"Choroid plexus",
+"Septum pellucidum"
+],
+"view": "latd"
+},
+{
+"t": "Basal nuclei",
+"x": "The caudate nucleus surrounds the lateral ventricle; the putamen and globus pallidus form the lentiform nucleus. Together with the substantia nigra and the subthalamus they control the initiation and scaling of movement: their degeneration produces Parkinson disease (substantia nigra) and Huntington disease (caudate).",
+"show": [
+"Caudate nucleus",
+"Putamen",
+"Globus pallidus",
+"Lateral ventricle",
+"Thalamus"
+],
+"view": "ant"
+},
+{
+"t": "Coronal section through the thalami",
+"x": "In a coronal section the following can be recognized, from medial to lateral: third ventricle, thalamus, internal capsule, lentiform nucleus (globus pallidus and putamen), external capsule, claustrum and insula. Above, the corpus callosum crosses the midline and forms the roof of the lateral ventricles.",
+"show": [
+"Thalamus",
+"Third ventricle",
+"Putamen",
+"Globus pallidus",
+"Caudate nucleus",
+"Lateral ventricle",
+"Corpus callosum",
+"Fornix",
+"Insula (Subcentral gyrus and ant. and post. sulci)"
+],
+"view": "ant",
+"cut": {
+"p": "fro",
+"pos": 0.0
+}
+},
+{
+"t": "Limbic system",
+"x": "The hippocampus, in the wall of the temporal horn of the lateral ventricle, consolidates memory; the fornix carries its fibers to the mammillary bodies of the hypothalamus. The amygdala, in front of the hippocampus, processes fear and emotions. Its involvement explains the recent memory loss of Alzheimer disease.",
+"show": [
+"Hippocampus",
+"Fornix",
+"Amygdaloid body",
+"Hypothalamus",
+"Hippocampal commissure",
+"Thalamus"
+],
+"view": "latd"
+},
+{
+"t": "Horizontal section",
+"x": "An axial section, such as that of a CT or MRI of the skull, shows in a single plane the frontal horns of the ventricles, the head of the caudate, the lentiform nucleus, the internal capsule shaped like a V open outward, and the thalamus. Try the CT and MRI modes in the Planes tab.",
+"show": [
+"Caudate nucleus",
+"Putamen",
+"Globus pallidus",
+"Thalamus",
+"Lateral ventricle",
+"Third ventricle",
+"Corpus callosum"
+],
+"view": "sup",
+"cut": {
+"p": "tra",
+"pos": 1.632
+}
+}
+],
+"q": [
+{
+"p": "Which structure connects the third and fourth ventricles?",
+"o": [
+"The cerebral aqueduct",
+"The interventricular foramen",
+"The central canal",
+"The septum pellucidum"
+],
+"a": 0
+},
+{
+"p": "Which two nuclei form the lentiform nucleus?",
+"o": [
+"Putamen and globus pallidus",
+"Caudate and putamen",
+"Thalamus and hypothalamus",
+"Amygdala and hippocampus"
+],
+"a": 0
+},
+{
+"p": "Where is most of the cerebrospinal fluid produced?",
+"o": [
+"In the choroid plexuses",
+"In the arachnoid granulations",
+"In the aqueduct",
+"In the fourth ventricle only"
+],
+"a": 0
+},
+{
+"p": "Which structure is essential for forming new memories?",
+"o": [
+"Hippocampus",
+"Putamen",
+"Cerebellum",
+"Globus pallidus"
+],
+"a": 0
+}
+],
+"only": true
+},
+{
+"id": "pares",
+"t": "Cranial nerves",
+"r": "Head",
+"only": true,
+"both": true,
+"steps": [
+{
+"t": "The sensory nerves: I, II and VIII",
+"x": "The olfactory nerve (I) crosses the cribriform plate of the ethmoid; the optic nerve (II) leaves the orbit through the optic canal toward the chiasm; the vestibulocochlear nerve (VIII) enters the internal acoustic meatus beside the facial nerve. They are purely sensory nerves.",
+"show": [
+"Olfactory nerve (I)",
+"Optic nerve (II)",
+"Vestibulocochlear nerve (VIII)",
+"Optic chiasm"
+],
+"view": "inf"
+},
+{
+"t": "The motors of the eye: III, IV and VI",
+"x": "The oculomotor nerve (III) supplies almost all the extraocular muscles, the levator palpebrae and, with parasympathetic fibers, the pupil; the trochlear nerve (IV), the superior oblique; the abducens nerve (VI), the lateral rectus. A lesion of III leaves the eye \"down and out\" with ptosis and mydriasis.",
+"show": [
+"Oculomotor nerve (III)",
+"Trochlear nerve (IV)",
+"Midbrain",
+"Pons"
+],
+"view": "inf"
+},
+{
+"t": "Trigeminal (V)",
+"x": "The largest of the cranial nerves: its three branches (ophthalmic, maxillary and mandibular) collect sensation from the face, and the mandibular branch supplies the muscles of mastication.",
+"show": [
+"Trigeminal nerve (V)",
+"Ophthalmic nerve",
+"Pons"
+],
+"view": "latd"
+},
+{
+"t": "Facial (VII)",
+"x": "It leaves the brainstem at the cerebellopontine angle, runs through the facial canal of the temporal bone and exits through the stylomastoid foramen to supply the muscles of facial expression. Its peripheral lesion (Bell palsy) paralyzes the whole hemiface.",
+"show": [
+"Facial nerve (VII)",
+"Pons"
+],
+"view": "latd"
+},
+{
+"t": "IX, X, XI and XII",
+"x": "Glossopharyngeal (IX) and vagus (X) exit through the jugular foramen: swallowing, taste from the posterior third of the tongue and the parasympathetic innervation of the thorax and abdomen. The accessory nerve (XI) supplies sternocleidomastoid and trapezius; the hypoglossal nerve (XII), the tongue: if injured, the tongue deviates toward the injured side.",
+"show": [
+"Glossopharyngeal nerve (IX)",
+"Vagus nerve (X)",
+"Accessory nerve (XI)",
+"Hypoglossal nerve (XII)",
+"Medulla oblongata"
+],
+"view": "latd"
+}
+],
+"q": [
+{
+"p": "Which nerve supplies the lateral rectus muscle of the eye?",
+"o": [
+"Abducens (VI)",
+"Trochlear (IV)",
+"Oculomotor (III)",
+"Trigeminal (V)"
+],
+"a": 0
+},
+{
+"p": "An eye deviated down and out with ptosis and a dilated pupil suggests a lesion of the…",
+"o": [
+"Oculomotor nerve (III)",
+"Optic nerve (II)",
+"Facial nerve (VII)",
+"Abducens nerve (VI)"
+],
+"a": 0
+},
+{
+"p": "Which cranial nerve supplies the muscles of mastication?",
+"o": [
+"Trigeminal (V), mandibular branch",
+"Facial (VII)",
+"Hypoglossal (XII)",
+"Glossopharyngeal (IX)"
+],
+"a": 0
+}
+]
+},
+{
+"id": "cuello",
+"t": "Neck: triangles and vessels",
+"r": "Neck",
+"both": false,
+"steps": [
+{
+"t": "The sternocleidomastoid",
+"x": "It divides the neck into an anterior and a posterior triangle. It turns the head to the opposite side and tilts it to the same side. It is supplied by the accessory nerve (XI).",
+"show": [
+"Sternocleidomastoid muscle",
+"Mandible",
+"Hyoid bone"
+],
+"view": "latd"
+},
+{
+"t": "Infrahyoid muscles",
+"x": "The sternohyoid and omohyoid lower the hyoid in swallowing and phonation; the mylohyoid forms the floor of the mouth.",
+"show": [
+"Sternohyoid muscle",
+"Omohyoid muscle",
+"Mylohyoid muscle",
+"Hyoid bone",
+"Thyroid cartilage",
+"Cricoid cartilage"
+],
+"view": "ant"
+},
+{
+"t": "Thyroid gland",
+"x": "It wraps around the trachea below the cricoid cartilage; its isthmus crosses the 2nd to 4th tracheal rings. It moves with swallowing because it is attached to the larynx.",
+"show": [
+"Thyroid gland",
+"Trachea",
+"Thyroid cartilage",
+"Cricoid cartilage"
+],
+"view": "ant"
+},
+{
+"t": "The carotid sheath",
+"x": "It contains the common carotid artery (which divides at the level of the thyroid cartilage into internal and external), the internal jugular vein laterally and the vagus nerve posteriorly. The carotid pulse is palpated at the anterior border of the sternocleidomastoid.",
+"show": [
+"Internal carotid artery",
+"External carotid artery",
+"Internal jugular vein",
+"Vagus nerve (X)",
+"Sternocleidomastoid muscle"
+],
+"view": "latd"
+}
+],
+"q": [
+{
+"p": "Where does the common carotid usually divide?",
+"o": [
+"At the level of the upper border of the thyroid cartilage",
+"At the level of the angle of the mandible",
+"Behind the clavicle",
+"At the level of the cricoid"
+],
+"a": 0
+},
+{
+"p": "Which structure lies inside the carotid sheath, behind the vessels?",
+"o": [
+"The vagus nerve",
+"The phrenic nerve",
+"The sympathetic trunk",
+"The hypoglossal nerve"
+],
+"a": 0
+}
+]
+},
+{
+"id": "torax",
+"t": "Thorax and breathing",
+"r": "Thorax",
+"both": true,
+"steps": [
+{
+"t": "The chest wall",
+"x": "The external intercostals raise the ribs in inspiration (like a bucket handle); the internal ones help in forced expiration. Along the inferior border of each rib runs the intercostal neurovascular bundle: that is why punctures are made along the superior border of the lower rib.",
+"show": [
+"External intercostal muscles",
+"Internal intercostal muscles",
+"Intercostal nerves"
+],
+"view": "latd"
+},
+{
+"t": "The diaphragm",
+"x": "The main inspiratory muscle: on contracting it descends and increases the vertical diameter of the thorax. It is supplied by the phrenic nerve (C3–C5): \"C3, 4 and 5 keep the diaphragm alive.\"",
+"show": [
+"Diaphragm"
+],
+"view": "ant"
+},
+{
+"t": "Lungs",
+"x": "The right has three lobes (upper, middle and lower) and the left two, with the lingula in place of the middle lobe. Each lobe is divided into bronchopulmonary segments, surgical units with their own bronchus and artery.",
+"show": [
+"Superior lobe of right lung",
+"Middle lobe of right lung",
+"Inferior lobe of right lung",
+"Superior lobe of left lung",
+"Inferior lobe of left lung",
+"Trachea"
+],
+"view": "ant"
+},
+{
+"t": "Bronchial tree",
+"x": "The trachea divides at the level of T4–T5 (carina). The right main bronchus is shorter, wider and more vertical: that is why aspirated foreign bodies usually go to the right lung.",
+"show": [
+"Trachea",
+"Right main bronchus",
+"Left main bronchus",
+"Right superior lobar bronchus",
+"Intermediate bronchus",
+"Left superior lobar bronchus",
+"Left inferior lobar bronchus"
+],
+"view": "ant"
+},
+{
+"t": "Mediastinum",
+"x": "Between both lungs: heart and great vessels, trachea, esophagus, vagus and phrenic nerves, thoracic duct and the azygos vein, which drains into the superior vena cava.",
+"show": [
+"Superior vena cava",
+"Azygos vein",
+"Pulmonary trunk",
+"Aortic arch",
+"Trachea",
+"Left ventricle"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "Why do aspirated foreign bodies tend to go to the right lung?",
+"o": [
+"Its main bronchus is shorter, wider and more vertical",
+"The right lung is smaller",
+"Because of the position of the heart on the right",
+"Because the left bronchus has no cartilage"
+],
+"a": 0
+},
+{
+"p": "Which roots form the phrenic nerve?",
+"o": [
+"C3–C5",
+"C5–C7",
+"T1–T2",
+"C1–C2"
+],
+"a": 0
+},
+{
+"p": "Along which border of the rib is thoracentesis performed?",
+"o": [
+"Along the superior border of the lower rib",
+"Along the inferior border of the upper rib",
+"Through the middle of the space",
+"It makes no difference"
+],
+"a": 0
+}
+]
+},
+{
+"id": "abdomen",
+"t": "Abdominal viscera",
+"r": "Abdomen",
+"both": true,
+"steps": [
+{
+"t": "Stomach, liver and gallbladder",
+"x": "The liver occupies the right hypochondrium under the diaphragm; the gallbladder, on its inferior surface, projects its fundus at the crossing of the costal margin with the rectus abdominis (Murphy point). The stomach, in the epigastrium and left hypochondrium, continues into the duodenum.",
+"show": [
+"Liver",
+"Gallbladder",
+"Stomach",
+"Duodenum",
+"Spleen"
+],
+"view": "ant"
+},
+{
+"t": "Pancreas and duodenum",
+"x": "The head of the pancreas lies in the duodenal C-loop; the body crosses in front of the aorta and the vena cava, and the tail reaches the spleen. The common bile duct and the pancreatic duct open together at the ampulla of Vater, in the 2nd part of the duodenum.",
+"show": [
+"Pancreas",
+"Duodenum",
+"Spleen",
+"Abdominal aorta"
+],
+"view": "ant"
+},
+{
+"t": "The intestine",
+"x": "Jejunum and ileum occupy the center of the abdomen; the colon frames it: ascending, transverse, descending and sigmoid, which continues into the rectum. The colon has taeniae coli, haustra and epiploic appendages, which distinguish it from the small intestine.",
+"show": [
+"Jejunum",
+"Ascending colon",
+"Transverse colon",
+"Descending colon",
+"Sigmoid colon",
+"Rectum"
+],
+"view": "ant"
+},
+{
+"t": "Kidneys and adrenal glands",
+"x": "Retroperitoneal, at the level of T12–L3; the right one somewhat lower because of the liver. The adrenal gland rests on its upper pole.",
+"show": [
+"Kidney",
+"Suprarenal gland",
+"Abdominal aorta",
+"Ureter"
+],
+"view": "post"
+},
+{
+"t": "Blood supply of the digestive tract",
+"x": "The abdominal aorta gives off the celiac trunk (foregut: stomach, liver, spleen), the superior mesenteric artery (midgut: from the duodenum to the transverse colon) and the inferior mesenteric artery (hindgut: down to the rectum). Venous blood returns to the liver through the portal vein.",
+"show": [
+"Abdominal aorta",
+"Superior mesenteric artery",
+"Inferior mesenteric artery",
+"Hepatic portal vein",
+"Superior mesenteric vein",
+"Inferior mesenteric vein"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "Which artery supplies from the duodenum to the transverse colon?",
+"o": [
+"Superior mesenteric",
+"Celiac trunk",
+"Inferior mesenteric",
+"Internal iliac"
+],
+"a": 0
+},
+{
+"p": "Where do the common bile duct and the pancreatic duct open?",
+"o": [
+"In the 2nd part of the duodenum (ampulla of Vater)",
+"In the pylorus",
+"In the jejunum",
+"In the 4th part of the duodenum"
+],
+"a": 0
+}
+]
+},
+{
+"id": "pared_abd",
+"t": "Anterolateral abdominal wall",
+"r": "Abdomen",
+"both": true,
+"steps": [
+{
+"t": "The broad muscles",
+"x": "From superficial to deep: external oblique (fibers running downward and forward, \"hands in the pockets\"), internal oblique (fibers perpendicular to those of the external) and transversus abdominis (horizontal fibers, the \"corset\"). Their aponeuroses form the rectus sheath.",
+"show": [
+"External abdominal oblique muscle",
+"Internal abdominal oblique muscle",
+"Transversus abdominis muscle"
+],
+"view": "latd"
+},
+{
+"t": "The rectus abdominis",
+"x": "It runs from the 5th–7th costal cartilages and the xiphoid process to the pubis. Its tendinous intersections divide it into bellies and adhere to the anterior layer of its sheath. It flexes the trunk and compresses the abdomen.",
+"show": [
+"Rectus abdominis muscle",
+"Tendinous intersection of rectus abdominis",
+"Pyramidalis muscle"
+],
+"view": "ant"
+},
+{
+"t": "The linea alba",
+"x": "A midline raphe formed by the interlacing of the aponeuroses of the three broad muscles, from the xiphoid process to the pubis, with the umbilical ring at its midpoint. Its widening is rectus diastasis; the midline laparotomy is made through it.",
+"show": [
+"Linea alba",
+"Rectus abdominis muscle",
+"Tendinous intersection of rectus abdominis"
+],
+"view": "ant"
+},
+{
+"t": "The rectus sheath",
+"x": "Above the arcuate line (about 4 cm below the umbilicus) the aponeurosis of the internal oblique splits: the anterior layer passes in front of the rectus and the posterior layer behind it. Below it, all the aponeuroses pass in front and the rectus rests only on the transversalis fascia.",
+"show": [
+"Anterior layer of rectus sheath",
+"Posterior layer of rectus sheath",
+"Rectus abdominis muscle",
+"Linea alba"
+],
+"view": "ant"
+},
+{
+"t": "Inguinal region",
+"x": "The inguinal ligament is the thickened inferior border of the external oblique aponeurosis, from the anterior superior iliac spine to the pubic tubercle. Above it runs the inguinal canal, with the ilioinguinal and iliohypogastric nerves and the inferior epigastric vessels in its posterior wall.",
+"show": [
+"Inguinal ligament",
+"Ilio-inguinal nerve",
+"Iliohypogastric nerve",
+"Inferior epigastric artery",
+"Internal abdominal oblique muscle",
+"Transversus abdominis muscle"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "Which abdominal wall muscle has fibers directed downward and forward?",
+"o": [
+"External oblique",
+"Internal oblique",
+"Transversus abdominis",
+"Rectus abdominis"
+],
+"a": 0
+},
+{
+"p": "Which structure forms the thickened inferior border of the external oblique aponeurosis?",
+"o": [
+"The inguinal ligament",
+"The linea alba",
+"The arcuate line",
+"The conjoint tendon"
+],
+"a": 0
+},
+{
+"p": "Below the arcuate line, the rectus abdominis rests posteriorly on…",
+"o": [
+"The transversalis fascia",
+"The posterior layer of the sheath",
+"The transversus abdominis",
+"The parietal peritoneum directly, without fascia"
+],
+"a": 0
+}
+]
+},
+{
+"id": "gluteo",
+"t": "Gluteal region and sciatic nerve",
+"r": "Hip",
+"steps": [
+{
+"t": "Gluteus maximus",
+"x": "The bulkiest muscle in the body: it extends and laterally rotates the hip and inserts on the gluteal tuberosity and the iliotibial tract. It is key for rising from a chair and climbing stairs.",
+"show": [
+"Gluteus maximus muscle"
+],
+"view": "post"
+},
+{
+"t": "Gluteus medius and minimus",
+"x": "Abductors and stabilizers of the pelvis in single-leg stance. Their weakness produces the Trendelenburg sign. They are supplied by the superior gluteal nerve.",
+"show": [
+"Gluteus medius muscle",
+"Gluteus minimus muscle",
+"Superior gluteal nerve",
+"Tensor fasciae latae"
+],
+"view": "latd"
+},
+{
+"t": "Short lateral rotators",
+"x": "Piriformis, gemelli, obturator internus, quadratus femoris and obturator externus. The piriformis divides the greater sciatic foramen into a suprapiriform space (superior gluteal vessels and nerve) and an infrapiriform space (sciatic nerve, inferior gluteal and pudendal).",
+"show": [
+"Piriformis muscle",
+"Obturator internus",
+"Quadratus femoris muscle",
+"Obturator externus"
+],
+"view": "post"
+},
+{
+"t": "The sciatic nerve",
+"x": "The thickest nerve in the body (L4–S3): it exits below the piriformis, descends between the greater trochanter and the ischial tuberosity and divides, usually at the apex of the popliteal fossa, into the tibial and common fibular nerves. Injections are given in the superolateral quadrant of the buttock to avoid injuring it.",
+"show": [
+"Sciatic nerve",
+"Piriformis muscle",
+"Gluteus maximus muscle",
+"Tibial nerve",
+"Common fibular nerve"
+],
+"view": "post"
+}
+],
+"q": [
+{
+"p": "Which nerve supplies gluteus medius and minimus?",
+"o": [
+"Superior gluteal",
+"Inferior gluteal",
+"Sciatic",
+"Femoral"
+],
+"a": 0
+},
+{
+"p": "Where does the sciatic nerve usually leave the pelvis?",
+"o": [
+"Below the piriformis muscle",
+"Above the piriformis",
+"Through the obturator foramen",
+"Below the inguinal ligament"
+],
+"a": 0
+},
+{
+"p": "In which quadrant of the buttock are intramuscular injections given?",
+"o": [
+"Superolateral",
+"Inferomedial",
+"Inferolateral",
+"Superomedial"
+],
+"a": 0
+}
+]
+},
+{
+"id": "popliteo",
+"t": "Popliteal fossa",
+"r": "Knee",
+"steps": [
+{
+"t": "Boundaries",
+"x": "A diamond behind the knee: above, the biceps femoris (lateral) and the semimembranosus and semitendinosus (medial); below, the two heads of the gastrocnemius.",
+"show": [
+"Long head of biceps femoris",
+"Short head of biceps femoris",
+"Semimembranosus muscle",
+"Semitendinosus muscle",
+"Medial head of gastrocnemius",
+"Lateral head of gastrocnemius"
+],
+"view": "post"
+},
+{
+"t": "Contents",
+"x": "From superficial to deep: tibial and common fibular nerves, popliteal vein and, deepest and next to the bone, the popliteal artery. Its pulse is palpated with the knee flexed.",
+"show": [
+"Tibial nerve",
+"Common fibular nerve",
+"Popliteal vein",
+"Popliteal artery"
+],
+"view": "post"
+},
+{
+"t": "The floor",
+"x": "The popliteus unlocks the knee at the start of flexion by rotating the tibia medially. Above it lie the capsule and the oblique popliteal ligament.",
+"show": [
+"Popliteus muscle",
+"Plantaris muscle",
+"Femur",
+"Tibia"
+],
+"view": "post"
+}
+],
+"q": [
+{
+"p": "What is the deepest structure in the popliteal fossa?",
+"o": [
+"Popliteal artery",
+"Popliteal vein",
+"Tibial nerve",
+"Common fibular nerve"
+],
+"a": 0
+},
+{
+"p": "Which muscle \"unlocks\" the knee at the start of flexion?",
+"o": [
+"Popliteus",
+"Gastrocnemius",
+"Plantaris",
+"Soleus"
+],
+"a": 0
+}
+]
+},
+{
+"id": "antebrazo",
+"t": "Forearm: flexors and pronators",
+"r": "Forearm",
+"steps": [
+{
+"t": "Superficial layer",
+"x": "From the medial epicondyle: pronator teres, flexor carpi radialis, palmaris longus and flexor carpi ulnaris. Its tendinopathy is medial epicondylitis (golfer's elbow).",
+"show": [
+"Superficial head of pronator teres",
+"Deep head of pronator teres",
+"Flexor carpi radialis",
+"Palmaris longus muscle",
+"Humeral head of flexor carpi ulnaris",
+"Ulnar head of flexor carpi ulnaris"
+],
+"view": "ant"
+},
+{
+"t": "Intermediate layer",
+"x": "Flexor digitorum superficialis flexes the proximal interphalangeal joints; its tendons pass through the carpal tunnel.",
+"show": [
+"Humero-ulnar head of flexor digitorum superficialis",
+"Radial head of flexor digitorum superficialis"
+],
+"view": "ant"
+},
+{
+"t": "Deep layer",
+"x": "Flexor digitorum profundus (distal interphalangeal joints), flexor pollicis longus and pronator quadratus. The lateral half of the flexor digitorum profundus is supplied by the median nerve (anterior interosseous) and the medial half by the ulnar nerve.",
+"show": [
+"Flexor digitorum profundus",
+"Flexor pollicis longus",
+"Pronator quadratus"
+],
+"view": "ant"
+},
+{
+"t": "Nerves",
+"x": "The median nerve passes between the heads of pronator teres and under flexor digitorum superficialis; the ulnar nerve, behind the medial epicondyle and under flexor carpi ulnaris.",
+"show": [
+"Median nerve",
+"Ulnar nerve",
+"Superficial head of pronator teres",
+"Humeral head of flexor carpi ulnaris"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "Which muscle flexes the distal interphalangeal joint of the fingers?",
+"o": [
+"Flexor digitorum profundus",
+"Flexor digitorum superficialis",
+"Palmaris longus",
+"Lumbricals"
+],
+"a": 0
+},
+{
+"p": "Between which structures does the median nerve pass at the elbow?",
+"o": [
+"Between the heads of pronator teres",
+"Behind the medial epicondyle",
+"Under the supinator",
+"Through the spiral groove"
+],
+"a": 0
+}
+]
+},
+{
+"id": "mano",
+"t": "Muscles of the hand",
+"r": "Hand",
+"steps": [
+{
+"t": "Thenar eminence",
+"x": "Abductor pollicis brevis, flexor pollicis brevis and opponens pollicis: they allow opposition. They are supplied by the recurrent branch of the median nerve, except the deep head of flexor pollicis brevis.",
+"show": [
+"Abductor pollicis brevis",
+"Superficial head of flexor pollicis brevis",
+"Deep head of flexor pollicis brevis",
+"Opponens pollicis muscle"
+],
+"view": "ant"
+},
+{
+"t": "Adductor pollicis",
+"x": "With its oblique and transverse heads it brings the thumb toward the palm (key pinch). It is supplied by the ulnar nerve: its weakness gives Froment sign.",
+"show": [
+"Oblique head of adductor pollicis",
+"Transverse head of adductor pollicis"
+],
+"view": "ant"
+},
+{
+"t": "Hypothenar eminence",
+"x": "Abductor, flexor brevis and opponens of the little finger, supplied by the ulnar nerve.",
+"show": [
+"Abductor digiti minimi of hand",
+"Flexor digiti minimi of hand",
+"Opponens digiti minimi muscle of hand"
+],
+"view": "ant"
+},
+{
+"t": "Lumbricals and interossei",
+"x": "The lumbricals arise from the tendons of flexor digitorum profundus; with the interossei they flex the metacarpophalangeal joints and extend the interphalangeal joints. The palmar interossei adduct the fingers and the dorsal ones abduct them (\"PAD and DAB\").",
+"show": [
+"Lumbrical muscles of hand",
+"Palmar interossei muscles",
+"Dorsal interossei muscles of hand",
+"Palmar aponeurosis"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "Which nerve supplies adductor pollicis?",
+"o": [
+"Ulnar",
+"Median",
+"Radial",
+"Musculocutaneous"
+],
+"a": 0
+},
+{
+"p": "Which muscles abduct the fingers of the hand?",
+"o": [
+"Dorsal interossei",
+"Palmar interossei",
+"Lumbricals",
+"Flexor superficialis"
+],
+"a": 0
+}
+]
+},
+{
+"id": "pie",
+"t": "Foot and plantar arch",
+"r": "Foot",
+"steps": [
+{
+"t": "Skeleton of the arch",
+"x": "The medial longitudinal arch is formed by the calcaneus, talus, navicular, cuneiforms and the first three metatarsals; the lateral arch, by the calcaneus, cuboid and 4th–5th metatarsals.",
+"show": [
+"Calcaneus",
+"Talus",
+"Navicular bone"
+],
+"view": "latd"
+},
+{
+"t": "Plantar aponeurosis and first layer",
+"x": "The plantar aponeurosis joins the calcaneus to the toes and tenses the arch in the late stance phase (windlass mechanism). Beneath it lie abductor hallucis, flexor digitorum brevis and abductor digiti minimi.",
+"show": [
+"Plantar aponeurosis",
+"Abductor hallucis",
+"Flexor digitorum brevis",
+"Abductor digiti minimi of foot"
+],
+"view": "inf"
+},
+{
+"t": "Middle and deep layers",
+"x": "Quadratus plantae and lumbricals; then flexor hallucis brevis and adductor hallucis, flexor digiti minimi brevis and the interossei.",
+"show": [
+"Quadratus plantae muscle",
+"Lumbrical muscles of foot",
+"Oblique head of adductor hallucis",
+"Transverse head of adductor hallucis",
+"Plantar interossei muscles",
+"Dorsal interossei muscles of foot"
+],
+"view": "inf"
+},
+{
+"t": "Ligamentous and tendinous supports",
+"x": "The long plantar ligament and the plantar calcaneonavicular ligament (\"spring ligament\") support the arch, together with the tendons of tibialis posterior and fibularis longus, which cross the sole like a stirrup.",
+"show": [
+"Long plantar ligament",
+"Plantar calcaneonavicular ligament",
+"Tibialis posterior muscle",
+"Fibularis longus muscle"
+],
+"view": "inf"
+}
+],
+"q": [
+{
+"p": "Which structure tenses the arch at toe-off (windlass mechanism)?",
+"o": [
+"The plantar aponeurosis",
+"The deltoid ligament",
+"The calcaneal tendon",
+"The extensor retinaculum"
+],
+"a": 0
+},
+{
+"p": "Which tendons form the \"stirrup\" of the foot?",
+"o": [
+"Tibialis posterior and fibularis longus",
+"Tibialis anterior and extensor hallucis longus",
+"Fibularis brevis and fibularis tertius",
+"Flexor digitorum longus and plantaris"
+],
+"a": 0
+}
+]
+},
+{
+"id": "axila",
+"t": "Axilla",
+"r": "Shoulder",
+"both": false,
+"steps": [
+{
+"t": "Walls",
+"x": "Anterior: pectoralis major and minor. Posterior: subscapularis, teres major and latissimus dorsi. Medial: serratus anterior over the chest wall. Lateral: intertubercular groove of the humerus.",
+"show": [
+"Clavicular head of pectoralis major muscle",
+"Sternocostal head of pectoralis major muscle",
+"Pectoralis minor muscle",
+"Subscapularis muscle",
+"Teres major muscle",
+"Latissimus dorsi muscle",
+"Serratus anterior muscle"
+],
+"view": "ant"
+},
+{
+"t": "Axillary artery and vein",
+"x": "The axillary artery continues the subclavian from the border of the 1st rib and pectoralis minor divides it into three parts. The axillary vein lies medial.",
+"show": [
+"Axillary artery",
+"Axillary vein",
+"Pectoralis minor muscle"
+],
+"view": "ant"
+},
+{
+"t": "Brachial plexus",
+"x": "Its cords surround the 2nd part of the axillary artery and give the terminal nerves of the upper limb: musculocutaneous, median, ulnar, axillary and radial.",
+"show": [
+"Posterior cord of brachial plexus",
+"Musculocutaneous nerve",
+"Median nerve",
+"Ulnar nerve",
+"Axillary nerve",
+"Radial nerve",
+"Axillary artery"
+],
+"view": "ant"
+},
+{
+"t": "Lymph nodes",
+"x": "Pectoral (anterior), central, lateral, subscapular (posterior) and apical; they drain the upper limb and most of the breast.",
+"show": [
+"Anterior axillary nodes",
+"Central axillary nodes",
+"Lateral axillary nodes",
+"Posterior axillary nodes",
+"Apical axillary nodes"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "Which muscle divides the axillary artery into three parts?",
+"o": [
+"Pectoralis minor",
+"Pectoralis major",
+"Subscapularis",
+"Teres major"
+],
+"a": 0
+},
+{
+"p": "To which group of nodes does most of the lymph from the breast drain first?",
+"o": [
+"Pectoral (anterior) axillary nodes",
+"Apical nodes",
+"Parasternal nodes",
+"Supraclavicular nodes"
+],
+"a": 0
+}
+]
+}
+]

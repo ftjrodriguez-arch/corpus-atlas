@@ -1,0 +1,1919 @@
+[
+{
+"id": "manguito",
+"t": "Manguito rotador",
+"r": "Ombro",
+"steps": [
+{
+"t": "Os ossos de referência",
+"x": "A escápula e o úmero formam a articulação glenoumeral. A cavidade glenoidal é pouco profunda: a estabilidade depende em grande parte dos músculos do manguito.",
+"show": [
+"Scapula",
+"Humerus"
+],
+"view": "latd"
+},
+{
+"t": "Supraespinal",
+"x": "Origina-se na fossa supraespinal, passa sob o acrômio e insere-se na faceta superior do tubérculo maior. Inicia a abdução e é o tendão que mais se lesiona.",
+"show": [
+"Supraspinatus muscle"
+],
+"view": "post"
+},
+{
+"t": "Infraespinal e redondo menor",
+"x": "Ocupam a face posterior da escápula e inserem-se nas facetas média e inferior do tubérculo maior. São os rotadores laterais do ombro.",
+"show": [
+"Infraspinatus muscle",
+"Teres minor muscle"
+],
+"view": "post"
+},
+{
+"t": "Subescapular",
+"x": "Ocupa a fossa subescapular, na face anterior da escápula, e insere-se no tubérculo menor. É o principal rotador medial.",
+"show": [
+"Subscapularis muscle"
+],
+"view": "ant"
+},
+{
+"t": "Cápsula e ligamentos",
+"x": "A cápsula glenoumeral é reforçada pelos ligamentos glenoumerais e pelo coracoumeral. O ligamento coracoacromial forma o teto do espaço subacromial, onde o supraespinal sofre pinçamento.",
+"show": [
+"Articular capsule of glenohumeral joint",
+"Superior glenohumeral ligament",
+"Middle glenohumeral ligament",
+"Inferior glenohumeral ligament",
+"Coracohumeral ligament",
+"Coraco-acromial ligament"
+],
+"view": "ant"
+},
+{
+"t": "Inervação",
+"x": "O nervo supraescapular inerva o supraespinal e o infraespinal; o axilar, o redondo menor e o deltoide. Uma lesão do axilar após luxação causa anestesia na face lateral do braço.",
+"show": [
+"Suprascapular nerve",
+"Axillary nerve",
+"Supraspinatus muscle",
+"Infraspinatus muscle",
+"Teres minor muscle"
+],
+"view": "post"
+}
+],
+"q": {
+"p": "Qual músculo do manguito rotador é o principal rotador medial do ombro?",
+"o": [
+"Subescapular",
+"Infraespinal",
+"Redondo menor",
+"Supraespinal"
+],
+"a": 0
+}
+},
+{
+"id": "carpo",
+"t": "Túnel do carpo",
+"r": "Punho e mão",
+"steps": [
+{
+"t": "O assoalho ósseo",
+"x": "Os ossos do carpo formam um canal côncavo voltado para a face palmar. Suas bordas são o escafoide e o trapézio lateralmente, e o pisiforme e o hamato medialmente.",
+"show": [
+"Scaphoid bone",
+"Lunate bone",
+"Triquetrum bone",
+"Pisiform bone",
+"Trapezium bone",
+"Trapezoid bone",
+"Capitate bone",
+"Hamate bone"
+],
+"view": "ant"
+},
+{
+"t": "O teto: retináculo dos músculos flexores",
+"x": "O retináculo dos flexores fecha o canal e o transforma em um túnel osteofibroso inextensível. Qualquer aumento de volume em seu interior comprime o conteúdo.",
+"show": [
+"Flexor retinaculum of wrist"
+],
+"view": "ant"
+},
+{
+"t": "Os tendões que o atravessam",
+"x": "Passam quatro tendões do flexor superficial dos dedos, quatro do flexor profundo dos dedos e o flexor longo do polegar, envolvidos por bainhas sinoviais.",
+"show": [
+"Flexor digitorum profundus",
+"Humero-ulnar head of flexor digitorum superficialis",
+"Radial head of flexor digitorum superficialis",
+"Flexor pollicis longus"
+],
+"view": "ant"
+},
+{
+"t": "O nervo mediano",
+"x": "É a estrutura mais superficial do túnel e a que sofre compressão. Fornece os nervos digitais palmares para o polegar, o indicador, o médio e a metade lateral do anular.",
+"show": [
+"Median nerve",
+"Common palmar digital branches of median nerve"
+],
+"view": "ant"
+},
+{
+"t": "Músculos tenares",
+"x": "O ramo recorrente do mediano inerva o abdutor curto, o oponente e a cabeça superficial do flexor curto do polegar. Sua atrofia indica compressão avançada.",
+"show": [
+"Abductor pollicis brevis",
+"Opponens pollicis muscle",
+"Superficial head of flexor pollicis brevis"
+],
+"view": "ant"
+}
+],
+"q": {
+"p": "Qual nervo é comprimido na síndrome do túnel do carpo?",
+"o": [
+"Nervo mediano",
+"Nervo ulnar",
+"Nervo radial",
+"Nervo musculocutâneo"
+],
+"a": 0
+}
+},
+{
+"id": "rodilla",
+"t": "Ligamentos do joelho",
+"r": "Joelho",
+"steps": [
+{
+"t": "Ossos",
+"x": "O fêmur articula-se com a tíbia e com a patela. A fíbula não participa da articulação do joelho, mas serve de ancoragem para o ligamento colateral fibular.",
+"show": [
+"Femur",
+"Tibia",
+"Fibula",
+"Patella"
+],
+"view": "ant"
+},
+{
+"t": "Ligamentos cruzados",
+"x": "O cruzado anterior impede que a tíbia se desloque para a frente; o posterior, para trás. São examinados com os testes de Lachman e da gaveta.",
+"show": [
+"Anterior cruciate ligament",
+"Posterior cruciate ligament"
+],
+"view": "ant"
+},
+{
+"t": "Ligamentos colaterais",
+"x": "O colateral tibial resiste ao valgo e está unido ao menisco medial; o colateral fibular resiste ao varo e é extracapsular.",
+"show": [
+"Superficial part of tibial collateral ligament",
+"Deep part of tibial collateral ligament",
+"Fibular collateral ligament"
+],
+"view": "ant"
+},
+{
+"t": "Meniscos",
+"x": "Fibrocartilagens em forma de C que distribuem a carga. O medial, menos móvel por sua união ao colateral tibial, lesiona-se com mais frequência.",
+"show": [
+"Medial meniscus",
+"Lateral meniscus"
+],
+"view": "sup"
+},
+{
+"t": "Aparelho extensor",
+"x": "O ligamento da patela une a patela à tuberosidade da tíbia, e os retináculos a estabilizam lateralmente.",
+"show": [
+"Medial patellar retinaculum",
+"Lateral patellar retinaculum",
+"Patella"
+],
+"view": "ant"
+}
+],
+"q": {
+"p": "Qual estrutura impede o deslocamento anterior da tíbia sobre o fêmur?",
+"o": [
+"Ligamento cruzado anterior",
+"Ligamento cruzado posterior",
+"Ligamento colateral tibial",
+"Menisco lateral"
+],
+"a": 0
+}
+},
+{
+"id": "tobillo",
+"t": "Entorse lateral do tornozelo",
+"r": "Tornozelo",
+"steps": [
+{
+"t": "Ossos",
+"x": "A pinça tibiofibular abraça o tálus. O maléolo lateral desce mais que o medial, o que favorece as entorses por inversão.",
+"show": [
+"Tibia",
+"Fibula",
+"Talus",
+"Calcaneus"
+],
+"view": "latd"
+},
+{
+"t": "Ligamento talofibular anterior",
+"x": "Vai do maléolo lateral ao colo do tálus e tensiona-se na flexão plantar e na inversão. É o primeiro e o mais frequentemente lesionado.",
+"show": [
+"Anterior talofibular ligament"
+],
+"view": "latd"
+},
+{
+"t": "Calcaneofibular e talofibular posterior",
+"x": "O calcaneofibular lesiona-se nas entorses moderadas; o posterior, o mais resistente, apenas nas graves.",
+"show": [
+"Calcaneofibular ligament",
+"Posterior talofibular ligament"
+],
+"view": "latd"
+},
+{
+"t": "Sindesmose",
+"x": "Os ligamentos tibiofibulares unem a tíbia e a fíbula. Sua lesão, a entorse alta, demora mais para cicatrizar.",
+"show": [
+"Anterior tibiofibular ligament",
+"Posterior tibiofibular ligament"
+],
+"view": "latd"
+},
+{
+"t": "Estabilizadores dinâmicos",
+"x": "Os fibulares longo e curto evertem o pé e protegem contra a inversão; seus tendões passam sob os retináculos dos fibulares.",
+"show": [
+"Fibularis longus muscle",
+"Fibularis brevis muscle",
+"Superior fibular retinaculum",
+"Inferior fibular retinaculum"
+],
+"view": "latd"
+}
+],
+"q": {
+"p": "Qual é o ligamento mais lesionado na entorse lateral do tornozelo?",
+"o": [
+"Talofibular anterior",
+"Calcaneofibular",
+"Talofibular posterior",
+"Tibiofibular anterior"
+],
+"a": 0
+}
+},
+{
+"id": "plexo",
+"t": "Plexo braquial",
+"r": "Pescoço e axila",
+"steps": [
+{
+"t": "Raízes",
+"x": "Os ramos anteriores de C5 a T1 formam as raízes do plexo, que emergem entre os músculos escalenos anterior e médio.",
+"show": [
+"Roots of brachial plexus",
+"Scalenus anterior muscle",
+"Scalenus medius muscle"
+],
+"view": "ant"
+},
+{
+"t": "Troncos",
+"x": "C5 e C6 formam o tronco superior, C7 o médio e C8–T1 o inferior. A paralisia de Erb acomete o tronco superior.",
+"show": [
+"Superior trunk of brachial plexus",
+"Middle trunk of brachial plexus",
+"Inferior trunk of brachial plexus"
+],
+"view": "ant"
+},
+{
+"t": "Divisões e fascículos",
+"x": "Cada tronco divide-se em anterior e posterior. As divisões posteriores formam o fascículo posterior, origem do axilar e do radial.",
+"show": [
+"Anterior division of superior trunk of brachial plexus",
+"Anterior division of middle trunk of brachial plexus",
+"Anterior division of inferior trunk of brachial plexus",
+"Posterior division of superior trunk of brachial plexus",
+"Posterior division of middle trunk of brachial plexus",
+"Posterior division of inferior trunk of brachial plexus",
+"Posterior cord of brachial plexus"
+],
+"view": "ant"
+},
+{
+"t": "Ramos terminais",
+"x": "Musculocutâneo, mediano, ulnar, axilar e radial inervam todo o membro superior.",
+"show": [
+"Musculocutaneous nerve",
+"Median nerve",
+"Muscular branches of ulnar nerve",
+"Deep branch of ulnar nerve",
+"Axillary nerve",
+"Radial nerve"
+],
+"view": "ant"
+},
+{
+"t": "Ramos colaterais",
+"x": "O torácico longo inerva o serrátil anterior: sua lesão produz escápula alada. O supraescapular inerva o supraespinal e o infraespinal.",
+"show": [
+"Long thoracic nerve",
+"Suprascapular nerve",
+"Serratus anterior muscle"
+],
+"view": "latd"
+}
+],
+"q": {
+"p": "Qual nervo provém do fascículo posterior do plexo braquial?",
+"o": [
+"Nervo radial",
+"Nervo mediano",
+"Nervo musculocutâneo",
+"Nervo ulnar"
+],
+"a": 0
+}
+},
+{
+"id": "femoral",
+"t": "Trígono femoral",
+"r": "Coxa",
+"steps": [
+{
+"t": "Limites",
+"x": "O ligamento inguinal forma a base; o sartório, o limite lateral, e o adutor longo, o limite medial.",
+"show": [
+"Inguinal ligament",
+"Sartorius muscle",
+"Adductor longus"
+],
+"view": "ant"
+},
+{
+"t": "Assoalho",
+"x": "O iliopsoas lateralmente e o pectíneo medialmente formam o assoalho do trígono.",
+"show": [
+"Psoas major",
+"Iliacus muscle",
+"Pectineus muscle"
+],
+"view": "ant"
+},
+{
+"t": "Conteúdo: nervo, artéria e veia",
+"x": "De lateral para medial: nervo femoral, artéria femoral e veia femoral. O pulso femoral é palpado no ponto médio inguinal e a veia fica logo medial a ele.",
+"show": [
+"Femoral nerve",
+"Femoral artery",
+"Femoral vein"
+],
+"view": "ant"
+},
+{
+"t": "Veia safena magna",
+"x": "Ascende pela face medial da coxa e desemboca na veia femoral através do hiato safeno. É usada como enxerto na cirurgia coronariana.",
+"show": [
+"Great saphenous vein",
+"Femoral vein"
+],
+"view": "ant"
+}
+],
+"q": {
+"p": "Qual é a ordem de lateral para medial no trígono femoral?",
+"o": [
+"Nervo, artéria, veia",
+"Artéria, nervo, veia",
+"Veia, artéria, nervo",
+"Nervo, veia, artéria"
+],
+"a": 0
+}
+},
+{
+"id": "lumbar",
+"t": "Coluna lombar e disco",
+"r": "Coluna vertebral",
+"steps": [
+{
+"t": "Vértebras lombares e sacro",
+"x": "Cinco vértebras de corpo grande suportam a maior carga axial e formam a lordose lombar sobre o sacro.",
+"show": [
+"Vertebra L1",
+"Vertebra L2",
+"Vertebra L3",
+"Vertebra L4",
+"Vertebra L5",
+"Sacrum"
+],
+"view": "latd"
+},
+{
+"t": "Discos intervertebrais",
+"x": "O núcleo pulposo, envolvido pelo ânulo fibroso, distribui a carga. L4–L5 e L5–S1 concentram a maioria das hérnias.",
+"show": [
+"Nucleus pulposus L1-L2",
+"Nucleus pulposus L2-L3",
+"Nucleus pulposus L3-L4",
+"Nucleus pulposus L4-L5",
+"Nucleus pulposus L5-S1"
+],
+"view": "latd"
+},
+{
+"t": "Ligamentos",
+"x": "O longitudinal anterior limita a extensão; o posterior, mais fraco na região lombar, explica por que as hérnias são posterolaterais. Os ligamentos amarelos, interespinais e supraespinal limitam a flexão.",
+"show": [
+"Anterior longitudinal ligament",
+"Posterior longitudinal ligament",
+"Ligamenta flava",
+"Interspinous ligaments",
+"Supraspinous ligament"
+],
+"view": "latd"
+},
+{
+"t": "Nervo isquiático",
+"x": "Origina-se de L4 a S3 e desce pela região glútea e pela coxa posterior. A compressão de suas raízes por uma hérnia produz ciatalgia.",
+"show": [
+"Sciatic nerve",
+"Vertebra L4",
+"Vertebra L5",
+"Sacrum"
+],
+"view": "post"
+}
+],
+"q": {
+"p": "Em quais níveis se concentra a maioria das hérnias de disco lombares?",
+"o": [
+"L4–L5 e L5–S1",
+"L1–L2 e L2–L3",
+"L2–L3 e L3–L4",
+"T12–L1"
+],
+"a": 0
+}
+},
+{
+"id": "extensor",
+"t": "Quadríceps e extensão do joelho",
+"r": "Coxa",
+"steps": [
+{
+"t": "As quatro cabeças",
+"x": "Reto femoral, vasto lateral, vasto medial e vasto intermédio convergem no tendão do quadríceps. Apenas o reto femoral cruza também o quadril.",
+"show": [
+"Rectus femoris muscle",
+"Vastus lateralis muscle",
+"Vastus medialis muscle",
+"Vastus intermedius muscle"
+],
+"view": "ant"
+},
+{
+"t": "Patela e ligamento da patela",
+"x": "A patela, osso sesamoide, aumenta o braço de alavanca do quadríceps. O ligamento da patela transmite a força à tuberosidade da tíbia.",
+"show": [
+"Patella",
+"Tibia"
+],
+"view": "ant"
+},
+{
+"t": "Inervação",
+"x": "O nervo femoral (L2–L4) inerva todo o quadríceps. O reflexo patelar avalia L3–L4.",
+"show": [
+"Femoral nerve",
+"Rectus femoris muscle",
+"Vastus medialis muscle"
+],
+"view": "ant"
+}
+],
+"q": {
+"p": "Qual cabeça do quadríceps cruza duas articulações?",
+"o": [
+"Reto femoral",
+"Vasto lateral",
+"Vasto medial",
+"Vasto intermédio"
+],
+"a": 0
+}
+},
+{
+"id": "suelo_f",
+"t": "Pelve e assoalho pélvico feminino",
+"r": "Pelve · mulher",
+"body": "f",
+"both": true,
+"steps": [
+{
+"t": "A pelve óssea feminina",
+"x": "Os dois ossos do quadril, o sacro e o cóccix formam um anel fechado anteriormente na sínfise púbica. Na mulher a pelve é mais larga e baixa, a abertura superior é oval, as espinhas isquiáticas ficam mais afastadas e o arco púbico ultrapassa 80°: tudo isso amplia o canal de parto.",
+"show": [
+"Hip bone",
+"Sacrum",
+"Coccyx",
+"Pubic symphysis"
+],
+"view": "sup"
+},
+{
+"t": "Ligamentos sacroespinal e sacrotuberal",
+"x": "Unem o sacro à espinha isquiática (sacroespinal) e ao túber isquiático (sacrotuberal). Transformam as incisuras isquiáticas nos forames isquiáticos maior e menor, por onde saem os vasos e o nervo pudendos em direção ao períneo.",
+"show": [
+"Sacrospinous ligament",
+"Sacrotuberous ligament",
+"Hip bone",
+"Sacrum",
+"Coccyx"
+],
+"view": "post"
+},
+{
+"t": "Paredes da pelve",
+"x": "O obturador interno reveste a parede lateral e sua fáscia espessada forma o arco tendíneo do levantador do ânus, uma faixa que vai do púbis até a espinha isquiática, onde o assoalho pélvico se ancora. O piriforme fecha a parede posterior.",
+"show": [
+"Obturator internus",
+"Piriformis muscle",
+"Tendinous arch of levator ani",
+"Hip bone",
+"Sacrum"
+],
+"view": "sup"
+},
+{
+"t": "O diafragma pélvico",
+"x": "O levantador do ânus (pubococcígeo, puboanal/puborretal e iliococcígeo) e o coccígeo formam uma rede em funil que sustenta as vísceras. Na linha média deixa o hiato urogenital, por onde passam a uretra e a vagina. A alça puborretal puxa o reto para a frente e forma o ângulo anorretal, fundamental para a continência.",
+"show": [
+"Pubococcygeus muscle",
+"Pubo-analis muscle",
+"Iliococcygeus muscle",
+"Coccygeus muscle",
+"Tendinous arch of levator ani",
+"Hip bone",
+"Sacrum",
+"Coccyx"
+],
+"view": "sup"
+},
+{
+"t": "As vísceras pélvicas",
+"x": "De anterior para posterior: bexiga, útero com a vagina e reto. O útero costuma estar em anteversão (inclinado para a frente sobre a bexiga) e anteflexão. Entre o útero e o reto fica o fundo de saco retouterino (de Douglas), o ponto mais baixo da cavidade peritoneal.",
+"show": [
+"Urinary bladder",
+"Body of uterus",
+"Fundus of uterus",
+"Cervix of uterus",
+"Vagina",
+"Rectum",
+"Anal canal",
+"Ovary",
+"Ampulla of uterine tube",
+"Hip bone",
+"Sacrum"
+],
+"view": "lati",
+"cut": {
+"p": "sag",
+"pos": 0.002
+}
+},
+{
+"t": "Os meios de fixação do útero",
+"x": "O útero é suspenso pelos ligamentos cardinais (de Mackenrodt) e uterossacros, que fixam o colo às paredes da pelve; o ligamento redondo o mantém em anteversão e o largo é uma prega de peritônio que leva os vasos. Seu enfraquecimento, junto com o do levantador do ânus, produz o prolapso.",
+"show": [
+"Cardinal ligament",
+"Uterosacral ligament",
+"Round ligament of uterus",
+"Broad ligament of uterus",
+"Ligament of ovary",
+"Suspensory ligament of ovary",
+"Body of uterus",
+"Cervix of uterus",
+"Vagina",
+"Hip bone",
+"Sacrum"
+],
+"view": "sup"
+},
+{
+"t": "O períneo",
+"x": "Abaixo do diafragma pélvico, o espaço perineal superficial contém os ramos do clitóris com o isquiocavernoso, os bulbos do vestíbulo com o bulboesponjoso, as glândulas de Bartholin e o transverso superficial do períneo. Todos convergem no corpo perineal, junto com o esfíncter externo do ânus.",
+"show": [
+"Ischiocavernosus muscle",
+"Bulbospongiosus muscle",
+"Superficial transverse perineal muscle",
+"Perineal body",
+"External anal sphincter",
+"Crus of clitoris",
+"Bulb of vestibule",
+"Greater vestibular gland",
+"Hip bone",
+"Sacrum",
+"Coccyx",
+"Pubic symphysis"
+],
+"view": "inf"
+},
+{
+"t": "Vasos e nervos",
+"x": "A artéria uterina, ramo da ilíaca interna, cruza por cima do ureter (\"a água passa sob a ponte\"), um detalhe crítico na histerectomia. O nervo e os vasos pudendos saem da pelve pelo forame isquiático maior e entram no períneo pelo menor, contornando a espinha isquiática: ali se realiza o bloqueio do pudendo em obstetrícia.",
+"show": [
+"Internal iliac artery",
+"Uterine artery",
+"Ureter",
+"Internal pudendal artery",
+"Pudendal nerve",
+"Body of uterus",
+"Hip bone",
+"Sacrum"
+],
+"view": "lati",
+"cut": {
+"p": "sag",
+"pos": 0.002
+}
+}
+],
+"q": [
+{
+"p": "Qual músculo forma o ângulo anorretal e é fundamental para a continência fecal?",
+"o": [
+"Puborretal (puboanal)",
+"Iliococcígeo",
+"Obturador interno",
+"Piriforme"
+],
+"a": 0
+},
+{
+"p": "Qual estrutura a artéria uterina cruza por cima, junto ao colo do útero?",
+"o": [
+"O ureter",
+"A uretra",
+"O nervo pudendo",
+"O ligamento redondo"
+],
+"a": 0
+},
+{
+"p": "Qual é o ponto mais baixo da cavidade peritoneal na mulher?",
+"o": [
+"Fundo de saco retouterino (de Douglas)",
+"Fundo de saco vesicouterino",
+"Fossa isquioanal",
+"Espaço retropúbico"
+],
+"a": 0
+},
+{
+"p": "Em qual referência óssea se realiza o bloqueio do nervo pudendo?",
+"o": [
+"Espinha isquiática",
+"Túber isquiático",
+"Promontório do sacro",
+"Crista ilíaca"
+],
+"a": 0
+},
+{
+"p": "Quais ligamentos sustentam principalmente o colo do útero e sua lesão favorece o prolapso?",
+"o": [
+"Cardinais e uterossacros",
+"Redondos",
+"Suspensores do ovário",
+"Largo"
+],
+"a": 0
+}
+],
+"only": true
+},
+{
+"id": "corazon",
+"t": "O coração por dentro",
+"r": "Tórax",
+"both": true,
+"steps": [
+{
+"t": "Posição e grandes vasos",
+"x": "O coração ocupa o mediastino médio, com dois terços à esquerda da linha mediana e o ápice voltado para baixo, para a frente e para a esquerda. Recebe as veias cavas no átrio direito e as quatro veias pulmonares no esquerdo; dos ventrículos saem o tronco pulmonar e a aorta ascendente.",
+"show": [
+"Right atrium",
+"Right ventricle",
+"Left atrium",
+"Left ventricle",
+"Superior vena cava",
+"Inferior vena cava (thoracic part)",
+"Ascending aorta",
+"Aortic arch",
+"Pulmonary trunk",
+"Right superior pulmonary vein",
+"Left superior pulmonary vein",
+"Right inferior pulmonary vein",
+"Left inferior pulmonary vein"
+],
+"view": "ant"
+},
+{
+"t": "As artérias coronárias",
+"x": "Originam-se dos seios da aorta, logo acima da valva da aorta. A coronária direita percorre o sulco atrioventricular direito; a esquerda divide-se no ramo interventricular anterior (descendente anterior), que irriga a parte anterior do septo, e no ramo circunflexo. O sangue venoso retorna pelo seio coronário ao átrio direito.",
+"show": [
+"Right atrium",
+"Right ventricle",
+"Left atrium",
+"Left ventricle",
+"Right coronary artery",
+"Left coronary artery",
+"Anterior interventricular artery",
+"Circumflex artery of heart",
+"Great cardiac vein",
+"Coronary sinus"
+],
+"view": "ant"
+},
+{
+"t": "Corte de quatro câmaras",
+"x": "Um corte frontal abre as quatro cavidades. As paredes do ventrículo esquerdo são cerca de três vezes mais espessas que as do direito, porque impulsionam o sangue para a circulação sistêmica com maior pressão. O septo interventricular separa os dois ventrículos.",
+"show": [
+"Right atrium",
+"Right ventricle",
+"Left atrium",
+"Left ventricle"
+],
+"view": "ant",
+"cut": {
+"p": "fro",
+"pos": 0.03
+}
+},
+{
+"t": "Valvas atrioventriculares",
+"x": "A tricúspide (direita, três válvulas) e a mitral (esquerda, duas válvulas: anterior e posterior) abrem-se na diástole para encher os ventrículos e fecham-se na sístole: seu fechamento produz a primeira bulha cardíaca. As válvulas são sustentadas por cordas tendíneas presas aos músculos papilares, que se contraem para impedir que sofram prolapso para os átrios.",
+"show": [
+"Inferior leaflet of right atrioventricular valve",
+"Septal leaflet of right atrioventricular valve",
+"Posterior leaflet of left atrioventricular valve",
+"Inferior papillary muscle of right ventricle",
+"Anterior papillary muscle of right ventricle",
+"Septal papillary muscle of right ventricle",
+"Inferior papillary muscle of left ventricle",
+"Right ventricle",
+"Left ventricle",
+"Anterior leaflet of left atrioventricular valve",
+"Anterior leaflet of right atrioventricular valve",
+"Anterior papillary muscle of left ventricle"
+],
+"view": "ant",
+"cut": {
+"p": "fro",
+"pos": 0.03
+}
+},
+{
+"t": "Valvas semilunares",
+"x": "A valva do tronco pulmonar e a valva da aorta têm três válvulas semilunares cada uma. Fecham-se no final da sístole e produzem a segunda bulha. Atrás das válvulas coronárias direita e esquerda da aorta originam-se as artérias coronárias; a terceira é a não coronária.",
+"show": [
+"Left coronary leaflet",
+"Non-coronary leaflet",
+"Right coronary leaflet",
+"Anterior semilunar leaflet of pulmonary valve",
+"Left semilunar leaflet of pulmonary valve",
+"Right semilunar leaflet of pulmonary valve",
+"Ascending aorta",
+"Pulmonary trunk",
+"Right coronary artery",
+"Left coronary artery"
+],
+"view": "sup"
+},
+{
+"t": "O trajeto do sangue",
+"x": "Veias cavas → átrio direito → valva tricúspide → ventrículo direito → valva do tronco pulmonar → pulmões → veias pulmonares → átrio esquerdo → valva mitral → ventrículo esquerdo → valva da aorta → aorta. Ative a camada de veias e artérias para acompanhá-lo no modelo.",
+"show": [
+"Right atrium",
+"Right ventricle",
+"Left atrium",
+"Left ventricle",
+"Inferior leaflet of right atrioventricular valve",
+"Septal leaflet of right atrioventricular valve",
+"Posterior leaflet of left atrioventricular valve",
+"Left coronary leaflet",
+"Non-coronary leaflet",
+"Right coronary leaflet",
+"Anterior semilunar leaflet of pulmonary valve",
+"Left semilunar leaflet of pulmonary valve",
+"Right semilunar leaflet of pulmonary valve",
+"Pulmonary trunk",
+"Ascending aorta",
+"Superior vena cava",
+"Inferior vena cava (thoracic part)",
+"Anterior leaflet of left atrioventricular valve",
+"Anterior leaflet of right atrioventricular valve",
+"Anterior papillary muscle of left ventricle"
+],
+"view": "ant",
+"cut": {
+"p": "fro",
+"pos": 0.035
+}
+}
+],
+"q": [
+{
+"p": "Quais estruturas prendem as válvulas das valvas atrioventriculares?",
+"o": [
+"As cordas tendíneas e os músculos papilares",
+"O septo interventricular",
+"Os seios da aorta",
+"O anel fibroso da valva do tronco pulmonar"
+],
+"a": 0
+},
+{
+"p": "O que produz a primeira bulha cardíaca?",
+"o": [
+"O fechamento das valvas mitral e tricúspide",
+"O fechamento das valvas da aorta e do tronco pulmonar",
+"A contração atrial",
+"A abertura da valva da aorta"
+],
+"a": 0
+},
+{
+"p": "De onde se originam as artérias coronárias?",
+"o": [
+"Dos seios da aorta, acima da valva da aorta",
+"Do tronco pulmonar",
+"Do arco da aorta",
+"Diretamente do ventrículo esquerdo"
+],
+"a": 0
+},
+{
+"p": "Por que a parede do ventrículo esquerdo é mais espessa?",
+"o": [
+"Porque bombeia para a circulação sistêmica, de maior pressão",
+"Porque recebe maior volume de sangue",
+"Porque contém a valva mitral",
+"Porque está mais perto do pericárdio"
+],
+"a": 0
+}
+],
+"only": true
+},
+{
+"id": "cerebro",
+"t": "O cérebro por dentro: núcleos e ventrículos",
+"r": "Cabeça",
+"both": true,
+"steps": [
+{
+"t": "Tronco encefálico e cerebelo",
+"x": "O tronco encefálico (mesencéfalo, ponte e bulbo) une o cérebro à medula espinal e contém os núcleos dos nervos cranianos e os centros vitais. O cerebelo, posteriormente, coordena o movimento; suas tonsilas podem herniar pelo forame magno quando a pressão intracraniana aumenta.",
+"show": [
+"Midbrain",
+"Pons",
+"Medulla oblongata",
+"Pyramid of medulla oblongata",
+"Tonsil of cerebellum",
+"Superior cerebellar peduncle",
+"Lingula of cerebellum"
+],
+"view": "lati"
+},
+{
+"t": "O sistema ventricular",
+"x": "Os ventrículos laterais, um em cada hemisfério, comunicam-se pelos forames interventriculares com o terceiro ventrículo, entre os dois tálamos; este continua pelo aqueduto do mesencéfalo até o quarto ventrículo, anterior ao cerebelo. O plexo corioide produz o líquido cefalorraquidiano (cerca de 500 ml por dia). Sua obstrução causa hidrocefalia.",
+"show": [
+"Lateral ventricle",
+"Third ventricle",
+"Aqueduct of midbrain",
+"Fourth ventricle",
+"Choroid plexus",
+"Septum pellucidum"
+],
+"view": "latd"
+},
+{
+"t": "Núcleos da base",
+"x": "O núcleo caudado envolve o ventrículo lateral; o putame e o globo pálido formam o núcleo lentiforme. Junto com a substância negra e o subtálamo, controlam o início e a escala do movimento: sua degeneração produz a doença de Parkinson (substância negra) e a de Huntington (caudado).",
+"show": [
+"Caudate nucleus",
+"Putamen",
+"Globus pallidus",
+"Lateral ventricle",
+"Thalamus"
+],
+"view": "ant"
+},
+{
+"t": "Corte coronal pelos tálamos",
+"x": "Em um corte coronal reconhecem-se, de medial para lateral: terceiro ventrículo, tálamo, cápsula interna, núcleo lentiforme (globo pálido e putame), cápsula externa, claustro e ínsula. Acima, o corpo caloso cruza a linha mediana e forma o teto dos ventrículos laterais.",
+"show": [
+"Thalamus",
+"Third ventricle",
+"Putamen",
+"Globus pallidus",
+"Caudate nucleus",
+"Lateral ventricle",
+"Corpus callosum",
+"Fornix",
+"Insula (Subcentral gyrus and ant. and post. sulci)"
+],
+"view": "ant",
+"cut": {
+"p": "fro",
+"pos": 0.0
+}
+},
+{
+"t": "Sistema límbico",
+"x": "O hipocampo, na parede do corno temporal do ventrículo lateral, consolida a memória; o fórnice leva suas fibras até os corpos mamilares do hipotálamo. A amígdala, anterior ao hipocampo, processa o medo e as emoções. Seu comprometimento explica a perda de memória recente da doença de Alzheimer.",
+"show": [
+"Hippocampus",
+"Fornix",
+"Amygdaloid body",
+"Hypothalamus",
+"Hippocampal commissure",
+"Thalamus"
+],
+"view": "latd"
+},
+{
+"t": "Corte horizontal",
+"x": "Um corte axial, como o de uma TC ou RM de crânio, mostra no mesmo plano os cornos frontais dos ventrículos, a cabeça do caudado, o núcleo lentiforme, a cápsula interna em forma de V aberto para fora e o tálamo. Experimente os modos TC e RM na aba Planos.",
+"show": [
+"Caudate nucleus",
+"Putamen",
+"Globus pallidus",
+"Thalamus",
+"Lateral ventricle",
+"Third ventricle",
+"Corpus callosum"
+],
+"view": "sup",
+"cut": {
+"p": "tra",
+"pos": 1.632
+}
+}
+],
+"q": [
+{
+"p": "Qual estrutura comunica o terceiro e o quarto ventrículos?",
+"o": [
+"O aqueduto do mesencéfalo",
+"O forame interventricular",
+"O canal central",
+"O septo pelúcido"
+],
+"a": 0
+},
+{
+"p": "Quais dois núcleos formam o núcleo lentiforme?",
+"o": [
+"Putame e globo pálido",
+"Caudado e putame",
+"Tálamo e hipotálamo",
+"Amígdala e hipocampo"
+],
+"a": 0
+},
+{
+"p": "Onde é produzida a maior parte do líquido cefalorraquidiano?",
+"o": [
+"Nos plexos corioides",
+"Nas granulações aracnóideas",
+"No aqueduto",
+"Exclusivamente no quarto ventrículo"
+],
+"a": 0
+},
+{
+"p": "Qual estrutura é essencial para formar novas memórias?",
+"o": [
+"Hipocampo",
+"Putame",
+"Cerebelo",
+"Globo pálido"
+],
+"a": 0
+}
+],
+"only": true
+},
+{
+"id": "pares",
+"t": "Nervos cranianos",
+"r": "Cabeça",
+"only": true,
+"both": true,
+"steps": [
+{
+"t": "Os nervos sensoriais: I, II e VIII",
+"x": "O olfatório (I) atravessa a lâmina cribriforme do etmoide; o óptico (II) sai da órbita pelo canal óptico em direção ao quiasma; o vestibulococlear (VIII) entra no meato acústico interno junto ao facial. São nervos puramente sensoriais.",
+"show": [
+"Olfactory nerve (I)",
+"Optic nerve (II)",
+"Vestibulocochlear nerve (VIII)",
+"Optic chiasm"
+],
+"view": "inf"
+},
+{
+"t": "Os motores do olho: III, IV e VI",
+"x": "O oculomotor (III) inerva quase todos os músculos extraoculares, o levantador da pálpebra e, com fibras parassimpáticas, a pupila; o troclear (IV), o oblíquo superior; o abducente (VI), o reto lateral. Uma lesão do III deixa o olho \"para baixo e para fora\" com ptose e midríase.",
+"show": [
+"Oculomotor nerve (III)",
+"Trochlear nerve (IV)",
+"Midbrain",
+"Pons"
+],
+"view": "inf"
+},
+{
+"t": "Trigêmeo (V)",
+"x": "O maior dos nervos cranianos: seus três ramos (oftálmico, maxilar e mandibular) recolhem a sensibilidade da face, e o mandibular inerva os músculos da mastigação.",
+"show": [
+"Trigeminal nerve (V)",
+"Ophthalmic nerve",
+"Pons"
+],
+"view": "latd"
+},
+{
+"t": "Facial (VII)",
+"x": "Sai do tronco encefálico pelo ângulo pontocerebelar, percorre o canal do facial no temporal e sai pelo forame estilomastóideo para inervar a mímica facial. Sua lesão periférica (paralisia de Bell) paralisa toda a hemiface.",
+"show": [
+"Facial nerve (VII)",
+"Pons"
+],
+"view": "latd"
+},
+{
+"t": "IX, X, XI e XII",
+"x": "Glossofaríngeo (IX) e vago (X) saem pelo forame jugular: deglutição, gustação do terço posterior da língua e inervação parassimpática do tórax e do abdome. O acessório (XI) inerva o esternocleidomastóideo e o trapézio; o hipoglosso (XII), a língua: se lesionado, a língua desvia-se para o lado lesionado.",
+"show": [
+"Glossopharyngeal nerve (IX)",
+"Vagus nerve (X)",
+"Accessory nerve (XI)",
+"Hypoglossal nerve (XII)",
+"Medulla oblongata"
+],
+"view": "latd"
+}
+],
+"q": [
+{
+"p": "Qual nervo inerva o músculo reto lateral do olho?",
+"o": [
+"Abducente (VI)",
+"Troclear (IV)",
+"Oculomotor (III)",
+"Trigêmeo (V)"
+],
+"a": 0
+},
+{
+"p": "Um olho desviado para baixo e para fora com ptose e pupila dilatada sugere lesão do…",
+"o": [
+"Nervo oculomotor (III)",
+"Nervo óptico (II)",
+"Nervo facial (VII)",
+"Nervo abducente (VI)"
+],
+"a": 0
+},
+{
+"p": "Qual nervo craniano inerva os músculos da mastigação?",
+"o": [
+"Trigêmeo (V), ramo mandibular",
+"Facial (VII)",
+"Hipoglosso (XII)",
+"Glossofaríngeo (IX)"
+],
+"a": 0
+}
+]
+},
+{
+"id": "cuello",
+"t": "Pescoço: trígonos e vasos",
+"r": "Pescoço",
+"both": false,
+"steps": [
+{
+"t": "O esternocleidomastóideo",
+"x": "Divide o pescoço em um trígono anterior e outro posterior. Gira a cabeça para o lado oposto e a inclina para o mesmo lado. É inervado pelo nervo acessório (XI).",
+"show": [
+"Sternocleidomastoid muscle",
+"Mandible",
+"Hyoid bone"
+],
+"view": "latd"
+},
+{
+"t": "Músculos infra-hióideos",
+"x": "O esterno-hióideo e o omo-hióideo abaixam o osso hioide na deglutição e na fonação; o milo-hióideo forma o assoalho da boca.",
+"show": [
+"Sternohyoid muscle",
+"Omohyoid muscle",
+"Mylohyoid muscle",
+"Hyoid bone",
+"Thyroid cartilage",
+"Cricoid cartilage"
+],
+"view": "ant"
+},
+{
+"t": "Glândula tireoide",
+"x": "Envolve a traqueia abaixo da cartilagem cricóidea; seu istmo cruza os anéis traqueais 2º a 4º. Move-se com a deglutição porque está unida à laringe.",
+"show": [
+"Thyroid gland",
+"Trachea",
+"Thyroid cartilage",
+"Cricoid cartilage"
+],
+"view": "ant"
+},
+{
+"t": "A bainha carótica",
+"x": "Contém a artéria carótida comum (que se divide na altura da cartilagem tireóidea em interna e externa), a veia jugular interna lateralmente e o nervo vago posteriormente. O pulso carotídeo é palpado na borda anterior do esternocleidomastóideo.",
+"show": [
+"Internal carotid artery",
+"External carotid artery",
+"Internal jugular vein",
+"Vagus nerve (X)",
+"Sternocleidomastoid muscle"
+],
+"view": "latd"
+}
+],
+"q": [
+{
+"p": "Onde habitualmente se divide a carótida comum?",
+"o": [
+"Na altura da borda superior da cartilagem tireóidea",
+"Na altura do ângulo da mandíbula",
+"Atrás da clavícula",
+"Na altura da cricóidea"
+],
+"a": 0
+},
+{
+"p": "Qual estrutura segue dentro da bainha carótica, posteriormente aos vasos?",
+"o": [
+"O nervo vago",
+"O nervo frênico",
+"O tronco simpático",
+"O nervo hipoglosso"
+],
+"a": 0
+}
+]
+},
+{
+"id": "torax",
+"t": "Tórax e respiração",
+"r": "Tórax",
+"both": true,
+"steps": [
+{
+"t": "A parede torácica",
+"x": "Os intercostais externos elevam as costelas na inspiração (como a alça de um balde); os internos auxiliam na expiração forçada. Pela borda inferior de cada costela corre o feixe vasculonervoso intercostal: por isso as punções são feitas pela borda superior da costela inferior.",
+"show": [
+"External intercostal muscles",
+"Internal intercostal muscles",
+"Intercostal nerves"
+],
+"view": "latd"
+},
+{
+"t": "O diafragma",
+"x": "Principal músculo inspiratório: ao se contrair, desce e aumenta o diâmetro vertical do tórax. É inervado pelo nervo frênico (C3–C5): \"C3, 4 e 5 mantêm o diafragma vivo\".",
+"show": [
+"Diaphragm"
+],
+"view": "ant"
+},
+{
+"t": "Pulmões",
+"x": "O direito tem três lobos (superior, médio e inferior) e o esquerdo dois, com a língula no lugar do lobo médio. Cada lobo divide-se em segmentos broncopulmonares, unidades cirúrgicas com seu brônquio e sua artéria.",
+"show": [
+"Superior lobe of right lung",
+"Middle lobe of right lung",
+"Inferior lobe of right lung",
+"Superior lobe of left lung",
+"Inferior lobe of left lung",
+"Trachea"
+],
+"view": "ant"
+},
+{
+"t": "Árvore brônquica",
+"x": "A traqueia se divide na altura de T4–T5 (carina). O brônquio principal direito é mais curto, largo e vertical: por isso os corpos estranhos aspirados costumam ir para o pulmão direito.",
+"show": [
+"Trachea",
+"Right main bronchus",
+"Left main bronchus",
+"Right superior lobar bronchus",
+"Intermediate bronchus",
+"Left superior lobar bronchus",
+"Left inferior lobar bronchus"
+],
+"view": "ant"
+},
+{
+"t": "Mediastino",
+"x": "Entre os dois pulmões: coração e grandes vasos, traqueia, esôfago, nervos vago e frênico, ducto torácico e a veia ázigo, que desemboca na cava superior.",
+"show": [
+"Superior vena cava",
+"Azygos vein",
+"Pulmonary trunk",
+"Aortic arch",
+"Trachea",
+"Left ventricle"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "Por que os corpos estranhos aspirados vão mais para o pulmão direito?",
+"o": [
+"Seu brônquio principal é mais curto, largo e vertical",
+"O pulmão direito é menor",
+"Pela posição do coração à direita",
+"Porque o brônquio esquerdo não tem cartilagem"
+],
+"a": 0
+},
+{
+"p": "Quais raízes formam o nervo frênico?",
+"o": [
+"C3–C5",
+"C5–C7",
+"T1–T2",
+"C1–C2"
+],
+"a": 0
+},
+{
+"p": "Por qual borda da costela se faz a toracocentese?",
+"o": [
+"Pela borda superior da costela inferior",
+"Pela borda inferior da costela superior",
+"Pelo centro do espaço",
+"É indiferente"
+],
+"a": 0
+}
+]
+},
+{
+"id": "abdomen",
+"t": "Vísceras abdominais",
+"r": "Abdome",
+"both": true,
+"steps": [
+{
+"t": "Estômago, fígado e vesícula biliar",
+"x": "O fígado ocupa o hipocôndrio direito sob o diafragma; a vesícula biliar, em sua face inferior, projeta o fundo no cruzamento da margem costal com o reto do abdome (ponto de Murphy). O estômago, no epigástrio e no hipocôndrio esquerdo, continua com o duodeno.",
+"show": [
+"Liver",
+"Gallbladder",
+"Stomach",
+"Duodenum",
+"Spleen"
+],
+"view": "ant"
+},
+{
+"t": "Pâncreas e duodeno",
+"x": "A cabeça do pâncreas se aloja na moldura duodenal; o corpo cruza anteriormente à aorta e à veia cava, e a cauda chega ao baço. O ducto colédoco e o pancreático desembocam juntos na ampola de Vater, na 2ª parte do duodeno.",
+"show": [
+"Pancreas",
+"Duodenum",
+"Spleen",
+"Abdominal aorta"
+],
+"view": "ant"
+},
+{
+"t": "O intestino",
+"x": "Jejuno e íleo ocupam o centro do abdome; o colo o contorna: ascendente, transverso, descendente e sigmoide, que continua com o reto. O colo tem tênias, haustros e apêndices omentais, que o distinguem do intestino delgado.",
+"show": [
+"Jejunum",
+"Ascending colon",
+"Transverse colon",
+"Descending colon",
+"Sigmoid colon",
+"Rectum"
+],
+"view": "ant"
+},
+{
+"t": "Rins e glândulas suprarrenais",
+"x": "Retroperitoneais, na altura de T12–L3; o direito é um pouco mais baixo por causa do fígado. A glândula suprarrenal se apoia em seu polo superior.",
+"show": [
+"Kidney",
+"Suprarenal gland",
+"Abdominal aorta",
+"Ureter"
+],
+"view": "post"
+},
+{
+"t": "A irrigação do tubo digestório",
+"x": "A aorta abdominal dá o tronco celíaco (intestino anterior: estômago, fígado, baço), a mesentérica superior (intestino médio: do duodeno ao colo transverso) e a mesentérica inferior (intestino posterior: até o reto). O sangue venoso retorna ao fígado pela veia porta.",
+"show": [
+"Abdominal aorta",
+"Superior mesenteric artery",
+"Inferior mesenteric artery",
+"Hepatic portal vein",
+"Superior mesenteric vein",
+"Inferior mesenteric vein"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "Qual artéria irriga do duodeno ao colo transverso?",
+"o": [
+"Mesentérica superior",
+"Tronco celíaco",
+"Mesentérica inferior",
+"Ilíaca interna"
+],
+"a": 0
+},
+{
+"p": "Onde desembocam o colédoco e o ducto pancreático?",
+"o": [
+"Na 2ª parte do duodeno (ampola de Vater)",
+"No piloro",
+"No jejuno",
+"Na 4ª parte do duodeno"
+],
+"a": 0
+}
+]
+},
+{
+"id": "pared_abd",
+"t": "Parede abdominal anterolateral",
+"r": "Abdome",
+"both": true,
+"steps": [
+{
+"t": "Os músculos largos",
+"x": "De superficial para profundo: oblíquo externo (fibras para baixo e para a frente, \"mãos nos bolsos\"), oblíquo interno (fibras perpendiculares às do externo) e transverso do abdome (fibras horizontais, o \"espartilho\"). Suas aponeuroses formam a bainha do músculo reto do abdome.",
+"show": [
+"External abdominal oblique muscle",
+"Internal abdominal oblique muscle",
+"Transversus abdominis muscle"
+],
+"view": "latd"
+},
+{
+"t": "O reto do abdome",
+"x": "Vai das cartilagens costais 5ª–7ª e do processo xifoide ao púbis. Suas intersecções tendíneas o dividem em ventres e aderem ao folheto anterior da bainha. Flexiona o tronco e comprime o abdome.",
+"show": [
+"Rectus abdominis muscle",
+"Tendinous intersection of rectus abdominis",
+"Pyramidalis muscle"
+],
+"view": "ant"
+},
+{
+"t": "A linha alba",
+"x": "Rafe mediano formado pelo entrecruzamento das aponeuroses dos três músculos largos, do processo xifoide ao púbis, com o anel umbilical em sua metade. Seu alargamento é a diástase dos retos; por ela se faz a laparotomia mediana.",
+"show": [
+"Linea alba",
+"Rectus abdominis muscle",
+"Tendinous intersection of rectus abdominis"
+],
+"view": "ant"
+},
+{
+"t": "A bainha do músculo reto do abdome",
+"x": "Acima da linha arqueada (cerca de 4 cm abaixo do umbigo), a aponeurose do oblíquo interno se divide: o folheto anterior passa por diante do reto e o posterior por trás. Abaixo, todas as aponeuroses passam anteriormente e o reto se apoia apenas na fáscia transversal.",
+"show": [
+"Anterior layer of rectus sheath",
+"Posterior layer of rectus sheath",
+"Rectus abdominis muscle",
+"Linea alba"
+],
+"view": "ant"
+},
+{
+"t": "Região inguinal",
+"x": "O ligamento inguinal é a borda inferior espessada da aponeurose do oblíquo externo, da espinha ilíaca anterossuperior ao tubérculo púbico. Acima dele corre o canal inguinal, com os nervos ilioinguinal e ílio-hipogástrico e os vasos epigástricos inferiores em sua parede posterior.",
+"show": [
+"Inguinal ligament",
+"Ilio-inguinal nerve",
+"Iliohypogastric nerve",
+"Inferior epigastric artery",
+"Internal abdominal oblique muscle",
+"Transversus abdominis muscle"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "Qual músculo da parede abdominal tem as fibras dirigidas para baixo e para a frente?",
+"o": [
+"Oblíquo externo",
+"Oblíquo interno",
+"Transverso do abdome",
+"Reto do abdome"
+],
+"a": 0
+},
+{
+"p": "Qual estrutura forma a borda inferior espessada da aponeurose do oblíquo externo?",
+"o": [
+"O ligamento inguinal",
+"A linha alba",
+"A linha arqueada",
+"O tendão conjunto"
+],
+"a": 0
+},
+{
+"p": "Abaixo da linha arqueada, o reto do abdome se apoia posteriormente sobre…",
+"o": [
+"A fáscia transversal",
+"O folheto posterior da bainha",
+"O transverso do abdome",
+"O peritônio parietal diretamente, sem fáscia"
+],
+"a": 0
+}
+]
+},
+{
+"id": "gluteo",
+"t": "Região glútea e nervo isquiático",
+"r": "Quadril",
+"steps": [
+{
+"t": "Glúteo máximo",
+"x": "O músculo mais volumoso do corpo: estende e rotaciona lateralmente o quadril e insere-se na tuberosidade glútea e no trato iliotibial. É fundamental para levantar de uma cadeira e subir escadas.",
+"show": [
+"Gluteus maximus muscle"
+],
+"view": "post"
+},
+{
+"t": "Glúteos médio e mínimo",
+"x": "Abdutores e estabilizadores da pelve no apoio unipodal. Sua fraqueza produz o sinal de Trendelenburg. São inervados pelo nervo glúteo superior.",
+"show": [
+"Gluteus medius muscle",
+"Gluteus minimus muscle",
+"Superior gluteal nerve",
+"Tensor fasciae latae"
+],
+"view": "latd"
+},
+{
+"t": "Rotadores laterais curtos",
+"x": "Piriforme, gêmeos, obturador interno, quadrado femoral e obturador externo. O piriforme divide o forame isquiático maior em um espaço suprapiriforme (vasos e nervo glúteos superiores) e infrapiriforme (nervo isquiático, glúteo inferior e pudendo).",
+"show": [
+"Piriformis muscle",
+"Obturator internus",
+"Quadratus femoris muscle",
+"Obturator externus"
+],
+"view": "post"
+},
+{
+"t": "O nervo isquiático",
+"x": "O nervo mais grosso do corpo (L4–S3): sai abaixo do piriforme, desce entre o trocânter maior e o túber isquiático e se divide, geralmente no vértice da fossa poplítea, em tibial e fibular comum. As injeções são aplicadas no quadrante superolateral do glúteo para não lesioná-lo.",
+"show": [
+"Sciatic nerve",
+"Piriformis muscle",
+"Gluteus maximus muscle",
+"Tibial nerve",
+"Common fibular nerve"
+],
+"view": "post"
+}
+],
+"q": [
+{
+"p": "Qual nervo inerva os glúteos médio e mínimo?",
+"o": [
+"Glúteo superior",
+"Glúteo inferior",
+"Isquiático",
+"Femoral"
+],
+"a": 0
+},
+{
+"p": "Por onde o nervo isquiático sai habitualmente da pelve?",
+"o": [
+"Abaixo do músculo piriforme",
+"Acima do piriforme",
+"Pelo forame obturado",
+"Abaixo do ligamento inguinal"
+],
+"a": 0
+},
+{
+"p": "Em qual quadrante do glúteo são aplicadas as injeções intramusculares?",
+"o": [
+"Superolateral",
+"Inferomedial",
+"Inferolateral",
+"Superomedial"
+],
+"a": 0
+}
+]
+},
+{
+"id": "popliteo",
+"t": "Fossa poplítea",
+"r": "Joelho",
+"steps": [
+{
+"t": "Limites",
+"x": "Losango atrás do joelho: superiormente, o bíceps femoral (lateral) e o semimembranáceo e o semitendíneo (medial); inferiormente, as duas cabeças do gastrocnêmio.",
+"show": [
+"Long head of biceps femoris",
+"Short head of biceps femoris",
+"Semimembranosus muscle",
+"Semitendinosus muscle",
+"Medial head of gastrocnemius",
+"Lateral head of gastrocnemius"
+],
+"view": "post"
+},
+{
+"t": "Conteúdo",
+"x": "De superficial para profundo: nervos tibial e fibular comum, veia poplítea e, o mais profundo e junto ao osso, a artéria poplítea. Seu pulso é palpado com o joelho flexionado.",
+"show": [
+"Tibial nerve",
+"Common fibular nerve",
+"Popliteal vein",
+"Popliteal artery"
+],
+"view": "post"
+},
+{
+"t": "O assoalho",
+"x": "O músculo poplíteo destrava o joelho no início da flexão, rotacionando a tíbia medialmente. Acima, a cápsula e o ligamento poplíteo oblíquo.",
+"show": [
+"Popliteus muscle",
+"Plantaris muscle",
+"Femur",
+"Tibia"
+],
+"view": "post"
+}
+],
+"q": [
+{
+"p": "Qual é a estrutura mais profunda da fossa poplítea?",
+"o": [
+"Artéria poplítea",
+"Veia poplítea",
+"Nervo tibial",
+"Nervo fibular comum"
+],
+"a": 0
+},
+{
+"p": "Qual músculo \"destrava\" o joelho no início da flexão?",
+"o": [
+"Poplíteo",
+"Gastrocnêmio",
+"Plantar",
+"Sóleo"
+],
+"a": 0
+}
+]
+},
+{
+"id": "antebrazo",
+"t": "Antebraço: flexores e pronadores",
+"r": "Antebraço",
+"steps": [
+{
+"t": "Plano superficial",
+"x": "A partir do epicôndilo medial: pronador redondo, flexor radial do carpo, palmar longo e flexor ulnar do carpo. Sua tendinopatia é a epitrocleíte (cotovelo de golfista).",
+"show": [
+"Superficial head of pronator teres",
+"Deep head of pronator teres",
+"Flexor carpi radialis",
+"Palmaris longus muscle",
+"Humeral head of flexor carpi ulnaris",
+"Ulnar head of flexor carpi ulnaris"
+],
+"view": "ant"
+},
+{
+"t": "Plano intermédio",
+"x": "O flexor superficial dos dedos flexiona as interfalângicas proximais; seus tendões passam pelo túnel do carpo.",
+"show": [
+"Humero-ulnar head of flexor digitorum superficialis",
+"Radial head of flexor digitorum superficialis"
+],
+"view": "ant"
+},
+{
+"t": "Plano profundo",
+"x": "Flexor profundo dos dedos (interfalângicas distais), flexor longo do polegar e pronador quadrado. A metade lateral do flexor profundo é inervada pelo mediano (interósseo anterior) e a medial, pelo ulnar.",
+"show": [
+"Flexor digitorum profundus",
+"Flexor pollicis longus",
+"Pronator quadratus"
+],
+"view": "ant"
+},
+{
+"t": "Nervos",
+"x": "O mediano passa entre as cabeças do pronador redondo e sob o flexor superficial; o ulnar, atrás do epicôndilo medial e sob o flexor ulnar do carpo.",
+"show": [
+"Median nerve",
+"Ulnar nerve",
+"Superficial head of pronator teres",
+"Humeral head of flexor carpi ulnaris"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "Qual músculo flexiona a articulação interfalângica distal dos dedos?",
+"o": [
+"Flexor profundo dos dedos",
+"Flexor superficial dos dedos",
+"Palmar longo",
+"Lumbricais"
+],
+"a": 0
+},
+{
+"p": "Entre quais estruturas passa o nervo mediano no cotovelo?",
+"o": [
+"Entre as cabeças do pronador redondo",
+"Atrás do epicôndilo medial",
+"Sob o supinador",
+"Pelo sulco do nervo radial"
+],
+"a": 0
+}
+]
+},
+{
+"id": "mano",
+"t": "Músculos da mão",
+"r": "Mão",
+"steps": [
+{
+"t": "Eminência tenar",
+"x": "Abdutor curto, flexor curto e oponente do polegar: permitem a oposição. São inervados pelo ramo recorrente do nervo mediano, exceto a cabeça profunda do flexor curto.",
+"show": [
+"Abductor pollicis brevis",
+"Superficial head of flexor pollicis brevis",
+"Deep head of flexor pollicis brevis",
+"Opponens pollicis muscle"
+],
+"view": "ant"
+},
+{
+"t": "Adutor do polegar",
+"x": "Com suas cabeças oblíqua e transversa aproxima o polegar da palma (pinça lateral). É inervado pelo ulnar: sua fraqueza dá o sinal de Froment.",
+"show": [
+"Oblique head of adductor pollicis",
+"Transverse head of adductor pollicis"
+],
+"view": "ant"
+},
+{
+"t": "Eminência hipotenar",
+"x": "Abdutor, flexor curto e oponente do dedo mínimo, inervados pelo ulnar.",
+"show": [
+"Abductor digiti minimi of hand",
+"Flexor digiti minimi of hand",
+"Opponens digiti minimi muscle of hand"
+],
+"view": "ant"
+},
+{
+"t": "Lumbricais e interósseos",
+"x": "Os lumbricais originam-se dos tendões do flexor profundo; com os interósseos flexionam as metacarpofalângicas e estendem as interfalângicas. Os palmares aduzem os dedos e os dorsais os abduzem (\"PAD e DAB\").",
+"show": [
+"Lumbrical muscles of hand",
+"Palmar interossei muscles",
+"Dorsal interossei muscles of hand",
+"Palmar aponeurosis"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "Qual nervo inerva o adutor do polegar?",
+"o": [
+"Ulnar",
+"Mediano",
+"Radial",
+"Musculocutâneo"
+],
+"a": 0
+},
+{
+"p": "Quais músculos abduzem os dedos da mão?",
+"o": [
+"Interósseos dorsais",
+"Interósseos palmares",
+"Lumbricais",
+"Flexor superficial"
+],
+"a": 0
+}
+]
+},
+{
+"id": "pie",
+"t": "Pé e arco plantar",
+"r": "Pé",
+"steps": [
+{
+"t": "Esqueleto do arco",
+"x": "O arco longitudinal medial é formado pelo calcâneo, tálus, navicular, cuneiformes e pelos três primeiros metatarsos; o lateral, pelo calcâneo, cuboide e 4º–5º metatarsos.",
+"show": [
+"Calcaneus",
+"Talus",
+"Navicular bone"
+],
+"view": "latd"
+},
+{
+"t": "Aponeurose plantar e primeiro plano",
+"x": "A aponeurose plantar une o calcâneo aos dedos e tensiona o arco na fase final do apoio (mecanismo de molinete). Abaixo, abdutor do hálux, flexor curto dos dedos e abdutor do dedo mínimo.",
+"show": [
+"Plantar aponeurosis",
+"Abductor hallucis",
+"Flexor digitorum brevis",
+"Abductor digiti minimi of foot"
+],
+"view": "inf"
+},
+{
+"t": "Planos médios e profundos",
+"x": "Quadrado plantar e lumbricais; depois flexor curto e adutor do hálux, flexor curto do dedo mínimo e interósseos.",
+"show": [
+"Quadratus plantae muscle",
+"Lumbrical muscles of foot",
+"Oblique head of adductor hallucis",
+"Transverse head of adductor hallucis",
+"Plantar interossei muscles",
+"Dorsal interossei muscles of foot"
+],
+"view": "inf"
+},
+{
+"t": "Suportes ligamentares e tendíneos",
+"x": "O ligamento plantar longo e o calcaneonavicular plantar (\"ligamento em rede\") sustentam o arco, junto com os tendões do tibial posterior e do fibular longo, que cruzam a planta como um estribo.",
+"show": [
+"Long plantar ligament",
+"Plantar calcaneonavicular ligament",
+"Tibialis posterior muscle",
+"Fibularis longus muscle"
+],
+"view": "inf"
+}
+],
+"q": [
+{
+"p": "Qual estrutura tensiona o arco na propulsão do pé (mecanismo de molinete)?",
+"o": [
+"A aponeurose plantar",
+"O ligamento deltóideo",
+"O tendão calcâneo",
+"O retináculo dos extensores"
+],
+"a": 0
+},
+{
+"p": "Quais tendões formam o \"estribo\" do pé?",
+"o": [
+"Tibial posterior e fibular longo",
+"Tibial anterior e extensor longo do hálux",
+"Fibular curto e fibular terceiro",
+"Flexor longo dos dedos e plantar"
+],
+"a": 0
+}
+]
+},
+{
+"id": "axila",
+"t": "Axila",
+"r": "Ombro",
+"both": false,
+"steps": [
+{
+"t": "Paredes",
+"x": "Anterior: peitorais maior e menor. Posterior: subescapular, redondo maior e latíssimo do dorso. Medial: serrátil anterior sobre a parede torácica. Lateral: sulco intertubercular do úmero.",
+"show": [
+"Clavicular head of pectoralis major muscle",
+"Sternocostal head of pectoralis major muscle",
+"Pectoralis minor muscle",
+"Subscapularis muscle",
+"Teres major muscle",
+"Latissimus dorsi muscle",
+"Serratus anterior muscle"
+],
+"view": "ant"
+},
+{
+"t": "Artéria e veia axilares",
+"x": "A artéria axilar continua a subclávia a partir da borda da 1ª costela e o peitoral menor a divide em três partes. A veia axilar fica medial.",
+"show": [
+"Axillary artery",
+"Axillary vein",
+"Pectoralis minor muscle"
+],
+"view": "ant"
+},
+{
+"t": "Plexo braquial",
+"x": "Seus fascículos envolvem a 2ª parte da artéria axilar e dão os nervos terminais do membro superior: musculocutâneo, mediano, ulnar, axilar e radial.",
+"show": [
+"Posterior cord of brachial plexus",
+"Musculocutaneous nerve",
+"Median nerve",
+"Ulnar nerve",
+"Axillary nerve",
+"Radial nerve",
+"Axillary artery"
+],
+"view": "ant"
+},
+{
+"t": "Linfonodos",
+"x": "Peitorais (anteriores), centrais, laterais, subescapulares (posteriores) e apicais; drenam o membro superior e a maior parte da mama.",
+"show": [
+"Anterior axillary nodes",
+"Central axillary nodes",
+"Lateral axillary nodes",
+"Posterior axillary nodes",
+"Apical axillary nodes"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "Qual músculo divide a artéria axilar em três partes?",
+"o": [
+"Peitoral menor",
+"Peitoral maior",
+"Subescapular",
+"Redondo maior"
+],
+"a": 0
+},
+{
+"p": "Para qual grupo de linfonodos chega primeiro a maior parte da linfa da mama?",
+"o": [
+"Linfonodos axilares peitorais (anteriores)",
+"Linfonodos apicais",
+"Linfonodos paraesternais",
+"Linfonodos supraclaviculares"
+],
+"a": 0
+}
+]
+}
+]
