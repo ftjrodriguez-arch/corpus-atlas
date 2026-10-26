@@ -374,7 +374,7 @@ details.more > .card{margin-bottom:10px}
         <div id="sysList"></div>
         <button class="btn" id="unhide" hidden>Mostrar estructuras ocultas</button>
         <div class="card femonly"><p class="small">Estás viendo el <b>Visible Human Female</b> (HuBMAP Human Reference Atlas): órganos, vasos, pelvis y mamas reconstruidos de una mujer real, sin la musculatura de tronco y miembros.</p><button class="btn pri" onclick="setBody('f')">Volver al modelo femenino completo</button></div>
-        <div class="card wonly"><p class="small">Modelo femenino completo: el mismo esqueleto, músculos, ligamentos, vasos y nervios del atlas, con <b>mamas y glándula mamaria</b>, <b>útero, ovarios, trompas y vagina</b> y piel femenina. La pelvis ósea es la del atlas masculino; la forma propia de la pelvis femenina puede verse en el modelo real.</p><button class="btn" onclick="setBody('vh')">Ver el modelo real: Visible Human Female</button></div>
+        <div class="card wonly"><p class="small">Modelo femenino completo: el mismo esqueleto, músculos, ligamentos, vasos y nervios del atlas, con <b>mamas y glándula mamaria</b>, <b>útero, ovarios, trompas y vagina</b> y piel femenina. La <b>pelvis ósea es femenina</b> (más ancha, arco del pubis abierto, adaptada a la del Visible Human Female) y se añaden <b>vulva, clítoris, bulbos del vestíbulo, glándulas de Bartholin y músculos del periné</b>, modelados de forma esquemática a partir de medidas de referencia (Lloyd y cols., 2005). Para la forma real, compara con el modelo real.</p><button class="btn" onclick="setBody('vh')">Ver el modelo real: Visible Human Female</button></div>
         <details class="more"><summary>Más opciones: alta resolución, vistas guardadas, importar</summary>
         <div class="card maleonly" id="hrCard">
           <h3>Alta resolución · mallas originales</h3>
@@ -574,7 +574,7 @@ const sexOk=k=>{if(k==='importado')return true;const s=SYS[k];if(!s)return false
 const sexOf=k=>(SYS[k]&&SYS[k].sex)||null;
 /* equivalencias de capas entre sexos */
 const SEXKEY=k=>BODY==='f'?({piel:'piel_f',reproductor:'reproductor_f'}[k]||k):BODY==='m'?({piel_f:'piel',reproductor_f:'reproductor',mama:null}[k]===undefined?k:{piel_f:'piel',reproductor_f:'reproductor',mama:null}[k]):k;
-const MALE_ONLY=/testicular|of penis|penile|cremaster|spermatic|scrot|prostat/i;
+const MALE_ONLY=/testicular|of penis|penile|cremaster|spermatic|scrot|prostat|^Urethra$/i;
 const isFemLayer=k=>!!k&&(k.startsWith('f_')||sexOf(k)==='f');
 const saved=store.get('sys',null);
 if(saved) for(const k in saved) if(SYS[k]){SYS[k].on=!!saved[k].on;SYS[k].op=+saved[k].op||1;}
@@ -612,7 +612,7 @@ function baseMat(kk,variant,noTint){
     transparent:true,opacity:1,clippingPlanes:clipArr,side:s.dbl?THREE.DoubleSide:THREE.FrontSide});
   if(WET.includes(k)){m.clearcoat=k.startsWith('nervioso')?0.25:0.65;m.clearcoatRoughness=0.28;}
   if(k==='muscular'){m.sheen&&m.sheen.set&&0;}
-  const kind=k==='oseo'?'bone':k==='muscular'?'muscle':k==='piel'?'skin':k==='arterial'?'artery':k==='venoso'?'vein':k==='nervioso_periferico'?'nerve':'soft';
+  const kind=k==='oseo'?'bone':k==='muscular'?'muscle':(k==='piel'||(SYS[k]&&SYS[k].base==='piel'))?'skin':k==='arterial'?'artery':k==='venoso'?'vein':k==='nervioso_periferico'?'nerve':'soft';
   if(k!=='importado'){m.extensions={derivatives:true};m.onBeforeCompile=sh=>corpusShader(sh,kind,noTint);m.customProgramCacheKey=()=>'ck3_'+kind+(noTint?'_n':'');}
   m.userData.baseSide=m.side;return m;
 }
@@ -650,7 +650,7 @@ const parentName=en=>en.replace(/^.*?\b(head|part|belly|parts|heads) of (the )?/
 const mnorm=s=>norm(s).replace(/\bmuscles?\b/g,'').replace(/\s+/g,' ').trim();
 function infoFor(c){
   const en=c.en;
-  if(isFemLayer(c.sys)&&FEM_INFO[en]) return {kind:'gen',d:FEM_INFO[en]};
+  if((isFemLayer(c.sys)||FEM_ONLY.has(c.id)||BODY==='f')&&FEM_INFO[en]) return {kind:'gen',d:FEM_INFO[en]};
   c={...c,sys:BS(c.sys)};
   if(c.sys==='muscular'||c.sys==='fascia'||c.sys==='bolsas'||c.sys==='insercion'){
     const d=INFO.mus[en]||INFO.mus[parentName(en)]||Object.entries(INFO.mus).find(([k])=>mnorm(k)===mnorm(en))?.[1];
@@ -708,6 +708,7 @@ function loadSys(k){
       });
       s.group=grp;s.count=grp.children.length;body.add(grp);s.state='loaded';
       delete loadQueue.parts[k];showLoad();
+      if(BODY==='f'&&FEM_OVR.includes(k))loadFemOvr(k);
       applySystems();renderSysList();
       if(currentTab==='mov'){prepWeights();applyPose();applyAgonists();}
       res(grp);
@@ -720,6 +721,29 @@ function loadSys(k){
 }
 
 /* Atributos horneados por vértice: R = oclusión ambiental, G = tendón/aponeurosis, B = cartílago articular */
+/* ───────── Pelvis y periné femeninos: versiones femeninas de las mallas del atlas (pelvis ensanchada a partir
+   del Visible Human Female) y estructuras exclusivas de la mujer dentro de las capas compartidas ───────── */
+let FEM_OVR=[],FEM_ONLY=new Set();const FOVR={};
+function gltfMeshes(g,cb){g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(!o.isMesh)return;
+  const pa=o.geometry.attributes.position,n=pa.count,pos=new Float32Array(n*3),e=o.matrixWorld.elements;
+  for(let i=0;i<n;i++){const x=pa.getX(i),y=pa.getY(i),z=pa.getZ(i);pos[i*3]=e[0]*x+e[4]*y+e[8]*z+e[12];pos[i*3+1]=e[1]*x+e[5]*y+e[9]*z+e[13];pos[i*3+2]=e[2]*x+e[6]*y+e[10]*z+e[14];}
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  const ix=o.geometry.index.array;geo.setIndex(new THREE.BufferAttribute(n<65536?new Uint16Array(ix):new Uint32Array(ix),1));
+  setVattr(geo,o.geometry.attributes.color);geo.computeVertexNormals();geo.computeBoundingSphere();cb(o.name,geo);o.geometry.dispose();});}
+function loadFemOvr(k){if(FOVR[k])return FOVR[k];
+  FOVR[k]=fetchB64('m2/'+k+'__f.txt',()=>{}).then(buf=>new Promise((res,rej)=>loader.parse(buf,'',res,rej))).then(g=>{
+    const grp=SYS[k].group;
+    gltfMeshes(g,(id,geo)=>{const m=byId[id];
+      if(m){m.userData.geoF=geo;if(BS(k)==='muscular'){const t=m.geometry;m.geometry=geo;delete geo.attributes.fdir;addFiberDir(m);m.geometry=t;}else if(TUBE_SYS.includes(BS(k))){const t=m.geometry;m.geometry=geo;addAxisDir(m);m.geometry=t;}}
+      else{const c=entry(id)||{id,en:id,es:id,la:'',sys:k,side:'',ins:''};const nm=new THREE.Mesh(geo,matFor(k,'',''));nm.userData={c,sys:k,state:'',fonly:true};
+        applyTint(nm);if(BS(k)==='muscular')addFiberDir(nm);grp.add(nm);meshes.push(nm);byId[id]=nm;}});
+    applyFemGeo();applySystems();renderSysList();}).catch(()=>{FOVR[k]=null;});
+  return FOVR[k];}
+function applyFemGeo(){for(const m of meshes){const u=m.userData;if(!u.geoF)continue;const want=BODY==='f'?u.geoF:(u.geoM||m.geometry);
+  if(m.geometry===want)continue;if(u.rest){m.geometry.attributes.position.array.set(u.rest);m.geometry.attributes.normal.array.set(u.restN);m.geometry.attributes.position.needsUpdate=true;m.geometry.attributes.normal.needsUpdate=true;}
+  if(BODY==='f'&&!u.geoM){if(u.lrGeo){unswapGeo(m);}u.geoM=m.geometry;}
+  m.geometry=want;applyTint(m);u.rest=null;u.restN=null;u.W={};deformed.delete(m);}
+  if(typeof applyPose==='function')applyPose();}
 function setVattr(geo,src){const n=geo.attributes.position.count;let a;
   if(src&&src.count===n){a=new Uint8Array(n*3);const s=src.array;if(s instanceof Uint8Array&&src.itemSize===3)a.set(s);else for(let i=0;i<n;i++){a[i*3]=Math.round(src.getX(i)*255);a[i*3+1]=Math.round(src.getY(i)*255);a[i*3+2]=Math.round(src.getZ(i)*255);}}
   else{a=new Uint8Array(n*3);for(let i=0;i<n;i++)a[i*3]=235;}
@@ -732,6 +756,7 @@ const TINT=[
  [/^Nipple|^Areola|areolar/i,'#9a5a48',1],[/mammary lob|lactiferous|mammary gland|lobule of mammary/i,'#e6b9a2',1],[/^Fat\b|adipose|fat of breast|subcutaneous fat/i,'#e8c77e',1],
  [/uterine tube|fallopian|fimbria|infundibulum|ampulla of uterine|isthmus of uterine/i,'#d39a8f',1],[/vagina|cervix|cervical canal|ostium of uterus/i,'#c9827f',1],[/round ligament|broad ligament|uterosacral|cardinal ligament|suspensory ligament of ovary|ovarian ligament|mesovarium|mesosalpinx|pouch/i,'#d8c3b0',.9],
  [/bronchopulmonary segment|lobe of (left|right)? ?lung|hilum of lung/i,'#c98a8a',1],[/^Pupil/i,'#111111',1],[/choroid|ciliary body/i,'#5a2a26',1],[/retina|ora serrata/i,'#c96f5e',.8],
+ [/Labium minus|Vestibule of vagina|Vaginal orifice|Vaginal canal/i,'#c98380',1],[/Glans of clitoris|Prepuce of clitoris/i,'#c06a70',1],[/Body of clitoris|Crus of clitoris/i,'#a3485a',1],[/Bulb of vestibule/i,'#8e3446',1],[/Greater vestibular gland/i,'#e0c4a2',1],[/Female urethra|urethral orifice/i,'#d2a089',1],[/Perineal body/i,'#e8e0d0',1],
  [/taenia/i,'#d9b9a2',.9],[/gingiva|palate|uvula/i,'#d58d8c',.9],
  [/omentum|mesenter|appendices epiploicae|fat body|adipose/i,'#e2c07c',.9],
  [/^(?!.*(duct|artery|vein)).*(liver|hepat(ic)? lobe|caudate lobe|quadrate lobe|porta hepatis)/i,'#7a2d22',1],[/gallbladder|cystic duct|bile duct/i,'#56703c',1],[/^spleen/i,'#6c2a3a',1],
@@ -759,7 +784,7 @@ const HRGEO={};
 const HR={superior:{n:'Miembro superior',mb:4.3,tris:'1,64 M'},inferior:{n:'Miembro inferior',mb:3.9,tris:'1,43 M'},tronco:{n:'Tronco y vísceras',mb:5.6,tris:'2,73 M'},cabeza:{n:'Cabeza, cuello y encéfalo',mb:6.4,tris:'2,93 M'}};
 for(const k in HR){HR[k].state='idle';HR[k].ids=[];}
 let autoHR=store.get('autoHR',true);
-function swapGeo(m,g){const u=m.userData;if(u.rest){m.geometry.attributes.position.array.set(u.rest);m.geometry.attributes.normal.array.set(u.restN);m.geometry.attributes.position.needsUpdate=true;m.geometry.attributes.normal.needsUpdate=true;}
+function swapGeo(m,g){const u=m.userData;if(BODY==='f'&&u.geoF)return;if(u.rest){m.geometry.attributes.position.array.set(u.rest);m.geometry.attributes.normal.array.set(u.restN);m.geometry.attributes.position.needsUpdate=true;m.geometry.attributes.normal.needsUpdate=true;}
   if(!u.lrGeo)u.lrGeo=m.geometry;m.geometry=g;applyTint(m);u.rest=null;u.restN=null;u.W={};deformed.delete(m);if(BS(u.sys)==='muscular')addFiberDir(m);else if(TUBE_SYS.includes(BS(u.sys)))addAxisDir(m);}
 function unswapGeo(m){const u=m.userData;if(!u.lrGeo)return;const hr=m.geometry;if(u.rest){hr.attributes.position.array.set(u.rest);}m.geometry=u.lrGeo;u.lrGeo=null;u.rest=null;u.restN=null;u.W={};deformed.delete(m);}
 function loadHR(r){const h=HR[r];if(h.state==='loaded'||h.state==='loading')return h.promise;h.state='loading';renderHR();
@@ -779,7 +804,7 @@ function renderHR(){const el=$('#hrList');if(!el)return;
 function regionAt(v){if(!RIG)return null;const sx=Math.abs(RIG.shoulder_R[0])*0.85;
   if(v.y>1.47)return 'cabeza';if(Math.abs(v.x)>sx&&v.y>0.62)return 'superior';if(v.y<0.9)return 'inferior';return 'tronco';}
 let hrTick=0;
-function autoHRTick(dt){hrTick+=dt;if(hrTick<1)return;hrTick=0;if(BODY==='vh'||!autoHR||orb.r>1.05)return;const r=regionAt(orb.tgt);if(r&&HR[r].state==='idle'){
+function autoHRTick(dt){hrTick+=dt;if(hrTick<1)return;hrTick=0;if(BODY==='vh'||!autoHR||orb.r>1.05)return;const r=regionAt(orb.tgt);if(BODY==='f'&&(r==='inferior'||r==='tronco'))return;if(r&&HR[r].state==='idle'){
   const loaded=Object.keys(HR).filter(k=>HR[k].state==='loaded');if(loaded.length>=2)unloadHR(loaded[0]);loadHR(r);}}
 
 /* ───────── Materiales realistas (shaders) ───────── */
@@ -850,6 +875,7 @@ function applySystems(){
     if(v&&isoSet) v=isoSet.has(m.userData.c.id)||(BS(m.userData.sys)==='oseo'&&!isoOnly);
     if(v&&DIS_EXC&&DIS_EXC.test(m.userData.c.en)) v=false;
     if(v&&BODY==='f'&&MALE_ONLY.test(m.userData.c.en)) v=false;
+    if(v&&m.userData.fonly&&BODY!=='f') v=false;
     if(v&&DIS_FLT&&DIS_FLT[m.userData.sys]&&!DIS_FLT[m.userData.sys].test(m.userData.c.en)) v=false;
     if(v&&m.userData.sys==='muscular'&&DEPTH_OFF.size&&DEPTH_OFF.has(EX.dep[m.userData.c.id]||'')) v=false;
     m.visible=v;}
@@ -885,6 +911,7 @@ function setBody(b){if(b!==BODY){select(null);stopTools&&stopTools();}BODY=b;sto
   isoSet=null;patchFocus=null;DIS_FLT=null;DIS_EXC=null;disStage=-1;hiddenIds.clear();
   if(b==='f'&&currentTab==='mov'){playing=false;}
   for(const k in SYS) if(sexOk(k)&&SYS[k].on&&SYS[k].state!=='loaded'&&CAT_READY) loadSys(k);
+  if(b==='f'){for(const k of FEM_OVR)if(SYS[k].state==='loaded')loadFemOvr(k);for(const r of ['inferior','tronco'])if(HR[r].state==='loaded')unloadHR(r);}applyFemGeo();
   applySystems();renderSysList();renderDis();if(CAT_READY)renderSrsDecks();if(b==='vh')for(const k in HR)if(HR[k].state==='loaded')unloadHR(k);applyPose&&applyPose();}
 let CAT_READY=false;
 $('#b-m').onclick=()=>setBody('m');$('#b-f').onclick=()=>setBody('f');
@@ -1875,7 +1902,7 @@ resize();requestAnimationFrame(frame);
 window.__corpus={orb,HR,loadHR,setDissection,SYS,setGait,gait,showTab,setGaitPattern,shareLink,applyShared};
 fetch('data/cases.json').then(r=>r.ok?r.json():[]).then(c=>{CASES=c;renderCases();}).catch(()=>{});
 Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.json').then(r=>{if(!r.ok)throw new Error(n);return r.json();}))).then(([cat,info,rig,les,ex,fem])=>{
-  cat=cat.concat(fem.cat,fem.full||[]);FEM_INFO=fem.info;CAT_READY=true;
+  cat=cat.concat(fem.cat,fem.full||[]);FEM_INFO=fem.info;FEM_OVR=fem.ovr||[];FEM_ONLY=new Set(fem.fonly||[]);CAT_READY=true;
   LESSONS=les;EX=ex;
   for(const r of cat) CAT[r[0]]=r;INFO=info;RIG=rig;buildRig();
   buildSearch();if(LANG!=='es')setLang(LANG);
@@ -1893,11 +1920,11 @@ Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data
 <script>
 /* Descarga completa para estudiar sin conexión (solo en la versión publicada en la web) */
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
- const FILES=["hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/articular.txt", "m2/bolsas.txt", "m2/digestivo.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/insercion.txt", "m2/linfatico.txt", "m2/mama.txt", "m2/muscular.txt", "m2/nervioso_central.txt", "m2/nervioso_periferico.txt", "m2/oseo.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/venoso.txt"];const box=document.createElement('div');box.className='card';
- box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 49 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
+ const FILES=["hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"];const box=document.createElement('div');box.className='card';
+ box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 54 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v18');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v19');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();
