@@ -45,17 +45,18 @@ def write_bin(path, items):
             f.write(np.asarray(V, np.float32).tobytes()); f.write(np.asarray(T, np.uint32).tobytes())
             f.write(np.clip(np.round(C), 0, 255).astype(np.uint8).tobytes())
 
-cat = json.load(open('../work/pub/data/catalog.json')); SYS = {r[0]: r[4] for r in cat}
-os.makedirs('../hr/lr_in2', exist_ok=True); os.makedirs('../hr/in2', exist_ok=True)
-for f in sorted(glob.glob('../hr/lr_in/*.bin')):
-    s = os.path.basename(f)[:-4]; items = []; tt = 0
-    for nid in ids_of(f):
-        i = int(nid[1:]); o = raw[i]
-        tgt = int(len(raw0[i]['T']) * RATIO.get(s, .5) * BOOST.get(s, 1.0))
-        V, T, C = decimate(o['V'], o['T'], A[i], tgt); items.append((nid, V, T, C)); tt += len(T)
-    write_bin('../hr/lr_in2/' + s + '.bin', items); print('lr', s, len(items), tt, flush=True)
-for f in sorted(glob.glob('../hr/in/*.bin')):
-    items = []; tt = 0
-    for nid in ids_of(f):
-        i = int(nid[1:]); o = raw[i]; items.append((nid, o['V'], o['T'], A[i])); tt += len(o['T'])
-    write_bin('../hr/in2/' + os.path.basename(f), items); print('hr', os.path.basename(f), len(items), tt, flush=True)
+if __name__ == '__main__':
+    cat = json.load(open('../work/pub/data/catalog.json')); SYS = {r[0]: r[4] for r in cat}
+    os.makedirs('../hr/lr_in2', exist_ok=True); os.makedirs('../hr/in2', exist_ok=True)
+    for f in sorted(glob.glob('../hr/lr_in/*.bin')):
+        s = os.path.basename(f)[:-4]; items = []; tt = 0
+        for nid in ids_of(f):
+            i = int(nid[1:]); o = raw[i]
+            tgt = int(len(raw0[i]['T']) * RATIO.get(s, .5) * BOOST.get(s, 1.0))
+            V, T, C = decimate(o['V'], o['T'], A[i], tgt); items.append((nid, V, T, C)); tt += len(T)
+        write_bin('../hr/lr_in2/' + s + '.bin', items); print('lr', s, len(items), tt, flush=True)
+    for f in sorted(glob.glob('../hr/in/*.bin')):
+        items = []; tt = 0
+        for nid in ids_of(f):
+            i = int(nid[1:]); o = raw[i]; items.append((nid, o['V'], o['T'], A[i])); tt += len(o['T'])
+        write_bin('../hr/in2/' + os.path.basename(f), items); print('hr', os.path.basename(f), len(items), tt, flush=True)
