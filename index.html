@@ -137,7 +137,7 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .gm{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px}.gm small{color:var(--muted);text-align:right}
 .gm .ty{align-self:flex-start;flex:none;font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}.gm .ty.exc{color:#f0a040;border-color:#f0a04066}.gm .ty.con{color:var(--ok);border-color:var(--ok)}.gm .ty.iso{color:var(--accent);border-color:var(--accent)}
 body:not(.body-f) .femonly{display:none}
-body.body-f .maleonly,body.body-f #tab-sistemas > .row:first-child,body.body-f #tab-mov > :not(.femonly),body.body-f #lecBox{display:none}
+body.body-f .maleonly,body.body-f #tab-sistemas > .presets,body.body-f #tab-mov > :not(.femonly),body.body-f #lecBox{display:none}
 header{flex-wrap:wrap;gap:8px}
 .dis input[type=range]{width:100%;accent-color:var(--accent);margin:6px 0 2px}
 .disSteps{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin-bottom:8px}
@@ -180,23 +180,102 @@ textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
 .err{color:var(--bad);font-size:12.5px}
 .credit{font-size:11.5px;color:var(--muted);line-height:1.5}
 .credit a{color:var(--muted)}
-@media (prefers-reduced-motion: reduce){ .sw::after,.bar i{transition:none} }
+
+/* ───── Interfaz v2: cabecera compacta, barra de herramientas con iconos, ajustes, bienvenida y hoja inferior en móvil ───── */
+header{flex-wrap:nowrap}
+.hdr-r{display:flex;align-items:center;gap:8px}
+.icon-btn{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:10px;padding:6px;min-width:40px;min-height:40px;backdrop-filter:blur(6px)}
+.icon-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.icon-btn span{font-size:9.5px;font-weight:600;color:var(--muted);line-height:1}
+.icon-btn:hover{border-color:var(--accent)}
+.icon-btn[aria-pressed="true"],.icon-btn[aria-expanded="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.icon-btn[aria-pressed="true"] span,.icon-btn[aria-expanded="true"] span{color:var(--accent-ink)}
+header .icon-btn{background:var(--panel)}
+.tools{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:6px;z-index:6}
+.tools .icon-btn{width:54px}
+.pop{position:absolute;z-index:40;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:0 14px 40px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:10px}
+.setpop{right:16px;top:58px;width:min(340px,calc(100vw - 32px));max-height:calc(100vh - 80px);overflow:auto}
+header{position:relative}
+.poprow{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:600;font-size:13px}
+.keys summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)}
+.keys .credit{margin-top:6px}
+.viewpop{top:10px;right:74px;width:208px}
+.vgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.vgrid button,.vreset{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:8px;font-size:12.5px;font-weight:600}
+.vgrid button:hover,.vreset:hover{border-color:var(--accent)}
+.actbar{bottom:10px;right:76px}
+.hint{right:76px}
+.toast{bottom:70px}
+.welcome{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,9,12,.55);backdrop-filter:blur(3px)}
+.wcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:560px;width:100%;display:flex;flex-direction:column;gap:12px;max-height:100%;overflow:auto}
+.wcard h2{font-size:26px}
+.wgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wgrid button{text-align:left;border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.wgrid button:hover{border-color:var(--accent)}
+.wgrid b{font:500 18px/1.1 var(--f-display);color:var(--accent)}
+.wgrid span{font-size:12.5px;color:var(--muted);line-height:1.35}
+#wClose{align-self:flex-start}
+h3.sect{margin-top:4px;padding-top:10px;border-top:1px solid var(--line)}
+.presets button{font-size:12px}
+details.more{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+details.more > summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--muted)}
+details.more[open] > summary{margin-bottom:10px}
+details.more > .card{margin-bottom:10px}
+.sheet-h{display:none}
+@media (max-width:879px){
+  body{padding:0;gap:0}
+  header{position:fixed;top:0;left:0;right:0;height:54px;padding:7px max(12px,env(safe-area-inset-left,0px));z-index:25;background:var(--bg);border-bottom:1px solid var(--line);gap:8px}
+  .brand span{display:none}
+  .brand b{font-size:23px}
+  header .seg button{padding:6px 10px;font-size:12.5px}
+  main{display:block}
+  .stage{position:fixed;top:54px;left:0;right:0;bottom:0;border-radius:0;border:0}
+  .panel{position:fixed;left:0;right:0;bottom:0;height:var(--sheet,150px);border-radius:18px 18px 0 0;z-index:20;box-shadow:0 -10px 30px rgba(0,0,0,.45);transition:height .25s ease;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .panel.dragging{transition:none}
+  .sheet-h{display:flex;justify-content:center;padding:8px 0 2px;cursor:grab;touch-action:none}
+  .sheet-h i{width:42px;height:5px;border-radius:3px;background:var(--line)}
+  .ptop{padding-top:2px}
+  .tools{top:8px;right:8px;gap:5px}
+  .tools .icon-btn{width:46px;min-height:44px}
+  .viewpop{right:62px;top:8px}
+  .actbar{left:8px;right:62px;bottom:calc(var(--sheet,150px) + 8px)}
+  .hint{right:62px}
+  .toast{bottom:calc(var(--sheet,150px) + 12px)}
+  .loader{top:35%}
+  .wgrid{grid-template-columns:1fr}
+  .wcard{padding:16px}
+  .setpop{top:58px}
+  body.wopen .stage{z-index:22}
+  .welcome{align-items:flex-start;overflow:auto}
+}
+@media (prefers-reduced-motion: reduce){ .sw::after,.bar i,.panel{transition:none} }
 </style>
 
 <header>
   <div class="brand"><b>Corpus</b><span>Atlas anatómico 3D</span></div>
-  <div class="seg" role="group" aria-label="Modo de uso">
-    <button id="m-stu" aria-pressed="true">Estudiante</button>
-    <button id="m-pro" aria-pressed="false">Profesional</button>
-  </div>
-  <div class="seg" role="group" aria-label="Idioma" id="langSeg">
-    <button data-lang="es" aria-pressed="true" title="Español">ES</button>
-    <button data-lang="en" aria-pressed="false" title="English">EN</button>
-    <button data-lang="pt" aria-pressed="false" title="Português">PT</button>
-  </div>
   <div class="seg" role="group" aria-label="Cuerpo">
     <button id="b-m" aria-pressed="true">Hombre</button>
     <button id="b-f" aria-pressed="false">Mujer</button>
+  </div>
+  <div class="hdr-r">
+    <button class="icon-btn" id="setBtn" aria-haspopup="dialog" aria-expanded="false" aria-label="Ajustes" title="Ajustes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </div>
+  <div class="pop setpop" id="setPop" role="dialog" aria-label="Ajustes" hidden>
+    <div class="poprow"><span>Idioma</span><div class="seg" role="group" aria-label="Idioma" id="langSeg">
+    <button data-lang="es" aria-pressed="true" title="Español">ES</button>
+    <button data-lang="en" aria-pressed="false" title="English">EN</button>
+    <button data-lang="pt" aria-pressed="false" title="Português">PT</button>
+  </div></div>
+    <div class="poprow"><span>Modo</span><div class="seg" role="group" aria-label="Modo de uso">
+    <button id="m-stu" aria-pressed="true">Estudiante</button>
+    <button id="m-pro" aria-pressed="false">Profesional</button>
+  </div></div>
+    <label class="chk"><input type="checkbox" id="liteChk"> Modo ligero para móviles modestos (menos resolución y efectos)</label>
+    <details class="keys"><summary>Atajos de teclado</summary><p class="small muted">Flechas: girar · + / −: acercar · 1–6: vistas · X: rayos X · E: estudio · Esc: deseleccionar · /: buscar</p></details>
+    <details class="keys"><summary>Créditos y licencias</summary>
+        <p class="credit">Modelos 3D: <a href="https://github.com/Z-Anatomy/Models-of-human-anatomy" target="_blank" rel="noopener">Z-Anatomy</a> (CC BY-SA 4.0), derivados de BodyParts3D, Copyright© The Database Center for Life Science licensed by CC Attribution-Share Alike 2.1 Japan. Mallas optimizadas para la web y fichas en español redactadas para Corpus; distribuidas bajo CC BY-SA 4.0.</p>
+        <p class="credit">Modelo femenino: <a href="https://github.com/hubmapconsortium/ccf-3d-reference-object-library" target="_blank" rel="noopener">HuBMAP Human Reference Atlas, 3D Reference Object Library (Visible Human Female, v1.3)</a>, CC BY 4.0. Mallas reducidas y realineadas para Corpus; nombres y fichas en español añadidos.</p>
+    </details>
   </div>
 </header>
 
@@ -222,22 +301,44 @@ textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
     </div>
     <div class="conchip" id="conChip" hidden></div>
     <div class="legend" id="legend" hidden><span><i class="dot" style="background:var(--orig)"></i>Origen (proximal)</span><span><i class="dot" style="background:var(--ins)"></i>Inserción (distal)</span></div>
-    <div class="views">
-      <button data-view="ant">Anterior</button>
-      <button data-view="post">Posterior</button>
-      <button data-view="latd">Lateral D</button>
-      <button data-view="lati">Lateral I</button>
-      <button data-view="sup">Superior</button>
-      <button data-view="inf">Inferior</button>
-      <button data-view="reset">Restablecer</button>
-      <button id="xrayBtn" aria-pressed="false">Rayos X</button>
-      <button id="studioBtn" aria-pressed="false" title="Fondo negro e iluminación de estudio para ver fibras y relieves">Estudio</button>
-      <button id="shareBtn" title="Copia un enlace que abre el atlas exactamente en esta vista">Compartir vista</button>
+    <div class="tools" role="toolbar" aria-label="Herramientas de la vista">
+      <button class="icon-btn" id="viewMenuBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Vistas" title="Vistas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg><span>Vistas</span></button>
+      <button class="icon-btn" id="xrayBtn" aria-pressed="false" aria-label="Rayos X" title="Rayos X"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M7 7h3M7 11h3M7 15h3M14 9h3M14 13h3M14 17h3"/></svg><span>Rayos X</span></button>
+      <button class="icon-btn" id="studioBtn" aria-pressed="false" aria-label="Estudio" title="Fondo negro e iluminación de estudio para ver fibras y relieves"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg><span>Estudio</span></button>
+      <button class="icon-btn" id="shareBtn" aria-label="Compartir vista" title="Copia un enlace que abre el atlas exactamente en esta vista"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg><span>Compartir</span></button>
+      <button class="icon-btn" id="fsBtn" aria-label="Pantalla completa" title="Pantalla completa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>Pantalla</span></button>
+      <button class="icon-btn" id="helpBtn" aria-label="Ayuda" title="Ayuda"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg><span>Ayuda</span></button>
+    </div>
+    <div class="pop viewpop" id="viewPop" role="menu" hidden>
+      <div class="vgrid">
+        <button data-view="ant" role="menuitem">Anterior</button>
+        <button data-view="post" role="menuitem">Posterior</button>
+        <button data-view="latd" role="menuitem">Lateral D</button>
+        <button data-view="lati" role="menuitem">Lateral I</button>
+        <button data-view="sup" role="menuitem">Superior</button>
+        <button data-view="inf" role="menuitem">Inferior</button>
+      </div>
+      <button data-view="reset" role="menuitem" class="vreset">Restablecer</button>
+    </div>
+    <div class="welcome" id="welcome" hidden>
+      <div class="wcard">
+        <h2>Bienvenido a Corpus</h2>
+        <p class="muted">Un atlas del cuerpo humano en 3D, libre y gratuito. ¿Por dónde quieres empezar?</p>
+        <div class="wgrid">
+          <button data-w="explore"><b>Explorar</b><span>Gira, acerca y toca cualquier estructura para ver su ficha.</span></button>
+          <button data-w="dissect"><b>Disección</b><span>Retira el cuerpo capa por capa, de la piel al hueso.</span></button>
+          <button data-w="move"><b>Movimiento</b><span>Rangos articulares y el ciclo de la marcha, normal y patológica.</span></button>
+          <button data-w="study"><b>Estudiar</b><span>Casos clínicos, lecciones, práctica y repaso espaciado.</span></button>
+        </div>
+        <p class="small muted wtip">Arrastra para girar · pellizca o rueda para acercar · dos dedos o clic derecho para desplazar.</p>
+        <button class="btn" id="wClose">Empezar a explorar</button>
+      </div>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
   </section>
 
-  <aside class="panel">
+  <aside class="panel" id="panel">
+    <div class="sheet-h" id="sheetH" role="button" tabindex="0" aria-label="Mostrar u ocultar el panel"><i></i></div>
     <div class="ptop">
       <div class="search">
         <input id="q" type="search" placeholder="Buscar entre 4.719 estructuras: supraespinoso, LCA, nervio mediano…" autocomplete="off" aria-label="Buscar estructura">
@@ -245,20 +346,20 @@ textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
       </div>
       <div class="tabs" role="tablist">
         <button role="tab" data-tab="sistemas" aria-selected="true">Capas</button>
-        <button role="tab" data-tab="planos" aria-selected="false">Planos</button>
-        <button role="tab" data-tab="mov" aria-selected="false">Movimiento</button>
         <button role="tab" data-tab="estr" aria-selected="false">Ficha</button>
-        <button role="tab" data-tab="lec" aria-selected="false">Lecciones</button>
+        <button role="tab" data-tab="lec" aria-selected="false">Estudiar</button>
+        <button role="tab" data-tab="mov" aria-selected="false">Movimiento</button>
+        <button role="tab" data-tab="planos" aria-selected="false">Planos</button>
       </div>
     </div>
     <div class="pbody">
       <div class="view" id="tab-sistemas">
-        <div class="row">
-          <button class="btn" data-preset="osteo">Osteomuscular</button>
-          <button class="btn" data-preset="artro">Articular</button>
-          <button class="btn" data-preset="vasc">Vascular</button>
-          <button class="btn" data-preset="neuro">Nervioso</button>
-          <button class="btn" data-preset="visc">Vísceras</button>
+        <div class="chips presets">
+          <button data-preset="osteo">Osteomuscular</button>
+          <button data-preset="artro">Articular</button>
+          <button data-preset="vasc">Vascular</button>
+          <button data-preset="neuro">Nervioso</button>
+          <button data-preset="visc">Vísceras</button>
         </div>
         <div class="card dis">
           <h3>Disección por capas</h3>
@@ -268,16 +369,16 @@ textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
           <div class="disNow"><b id="disName">Piel</b><span id="disTxt"></span></div>
           <div class="row"><button class="btn" id="disPrev" aria-label="Capa anterior">← Más superficial</button><button class="btn" id="disNext" aria-label="Capa siguiente">Más profunda →</button></div>
         </div>
-        <p class="muted small">Cada capa se descarga al activarla por primera vez. El tamaño aparece junto al nombre.</p>
+        <h3 class="sect">Capas del cuerpo</h3>
         <div id="sysList"></div>
         <button class="btn" id="unhide" hidden>Mostrar estructuras ocultas</button>
         <p class="muted small femonly">Modelo femenino: Visible Human Female del Human Reference Atlas (HuBMAP). Incluye piel, mamas, pelvis femenina, columna, órganos y vasos; no incluye la musculatura del tronco ni de los miembros, que solo existe en el modelo masculino.</p>
+        <details class="more"><summary>Más opciones: alta resolución, vistas guardadas, importar</summary>
         <div class="card maleonly" id="hrCard">
           <h3>Alta resolución · mallas originales</h3>
           <p class="muted small">Sustituye las mallas ligeras de una región por las originales del atlas, sin reducir (compresión Draco). Úsalo para estudiar de cerca.</p>
           <div id="hrList"></div>
           <label class="chk"><input type="checkbox" id="autoHR"> Cargar automáticamente al acercar la cámara</label>
-          <label class="chk"><input type="checkbox" id="liteChk"> Modo ligero para móviles modestos (menos resolución y efectos)</label>
         </div>
         <div class="card">
           <h3>Vistas guardadas</h3>
@@ -294,8 +395,8 @@ textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
           <input id="glbIn" type="file" accept=".glb,.gltf" class="small">
           <p class="err" id="glbErr" hidden></p>
         </div>
-        <p class="credit">Modelos 3D: <a href="https://github.com/Z-Anatomy/Models-of-human-anatomy" target="_blank" rel="noopener">Z-Anatomy</a> (CC BY-SA 4.0), derivados de BodyParts3D, Copyright© The Database Center for Life Science licensed by CC Attribution-Share Alike 2.1 Japan. Mallas optimizadas para la web y fichas en español redactadas para Corpus; distribuidas bajo CC BY-SA 4.0.</p>
-        <p class="credit">Modelo femenino: <a href="https://github.com/hubmapconsortium/ccf-3d-reference-object-library" target="_blank" rel="noopener">HuBMAP Human Reference Atlas, 3D Reference Object Library (Visible Human Female, v1.3)</a>, CC BY 4.0. Mallas reducidas y realineadas para Corpus; nombres y fichas en español añadidos.</p>
+        </details>
+
       </div>
 
       <div class="view" id="tab-planos" hidden>
@@ -379,10 +480,8 @@ textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
         <p class="muted" style="font-size:12px">Valores de referencia de rango articular activo en adultos (AAOS). Las mallas reales se deforman alrededor del centro articular calculado a partir de los huesos; los músculos que cruzan la articulación se curvan de forma aproximada.</p>
       </div>
 
-      <div class="view" id="tab-lec" hidden><p class="femonly card">Las lecciones guiadas están construidas sobre el modelo masculino. <button class="btn" onclick="setBody('m')">Cambiar a hombre</button></p><div id="lecBox"></div><div id="caseBox" class="maleonly"></div></div>
-
-      <div class="view" id="tab-estr" hidden>
-        <div id="infoBox" aria-live="polite"></div>
+      <div class="view" id="tab-lec" hidden><p class="femonly card">Las lecciones guiadas están construidas sobre el modelo masculino. <button class="btn" onclick="setBody('m')">Cambiar a hombre</button></p><div id="caseBox" class="maleonly"></div><h3 class="sect maleonly">Lecciones guiadas</h3><div id="lecBox"></div>
+<h3 class="sect">Practicar y repasar</h3>
         <div class="card only-stu">
           <h3>Práctica de identificación</h3>
           <p class="muted small">Se te pedirá una estructura de las capas visibles. Tócala en el modelo.</p>
@@ -408,6 +507,11 @@ textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
             <div class="row" id="srsGrade" hidden><button class="btn" data-g="0">No lo sabía</button><button class="btn" data-g="1">Dudé</button><button class="btn pri" data-g="2">Lo sabía</button></div>
           </div>
         </div>
+      </div>
+
+      <div class="view" id="tab-estr" hidden>
+        <div id="infoBox" aria-live="polite"></div>
+
       </div>
     </div>
   </aside>
@@ -822,7 +926,7 @@ $('#disPrev').onclick=()=>setDissection(disStage-1);$('#disNext').onclick=()=>se
 /* ───────── Cámara orbital ───────── */
 const orb={tgt:new V3(0,0.88,0),r:3.5,th:0.42,ph:1.45,T:{tgt:new V3(0,0.88,0),r:3.5,th:0.42,ph:1.43}};
 const VIEWS={ant:[0,1.45],post:[Math.PI,1.45],latd:[-Math.PI/2,1.45],lati:[Math.PI/2,1.45],sup:[0,0.12],inf:[0,Math.PI-0.12]};
-function setView(v){if(v==='reset'){orb.T.th=0.42;orb.T.ph=1.45;orb.T.r=3.5;orb.T.tgt.set(0,0.88,0);return;}
+function setView(v){if(v==='reset'){orb.T.th=0.42;orb.T.ph=1.45;orb.T.r=isPhone()?4.4:3.5;orb.T.tgt.set(0,0.88,0);return;}
   const [th,ph]=VIEWS[v];let d=th-orb.th;d=Math.atan2(Math.sin(d),Math.cos(d));orb.T.th=orb.th+d;orb.T.ph=ph;}
 $$('[data-view]').forEach(b=>b.onclick=()=>setView(b.dataset.view));
 let hintDone=false;
@@ -873,7 +977,7 @@ function select(m,point){
   selected={m,local};tagLabel.el.textContent=label(m.userData.c);
   $('#hintTxt').hidden=true;renderActbar();
   renderInfo();
-  if(window.innerWidth<880||currentTab!=='mov') showTab('estr');
+  if(window.innerWidth<880||currentTab!=='mov') showTab('estr');if(isPhone()&&sheetState==='peek')setSheet('half');
 }
 function findMesh(id){return byId[id];}
 
@@ -1495,6 +1599,47 @@ async function setLang(l){if(!['es','en','pt'].includes(l))l='es';
 $$('#langSeg button').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
 function buildSearch(){SEARCH=Object.values(CAT).map(r=>({k:norm([r[2],r[3],r[1],I18N&&I18N.names[r[2]]||''].join(' | ')),c:r}));}
 
+
+/* ───────── Interfaz: ajustes, menú de vistas, pantalla completa, bienvenida y hoja inferior ───────── */
+function togglePop(btn,pop,force){const open=force??pop.hidden;pop.hidden=!open;btn.setAttribute('aria-expanded',open);}
+$('#setBtn').onclick=e=>{e.stopPropagation();togglePop($('#setBtn'),$('#setPop'));togglePop($('#viewMenuBtn'),$('#viewPop'),false);};
+$('#viewMenuBtn').onclick=e=>{e.stopPropagation();togglePop($('#viewMenuBtn'),$('#viewPop'));togglePop($('#setBtn'),$('#setPop'),false);};
+$('#viewPop').querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>togglePop($('#viewMenuBtn'),$('#viewPop'),false)));
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#setPop,#setBtn'))togglePop($('#setBtn'),$('#setPop'),false);if(!e.target.closest('#viewPop,#viewMenuBtn'))togglePop($('#viewMenuBtn'),$('#viewPop'),false);});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){togglePop($('#setBtn'),$('#setPop'),false);togglePop($('#viewMenuBtn'),$('#viewPop'),false);if(!$('#welcome').hidden)closeWelcome();}});
+$('#fsBtn').onclick=()=>{const d=document;try{if(d.fullscreenElement)d.exitFullscreen();else d.documentElement.requestFullscreen();}catch(e){toast('La pantalla completa no está disponible en este navegador.');}};
+document.addEventListener('fullscreenchange',()=>$('#fsBtn').setAttribute('aria-pressed',!!document.fullscreenElement));
+/* hoja inferior (móvil) */
+const isPhone=()=>window.innerWidth<880;
+const SHEET={peek:150,half:()=>Math.round(innerHeight*0.52),full:()=>Math.round(innerHeight-70)};
+let sheetState='peek';
+function sheetH(st){return st==='peek'?SHEET.peek:st==='half'?SHEET.half():SHEET.full();}
+function applySheet(px){const p=$('#panel');if(!isPhone()){p.style.height='';document.documentElement.style.removeProperty('--sheet');viewOffset();return;}
+  p.style.height=px+'px';document.documentElement.style.setProperty('--sheet',px+'px');viewOffset();}
+function setSheet(st){sheetState=st;applySheet(sheetH(st));}
+function viewOffset(){const r=stage.getBoundingClientRect();const sh=isPhone()?parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sheet'))||SHEET.peek:0;
+  if(sh>0){const off=Math.min(r.height*0.36,sh/2);camera.setViewOffset(r.width,r.height,0,off,r.width,r.height);}else camera.clearViewOffset();}
+(()=>{const h=$('#sheetH'),p=$('#panel');let y0=null,h0=0,moved=false;
+  const start=e=>{if(!isPhone())return;y0=e.clientY;h0=p.getBoundingClientRect().height;moved=false;p.classList.add('dragging');h.setPointerCapture(e.pointerId);};
+  const move=e=>{if(y0==null)return;const d=y0-e.clientY;if(Math.abs(d)>4)moved=true;applySheet(Math.max(110,Math.min(sheetH('full'),h0+d)));};
+  const end=e=>{if(y0==null)return;p.classList.remove('dragging');const cur=p.getBoundingClientRect().height;y0=null;
+    if(!moved){setSheet(sheetState==='peek'?'half':sheetState==='half'?'full':'peek');return;}
+    const c=[['peek',sheetH('peek')],['half',sheetH('half')],['full',sheetH('full')]].sort((a,b)=>Math.abs(a[1]-cur)-Math.abs(b[1]-cur))[0][0];setSheet(c);};
+  h.addEventListener('pointerdown',start);h.addEventListener('pointermove',move);h.addEventListener('pointerup',end);h.addEventListener('pointercancel',end);
+  h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setSheet(sheetState==='peek'?'half':'peek');}});
+  $$('.tabs button').forEach(b=>b.addEventListener('click',()=>{if(isPhone()&&sheetState==='peek')setSheet('half');}));
+  $('#q').addEventListener('focus',()=>{if(isPhone()&&sheetState==='peek')setSheet('half');});
+  addEventListener('resize',()=>{if(isPhone())setSheet(sheetState);else applySheet(0);});})();
+/* bienvenida */
+function openWelcome(){$('#welcome').hidden=false;$('#hintTxt').hidden=true;document.body.classList.add('wopen');}
+function closeWelcome(){$('#welcome').hidden=true;store.set('welcomed',true);document.body.classList.remove('wopen');}
+$('#wClose').onclick=closeWelcome;$('#helpBtn').onclick=openWelcome;
+$('#welcome').addEventListener('click',e=>{if(e.target.id==='welcome')closeWelcome();});
+$$('[data-w]').forEach(b=>b.onclick=()=>{const w=b.dataset.w;closeWelcome();
+  if(w==='dissect'){showTab('sistemas');setDissection(0);if(isPhone())setSheet('half');}
+  else if(w==='move'){if(BODY!=='m')setBody('m');showTab('mov');setGait(true);if(isPhone())setSheet('half');}
+  else if(w==='study'){showTab('lec');if(isPhone())setSheet('full');}});
+
 /* ───────── Casos clínicos ───────── */
 let CASES=[],caseOn=null;
 function caseIds(names,side){const out=[];for(const en of names||[]){let r=Object.values(CAT).filter(x=>x[1]===en&&!x[6]&&!String(x[4]).startsWith('f_'));
@@ -1686,7 +1831,7 @@ function showLm(list,focus){clearLm();if(SYS.muscular.on)setXray(true);for(const
   if(focus&&list.length===1) focusOn(new V3(...list[0][2]),0.35);}
 
 /* ───────── Bucle ───────── */
-function resize(){const r=stage.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix();}
+function resize(){const r=stage.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix();if(typeof viewOffset==='function')viewOffset();}
 new ResizeObserver(resize).observe(stage);
 const mq=window.matchMedia('(prefers-color-scheme: dark)');mq.addEventListener&&mq.addEventListener('change',()=>setTimeout(()=>{planeColors();for(const k in MAT)delete MAT[k];meshes.forEach(m=>setState(m,m.userData.state));applySystems();},30));
 let last=performance.now();
@@ -1723,6 +1868,8 @@ Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data
   buildSearch();if(LANG!=='es')setLang(LANG);
   setSide(romSide);renderLessons();showTab(store.get('tab','sistemas'));
   const shared=readHash();if(shared&&shared.b)BODY=shared.b;
+  if(!shared&&!store.get('welcomed',false))openWelcome();
+  if(isPhone()){setSheet('peek');orb.T.r=orb.r=4.4;}
   setBody(BODY);
   if(shared)applyShared(shared);
   for(const k in SYS) if(SYS[k].on&&sexOk(k)&&SYS[k].state==='idle') loadSys(k);
@@ -1737,7 +1884,7 @@ Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 47 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v15');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v17');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();
