@@ -576,9 +576,13 @@ details.more > .card{margin-bottom:10px}
       <div class="view" id="tab-glo" hidden>
         <div><h2>Glosario médico</h2><p class="muted small" style="margin-top:4px">Terminología anatómica y clínica con definición, etimología, sinónimos y ejemplos que se muestran y fotografían en el modelo 3D.</p></div>
         <div class="gloTop"><input id="gloQ" type="search" placeholder="Buscar término: apófisis, glenoide, abducción…" autocomplete="off" aria-label="Buscar en el glosario"><select id="gloCat" aria-label="Categoría"></select></div>
+        <div class="row" id="gloTools"><button class="btn" id="gloPrac">Practicar con tarjetas</button><span class="muted small">10 preguntas de la categoría elegida</span></div>
+        <div id="gloQuiz" hidden></div>
+        <div id="gloMain">
         <div class="gloAZ" id="gloAZ"></div>
-        <p class="muted small" id="gloCount">Cargando glosario…</p>
+        <p class="muted small" id="gloCount" style="margin:8px 0">Cargando glosario…</p>
         <div id="gloList"></div>
+        </div>
       </div>
       <div class="view" id="tab-estr" hidden>
         <div id="infoBox" aria-live="polite"></div>
@@ -757,7 +761,7 @@ async function fetchB64(url,onProg){
 }
 function showLoad(){const ks=Object.keys(loadQueue.parts);if(!ks.length){$('#loader').hidden=true;return;}
   let l=0,t=0;ks.forEach(k=>{l+=loadQueue.parts[k].l;t+=loadQueue.parts[k].t||(SYS[k]?SYS[k].mb*1e6:0);});
-  $('#loader').hidden=false;$('#loadTxt').textContent=`Cargando ${[...new Set(ks.map(k=>(loadQueue.parts[k].name||SYS[k].n).toLowerCase()))].join(', ')} · ${(Math.min(l,t)/1e6).toFixed(1)} de ${(t/1e6).toFixed(1)} MB`;
+  $('#loader').hidden=false;$('#loadTxt').textContent=`${TL('Cargando','Loading','Carregando')} ${[...new Set(ks.map(k=>{const q=loadQueue.parts[k];return trW(q.name||SYS[k].n).toLowerCase()+(q.hr?TL(' (alta resolución)',' (high resolution)',' (alta resolução)'):'');}))].join(', ')} · ${(Math.min(l,t)/1e6).toFixed(1)} ${TL('de','of','de')} ${(t/1e6).toFixed(1)} MB`;
   $('#loadBar').style.width=Math.min(100,t?l/t*100:0)+'%';}
 function loadSys(k){
   const s=SYS[k];if(s.promise) return s.promise;
@@ -865,7 +869,7 @@ function swapGeo(m,g){const u=m.userData;if(BODY==='f'&&u.geoF)return;if(u.rest)
 function unswapGeo(m){const u=m.userData;if(!u.lrGeo)return;const hr=m.geometry;if(u.rest){hr.attributes.position.array.set(u.rest);}m.geometry=u.lrGeo;u.lrGeo=null;u.rest=null;u.restN=null;u.W={};deformed.delete(m);}
 function loadHR(r){const h=HR[r];if(h.state==='loaded'||h.state==='loading')return h.promise;h.state='loading';renderHR();
   const parts=['loc','nv'];
-  h.promise=Promise.all(parts.map(lv=>{const key='hr_'+r+'_'+lv;loadQueue.parts[key]={l:0,t:0,name:h.n+' (alta resolución)'};showLoad();
+  h.promise=Promise.all(parts.map(lv=>{const key='hr_'+r+'_'+lv;loadQueue.parts[key]={l:0,t:0,name:h.n,hr:1};showLoad();
     return fetchB64('hr/'+r+'_'+lv+'.txt',l=>{if(loadQueue.parts[key]){loadQueue.parts[key].l=l/1.333;loadQueue.parts[key].t=h.mb*1e6/2;showLoad();}})
       .then(buf=>new Promise((res,rej)=>loader.parse(buf,'',res,rej)))
       .then(g=>{g.scene.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry;if(!geo.index)return;setVattr(geo,geo.attributes.color);geo.computeVertexNormals();geo.computeBoundingSphere();
@@ -1169,7 +1173,7 @@ function renderInfo(){
     if(d.biomecanica) extra+=`<div class="card"><h3>Función biomecánica (plano / eje)</h3><p class="small">${esc(d.biomecanica)}</p>${mv.length?`<div class="chips" style="margin-top:4px">${mv.map(([j,v],i)=>`<button data-mv="${i}">${esc(v.n)} ${esc(j.n.toLowerCase())}</button>`).join('')}</div><p class="muted" style="font-size:11.5px">Toca un movimiento para verlo en el simulador.</p>`:''}</div>`;
     if(d.prueba) extra+=`<div class="card"><h3>Prueba muscular manual</h3><p class="small">${esc(d.prueba)}</p></div>`;}
   const lms=EX.lm[c.id]||[];
-  if(lms.length) extra+=`<div class="card"><h3>Accidentes óseos (${lms.length})</h3><div class="lms">${lms.map((l,i)=>`<button data-lm="${i}">${esc(l[0])}</button>`).join('')}</div><div class="row"><button class="btn" id="lmAll">Mostrar todos</button><button class="btn" id="lmNone">Ocultar marcas</button></div></div>`;
+  if(lms.length) extra+=`<div class="card"><h3>${TL('Accidentes óseos','Bony landmarks','Acidentes ósseos')} (${lms.length})</h3><div class="lms">${lms.map((l,i)=>`<button data-lm="${i}">${esc(LANG==='en'?l[1]:l[0])}</button>`).join('')}</div><div class="row"><button class="btn" id="lmAll">Mostrar todos</button><button class="btn" id="lmNone">Ocultar marcas</button></div></div>`;
   extra+=gloInfoCard(c,lms);
   extra+=aiCard();
   const patches=(m.userData.sys==='muscular')?patchesFor(c):[];
@@ -1930,7 +1934,7 @@ const trW=w=>{const D=I18N&&I18N.ui[LANG]||{};return D[w]??w;};
 const PREF=['Mostrar','Opacidad','Alta resolución','Posición del plano'];
 function trText(t){if(LANG==='es'||!I18N)return null;const D=I18N.ui[LANG]||{};const k=t.trim();if(!k)return null;
   if(D[k]!=null)return t.replace(k,D[k]);for(const p of PREF){if(k.startsWith(p+' ')&&D[p]){const rest=k.slice(p.length+1);return t.replace(k,D[p]+' '+(D[rest]??(I18N.names&&LANG==='pt'&&I18N.names[rest])??rest));}}for(const [re,to] of RX[LANG]||[]){if(re.test(k))return t.replace(k,k.replace(re,to));}return null;}
-const SKIP_TR=el=>el&&el.closest&&el.closest('#gloList,#gloCat,#gloCount,#gloAZ,.gloZoom,#infoBox .kv dd,#infoBox > .view > p:not(.muted),.latin,#caseBox p,#caseBox li,#srsA,.refs,script,style');
+const SKIP_TR=el=>el&&el.closest&&el.closest('#gloList,#gloQuiz,#gloCat,#gloCount,#gloAZ,.gloZoom,#infoBox .kv dd,#infoBox > .view > p:not(.muted),.latin,#caseBox p,#caseBox li,#srsA,.refs,script,style');
 function trNode(root){if(!root)return;const walk=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;
   const list=[];while((n=walk.nextNode()))list.push(n);
   for(const t of list){const p=t.parentElement;if(!p||SKIP_TR(p))continue;let o=_orig.get(t);
@@ -2188,7 +2192,7 @@ async function askAi(){const q=$('#aiQ').value.trim();if(!q||!SAMPLE)return;cons
 
 /* ───────── Glosario médico ───────── */
 var gloBusy=false,GLO_FAIL=false;let GLO=null,GLO_P=null,gloOpen=-1,gloLetter='';const GLO_IMG=new Map();
-const GLO_CAT={'Osteología':['Osteology','Osteologia'],'Huesos del cuerpo':['Bones of the body','Ossos do corpo'],'Artrología':['Arthrology','Artrologia'],'Miología':['Myology','Miologia'],'Tejidos':['Tissues','Tecidos'],'Posición y dirección':['Position and direction','Posição e direção'],'Planos y ejes':['Planes and axes','Planos e eixos'],'Movimientos':['Movements','Movimentos'],'Regiones del cuerpo':['Body regions','Regiões do corpo'],'Términos clínicos':['Clinical terms','Termos clínicos'],'Semiología':['Semiology','Semiologia'],'Raíces y afijos':['Roots and affixes','Raízes e afixos'],'Angiología':['Angiology','Angiologia'],'Neuroanatomía':['Neuroanatomy','Neuroanatomia'],'Esplacnología':['Splanchnology','Esplancnologia'],'Generalidades':['General terms','Generalidades']};
+const GLO_CAT={'Osteología':['Osteology','Osteologia'],'Huesos del cuerpo':['Bones of the body','Ossos do corpo'],'Artrología':['Arthrology','Artrologia'],'Miología':['Myology','Miologia'],'Tejidos':['Tissues','Tecidos'],'Posición y dirección':['Position and direction','Posição e direção'],'Planos y ejes':['Planes and axes','Planos e eixos'],'Movimientos':['Movements','Movimentos'],'Regiones del cuerpo':['Body regions','Regiões do corpo'],'Términos clínicos':['Clinical terms','Termos clínicos'],'Semiología':['Semiology','Semiologia'],'Raíces y afijos':['Roots and affixes','Raízes e afixos'],'Angiología':['Angiology','Angiologia'],'Neuroanatomía':['Neuroanatomy','Neuroanatomia'],'Esplacnología':['Splanchnology','Esplancnologia'],'Generalidades':['General terms','Generalidades'],'Imagenología':['Medical imaging','Imagenologia'],'Embriología':['Embryology','Embriologia'],'Histología':['Histology','Histologia']};
 const gCat=c=>{const t=GLO_CAT[c];return t?TL(c,t[0],t[1]):c;};
 const gT=g=>TL(g.t,g.en||g.t,g.pt||g.t),gD=g=>TL(g.def,g.def_en||g.def,g.def_pt||g.def);
 const gKey=s=>norm(s).replace(/[^a-z0-9]+/g,' ').trim();
@@ -2219,12 +2223,13 @@ function gloCard(g){const other=[['ES',g.t],['EN',g.en],['PT',g.pt]].filter(([l,
   return `<div class="gloCard" data-gc="${g.i}">
     <div class="nm">${other.map(([l,n])=>`<b>${l}</b> ${esc(n)}`).join(' · ')} · <span>${esc(gCat(g.cat))}</span></div>
     <p class="df">${esc(gD(g))}</p>
-    ${g.etim?`<p class="small"><span class="muted">${TL('Etimología','Etymology','Etimologia')}:</span> <i>${esc(g.etim)}</i></p>`:''}
+    ${g.etim?`<p class="small"><span class="muted">${TL('Etimología','Etymology','Etimologia')}:</span> <i>${esc(TL(g.etim,g.etim_en||g.etim,g.etim_pt||g.etim))}</i></p>`:''}
     ${(g.sin||[]).length&&LANG==='es'?`<div>${lbl('Sinónimos','Synonyms','Sinônimos')}<div class="gloChips" style="margin-top:5px">${g.sin.map(x=>`<span>${esc(x)}</span>`).join('')}</div></div>`:''}
     ${ex?`<div>${lbl('Ejemplos en el modelo 3D','Examples on the 3D model','Exemplos no modelo 3D')}<div class="gloEx" style="margin-top:6px">${ex}</div>${(g.ej||[]).length>1?`<button class="btn" data-gall style="margin-top:8px">${TL('Fotografiar todos los ejemplos','Photograph all examples','Fotografar todos os exemplos')}</button>`:''}</div>`:''}
     ${rel?`<div>${lbl('Términos relacionados','Related terms','Termos relacionados')}<div class="gloChips" style="margin-top:5px">${rel}</div></div>`:''}
   </div>`;}
 function gloWire(){const box=$('#gloList');
+  box.querySelectorAll('[data-ph]').forEach(ph=>{if(ph.querySelector('img'))return;const [gi,k]=ph.dataset.ph.split(':').map(Number);const g=GLO[gi];gloDB.get(gPhKey(g,k)).then(u=>{if(u&&!ph.querySelector('img')){GLO_IMG.set(ph.dataset.ph,u);ph.innerHTML=`<img src="${u}" alt="">`;}});});
   box.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{const i=+b.dataset.g;gloOpen=gloOpen===i?-1:i;renderGlo();if(gloOpen>=0)gloScroll(i);});
   box.querySelectorAll('[data-grel]').forEach(b=>b.onclick=()=>gloOpenTerm(+b.dataset.grel));
   const card=box.querySelector('.gloCard');if(!card)return;const g=GLO[+card.dataset.gc];
@@ -2245,12 +2250,45 @@ function gloInfoCard(c,lms){if(GLO_FAIL)return '';if(!GLO){gloLoad()&&GLO_P.then
   for(const g of GLO){if(hits.has(g.i))continue;const w=gKey(g.t);if(w.length>3&&!w.includes(' ')&&txt.includes(' '+w+' '))hits.set(g.i,1);}
   const L=[...hits].sort((a,b)=>a[1]-b[1]).slice(0,18).map(([i])=>GLO[i]);if(!L.length)return '';
   return `<div class="card"><h3>Términos del glosario</h3><div class="gloChips">${L.map(g=>`<button data-gterm="${g.i}">${esc(gT(g))}</button>`).join('')}</div></div>`;}
+
+const gPhKey=(g,k)=>{const x=g.ej[k]||{};return g.t+'|'+(x.s||x.lm||k)+'|'+(BODY||'');};
+const gloDB=(()=>{let P=null;const open=()=>P||(P=new Promise((res,rej)=>{try{const r=indexedDB.open('corpus-glo',1);r.onupgradeneeded=()=>r.result.createObjectStore('img');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}}));
+  return {get:async k=>{try{const db=await open();return await new Promise(r=>{const q=db.transaction('img').objectStore('img').get(k);q.onsuccess=()=>r(q.result||null);q.onerror=()=>r(null);});}catch(e){return null;}},
+    set:async(k,v)=>{try{const db=await open();db.transaction('img','readwrite').objectStore('img').put(v,k);}catch(e){}}};})();
+/* Práctica con tarjetas del glosario */
+let GQ=null;
+function gloMask(txt,g){let o=txt;for(const n of [g.t,g.en,g.pt,...(g.sin||[])]){if(!n||n.length<3)continue;const w=n.replace(/^-|-$/g,'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&');o=o.replace(new RegExp(w,'gi'),'＿＿＿');}return o;}
+function gloQuizStart(){if(!GLO)return;const cat=$('#gloCat').value;let pool=GLO.filter(g=>(!cat||g.cat===cat)&&gD(g));if(pool.length<4)pool=GLO.slice();
+  pool=pool.slice().sort(()=>Math.random()-.5).slice(0,10);GQ={qs:pool,i:0,ok:0,miss:[],cat};$('#gloMain').hidden=true;$('#gloTools').hidden=true;$('#gloQuiz').hidden=false;gloQuizRender();}
+function gloQuizEnd(){GQ=null;$('#gloQuiz').hidden=true;$('#gloMain').hidden=false;$('#gloTools').hidden=false;}
+function gloQuizRender(){const box=$('#gloQuiz');if(!GQ)return;
+  if(GQ.i>=GQ.qs.length){const n=GQ.qs.length;box.innerHTML=`<div class="card"><h3>${TL('Resultado','Result','Resultado')}</h3><h2>${GQ.ok} / ${n}</h2>
+    ${GQ.miss.length?`<p class="small muted">${TL('Repasa:','Review:','Revise:')}</p><div class="gloChips">${GQ.miss.map(i=>`<button data-grel="${i}">${esc(gT(GLO[i]))}</button>`).join('')}</div>`:`<p class="small">${TL('¡Todas correctas!','All correct!','Todas corretas!')}</p>`}
+    <div class="row"><button class="btn pri" id="gqAgain">${TL('Otra ronda','Another round','Outra rodada')}</button><button class="btn" id="gqExit">${TL('Volver al glosario','Back to the glossary','Voltar ao glossário')}</button></div></div>`;
+    $('#gqAgain').onclick=gloQuizStart;$('#gqExit').onclick=gloQuizEnd;box.querySelectorAll('[data-grel]').forEach(b=>b.onclick=()=>{gloQuizEnd();gloOpenTerm(+b.dataset.grel);});return;}
+  const g=GQ.qs[GQ.i],rev=GQ.i%2===1;
+  const same=GLO.filter(x=>x!==g&&x.cat===g.cat&&gD(x)),oth=GLO.filter(x=>x!==g&&gD(x));
+  const pick=a=>a.slice().sort(()=>Math.random()-.5);let ds=pick(same).slice(0,3);if(ds.length<3)ds=ds.concat(pick(oth.filter(x=>!ds.includes(x))).slice(0,3-ds.length));
+  const opts=pick([g,...ds]);
+  const prompt=rev?`<p class="small muted">${TL('¿Qué definición corresponde a…','Which definition matches…','Qual definição corresponde a…')}</p><h2>${esc(gT(g))}</h2>`:`<p class="small muted">${TL('¿Qué término corresponde a esta definición?','Which term matches this definition?','Qual termo corresponde a esta definição?')}</p><p class="df" style="font-size:15px;line-height:1.55">${esc(gloMask(gD(g),g))}</p>`;
+  box.innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><h3>${TL('Pregunta','Question','Pergunta')} ${GQ.i+1} / ${GQ.qs.length} · ${esc(gCat(g.cat))}</h3><span class="small muted">${GQ.ok} ✓</span></div>${prompt}
+    <div>${opts.map(o=>`<button class="opt" data-go="${o.i}">${esc(rev?gloMask(gD(o),o):gT(o))}</button>`).join('')}</div><div id="gqFb"></div>
+    <div class="row"><button class="btn" id="gqExit2">${TL('Salir','Exit','Sair')}</button></div></div>`;
+  $('#gqExit2').onclick=gloQuizEnd;
+  box.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(box.dataset.done==='1')return;box.dataset.done='1';const ok=+b.dataset.go===g.i;
+    box.querySelectorAll('[data-go]').forEach(x=>{if(+x.dataset.go===g.i)x.classList.add('ok');});if(!ok){b.classList.add('bad');GQ.miss.push(g.i);}else GQ.ok++;
+    const ej=(g.ej||[]).findIndex(x=>gloResolve(x));
+    $('#gqFb').innerHTML=`<p class="small" style="margin:6px 0">${ok?'':`<b>${esc(gT(g))}</b>: `}${rev?'':esc(gD(g))}</p><div class="row">${ej>=0?`<button class="btn" id="gqSee">${TL('Ver en 3D','Show in 3D','Ver em 3D')}</button>`:''}<button class="btn pri" id="gqNext">${GQ.i+1<GQ.qs.length?TL('Siguiente','Next','Próxima'):TL('Ver resultado','See result','Ver resultado')}</button></div>`;
+    if(ej>=0)$('#gqSee').onclick=()=>gloShow(g,ej);
+    $('#gqNext').onclick=()=>{box.dataset.done='';GQ.i++;gloQuizRender();};});
+  box.dataset.done='';}
+$('#gloPrac').onclick=()=>{gloLoad();if(GLO)gloQuizStart();else GLO_P&&GLO_P.then(gloQuizStart);};
 const gSleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function gloShow(g,k){const x=g.ej[k],R=gloResolve(x);if(!R){toast(TL('Esta estructura no está disponible en el modelo actual.','This structure is not available in the current model.','Esta estrutura não está disponível no modelo atual.'));return;}
   gloBusy=true;try{if(isPhone()&&sheetState!=='peek')setSheet('peek');
     clearLm();await goTo(R.id);if(R.lm)showLm([R.lm],true);
     await gSleep(1500);const url=gloSnap(R.lm?new V3(...R.lm[2]):orb.T.tgt.clone(),!!R.lm);
-    if(url){const key=g.i+':'+k;GLO_IMG.set(key,url);const ph=$('#gloList').querySelector(`[data-ph="${key}"]`);if(ph)ph.innerHTML=`<img src="${url}" alt="${esc(gloExLabel(x))}">`;}
+    if(url){const key=g.i+':'+k;GLO_IMG.set(key,url);gloDB.set(gPhKey(g,k),url);const ph=$('#gloList').querySelector(`[data-ph="${key}"]`);if(ph)ph.innerHTML=`<img src="${url}" alt="${esc(gloExLabel(x))}">`;}
   }finally{gloBusy=false;}}
 function gloSnap(p,mark){try{renderer.render(scene,camera);const W=cv.width,H=cv.height;const v=p.clone().project(camera);
   let cx=(v.x+1)/2*W,cy=(1-v.y)/2*H;const sz=Math.round(Math.min(W,H)*(mark?0.5:0.62));const px=cx,py=cy;cx=Math.max(sz/2,Math.min(W-sz/2,cx));cy=Math.max(sz/2,Math.min(H-sz/2,cy));
@@ -2268,7 +2306,7 @@ const lmGroup=new THREE.Group();scene.add(lmGroup);
 function clearLm(){lmGroup.clear();removeLabels('lm');}
 function showLm(list,focus){clearLm();if(SYS.muscular.on)setXray(true);for(const [es,en,p] of list){const v=new V3(...p);
   const s=new THREE.Mesh(new THREE.SphereGeometry(0.0045,14,10),new THREE.MeshBasicMaterial({color:0xffd34d,depthTest:false,transparent:true}));s.position.copy(v);s.renderOrder=32;lmGroup.add(s);
-  const L=addLabel(es,()=>v,'','lm');L.on=true;L.pos=v;}
+  const L=addLabel(LANG==='en'?en:es,()=>v,'','lm');L.on=true;L.pos=v;}
   if(focus&&list.length===1) focusOn(new V3(...list[0][2]),0.35);}
 
 /* ───────── Bucle ───────── */
@@ -2329,7 +2367,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 53 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v32');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v33');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();
