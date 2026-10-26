@@ -672,11 +672,12 @@ function matFor(k,ins,state){
   if(state==='ag'){m.color=lin('#f0a040');m.emissive=lin('#ff6a00');m.emissiveIntensity=.45;}
   if(state==='hint'){m.emissive=lin(cssVar('--accent'));m.emissiveIntensity=.6;}
   if(state==='memb'){m.userData.memb=true;}
+  if(state==='semi'){m.userData.semi=true;}
   if(state==='ghost'){m.emissive=lin(cssVar('--accent'));m.emissiveIntensity=.25;m.userData.ghost=true;}
   MAT[key]=m;syncMat(m,key);return m;
 }
 const XRAY_SYS=['muscular','fascia','piel'];/* en la mujer la piel también se aclara en rayos X */let xray=false;
-function syncMat(m,key){const [k,,st]=key.split('|');const s=SYS[k];let op=m.userData.ghost?.32:s.op;if(m.userData.memb)op=Math.min(op,.2);if(xray&&XRAY_SYS.includes(BS(k))&&!st)op=Math.min(op,.14);m.opacity=op;m.transparent=op<.99;m.depthWrite=op>=.99;if(studio&&BS(k)==='piel'&&!clipArr.length){m.transparent=true;m.depthWrite=false;}
+function syncMat(m,key){const [k,,st]=key.split('|');const s=SYS[k];let op=m.userData.ghost?.32:s.op;if(m.userData.memb)op=Math.min(op,.2);if(m.userData.semi)op=Math.min(op,.42);if(xray&&XRAY_SYS.includes(BS(k))&&!st)op=Math.min(op,.14);m.opacity=op;m.transparent=op<.99;m.depthWrite=op>=.99;if(studio&&BS(k)==='piel'&&!clipArr.length){m.transparent=true;m.depthWrite=false;}
   const want=clipArr.length?THREE.DoubleSide:m.userData.baseSide;if(m.side!==want){m.side=want;m.needsUpdate=true;}}
 function syncAllMats(){for(const key in MAT) syncMat(MAT[key],key);}
 const autoLite=(navigator.deviceMemory&&navigator.deviceMemory<=3)||((navigator.hardwareConcurrency||8)<=4&&matchMedia('(pointer:coarse)').matches);
@@ -753,7 +754,7 @@ function loadSys(k){
         setVattr(geo,o.geometry.attributes.color);
         geo.computeVertexNormals();geo.computeBoundingSphere();
         const c=entry(o.name)||{id:o.name,en:o.name,es:o.name,la:'',sys:k,side:'',ins:''};
-        const m=new THREE.Mesh(geo,matFor(k,c.ins,MEMB.test(c.en)?'memb':''));m.userData={c,sys:k,state:''};
+        const m=new THREE.Mesh(geo,matFor(k,c.ins,MEMB.test(c.en)?'memb':SEMI.test(c.en)?'semi':''));m.userData={c,sys:k,state:''};
         applyTint(m);if(HRGEO[c.id]) swapGeo(m,HRGEO[c.id]);
         if(BS(k)==='muscular') addFiberDir(m);else if(TUBE_SYS.includes(BS(k))) addAxisDir(m);
         grp.add(m);meshes.push(m);(byId[c.id]=m);
@@ -942,7 +943,7 @@ function corpusShader(sh,kind,noTint,gk){
       if(ckAmp>0.01&&ckLite<0.5){float ckE=0.25/ckFq;
         vec3 ckG=vec3(ckF(ckMap(vObj+vec3(ckE,0,0))*ckFq),ckF(ckMap(vObj+vec3(0,ckE,0))*ckFq),ckF(ckMap(vObj+vec3(0,0,ckE))*ckFq))-vec3(H0);
         ckG=(viewMatrix*vec4(ckG/ckE,0.0)).xyz;ckG-=normal*dot(ckG,normal);
-        normal=normalize(normal-ckG*${P.b.toFixed(3)}*ckAmp*(1.0+0.6*ckStudio)*${kind==='bone'?'1.0':'(1.0-1.0*ckAtlas)'}*(1.0-0.55*ckTen-0.8*ckCart));}`).replace('#include <dithering_fragment>',`#include <dithering_fragment>
+        normal=normalize(normal-ckG*${P.b.toFixed(3)}*ckAmp*(1.0+0.6*ckStudio)*${kind==='bone'?'(1.0-0.6*ckAtlas)':'(1.0-1.0*ckAtlas)'}*(1.0-0.55*ckTen-0.8*ckCart));}`).replace('#include <dithering_fragment>',`#include <dithering_fragment>
       if(ckSlabOn>0.5&&gl_FrontFacing&&dot(ckSlab.xyz,vWp)+ckSlab.w>0.006)discard;
       ${kind==='skin'?`if(ckAtlas>0.5&&ckCut<0.5&&ckImg<0.5){if(!gl_FrontFacing)discard;float fr=pow(1.0-clamp(abs(dot(normal,normalize(vViewPosition))),0.0,1.0),1.6);gl_FragColor=vec4(mix(vec3(0.16,0.165,0.17),vec3(0.62,0.63,0.65),fr),clamp((0.14+0.66*fr)*min(1.0,diffuseColor.a*2.6),0.0,0.92));}`:''}
       {float ckG=ckImg>1.5?${gk[1].toFixed(2)}:${gk[0].toFixed(2)};
@@ -1096,8 +1097,9 @@ function pick(cx,cy){
   if(quiz.on){quizAnswer(hits[0].object);return;}
   select(hits[0].object,hits[0].point);
 }
+const SEMI=/omentum|^Palmar aponeurosis$|^Plantar aponeurosis$/i;
 const MEMB=/^(Pleura|Spinal dura|Pericardium|Peritoneum)$|cornea|conjunctiva|aqueous|vitreous|tear film|anterior chamber|posterior chamber/i;
-function setState(m,st){m.userData.state=st;m.material=matFor(m.userData.sys,m.userData.c.ins,st===''&&MEMB.test(m.userData.c.en)?'memb':st);}
+function setState(m,st){m.userData.state=st;m.material=matFor(m.userData.sys,m.userData.c.ins,st===''&&MEMB.test(m.userData.c.en)?'memb':st===''&&SEMI.test(m.userData.c.en)?'semi':st);}
 function refreshState(m){const u=m.userData;const st=u.sel&&u.ghost?'ghost':u.sel?'sel':u.hint?'hint':u.ag?'ag':'';if(st!==u.state) setState(m,st);}
 function select(m,point){
   stopTools();clearLm();
@@ -2212,7 +2214,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 53 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v26');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v27');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();
