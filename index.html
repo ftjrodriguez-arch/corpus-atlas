@@ -75,6 +75,9 @@ main{flex:1;min-height:0;display:grid;gap:10px;grid-template-rows:minmax(0,1.15f
 .lesson{border:1px solid var(--line);border-radius:10px;padding:11px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
 .lesson b{display:block;font:500 17px/1.2 var(--f-display)}
 .steps{display:flex;gap:4px}.steps i{flex:1;height:4px;border-radius:2px;background:var(--line)}.steps i.on{background:var(--accent)}
+.lq{margin-bottom:12px}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+#stage.medimg{background:#000!important}
 .opt{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:9px 11px;font-size:13.5px;margin-bottom:6px}
 .opt.ok{border-color:var(--ok);color:var(--ok);font-weight:700}.opt.bad{border-color:var(--bad);color:var(--bad)}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
@@ -404,6 +407,7 @@ details.more > .card{margin-bottom:10px}
       <div class="view" id="tab-planos" hidden>
         <p class="muted">Posición anatómica: de pie, mirada al frente, palmas hacia delante. Cada plano tiene un eje perpendicular, y el movimiento ocurre en el plano girando alrededor de ese eje.</p>
         <div id="planeCards"></div>
+        <div class="card" id="sectCard"></div>
         <div class="card">
           <label class="chk"><input type="checkbox" id="axesChk"> Mostrar ejes de movimiento</label>
           <label class="chk"><input type="checkbox" id="dirChk"> Mostrar términos de dirección</label>
@@ -494,6 +498,19 @@ details.more > .card{margin-bottom:10px}
             <button class="btn" id="quizStop" hidden>Terminar</button>
           </div>
           <p id="quizMsg" style="font-size:13px"></p>
+        </div>
+        <div class="card" id="examCard">
+          <h3>Modo examen</h3>
+          <p class="muted small">Preguntas cronometradas sin ayudas: tocar la estructura pedida o reconocer la resaltada. La nota se ve al final. El profesor puede copiar un enlace con el mismo examen para toda la clase.</p>
+          <div id="examSetup">
+            <select id="exSys" class="field" aria-label="Capa del examen"></select>
+            <div class="row"><select id="exN" class="field" aria-label="Número de preguntas"><option value="10">10 preguntas</option><option value="20" selected>20 preguntas</option><option value="30">30 preguntas</option></select>
+            <select id="exT" class="field" aria-label="Tiempo"><option value="0">Sin límite</option><option value="300">5 minutos</option><option value="600" selected>10 minutos</option><option value="900">15 minutos</option><option value="1800">30 minutos</option></select></div>
+            <select id="exTy" class="field" aria-label="Tipo de preguntas"><option value="mix">Mixto: tocar y reconocer</option><option value="find">Tocar la estructura pedida</option><option value="id">Reconocer la estructura resaltada</option></select>
+            <p class="small" id="exInfo"></p>
+            <div class="row"><button class="btn pri" id="exStart">Empezar examen</button><button class="btn" id="exLink">Copiar enlace del examen</button></div>
+          </div>
+          <div id="examRun" hidden></div>
         </div>
         <div class="card" id="srsCard">
           <h3>Repaso espaciado</h3>
@@ -613,7 +630,7 @@ function baseMat(kk,variant,noTint){
   if(WET.includes(k)){m.clearcoat=k.startsWith('nervioso')?0.25:0.65;m.clearcoatRoughness=0.28;}
   if(k==='muscular'){m.sheen&&m.sheen.set&&0;}
   const kind=k==='oseo'?'bone':k==='muscular'?'muscle':(k==='piel'||(SYS[k]&&SYS[k].base==='piel'))?'skin':k==='arterial'?'artery':k==='venoso'?'vein':k==='nervioso_periferico'?'nerve':'soft';
-  if(k!=='importado'){m.extensions={derivatives:true};m.onBeforeCompile=sh=>corpusShader(sh,kind,noTint);m.customProgramCacheKey=()=>'ck3_'+kind+(noTint?'_n':'');}
+  if(k!=='importado'){m.extensions={derivatives:true};const gk=GRAYK[k]||GRAYK[kind]||GRAYK.soft;m.onBeforeCompile=sh=>corpusShader(sh,kind,noTint,gk);m.customProgramCacheKey=()=>'ck4_'+kind+(noTint?'_n':'')+gk.join('_');}
   m.userData.baseSide=m.side;return m;
 }
 function matFor(k,ins,state){
@@ -835,18 +852,22 @@ float ckN(vec3 x){vec3 i=floor(x);vec3 f=fract(x);f=f*f*(3.0-2.0*f);
  return mix(mix(mix(ckH(i),ckH(i+vec3(1,0,0)),f.x),mix(ckH(i+vec3(0,1,0)),ckH(i+vec3(1,1,0)),f.x),f.y),mix(mix(ckH(i+vec3(0,0,1)),ckH(i+vec3(1,0,1)),f.x),mix(ckH(i+vec3(0,1,1)),ckH(i+vec3(1,1,1)),f.x),f.y),f.z);}
 float ckF(vec3 p){return 0.65*ckN(p)+0.35*ckN(p*2.07);}
 `;
-const STUDIO_U={value:0},LITE_U={value:0};
-function corpusShader(sh,kind,noTint){
-  sh.uniforms.ckStudio=STUDIO_U;sh.uniforms.ckLite=LITE_U;
+const STUDIO_U={value:0},LITE_U={value:0},CUT_U={value:0},IMG_U={value:0},SLAB_U={value:new THREE.Vector4(0,-1,0,0)},SLABON_U={value:0};
+/* gris por tejido para el modo imagen médica: [TC, RM T1] */
+const GRAYK={bone:[0.97,0.16],oseo:[0.97,0.16],muscle:[0.46,0.33],muscular:[0.46,0.33],insercion:[0.6,0.12],articular:[0.56,0.2],fascia:[0.5,0.28],bolsas:[0.42,0.35],
+  skin:[0.42,0.62],piel:[0.42,0.62],mama:[0.4,0.7],artery:[0.82,0.06],arterial:[0.82,0.06],vein:[0.66,0.12],venoso:[0.66,0.12],nerve:[0.44,0.5],nervioso_periferico:[0.44,0.5],
+  nervioso_central:[0.47,0.58],respiratorio:[0.05,0.04],digestivo:[0.5,0.44],urinario:[0.52,0.38],reproductor:[0.53,0.46],endocrino:[0.55,0.5],linfatico:[0.5,0.45],soft:[0.5,0.45]};
+function corpusShader(sh,kind,noTint,gk){
+  sh.uniforms.ckStudio=STUDIO_U;sh.uniforms.ckLite=LITE_U;sh.uniforms.ckCut=CUT_U;sh.uniforms.ckImg=IMG_U;sh.uniforms.ckSlab=SLAB_U;sh.uniforms.ckSlabOn=SLABON_U;gk=gk||[0.5,0.45];
   const SSS={bone:0.08,muscle:0.32,soft:0.22,skin:0.45,artery:0.38,vein:0.42,nerve:0.22}[kind];
   const SSC={artery:'1.0,0.28,0.22',vein:'0.42,0.32,0.95',nerve:'1.0,0.86,0.55'}[kind]||'1.0,0.42,0.3';
-  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute vec3 fdir;\nattribute vec3 vattr;\nattribute vec4 vtint;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;')
-    .replace('#include <begin_vertex>','#include <begin_vertex>\nvObj=position;vFd=fdir;vVa=vattr;vTn=vtint;');
+  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute vec3 fdir;\nattribute vec3 vattr;\nattribute vec4 vtint;\nvarying vec3 vWp;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;')
+    .replace('#include <begin_vertex>','#include <begin_vertex>\nvWp=(modelMatrix*vec4(transformed,1.0)).xyz;vObj=position;vFd=fdir;vVa=vattr;vTn=vtint;');
   const P={bone:{fq:520.0,b:0.0022,c:[0.97,1.02],r:0.12},muscle:{fq:210.0,b:0.016,c:[0.9,1.03],r:0.2},soft:{fq:160.0,b:0.004,c:[0.97,1.02],r:0.0},artery:{fq:240.0,b:0.002,c:[0.95,1.03],r:0.08},vein:{fq:200.0,b:0.003,c:[0.93,1.04],r:0.06},nerve:{fq:900.0,b:0.007,c:[0.9,1.05],r:0.18},skin:{fq:900.0,b:0.0018,c:[0.985,1.015],r:0.1}}[kind];
   const map=['muscle','artery','vein','nerve'].includes(kind)?'vec3 ckMap(vec3 p){vec3 f=normalize(vFd+1e-5);return (p-f*dot(p,f))+f*dot(p,f)*'+(kind==='nerve'?'0.03':kind==='muscle'?'0.07':'0.12')+';}':'vec3 ckMap(vec3 p){return p;}';
   const h=`float ckAO=clamp(vVa.r*1.2,0.0,1.0);${kind==='skin'?'ckAO=mix(1.0,ckAO,0.3);':''}float ckTen=${kind==='muscle'?'smoothstep(0.15,0.75,vVa.g)':'0.0'};float ckCart=${kind==='bone'?'smoothstep(0.2,0.8,vVa.b)':'0.0'};float ckFq=${P.fq.toFixed(1)};float ckFw=length(fwidth(vObj))*ckFq;float ckAmp=1.0-smoothstep(0.12,0.5,ckFw);
     float H0=ckF(ckMap(vObj)*ckFq);float H=mix(0.5,H0,ckAmp*(1.0+0.6*ckStudio));`+(noTint?'':'diffuseColor.rgb=mix(diffuseColor.rgb,pow(vTn.rgb,vec3(2.2)),vTn.a);');
-  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform float ckStudio;\nuniform float ckLite;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;\n'+NOISE_GLSL+map)
+  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform float ckStudio;\nuniform float ckLite;\nuniform float ckCut;\nuniform float ckImg;\nuniform vec4 ckSlab;\nuniform float ckSlabOn;\nvarying vec3 vWp;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;\n'+NOISE_GLSL+map)
     .replace('#include <color_fragment>','#include <color_fragment>\n'+h+`diffuseColor.rgb*=mix(${P.c[0].toFixed(2)},${P.c[1].toFixed(2)},H);
       ${kind==='bone'?'diffuseColor.rgb*=mix(vec3(0.90,0.88,0.83),vec3(1.03,1.02,1.0),ckN(vObj*22.0));':''}${kind==='skin'?'diffuseColor.rgb*=mix(vec3(0.95,0.93,0.94),vec3(1.03,1.0,0.97),ckN(vObj*14.0));':''}
       diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.80,0.76,0.66)*mix(0.95,1.04,H),ckTen);
@@ -861,12 +882,19 @@ function corpusShader(sh,kind,noTint){
       if(ckAmp>0.01&&ckLite<0.5){float ckE=0.25/ckFq;
         vec3 ckG=vec3(ckF(ckMap(vObj+vec3(ckE,0,0))*ckFq),ckF(ckMap(vObj+vec3(0,ckE,0))*ckFq),ckF(ckMap(vObj+vec3(0,0,ckE))*ckFq))-vec3(H0);
         ckG=(viewMatrix*vec4(ckG/ckE,0.0)).xyz;ckG-=normal*dot(ckG,normal);
-        normal=normalize(normal-ckG*${P.b.toFixed(3)}*ckAmp*(1.0+0.6*ckStudio)*(1.0-0.55*ckTen-0.8*ckCart));}`);
+        normal=normalize(normal-ckG*${P.b.toFixed(3)}*ckAmp*(1.0+0.6*ckStudio)*(1.0-0.55*ckTen-0.8*ckCart));}`).replace('#include <dithering_fragment>',`#include <dithering_fragment>
+      if(ckSlabOn>0.5&&gl_FrontFacing&&dot(ckSlab.xyz,vWp)+ckSlab.w>0.006)discard;
+      {float ckG=ckImg>1.5?${gk[1].toFixed(2)}:${gk[0].toFixed(2)};
+       if(ckCut>0.5&&!gl_FrontFacing){vec3 cc=ckImg>0.5?vec3(ckG*mix(0.9,1.06,H)):pow(max(diffuseColor.rgb*mix(0.82,1.0,H),vec3(0.0)),vec3(0.4545));gl_FragColor=vec4(cc*0.97,max(diffuseColor.a,0.0));}
+       else if(ckImg>0.5){float l=dot(gl_FragColor.rgb,vec3(0.333));float b=dot(pow(max(diffuseColor.rgb,vec3(0.001)),vec3(0.4545)),vec3(0.333));gl_FragColor.rgb=vec3(ckG*clamp(l/max(b,0.05),0.35,1.25));}}`);
 }
 const WET=['arterial','venoso','digestivo','respiratorio','urinario','reproductor','endocrino','linfatico','nervioso_central','nervioso_periferico','bolsas'];
 
 /* ───────── Visibilidad ───────── */
 const hiddenIds=new Set();let patchFocus=null;
+const _bb=new THREE.Box3();
+function slabHit(m){const g=m.geometry;if(!g.boundingBox)g.computeBoundingBox();_bb.copy(g.boundingBox).applyMatrix4(m.matrixWorld);const n=SLAB_U.value,w=n.w;
+  const a=n.x*(n.x>0?_bb.min.x:_bb.max.x)+n.y*(n.y>0?_bb.min.y:_bb.max.y)+n.z*(n.z>0?_bb.min.z:_bb.max.z)+w,b=n.x*(n.x>0?_bb.max.x:_bb.min.x)+n.y*(n.y>0?_bb.max.y:_bb.min.y)+n.z*(n.z>0?_bb.max.z:_bb.min.z)+w;return a<0.006&&b>0;}
 function applySystems(){
   for(const k in SYS){const s=SYS[k];if(s.group) s.group.visible=s.on&&sexOk(k);}
   syncAllMats();
@@ -877,6 +905,7 @@ function applySystems(){
     if(v&&BODY==='f'&&MALE_ONLY.test(m.userData.c.en)) v=false;
     if(v&&m.userData.fonly&&BODY!=='f') v=false;
     if(v&&DIS_FLT&&DIS_FLT[m.userData.sys]&&!DIS_FLT[m.userData.sys].test(m.userData.c.en)) v=false;
+    if(v&&SLABON_U.value) v=slabHit(m);
     if(v&&m.userData.sys==='muscular'&&DEPTH_OFF.size&&DEPTH_OFF.has(EX.dep[m.userData.c.id]||'')) v=false;
     m.visible=v;}
   $('#unhide').hidden=hiddenIds.size===0&&!isoSet&&!DIS_EXC;
@@ -912,7 +941,7 @@ function setBody(b){if(b!==BODY){select(null);stopTools&&stopTools();}BODY=b;sto
   if(b==='f'&&currentTab==='mov'){playing=false;}
   for(const k in SYS) if(sexOk(k)&&SYS[k].on&&SYS[k].state!=='loaded'&&CAT_READY) loadSys(k);
   if(b==='f'){for(const k of FEM_OVR)if(SYS[k].state==='loaded')loadFemOvr(k);for(const r of ['inferior','tronco'])if(HR[r].state==='loaded')unloadHR(r);}applyFemGeo();
-  applySystems();renderSysList();renderDis();if(CAT_READY)renderSrsDecks();if(b==='vh')for(const k in HR)if(HR[k].state==='loaded')unloadHR(k);applyPose&&applyPose();}
+  applySystems();renderSysList();renderDis();if(CAT_READY){renderSrsDecks();renderExamSetup(exam.shared);}if(b==='vh')for(const k in HR)if(HR[k].state==='loaded')unloadHR(k);applyPose&&applyPose();}
 let CAT_READY=false;
 $('#b-m').onclick=()=>setBody('m');$('#b-f').onclick=()=>setBody('f');
 
@@ -999,7 +1028,8 @@ function pick(cx,cy){
   ray.setFromCamera(ndc,camera);
   const cand=meshes.filter(m=>visibleDeep(m)&&m.material.opacity>0.04);
   const hits=ray.intersectObjects(cand,false).filter(h=>clipArr.every(pl=>pl.distanceToPoint(h.point)>=-0.0005));
-  if(!hits.length){if(!quiz.on)select(null);return;}
+  if(!hits.length){if(!quiz.on&&!exam.on)select(null);return;}
+  if(exam.on){examPick(hits[0].object);return;}
   if(quiz.on){quizAnswer(hits[0].object);return;}
   select(hits[0].object,hits[0].point);
 }
@@ -1145,7 +1175,8 @@ for(const k in PLANES){const p=PLANES[k];
   const mat=new THREE.MeshBasicMaterial({transparent:true,opacity:.13,side:THREE.DoubleSide,depthWrite:false});
   const mesh=new THREE.Mesh(geo,mat);const edge=new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({transparent:true,opacity:.75}));
   const g=new THREE.Group();g.add(mesh,edge);planeGroup.add(g);p.g=g;p.mat=mat;p.emat=edge.material;
-  p.clip=k==='sag'?new THREE.Plane(new V3(-1,0,0),0):k==='fro'?new THREE.Plane(new V3(0,0,-1),0):new THREE.Plane(new V3(0,-1,0),1);}
+  p.clip=k==='sag'?new THREE.Plane(new V3(-1,0,0),0):k==='fro'?new THREE.Plane(new V3(0,0,-1),0):new THREE.Plane(new V3(0,-1,0),1);p.clip2=new THREE.Plane(new V3(1,0,0),0);}
+const SECT=Object.assign({img:0,slab:0},store.get('sect',{}));
 const savedP=store.get('planes',null);if(savedP) for(const k in savedP) if(PLANES[k]) Object.assign(PLANES[k],{pos:savedP[k].pos,show:savedP[k].show,cut:savedP[k].cut});
 const axisObjs=[];const axisGroup=new THREE.Group();scene.add(axisGroup);
 function axis(dir,len,cv_,lbl){const mat=new THREE.MeshBasicMaterial({depthTest:false,transparent:true});const g=new THREE.Group();
@@ -1155,9 +1186,11 @@ function axis(dir,len,cv_,lbl){const mat=new THREE.MeshBasicMaterial({depthTest:
 axis(new V3(1,0,0),0.4,'--sag','Eje frontal');axis(new V3(0,0,1),0.34,'--fro','Eje sagital');axis(new V3(0,1,0),0.95,'--tra','Eje longitudinal');
 function planeColors(){for(const k in PLANES){const c=new THREE.Color(cssVar(planeCols[k]));PLANES[k].mat.color.copy(c);PLANES[k].emat.color.copy(c);}axisObjs.forEach(a=>a.mat.color.set(cssVar(a.cv)));}
 function updatePlanes(){clipArr.length=0;
-  for(const k in PLANES){const p=PLANES[k];p.g.visible=p.show;
+  for(const k in PLANES){const p=PLANES[k];p.g.visible=p.show&&!p.cut;
     if(k==='sag'){p.g.position.set(p.pos,0.9,0);} if(k==='fro'){p.g.position.set(0,0.9,p.pos);} if(k==='tra'){p.g.position.set(0,p.pos,0);}
-    p.clip.constant=p.pos;if(p.cut) clipArr.push(p.clip);}
+    p.clip.constant=p.pos;if(p.cut){clipArr.push(p.clip);SLAB_U.value.set(p.clip.normal.x,p.clip.normal.y,p.clip.normal.z,p.pos);}}
+  const slabWas=SLABON_U.value;SLABON_U.value=(clipArr.length===1&&SECT.slab)?1:0;if(SLABON_U.value||slabWas)applySystems();
+  CUT_U.value=clipArr.length?1:0;IMG_U.value=clipArr.length?SECT.img:0;stage.classList.toggle('medimg',!!(clipArr.length&&SECT.img));
   syncAllMats();
   store.set('planes',Object.fromEntries(Object.entries(PLANES).map(([k,p])=>[k,{pos:p.pos,show:p.show,cut:p.cut}])));}
 const labelsEl=$('#labels');const labels=[];
@@ -1168,7 +1201,19 @@ for(const k in PLANES){const p=PLANES[k];addLabel('Plano '+p.n.split(' ')[0].toL
 const tagLabel=addLabel('',()=>null,'tag','tag');
 function removeLabels(group){for(let i=labels.length-1;i>=0;i--) if(labels[i].group===group){labels[i].el.remove();labels.splice(i,1);}}
 let showAxes=store.get('axes',false),showDir=store.get('dir',false);
-function renderPlanes(){const wrap=$('#planeCards');wrap.innerHTML='';
+function sectView(){const k=Object.keys(PLANES).find(k=>PLANES[k].cut);if(!k)return;const p=PLANES[k];
+  orb.T.tgt.set(k==='sag'?p.pos:0,k==='tra'?p.pos:0.95,k==='fro'?p.pos:0);setView({sag:'lati',fro:'ant',tra:'sup'}[k]);orb.T.r=k==='tra'?1.1:2.2;orb.T.tgt.set(k==='sag'?p.pos:0,k==='tra'?p.pos:0.95,k==='fro'?p.pos:0);}
+function renderSect(){const el=$('#sectCard');if(!el)return;
+  el.innerHTML=`<h3>Cortes tipo imagen médica</h3><p class="muted small">Activa «Cortar el modelo» en un plano. La superficie cortada se rellena con el color de cada tejido, como en una pieza de disección; también puede verse en escala de grises aproximada de TC o de RM ponderada en T1.</p>
+   <div class="seg" role="group" aria-label="Aspecto del corte">${[['Color real',0],['TC',1],['RM T1',2]].map(([t,v])=>`<button class="btn${SECT.img===v?' pri':''}" data-img="${v}">${t}</button>`).join('')}</div>
+   <label class="chk"><input type="checkbox" id="slabChk" ${SECT.slab?'checked':''}> Solo la lámina del corte (como un tomograma)</label>
+   <div class="row"><button class="btn" id="sectView">Mirar el corte de frente</button><button class="btn" id="sectAx">Corte axial en la pelvis</button></div>
+   <p class="muted small">Los grises son una aproximación didáctica según el tipo de tejido, no una imagen real: en TC el hueso es blanco y el aire negro; en RM T1 la grasa es brillante y el hueso cortical y la sangre en movimiento, oscuros.</p>`;
+  el.querySelectorAll('[data-img]').forEach(b=>b.onclick=()=>{SECT.img=+b.dataset.img;store.set('sect',SECT);renderSect();updatePlanes();});
+  $('#slabChk').onchange=e=>{SECT.slab=e.target.checked?6:0;store.set('sect',SECT);updatePlanes();};
+  $('#sectView').onclick=sectView;
+  $('#sectAx').onclick=()=>{for(const k in PLANES){PLANES[k].cut=k==='tra';PLANES[k].show=k==='tra';}PLANES.tra.pos=BODY==='m'?0.86:0.86;renderPlanes();updatePlanes();sectView();};}
+function renderPlanes(){const wrap=$('#planeCards');wrap.innerHTML='';renderSect();
   for(const k in PLANES){const p=PLANES[k];const c=document.createElement('div');c.className='card';c.style.marginBottom='10px';
     c.innerHTML=`<div class="plane-h"><b><span class="swatch" style="background:var(${planeCols[k]})"></span>Plano ${p.n.toLowerCase()}</b><button class="sw" role="switch" aria-checked="${p.show}" aria-label="Mostrar plano ${p.n}"></button></div>
       <p class="muted small">${p.desc} Eje perpendicular: ${p.axis.toLowerCase()}.</p>
@@ -1569,6 +1614,59 @@ async function applyShared(v){
 }
 function readHash(){const h=location.hash.match(/#v=([A-Za-z0-9_-]+)/);if(!h)return null;try{return JSON.parse(unb64u(h[1]));}catch(e){return null;}}
 
+/* ───────── Modo examen ───────── */
+const exam={on:false,cfg:null,qs:[],i:0,ans:[],t0:0,timer:null,hl:null};
+function rng(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
+function exSysList(){return Object.keys(SYS).filter(k=>sexOk(k)&&!['importado','insercion'].includes(k)&&!/^piel/.test(k));}
+function renderExamSetup(shared){const el=$('#exSys');if(!el)return;const cur=el.value;
+  el.innerHTML=exSysList().map(k=>`<option value="${k}">${esc(SYS[k].n)}</option>`).join('');if(cur&&exSysList().includes(cur))el.value=cur;else el.value=exSysList().includes('muscular')?'muscular':exSysList()[0];
+  if(shared){el.value=shared.sys;$('#exN').value=shared.n;$('#exT').value=shared.t;$('#exTy').value=shared.ty;}
+  $('#exInfo').innerHTML=shared?`<b>Examen compartido</b> · ${({m:'hombre',f:'mujer',vh:'Visible Human'})[shared.b]||''} · ${esc(SYS[shared.sys]?.n||'')} · ${shared.n} preguntas${+shared.t?` · ${Math.round(shared.t/60)} min`:''}. Pulsa «Empezar examen».`:'';}
+function exCfg(){return{b:BODY,sys:$('#exSys').value,n:+$('#exN').value,t:+$('#exT').value,ty:$('#exTy').value,seed:exam.shared&&exam.shared.seed||(Math.random()*1e9|0)};}
+function exLink(c){const base=/github\.io$|^localhost$|^127\./.test(location.hostname)?location.origin+location.pathname:PUBLIC_URL;return base+'#ex='+b64u(JSON.stringify(c));}
+async function startExam(cfg){if(quiz.on)stopQuiz();if(srs.on)$('#srsStop').click();select(null);
+  if(cfg.b&&cfg.b!==BODY)setBody(cfg.b);
+  for(const k in SYS){if(k==='importado'||!sexOk(k))continue;SYS[k].on=(k===cfg.sys||k==='oseo');if(SYS[k].on&&SYS[k].op<.3)SYS[k].op=1;}
+  isoSet=null;hiddenIds.clear();DIS_FLT=null;DIS_EXC=null;applySystems();renderSysList();
+  $('#exInfo').textContent='Cargando modelos…';await Promise.all([cfg.sys,'oseo'].map(k=>loadSys(k)));applySystems();
+  const seen=new Set(),pool=meshes.filter(m=>m.userData.sys===cfg.sys&&visibleDeep(m)&&m.userData.c.es&&!m.userData.c.ins).sort((a,b)=>a.userData.c.id<b.userData.c.id?-1:1)
+    .filter(m=>{const k=m.userData.c.en+'|'+m.userData.c.side;if(seen.has(k))return false;seen.add(k);return true;});
+  if(pool.length<4){$('#exInfo').textContent='No hay estructuras suficientes en esta capa.';return;}
+  const R=rng(cfg.seed),qs=[],used=new Set();
+  for(let i=0;i<cfg.n;i++){let m,g=0;do{m=pool[R()*pool.length|0];g++;}while(used.has(m.userData.c.id)&&g<50);used.add(m.userData.c.id);
+    const ty=cfg.ty==='mix'?(R()<.5?'find':'id'):cfg.ty;const q={ty,id:m.userData.c.id};
+    if(ty==='id'){const opts=new Set([m.userData.c.es]);let h=0;while(opts.size<4&&h++<200){const o=pool[R()*pool.length|0].userData.c.es;opts.add(o);}q.o=[...opts].sort(()=>R()-.5);q.a=q.o.indexOf(m.userData.c.es);}
+    qs.push(q);}
+  exam.on=true;exam.cfg=cfg;exam.qs=qs;exam.i=0;exam.ans=[];exam.t0=performance.now();$('#examSetup').hidden=true;$('#examRun').hidden=false;
+  clearInterval(exam.timer);exam.timer=setInterval(exTick,500);exQ();}
+function exLeft(){return exam.cfg.t?Math.max(0,exam.cfg.t-(performance.now()-exam.t0)/1000):null;}
+function exTick(){if(!exam.on)return;const l=exLeft();if(l!==null&&l<=0){finishExam();return;}exBar();}
+function exBar(){const q=exam.qs[exam.i];if(!q)return;const l=exLeft();const c=entry(q.id);
+  $('#quizbar').textContent=`Pregunta ${exam.i+1}/${exam.qs.length}${l!==null?` · ${Math.floor(l/60)}:${String(Math.floor(l%60)).padStart(2,'0')}`:''} · `+(q.ty==='find'?'Toca: '+label(c):'¿Qué estructura está resaltada?');$('#quizbar').hidden=false;}
+function exClearHl(){if(exam.hl){exam.hl.userData.hint=false;refreshState(exam.hl);exam.hl=null;}}
+function exQ(){exClearHl();const q=exam.qs[exam.i];if(!q){finishExam();return;}const el=$('#examRun');exBar();setXray(q.ty==='id');
+  if(q.ty==='id'){const m=findMesh(q.id);if(m){m.userData.hint=true;refreshState(m);exam.hl=m;focusMesh(m);}
+    el.innerHTML=`<p class="small"><b>Pregunta ${exam.i+1} de ${exam.qs.length}.</b> ¿Qué estructura está resaltada en el modelo?</p>${q.o.map((o,i)=>`<button class="opt" data-eo="${i}">${esc(o)}</button>`).join('')}<div class="row"><button class="btn" id="exSkip">Saltar</button><button class="btn" id="exEnd">Entregar</button></div>`;
+    el.querySelectorAll('[data-eo]').forEach(b=>b.onclick=()=>exAnswer(+b.dataset.eo===q.a,q.o[+b.dataset.eo]));}
+  else el.innerHTML=`<p class="small"><b>Pregunta ${exam.i+1} de ${exam.qs.length}.</b> Toca en el modelo: <b>${esc(label(entry(q.id)))}</b></p><div class="row"><button class="btn" id="exSkip">Saltar</button><button class="btn" id="exEnd">Entregar</button></div>`;
+  $('#exSkip').onclick=()=>exAnswer(false,'(sin respuesta)');$('#exEnd').onclick=finishExam;}
+function exAnswer(ok,given){exam.ans.push({ok,given});exam.i++;exQ();}
+function examPick(m){const q=exam.qs[exam.i];if(!q||q.ty!=='find')return;const c=m.userData.c,t=entry(q.id);exAnswer(c.en===t.en&&c.side===t.side,label(c));}
+function finishExam(){if(!exam.on)return;exam.on=false;clearInterval(exam.timer);exClearHl();setXray(false);$('#quizbar').hidden=true;
+  while(exam.ans.length<exam.qs.length)exam.ans.push({ok:false,given:'(sin tiempo)'});
+  const ok=exam.ans.filter(a=>a.ok).length,n=exam.qs.length,nota=Math.round(ok/n*100)/10,secs=Math.round((performance.now()-exam.t0)/1000);
+  const hist=store.get('exams',[]);hist.unshift({d:Date.now(),sys:exam.cfg.sys,b:exam.cfg.b,ok,n,secs});store.set('exams',hist.slice(0,20));
+  $('#examRun').innerHTML=`<h2 style="margin:4px 0">Nota: ${nota.toFixed(1).replace('.',',')} / 10</h2><p class="small">${ok} de ${n} correctas · ${Math.floor(secs/60)} min ${secs%60} s</p>
+   <div class="tblwrap"><table class="tbl"><thead><tr><th>#</th><th>Pregunta</th><th>Tu respuesta</th></tr></thead><tbody>${exam.qs.map((q,i)=>{const a=exam.ans[i],c=entry(q.id);return`<tr><td>${i+1}</td><td><button class="link small" data-exgo="${q.id}">${esc(label(c))}</button><br><span class="muted small">${q.ty==='find'?'tocar':'reconocer'}</span></td><td style="color:var(${a.ok?'--ok':'--bad'})">${a.ok?'Correcta':esc(a.given)}</td></tr>`;}).join('')}</tbody></table></div>
+   <div class="row"><button class="btn pri" id="exAgain">Nuevo examen</button><button class="btn" id="exRetry">Repetir el mismo</button></div>`;
+  $('#examRun').querySelectorAll('[data-exgo]').forEach(b=>b.onclick=()=>{const m=findMesh(b.dataset.exgo);if(m){select(m,null);focusMesh(m);}});
+  $('#exAgain').onclick=()=>{exam.shared=null;$('#examSetup').hidden=false;$('#examRun').hidden=true;renderExamSetup();};
+  $('#exRetry').onclick=()=>startExam(exam.cfg);}
+$('#exStart').onclick=()=>startExam(exCfg());
+$('#exLink').onclick=async()=>{const c=exCfg();c.seed=Math.random()*1e9|0;const url=exLink(c);let ok=false;try{await navigator.clipboard.writeText(url);ok=true;}catch(e){}
+  toast(ok?'Enlace del examen copiado: todos los que lo abran tendrán las mismas preguntas.':'Copia este enlace: '+url);};
+function readExamHash(){const h=location.hash.match(/#ex=([A-Za-z0-9_-]+)/);if(!h)return null;try{return JSON.parse(unb64u(h[1]));}catch(e){return null;}}
+
 /* ───────── Repaso espaciado (Leitner) ───────── */
 let SRS=store.get('srs',{});if(!SRS||typeof SRS!=='object')SRS={};
 const SRS_DAYS=[0,1,3,7,14,30],DAY=864e5;
@@ -1611,8 +1709,8 @@ let LANG=store.get('lang',null)||(/^pt/i.test(navigator.language||'')?'pt':/^en/
 let I18N=null;const _orig=new WeakMap(),_origA=new WeakMap();
 const nameL=r=>LANG==='en'?r[1]:LANG==='pt'&&I18N&&I18N.names[r[2]]||r[2];
 const SIDE_L=sd=>sd;
-const RX={en:[[/^(\d+) estructuras$/,'$1 structures'],[/^(\d+) % del ciclo$/,'$1 % of the cycle'],[/^ ?(\d+) de (\d+) archivos$/,' $1 of $2 files'],[/^Cargando (.*)$/,'Loading $1'],[/^Puntuación: (\d+) de (\d+)(.*)$/,'Score: $1 of $2$3'],[/^(.*) \(derecho\)$/,(m,a)=>trW(a)+' (right)'],[/^(.*) triángulos$/,'$1 triangles'],[/^Región · (.*)$/,'Region · $1'],[/^Sistema · (.*)$/,'System · $1'],[/^Mujer · (.*)$/,'Female · $1'],[/^(\d+) tarjetas · (\d+) pendientes hoy · (\d+) nuevas · (\d+) dominadas$/,'$1 cards · $2 due today · $3 new · $4 mastered'],[/^lado (izquierdo|derecho)$/,(m,a)=>a==='izquierdo'?'left side':'right side']],
- pt:[[/^(\d+) estructuras$/,'$1 estruturas'],[/^(\d+) % del ciclo$/,'$1 % do ciclo'],[/^ ?(\d+) de (\d+) archivos$/,' $1 de $2 arquivos'],[/^Cargando (.*)$/,'Carregando $1'],[/^Puntuación: (\d+) de (\d+)(.*)$/,'Pontuação: $1 de $2$3'],[/^(.*) \(derecho\)$/,(m,a)=>trW(a)+' (direito)'],[/^(.*) triángulos$/,'$1 triângulos'],[/^Región · (.*)$/,'Região · $1'],[/^Sistema · (.*)$/,'Sistema · $1'],[/^Mujer · (.*)$/,'Mulher · $1'],[/^(\d+) tarjetas · (\d+) pendientes hoy · (\d+) nuevas · (\d+) dominadas$/,'$1 cartões · $2 para hoje · $3 novos · $4 dominados'],[/^lado (izquierdo|derecho)$/,(m,a)=>a==='izquierdo'?'lado esquerdo':'lado direito']]};
+const RX={en:[[/^(\d+) estructuras$/,'$1 structures'],[/^(\d+) % del ciclo$/,'$1 % of the cycle'],[/^ ?(\d+) de (\d+) archivos$/,' $1 of $2 files'],[/^Cargando (.*)$/,'Loading $1'],[/^Puntuación: (\d+) de (\d+)(.*)$/,'Score: $1 of $2$3'],[/^(.*) \(derecho\)$/,(m,a)=>trW(a)+' (right)'],[/^(.*) \(izquierdo\)$/,(m,a)=>trW(a)+' (left)'],[/^(.*) triángulos$/,'$1 triangles'],[/^Región · (.*)$/,'Region · $1'],[/^Sistema · (.*)$/,'System · $1'],[/^Mujer · (.*)$/,'Female · $1'],[/^(\d+) tarjetas · (\d+) pendientes hoy · (\d+) nuevas · (\d+) dominadas$/,'$1 cards · $2 due today · $3 new · $4 mastered'],[/^lado (izquierdo|derecho)$/,(m,a)=>a==='izquierdo'?'left side':'right side']],
+ pt:[[/^(\d+) estructuras$/,'$1 estruturas'],[/^(\d+) % del ciclo$/,'$1 % do ciclo'],[/^ ?(\d+) de (\d+) archivos$/,' $1 de $2 arquivos'],[/^Cargando (.*)$/,'Carregando $1'],[/^Puntuación: (\d+) de (\d+)(.*)$/,'Pontuação: $1 de $2$3'],[/^(.*) \(derecho\)$/,(m,a)=>trW(a)+' (direito)'],[/^(.*) \(izquierdo\)$/,(m,a)=>trW(a)+' (esquerdo)'],[/^(.*) triángulos$/,'$1 triângulos'],[/^Región · (.*)$/,'Região · $1'],[/^Sistema · (.*)$/,'Sistema · $1'],[/^Mujer · (.*)$/,'Mulher · $1'],[/^(\d+) tarjetas · (\d+) pendientes hoy · (\d+) nuevas · (\d+) dominadas$/,'$1 cartões · $2 para hoje · $3 novos · $4 dominados'],[/^lado (izquierdo|derecho)$/,(m,a)=>a==='izquierdo'?'lado esquerdo':'lado direito']]};
 const trW=w=>{const D=I18N&&I18N.ui[LANG]||{};return D[w]??w;};
 const PREF=['Mostrar','Opacidad','Alta resolución','Posición del plano'];
 function trText(t){if(LANG==='es'||!I18N)return null;const D=I18N.ui[LANG]||{};const k=t.trim();if(!k)return null;
@@ -1685,17 +1783,19 @@ let CASES=[],caseOn=null;
 function caseIds(names,side){const out=[];for(const en of names||[]){let r=Object.values(CAT).filter(x=>x[1]===en&&!x[6]&&sexOk(x[4]));
   if(!r.length)r=Object.values(CAT).filter(x=>x[1]===en&&sexOk(x[4]));
   const pick=r.filter(x=>!x[5]||x[5]===side);(pick.length?pick:r.slice(0,1)).forEach(x=>out.push(x[0]));}return out;}
-function clearCase(){if(!caseOn)return;for(const id of caseOn.all){const m=findMesh(id);if(m){m.userData.hint=false;m.userData.ag=false;refreshState(m);}}caseOn=null;isoSet=null;applySystems();}
-async function openCase(i){const cs=CASES[i];if(!cs)return;if(BODY==='vh')setBody('m');clearCase();select(null);if(gait.on)setGait(false);
+function clearCase(){if(!caseOn)return;if(caseOn.cut){for(const k in PLANES)PLANES[k].cut=false;updatePlanes();renderPlanes();}isoOnly=false;for(const id of caseOn.all){const m=findMesh(id);if(m){m.userData.hint=false;m.userData.ag=false;refreshState(m);}}caseOn=null;isoSet=null;applySystems();}
+async function openCase(i){const cs=CASES[i];if(!cs)return;if(cs.body&&BODY!==cs.body)setBody(cs.body);else if(!cs.body&&BODY==='vh')setBody('m');clearCase();select(null);if(gait.on)setGait(false);
   const side=cs.side||'derecho',L=caseIds(cs.lesion,side),A=caseIds(cs.afectados,side),R=caseIds(cs.relacionados,side),all=[...new Set([...L,...A,...R])];
   const need=[...new Set(all.map(id=>CAT[id][4]))];for(const k of need){SYS[k].on=true;if(SYS[k].op<.3)SYS[k].op=1;}SYS.oseo.on=true;renderSysList();
   await Promise.all([...need,'oseo'].map(k=>loadSys(k)));
-  caseOn={cs,all};isoSet=new Set(all);hiddenIds.clear();applySystems();
+  caseOn={cs,all};isoOnly=!!cs.solo;isoSet=new Set(all);hiddenIds.clear();
+  if(cs.cut){for(const k in PLANES){PLANES[k].cut=k===cs.cut.p;PLANES[k].show=false;if(k===cs.cut.p)PLANES[k].pos=cs.cut.pos;}caseOn.cut=true;updatePlanes();renderPlanes();}
+  applySystems();
   for(const id of L){const m=findMesh(id);if(m){m.userData.hint=true;refreshState(m);}}
   for(const id of A){if(L.includes(id))continue;const m=findMesh(id);if(m){m.userData.ag=true;refreshState(m);}}
   const box=new THREE.Box3();for(const id of [...L,...A]){const m=findMesh(id);if(m){m.geometry.computeBoundingBox();box.union(m.geometry.boundingBox);}}
   if(!box.isEmpty()){const c=box.getCenter(new V3()),sz=box.getSize(new V3()).length();focusOn(c,Math.max(0.5,sz*1.6));}
-  setView({anterior:'ant',posterior:'post',lateral:side==='izquierdo'?'lati':'latd',medial:side==='izquierdo'?'latd':'lati'}[cs.camara]||'ant');
+  setView({anterior:'ant',posterior:'post',superior:'sup',inferior:'inf',lateral:side==='izquierdo'?'lati':'latd',medial:side==='izquierdo'?'latd':'lati'}[cs.camara]||'ant');
   renderCases(i);}
 function renderCases(open){const el=$('#caseBox');if(!el)return;
   if(open==null){el.innerHTML=`<div class="card"><h3>Casos clínicos</h3><p class="muted small">Cada caso resalta en el modelo la estructura lesionada (turquesa) y los músculos que pierden su función (naranja), con la explicación anatómica, los signos y las pruebas.</p>${CASES.map((c,i)=>`<div class="lesson"><div><b>${esc(c.titulo)}</b><span class="muted small">${esc(c.region)}</span></div><button class="btn" data-case="${i}">Abrir</button></div>`).join('')}</div>`;
@@ -1787,11 +1887,12 @@ let LESSONS=[],lesson=null,lstep=0,lhl=[];
 function renderLessons(){
   const box=$('#lecBox');
   if(!lesson){box.innerHTML=`<div class="view"><p class="muted small">Recorridos por región: cada paso muestra solo las estructuras que explica, con el resto del esqueleto como referencia.</p>${LESSONS.map((l,i)=>`<div class="lesson"><div><b>${esc(l.t)}</b><span class="muted small">${esc(l.r)} · ${l.steps.length} pasos</span></div><button class="btn pri" data-les="${i}">Empezar</button></div>`).join('')}</div>`;
-    box.querySelectorAll('[data-les]').forEach(b=>b.onclick=()=>{lesson=LESSONS[+b.dataset.les];lstep=0;showStep();});return;}
+    box.querySelectorAll('[data-les]').forEach(b=>b.onclick=()=>{lesson=LESSONS[+b.dataset.les];lstep=0;if(lesson.body&&BODY!==lesson.body)setBody(lesson.body);else if(!lesson.body&&BODY==='vh')setBody('m');showStep();});return;}
   const n=lesson.steps.length;
-  if(lstep>=n){const q=lesson.q;
-    box.innerHTML=`<div class="view"><div class="steps">${lesson.steps.map(()=>'<i class="on"></i>').join('')}</div><h3>${esc(lesson.t)} · repaso</h3><h2>${esc(q.p)}</h2><div id="qOpts">${q.o.map((o,i)=>`<button class="opt" data-o="${i}">${esc(o)}</button>`).join('')}</div><p id="qRes" class="small"></p><div class="row"><button class="btn" id="lBack">Volver al último paso</button><button class="btn pri" id="lExit">Terminar lección</button></div></div>`;
-    box.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{const i=+b.dataset.o;box.querySelectorAll('[data-o]').forEach(x=>{x.disabled=true;if(+x.dataset.o===q.a)x.classList.add('ok');});if(i!==q.a)b.classList.add('bad');$('#qRes').textContent=i===q.a?'Correcto.':'La respuesta correcta está marcada en verde.';});
+  if(lstep>=n){const QS=Array.isArray(lesson.q)?lesson.q:[lesson.q];let ok=0,done=0;
+    box.innerHTML=`<div class="view"><div class="steps">${lesson.steps.map(()=>'<i class="on"></i>').join('')}</div><h3>${esc(lesson.t)} · repaso</h3>${QS.map((q,j)=>`<div class="lq" data-q="${j}"><h2>${esc(q.p)}</h2><div>${q.o.map((o,i)=>`<button class="opt" data-o="${i}">${esc(o)}</button>`).join('')}</div><p class="small qres"></p></div>`).join('')}<p id="qRes" class="small"></p><div class="row"><button class="btn" id="lBack">Volver al último paso</button><button class="btn pri" id="lExit">Terminar lección</button></div></div>`;
+    box.querySelectorAll('.lq').forEach(w=>{const q=QS[+w.dataset.q];w.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{const i=+b.dataset.o;w.querySelectorAll('[data-o]').forEach(x=>{x.disabled=true;if(+x.dataset.o===q.a)x.classList.add('ok');});if(i!==q.a)b.classList.add('bad');else ok++;done++;
+      w.querySelector('.qres').textContent=i===q.a?'Correcto.':'La respuesta correcta está marcada en verde.';if(QS.length>1&&done===QS.length)$('#qRes').innerHTML=`<b>Resultado: ${ok} de ${QS.length}</b>`;});});
     $('#lBack').onclick=()=>{lstep=n-1;showStep();};$('#lExit').onclick=exitLesson;return;}
   const st=lesson.steps[lstep];
   box.innerHTML=`<div class="view"><div class="steps">${lesson.steps.map((_,i)=>`<i class="${i<=lstep?'on':''}"></i>`).join('')}</div>
@@ -1805,18 +1906,19 @@ function clearLessonHl(){lhl.forEach(m=>{m.userData.hint=false;refreshState(m);}
 async function showStep(){
   renderLessons();renderActbar();clearLessonHl();if(!lesson||lstep>=lesson.steps.length) return;
   const st=lesson.steps[lstep];
-  const rows=Object.values(CAT).filter(r=>st.show.includes(r[1])&&(!r[5]||r[5]==='derecho'));
+  const rows=Object.values(CAT).filter(r=>st.show.includes(r[1])&&sexOk(r[4])&&(lesson.both||!r[5]||r[5]==='derecho'));
   const need=[...new Set(rows.map(r=>r[4]))];
   await Promise.all(need.map(k=>{SYS[k].on=true;if(SYS[k].op<.3)SYS[k].op=1;return loadSys(k);}));
   if(!lesson||lesson.steps[lstep]!==st) return;
   SYS.oseo.on=true;setXray(false);
-  isoSet=new Set(rows.map(r=>r[0]));patchFocus=null;applySystems();renderSysList();
+  {const cu=st.cut||null;if(cu||lesson.cutUsed){for(const k in PLANES){PLANES[k].cut=!!(cu&&cu.p===k);PLANES[k].show=false;if(cu&&cu.p===k)PLANES[k].pos=cu.pos;}updatePlanes();renderPlanes();}if(cu)lesson.cutUsed=true;}
+  isoOnly=!!(lesson.only||st.only);isoSet=new Set(rows.map(r=>r[0]));patchFocus=null;applySystems();renderSysList();
   const box=new THREE.Box3();
   for(const r of rows){const m=findMesh(r[0]);if(!m)continue;if(r[4]!=='oseo'||rows.every(x=>x[4]==='oseo')){m.userData.hint=true;refreshState(m);lhl.push(m);}m.geometry.computeBoundingBox();box.union(m.geometry.boundingBox);}
   if(!box.isEmpty()){const sz=box.getSize(new V3()).length();focusOn(box.getCenter(new V3()),Math.max(0.35,sz*2.1));}
   setView(st.view||'ant');
 }
-function exitLesson(){clearLessonHl();lesson=null;isoSet=null;applySystems();renderLessons();}
+function exitLesson(){clearLessonHl();isoOnly=false;if(lesson&&lesson.cutUsed){for(const k in PLANES)PLANES[k].cut=false;lesson.cutUsed=false;updatePlanes();renderPlanes();}lesson=null;isoSet=null;applySystems();renderLessons();}
 $('#xrayBtn').onclick=()=>setXray(!xray);$('#liteChk').onchange=e=>setLite(e.target.checked);setLite(lite);
 /* Teclado: flechas giran, +/− acercan, 1–6 vistas, X rayos X, E estudio, Esc deselecciona, / busca */
 document.addEventListener('keydown',e=>{const t=e.target;if(t&&(/INPUT|TEXTAREA|SELECT/.test(t.tagName)||t.isContentEditable))return;if(e.ctrlKey||e.metaKey||e.altKey)return;
@@ -1912,6 +2014,7 @@ Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data
   if(isPhone()){setSheet('peek');orb.T.r=orb.r=4.4;}
   setBody(BODY);
   if(shared)applyShared(shared);
+  const exS=readExamHash();if(exS){exam.shared=exS;if(exS.b&&exS.b!==BODY)setBody(exS.b);showTab('lec');renderExamSetup(exS);$('#examCard').scrollIntoView({block:'start'});}else renderExamSetup();
   for(const k in SYS) if(SYS[k].on&&sexOk(k)&&SYS[k].state==='idle') loadSys(k);
 }).catch(()=>{$('#hintTxt').textContent='No se pudieron cargar los datos del atlas. Recarga la página para intentarlo de nuevo.';});
 })();
@@ -1924,7 +2027,7 @@ Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 54 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v19');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v20');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();

@@ -17,8 +17,12 @@ Funciona en el navegador del ordenador, la tableta o el móvil, sin instalar nad
 - **Fichas en español** con nombre latino: origen, inserción, inervación, irrigación, acción, biomecánica por plano y eje, prueba muscular manual (Daniels) y nota clínica.
 - **Movimiento**: rangos articulares de referencia (AAOS), simulador con deformación del modelo, agonistas, goniometría y registro de mediciones.
 - **Idiomas**: español, inglés y portugués (interfaz y nombres de las 4.715 estructuras; las fichas detalladas, por ahora en español).
-- **Casos clínicos**: 14 casos (lesiones nerviosas, manguito rotador, LCA, esguince de tobillo, tendón calcáneo, Trendelenburg…) que resaltan la estructura lesionada y los músculos afectados.
+- **Casos clínicos**: 20 casos (lesiones nerviosas, manguito rotador, LCA, esguince de tobillo, tendón calcáneo, Trendelenburg…, y en la mujer: cáncer de mama y drenaje axilar, prolapso de órganos pélvicos, endometriosis, dolor de cintura pélvica y diástasis en el embarazo, desgarro perineal y neuralgia del pudendo) que resaltan la estructura lesionada y las afectadas.
+- **Lecciones guiadas**: 11 recorridos, entre ellos la pelvis y el suelo pélvico femenino, el corazón por dentro (corte de cuatro cámaras y válvulas) y los núcleos y ventrículos del cerebro, con repaso final.
+- **Cortes tipo imagen médica** (v20): la sección se rellena con el color de cada tejido o en grises aproximados de TC o RM T1, y puede verse solo la lámina del corte, como un tomograma.
+- **Modo examen** (v20): preguntas cronometradas (tocar o reconocer estructuras), nota final y enlace para que toda la clase haga el mismo examen.
 - **Repaso espaciado** (Leitner) por región o sistema, y práctica de identificación.
+- **Recto y conducto anal** como estructuras propias (antes formaban parte del colon sigmoide del atlas), y uniones entre regiones de piel soldadas para eliminar grietas.
 - **Compartir vista**: un enlace abre el atlas exactamente en la misma vista (capas, cámara, cortes, estructura, marcha).
 - **Marcha patológica**: Trendelenburg, steppage, antiálgica, hemiparética, en tijera, parkinsoniana y rodilla rígida.
 - **Ciclo de la marcha**: las 8 fases de Perry animadas sobre el modelo, con ángulos de cadera, rodilla y tobillo y los músculos activos (concéntrica, excéntrica, isométrica).

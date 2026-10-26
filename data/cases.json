@@ -1,580 +1,837 @@
 [
- {
-  "id": "radial-canal-torsion",
-  "titulo": "Lesión del nervio radial en el canal de torsión (mano péndula)",
-  "region": "miembro superior",
-  "side": "derecho",
-  "presentacion": "Varón de 34 años con fractura diafisaria de húmero derecho tras una caída de moto. Al explorarlo no puede extender la muñeca ni los dedos y refiere hormigueo en el dorso de la primera comisura.",
-  "anatomia": "El nervio radial rodea la cara posterior de la diáfisis humeral en el surco del nervio radial (canal de torsión), en contacto directo con el hueso, por lo que se lesiona en las fracturas del tercio medio. Las ramas para el tríceps suelen salir antes del canal, de modo que la extensión del codo se conserva casi siempre. Por debajo quedan denervados los extensores de muñeca, dedos y pulgar, el braquiorradial y el supinador. La rama superficial sensitiva explica la hipoestesia del dorso de la primera comisura.",
-  "lesion": [
-   "Radial nerve",
-   "Superficial branch of radial nerve"
-  ],
-  "afectados": [
-   "Brachioradialis muscle",
-   "Extensor carpi radialis longus",
-   "Extensor carpi radialis brevis",
-   "Extensor digitorum",
-   "Extensor digiti minimi",
-   "Humeral head of extensor carpi ulnaris",
-   "Ulnar head of extensor carpi ulnaris",
-   "Supinator",
-   "Abductor pollicis longus",
-   "Extensor pollicis brevis",
-   "Extensor pollicis longus",
-   "Extensor indicis"
-  ],
-  "relacionados": [
-   "Humerus",
-   "Lateral head of triceps brachii",
-   "Medial head of triceps brachii"
-  ],
-  "signos": [
-   "Mano péndula: imposibilidad de extender la muñeca",
-   "Imposibilidad de extender las articulaciones metacarpofalángicas y el pulgar",
-   "Extensión del codo conservada",
-   "Hipoestesia en el dorso de la primera comisura (tabaquera anatómica)",
-   "Debilidad de la prensión por pérdida del efecto tenodesis de los extensores"
-  ],
-  "pruebas": [
-   "Balance muscular de extensores de muñeca y dedos (Kendall), con la muñeca estabilizada pasivamente",
-   "Prueba de extensión del pulgar: el paciente no puede separar el pulgar del plano de la mesa con la palma apoyada",
-   "Exploración de la sensibilidad en el territorio de la rama superficial del nervio radial",
-   "Electromiograma y estudio de conducción nerviosa a las 3–4 semanas para estimar el pronóstico"
-  ],
-  "fisioterapia": "Férula dinámica de extensión de muñeca y dedos para preservar la función y evitar el sobreestiramiento de los extensores, con movilización pasiva diaria. Durante la reinervación, que suele empezar por el braquiorradial, se añaden electroestimulación y fortalecimiento progresivo.",
-  "camara": "posterior"
- },
- {
-  "id": "tunel-carpiano",
-  "titulo": "Síndrome del túnel carpiano",
-  "region": "miembro superior",
-  "side": "derecho",
-  "presentacion": "Mujer de 52 años, administrativa, con parestesias nocturnas en los dedos pulgar, índice y medio de la mano derecha que mejoran al sacudir la mano. En los últimos meses se le caen objetos y nota la eminencia tenar más plana.",
-  "anatomia": "El túnel carpiano está formado por los huesos del carpo y el retináculo flexor, y por él pasan el nervio mediano y los tendones de los flexores largos de los dedos y del pulgar. Cualquier aumento de presión dentro del túnel (tenosinovitis, edema, embarazo, hipotiroidismo) comprime el nervio. La rama palmar del mediano pasa por encima del retináculo, por lo que la sensibilidad de la palma central se conserva, y este dato ayuda a localizar la lesión. La rama motora recurrente inerva la musculatura tenar lateral y los dos primeros lumbricales.",
-  "lesion": [
-   "Median nerve"
-  ],
-  "afectados": [
-   "Abductor pollicis brevis",
-   "Opponens pollicis muscle",
-   "Superficial head of flexor pollicis brevis",
-   "Lumbrical muscles of hand"
-  ],
-  "relacionados": [
-   "Flexor retinaculum of wrist",
-   "Palmar branch of median nerve",
-   "Flexor pollicis longus",
-   "Scaphoid bone"
-  ],
-  "signos": [
-   "Parestesias nocturnas en el territorio del nervio mediano (del pulgar a la mitad radial del anular)",
-   "Sensibilidad de la eminencia tenar conservada (rama palmar intacta)",
-   "Atrofia de la eminencia tenar en fases avanzadas",
-   "Debilidad de la abducción y la oposición del pulgar",
-   "Torpeza en la pinza fina"
-  ],
-  "pruebas": [
-   "Signo de Tinel: la percusión sobre el retináculo flexor reproduce las parestesias",
-   "Prueba de Phalen: flexión máxima de la muñeca durante 60 s que provoca los síntomas",
-   "Prueba de compresión carpiana de Durkan: presión directa sobre el túnel durante 30 s",
-   "Fuerza de abducción del pulgar (abductor corto del pulgar) contra resistencia",
-   "Estudio de conducción nerviosa: aumento de la latencia distal del mediano"
-  ],
-  "fisioterapia": "Ortesis nocturna con la muñeca en posición neutra, ejercicios de deslizamiento neural y tendinoso, y educación ergonómica. Si hay déficit motor progresivo se indica la liberación quirúrgica, seguida de movilización precoz y cuidado de la cicatriz.",
-  "camara": "anterior"
- },
- {
-  "id": "cubital-codo",
-  "titulo": "Lesión del nervio cubital en el codo (mano en garra)",
-  "region": "miembro superior",
-  "side": "derecho",
-  "presentacion": "Varón de 45 años que apoya habitualmente el codo en la ventanilla del coche. Refiere hormigueo en el meñique y la mitad cubital del anular, torpeza para abrochar botones y pérdida de masa entre el primer y el segundo metacarpiano.",
-  "anatomia": "El nervio cubital pasa por detrás del epicóndilo medial del húmero, en el surco del nervio cubital, y entra en el antebrazo por el túnel cubital, entre las dos cabezas del flexor cubital del carpo. Allí es superficial y queda expuesto a la presión y al estiramiento con la flexión mantenida del codo. Inerva el flexor cubital del carpo, la mitad medial del flexor profundo de los dedos y casi toda la musculatura intrínseca de la mano. La garra cubital (hiperextensión de las metacarpofalángicas y flexión de las interfalángicas del 4.º y 5.º dedos) aparece por la parálisis de los lumbricales 3.º y 4.º y de los interóseos; en la lesión alta la garra es menos marcada que en la distal porque el flexor profundo también está débil (paradoja cubital).",
-  "lesion": [
-   "Ulnar nerve"
-  ],
-  "afectados": [
-   "Humeral head of flexor carpi ulnaris",
-   "Ulnar head of flexor carpi ulnaris",
-   "Flexor digitorum profundus",
-   "Abductor digiti minimi of hand",
-   "Flexor digiti minimi of hand",
-   "Opponens digiti minimi muscle of hand",
-   "Dorsal interossei muscles of hand",
-   "Palmar interossei muscles",
-   "Lumbrical muscles of hand",
-   "Oblique head of adductor pollicis",
-   "Transverse head of adductor pollicis",
-   "Deep head of flexor pollicis brevis"
-  ],
-  "relacionados": [
-   "Humerus",
-   "Ulna",
-   "Ulnar collateral ligament",
-   "Dorsal branch of ulnar nerve"
-  ],
-  "signos": [
-   "Mano en garra cubital en el 4.º y 5.º dedos",
-   "Atrofia del primer espacio interóseo dorsal y de la eminencia hipotenar",
-   "Hipoestesia del meñique y de la mitad cubital del anular, incluido el dorso (la rama dorsal sale por encima de la muñeca)",
-   "Signo de Wartenberg: el meñique queda en abducción",
-   "Debilidad de la abducción y la aducción de los dedos"
-  ],
-  "pruebas": [
-   "Signo de Froment: al sujetar un papel entre pulgar e índice se flexiona la interfalángica del pulgar (el flexor largo del pulgar suple al aductor)",
-   "Prueba de flexión del codo: flexión máxima con la muñeca extendida durante 1 min que reproduce las parestesias",
-   "Signo de Tinel en el surco del nervio cubital, detrás del epicóndilo medial",
-   "Prueba de los interóseos: abducción del índice contra resistencia (primer interóseo dorsal)",
-   "Estudio de conducción con enlentecimiento focal a nivel del codo"
-  ],
-  "fisioterapia": "Evitar la flexión mantenida y el apoyo sobre el codo (férula nocturna en extensión relativa), con técnicas de deslizamiento neural. Ortesis antigarra que bloquea la hiperextensión metacarpofalángica y fortalecimiento de la musculatura intrínseca durante la recuperación.",
-  "camara": "medial"
- },
- {
-  "id": "axilar-cuello-quirurgico",
-  "titulo": "Lesión del nervio axilar (fractura del cuello quirúrgico del húmero)",
-  "region": "miembro superior",
-  "side": "derecho",
-  "presentacion": "Mujer de 68 años con fractura del cuello quirúrgico del húmero derecho tras caer sobre el brazo. Semanas después no consigue separar el brazo del tronco, el contorno del hombro está aplanado y tiene una zona de anestesia en la cara lateral del brazo.",
-  "anatomia": "El nervio axilar sale de la axila por el espacio cuadrangular junto con la arteria circunfleja humeral posterior y rodea el cuello quirúrgico del húmero por detrás, pegado al hueso. Por eso se lesiona en las fracturas de esa zona y en las luxaciones anteriores del hombro. Inerva el deltoides y el redondo menor, y a través del nervio cutáneo braquial lateral superior la piel de la cara lateral del hombro («zona de la charretera»). La abducción más allá de los primeros grados queda muy limitada, aunque el supraespinoso puede iniciarla.",
-  "lesion": [
-   "Axillary nerve",
-   "Superior lateral brachial cutaneous nerve"
-  ],
-  "afectados": [
-   "Clavicular part of deltoid muscle",
-   "Acromial part of deltoid muscle",
-   "Scapular spinal part of deltoid muscle",
-   "Teres minor muscle"
-  ],
-  "relacionados": [
-   "Humerus",
-   "Posterior circumflex humeral artery",
-   "Long head of triceps brachii",
-   "Teres major muscle"
-  ],
-  "signos": [
-   "Atrofia del deltoides con hombro aplanado y acromion prominente",
-   "Pérdida de fuerza de la abducción del hombro (más allá de unos 15°)",
-   "Debilidad de la flexión, la extensión y la rotación externa del hombro",
-   "Hipoestesia en la cara lateral del hombro («zona de la charretera»)"
-  ],
-  "pruebas": [
-   "Balance muscular del deltoides en sus tres porciones (Kendall)",
-   "Prueba de sensibilidad en la «zona de la charretera», sobre la inserción del deltoides",
-   "Prueba de retraso en extensión (extension lag sign) del deltoides",
-   "Electromiograma del deltoides a las 3–4 semanas"
-  ],
-  "fisioterapia": "Tras consolidar la fractura, movilización pasiva y activa asistida para evitar la rigidez glenohumeral, y electroestimulación del deltoides. Fortalecimiento progresivo del deltoides y del manguito cuando aparecen signos de reinervación.",
-  "camara": "posterior"
- },
- {
-  "id": "toracico-largo-escapula-alada",
-  "titulo": "Lesión del nervio torácico largo (escápula alada)",
-  "region": "tronco",
-  "side": "derecho",
-  "presentacion": "Varón de 28 años que, tras varias semanas cargando una mochila pesada, nota que el borde medial de la escápula derecha sobresale al empujar una pared. Tiene dificultad para elevar el brazo por encima de la cabeza y no refiere déficit sensitivo.",
-  "anatomia": "El nervio torácico largo nace de las raíces C5–C7, atraviesa el escaleno medio y desciende por la cara lateral de la pared torácica sobre el serrato anterior, superficial y con un trayecto largo. Es vulnerable a la compresión (mochilas), al estiramiento y a la cirugía (mastectomía con vaciamiento axilar). El serrato anterior mantiene la escápula pegada al tórax y la rota hacia arriba junto con el trapecio. Sin él, el borde medial y el ángulo inferior se separan de la pared torácica. Es un nervio solo motor, por lo que no hay alteración de la sensibilidad.",
-  "lesion": [
-   "Long thoracic nerve"
-  ],
-  "afectados": [
-   "Serratus anterior muscle",
-   "Scapula"
-  ],
-  "relacionados": [
-   "Scalenus medius muscle",
-   "Descending part of trapezius muscle",
-   "Rhomboid major muscle",
-   "Fifth rib"
-  ],
-  "signos": [
-   "Escápula alada medial: el borde medial y el ángulo inferior se separan del tórax",
-   "Desplazamiento medial de la escápula",
-   "Dificultad para la flexión y la abducción por encima de 90° por falta de rotación superior",
-   "Sensibilidad normal"
-  ],
-  "pruebas": [
-   "Prueba de empuje contra la pared (flexión de brazos en pared): se acentúa el aleteo",
-   "Flexión resistida del hombro a 90° observando el borde medial de la escápula",
-   "Diagnóstico diferencial con la escápula alada lateral por lesión del nervio accesorio (trapecio)",
-   "Electromiograma del serrato anterior"
-  ],
-  "fisioterapia": "Evitar la carga sobre el hombro y el estiramiento del nervio; considerar una ortesis escapular. Fortalecimiento progresivo del serrato anterior (push-up plus, punching) y control motor escapulotorácico durante la reinervación.",
-  "camara": "posterior"
- },
- {
-  "id": "peroneo-comun-pie-caido",
-  "titulo": "Lesión del nervio peroneo común en la cabeza del peroné (pie caído)",
-  "region": "miembro inferior",
-  "side": "derecho",
-  "presentacion": "Varón de 40 años al que se le retira un yeso inguinopédico mal almohadillado. No puede levantar la punta del pie derecho, arrastra los dedos al caminar y tiene hipoestesia en el dorso del pie.",
-  "anatomia": "El nervio peroneo común (fibular común) rodea por fuera el cuello del peroné, justo debajo de su cabeza, en una posición muy superficial y fija contra el hueso. Por eso se lesiona con yesos, cruzando las piernas, en fracturas del cuello del peroné o en lesiones en varo de la rodilla. Allí se divide en el nervio peroneo profundo (músculos del compartimento anterior y extensor corto de los dedos) y el superficial (peroneos largo y corto y piel del dorso del pie). Su afectación produce un déficit de la flexión dorsal y de la eversión, con la inversión conservada (tibial posterior, inervado por el nervio tibial).",
-  "lesion": [
-   "Common fibular nerve",
-   "Deep fibular nerve",
-   "Superficial fibular nerve"
-  ],
-  "afectados": [
-   "Tibialis anterior muscle",
-   "Extensor hallucis longus",
-   "Extensor digitorum longus",
-   "Fibularis tertius muscle",
-   "Extensor digitorum brevis",
-   "Extensor hallucis brevis",
-   "Fibularis longus muscle",
-   "Fibularis brevis muscle"
-  ],
-  "relacionados": [
-   "Fibula",
-   "Long head of biceps femoris",
-   "Tibialis posterior muscle"
-  ],
-  "signos": [
-   "Pie caído: déficit de la flexión dorsal del tobillo y de la extensión de los dedos",
-   "Marcha en estepaje (flexión exagerada de cadera y rodilla para no arrastrar el pie)",
-   "Debilidad de la eversión del pie, con la inversión conservada",
-   "Hipoestesia del dorso del pie y de la cara lateral de la pierna; primer espacio interdigital (peroneo profundo)"
-  ],
-  "pruebas": [
-   "Balance muscular del tibial anterior y del extensor largo del dedo gordo (Kendall)",
-   "Prueba de la marcha sobre talones: el paciente no puede",
-   "Signo de Tinel sobre el cuello del peroné",
-   "Diferenciar de una radiculopatía L5: en ella la inversión (tibial posterior) y la abducción de cadera (glúteo medio) también están débiles",
-   "Estudio de conducción con bloqueo a nivel de la cabeza del peroné"
-  ],
-  "fisioterapia": "Ortesis antiequino (rígida o dinámica) para la marcha y prevención de la retracción del tríceps sural con estiramientos. Electroestimulación y fortalecimiento progresivo de dorsiflexores y eversores a medida que se reinervan.",
-  "camara": "lateral"
- },
- {
-  "id": "nervio-femoral",
-  "titulo": "Lesión del nervio femoral",
-  "region": "miembro inferior",
-  "side": "derecho",
-  "presentacion": "Mujer de 60 años anticoagulada que desarrolla un hematoma retroperitoneal en el músculo iliopsoas. Presenta dolor inguinal, la rodilla derecha le falla al subir escaleras y nota hipoestesia en la cara anteromedial del muslo y de la pierna.",
-  "anatomia": "El nervio femoral (L2–L4) desciende entre los músculos psoas e ilíaco y entra en el muslo por debajo del ligamento inguinal, lateral a la arteria femoral. Puede comprimirse en la fosa ilíaca (hematoma del iliopsoas, cirugía pélvica o de cadera). Inerva el ilíaco, el sartorio, el pectíneo y el cuádriceps, y su rama terminal sensitiva es el nervio safeno. La pérdida del cuádriceps impide bloquear la rodilla en extensión durante la fase de apoyo, y la del ilíaco debilita la flexión de cadera (el psoas, inervado por ramas directas del plexo, se conserva en parte).",
-  "lesion": [
-   "Femoral nerve",
-   "Saphenous nerve"
-  ],
-  "afectados": [
-   "Iliacus muscle",
-   "Sartorius muscle",
-   "Pectineus muscle",
-   "Rectus femoris muscle",
-   "Vastus lateralis muscle",
-   "Vastus intermedius muscle",
-   "Vastus medialis muscle"
-  ],
-  "relacionados": [
-   "Inguinal ligament",
-   "Femoral artery",
-   "Psoas major",
-   "Patella"
-  ],
-  "signos": [
-   "Debilidad de la extensión de la rodilla: la rodilla cede en carga y al subir escaleras",
-   "Reflejo rotuliano disminuido o abolido",
-   "Debilidad de la flexión de cadera",
-   "Hipoestesia de la cara anterior del muslo y de la cara medial de la pierna (nervio safeno)",
-   "Atrofia del cuádriceps"
-  ],
-  "pruebas": [
-   "Balance muscular del cuádriceps y del iliopsoas (Kendall)",
-   "Reflejo rotuliano (L4)",
-   "Prueba de estiramiento del nervio femoral: en decúbito prono, flexión de rodilla con extensión de cadera que reproduce el dolor",
-   "Prueba de levantarse de una silla o subir un escalón con una sola pierna",
-   "Electromiograma y pruebas de imagen (TC) de la fosa ilíaca"
-  ],
-  "fisioterapia": "Ortesis o bastón para dar seguridad a la rodilla en la marcha y electroestimulación del cuádriceps. Fortalecimiento progresivo en cadena cerrada y reeducación de la marcha y de las escaleras cuando aparece la reinervación.",
-  "camara": "anterior"
- },
- {
-  "id": "ciatica",
-  "titulo": "Ciática / afectación del nervio ciático",
-  "region": "miembro inferior",
-  "side": "derecho",
-  "presentacion": "Varón de 42 años con dolor lumbar irradiado por la cara posterior del muslo y la cara lateral de la pierna derecha hasta el pie, que empeora al sentarse y al toser. Refiere hormigueo en el dorso del pie y cierta debilidad para caminar de talones.",
-  "anatomia": "El nervio ciático se forma a partir de las raíces L4–S3 y sale de la pelvis por el foramen ciático mayor, habitualmente por debajo del piriforme. Desciende por la cara posterior del muslo, donde inerva los isquiotibiales y la porción isquiotibial del aductor mayor, y en la fosa poplítea se divide en los nervios tibial y peroneo común. La causa más frecuente de ciática es una hernia discal L4–L5 o L5–S1 que comprime la raíz L5 o S1; con menos frecuencia el nervio se atrapa a nivel glúteo (síndrome del piriforme) o se lesiona en la cirugía o la luxación de cadera. El patrón de déficit depende del nivel: radicular (dermatoma y miotoma) o troncular (todo lo distal a la lesión).",
-  "lesion": [
-   "Sciatic nerve",
-   "Tibial nerve",
-   "Common fibular nerve"
-  ],
-  "afectados": [
-   "Long head of biceps femoris",
-   "Short head of biceps femoris",
-   "Semitendinosus muscle",
-   "Semimembranosus muscle",
-   "Adductor magnus",
-   "Medial head of gastrocnemius",
-   "Lateral head of gastrocnemius",
-   "Soleus muscle",
-   "Tibialis posterior muscle",
-   "Tibialis anterior muscle",
-   "Extensor hallucis longus",
-   "Fibularis longus muscle"
-  ],
-  "relacionados": [
-   "Piriformis muscle",
-   "Intervertebral disc L4-L5",
-   "Intervertebral disc L5-S1",
-   "Sacrum"
-  ],
-  "signos": [
-   "Dolor irradiado por la cara posterior del muslo por debajo de la rodilla",
-   "Parestesias en el dermatoma L5 (dorso del pie, dedo gordo) o S1 (borde lateral y planta del pie)",
-   "Debilidad de la extensión del dedo gordo y de la dorsiflexión (L5) o de la flexión plantar (S1)",
-   "Reflejo aquíleo disminuido en la afectación S1",
-   "Postura antiálgica y contractura paravertebral"
-  ],
-  "pruebas": [
-   "Prueba de elevación de la pierna recta (Lasègue): dolor radicular entre 30° y 70°",
-   "Prueba de slump: tensión neural en sedestación con flexión del tronco y extensión de la rodilla",
-   "Signo de Bragard: la dorsiflexión del tobillo sensibiliza la prueba de Lasègue",
-   "Exploración neurológica por miotomas, dermatomas y reflejos (rotuliano L4, aquíleo S1)",
-   "Prueba FAIR (flexión, aducción y rotación interna de la cadera) en sospecha de síndrome del piriforme"
-  ],
-  "fisioterapia": "Educación y mantenimiento de la actividad, con ejercicio terapéutico, técnicas de movilización neural y control motor lumbopélvico. Los signos de alarma (síndrome de cola de caballo, déficit motor progresivo) requieren derivación urgente.",
-  "camara": "posterior"
- },
- {
-  "id": "manguito-supraespinoso",
-  "titulo": "Rotura del manguito rotador (supraespinoso) y pinzamiento subacromial",
-  "region": "miembro superior",
-  "side": "derecho",
-  "presentacion": "Varón de 58 años, pintor, con dolor en la cara lateral del hombro derecho que empeora al elevar el brazo y por la noche al acostarse sobre ese lado. Tiene un arco doloroso entre 60° y 120° de abducción y le cuesta mantener el brazo elevado.",
-  "anatomia": "El tendón del supraespinoso discurre por el espacio subacromial, entre la cabeza del húmero y el arco coracoacromial (acromion y ligamento coracoacromial), separado de él por la bolsa subacromial-subdeltoidea. En la abducción y la flexión ese espacio se estrecha, y la morfología acromial, los osteofitos acromioclaviculares o la discinesia escapular favorecen el pinzamiento. La degeneración del tendón en su zona crítica, cerca de la inserción en el tubérculo mayor, acaba en roturas parciales o completas, a veces extendidas al infraespinoso. Sin el efecto depresor del manguito, el deltoides desplaza la cabeza humeral hacia arriba y empeora el pinzamiento.",
-  "lesion": [
-   "Supraspinatus muscle",
-   "Subacromial bursa"
-  ],
-  "afectados": [
-   "Supraspinatus muscle",
-   "Infraspinatus muscle",
-   "Acromial part of deltoid muscle",
-   "Subdeltoid bursa"
-  ],
-  "relacionados": [
-   "Coraco-acromial ligament",
-   "Scapula",
-   "Humerus",
-   "Articular capsule of glenohumeral joint"
-  ],
-  "signos": [
-   "Arco doloroso entre 60° y 120° de abducción",
-   "Dolor en la cara lateral del hombro que irradia hacia la inserción del deltoides",
-   "Dolor nocturno al acostarse sobre el hombro afectado",
-   "Debilidad de la abducción y de la rotación externa en las roturas",
-   "Movilidad pasiva conservada (a diferencia de la capsulitis adhesiva)"
-  ],
-  "pruebas": [
-   "Prueba de Jobe (lata vacía): abducción resistida a 90° en el plano escapular con rotación interna",
-   "Prueba de Neer: flexión pasiva máxima con rotación interna que provoca dolor subacromial",
-   "Prueba de Hawkins-Kennedy: flexión a 90° y rotación interna forzada",
-   "Signo del brazo caído (drop arm): el paciente no puede bajar el brazo lentamente desde la abducción",
-   "Prueba de rotación externa resistida y signo de retraso en rotación externa (infraespinoso)"
-  ],
-  "fisioterapia": "Ejercicio terapéutico progresivo del manguito rotador y de los estabilizadores escapulares, con control de la carga y del dolor. En las roturas reparadas quirúrgicamente se sigue un protocolo por fases: protección, movilidad pasiva, activa y fortalecimiento.",
-  "camara": "lateral"
- },
- {
-  "id": "epicondilalgia-lateral",
-  "titulo": "Epicondilalgia lateral (codo de tenista)",
-  "region": "miembro superior",
-  "side": "derecho",
-  "presentacion": "Mujer de 45 años, que trabaja con el ratón y juega al pádel, con dolor en la cara lateral del codo derecho desde hace tres meses. El dolor aparece al agarrar objetos, al girar un pomo y al levantar una taza con el brazo extendido.",
-  "anatomia": "Los extensores de la muñeca y de los dedos se originan en el epicóndilo lateral del húmero mediante el tendón común de los extensores. El extensor radial corto del carpo, en la parte profunda de ese origen, soporta mucha carga al estabilizar la muñeca en extensión durante la prensión. La sobrecarga repetida produce una tendinopatía degenerativa (angiofibroblástica), no una inflamación aguda. Hay que diferenciarla del atrapamiento del nervio interóseo posterior en el supinador (síndrome del túnel radial) y de la patología articular radiohumeral.",
-  "lesion": [
-   "Extensor carpi radialis brevis",
-   "Common extensor tendon"
-  ],
-  "afectados": [
-   "Extensor carpi radialis brevis",
-   "Extensor carpi radialis longus",
-   "Extensor digitorum",
-   "Humeral head of extensor carpi ulnaris",
-   "Supinator"
-  ],
-  "relacionados": [
-   "Humerus",
-   "Radial collateral ligament",
-   "Annular ligament of radius",
-   "Deep branch of radial nerve"
-  ],
-  "signos": [
-   "Dolor a la palpación sobre el epicóndilo lateral o justo distal a él",
-   "Dolor con la extensión resistida de la muñeca",
-   "Disminución de la fuerza de prensión sin dolor",
-   "Ausencia de déficit neurológico"
-  ],
-  "pruebas": [
-   "Prueba de Cozen: extensión resistida de la muñeca con el puño cerrado y el codo extendido",
-   "Prueba de Mill: estiramiento pasivo de los extensores (codo extendido, pronación y flexión de muñeca)",
-   "Prueba de Maudsley: extensión resistida del dedo medio",
-   "Dinamometría de prensión sin dolor comparada con el lado sano",
-   "Palpación del túnel radial y supinación resistida para descartar compresión del nervio interóseo posterior"
-  ],
-  "fisioterapia": "Gestión de la carga y ejercicio progresivo de los extensores de la muñeca (isométrico, después excéntrico-concéntrico), combinado con terapia manual y ortesis de contrafuerza si es útil. Corregir el gesto deportivo y la ergonomía del puesto de trabajo.",
-  "camara": "lateral"
- },
- {
-  "id": "lca-triada",
-  "titulo": "Rotura del ligamento cruzado anterior (con tríada desgraciada como variante)",
-  "region": "miembro inferior",
-  "side": "derecho",
-  "presentacion": "Jugadora de fútbol de 22 años que al pivotar con el pie apoyado nota un chasquido en la rodilla derecha y no puede seguir jugando. En pocas horas la rodilla se hincha mucho (hemartros) y después tiene sensación de inestabilidad, de que la rodilla «se va».",
-  "anatomia": "El ligamento cruzado anterior va desde la cara medial del cóndilo lateral del fémur hasta el área intercondílea anterior de la tibia. Impide la traslación anterior de la tibia respecto al fémur y controla la rotación interna. Se rompe típicamente en mecanismos sin contacto de desaceleración y pivote, con valgo y rotación de la rodilla y el pie fijo. En la «tríada desgraciada» (O'Donoghue) un golpe en valgo y rotación externa lesiona además el ligamento colateral tibial y el menisco medial, unido a él; en las lesiones agudas, sin embargo, suele dañarse más el menisco lateral. La pérdida del ligamento se acompaña de inhibición del cuádriceps, y los isquiotibiales actúan como estabilizadores dinámicos.",
-  "lesion": [
-   "Anterior cruciate ligament",
-   "Superficial part of tibial collateral ligament",
-   "Medial meniscus"
-  ],
-  "afectados": [
-   "Deep part of tibial collateral ligament",
-   "Vastus medialis muscle",
-   "Rectus femoris muscle",
-   "Vastus lateralis muscle",
-   "Semitendinosus muscle",
-   "Long head of biceps femoris"
-  ],
-  "relacionados": [
-   "Femur",
-   "Tibia",
-   "Posterior cruciate ligament",
-   "Lateral meniscus"
-  ],
-  "signos": [
-   "Chasquido audible y derrame inmediato (hemartros) en las primeras horas",
-   "Inestabilidad o fallos de la rodilla en los giros",
-   "En la tríada: dolor en la interlínea medial y en el trayecto del colateral tibial, con bostezo en valgo",
-   "Atrofia o inhibición del cuádriceps",
-   "Posible bloqueo articular si hay una rotura meniscal en asa de cubo"
-  ],
-  "pruebas": [
-   "Prueba de Lachman: traslación anterior de la tibia a 20–30° de flexión sin tope firme (la más sensible)",
-   "Prueba del cajón anterior a 90° de flexión",
-   "Prueba de pivot shift: resalte por subluxación anterolateral de la tibia (la más específica)",
-   "Prueba de estrés en valgo a 0° y 30° para el colateral tibial",
-   "Prueba de McMurray y prueba de Thessaly para los meniscos"
-  ],
-  "fisioterapia": "Recuperar pronto la extensión completa, controlar el derrame y reactivar el cuádriceps; después, fortalecimiento progresivo, propiocepción y control neuromuscular, con o sin reconstrucción. La vuelta al deporte tras la plastia se basa en criterios funcionales (de 9 a 12 meses).",
-  "camara": "anterior"
- },
- {
-  "id": "esguince-tobillo-lateral",
-  "titulo": "Esguince lateral de tobillo (ligamento talofibular anterior)",
-  "region": "miembro inferior",
-  "side": "derecho",
-  "presentacion": "Jugador de baloncesto de 19 años que cae sobre el pie de un rival y se tuerce el tobillo derecho hacia dentro. Presenta dolor y tumefacción por delante y por debajo del maléolo lateral, con hematoma, y puede apoyar el pie con dificultad.",
-  "anatomia": "El complejo ligamentario lateral del tobillo lo forman los ligamentos talofibular anterior, calcaneofibular y talofibular posterior. El mecanismo típico es la inversión con flexión plantar; en esa posición el ligamento talofibular anterior queda tenso y vertical y es el primero (y a menudo el único) en romperse. Si la fuerza continúa se lesiona el calcaneofibular, y rara vez el talofibular posterior. Los peroneos son estabilizadores dinámicos frente a la inversión, y su retraso de activación junto con el déficit propioceptivo explica la inestabilidad crónica.",
-  "lesion": [
-   "Anterior talofibular ligament",
-   "Calcaneofibular ligament"
-  ],
-  "afectados": [
-   "Posterior talofibular ligament",
-   "Fibularis longus muscle",
-   "Fibularis brevis muscle",
-   "Anterior tibiofibular ligament"
-  ],
-  "relacionados": [
-   "Fibula",
-   "Talus",
-   "Calcaneus",
-   "Fifth metatarsal bone"
-  ],
-  "signos": [
-   "Dolor y tumefacción anterolaterales en el tobillo, con equimosis",
-   "Dolor a la palpación sobre el ligamento talofibular anterior, por delante del maléolo lateral",
-   "Dolor con la inversión pasiva y la flexión plantar",
-   "Sensación de inestabilidad y esguinces de repetición en los casos crónicos"
-  ],
-  "pruebas": [
-   "Reglas de Ottawa: radiografía si hay dolor óseo en el borde posterior o la punta de los maléolos, en la base del 5.º metatarsiano o en el navicular, o incapacidad para cargar cuatro pasos",
-   "Prueba del cajón anterior del tobillo (ligamento talofibular anterior), mejor a los 4–5 días",
-   "Prueba de inclinación talar en varo (ligamento calcaneofibular)",
-   "Prueba de compresión (squeeze test) y prueba de rotación externa para descartar una lesión de la sindesmosis",
-   "Equilibrio monopodal y Star Excursion Balance Test para valorar la propiocepción"
-  ],
-  "fisioterapia": "Carga precoz protegida con soporte funcional (vendaje u ortesis) y control del edema. Ejercicio progresivo de movilidad, fortalecimiento de los peroneos y entrenamiento propioceptivo y neuromuscular para prevenir las recidivas.",
-  "camara": "lateral"
- },
- {
-  "id": "tendon-calcaneo",
-  "titulo": "Tendinopatía aquílea / rotura del tendón calcáneo",
-  "region": "miembro inferior",
-  "side": "derecho",
-  "presentacion": "Varón de 44 años, corredor aficionado, con meses de dolor y rigidez matutina en el tendón de Aquiles derecho. Durante un partido de pádel nota un «golpe» en la pantorrilla y desde entonces no puede ponerse de puntillas sobre ese pie.",
-  "anatomia": "El tendón calcáneo es la inserción común de los gemelos (gastrocnemio) y del sóleo (tríceps sural) en la tuberosidad del calcáneo. Su porción media, de 2 a 6 cm por encima de la inserción, está poco vascularizada y es donde se concentran la tendinopatía y la mayoría de las roturas. Las roturas se producen por una carga excéntrica brusca (salto, arrancada) sobre un tendón degenerado, a menudo en varones de mediana edad con actividad deportiva intermitente. La tendinopatía insercional se acompaña con frecuencia de bursitis retrocalcánea. Los flexores plantares profundos (tibial posterior, flexores largos y peroneos) pueden mantener una flexión plantar débil, lo que puede retrasar el diagnóstico.",
-  "lesion": [
-   "Calcaneal tendon"
-  ],
-  "afectados": [
-   "Medial head of gastrocnemius",
-   "Lateral head of gastrocnemius",
-   "Soleus muscle",
-   "Plantaris muscle"
-  ],
-  "relacionados": [
-   "Calcaneus",
-   "Subtendinous calcaneal bursa",
-   "Subcutaneous calcaneal bursa",
-   "Flexor hallucis longus"
-  ],
-  "signos": [
-   "Tendinopatía: dolor y engrosamiento fusiforme de 2 a 6 cm por encima de la inserción, con rigidez matutina",
-   "Rotura: chasquido y sensación de patada en la pantorrilla",
-   "Defecto palpable (hachazo) en el trayecto del tendón",
-   "Imposibilidad de ponerse de puntillas sobre una sola pierna",
-   "Aumento de la flexión dorsal pasiva en reposo respecto al lado sano"
-  ],
-  "pruebas": [
-   "Prueba de Thompson: al comprimir la pantorrilla en decúbito prono no hay flexión plantar (rotura completa)",
-   "Prueba de Matles: con las rodillas a 90° en prono, el pie afectado cae en posición neutra o en flexión dorsal",
-   "Prueba del arco doloroso del tendón: el engrosamiento se desplaza con el movimiento en la tendinopatía de la porción media",
-   "Elevaciones de talón a una pierna: número de repeticiones y dolor (escala VISA-A)",
-   "Ecografía para valorar la tendinopatía y la separación de los cabos"
-  ],
-  "fisioterapia": "En la tendinopatía, programa progresivo de carga (isométricos y excéntricos o de carga pesada y lenta) con modificación de la actividad. En la rotura, tratamiento funcional o quirúrgico con bota en equino y carga precoz progresiva, y vuelta gradual a la carrera y al salto.",
-  "camara": "posterior"
- },
- {
-  "id": "gluteo-medio-trendelenburg",
-  "titulo": "Debilidad del glúteo medio (signo de Trendelenburg)",
-  "region": "miembro inferior",
-  "side": "derecho",
-  "presentacion": "Mujer de 63 años operada de prótesis de cadera derecha por vía lateral. Al caminar, la pelvis cae hacia el lado izquierdo en cada apoyo sobre la pierna derecha y ella inclina el tronco hacia la derecha; también refiere dolor en la cara lateral de la cadera.",
-  "anatomia": "El glúteo medio y el glúteo menor se originan en la cara externa del ilion y se insertan en el trocánter mayor. Son los principales abductores de la cadera y, durante el apoyo monopodal, impiden que la pelvis caiga hacia el lado de la pierna oscilante. Los inerva el nervio glúteo superior (L4–S1), que sale por encima del piriforme junto con el tensor de la fascia lata. La debilidad puede deberse a una lesión del nervio (inyección intramuscular mal situada, abordaje quirúrgico lateral), a una tendinopatía o rotura glútea, o a una alteración de la palanca (coxa vara, luxación). El signo de Trendelenburg aparece en el lado contrario a la cadera débil.",
-  "lesion": [
-   "Gluteus medius muscle",
-   "Superior gluteal nerve"
-  ],
-  "afectados": [
-   "Gluteus medius muscle",
-   "Gluteus minimus muscle",
-   "Tensor fasciae latae"
-  ],
-  "relacionados": [
-   "Hip bone",
-   "Femur",
-   "Trochanteric bursa of gluteus medius muscle",
-   "Iliotibial tract"
-  ],
-  "signos": [
-   "Signo de Trendelenburg: la pelvis cae hacia el lado contralateral en el apoyo monopodal sobre la pierna afectada",
-   "Marcha de Trendelenburg compensada o de Duchenne: inclinación del tronco hacia el lado afectado",
-   "Debilidad de la abducción de la cadera",
-   "Dolor a la palpación en el trocánter mayor si hay tendinopatía glútea"
-  ],
-  "pruebas": [
-   "Prueba de Trendelenburg: apoyo monopodal durante 30 s observando el nivel de la pelvis",
-   "Balance muscular del glúteo medio en decúbito lateral, con la cadera en ligera extensión y rotación externa (Kendall)",
-   "Apoyo monopodal mantenido 30 s, que reproduce el dolor trocantéreo (tendinopatía glútea)",
-   "Prueba FADER-R (flexión, aducción, rotación externa con rotación interna resistida) para la tendinopatía glútea"
-  ],
-  "fisioterapia": "Fortalecimiento progresivo de los abductores de la cadera, empezando por isométricos sin compresión del tendón y progresando a cargas en apoyo monopodal y en cadena cerrada. Reeducación de la marcha, con bastón contralateral si hace falta, y evitar posturas en aducción (cruzar las piernas).",
-  "camara": "posterior"
- }
+{
+"id": "radial-canal-torsion",
+"titulo": "Lesión del nervio radial en el canal de torsión (mano péndula)",
+"region": "miembro superior",
+"side": "derecho",
+"presentacion": "Varón de 34 años con fractura diafisaria de húmero derecho tras una caída de moto. Al explorarlo no puede extender la muñeca ni los dedos y refiere hormigueo en el dorso de la primera comisura.",
+"anatomia": "El nervio radial rodea la cara posterior de la diáfisis humeral en el surco del nervio radial (canal de torsión), en contacto directo con el hueso, por lo que se lesiona en las fracturas del tercio medio. Las ramas para el tríceps suelen salir antes del canal, de modo que la extensión del codo se conserva casi siempre. Por debajo quedan denervados los extensores de muñeca, dedos y pulgar, el braquiorradial y el supinador. La rama superficial sensitiva explica la hipoestesia del dorso de la primera comisura.",
+"lesion": [
+"Radial nerve",
+"Superficial branch of radial nerve"
+],
+"afectados": [
+"Brachioradialis muscle",
+"Extensor carpi radialis longus",
+"Extensor carpi radialis brevis",
+"Extensor digitorum",
+"Extensor digiti minimi",
+"Humeral head of extensor carpi ulnaris",
+"Ulnar head of extensor carpi ulnaris",
+"Supinator",
+"Abductor pollicis longus",
+"Extensor pollicis brevis",
+"Extensor pollicis longus",
+"Extensor indicis"
+],
+"relacionados": [
+"Humerus",
+"Lateral head of triceps brachii",
+"Medial head of triceps brachii"
+],
+"signos": [
+"Mano péndula: imposibilidad de extender la muñeca",
+"Imposibilidad de extender las articulaciones metacarpofalángicas y el pulgar",
+"Extensión del codo conservada",
+"Hipoestesia en el dorso de la primera comisura (tabaquera anatómica)",
+"Debilidad de la prensión por pérdida del efecto tenodesis de los extensores"
+],
+"pruebas": [
+"Balance muscular de extensores de muñeca y dedos (Kendall), con la muñeca estabilizada pasivamente",
+"Prueba de extensión del pulgar: el paciente no puede separar el pulgar del plano de la mesa con la palma apoyada",
+"Exploración de la sensibilidad en el territorio de la rama superficial del nervio radial",
+"Electromiograma y estudio de conducción nerviosa a las 3–4 semanas para estimar el pronóstico"
+],
+"fisioterapia": "Férula dinámica de extensión de muñeca y dedos para preservar la función y evitar el sobreestiramiento de los extensores, con movilización pasiva diaria. Durante la reinervación, que suele empezar por el braquiorradial, se añaden electroestimulación y fortalecimiento progresivo.",
+"camara": "posterior"
+},
+{
+"id": "tunel-carpiano",
+"titulo": "Síndrome del túnel carpiano",
+"region": "miembro superior",
+"side": "derecho",
+"presentacion": "Mujer de 52 años, administrativa, con parestesias nocturnas en los dedos pulgar, índice y medio de la mano derecha que mejoran al sacudir la mano. En los últimos meses se le caen objetos y nota la eminencia tenar más plana.",
+"anatomia": "El túnel carpiano está formado por los huesos del carpo y el retináculo flexor, y por él pasan el nervio mediano y los tendones de los flexores largos de los dedos y del pulgar. Cualquier aumento de presión dentro del túnel (tenosinovitis, edema, embarazo, hipotiroidismo) comprime el nervio. La rama palmar del mediano pasa por encima del retináculo, por lo que la sensibilidad de la palma central se conserva, y este dato ayuda a localizar la lesión. La rama motora recurrente inerva la musculatura tenar lateral y los dos primeros lumbricales.",
+"lesion": [
+"Median nerve"
+],
+"afectados": [
+"Abductor pollicis brevis",
+"Opponens pollicis muscle",
+"Superficial head of flexor pollicis brevis",
+"Lumbrical muscles of hand"
+],
+"relacionados": [
+"Flexor retinaculum of wrist",
+"Palmar branch of median nerve",
+"Flexor pollicis longus",
+"Scaphoid bone"
+],
+"signos": [
+"Parestesias nocturnas en el territorio del nervio mediano (del pulgar a la mitad radial del anular)",
+"Sensibilidad de la eminencia tenar conservada (rama palmar intacta)",
+"Atrofia de la eminencia tenar en fases avanzadas",
+"Debilidad de la abducción y la oposición del pulgar",
+"Torpeza en la pinza fina"
+],
+"pruebas": [
+"Signo de Tinel: la percusión sobre el retináculo flexor reproduce las parestesias",
+"Prueba de Phalen: flexión máxima de la muñeca durante 60 s que provoca los síntomas",
+"Prueba de compresión carpiana de Durkan: presión directa sobre el túnel durante 30 s",
+"Fuerza de abducción del pulgar (abductor corto del pulgar) contra resistencia",
+"Estudio de conducción nerviosa: aumento de la latencia distal del mediano"
+],
+"fisioterapia": "Ortesis nocturna con la muñeca en posición neutra, ejercicios de deslizamiento neural y tendinoso, y educación ergonómica. Si hay déficit motor progresivo se indica la liberación quirúrgica, seguida de movilización precoz y cuidado de la cicatriz.",
+"camara": "anterior"
+},
+{
+"id": "cubital-codo",
+"titulo": "Lesión del nervio cubital en el codo (mano en garra)",
+"region": "miembro superior",
+"side": "derecho",
+"presentacion": "Varón de 45 años que apoya habitualmente el codo en la ventanilla del coche. Refiere hormigueo en el meñique y la mitad cubital del anular, torpeza para abrochar botones y pérdida de masa entre el primer y el segundo metacarpiano.",
+"anatomia": "El nervio cubital pasa por detrás del epicóndilo medial del húmero, en el surco del nervio cubital, y entra en el antebrazo por el túnel cubital, entre las dos cabezas del flexor cubital del carpo. Allí es superficial y queda expuesto a la presión y al estiramiento con la flexión mantenida del codo. Inerva el flexor cubital del carpo, la mitad medial del flexor profundo de los dedos y casi toda la musculatura intrínseca de la mano. La garra cubital (hiperextensión de las metacarpofalángicas y flexión de las interfalángicas del 4.º y 5.º dedos) aparece por la parálisis de los lumbricales 3.º y 4.º y de los interóseos; en la lesión alta la garra es menos marcada que en la distal porque el flexor profundo también está débil (paradoja cubital).",
+"lesion": [
+"Ulnar nerve"
+],
+"afectados": [
+"Humeral head of flexor carpi ulnaris",
+"Ulnar head of flexor carpi ulnaris",
+"Flexor digitorum profundus",
+"Abductor digiti minimi of hand",
+"Flexor digiti minimi of hand",
+"Opponens digiti minimi muscle of hand",
+"Dorsal interossei muscles of hand",
+"Palmar interossei muscles",
+"Lumbrical muscles of hand",
+"Oblique head of adductor pollicis",
+"Transverse head of adductor pollicis",
+"Deep head of flexor pollicis brevis"
+],
+"relacionados": [
+"Humerus",
+"Ulna",
+"Ulnar collateral ligament",
+"Dorsal branch of ulnar nerve"
+],
+"signos": [
+"Mano en garra cubital en el 4.º y 5.º dedos",
+"Atrofia del primer espacio interóseo dorsal y de la eminencia hipotenar",
+"Hipoestesia del meñique y de la mitad cubital del anular, incluido el dorso (la rama dorsal sale por encima de la muñeca)",
+"Signo de Wartenberg: el meñique queda en abducción",
+"Debilidad de la abducción y la aducción de los dedos"
+],
+"pruebas": [
+"Signo de Froment: al sujetar un papel entre pulgar e índice se flexiona la interfalángica del pulgar (el flexor largo del pulgar suple al aductor)",
+"Prueba de flexión del codo: flexión máxima con la muñeca extendida durante 1 min que reproduce las parestesias",
+"Signo de Tinel en el surco del nervio cubital, detrás del epicóndilo medial",
+"Prueba de los interóseos: abducción del índice contra resistencia (primer interóseo dorsal)",
+"Estudio de conducción con enlentecimiento focal a nivel del codo"
+],
+"fisioterapia": "Evitar la flexión mantenida y el apoyo sobre el codo (férula nocturna en extensión relativa), con técnicas de deslizamiento neural. Ortesis antigarra que bloquea la hiperextensión metacarpofalángica y fortalecimiento de la musculatura intrínseca durante la recuperación.",
+"camara": "medial"
+},
+{
+"id": "axilar-cuello-quirurgico",
+"titulo": "Lesión del nervio axilar (fractura del cuello quirúrgico del húmero)",
+"region": "miembro superior",
+"side": "derecho",
+"presentacion": "Mujer de 68 años con fractura del cuello quirúrgico del húmero derecho tras caer sobre el brazo. Semanas después no consigue separar el brazo del tronco, el contorno del hombro está aplanado y tiene una zona de anestesia en la cara lateral del brazo.",
+"anatomia": "El nervio axilar sale de la axila por el espacio cuadrangular junto con la arteria circunfleja humeral posterior y rodea el cuello quirúrgico del húmero por detrás, pegado al hueso. Por eso se lesiona en las fracturas de esa zona y en las luxaciones anteriores del hombro. Inerva el deltoides y el redondo menor, y a través del nervio cutáneo braquial lateral superior la piel de la cara lateral del hombro («zona de la charretera»). La abducción más allá de los primeros grados queda muy limitada, aunque el supraespinoso puede iniciarla.",
+"lesion": [
+"Axillary nerve",
+"Superior lateral brachial cutaneous nerve"
+],
+"afectados": [
+"Clavicular part of deltoid muscle",
+"Acromial part of deltoid muscle",
+"Scapular spinal part of deltoid muscle",
+"Teres minor muscle"
+],
+"relacionados": [
+"Humerus",
+"Posterior circumflex humeral artery",
+"Long head of triceps brachii",
+"Teres major muscle"
+],
+"signos": [
+"Atrofia del deltoides con hombro aplanado y acromion prominente",
+"Pérdida de fuerza de la abducción del hombro (más allá de unos 15°)",
+"Debilidad de la flexión, la extensión y la rotación externa del hombro",
+"Hipoestesia en la cara lateral del hombro («zona de la charretera»)"
+],
+"pruebas": [
+"Balance muscular del deltoides en sus tres porciones (Kendall)",
+"Prueba de sensibilidad en la «zona de la charretera», sobre la inserción del deltoides",
+"Prueba de retraso en extensión (extension lag sign) del deltoides",
+"Electromiograma del deltoides a las 3–4 semanas"
+],
+"fisioterapia": "Tras consolidar la fractura, movilización pasiva y activa asistida para evitar la rigidez glenohumeral, y electroestimulación del deltoides. Fortalecimiento progresivo del deltoides y del manguito cuando aparecen signos de reinervación.",
+"camara": "posterior"
+},
+{
+"id": "toracico-largo-escapula-alada",
+"titulo": "Lesión del nervio torácico largo (escápula alada)",
+"region": "tronco",
+"side": "derecho",
+"presentacion": "Varón de 28 años que, tras varias semanas cargando una mochila pesada, nota que el borde medial de la escápula derecha sobresale al empujar una pared. Tiene dificultad para elevar el brazo por encima de la cabeza y no refiere déficit sensitivo.",
+"anatomia": "El nervio torácico largo nace de las raíces C5–C7, atraviesa el escaleno medio y desciende por la cara lateral de la pared torácica sobre el serrato anterior, superficial y con un trayecto largo. Es vulnerable a la compresión (mochilas), al estiramiento y a la cirugía (mastectomía con vaciamiento axilar). El serrato anterior mantiene la escápula pegada al tórax y la rota hacia arriba junto con el trapecio. Sin él, el borde medial y el ángulo inferior se separan de la pared torácica. Es un nervio solo motor, por lo que no hay alteración de la sensibilidad.",
+"lesion": [
+"Long thoracic nerve"
+],
+"afectados": [
+"Serratus anterior muscle",
+"Scapula"
+],
+"relacionados": [
+"Scalenus medius muscle",
+"Descending part of trapezius muscle",
+"Rhomboid major muscle",
+"Fifth rib"
+],
+"signos": [
+"Escápula alada medial: el borde medial y el ángulo inferior se separan del tórax",
+"Desplazamiento medial de la escápula",
+"Dificultad para la flexión y la abducción por encima de 90° por falta de rotación superior",
+"Sensibilidad normal"
+],
+"pruebas": [
+"Prueba de empuje contra la pared (flexión de brazos en pared): se acentúa el aleteo",
+"Flexión resistida del hombro a 90° observando el borde medial de la escápula",
+"Diagnóstico diferencial con la escápula alada lateral por lesión del nervio accesorio (trapecio)",
+"Electromiograma del serrato anterior"
+],
+"fisioterapia": "Evitar la carga sobre el hombro y el estiramiento del nervio; considerar una ortesis escapular. Fortalecimiento progresivo del serrato anterior (push-up plus, punching) y control motor escapulotorácico durante la reinervación.",
+"camara": "posterior"
+},
+{
+"id": "peroneo-comun-pie-caido",
+"titulo": "Lesión del nervio peroneo común en la cabeza del peroné (pie caído)",
+"region": "miembro inferior",
+"side": "derecho",
+"presentacion": "Varón de 40 años al que se le retira un yeso inguinopédico mal almohadillado. No puede levantar la punta del pie derecho, arrastra los dedos al caminar y tiene hipoestesia en el dorso del pie.",
+"anatomia": "El nervio peroneo común (fibular común) rodea por fuera el cuello del peroné, justo debajo de su cabeza, en una posición muy superficial y fija contra el hueso. Por eso se lesiona con yesos, cruzando las piernas, en fracturas del cuello del peroné o en lesiones en varo de la rodilla. Allí se divide en el nervio peroneo profundo (músculos del compartimento anterior y extensor corto de los dedos) y el superficial (peroneos largo y corto y piel del dorso del pie). Su afectación produce un déficit de la flexión dorsal y de la eversión, con la inversión conservada (tibial posterior, inervado por el nervio tibial).",
+"lesion": [
+"Common fibular nerve",
+"Deep fibular nerve",
+"Superficial fibular nerve"
+],
+"afectados": [
+"Tibialis anterior muscle",
+"Extensor hallucis longus",
+"Extensor digitorum longus",
+"Fibularis tertius muscle",
+"Extensor digitorum brevis",
+"Extensor hallucis brevis",
+"Fibularis longus muscle",
+"Fibularis brevis muscle"
+],
+"relacionados": [
+"Fibula",
+"Long head of biceps femoris",
+"Tibialis posterior muscle"
+],
+"signos": [
+"Pie caído: déficit de la flexión dorsal del tobillo y de la extensión de los dedos",
+"Marcha en estepaje (flexión exagerada de cadera y rodilla para no arrastrar el pie)",
+"Debilidad de la eversión del pie, con la inversión conservada",
+"Hipoestesia del dorso del pie y de la cara lateral de la pierna; primer espacio interdigital (peroneo profundo)"
+],
+"pruebas": [
+"Balance muscular del tibial anterior y del extensor largo del dedo gordo (Kendall)",
+"Prueba de la marcha sobre talones: el paciente no puede",
+"Signo de Tinel sobre el cuello del peroné",
+"Diferenciar de una radiculopatía L5: en ella la inversión (tibial posterior) y la abducción de cadera (glúteo medio) también están débiles",
+"Estudio de conducción con bloqueo a nivel de la cabeza del peroné"
+],
+"fisioterapia": "Ortesis antiequino (rígida o dinámica) para la marcha y prevención de la retracción del tríceps sural con estiramientos. Electroestimulación y fortalecimiento progresivo de dorsiflexores y eversores a medida que se reinervan.",
+"camara": "lateral"
+},
+{
+"id": "nervio-femoral",
+"titulo": "Lesión del nervio femoral",
+"region": "miembro inferior",
+"side": "derecho",
+"presentacion": "Mujer de 60 años anticoagulada que desarrolla un hematoma retroperitoneal en el músculo iliopsoas. Presenta dolor inguinal, la rodilla derecha le falla al subir escaleras y nota hipoestesia en la cara anteromedial del muslo y de la pierna.",
+"anatomia": "El nervio femoral (L2–L4) desciende entre los músculos psoas e ilíaco y entra en el muslo por debajo del ligamento inguinal, lateral a la arteria femoral. Puede comprimirse en la fosa ilíaca (hematoma del iliopsoas, cirugía pélvica o de cadera). Inerva el ilíaco, el sartorio, el pectíneo y el cuádriceps, y su rama terminal sensitiva es el nervio safeno. La pérdida del cuádriceps impide bloquear la rodilla en extensión durante la fase de apoyo, y la del ilíaco debilita la flexión de cadera (el psoas, inervado por ramas directas del plexo, se conserva en parte).",
+"lesion": [
+"Femoral nerve",
+"Saphenous nerve"
+],
+"afectados": [
+"Iliacus muscle",
+"Sartorius muscle",
+"Pectineus muscle",
+"Rectus femoris muscle",
+"Vastus lateralis muscle",
+"Vastus intermedius muscle",
+"Vastus medialis muscle"
+],
+"relacionados": [
+"Inguinal ligament",
+"Femoral artery",
+"Psoas major",
+"Patella"
+],
+"signos": [
+"Debilidad de la extensión de la rodilla: la rodilla cede en carga y al subir escaleras",
+"Reflejo rotuliano disminuido o abolido",
+"Debilidad de la flexión de cadera",
+"Hipoestesia de la cara anterior del muslo y de la cara medial de la pierna (nervio safeno)",
+"Atrofia del cuádriceps"
+],
+"pruebas": [
+"Balance muscular del cuádriceps y del iliopsoas (Kendall)",
+"Reflejo rotuliano (L4)",
+"Prueba de estiramiento del nervio femoral: en decúbito prono, flexión de rodilla con extensión de cadera que reproduce el dolor",
+"Prueba de levantarse de una silla o subir un escalón con una sola pierna",
+"Electromiograma y pruebas de imagen (TC) de la fosa ilíaca"
+],
+"fisioterapia": "Ortesis o bastón para dar seguridad a la rodilla en la marcha y electroestimulación del cuádriceps. Fortalecimiento progresivo en cadena cerrada y reeducación de la marcha y de las escaleras cuando aparece la reinervación.",
+"camara": "anterior"
+},
+{
+"id": "ciatica",
+"titulo": "Ciática / afectación del nervio ciático",
+"region": "miembro inferior",
+"side": "derecho",
+"presentacion": "Varón de 42 años con dolor lumbar irradiado por la cara posterior del muslo y la cara lateral de la pierna derecha hasta el pie, que empeora al sentarse y al toser. Refiere hormigueo en el dorso del pie y cierta debilidad para caminar de talones.",
+"anatomia": "El nervio ciático se forma a partir de las raíces L4–S3 y sale de la pelvis por el foramen ciático mayor, habitualmente por debajo del piriforme. Desciende por la cara posterior del muslo, donde inerva los isquiotibiales y la porción isquiotibial del aductor mayor, y en la fosa poplítea se divide en los nervios tibial y peroneo común. La causa más frecuente de ciática es una hernia discal L4–L5 o L5–S1 que comprime la raíz L5 o S1; con menos frecuencia el nervio se atrapa a nivel glúteo (síndrome del piriforme) o se lesiona en la cirugía o la luxación de cadera. El patrón de déficit depende del nivel: radicular (dermatoma y miotoma) o troncular (todo lo distal a la lesión).",
+"lesion": [
+"Sciatic nerve",
+"Tibial nerve",
+"Common fibular nerve"
+],
+"afectados": [
+"Long head of biceps femoris",
+"Short head of biceps femoris",
+"Semitendinosus muscle",
+"Semimembranosus muscle",
+"Adductor magnus",
+"Medial head of gastrocnemius",
+"Lateral head of gastrocnemius",
+"Soleus muscle",
+"Tibialis posterior muscle",
+"Tibialis anterior muscle",
+"Extensor hallucis longus",
+"Fibularis longus muscle"
+],
+"relacionados": [
+"Piriformis muscle",
+"Intervertebral disc L4-L5",
+"Intervertebral disc L5-S1",
+"Sacrum"
+],
+"signos": [
+"Dolor irradiado por la cara posterior del muslo por debajo de la rodilla",
+"Parestesias en el dermatoma L5 (dorso del pie, dedo gordo) o S1 (borde lateral y planta del pie)",
+"Debilidad de la extensión del dedo gordo y de la dorsiflexión (L5) o de la flexión plantar (S1)",
+"Reflejo aquíleo disminuido en la afectación S1",
+"Postura antiálgica y contractura paravertebral"
+],
+"pruebas": [
+"Prueba de elevación de la pierna recta (Lasègue): dolor radicular entre 30° y 70°",
+"Prueba de slump: tensión neural en sedestación con flexión del tronco y extensión de la rodilla",
+"Signo de Bragard: la dorsiflexión del tobillo sensibiliza la prueba de Lasègue",
+"Exploración neurológica por miotomas, dermatomas y reflejos (rotuliano L4, aquíleo S1)",
+"Prueba FAIR (flexión, aducción y rotación interna de la cadera) en sospecha de síndrome del piriforme"
+],
+"fisioterapia": "Educación y mantenimiento de la actividad, con ejercicio terapéutico, técnicas de movilización neural y control motor lumbopélvico. Los signos de alarma (síndrome de cola de caballo, déficit motor progresivo) requieren derivación urgente.",
+"camara": "posterior"
+},
+{
+"id": "manguito-supraespinoso",
+"titulo": "Rotura del manguito rotador (supraespinoso) y pinzamiento subacromial",
+"region": "miembro superior",
+"side": "derecho",
+"presentacion": "Varón de 58 años, pintor, con dolor en la cara lateral del hombro derecho que empeora al elevar el brazo y por la noche al acostarse sobre ese lado. Tiene un arco doloroso entre 60° y 120° de abducción y le cuesta mantener el brazo elevado.",
+"anatomia": "El tendón del supraespinoso discurre por el espacio subacromial, entre la cabeza del húmero y el arco coracoacromial (acromion y ligamento coracoacromial), separado de él por la bolsa subacromial-subdeltoidea. En la abducción y la flexión ese espacio se estrecha, y la morfología acromial, los osteofitos acromioclaviculares o la discinesia escapular favorecen el pinzamiento. La degeneración del tendón en su zona crítica, cerca de la inserción en el tubérculo mayor, acaba en roturas parciales o completas, a veces extendidas al infraespinoso. Sin el efecto depresor del manguito, el deltoides desplaza la cabeza humeral hacia arriba y empeora el pinzamiento.",
+"lesion": [
+"Supraspinatus muscle",
+"Subacromial bursa"
+],
+"afectados": [
+"Supraspinatus muscle",
+"Infraspinatus muscle",
+"Acromial part of deltoid muscle",
+"Subdeltoid bursa"
+],
+"relacionados": [
+"Coraco-acromial ligament",
+"Scapula",
+"Humerus",
+"Articular capsule of glenohumeral joint"
+],
+"signos": [
+"Arco doloroso entre 60° y 120° de abducción",
+"Dolor en la cara lateral del hombro que irradia hacia la inserción del deltoides",
+"Dolor nocturno al acostarse sobre el hombro afectado",
+"Debilidad de la abducción y de la rotación externa en las roturas",
+"Movilidad pasiva conservada (a diferencia de la capsulitis adhesiva)"
+],
+"pruebas": [
+"Prueba de Jobe (lata vacía): abducción resistida a 90° en el plano escapular con rotación interna",
+"Prueba de Neer: flexión pasiva máxima con rotación interna que provoca dolor subacromial",
+"Prueba de Hawkins-Kennedy: flexión a 90° y rotación interna forzada",
+"Signo del brazo caído (drop arm): el paciente no puede bajar el brazo lentamente desde la abducción",
+"Prueba de rotación externa resistida y signo de retraso en rotación externa (infraespinoso)"
+],
+"fisioterapia": "Ejercicio terapéutico progresivo del manguito rotador y de los estabilizadores escapulares, con control de la carga y del dolor. En las roturas reparadas quirúrgicamente se sigue un protocolo por fases: protección, movilidad pasiva, activa y fortalecimiento.",
+"camara": "lateral"
+},
+{
+"id": "epicondilalgia-lateral",
+"titulo": "Epicondilalgia lateral (codo de tenista)",
+"region": "miembro superior",
+"side": "derecho",
+"presentacion": "Mujer de 45 años, que trabaja con el ratón y juega al pádel, con dolor en la cara lateral del codo derecho desde hace tres meses. El dolor aparece al agarrar objetos, al girar un pomo y al levantar una taza con el brazo extendido.",
+"anatomia": "Los extensores de la muñeca y de los dedos se originan en el epicóndilo lateral del húmero mediante el tendón común de los extensores. El extensor radial corto del carpo, en la parte profunda de ese origen, soporta mucha carga al estabilizar la muñeca en extensión durante la prensión. La sobrecarga repetida produce una tendinopatía degenerativa (angiofibroblástica), no una inflamación aguda. Hay que diferenciarla del atrapamiento del nervio interóseo posterior en el supinador (síndrome del túnel radial) y de la patología articular radiohumeral.",
+"lesion": [
+"Extensor carpi radialis brevis",
+"Common extensor tendon"
+],
+"afectados": [
+"Extensor carpi radialis brevis",
+"Extensor carpi radialis longus",
+"Extensor digitorum",
+"Humeral head of extensor carpi ulnaris",
+"Supinator"
+],
+"relacionados": [
+"Humerus",
+"Radial collateral ligament",
+"Annular ligament of radius",
+"Deep branch of radial nerve"
+],
+"signos": [
+"Dolor a la palpación sobre el epicóndilo lateral o justo distal a él",
+"Dolor con la extensión resistida de la muñeca",
+"Disminución de la fuerza de prensión sin dolor",
+"Ausencia de déficit neurológico"
+],
+"pruebas": [
+"Prueba de Cozen: extensión resistida de la muñeca con el puño cerrado y el codo extendido",
+"Prueba de Mill: estiramiento pasivo de los extensores (codo extendido, pronación y flexión de muñeca)",
+"Prueba de Maudsley: extensión resistida del dedo medio",
+"Dinamometría de prensión sin dolor comparada con el lado sano",
+"Palpación del túnel radial y supinación resistida para descartar compresión del nervio interóseo posterior"
+],
+"fisioterapia": "Gestión de la carga y ejercicio progresivo de los extensores de la muñeca (isométrico, después excéntrico-concéntrico), combinado con terapia manual y ortesis de contrafuerza si es útil. Corregir el gesto deportivo y la ergonomía del puesto de trabajo.",
+"camara": "lateral"
+},
+{
+"id": "lca-triada",
+"titulo": "Rotura del ligamento cruzado anterior (con tríada desgraciada como variante)",
+"region": "miembro inferior",
+"side": "derecho",
+"presentacion": "Jugadora de fútbol de 22 años que al pivotar con el pie apoyado nota un chasquido en la rodilla derecha y no puede seguir jugando. En pocas horas la rodilla se hincha mucho (hemartros) y después tiene sensación de inestabilidad, de que la rodilla «se va».",
+"anatomia": "El ligamento cruzado anterior va desde la cara medial del cóndilo lateral del fémur hasta el área intercondílea anterior de la tibia. Impide la traslación anterior de la tibia respecto al fémur y controla la rotación interna. Se rompe típicamente en mecanismos sin contacto de desaceleración y pivote, con valgo y rotación de la rodilla y el pie fijo. En la «tríada desgraciada» (O'Donoghue) un golpe en valgo y rotación externa lesiona además el ligamento colateral tibial y el menisco medial, unido a él; en las lesiones agudas, sin embargo, suele dañarse más el menisco lateral. La pérdida del ligamento se acompaña de inhibición del cuádriceps, y los isquiotibiales actúan como estabilizadores dinámicos.",
+"lesion": [
+"Anterior cruciate ligament",
+"Superficial part of tibial collateral ligament",
+"Medial meniscus"
+],
+"afectados": [
+"Deep part of tibial collateral ligament",
+"Vastus medialis muscle",
+"Rectus femoris muscle",
+"Vastus lateralis muscle",
+"Semitendinosus muscle",
+"Long head of biceps femoris"
+],
+"relacionados": [
+"Femur",
+"Tibia",
+"Posterior cruciate ligament",
+"Lateral meniscus"
+],
+"signos": [
+"Chasquido audible y derrame inmediato (hemartros) en las primeras horas",
+"Inestabilidad o fallos de la rodilla en los giros",
+"En la tríada: dolor en la interlínea medial y en el trayecto del colateral tibial, con bostezo en valgo",
+"Atrofia o inhibición del cuádriceps",
+"Posible bloqueo articular si hay una rotura meniscal en asa de cubo"
+],
+"pruebas": [
+"Prueba de Lachman: traslación anterior de la tibia a 20–30° de flexión sin tope firme (la más sensible)",
+"Prueba del cajón anterior a 90° de flexión",
+"Prueba de pivot shift: resalte por subluxación anterolateral de la tibia (la más específica)",
+"Prueba de estrés en valgo a 0° y 30° para el colateral tibial",
+"Prueba de McMurray y prueba de Thessaly para los meniscos"
+],
+"fisioterapia": "Recuperar pronto la extensión completa, controlar el derrame y reactivar el cuádriceps; después, fortalecimiento progresivo, propiocepción y control neuromuscular, con o sin reconstrucción. La vuelta al deporte tras la plastia se basa en criterios funcionales (de 9 a 12 meses).",
+"camara": "anterior"
+},
+{
+"id": "esguince-tobillo-lateral",
+"titulo": "Esguince lateral de tobillo (ligamento talofibular anterior)",
+"region": "miembro inferior",
+"side": "derecho",
+"presentacion": "Jugador de baloncesto de 19 años que cae sobre el pie de un rival y se tuerce el tobillo derecho hacia dentro. Presenta dolor y tumefacción por delante y por debajo del maléolo lateral, con hematoma, y puede apoyar el pie con dificultad.",
+"anatomia": "El complejo ligamentario lateral del tobillo lo forman los ligamentos talofibular anterior, calcaneofibular y talofibular posterior. El mecanismo típico es la inversión con flexión plantar; en esa posición el ligamento talofibular anterior queda tenso y vertical y es el primero (y a menudo el único) en romperse. Si la fuerza continúa se lesiona el calcaneofibular, y rara vez el talofibular posterior. Los peroneos son estabilizadores dinámicos frente a la inversión, y su retraso de activación junto con el déficit propioceptivo explica la inestabilidad crónica.",
+"lesion": [
+"Anterior talofibular ligament",
+"Calcaneofibular ligament"
+],
+"afectados": [
+"Posterior talofibular ligament",
+"Fibularis longus muscle",
+"Fibularis brevis muscle",
+"Anterior tibiofibular ligament"
+],
+"relacionados": [
+"Fibula",
+"Talus",
+"Calcaneus",
+"Fifth metatarsal bone"
+],
+"signos": [
+"Dolor y tumefacción anterolaterales en el tobillo, con equimosis",
+"Dolor a la palpación sobre el ligamento talofibular anterior, por delante del maléolo lateral",
+"Dolor con la inversión pasiva y la flexión plantar",
+"Sensación de inestabilidad y esguinces de repetición en los casos crónicos"
+],
+"pruebas": [
+"Reglas de Ottawa: radiografía si hay dolor óseo en el borde posterior o la punta de los maléolos, en la base del 5.º metatarsiano o en el navicular, o incapacidad para cargar cuatro pasos",
+"Prueba del cajón anterior del tobillo (ligamento talofibular anterior), mejor a los 4–5 días",
+"Prueba de inclinación talar en varo (ligamento calcaneofibular)",
+"Prueba de compresión (squeeze test) y prueba de rotación externa para descartar una lesión de la sindesmosis",
+"Equilibrio monopodal y Star Excursion Balance Test para valorar la propiocepción"
+],
+"fisioterapia": "Carga precoz protegida con soporte funcional (vendaje u ortesis) y control del edema. Ejercicio progresivo de movilidad, fortalecimiento de los peroneos y entrenamiento propioceptivo y neuromuscular para prevenir las recidivas.",
+"camara": "lateral"
+},
+{
+"id": "tendon-calcaneo",
+"titulo": "Tendinopatía aquílea / rotura del tendón calcáneo",
+"region": "miembro inferior",
+"side": "derecho",
+"presentacion": "Varón de 44 años, corredor aficionado, con meses de dolor y rigidez matutina en el tendón de Aquiles derecho. Durante un partido de pádel nota un «golpe» en la pantorrilla y desde entonces no puede ponerse de puntillas sobre ese pie.",
+"anatomia": "El tendón calcáneo es la inserción común de los gemelos (gastrocnemio) y del sóleo (tríceps sural) en la tuberosidad del calcáneo. Su porción media, de 2 a 6 cm por encima de la inserción, está poco vascularizada y es donde se concentran la tendinopatía y la mayoría de las roturas. Las roturas se producen por una carga excéntrica brusca (salto, arrancada) sobre un tendón degenerado, a menudo en varones de mediana edad con actividad deportiva intermitente. La tendinopatía insercional se acompaña con frecuencia de bursitis retrocalcánea. Los flexores plantares profundos (tibial posterior, flexores largos y peroneos) pueden mantener una flexión plantar débil, lo que puede retrasar el diagnóstico.",
+"lesion": [
+"Calcaneal tendon"
+],
+"afectados": [
+"Medial head of gastrocnemius",
+"Lateral head of gastrocnemius",
+"Soleus muscle",
+"Plantaris muscle"
+],
+"relacionados": [
+"Calcaneus",
+"Subtendinous calcaneal bursa",
+"Subcutaneous calcaneal bursa",
+"Flexor hallucis longus"
+],
+"signos": [
+"Tendinopatía: dolor y engrosamiento fusiforme de 2 a 6 cm por encima de la inserción, con rigidez matutina",
+"Rotura: chasquido y sensación de patada en la pantorrilla",
+"Defecto palpable (hachazo) en el trayecto del tendón",
+"Imposibilidad de ponerse de puntillas sobre una sola pierna",
+"Aumento de la flexión dorsal pasiva en reposo respecto al lado sano"
+],
+"pruebas": [
+"Prueba de Thompson: al comprimir la pantorrilla en decúbito prono no hay flexión plantar (rotura completa)",
+"Prueba de Matles: con las rodillas a 90° en prono, el pie afectado cae en posición neutra o en flexión dorsal",
+"Prueba del arco doloroso del tendón: el engrosamiento se desplaza con el movimiento en la tendinopatía de la porción media",
+"Elevaciones de talón a una pierna: número de repeticiones y dolor (escala VISA-A)",
+"Ecografía para valorar la tendinopatía y la separación de los cabos"
+],
+"fisioterapia": "En la tendinopatía, programa progresivo de carga (isométricos y excéntricos o de carga pesada y lenta) con modificación de la actividad. En la rotura, tratamiento funcional o quirúrgico con bota en equino y carga precoz progresiva, y vuelta gradual a la carrera y al salto.",
+"camara": "posterior"
+},
+{
+"id": "gluteo-medio-trendelenburg",
+"titulo": "Debilidad del glúteo medio (signo de Trendelenburg)",
+"region": "miembro inferior",
+"side": "derecho",
+"presentacion": "Mujer de 63 años operada de prótesis de cadera derecha por vía lateral. Al caminar, la pelvis cae hacia el lado izquierdo en cada apoyo sobre la pierna derecha y ella inclina el tronco hacia la derecha; también refiere dolor en la cara lateral de la cadera.",
+"anatomia": "El glúteo medio y el glúteo menor se originan en la cara externa del ilion y se insertan en el trocánter mayor. Son los principales abductores de la cadera y, durante el apoyo monopodal, impiden que la pelvis caiga hacia el lado de la pierna oscilante. Los inerva el nervio glúteo superior (L4–S1), que sale por encima del piriforme junto con el tensor de la fascia lata. La debilidad puede deberse a una lesión del nervio (inyección intramuscular mal situada, abordaje quirúrgico lateral), a una tendinopatía o rotura glútea, o a una alteración de la palanca (coxa vara, luxación). El signo de Trendelenburg aparece en el lado contrario a la cadera débil.",
+"lesion": [
+"Gluteus medius muscle",
+"Superior gluteal nerve"
+],
+"afectados": [
+"Gluteus medius muscle",
+"Gluteus minimus muscle",
+"Tensor fasciae latae"
+],
+"relacionados": [
+"Hip bone",
+"Femur",
+"Trochanteric bursa of gluteus medius muscle",
+"Iliotibial tract"
+],
+"signos": [
+"Signo de Trendelenburg: la pelvis cae hacia el lado contralateral en el apoyo monopodal sobre la pierna afectada",
+"Marcha de Trendelenburg compensada o de Duchenne: inclinación del tronco hacia el lado afectado",
+"Debilidad de la abducción de la cadera",
+"Dolor a la palpación en el trocánter mayor si hay tendinopatía glútea"
+],
+"pruebas": [
+"Prueba de Trendelenburg: apoyo monopodal durante 30 s observando el nivel de la pelvis",
+"Balance muscular del glúteo medio en decúbito lateral, con la cadera en ligera extensión y rotación externa (Kendall)",
+"Apoyo monopodal mantenido 30 s, que reproduce el dolor trocantéreo (tendinopatía glútea)",
+"Prueba FADER-R (flexión, aducción, rotación externa con rotación interna resistida) para la tendinopatía glútea"
+],
+"fisioterapia": "Fortalecimiento progresivo de los abductores de la cadera, empezando por isométricos sin compresión del tendón y progresando a cargas en apoyo monopodal y en cadena cerrada. Reeducación de la marcha, con bastón contralateral si hace falta, y evitar posturas en aducción (cruzar las piernas).",
+"camara": "posterior"
+},
+{
+"id": "mama-axila",
+"titulo": "Cáncer de mama y drenaje linfático axilar",
+"region": "mama · mujer",
+"side": "izquierdo",
+"body": "f",
+"presentacion": "Mujer de 52 años con un nódulo duro e indoloro en el cuadrante superoexterno de la mama izquierda y una adenopatía palpable en la axila del mismo lado.",
+"anatomia": "Alrededor del 75 % de la linfa de la mama drena a los ganglios axilares, sobre todo desde los cuadrantes externos: primero a los pectorales (anteriores), luego a los centrales y apicales, y de ahí a los supraclaviculares. Los cuadrantes internos drenan además a los ganglios paraesternales, junto a la arteria torácica interna. Los ligamentos suspensorios (de Cooper) unen la glándula a la piel: cuando el tumor los infiltra, la piel se retrae. En el vaciamiento axilar pueden lesionarse el nervio torácico largo (escápula alada) y el toracodorsal (dorsal ancho).",
+"lesion": [
+"Lobes of mammary gland",
+"Lactiferous ducts",
+"Suspensory ligaments of breast"
+],
+"afectados": [
+"Anterior axillary nodes",
+"Central axillary nodes",
+"Lateral axillary nodes",
+"Posterior axillary nodes",
+"Apical axillary nodes",
+"Interpectoral nodes",
+"Parasternal nodes",
+"Supraclavicular nodes"
+],
+"relacionados": [
+"Pectoralis minor muscle",
+"Sternocostal head of pectoralis major muscle",
+"Long thoracic nerve",
+"Thoracodorsal nerve",
+"Lateral thoracic artery",
+"Axillary artery"
+],
+"signos": [
+"Nódulo duro, irregular y poco móvil",
+"Retracción de la piel o del pezón (infiltración de los ligamentos de Cooper)",
+"Piel de naranja por bloqueo linfático",
+"Adenopatía axilar dura"
+],
+"pruebas": [
+"Exploración mamaria y axilar sistemática por cuadrantes",
+"Mamografía y ecografía; biopsia con aguja gruesa",
+"Biopsia del ganglio centinela para estadificar la axila",
+"Tras la cirugía: perímetros del brazo para detectar linfedema y prueba de la escápula alada (empuje contra la pared)"
+],
+"fisioterapia": "Movilización precoz del hombro tras la cirugía, drenaje linfático manual, vendaje y ejercicios para el linfedema, y fortalecimiento del serrato anterior si hay lesión del nervio torácico largo.",
+"camara": "anterior"
+},
+{
+"id": "prolapso",
+"titulo": "Prolapso de órganos pélvicos después de varios partos",
+"region": "pelvis · mujer",
+"side": "derecho",
+"body": "f",
+"presentacion": "Mujer de 58 años, con tres partos vaginales, que nota un bulto en la vagina al final del día, sensación de peso y escapes de orina al toser.",
+"anatomia": "La vejiga, el útero y el recto se sostienen por dos sistemas: la suspensión de los ligamentos cardinales y uterosacros (nivel I), la unión de la vagina a los arcos tendinosos (nivel II) y el apoyo del diafragma pélvico y del cuerpo perineal (nivel III). El parto puede desgarrar o desinervar el elevador del ano y estirar los ligamentos; con la menopausia y la presión abdominal repetida, el hiato urogenital se ensancha y los órganos descienden: la vejiga por la pared anterior (cistocele), el útero por el eje vaginal (histerocele) y el recto por la pared posterior (rectocele).",
+"lesion": [
+"Pubococcygeus muscle",
+"Pubo-analis muscle",
+"Iliococcygeus muscle",
+"Cardinal ligament",
+"Uterosacral ligament",
+"Perineal body"
+],
+"afectados": [
+"Urinary bladder",
+"Cervix of uterus",
+"Body of uterus",
+"Vagina",
+"Rectum"
+],
+"relacionados": [
+"Hip bone",
+"Sacrum",
+"Coccyx",
+"Tendinous arch of levator ani",
+"Coccygeus muscle"
+],
+"signos": [
+"Bulto vaginal que aumenta de pie y con el esfuerzo",
+"Sensación de peso pélvico",
+"Incontinencia urinaria de esfuerzo",
+"Dificultad para vaciar el recto (rectocele)"
+],
+"pruebas": [
+"Exploración en reposo y con maniobra de Valsalva; clasificación POP-Q",
+"Palpación vaginal de la contracción del elevador del ano (escala de Oxford)",
+"Ecografía del suelo pélvico para valorar avulsión del elevador",
+"Prueba de la tos para la incontinencia de esfuerzo"
+],
+"fisioterapia": "Entrenamiento de la musculatura del suelo pélvico supervisado (contracciones máximas y de resistencia, 'the knack' antes de toser), biofeedback, control de la presión intraabdominal y pesario si es necesario.",
+"camara": "medial",
+"solo": true,
+"cut": {
+"p": "sag",
+"pos": 0.002
+}
+},
+{
+"id": "endometriosis",
+"titulo": "Endometriosis profunda con dolor pélvico",
+"region": "pelvis · mujer",
+"side": "derecho",
+"body": "f",
+"presentacion": "Mujer de 29 años con dismenorrea intensa desde hace años, dolor con las relaciones sexuales profundas y dolor al defecar durante la menstruación.",
+"anatomia": "El tejido endometrial fuera del útero se implanta sobre todo en el peritoneo del fondo de saco rectouterino (de Douglas), los ligamentos uterosacros, los ovarios (endometriomas) y la pared anterior del recto. Por eso el dolor aparece con la penetración profunda, que presiona el fondo de saco, y con la defecación. Los nódulos uterosacros pueden atrapar el uréter, que pasa a pocos centímetros del cuello uterino bajo la arteria uterina.",
+"lesion": [
+"Uterosacral ligament",
+"Ovary"
+],
+"afectados": [
+"Rectum",
+"Ureter",
+"Vesico-uterine pouch"
+],
+"relacionados": [
+"Body of uterus",
+"Cervix of uterus",
+"Broad ligament of uterus",
+"Ampulla of uterine tube",
+"Uterine artery",
+"Sacrum"
+],
+"signos": [
+"Dismenorrea progresiva",
+"Dispareunia profunda",
+"Disquecia catamenial (dolor al defecar con la regla)",
+"Nódulo doloroso en el fondo de saco al tacto vaginal",
+"Infertilidad"
+],
+"pruebas": [
+"Tacto vaginal y rectovaginal: nodularidad de los uterosacros",
+"Ecografía transvaginal (endometriomas, nódulos profundos)",
+"Resonancia magnética pélvica para el mapa de lesiones",
+"Laparoscopia con biopsia (confirmación)"
+],
+"fisioterapia": "Educación en dolor, ejercicio terapéutico, relajación y terapia manual del suelo pélvico para la hipertonía secundaria al dolor, en coordinación con el tratamiento hormonal o quirúrgico.",
+"camara": "medial",
+"solo": true,
+"cut": {
+"p": "sag",
+"pos": 0.002
+}
+},
+{
+"id": "cintura-pelvica",
+"titulo": "Dolor de cintura pélvica y diástasis de los rectos en el embarazo",
+"region": "pelvis y abdomen · mujer",
+"side": "derecho",
+"body": "f",
+"presentacion": "Mujer de 33 años, embarazada de 30 semanas, con dolor sobre la sínfisis del pubis y en las nalgas al caminar, subir escaleras o girarse en la cama. Tras el parto nota un abultamiento en la línea media del abdomen al incorporarse.",
+"anatomia": "La relaxina y los estrógenos aumentan la laxitud de los ligamentos de la sínfisis del pubis y de las articulaciones sacroilíacas para ampliar el canal del parto: la sínfisis puede separarse unos milímetros. El aumento de peso y el desplazamiento anterior del centro de gravedad cargan estas articulaciones. El útero creciente estira la pared abdominal: la línea alba se adelgaza y los rectos del abdomen se separan (diástasis), mientras los oblicuos y el transverso pierden eficacia.",
+"lesion": [
+"Pubic symphysis",
+"Anterior sacro-iliac ligament",
+"Posterior sacro-iliac ligament",
+"Linea alba"
+],
+"afectados": [
+"Rectus abdominis muscle",
+"Transversus abdominis muscle"
+],
+"relacionados": [
+"Hip bone",
+"Sacrum",
+"Interosseous sacro-iliac ligament",
+"Iliolumbar ligament"
+],
+"signos": [
+"Dolor en la sínfisis y en las sacroilíacas al cargar sobre una pierna",
+"Marcha antiálgica y dolor al girarse en la cama",
+"Abultamiento en la línea media al incorporarse (diástasis)"
+],
+"pruebas": [
+"Prueba de elevación activa de la pierna recta (ASLR)",
+"Prueba de provocación del dolor pélvico posterior (P4) y palpación de la sínfisis",
+"Medición de la distancia entre los rectos con los dedos o con ecografía"
+],
+"fisioterapia": "Información y adaptación de las actividades, cinturón pélvico, ejercicios de control motor del transverso y del suelo pélvico, y recuperación progresiva de la pared abdominal tras el parto.",
+"camara": "anterior",
+"solo": true
+},
+{
+"id": "desgarro-perineal",
+"titulo": "Desgarro perineal de tercer grado e incontinencia anal",
+"region": "periné · mujer",
+"side": "derecho",
+"body": "f",
+"presentacion": "Mujer de 31 años, a las seis semanas de un parto con fórceps, refiere escapes de gases y urgencia para defecar. En el parto se reparó un desgarro perineal de tercer grado.",
+"anatomia": "El cuerpo perineal es el punto de anclaje del bulboesponjoso, los transversos del periné y el esfínter externo del ano. Los desgarros se gradúan por profundidad: 1.º piel, 2.º músculos del periné (cuerpo perineal), 3.º esfínter anal (3a menos del 50 % del externo, 3b más del 50 %, 3c también el interno) y 4.º mucosa del conducto anal. La lesión del esfínter, y a veces del nervio pudendo por el estiramiento, explica la incontinencia.",
+"lesion": [
+"Perineal body",
+"External anal sphincter"
+],
+"afectados": [
+"Bulbospongiosus muscle",
+"Superficial transverse perineal muscle",
+"Anal canal"
+],
+"relacionados": [
+"Vagina",
+"Pudendal nerve",
+"Rectum",
+"Ischiocavernosus muscle"
+],
+"signos": [
+"Incontinencia de gases o heces y urgencia defecatoria",
+"Distancia anogenital acortada o cicatriz perineal",
+"Tono anal en reposo o contracción voluntaria débiles"
+],
+"pruebas": [
+"Inspección y tacto rectal con contracción voluntaria (escala de Oxford modificada)",
+"Ecografía endoanal: defecto del esfínter",
+"Manometría anorrectal",
+"Escala de incontinencia de Wexner"
+],
+"fisioterapia": "Rehabilitación del suelo pélvico con biofeedback, entrenamiento de la fuerza y de la resistencia del esfínter, trabajo de la urgencia y masaje de la cicatriz perineal cuando haya cicatrizado.",
+"camara": "inferior",
+"solo": true
+},
+{
+"id": "pudendo",
+"titulo": "Neuralgia del nervio pudendo (ciclistas)",
+"region": "periné · mujer",
+"side": "derecho",
+"body": "f",
+"presentacion": "Mujer de 45 años, ciclista, con dolor quemante en la vulva y el periné que empeora sentada, mejora de pie y no la despierta por la noche.",
+"anatomia": "El nervio pudendo (S2–S4) sale de la pelvis por el agujero ciático mayor, rodea la espina ciática entre los ligamentos sacroespinoso y sacrotuberoso, y vuelve a entrar por el agujero ciático menor al conducto pudendo (de Alcock), en la pared lateral de la fosa isquioanal. Ahí puede comprimirse al estar sentado. Inerva la piel del periné y de la vulva, el esfínter externo del ano y los músculos del periné.",
+"lesion": [
+"Pudendal nerve"
+],
+"afectados": [
+"External anal sphincter",
+"Bulbospongiosus muscle",
+"Ischiocavernosus muscle",
+"Superficial transverse perineal muscle"
+],
+"relacionados": [
+"Sacrospinous ligament",
+"Sacrotuberous ligament",
+"Hip bone",
+"Sacrum",
+"Internal pudendal artery",
+"Obturator internus"
+],
+"signos": [
+"Dolor perineal o vulvar quemante que empeora sentada (criterios de Nantes)",
+"Mejora de pie o sentada en el inodoro",
+"Sin déficit sensitivo objetivo en la mayoría"
+],
+"pruebas": [
+"Palpación dolorosa de la espina ciática por vía vaginal",
+"Bloqueo anestésico del pudendo guiado por imagen (diagnóstico)",
+"Electromiograma del esfínter y latencia motora del pudendo"
+],
+"fisioterapia": "Evitar la sedestación prolongada y adaptar el sillín, educación en dolor, terapia manual de la musculatura del suelo pélvico y del obturador interno, y ejercicios de relajación.",
+"camara": "inferior",
+"solo": true
+}
 ]

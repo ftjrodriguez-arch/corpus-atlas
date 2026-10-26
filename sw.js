@@ -1,5 +1,5 @@
 /* Corpus — service worker: funciona sin conexión una vez descargado. */
-const V='corpus-v19';
+const V='corpus-v20';
 const CORE=['./','index.html','manifest.webmanifest','icons/icon.svg','icons/icon-192.png',
  'data/catalog.json','data/info.json','data/rig.json','data/lessons.json','data/extras.json','data/fem.json','data/cases.json',
  'draco/draco_wasm_wrapper.js','draco/draco_decoder.wasm','draco/draco_decoder.js',
