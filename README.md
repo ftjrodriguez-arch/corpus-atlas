@@ -22,6 +22,7 @@ Funciona en el navegador del ordenador, la tableta o el móvil, sin instalar nad
 - **Cortes tipo imagen médica** (v20): la sección se rellena con el color de cada tejido o en grises aproximados de TC o RM T1, y puede verse solo la lámina del corte, como un tomograma.
 - **Modo examen** (v20): preguntas cronometradas (tocar o reconocer estructuras), nota final y enlace para que toda la clase haga el mismo examen.
 - **Repaso espaciado** (Leitner) por región o sistema, y práctica de identificación.
+- **Corazón completo** (v21): se añadieron la valva anterior de la mitral, la valva anterior de la tricúspide (con sus cuerdas tendinosas) y el músculo papilar anterior del ventrículo izquierdo, que faltaban en el atlas original; son reconstrucciones esquemáticas.
 - **Recto y conducto anal** como estructuras propias (antes formaban parte del colon sigmoide del atlas), y uniones entre regiones de piel soldadas para eliminar grietas.
 - **Compartir vista**: un enlace abre el atlas exactamente en la misma vista (capas, cámara, cortes, estructura, marcha).
 - **Marcha patológica**: Trendelenburg, steppage, antiálgica, hemiparética, en tijera, parkinsoniana y rodilla rígida.

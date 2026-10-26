@@ -783,6 +783,7 @@ const TINT=[
  [/kidney|renal (cortex|medulla|pyramid|column|papilla)/i,'#8a3a2e',1],[/ureter|urinary bladder|urethra/i,'#d2a089',1],[/suprarenal|adrenal/i,'#c98e34',1],
  [/thyroid gland|parathyroid/i,'#8c3c33',1],[/thymus/i,'#d9b6a0',1],[/pituitar|hypophys|pineal/i,'#c99a8a',1],
  [/lung|lobe of (left|right) lung|pulmon/i,'#c98a8a',1],[/trache|bronch|laryn/i,'#d8cfc0',.9],
+ [/leaflet|chordae/i,'#e3cdb8',1],
  [/atrium|ventricle|heart|myocard|auricle of|papillary muscle|interventricular septum|valve/i,'#8d2e29',1],
  [/cerebell/i,'#c79f96',1],[/gyrus|lobe of cerebrum|cerebral cortex|cerebrum|frontal lobe|parietal lobe|temporal lobe|occipital lobe|insula|cortex/i,'#d6b4ab',1],
  [/thalamus|nucleus|caudate|putamen|globus|claustrum|amygdal|hippocamp/i,'#cfa49b',.8],[/spinal cord|medulla oblongata|pons|midbrain|brainstem|corpus callosum|white matter|tract/i,'#e6dacb',1],
@@ -2027,7 +2028,7 @@ Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 54 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v20');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v21');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();

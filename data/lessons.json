@@ -768,7 +768,7 @@
 },
 {
 "t": "Válvulas auriculoventriculares",
-"x": "La tricúspide (derecha) y la mitral (izquierda, dos valvas) se abren en diástole para llenar los ventrículos y se cierran en sístole: su cierre produce el primer ruido cardiaco. Las valvas se sujetan con cuerdas tendinosas a los músculos papilares, que se contraen para impedir que se evaginen hacia las aurículas.",
+"x": "La tricúspide (derecha, tres valvas) y la mitral (izquierda, dos valvas: anterior y posterior) se abren en diástole para llenar los ventrículos y se cierran en sístole: su cierre produce el primer ruido cardiaco. Las valvas se sujetan con cuerdas tendinosas a los músculos papilares, que se contraen para impedir que se evaginen hacia las aurículas.",
 "show": [
 "Inferior leaflet of right atrioventricular valve",
 "Septal leaflet of right atrioventricular valve",
@@ -778,7 +778,10 @@
 "Septal papillary muscle of right ventricle",
 "Inferior papillary muscle of left ventricle",
 "Right ventricle",
-"Left ventricle"
+"Left ventricle",
+"Anterior leaflet of left atrioventricular valve",
+"Anterior leaflet of right atrioventricular valve",
+"Anterior papillary muscle of left ventricle"
 ],
 "view": "ant",
 "cut": {
@@ -823,7 +826,10 @@
 "Pulmonary trunk",
 "Ascending aorta",
 "Superior vena cava",
-"Inferior vena cava (thoracic part)"
+"Inferior vena cava (thoracic part)",
+"Anterior leaflet of left atrioventricular valve",
+"Anterior leaflet of right atrioventricular valve",
+"Anterior papillary muscle of left ventricle"
 ],
 "view": "ant",
 "cut": {
