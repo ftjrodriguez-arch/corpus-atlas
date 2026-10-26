@@ -1173,7 +1173,7 @@ function renderInfo(){
     if(d.biomecanica) extra+=`<div class="card"><h3>Función biomecánica (plano / eje)</h3><p class="small">${esc(d.biomecanica)}</p>${mv.length?`<div class="chips" style="margin-top:4px">${mv.map(([j,v],i)=>`<button data-mv="${i}">${esc(v.n)} ${esc(j.n.toLowerCase())}</button>`).join('')}</div><p class="muted" style="font-size:11.5px">Toca un movimiento para verlo en el simulador.</p>`:''}</div>`;
     if(d.prueba) extra+=`<div class="card"><h3>Prueba muscular manual</h3><p class="small">${esc(d.prueba)}</p></div>`;}
   const lms=EX.lm[c.id]||[];
-  if(lms.length) extra+=`<div class="card"><h3>${TL('Accidentes óseos','Bony landmarks','Acidentes ósseos')} (${lms.length})</h3><div class="lms">${lms.map((l,i)=>`<button data-lm="${i}">${esc(LANG==='en'?l[1]:l[0])}</button>`).join('')}</div><div class="row"><button class="btn" id="lmAll">Mostrar todos</button><button class="btn" id="lmNone">Ocultar marcas</button></div></div>`;
+  if(lms.length) extra+=`<div class="card"><h3>${TL('Accidentes óseos','Bony landmarks','Acidentes ósseos')} (${lms.length})</h3><div class="lms">${lms.map((l,i)=>`<button data-lm="${i}">${esc(LANG==='en'?l[1]:LANG==='pt'&&l[3]?l[3]:l[0])}</button>`).join('')}</div><div class="row"><button class="btn" id="lmAll">Mostrar todos</button><button class="btn" id="lmNone">Ocultar marcas</button></div></div>`;
   extra+=gloInfoCard(c,lms);
   extra+=aiCard();
   const patches=(m.userData.sys==='muscular')?patchesFor(c):[];
@@ -2218,14 +2218,14 @@ function renderGlo(){if(!GLO)return;const q=$('#gloQ').value.trim();let L=gloFil
   if(!q&&!$('#gloCat').value&&!gloLetter&&gloOpen<0){const d=new Date(),n=(d.getFullYear()*372+d.getMonth()*31+d.getDate())*7919%GLO.length,g=GLO[n];const c=document.createElement('div');c.className='card';c.style.marginBottom='10px';c.innerHTML=`<h3>${TL('Término del día','Term of the day','Termo do dia')}</h3><button class="link" data-g="${g.i}" style="text-align:left;font:500 18px/1.2 var(--f-display)">${esc(gT(g))}</button><p class="small muted">${esc(gD(g).slice(0,160))}${gD(g).length>160?'…':''}</p>`;$('#gloList').prepend(c);}
   if(more>0){const b=document.createElement('button');b.className='btn';b.style.margin='10px 0';b.textContent=TL(`Mostrar ${Math.min(more,200)} más (quedan ${more})`,`Show ${Math.min(more,200)} more (${more} left)`,`Mostrar mais ${Math.min(more,200)} (restam ${more})`);b.onclick=()=>{gloLim+=200;renderGlo();};$('#gloList').appendChild(b);}
   gloWire();}
-function gloExLabel(x){const R=gloResolve(x);if(LANG==='es'||!R)return x.txt;if(R.lm)return R.lm[1];return nameL(CAT[R.id])||x.txt;}
+function gloExLabel(x){const R=gloResolve(x);if(LANG==='es'||!R)return x.txt;if(R.lm)return LANG==='pt'&&R.lm[3]?R.lm[3]:R.lm[1];return nameL(CAT[R.id])||x.txt;}
 function gloCard(g){const other=[['ES',g.t],['EN',g.en],['PT',g.pt]].filter(([l,n])=>n&&l.toLowerCase()!==LANG);
   const lbl=(es,en,pt)=>`<h3>${TL(es,en,pt)}</h3>`;
   const ex=(g.ej||[]).map((x,k)=>{const key=g.i+':'+k,img=GLO_IMG.get(key);return `<button data-gex="${k}" title="${esc(TL('Ver en 3D y fotografiar','Show in 3D and photograph','Ver em 3D e fotografar'))}"><span class="ph" data-ph="${key}">${img?`<img src="${img}" alt="">`:TL('Ver en 3D','Show in 3D','Ver em 3D')}</span><span>${esc(gloExLabel(x))}</span></button>`;}).join('');
   const rel=(g.rel||[]).map(r=>{const i=GLO.byKey.get(gKey(r));return i!=null?`<button data-grel="${i}">${esc(gT(GLO[i]))}</button>`:'';}).join('');
   return `<div class="gloCard" data-gc="${g.i}">
     <div class="nm">${other.map(([l,n])=>`<b>${l}</b> ${esc(n)}`).join(' · ')} · <span>${esc(gCat(g.cat))}</span></div>
-    <p class="df">${esc(gD(g))}</p>
+    <p class="df">${gloLinkify(gD(g),g)}</p>
     ${g.etim?`<p class="small"><span class="muted">${TL('Etimología','Etymology','Etimologia')}:</span> <i>${esc(TL(g.etim,g.etim_en||g.etim,g.etim_pt||g.etim))}</i></p>`:''}
     ${(g.sin||[]).length&&LANG==='es'?`<div>${lbl('Sinónimos','Synonyms','Sinônimos')}<div class="gloChips" style="margin-top:5px">${g.sin.map(x=>`<span>${esc(x)}</span>`).join('')}</div></div>`:''}
     ${ex?`<div>${lbl('Ejemplos en el modelo 3D','Examples on the 3D model','Exemplos no modelo 3D')}<div class="gloEx" style="margin-top:6px">${ex}</div>${(g.ej||[]).length>1?`<button class="btn" data-gall style="margin-top:8px">${TL('Fotografiar todos los ejemplos','Photograph all examples','Fotografar todos os exemplos')}</button>`:''}</div>`:''}
@@ -2286,6 +2286,17 @@ function gloQuizRender(){const box=$('#gloQuiz');if(!GQ)return;
     $('#gqNext').onclick=()=>{box.dataset.done='';GQ.i++;gloQuizRender();};});
   box.dataset.done='';}
 $('#gloPrac').onclick=()=>{gloLoad();if(GLO)gloQuizStart();else GLO_P&&GLO_P.then(gloQuizStart);};
+
+let GLO_RX=null;
+function gloLinkify(txt,g){try{if(!GLO_RX||GLO_RX.l!==LANG){const m=new Map();const NOL=new Set(['Posición y dirección','Planos y ejes','Raíces y afijos','Movimientos']);const okN=n=>n&&!/^-|-$/.test(n.trim())&&(/\s/.test(n.replace(/\s*\([^)]*\)/g,'').trim())?n.length>=8:n.length>=8);for(const x of GLO){if(NOL.has(x.cat))continue;const n=gT(x);if(okN(n)){const k=n.toLowerCase();if(!m.has(k))m.set(k,x.i);}
+      if(LANG==='es')for(const y of x.sin||[])if(okN(y)){const k=y.toLowerCase();if(!m.has(k))m.set(k,x.i);}}
+    const keys=[...m.keys()].sort((a,b)=>b.length-a.length).map(k=>k.replace(/\s*\([^)]*\)\s*/g,' ').trim()).filter(k=>k.length>=5);
+    const map=new Map();[...m].forEach(([k,i])=>map.set(k.replace(/\s*\([^)]*\)\s*/g,' ').trim(),i));
+    GLO_RX={l:LANG,map,rx:new RegExp('(?<![\\p{L}\\p{N}])('+[...new Set(keys)].map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')(?![\\p{L}\\p{N}])','giu')};}
+  const self=new Set([gT(g),g.t,...(g.sin||[])].map(x=>x.toLowerCase()));let out='',last=0,n=0;const used=new Set();
+  txt.replace(GLO_RX.rx,(mt,_1,off)=>{const k=mt.toLowerCase(),i=GLO_RX.map.get(k);if(i==null||i===g.i||self.has(k)||used.has(i)||n>=8)return mt;used.add(i);n++;
+    out+=esc(txt.slice(last,off))+`<button class="link" data-grel="${i}" style="font-weight:500">${esc(mt)}</button>`;last=off+mt.length;return mt;});
+  return out+esc(txt.slice(last));}catch(e){return esc(txt);}}
 const gSleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function gloShow(g,k){const x=g.ej[k],R=gloResolve(x);if(!R){toast(TL('Esta estructura no está disponible en el modelo actual.','This structure is not available in the current model.','Esta estrutura não está disponível no modelo atual.'));return;}
   gloBusy=true;try{if(isPhone()&&sheetState!=='peek')setSheet('peek');
@@ -2307,9 +2318,9 @@ $('#gloCat').addEventListener('change',()=>{gloOpen=-1;gloLetter='';gloLim=150;r
 /* ───────── Accidentes óseos ───────── */
 const lmGroup=new THREE.Group();scene.add(lmGroup);
 function clearLm(){lmGroup.clear();removeLabels('lm');}
-function showLm(list,focus){clearLm();if(SYS.muscular.on)setXray(true);for(const [es,en,p] of list){const v=new V3(...p);
+function showLm(list,focus){clearLm();if(SYS.muscular.on)setXray(true);for(const [es,en,p,pt] of list){const v=new V3(...p);
   const s=new THREE.Mesh(new THREE.SphereGeometry(0.0045,14,10),new THREE.MeshBasicMaterial({color:0xffd34d,depthTest:false,transparent:true}));s.position.copy(v);s.renderOrder=32;lmGroup.add(s);
-  const L=addLabel(LANG==='en'?en:es,()=>v,'','lm');L.on=true;L.pos=v;}
+  const L=addLabel(LANG==='en'?en:LANG==='pt'&&pt?pt:es,()=>v,'','lm');L.on=true;L.pos=v;}
   if(focus&&list.length===1) focusOn(new V3(...list[0][2]),0.35);}
 
 /* ───────── Bucle ───────── */
@@ -2370,7 +2381,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 53 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v34');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v35');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();
