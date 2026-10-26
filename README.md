@@ -30,6 +30,7 @@ Funciona en el navegador del ordenador, la tableta o el móvil, sin instalar nad
 - **Revisión experta**: formulario «Proponer corrección» en cada ficha y lista de estructuras reconstruidas que necesitan revisión.
 - **Más lecciones** (pares craneales, cuello, tórax y respiración, vísceras abdominales) y **más casos** (parálisis de Bell, III par, hernia inguinal, ictus de la cerebral media).
 - **Línea alba e intersecciones tendinosas** (v23): el rafe medio entre los rectos, con el anillo umbilical, y las tres intersecciones tendinosas de cada recto, construidas sobre la superficie de los músculos del atlas.
+- **Aponeurosis y retináculos con la musculatura** (v24): cintilla iliotibial, hoja posterior de la fascia toracolumbar, retináculos de la muñeca, la rodilla y el tobillo, aponeurosis palmar y plantar y galea aponeurótica se ven ya con la capa de músculos, como en un atlas; fibras musculares más finas en el estilo atlas.
 - **Recto y conducto anal** como estructuras propias (antes formaban parte del colon sigmoide del atlas), y uniones entre regiones de piel soldadas para eliminar grietas.
 - **Compartir vista**: un enlace abre el atlas exactamente en la misma vista (capas, cámara, cortes, estructura, marcha).
 - **Marcha patológica**: Trendelenburg, steppage, antiálgica, hemiparética, en tijera, parkinsoniana y rodilla rígida.
