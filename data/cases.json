@@ -833,5 +833,144 @@
 "fisioterapia": "Evitar la sedestación prolongada y adaptar el sillín, educación en dolor, terapia manual de la musculatura del suelo pélvico y del obturador interno, y ejercicios de relajación.",
 "camara": "inferior",
 "solo": true
+},
+{
+"id": "bell",
+"titulo": "Parálisis facial periférica (de Bell)",
+"region": "cabeza",
+"side": "derecho",
+"presentacion": "Mujer de 38 años que al despertar no puede cerrar el ojo derecho, se le cae la comisura de la boca y nota la comida acumulada en la mejilla. No tiene otros déficits.",
+"anatomia": "El nervio facial (VII) sale del tronco del encéfalo por el ángulo pontocerebeloso, recorre el conducto facial del hueso temporal, donde se inflama y comprime en la parálisis de Bell, y sale por el agujero estilomastoideo para dividirse en la parótida en sus ramas para la musculatura de la mímica. La lesión periférica paraliza toda la hemicara, incluida la frente; en la central (ictus) la frente se conserva porque su núcleo recibe fibras de ambos hemisferios.",
+"lesion": [
+"Facial nerve (VII)"
+],
+"afectados": [
+"Orbicularis oris muscle",
+"Zygomaticus major muscle",
+"Platysma"
+],
+"relacionados": [
+"Parotid gland",
+"Pons",
+"Temporal bone"
+],
+"signos": [
+"Incapacidad de cerrar el ojo (signo de Bell: el globo gira hacia arriba)",
+"Borramiento de las arrugas de la frente y del surco nasogeniano",
+"Desviación de la boca hacia el lado sano",
+"A veces hiperacusia y pérdida del gusto en los dos tercios anteriores de la lengua"
+],
+"pruebas": [
+"Escala de House-Brackmann",
+"Exploración de la frente: distingue lesión periférica de central",
+"Otoscopia (descartar herpes zóster ótico)",
+"Electroneurografía si no hay recuperación a las 3 semanas"
+],
+"fisioterapia": "Protección ocular, reeducación neuromuscular frente al espejo con ejercicios selectivos y biofeedback, evitando la estimulación eléctrica intensa y los movimientos en masa que favorecen las sincinesias.",
+"camara": "lateral"
+},
+{
+"id": "tercer-par",
+"titulo": "Parálisis del III par por aneurisma de la comunicante posterior",
+"region": "cabeza",
+"side": "derecho",
+"presentacion": "Varón de 55 años, hipertenso, con cefalea intensa de inicio brusco, caída del párpado derecho y visión doble. La pupila derecha está dilatada y no reacciona a la luz.",
+"anatomia": "El nervio oculomotor (III) sale del mesencéfalo entre las arterias cerebral posterior y cerebelosa superior y avanza junto a la arteria comunicante posterior. Sus fibras parasimpáticas para la pupila viajan en la superficie del nervio, por eso una compresión externa (aneurisma, herniación del uncus) dilata la pupila, mientras que la isquemia diabética suele respetarla. Inerva los rectos superior, inferior y medial, el oblicuo inferior y el elevador del párpado.",
+"lesion": [
+"Oculomotor nerve (III)"
+],
+"afectados": [
+"Midbrain"
+],
+"relacionados": [
+"Posterior cerebral artery",
+"Basilar artery",
+"Internal carotid artery",
+"Trochlear nerve (IV)"
+],
+"signos": [
+"Ptosis palpebral",
+"Ojo desviado abajo y afuera (acción sin oposición del recto lateral y oblicuo superior)",
+"Midriasis arreactiva",
+"Diplopía"
+],
+"pruebas": [
+"Exploración de la motilidad ocular en las nueve posiciones de la mirada",
+"Reflejo fotomotor directo y consensuado",
+"Angio-TC o angio-RM urgente: una parálisis del III con pupila afectada es un aneurisma hasta demostrar lo contrario"
+],
+"fisioterapia": "Tras el tratamiento neurovascular: oclusión alterna para la diplopía, ejercicios oculomotores y adaptación de las actividades de la vida diaria.",
+"camara": "inferior"
+},
+{
+"id": "hernia-inguinal",
+"titulo": "Hernia inguinal indirecta",
+"region": "abdomen",
+"side": "derecho",
+"presentacion": "Varón de 28 años que nota un bulto en la ingle derecha al cargar peso, que baja hacia el escroto y desaparece al tumbarse.",
+"anatomia": "El conducto inguinal atraviesa la pared abdominal oblicuamente por encima del ligamento inguinal, desde el anillo profundo (lateral a los vasos epigástricos inferiores) hasta el superficial. La hernia indirecta entra por el anillo profundo, lateral a los vasos epigástricos, siguiendo el cordón espermático; la directa empuja el suelo del conducto (triángulo de Hesselbach), medial a esos vasos. El oblicuo interno y el transverso forman el techo y el tendón conjunto refuerza la pared posterior.",
+"lesion": [
+"Inguinal ligament",
+"Inferior epigastric artery"
+],
+"afectados": [
+"Transversus abdominis muscle",
+"Rectus abdominis muscle"
+],
+"relacionados": [
+"Inferior epigastric vein",
+"Hip bone",
+"Ilio-inguinal nerve"
+],
+"signos": [
+"Bulto inguinal que aumenta con la tos y el esfuerzo",
+"Reducible en decúbito",
+"Puede descender al escroto (indirecta)",
+"Dolor brusco, irreductible y doloroso: estrangulación, urgencia quirúrgica"
+],
+"pruebas": [
+"Exploración de pie con tos: impulso en el dedo introducido por el anillo superficial",
+"Ecografía de pared abdominal en casos dudosos"
+],
+"fisioterapia": "Tras la reparación (hernioplastia): movilización precoz, control progresivo de la presión intraabdominal, fortalecimiento del transverso del abdomen y retorno gradual a las cargas.",
+"camara": "anterior"
+},
+{
+"id": "ictus-acm",
+"titulo": "Ictus de la arteria cerebral media izquierda",
+"region": "cerebro",
+"side": "izquierdo",
+"presentacion": "Varón de 67 años con fibrilación auricular que de forma brusca no puede mover el brazo y la cara derechos y no consigue hablar con fluidez, aunque entiende lo que se le dice.",
+"anatomia": "La arteria cerebral media irriga la cara lateral del hemisferio: la corteza motora y sensitiva de la cara y el miembro superior (giros precentral y poscentral), el área de Broca en el hemisferio dominante y, por sus ramas profundas lenticuloestriadas, la cápsula interna. Su oclusión en el hemisferio izquierdo produce hemiparesia y hemihipoestesia derechas de predominio facio-braquial y afasia; la pierna se afecta menos porque su corteza depende de la cerebral anterior.",
+"lesion": [
+"Middle cerebral artery (M1-segment)",
+"Middle cerebral artery (M3 segment)"
+],
+"afectados": [
+"Precentral gyrus",
+"Postcentral gyrus",
+"Putamen",
+"Caudate nucleus"
+],
+"relacionados": [
+"Internal carotid artery",
+"Anterior cerebral artery",
+"Posterior cerebral artery",
+"Basilar artery"
+],
+"signos": [
+"Hemiparesia derecha de predominio facio-braquial",
+"Parálisis facial central (respeta la frente)",
+"Afasia de expresión (Broca)",
+"Desviación de la mirada hacia el lado de la lesión"
+],
+"pruebas": [
+"Escala NIHSS",
+"TC craneal urgente para descartar hemorragia y angio-TC para localizar la oclusión (trombólisis o trombectomía)",
+"Valoración de la deglución antes de dar alimento"
+],
+"fisioterapia": "Movilización y sedestación precoces, posicionamiento del hombro pléjico, terapia orientada a tareas, terapia por restricción del lado sano en fases posteriores y logopedia para la afasia.",
+"camara": "lateral",
+"solo": true
 }
 ]

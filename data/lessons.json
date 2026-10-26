@@ -1022,5 +1022,363 @@
 }
 ],
 "only": true
+},
+{
+"id": "pares",
+"t": "Pares craneales",
+"r": "Cabeza",
+"only": true,
+"both": true,
+"steps": [
+{
+"t": "Los nervios sensoriales: I, II y VIII",
+"x": "El olfatorio (I) atraviesa la lámina cribosa del etmoides; el óptico (II) sale de la órbita por el conducto óptico hacia el quiasma; el vestibulococlear (VIII) entra en el conducto auditivo interno junto al facial. Son nervios puramente sensoriales.",
+"show": [
+"Olfactory nerve (I)",
+"Optic nerve (II)",
+"Vestibulocochlear nerve (VIII)",
+"Optic chiasm"
+],
+"view": "inf"
+},
+{
+"t": "Los motores del ojo: III, IV y VI",
+"x": "El oculomotor (III) inerva casi todos los músculos extraoculares, el elevador del párpado y, con fibras parasimpáticas, la pupila; el troclear (IV), el oblicuo superior; el abducens (VI), el recto lateral. Una lesión del III deja el ojo «abajo y afuera» con ptosis y midriasis.",
+"show": [
+"Oculomotor nerve (III)",
+"Trochlear nerve (IV)",
+"Midbrain",
+"Pons"
+],
+"view": "inf"
+},
+{
+"t": "Trigémino (V)",
+"x": "El mayor de los pares craneales: sus tres ramas (oftálmica, maxilar y mandibular) recogen la sensibilidad de la cara, y la mandibular inerva los músculos de la masticación.",
+"show": [
+"Trigeminal nerve (V)",
+"Ophthalmic nerve",
+"Pons"
+],
+"view": "latd"
+},
+{
+"t": "Facial (VII)",
+"x": "Sale del tronco por el ángulo pontocerebeloso, recorre el conducto facial del temporal y sale por el agujero estilomastoideo para inervar la mímica facial. Su lesión periférica (parálisis de Bell) paraliza toda la hemicara.",
+"show": [
+"Facial nerve (VII)",
+"Pons"
+],
+"view": "latd"
+},
+{
+"t": "IX, X, XI y XII",
+"x": "Glosofaríngeo (IX) y vago (X) salen por el agujero yugular: deglución, gusto del tercio posterior de la lengua y la inervación parasimpática de tórax y abdomen. El accesorio (XI) inerva esternocleidomastoideo y trapecio; el hipogloso (XII), la lengua: si se lesiona, la lengua se desvía hacia el lado lesionado.",
+"show": [
+"Glossopharyngeal nerve (IX)",
+"Vagus nerve (X)",
+"Accessory nerve (XI)",
+"Hypoglossal nerve (XII)",
+"Medulla oblongata"
+],
+"view": "latd"
+}
+],
+"q": [
+{
+"p": "¿Qué nervio inerva el músculo recto lateral del ojo?",
+"o": [
+"Abducens (VI)",
+"Troclear (IV)",
+"Oculomotor (III)",
+"Trigémino (V)"
+],
+"a": 0
+},
+{
+"p": "Un ojo desviado abajo y afuera con ptosis y pupila dilatada sugiere lesión del…",
+"o": [
+"Nervio oculomotor (III)",
+"Nervio óptico (II)",
+"Nervio facial (VII)",
+"Nervio abducens (VI)"
+],
+"a": 0
+},
+{
+"p": "¿Qué par craneal inerva los músculos de la masticación?",
+"o": [
+"Trigémino (V), rama mandibular",
+"Facial (VII)",
+"Hipogloso (XII)",
+"Glosofaríngeo (IX)"
+],
+"a": 0
+}
+]
+},
+{
+"id": "cuello",
+"t": "Cuello: triángulos y vasos",
+"r": "Cuello",
+"both": false,
+"steps": [
+{
+"t": "El esternocleidomastoideo",
+"x": "Divide el cuello en un triángulo anterior y otro posterior. Gira la cabeza hacia el lado opuesto e inclina hacia el mismo lado. Lo inerva el nervio accesorio (XI).",
+"show": [
+"Sternocleidomastoid muscle",
+"Mandible",
+"Hyoid bone"
+],
+"view": "latd"
+},
+{
+"t": "Músculos infrahioideos",
+"x": "El esternohioideo y el omohioideo descienden el hioides en la deglución y la fonación; el milohioideo forma el suelo de la boca.",
+"show": [
+"Sternohyoid muscle",
+"Omohyoid muscle",
+"Mylohyoid muscle",
+"Hyoid bone",
+"Thyroid cartilage",
+"Cricoid cartilage"
+],
+"view": "ant"
+},
+{
+"t": "Glándula tiroides",
+"x": "Rodea la tráquea por debajo del cartílago cricoides; su istmo cruza los anillos traqueales 2.º a 4.º. Se mueve con la deglución porque está unida a la laringe.",
+"show": [
+"Thyroid gland",
+"Trachea",
+"Thyroid cartilage",
+"Cricoid cartilage"
+],
+"view": "ant"
+},
+{
+"t": "La vaina carotídea",
+"x": "Contiene la arteria carótida común (que se divide a la altura del cartílago tiroides en interna y externa), la vena yugular interna por fuera y el nervio vago por detrás. El pulso carotídeo se palpa en el borde anterior del esternocleidomastoideo.",
+"show": [
+"Internal carotid artery",
+"External carotid artery",
+"Internal jugular vein",
+"Vagus nerve (X)",
+"Sternocleidomastoid muscle"
+],
+"view": "latd"
+}
+],
+"q": [
+{
+"p": "¿Dónde se divide habitualmente la carótida común?",
+"o": [
+"A la altura del borde superior del cartílago tiroides",
+"A la altura del ángulo de la mandíbula",
+"Detrás de la clavícula",
+"A la altura del cricoides"
+],
+"a": 0
+},
+{
+"p": "¿Qué estructura va dentro de la vaina carotídea, por detrás de los vasos?",
+"o": [
+"El nervio vago",
+"El nervio frénico",
+"El tronco simpático",
+"El nervio hipogloso"
+],
+"a": 0
+}
+]
+},
+{
+"id": "torax",
+"t": "Tórax y respiración",
+"r": "Tórax",
+"both": true,
+"steps": [
+{
+"t": "La pared torácica",
+"x": "Los intercostales externos elevan las costillas en la inspiración (como un asa de cubo); los internos ayudan en la espiración forzada. Por el borde inferior de cada costilla discurre el paquete vasculonervioso intercostal: por eso las punciones se hacen por el borde superior de la costilla inferior.",
+"show": [
+"External intercostal muscles",
+"Internal intercostal muscles",
+"Intercostal nerves"
+],
+"view": "latd"
+},
+{
+"t": "El diafragma",
+"x": "Principal músculo inspiratorio: al contraerse desciende y aumenta el diámetro vertical del tórax. Lo inerva el nervio frénico (C3–C5): «C3, 4 y 5 mantienen vivo el diafragma».",
+"show": [
+"Diaphragm"
+],
+"view": "ant"
+},
+{
+"t": "Pulmones",
+"x": "El derecho tiene tres lóbulos (superior, medio e inferior) y el izquierdo dos, con la língula en lugar del lóbulo medio. Cada lóbulo se divide en segmentos broncopulmonares, unidades quirúrgicas con su bronquio y su arteria.",
+"show": [
+"Superior lobe of right lung",
+"Middle lobe of right lung",
+"Inferior lobe of right lung",
+"Superior lobe of left lung",
+"Inferior lobe of left lung",
+"Trachea"
+],
+"view": "ant"
+},
+{
+"t": "Árbol bronquial",
+"x": "La tráquea se divide a la altura de T4–T5 (carina). El bronquio principal derecho es más corto, ancho y vertical: por eso los cuerpos extraños aspirados suelen ir al pulmón derecho.",
+"show": [
+"Trachea",
+"Right main bronchus",
+"Left main bronchus",
+"Right superior lobar bronchus",
+"Intermediate bronchus",
+"Left superior lobar bronchus",
+"Left inferior lobar bronchus"
+],
+"view": "ant"
+},
+{
+"t": "Mediastino",
+"x": "Entre ambos pulmones: corazón y grandes vasos, tráquea, esófago, nervios vago y frénico, conducto torácico y la vena ácigos, que desemboca en la cava superior.",
+"show": [
+"Superior vena cava",
+"Azygos vein",
+"Pulmonary trunk",
+"Aortic arch",
+"Trachea",
+"Left ventricle"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "¿Por qué los cuerpos extraños aspirados van más al pulmón derecho?",
+"o": [
+"Su bronquio principal es más corto, ancho y vertical",
+"El pulmón derecho es más pequeño",
+"Por la posición del corazón a la derecha",
+"Porque el bronquio izquierdo no tiene cartílago"
+],
+"a": 0
+},
+{
+"p": "¿Qué raíces forman el nervio frénico?",
+"o": [
+"C3–C5",
+"C5–C7",
+"T1–T2",
+"C1–C2"
+],
+"a": 0
+},
+{
+"p": "¿Por qué borde de la costilla se hace la toracocentesis?",
+"o": [
+"Por el borde superior de la costilla inferior",
+"Por el borde inferior de la costilla superior",
+"Por el centro del espacio",
+"Es indiferente"
+],
+"a": 0
+}
+]
+},
+{
+"id": "abdomen",
+"t": "Vísceras abdominales",
+"r": "Abdomen",
+"both": true,
+"steps": [
+{
+"t": "Estómago, hígado y vesícula",
+"x": "El hígado ocupa el hipocondrio derecho bajo el diafragma; la vesícula biliar, en su cara inferior, proyecta su fondo en el cruce del borde costal con el recto del abdomen (punto de Murphy). El estómago, en el epigastrio e hipocondrio izquierdo, continúa con el duodeno.",
+"show": [
+"Liver",
+"Gallbladder",
+"Stomach",
+"Duodenum",
+"Spleen"
+],
+"view": "ant"
+},
+{
+"t": "Páncreas y duodeno",
+"x": "La cabeza del páncreas se aloja en el marco duodenal; el cuerpo cruza por delante de la aorta y la vena cava, y la cola llega al bazo. El conducto colédoco y el pancreático desembocan juntos en la ampolla de Vater, en la 2.ª porción del duodeno.",
+"show": [
+"Pancreas",
+"Duodenum",
+"Spleen",
+"Abdominal aorta"
+],
+"view": "ant"
+},
+{
+"t": "El intestino",
+"x": "Yeyuno e íleon ocupan el centro del abdomen; el colon lo enmarca: ascendente, transverso, descendente y sigmoide, que sigue con el recto. El colon tiene tenias, haustras y apéndices epiploicos, que lo distinguen del intestino delgado.",
+"show": [
+"Jejunum",
+"Ascending colon",
+"Transverse colon",
+"Descending colon",
+"Sigmoid colon",
+"Rectum"
+],
+"view": "ant"
+},
+{
+"t": "Riñones y glándulas suprarrenales",
+"x": "Retroperitoneales, a la altura de T12–L3; el derecho algo más bajo por el hígado. La glándula suprarrenal se apoya en su polo superior.",
+"show": [
+"Kidney",
+"Suprarenal gland",
+"Abdominal aorta",
+"Ureter"
+],
+"view": "post"
+},
+{
+"t": "La irrigación del tubo digestivo",
+"x": "La aorta abdominal da el tronco celíaco (intestino anterior: estómago, hígado, bazo), la mesentérica superior (intestino medio: del duodeno al colon transverso) y la mesentérica inferior (intestino posterior: hasta el recto). La sangre venosa vuelve al hígado por la vena porta.",
+"show": [
+"Abdominal aorta",
+"Superior mesenteric artery",
+"Inferior mesenteric artery",
+"Hepatic portal vein",
+"Superior mesenteric vein",
+"Inferior mesenteric vein"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "¿Qué arteria irriga del duodeno al colon transverso?",
+"o": [
+"Mesentérica superior",
+"Tronco celíaco",
+"Mesentérica inferior",
+"Ilíaca interna"
+],
+"a": 0
+},
+{
+"p": "¿Dónde desembocan el colédoco y el conducto pancreático?",
+"o": [
+"En la 2.ª porción del duodeno (ampolla de Vater)",
+"En el píloro",
+"En el yeyuno",
+"En la 4.ª porción del duodeno"
+],
+"a": 0
+}
+]
 }
 ]

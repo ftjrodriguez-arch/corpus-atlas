@@ -76,6 +76,8 @@ main{flex:1;min-height:0;display:grid;gap:10px;grid-template-rows:minmax(0,1.15f
 .lesson b{display:block;font:500 17px/1.2 var(--f-display)}
 .steps{display:flex;gap:4px}.steps i{flex:1;height:4px;border-radius:2px;background:var(--line)}.steps i.on{background:var(--accent)}
 .lq{margin-bottom:12px}
+.animchip{top:auto;bottom:64px;white-space:normal;max-width:92%;text-align:center}
+.revform textarea,.revform input,.revform select{width:100%;margin:4px 0 8px}.revform textarea{min-height:76px;resize:vertical}
 .seg{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
 #stage.medimg{background:#000!important}
 .opt{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:9px 11px;font-size:13.5px;margin-bottom:6px}
@@ -203,7 +205,18 @@ header{position:relative}
 .poprow{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:600;font-size:13px}
 .keys summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)}
 .keys .credit{margin-top:6px}
-.viewpop{top:10px;right:74px;width:208px}
+.viewpop{top:10px;right:74px;width:208px;display:flex;flex-direction:column;gap:6px}
+.vsep{font:600 10.5px/1 var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:6px 0 0}
+.vreset[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.pinsvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.pinsvg line{stroke:var(--pin,#e9edf2);stroke-width:1.2;opacity:.9}.pinsvg circle{fill:var(--accent);stroke:#0008;stroke-width:1}
+.pin{position:absolute;top:0;white-space:normal;max-width:min(38%,260px);font:500 12.5px/1.2 var(--f-display);color:var(--ink);background:color-mix(in srgb,var(--panel) 88%,transparent);border:1px solid var(--line);border-radius:6px;padding:3px 7px;pointer-events:auto;cursor:pointer}
+.pin:hover{border-color:var(--bad)}
+body.teach .pin{font-size:20px;padding:5px 10px}body.teach .lbl.tag{font-size:22px}
+body.teach .pinsvg line{stroke-width:2}
+.laser{position:absolute;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:radial-gradient(circle,#ff3b30 0 35%,#ff3b3066 36% 60%,transparent 61%);pointer-events:none;z-index:6;box-shadow:0 0 14px #ff3b30}
+body.teach .stage canvas{cursor:none}
+body.teach .hint{display:none}
 .vgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .vgrid button,.vreset{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:8px;font-size:12.5px;font-weight:600}
 .vgrid button:hover,.vreset:hover{border-color:var(--accent)}
@@ -286,7 +299,9 @@ details.more > .card{margin-bottom:10px}
 <main>
   <section class="stage" id="stage" aria-label="Modelo 3D del cuerpo humano">
     <canvas id="cv" tabindex="0" role="img" aria-label="Modelo 3D interactivo del cuerpo humano. Flechas para girar, más y menos para acercar, 1 a 6 para las vistas, X para rayos X."></canvas>
+    <svg class="pinsvg" id="pinSvg" aria-hidden="true"></svg>
     <div class="labels" id="labels"></div>
+    <div class="laser" id="laser" hidden></div>
     <div class="hint">
       <p id="hintTxt">Arrastra para girar · pellizca o rueda para acercar · dos dedos o clic derecho para desplazar · toca una estructura para identificarla</p>
       <span class="quizbar" id="quizbar" hidden></span>
@@ -295,6 +310,7 @@ details.more > .card{margin-bottom:10px}
     <div class="actbar" id="actbar" hidden>
       <span class="actname" id="actName"></span>
       <div class="actbtns">
+        <button id="aPin">Etiquetar</button>
         <button id="aIso">Aislar 360°</button>
         <button id="aExt">Extraer</button>
         <button id="aHide">Ocultar</button>
@@ -304,11 +320,12 @@ details.more > .card{margin-bottom:10px}
       </div>
     </div>
     <div class="conchip" id="conChip" hidden></div>
+    <div class="conchip animchip" id="animChip" hidden></div>
     <div class="legend" id="legend" hidden><span><i class="dot" style="background:var(--orig)"></i>Origen (proximal)</span><span><i class="dot" style="background:var(--ins)"></i>Inserción (distal)</span></div>
     <div class="tools" role="toolbar" aria-label="Herramientas de la vista">
       <button class="icon-btn" id="viewMenuBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Vistas" title="Vistas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg><span>Vistas</span></button>
       <button class="icon-btn" id="xrayBtn" aria-pressed="false" aria-label="Rayos X" title="Rayos X"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M7 7h3M7 11h3M7 15h3M14 9h3M14 13h3M14 17h3"/></svg><span>Rayos X</span></button>
-      <button class="icon-btn" id="studioBtn" aria-pressed="false" aria-label="Estudio" title="Fondo negro e iluminación de estudio para ver fibras y relieves"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg><span>Estudio</span></button>
+      <button class="icon-btn" id="studioBtn" aria-pressed="false" aria-label="Estudio" title="Estilo atlas: fondo negro, piel translúcida y tejidos realzados"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg><span>Atlas</span></button>
       <button class="icon-btn" id="shareBtn" aria-label="Compartir vista" title="Copia un enlace que abre el atlas exactamente en esta vista"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg><span>Compartir</span></button>
       <button class="icon-btn" id="fsBtn" aria-label="Pantalla completa" title="Pantalla completa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>Pantalla</span></button>
       <button class="icon-btn" id="helpBtn" aria-label="Ayuda" title="Ayuda"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg><span>Ayuda</span></button>
@@ -323,6 +340,11 @@ details.more > .card{margin-bottom:10px}
         <button data-view="inf" role="menuitem">Inferior</button>
       </div>
       <button data-view="reset" role="menuitem" class="vreset">Restablecer</button>
+      <div class="vsep">Etiquetas y clase</div>
+      <button class="vreset" id="pinModeBtn" aria-pressed="false">Etiquetar al tocar</button>
+      <button class="vreset" id="pinClearBtn">Quitar etiquetas</button>
+      <button class="vreset" id="pngBtn">Guardar imagen (PNG)</button>
+      <button class="vreset" id="teachBtn" aria-pressed="false">Modo clase (proyector)</button>
     </div>
     <div class="welcome" id="welcome" hidden>
       <div class="wcard">
@@ -426,6 +448,14 @@ details.more > .card{margin-bottom:10px}
 
       <div class="view" id="tab-mov" hidden>
         <p class="femonly card">El Visible Human Female no tiene esqueleto articulado ni musculatura de los miembros. <button class="btn" onclick="setBody('f')">Ver el modelo femenino completo</button></p>
+        <div class="card" id="animCard">
+          <h3>Fisiología animada</h3>
+          <p class="muted small">El modelo se mueve para mostrar la función: el ciclo cardiaco con la apertura y el cierre de las válvulas, y la mecánica de la respiración.</p>
+          <div class="row"><button class="btn" id="animHeart" aria-pressed="false">Latido cardiaco</button><button class="btn" id="animBreath" aria-pressed="false">Respiración</button></div>
+          <label class="chk"><input type="checkbox" id="animCut"> Corte de cuatro cámaras (latido)</label>
+          <label class="chk"><input type="checkbox" id="animSlow"> Cámara lenta</label>
+          <p class="small" id="animTxt"></p>
+        </div>
         <div class="card gait" id="gaitCard">
           <div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">Ciclo de la marcha</h3><button class="btn" id="gaitBtn" aria-pressed="false">Ver marcha</button></div>
           <p class="muted small" id="gaitIntro">Marcha normal a velocidad libre con ángulos de referencia de la literatura (Perry; Winter). Se resaltan los músculos activos de ambos miembros inferiores en cada fase.</p>
@@ -499,6 +529,7 @@ details.more > .card{margin-bottom:10px}
           </div>
           <p id="quizMsg" style="font-size:13px"></p>
         </div>
+        <div class="card" id="revCard"></div>
         <div class="card" id="examCard">
           <h3>Modo examen</h3>
           <p class="muted small">Preguntas cronometradas sin ayudas: tocar la estructura pedida o reconocer la resaltada. La nota se ve al final. El profesor puede copiar un enlace con el mismo examen para toda la clase.</p>
@@ -625,7 +656,7 @@ function baseMat(kk,variant,noTint){
   const s=SYS[kk];let col=s.c;const k=BS(kk);
   if(k==='insercion') col=variant==='o'?cssVar('--orig'):cssVar('--ins');
   const M=WET.includes(k)?THREE.MeshPhysicalMaterial:THREE.MeshStandardMaterial;
-  const m=new M({color:lin(col),roughness:k==='oseo'?.62:k==='muscular'?.42:.34,metalness:0,envMapIntensity:(k==='oseo'?.55:.5)*(STUDIO_U.value?0.32:1),
+  const m=new M({color:lin(col),roughness:k==='oseo'?.62:k==='muscular'?.42:.34,metalness:0,envMapIntensity:(k==='oseo'?.55:.5)*(STUDIO_U.value?0.22:1),
     transparent:true,opacity:1,clippingPlanes:clipArr,side:s.dbl?THREE.DoubleSide:THREE.FrontSide});
   if(WET.includes(k)){m.clearcoat=k.startsWith('nervioso')?0.25:0.65;m.clearcoatRoughness=0.28;}
   if(k==='muscular'){m.sheen&&m.sheen.set&&0;}
@@ -645,27 +676,32 @@ function matFor(k,ins,state){
   MAT[key]=m;syncMat(m,key);return m;
 }
 const XRAY_SYS=['muscular','fascia','piel'];/* en la mujer la piel también se aclara en rayos X */let xray=false;
-function syncMat(m,key){const [k,,st]=key.split('|');const s=SYS[k];let op=m.userData.ghost?.32:s.op;if(m.userData.memb)op=Math.min(op,.2);if(xray&&XRAY_SYS.includes(BS(k))&&!st)op=Math.min(op,.14);m.opacity=op;m.transparent=op<.99;m.depthWrite=op>=.99;
+function syncMat(m,key){const [k,,st]=key.split('|');const s=SYS[k];let op=m.userData.ghost?.32:s.op;if(m.userData.memb)op=Math.min(op,.2);if(xray&&XRAY_SYS.includes(BS(k))&&!st)op=Math.min(op,.14);m.opacity=op;m.transparent=op<.99;m.depthWrite=op>=.99;if(studio&&BS(k)==='piel'&&!clipArr.length){m.transparent=true;m.depthWrite=false;}
   const want=clipArr.length?THREE.DoubleSide:m.userData.baseSide;if(m.side!==want){m.side=want;m.needsUpdate=true;}}
 function syncAllMats(){for(const key in MAT) syncMat(MAT[key],key);}
 const autoLite=(navigator.deviceMemory&&navigator.deviceMemory<=3)||((navigator.hardwareConcurrency||8)<=4&&matchMedia('(pointer:coarse)').matches);
 let lite=store.get('lite',null);if(lite===null)lite=!!autoLite;
 function setLite(on){lite=on;store.set('lite',on);LITE_U.value=on?1:0;renderer.setPixelRatio(on?1:Math.min(window.devicePixelRatio||1,2));if(on){autoHR=false;store.set('autoHR',false);const a=$('#autoHR');if(a)a.checked=false;}const c=$('#liteChk');if(c)c.checked=on;if(typeof resize==='function')resize();}
 let studio=false;const hemi=scene.children.find(o=>o.isHemisphereLight);const LBASE=null;
-function setStudio(on){studio=on;STUDIO_U.value=on?1:0;stage.classList.toggle('studio',on);$('#studioBtn').setAttribute('aria-pressed',on);store.set('studio',on);
-  if(hemi)hemi.intensity=on?0.12:(scene.environment?0.35:0.8);key.intensity=on?1.35:(scene.environment?0.85:1.15);rim.intensity=on?1.6:0.6;fill.intensity=on?0.12:0.35;camLight.intensity=on?0.1:0.25;
-  rim.color.set(on?0xdbe6ff:0xc9dcff);rim2.intensity=on?1.1:0;renderer.toneMappingExposure=on?1.15:1.05;
-  for(const k in MAT){MAT[k].envMapIntensity=(on?0.32:1)*(k.startsWith('oseo')?.55:.5);}}
+function setStudio(on){studio=on;key.position.set(on?-1.2:1.4,on?2.8:2.6,on?2.4:2.6);STUDIO_U.value=on?1:0;ATLAS_U.value=on?1:0;stage.classList.toggle('studio',on);$('#studioBtn').setAttribute('aria-pressed',on);store.set('studio',on);
+  if(hemi)hemi.intensity=on?0.06:(scene.environment?0.35:0.8);key.intensity=on?1.75:(scene.environment?0.85:1.15);rim.intensity=on?0.8:0.6;fill.intensity=on?0.18:0.35;camLight.intensity=on?0.3:0.25;
+  rim.color.set(on?0xdbe6ff:0xc9dcff);rim2.intensity=on?0.5:0;renderer.toneMappingExposure=on?1.0:1.05;
+  for(const k in MAT){MAT[k].envMapIntensity=(on?0.22:1)*(k.startsWith('oseo')?.55:.5);}syncAllMats();if(typeof applySystems==='function'&&meshes.length)applySystems();}
 function setXray(on){xray=on;$('#xrayBtn').setAttribute('aria-pressed',on);syncAllMats();}
 
 /* ───────── Datos ───────── */
-let FEM_INFO={};let CAT={},INFO={mus:{},lig:{},bone:{},rest:{}},RIG=null,EX={lm:{},dep:{},reg:{}},SAMPLE=null;
+let FEM_INFO={},INFO_READY=false;let CAT={},INFO={mus:{},lig:{},bone:{},rest:{}},RIG=null,EX={lm:{},dep:{},reg:{}},SAMPLE=null;
 const DEPTH_OFF=new Set(store.get('depthOff',[]));
 const meshes=[];const byId={};
 const fam=n=>n.replace(/^(First|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|Ninth|Tenth|Eleventh|Twelfth) /,'').replace(/ of (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth) (rib|finger)/,' of $2').replace(/Vertebra [CTL]\d+/,'Vertebra');
 const parentName=en=>en.replace(/^.*?\b(head|part|belly|parts|heads) of (the )?/i,'');
 const mnorm=s=>norm(s).replace(/\bmuscles?\b/g,'').replace(/\s+/g,' ').trim();
-function infoFor(c){
+let INFO_TR_L=null,TRM=null;
+async function loadInfoTr(l){if(l==='es'||INFO_TR_L===l||!INFO_READY)return;try{const j=await (await fetch('data/info_'+l+'.json')).json();const W=new WeakMap();
+  for(const key in j){const i=key.indexOf('|'),cat=key.slice(0,i),k=key.slice(i+1);const src=cat==='fem'?FEM_INFO[k]:(INFO[cat]||{})[k];if(src)W.set(src,j[key]);}
+  TRM=W;INFO_TR_L=l;if(selected){renderInfo();if(LANG!=='es')trNode($('#infoBox'));}}catch(e){}}
+function infoFor(c){const r=infoForEs(c);if(r&&LANG!=='es'&&INFO_TR_L===LANG&&TRM&&TRM.has(r.d))return {kind:r.kind,d:TRM.get(r.d),es:r.d,tr:true};return r;}
+function infoForEs(c){
   const en=c.en;
   if((isFemLayer(c.sys)||FEM_ONLY.has(c.id)||BODY==='f')&&FEM_INFO[en]) return {kind:'gen',d:FEM_INFO[en]};
   c={...c,sys:BS(c.sys)};
@@ -853,13 +889,24 @@ float ckN(vec3 x){vec3 i=floor(x);vec3 f=fract(x);f=f*f*(3.0-2.0*f);
  return mix(mix(mix(ckH(i),ckH(i+vec3(1,0,0)),f.x),mix(ckH(i+vec3(0,1,0)),ckH(i+vec3(1,1,0)),f.x),f.y),mix(mix(ckH(i+vec3(0,0,1)),ckH(i+vec3(1,0,1)),f.x),mix(ckH(i+vec3(0,1,1)),ckH(i+vec3(1,1,1)),f.x),f.y),f.z);}
 float ckF(vec3 p){return 0.65*ckN(p)+0.35*ckN(p*2.07);}
 `;
-const STUDIO_U={value:0},LITE_U={value:0},CUT_U={value:0},IMG_U={value:0},SLAB_U={value:new THREE.Vector4(0,-1,0,0)},SLABON_U={value:0};
+const STUDIO_U={value:0},ATLAS_U={value:0},LITE_U={value:0},CUT_U={value:0},IMG_U={value:0},SLAB_U={value:new THREE.Vector4(0,-1,0,0)},SLABON_U={value:0};
 /* gris por tejido para el modo imagen médica: [TC, RM T1] */
 const GRAYK={bone:[0.97,0.16],oseo:[0.97,0.16],muscle:[0.46,0.33],muscular:[0.46,0.33],insercion:[0.6,0.12],articular:[0.56,0.2],fascia:[0.5,0.28],bolsas:[0.42,0.35],
   skin:[0.42,0.62],piel:[0.42,0.62],mama:[0.4,0.7],artery:[0.82,0.06],arterial:[0.82,0.06],vein:[0.66,0.12],venoso:[0.66,0.12],nerve:[0.44,0.5],nervioso_periferico:[0.44,0.5],
   nervioso_central:[0.47,0.58],respiratorio:[0.05,0.04],digestivo:[0.5,0.44],urinario:[0.52,0.38],reproductor:[0.53,0.46],endocrino:[0.55,0.5],linfatico:[0.5,0.45],soft:[0.5,0.45]};
+/* estilo atlas: colores de tejido fresco, fibras finas, tendones nacarados, hueso marfil */
+const ATLAS_COL={
+ muscle:`if(ckAtlas>0.5){vec3 af=normalize(vFd+1e-5);vec3 q=(vObj-af*dot(vObj,af))+af*dot(vObj,af)*0.018;float s1=ckN(q*ckFq*2.6),s2=ckN(q*ckFq*6.5);
+   float fa=1.0-smoothstep(0.15,0.6,length(fwidth(q))*ckFq*6.5);float st=mix(0.5,0.6*s1+0.4*s2,fa);
+   float tv=dot(vTn.rgb,vec3(0.33));vec3 red=vec3(0.30,0.040,0.026)*mix(0.80,1.18,tv)*mix(0.74,1.08,st)*mix(0.92,1.06,H);
+   vec3 ten=vec3(0.56,0.47,0.37)*mix(0.86,1.06,st);diffuseColor.rgb=mix(red,ten,ckTen);}`,
+ bone:`if(ckAtlas>0.5){float po=ckN(vObj*190.0),po2=ckN(vObj*48.0);diffuseColor.rgb=mix(vec3(0.76,0.66,0.48),vec3(0.89,0.81,0.63),0.7*po2+0.3*po)*mix(1.0,0.82,ckCart*0.0);
+   diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.58,0.66,0.74),ckCart*0.8);}`,
+ artery:`if(ckAtlas>0.5){diffuseColor.rgb*=vec3(0.82,0.62,0.62);}`,
+ vein:`if(ckAtlas>0.5){diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.03,0.13,0.30)*mix(0.85,1.1,H),0.75);}`,
+ nerve:`if(ckAtlas>0.5){diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.72,0.56,0.16)*mix(0.85,1.08,H),0.6);}`};
 function corpusShader(sh,kind,noTint,gk){
-  sh.uniforms.ckStudio=STUDIO_U;sh.uniforms.ckLite=LITE_U;sh.uniforms.ckCut=CUT_U;sh.uniforms.ckImg=IMG_U;sh.uniforms.ckSlab=SLAB_U;sh.uniforms.ckSlabOn=SLABON_U;gk=gk||[0.5,0.45];
+  sh.uniforms.ckStudio=STUDIO_U;sh.uniforms.ckAtlas=ATLAS_U;sh.uniforms.ckLite=LITE_U;sh.uniforms.ckCut=CUT_U;sh.uniforms.ckImg=IMG_U;sh.uniforms.ckSlab=SLAB_U;sh.uniforms.ckSlabOn=SLABON_U;gk=gk||[0.5,0.45];
   const SSS={bone:0.08,muscle:0.32,soft:0.22,skin:0.45,artery:0.38,vein:0.42,nerve:0.22}[kind];
   const SSC={artery:'1.0,0.28,0.22',vein:'0.42,0.32,0.95',nerve:'1.0,0.86,0.55'}[kind]||'1.0,0.42,0.3';
   sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute vec3 fdir;\nattribute vec3 vattr;\nattribute vec4 vtint;\nvarying vec3 vWp;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;')
@@ -868,23 +915,25 @@ function corpusShader(sh,kind,noTint,gk){
   const map=['muscle','artery','vein','nerve'].includes(kind)?'vec3 ckMap(vec3 p){vec3 f=normalize(vFd+1e-5);return (p-f*dot(p,f))+f*dot(p,f)*'+(kind==='nerve'?'0.03':kind==='muscle'?'0.07':'0.12')+';}':'vec3 ckMap(vec3 p){return p;}';
   const h=`float ckAO=clamp(vVa.r*1.2,0.0,1.0);${kind==='skin'?'ckAO=mix(1.0,ckAO,0.3);':''}float ckTen=${kind==='muscle'?'smoothstep(0.15,0.75,vVa.g)':'0.0'};float ckCart=${kind==='bone'?'smoothstep(0.2,0.8,vVa.b)':'0.0'};float ckFq=${P.fq.toFixed(1)};float ckFw=length(fwidth(vObj))*ckFq;float ckAmp=1.0-smoothstep(0.12,0.5,ckFw);
     float H0=ckF(ckMap(vObj)*ckFq);float H=mix(0.5,H0,ckAmp*(1.0+0.6*ckStudio));`+(noTint?'':'diffuseColor.rgb=mix(diffuseColor.rgb,pow(vTn.rgb,vec3(2.2)),vTn.a);');
-  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform float ckStudio;\nuniform float ckLite;\nuniform float ckCut;\nuniform float ckImg;\nuniform vec4 ckSlab;\nuniform float ckSlabOn;\nvarying vec3 vWp;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;\n'+NOISE_GLSL+map)
+  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform float ckStudio;\nuniform float ckAtlas;\nuniform float ckLite;\nuniform float ckCut;\nuniform float ckImg;\nuniform vec4 ckSlab;\nuniform float ckSlabOn;\nvarying vec3 vWp;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;\n'+NOISE_GLSL+map)
     .replace('#include <color_fragment>','#include <color_fragment>\n'+h+`diffuseColor.rgb*=mix(${P.c[0].toFixed(2)},${P.c[1].toFixed(2)},H);
       ${kind==='bone'?'diffuseColor.rgb*=mix(vec3(0.90,0.88,0.83),vec3(1.03,1.02,1.0),ckN(vObj*22.0));':''}${kind==='skin'?'diffuseColor.rgb*=mix(vec3(0.95,0.93,0.94),vec3(1.03,1.0,0.97),ckN(vObj*14.0));':''}
       diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.80,0.76,0.66)*mix(0.95,1.04,H),ckTen);
-      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.66,0.76,0.84)*mix(0.97,1.03,H),ckCart*0.85);`)
-    .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\n'+(P.r?`roughnessFactor=clamp(roughnessFactor+(0.5-H)*${P.r.toFixed(2)},0.15,1.0);`:'')+`roughnessFactor=mix(roughnessFactor,0.30,ckTen);roughnessFactor=mix(roughnessFactor,0.22,ckCart);`)
+      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.66,0.76,0.84)*mix(0.97,1.03,H),ckCart*0.85);
+      ${ATLAS_COL[kind]||''}`)
+    .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\n'+(P.r?`roughnessFactor=clamp(roughnessFactor+(0.5-H)*${P.r.toFixed(2)},0.15,1.0);`:'')+`roughnessFactor=mix(roughnessFactor,0.30,ckTen);roughnessFactor=mix(roughnessFactor,0.22,ckCart);roughnessFactor=mix(roughnessFactor,${kind==='muscle'?'mix(0.52,0.3,ckTen)':kind==='bone'?'0.6':'roughnessFactor'},ckAtlas);`)
     .replace('#include <aomap_fragment>',`#include <aomap_fragment>
       reflectedLight.indirectDiffuse*=ckAO;reflectedLight.indirectSpecular*=ckAO*ckAO;
-      reflectedLight.directDiffuse*=mix(1.0,ckAO,0.6);reflectedLight.directSpecular*=mix(1.0,ckAO,0.8);
+      reflectedLight.directDiffuse*=mix(1.0,ckAO,0.6+0.3*ckAtlas);reflectedLight.directSpecular*=mix(1.0,ckAO,0.8+0.15*ckAtlas);reflectedLight.indirectDiffuse*=mix(1.0,ckAO*ckAO,0.6*ckAtlas);
       {float ckRim=pow(1.0-clamp(abs(dot(normal,normalize(vViewPosition))),0.0,1.0),2.2);
-       reflectedLight.indirectDiffuse+=diffuseColor.rgb*vec3(${SSC})*ckRim*${SSS.toFixed(2)}*(1.0+0.8*ckStudio)*(0.4+0.6*ckAO);}`)
+       reflectedLight.indirectDiffuse+=diffuseColor.rgb*vec3(${SSC})*ckRim*${SSS.toFixed(2)}*(1.0+0.8*ckStudio)*(1.0-0.55*ckAtlas)*(0.4+0.6*ckAO);}`)
     .replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
       if(ckAmp>0.01&&ckLite<0.5){float ckE=0.25/ckFq;
         vec3 ckG=vec3(ckF(ckMap(vObj+vec3(ckE,0,0))*ckFq),ckF(ckMap(vObj+vec3(0,ckE,0))*ckFq),ckF(ckMap(vObj+vec3(0,0,ckE))*ckFq))-vec3(H0);
         ckG=(viewMatrix*vec4(ckG/ckE,0.0)).xyz;ckG-=normal*dot(ckG,normal);
-        normal=normalize(normal-ckG*${P.b.toFixed(3)}*ckAmp*(1.0+0.6*ckStudio)*(1.0-0.55*ckTen-0.8*ckCart));}`).replace('#include <dithering_fragment>',`#include <dithering_fragment>
+        normal=normalize(normal-ckG*${P.b.toFixed(3)}*ckAmp*(1.0+0.6*ckStudio)*(1.0-0.6*ckAtlas)*(1.0-0.55*ckTen-0.8*ckCart));}`).replace('#include <dithering_fragment>',`#include <dithering_fragment>
       if(ckSlabOn>0.5&&gl_FrontFacing&&dot(ckSlab.xyz,vWp)+ckSlab.w>0.006)discard;
+      ${kind==='skin'?`if(ckAtlas>0.5&&ckCut<0.5&&ckImg<0.5){if(!gl_FrontFacing)discard;float fr=pow(1.0-clamp(abs(dot(normal,normalize(vViewPosition))),0.0,1.0),1.6);gl_FragColor=vec4(mix(vec3(0.16,0.165,0.17),vec3(0.62,0.63,0.65),fr),clamp((0.14+0.66*fr)*min(1.0,diffuseColor.a*2.6),0.0,0.92));}`:''}
       {float ckG=ckImg>1.5?${gk[1].toFixed(2)}:${gk[0].toFixed(2)};
        if(ckCut>0.5&&!gl_FrontFacing){vec3 cc=ckImg>0.5?vec3(ckG*mix(0.9,1.06,H)):pow(max(diffuseColor.rgb*mix(0.82,1.0,H),vec3(0.0)),vec3(0.4545));gl_FragColor=vec4(cc*0.97,max(diffuseColor.a,0.0));}
        else if(ckImg>0.5){float l=dot(gl_FragColor.rgb,vec3(0.333));float b=dot(pow(max(diffuseColor.rgb,vec3(0.001)),vec3(0.4545)),vec3(0.333));gl_FragColor.rgb=vec3(ckG*clamp(l/max(b,0.05),0.35,1.25));}}`);
@@ -905,6 +954,7 @@ function applySystems(){
     if(v&&DIS_EXC&&DIS_EXC.test(m.userData.c.en)) v=false;
     if(v&&BODY==='f'&&MALE_ONLY.test(m.userData.c.en)) v=false;
     if(v&&m.userData.fonly&&BODY!=='f') v=false;
+    if(v&&studio&&/hairs|eyelash/i.test(m.userData.c.en)) v=false;
     if(v&&DIS_FLT&&DIS_FLT[m.userData.sys]&&!DIS_FLT[m.userData.sys].test(m.userData.c.en)) v=false;
     if(v&&SLABON_U.value) v=slabHit(m);
     if(v&&m.userData.sys==='muscular'&&DEPTH_OFF.size&&DEPTH_OFF.has(EX.dep[m.userData.c.id]||'')) v=false;
@@ -1030,6 +1080,7 @@ function pick(cx,cy){
   const cand=meshes.filter(m=>visibleDeep(m)&&m.material.opacity>0.04);
   const hits=ray.intersectObjects(cand,false).filter(h=>clipArr.every(pl=>pl.distanceToPoint(h.point)>=-0.0005));
   if(!hits.length){if(!quiz.on&&!exam.on)select(null);return;}
+  if(pinMode&&!exam.on&&!quiz.on){addPin(hits[0].object,hits[0].object.worldToLocal(hits[0].point.clone()));return;}
   if(exam.on){examPick(hits[0].object);return;}
   if(quiz.on){quizAnswer(hits[0].object);return;}
   select(hits[0].object,hits[0].point);
@@ -1068,7 +1119,7 @@ function renderInfo(){
     body=`<dl class="kv">${row('Tipo',d.tipo)}${row('Articulación',d.articulacion)}${row('Une',d.une)}${row('Función',d.funcion)}</dl>`+(d.clinica?`<div class="note"><h3>Relevancia clínica</h3><p>${esc(d.clinica)}</p></div>`:'');}
   else if(inf&&inf.kind==='bone'){const d=inf.d;
     body=`<p>${esc(d.descripcion||'')}</p><dl class="kv">${row('Tipo',d.tipo)}${row('Articula con',d.articula)}<dt class="only-pro">Referencias</dt><dd class="only-pro">${esc(d.referencias||'—')}</dd></dl>`+(d.clinica?`<div class="note"><h3>Relevancia clínica</h3><p>${esc(d.clinica)}</p></div>`:'');}
-  else if(inf&&inf.kind==='gen'){const d=inf.d,t=norm(d.tipo||'');
+  else if(inf&&inf.kind==='gen'){const d=inf.d,t=norm((inf.es||d).tipo||'');
     const L=/vena|seno|venos/.test(t)?['Se forma','Desemboca en','Tributarias','Drena']:/arteria|arterial/.test(t)?['Nace de','Continúa como','Ramas','Irriga']:/nervio|ramo|plexo|tronco|division|fasciculo|ganglio(?! linf)/.test(t)?['Origen','Termina','Ramas','Inerva']:/linf/.test(t)?['Origen','Drenaje eferente','Ramas','Región que drena']:/tracto|via|fascicul/.test(t)?['Origen','Destino','Ramas','Irrigación']:['Inserción proximal','Inserción distal','Ramas','Relación / irrigación'];
     body=`<p>${esc(d.descripcion||'')}</p><dl class="kv">${row('Tipo',d.tipo)}${row(L[0],d.origen)}${row(L[1],d.destino)}${row(L[2],d.ramas)}${row(L[3],d.territorio)}${row('Función',d.funcion)}</dl>`+(d.clinica?`<div class="note"><h3>Relevancia clínica</h3><p>${esc(d.clinica)}</p></div>`:'');}
   else body=`<p class="muted small">Estructura del atlas. Nombre en inglés: ${esc(c.en)}.</p>`;
@@ -1084,20 +1135,21 @@ function renderInfo(){
   const patches=(m.userData.sys==='muscular')?patchesFor(c):[];
   box.innerHTML=`<div class="view" style="gap:10px">
     <span class="info-sys"><span class="dot" style="background:${m.userData.sys==='insercion'?(c.ins==='origen'?'var(--orig)':'var(--ins)'):s.c}"></span>${esc(s.n)}${c.side?' · lado '+c.side:''}</span>
-    <h2>${esc(c.es)}${c.ins?` <span class="muted" style="font-size:15px">(${c.ins})</span>`:''}</h2>
+    <h2>${esc((inf&&inf.tr&&inf.d.es)||c.es)}${c.ins?` <span class="muted" style="font-size:15px">(${c.ins})</span>`:''}</h2>
     ${c.la?`<p class="latin">${esc(c.la)}</p>`:''}
-    ${LANG!=='es'?'<p class="muted small">Ficha disponible por ahora solo en español.</p>':''}
+    ${LANG!=='es'&&!(inf&&inf.tr)?(INFO_READY?'<p class="muted small">Ficha disponible por ahora solo en español.</p>':'<p class="muted small">Cargando la ficha…</p>'):''}
     ${body}
     <div class="row">${patches.length?`<button class="btn pri" id="iPatch">Ver origen e inserción</button>`:''}<button class="btn" id="iFocus">Centrar</button><button class="btn" id="iIso">Aislar</button><button class="btn" id="iHide">Ocultar</button></div>
     ${extra}
     ${refsFor(inf,c)}
-    <div class="row"><button class="btn" id="iShare">Compartir esta estructura</button><button class="btn" id="iFix" title="Abre una propuesta de corrección pública en GitHub">Proponer corrección</button></div>
+    <div class="row"><button class="btn" id="iShare">Compartir esta estructura</button><button class="btn" id="iFix" title="Envía una corrección o una sugerencia sobre esta ficha o el modelo">Proponer corrección</button></div>
+    <div id="revBox"></div>
     <p class="muted" style="font-size:11.5px">Término del atlas: ${esc(c.en)} · id ${esc(c.id)}</p></div>`;
   box.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{const [j,v]=movesFor(c)[+b.dataset.mv];curJ=j;curM=v;angle=0;if(c.side)romSide=c.side==='izquierdo'?'L':'R';showTab('mov');renderROM();setSide(romSide);});
   box.querySelectorAll('[data-lm]').forEach(b=>b.onclick=()=>{box.querySelectorAll('[data-lm]').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');showLm([lms[+b.dataset.lm]],true);});
   if(lms.length){$('#lmAll').onclick=()=>showLm(lms,false);$('#lmNone').onclick=()=>{clearLm();box.querySelectorAll('[data-lm]').forEach(x=>x.setAttribute('aria-pressed','false'));};}
   $('#iShare').onclick=()=>$('#shareBtn').click();
-  $('#iFix').onclick=()=>window.open(reviewURL(c,inf),'_blank','noopener');
+  $('#iFix').onclick=()=>openReview(c,inf);
   bindAi(box);
   box.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>goTo(b.dataset.goto));
   $('#iFocus').onclick=()=>focusMesh(m);
@@ -1615,6 +1667,124 @@ async function applyShared(v){
 }
 function readHash(){const h=location.hash.match(/#v=([A-Za-z0-9_-]+)/);if(!h)return null;try{return JSON.parse(unb64u(h[1]));}catch(e){return null;}}
 
+/* ───────── Etiquetas sobre el modelo, imagen y modo clase ───────── */
+const PINS=[];let pinMode=false;const SVGNS='http://www.w3.org/2000/svg';const pinSvg=$('#pinSvg');
+function addPin(m,local){if(PINS.some(p=>p.m===m))return;const el=document.createElement('div');el.className='pin';el.title='Quitar esta etiqueta';
+  const ln=document.createElementNS(SVGNS,'line'),dot=document.createElementNS(SVGNS,'circle');dot.setAttribute('r','3.2');pinSvg.append(ln,dot);labelsEl.appendChild(el);
+  const P={m,local,el,ln,dot,txt:''};el.onclick=()=>removePin(P);PINS.push(P);}
+function removePin(P){P.el.remove();P.ln.remove();P.dot.remove();PINS.splice(PINS.indexOf(P),1);}
+function clearPins(){while(PINS.length)removePin(PINS[0]);}
+function layoutPins(r){if(!PINS.length)return;const items=[];const cx=r.width/2,teach=document.body.classList.contains('teach'),gap=teach?40:26,pad=10;
+  for(const P of PINS){const t=label(P.m.userData.c);if(t!==P.txt){P.txt=t;P.el.textContent=t;P.w=P.el.offsetWidth;P.h=P.el.offsetHeight;}
+    const v=P.m.localToWorld(P.local.clone()).project(camera);const ok=visibleDeep(P.m)&&v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;
+    P.ok=ok;P.el.hidden=!ok;P.ln.style.display=P.dot.style.display=ok?'':'none';if(!ok)continue;
+    items.push({P,x:(v.x+1)/2*r.width,y:(1-v.y)/2*r.height});}
+  for(const side of [0,1]){const col=items.filter(i=>(i.x>=cx)===!!side).sort((a,b)=>a.y-b.y);let y=-1e9;
+    for(const i of col){i.ly=Math.max(i.y,y+gap,gap/2);y=i.ly;}
+    let over=y-(r.height-gap/2);if(over>0)for(let k=col.length-1;k>=0;k--){col[k].ly-=over;if(k>0)over=Math.max(0,col[k-1].ly+gap-col[k].ly);}
+    for(const i of col){const P=i.P;const lx=side?r.width-pad-P.w:pad;P.side=side;P.ax=i.x;P.ay=i.y;P.lx=lx;P.ly=i.ly;
+      P.el.style.left=lx+'px';P.el.style.top=(i.ly-P.h/2)+'px';const ex=side?lx-2:lx+P.w+2;
+      P.ln.setAttribute('x1',ex);P.ln.setAttribute('y1',i.ly);P.ln.setAttribute('x2',i.x);P.ln.setAttribute('y2',i.y);P.dot.setAttribute('cx',i.x);P.dot.setAttribute('cy',i.y);}}}
+function setPinMode(on){pinMode=on;$('#pinModeBtn').setAttribute('aria-pressed',on);$('#hintTxt').hidden=!on;if(on)$('#hintTxt').textContent='Toca estructuras para etiquetarlas · toca una etiqueta para quitarla';}
+$('#pinModeBtn').onclick=()=>setPinMode(!pinMode);$('#pinClearBtn').onclick=()=>{clearPins();setPinMode(false);};
+$('#aPin').onclick=()=>{if(selected)addPin(selected.m,selected.local.clone());};
+async function savePNG(){const r=cv.getBoundingClientRect();renderer.render(scene,camera);const dpr=cv.width/r.width;
+  const c=document.createElement('canvas');c.width=cv.width;c.height=cv.height;const x=c.getContext('2d');
+  const bg=getComputedStyle(stage).backgroundColor;x.fillStyle=(!bg||bg==='rgba(0, 0, 0, 0)')?'#0d1117':bg;x.fillRect(0,0,c.width,c.height);x.drawImage(cv,0,0);
+  x.scale(dpr,dpr);const teach=document.body.classList.contains('teach'),fs=teach?20:13;x.font=`500 ${fs}px Spectral, Georgia, serif`;x.textBaseline='middle';
+  for(const P of PINS){if(!P.ok)continue;const w=x.measureText(P.txt).width+14,h=fs+10,lx=P.side?r.width-10-w:10;
+    x.strokeStyle='#e9edf2';x.lineWidth=teach?2:1.2;x.beginPath();x.moveTo(P.side?lx-2:lx+w+2,P.ly);x.lineTo(P.ax,P.ay);x.stroke();
+    x.fillStyle=getComputedStyle(document.body).getPropertyValue('--accent')||'#4fc1c6';x.beginPath();x.arc(P.ax,P.ay,3.2,0,7);x.fill();
+    x.fillStyle='rgba(16,20,26,.9)';x.fillRect(lx,P.ly-h/2,w,h);x.strokeStyle='#3a4250';x.strokeRect(lx,P.ly-h/2,w,h);x.fillStyle='#e9edf2';x.fillText(P.txt,lx+7,P.ly+1);}
+  x.font='500 11px system-ui, sans-serif';x.fillStyle='rgba(233,237,242,.7)';x.textBaseline='alphabetic';x.fillText('Corpus · atlas anatómico 3D libre · modelos Z-Anatomy / BodyParts3D (CC BY-SA 4.0)',10,r.height-10);
+  const blob=await new Promise(res=>c.toBlob(res,'image/png'));const name='corpus-'+(selected?selected.m.userData.c.es.replace(/[^\wáéíóúñü-]+/gi,'-').slice(0,40):'vista')+'.png';
+  let dl=null;try{dl=window.claude&&claude.use?await claude.use('downloads'):null;}catch(e){}
+  if(dl){try{await dl.save({filename:name,data:blob});return;}catch(e){if(e&&e.code==='declined')return;}}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);}
+$('#pngBtn').onclick=()=>{togglePop($('#viewMenuBtn'),$('#viewPop'),false);savePNG().catch(()=>toast('No se pudo guardar la imagen.'));};
+let teach=false;const laser=$('#laser');
+function setTeach(on){teach=on;document.body.classList.toggle('teach',on);$('#teachBtn').setAttribute('aria-pressed',on);laser.hidden=!on;for(const P of PINS)P.txt='';if(on)toast('Modo clase: etiquetas grandes y puntero láser. Pulsa F para pantalla completa.');}
+$('#teachBtn').onclick=()=>setTeach(!teach);
+stage.addEventListener('pointermove',e=>{if(!teach)return;const r=stage.getBoundingClientRect();laser.style.left=(e.clientX-r.left)+'px';laser.style.top=(e.clientY-r.top)+'px';});
+
+/* ───────── Fisiología animada: latido y respiración ───────── */
+const ANIM={mode:null,t:0,ms:[],C:null,dAV:null,prev:null};
+const HRX={atr:/^(Right|Left) atrium$/,ven:/^(Right|Left) ventricle$|papillary muscle|^(Right|Left) coronary artery$|interventricular artery|Circumflex artery of heart|inferolateral branch|cardiac vein|^Coronary sinus$/,av:/leaflet of (left|right) atrioventricular valve/,sl:/coronary leaflet|semilunar leaflet/};
+const BRX={lung:/lobe of (right|left) lung|^Pleura$/,br:/bronch/,dia:/^Diaphragm$/};
+const _c=new THREE.Box3(),_v=new V3();
+function centerOf(ms){const b=new THREE.Box3();for(const m of ms){m.geometry.computeBoundingBox();b.union(m.geometry.boundingBox);}return b.getCenter(new V3());}
+function animReset(){for(const o of ANIM.ms){o.m.scale.set(1,1,1);o.m.position.set(0,0,0);}ANIM.ms=[];}
+function xf(m,c,sx,sy,sz,off){m.scale.set(sx,sy,sz);m.position.set(c.x*(1-sx)+(off?off.x:0),c.y*(1-sy)+(off?off.y:0),c.z*(1-sz)+(off?off.z:0));}
+async function startAnim(mode){if(ANIM.mode===mode){stopAnim();return;}stopAnim();select(null);if(gait.on)setGait(false);
+  if(BODY==='vh')setBody('m');
+  const need=mode==='heart'?['arterial','venoso']:['respiratorio','muscular','oseo'];
+  for(const k of need){SYS[k].on=true;if(SYS[k].op<.3)SYS[k].op=1;}renderSysList();$('#animTxt').textContent='Cargando modelos…';
+  await Promise.all(need.map(k=>loadSys(k)));
+  const pick=rx=>meshes.filter(m=>rx.test(m.userData.c.en)&&need.includes(BS(m.userData.sys)));
+  if(mode==='heart'){const g={};for(const k in HRX)g[k]=pick(HRX[k]);const all=[...g.atr,...g.ven,...g.av,...g.sl];
+    ANIM.C=centerOf(g.ven);const ca=centerOf(g.atr);ANIM.dAV=ca.clone().sub(ANIM.C).normalize();
+    ANIM.ms=[...g.atr.map(m=>({m,k:'atr'})),...g.ven.map(m=>({m,k:'ven'})),...g.av.map(m=>({m,k:'av',c:centerOf([m])})),...g.sl.map(m=>({m,k:'sl',c:centerOf([m])}))];
+    isoOnly=true;isoSet=new Set(all.map(m=>m.userData.c.id));
+    if($('#animCut').checked){for(const k in PLANES){PLANES[k].cut=k==='fro';PLANES[k].show=false;}PLANES.fro.pos=0.03;updatePlanes();renderPlanes();ANIM.cut=true;}
+    focusOn(ANIM.C.clone(),0.32);setView('ant');}
+  else{const lung=pick(BRX.lung),br=pick(BRX.br),dia=pick(BRX.dia);
+    const lb=new THREE.Box3();for(const m of lung){m.geometry.computeBoundingBox();lb.union(m.geometry.boundingBox);}
+    ANIM.C=new V3((lb.min.x+lb.max.x)/2,lb.max.y,(lb.min.z+lb.max.z)/2);
+    ANIM.ms=[...lung.map(m=>({m,k:'lung'})),...br.map(m=>({m,k:'br'})),...dia.map(m=>({m,k:'dia'}))];
+    isoOnly=false;isoSet=new Set([...lung,...br,...dia].map(m=>m.userData.c.id));
+    focusOn(lb.getCenter(new V3()),0.75);setView('ant');}
+  hiddenIds.clear();applySystems();ANIM.mode=mode;ANIM.t=0;
+  $('#animHeart').setAttribute('aria-pressed',mode==='heart');$('#animBreath').setAttribute('aria-pressed',mode==='breath');
+  $('#animTxt').textContent=mode==='heart'?'Ciclo cardiaco a unos 70 latidos por minuto. Las aurículas se contraen primero; después los ventrículos: se cierran la mitral y la tricúspide (1.er ruido) y se abren la aórtica y la pulmonar; al relajarse, estas se cierran (2.º ruido).':'Respiración tranquila, unas 12 por minuto. En la inspiración el diafragma se contrae y desciende y los pulmones se expanden; la espiración es pasiva.';}
+function stopAnim(){if(!ANIM.mode)return;animReset();if(ANIM.cut){for(const k in PLANES)PLANES[k].cut=false;updatePlanes();renderPlanes();ANIM.cut=false;}
+  ANIM.mode=null;isoOnly=false;isoSet=null;applySystems();$('#animChip').hidden=true;$('#animTxt').textContent='';
+  $('#animHeart').setAttribute('aria-pressed',false);$('#animBreath').setAttribute('aria-pressed',false);}
+function animTick(dt){if(!ANIM.mode)return;ANIM.t+=dt*($('#animSlow').checked?0.3:1);const chip=$('#animChip');chip.hidden=false;
+  if(ANIM.mode==='heart'){const T=0.86,t=ANIM.t%T;
+    const sa=t<0.13?1-0.06*Math.sin(Math.PI*t/0.13):1;const sys=t>=0.13&&t<0.45;const sv=sys?1-0.075*Math.sin(Math.PI*(t-0.13)/0.32):1;
+    const close=t>=0.12&&t<0.47?1:0;const open=t>=0.16&&t<0.44?1:0;
+    for(const o of ANIM.ms){const m=o.m;
+      if(o.k==='atr')xf(m,ANIM.C,sa,sa,sa);
+      else if(o.k==='ven')xf(m,ANIM.C,sv,sv,sv);
+      else if(o.k==='av'){const s=1-0.12*close;_v.copy(ANIM.dAV).multiplyScalar(0.004*close);xf(m,o.c,s,s,s,_v);}
+      else{const s=1+0.12*open;_v.set(0,0.003*open,0);xf(m,o.c,s,s,s,_v);}}
+    chip.textContent=t<0.13?'Sístole auricular':sys?'Sístole ventricular · se cierran mitral y tricúspide (1.er ruido) · se abren aórtica y pulmonar':'Diástole · se cierran aórtica y pulmonar (2.º ruido) · se llenan los ventrículos';}
+  else{const T=5,t=ANIM.t%T,b=t<2?0.5-0.5*Math.cos(Math.PI*t/2):0.5+0.5*Math.cos(Math.PI*(t-2)/3);
+    for(const o of ANIM.ms){const m=o.m;
+      if(o.k==='lung')xf(m,ANIM.C,1+0.035*b,1+0.075*b,1+0.04*b);
+      else if(o.k==='br')xf(m,ANIM.C,1+0.01*b,1+0.03*b,1+0.01*b);
+      else{_v.set(0,-0.016*b,0);xf(m,ANIM.C,1,1,1,_v);m.position.copy(_v);}}
+    chip.textContent=t<2?'Inspiración: el diafragma se contrae y desciende':'Espiración: el diafragma se relaja y asciende';}}
+$('#animHeart').onclick=()=>startAnim('heart');$('#animBreath').onclick=()=>startAnim('breath');
+
+/* ───────── Revisión experta ───────── */
+const RECON=['gLMd','gLmd','gPrep','gGlans','gBody','gCrusd','gBulbd','gBartd','gVest','gUreth','gIscd','gBspd','gSTPd','gPB','xMVa','xTVa','xLVpa','xRect','xAnal'];
+const REV_PROF=['Anatomista','Médico/a','Fisioterapeuta','Enfermero/a','Docente','Estudiante','Otro'];
+let REVDB=null,REVUSER=null;
+(async()=>{try{if(window.claude&&claude.use){REVDB=await claude.use('db');REVUSER=await claude.use('user');renderReviewCard();}}catch(e){}})();
+function openReview(c,inf){const box=$('#revBox');if(!box)return;const d=inf?inf.d:{};const fields=Object.keys(d).filter(k=>d[k]&&typeof d[k]==='string'&&k!=='la');
+  box.innerHTML=`<div class="card revform"><h3>Proponer una corrección</h3><p class="muted small">Gracias por revisar. Indica qué cambiarías y en qué te basas; un enlace o una cita ayudan mucho.</p>
+   <label class="small">¿Qué parte?<select id="rvField" class="field"><option value="modelo">La forma o la posición en el modelo 3D</option><option value="nombre">El nombre</option>${fields.map(k=>`<option value="${k}">${esc(k)}</option>`).join('')}<option value="otra">Otra</option></select></label>
+   <label class="small">Corrección propuesta<textarea id="rvTxt" class="field"></textarea></label>
+   <label class="small">Fuente (libro, artículo, guía)<input id="rvSrc" class="field"></label>
+   <label class="small">Tu perfil<select id="rvProf" class="field">${REV_PROF.map(p=>`<option>${p}</option>`).join('')}</select></label>
+   <div class="row"><button class="btn pri" id="rvSend">Enviar</button><button class="btn" id="rvGh">Abrir en GitHub</button><button class="btn" id="rvCancel">Cancelar</button></div><p class="small" id="rvMsg"></p></div>`;
+  box.scrollIntoView({block:'nearest'});
+  $('#rvCancel').onclick=()=>box.innerHTML='';
+  $('#rvGh').onclick=()=>window.open(reviewURL(c,inf),'_blank','noopener');
+  $('#rvSend').onclick=async()=>{const txt=$('#rvTxt').value.trim();if(!txt){$('#rvMsg').textContent='Escribe la corrección antes de enviar.';return;}
+    const rec={id:c.id,en:c.en,es:c.es,field:$('#rvField').value,text:txt.slice(0,4000),src:$('#rvSrc').value.trim().slice(0,600),prof:$('#rvProf').value,body:BODY,ts:Date.now()};
+    let ok=false;if(REVDB&&REVUSER){try{const uid=await REVUSER.id();await REVDB.collection('reviews/'+uid+'/items').add(rec);await REVDB.doc('reviews/'+uid).set({last:rec.ts});ok=true;}catch(e){}}
+    if(ok){$('#rvMsg').innerHTML='<b style="color:var(--ok)">Enviado.</b> El equipo del atlas la revisará.';$('#rvSend').disabled=true;}
+    else{window.open(reviewURL(c,inf).replace(encodeURIComponent('(escribe aquí la corrección)'),encodeURIComponent(txt)).replace(encodeURIComponent('(libro, artículo o guía, con página si es posible)'),encodeURIComponent(rec.src||'—')).replace(encodeURIComponent('(p. ej. anatomista, fisioterapeuta, estudiante de 3.º)'),encodeURIComponent(rec.prof)),'_blank','noopener');
+      $('#rvMsg').textContent='Se abrió GitHub con tu corrección ya escrita: solo falta pulsar «Submit new issue».';}};}
+async function renderReviewCard(){const el=$('#revCard');if(!el)return;
+  let html=`<h3>Revisión experta</h3><p class="muted small">Estas estructuras se reconstruyeron a partir de medidas de referencia o del propio atlas y necesitan la mirada de un especialista. Abre cada una y usa «Proponer corrección» en su ficha.</p><div class="chips">${RECON.filter(id=>CAT[id]).map(id=>`<button data-rv="${id}">${esc(nameL(CAT[id]))}</button>`).join('')}</div>`;
+  let own=false;try{own=REVUSER?await REVUSER.isOwner():false;}catch(e){}
+  if(own&&REVDB){try{const us=await REVDB.collection('reviews').get();const rows=[];for(const d of us.docs){const it=await REVDB.collection('reviews/'+d.id+'/items').get();it.docs.forEach(x=>rows.push(x.data()));}
+    rows.sort((a,b)=>b.ts-a.ts);html+=`<h3 style="margin-top:10px">Correcciones recibidas (${rows.length})</h3>`+(rows.length?`<div class="tblwrap"><table class="tbl"><tbody>${rows.slice(0,50).map(r=>`<tr><td><button class="link small" data-rv="${esc(r.id)}">${esc(r.es)}</button><br><span class="muted small">${esc(r.prof)} · ${new Date(r.ts).toLocaleDateString()}</span></td><td class="small"><b>${esc(r.field)}:</b> ${esc(r.text)}${r.src?`<br><span class="muted">Fuente: ${esc(r.src)}</span>`:''}</td></tr>`).join('')}</tbody></table></div>`:'<p class="muted small">Todavía no hay correcciones.</p>');}catch(e){}}
+  el.innerHTML=html;el.querySelectorAll('[data-rv]').forEach(b=>b.onclick=()=>goTo(b.dataset.rv));}
+
 /* ───────── Modo examen ───────── */
 const exam={on:false,cfg:null,qs:[],i:0,ans:[],t0:0,timer:null,hl:null};
 function rng(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
@@ -1729,7 +1899,7 @@ function trNode(root){if(!root)return;const walk=document.createTreeWalker(root,
 let trPending=false;const trObs=new MutationObserver(()=>{if(trPending||LANG==='es')return;trPending=true;requestAnimationFrame(()=>{trPending=false;trObs.disconnect();trNode(document.body);trObs.observe(document.body,{childList:true,subtree:true,characterData:true});});});
 async function setLang(l){if(!['es','en','pt'].includes(l))l='es';
   if(l!=='es'&&!I18N){try{I18N=await (await fetch('data/i18n.json')).json();}catch(e){l='es';}}
-  LANG=l;store.set('lang',l);document.documentElement.lang=l;
+  LANG=l;store.set('lang',l);document.documentElement.lang=l;loadInfoTr(l);
   $$('#langSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===l));
   if(typeof SEARCH!=='undefined'&&SEARCH.length)buildSearch();
   if(selected)renderInfo();if(typeof renderSysList==='function')renderSysList();
@@ -1927,8 +2097,8 @@ document.addEventListener('keydown',e=>{const t=e.target;if(t&&(/INPUT|TEXTAREA|
   if(k==='ArrowLeft')orb.T.th-=0.25;else if(k==='ArrowRight')orb.T.th+=0.25;else if(k==='ArrowUp')orb.T.ph=Math.max(0.1,orb.T.ph-0.2);else if(k==='ArrowDown')orb.T.ph=Math.min(Math.PI-0.1,orb.T.ph+0.2);
   else if(k==='+'||k==='=')orb.T.r=Math.max(0.15,orb.T.r*0.82);else if(k==='-'||k==='_')orb.T.r=Math.min(6,orb.T.r/0.82);
   else if('123456'.includes(k)&&k.length===1)setView(['ant','post','latd','lati','sup','inf'][+k-1]);
-  else if(k==='x'||k==='X')setXray(!xray);else if(k==='e'||k==='E')setStudio(!studio);else if(k==='Escape')select(null);else if(k==='/'){$('#q').focus();}else hit=false;
-  if(hit)e.preventDefault();});$('#studioBtn').onclick=()=>setStudio(!studio);if(store.get('studio',false))setStudio(true);
+  else if(k==='x'||k==='X')setXray(!xray);else if(k==='e'||k==='E')setStudio(!studio);else if(k==='Escape')select(null);else if(k==='/'){$('#q').focus();}else if(k==='f'||k==='F'){$('#fsBtn').click();}else hit=false;
+  if(hit)e.preventDefault();});$('#studioBtn').onclick=()=>setStudio(!studio);if(store.get('studio',!lite))setStudio(true);
 
 /* ───────── Importar .glb ───────── */
 $('#glbIn').addEventListener('change',e=>{const f=e.target.files[0];$('#glbErr').hidden=true;if(!f)return;
@@ -1996,6 +2166,7 @@ function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;const k=1-M
     else if(L.group==='tag'&&selected&&visibleDeep(selected.m)){show=true;p=selected.m.localToWorld(selected.local.clone());}
     if(show){p=p||L.getPos();const v=p.clone().project(camera);if(v.z>1)show=false;else{L.el.style.left=((v.x+1)/2*r.width)+'px';L.el.style.top=((1-v.y)/2*r.height)+'px';}}
     if(L.show!==show){L.el.hidden=!show;L.show=show;}}
+  layoutPins(r);animTick&&animTick(dt);
   requestAnimationFrame(frame);}
 
 /* ───────── Inicio ───────── */
@@ -2004,10 +2175,11 @@ renderSysList();renderHR();renderDis();planeColors();renderPlanes();updatePlanes
 resize();requestAnimationFrame(frame);
 window.__corpus={orb,HR,loadHR,setDissection,SYS,setGait,gait,showTab,setGaitPattern,shareLink,applyShared};
 fetch('data/cases.json').then(r=>r.ok?r.json():[]).then(c=>{CASES=c;renderCases();}).catch(()=>{});
-Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.json').then(r=>{if(!r.ok)throw new Error(n);return r.json();}))).then(([cat,info,rig,les,ex,fem])=>{
+Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.json').then(r=>{if(!r.ok)throw new Error(n);return r.json();}))).then(([cat,rig,les,ex,fem])=>{
+  fetch('data/info.json').then(r=>r.json()).then(info=>{INFO=info;INFO_READY=true;if(selected)renderInfo();if(LANG!=='es')loadInfoTr(LANG);}).catch(()=>{});
   cat=cat.concat(fem.cat,fem.full||[]);FEM_INFO=fem.info;FEM_OVR=fem.ovr||[];FEM_ONLY=new Set(fem.fonly||[]);CAT_READY=true;
   LESSONS=les;EX=ex;
-  for(const r of cat) CAT[r[0]]=r;INFO=info;RIG=rig;buildRig();
+  for(const r of cat) CAT[r[0]]=r;RIG=rig;buildRig();
   buildSearch();if(LANG!=='es')setLang(LANG);
   setSide(romSide);renderLessons();showTab(store.get('tab','sistemas'));
   const shared=readHash();if(shared&&shared.b)BODY=shared.b;
@@ -2015,6 +2187,7 @@ Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data
   if(isPhone()){setSheet('peek');orb.T.r=orb.r=4.4;}
   setBody(BODY);
   if(shared)applyShared(shared);
+  renderReviewCard();
   const exS=readExamHash();if(exS){exam.shared=exS;if(exS.b&&exS.b!==BODY)setBody(exS.b);showTab('lec');renderExamSetup(exS);$('#examCard').scrollIntoView({block:'start'});}else renderExamSetup();
   for(const k in SYS) if(SYS[k].on&&sexOk(k)&&SYS[k].state==='idle') loadSys(k);
 }).catch(()=>{$('#hintTxt').textContent='No se pudieron cargar los datos del atlas. Recarga la página para intentarlo de nuevo.';});
@@ -2028,7 +2201,7 @@ Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 54 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v21');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v22');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();
