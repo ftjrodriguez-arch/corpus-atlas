@@ -19,3 +19,8 @@ No requieren Blender.
 2. `vhf_read.py` + `vhf_pack.py` — lee el glb, alinea al marco del atlas, calcula oclusión ambiental, reduce y agrupa en capas `f_*`.
 3. `encode.js` y base64 como arriba.
 4. `vhf_data.py` — genera `data/fem.json` (catálogo y fichas en español).
+
+## Mujer completa sobre el atlas
+1. `reg.py`: registro ICP (Umeyama) con escala.
+2. `female_full.py`: registra la pelvis y los pulmones del Visible Human Female a los del atlas, coloca útero, ovarios, trompas, vagina, ligamentos y vasos uterinos (escala 0,88 respecto a la pelvis) y la glándula mamaria (reducida al 82 % y apoyada 4 mm por delante del pectoral mayor); genera la piel femenina (piel de la mama a 4,5 mm de la grasa mamaria, pezón y aréola, región urogenital sin genitales masculinos con relajación armónica y hendidura vulvar).
+3. `female_pack.py`: oclusión ambiental, reducción y bins → `encode.js`.

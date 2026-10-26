@@ -9,7 +9,8 @@ Funciona en el navegador del ordenador, la tableta o el móvil, sin instalar nad
 ## Qué incluye
 
 - **Hombre** (Z-Anatomy / BodyParts3D): 3.849 estructuras — huesos, músculos con **origen e inserción**, ligamentos, cápsulas, bolsas, fascias, arterias, venas, nervios, linfáticos, encéfalo, médula, vísceras y piel.
-- **Mujer** (Visible Human Female, Human Reference Atlas): 866 estructuras — piel, mama y glándula mamaria, pelvis femenina, columna, aparato reproductor, órganos, vasos, encéfalo, médula y ojos.
+- **Mujer completa**: el mismo esqueleto, músculos, ligamentos, vasos, nervios y vísceras del atlas, con las diferencias sexuales: mamas y glándula mamaria (lóbulos, conductos, pezón y aréola) sobre el pectoral mayor, útero, ovarios, trompas, vagina, ligamentos y vasos uterinos, y piel femenina. Los órganos femeninos proceden del Visible Human Female (HuBMAP HRA) registrados a la pelvis y al tórax del atlas.
+- **Visible Human Female** (Human Reference Atlas) como modelo real de referencia: 866 estructuras de una mujer real, con su pelvis ósea femenina.
 - **Disección por capas**: de la piel al hueso, paso a paso.
 - **Fichas en español** con nombre latino: origen, inserción, inervación, irrigación, acción, biomecánica por plano y eje, prueba muscular manual (Daniels) y nota clínica.
 - **Movimiento**: rangos articulares de referencia (AAOS), simulador con deformación del modelo, agonistas, goniometría y registro de mediciones.
