@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Atlas anatómico 3D libre y gratuito en español: 4.700 estructuras del cuerpo humano masculino y femenino, disección por capas, orígenes e inserciones, rangos articulares y fichas clínicas.">
+<meta name="description" content="Atlas anatómico 3D libre y gratuito en español: 4.700 estructuras del cuerpo humano masculino y femenino, disección por capas, orígenes e inserciones, rangos articulares, ciclo de la marcha y fichas clínicas.">
 <meta name="theme-color" content="#0d1117">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -125,6 +125,13 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .plane-h b{display:flex;align-items:center;gap:8px}
 .swatch{width:10px;height:10px;border-radius:2px}
 .chk{display:flex;align-items:center;gap:6px;font-size:13px}
+.gait input[type=range]{width:100%;accent-color:var(--accent);margin:8px 0 2px}
+.gaitBar{display:flex;height:22px;border-radius:6px;overflow:hidden;font-size:10px;margin-bottom:8px}
+.gaitBar span{display:flex;align-items:center;justify-content:center;color:var(--ink);border-right:1px solid var(--bg);white-space:nowrap;overflow:hidden;cursor:pointer;opacity:.55}
+.gaitBar span[aria-current="true"]{opacity:1;font-weight:700}
+.gaitTbl{width:100%;margin:6px 0;font-size:12.5px}.gaitTbl td,.gaitTbl th{padding:3px 6px;text-align:right}.gaitTbl td:first-child,.gaitTbl th:first-child{text-align:left}
+.gm{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px}.gm small{color:var(--muted);text-align:right}
+.gm .ty{align-self:flex-start;flex:none;font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}.gm .ty.exc{color:#f0a040;border-color:#f0a04066}.gm .ty.con{color:var(--ok);border-color:var(--ok)}.gm .ty.iso{color:var(--accent);border-color:var(--accent)}
 body:not(.body-f) .femonly{display:none}
 body.body-f .maleonly,body.body-f #tab-sistemas > .row:first-child,body.body-f #tab-mov > :not(.femonly),body.body-f #lecBox{display:none}
 header{flex-wrap:wrap;gap:8px}
@@ -300,6 +307,19 @@ textarea.field{width:100%;font-family:var(--f-mono);font-size:11.5px}
 
       <div class="view" id="tab-mov" hidden>
         <p class="femonly card">El simulador de movimiento usa el esqueleto articulado del modelo masculino. <button class="btn" onclick="setBody('m')">Cambiar a hombre</button></p>
+        <div class="card gait" id="gaitCard">
+          <div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">Ciclo de la marcha</h3><button class="btn" id="gaitBtn" aria-pressed="false">Ver marcha</button></div>
+          <p class="muted small" id="gaitIntro">Marcha normal a velocidad libre con ángulos de referencia de la literatura (Perry; Winter). Se resaltan los músculos activos de ambos miembros inferiores en cada fase.</p>
+          <div id="gaitBody" hidden>
+            <input type="range" id="gaitR" min="0" max="99" step="1" value="0" aria-label="Porcentaje del ciclo de la marcha">
+            <div class="gaitBar" id="gaitBar" aria-hidden="true"></div>
+            <div class="row" style="justify-content:space-between;align-items:baseline"><b id="gaitPhase"></b><span class="mono" id="gaitPct"></span></div>
+            <p class="muted small" id="gaitGoal"></p>
+            <table class="tbl gaitTbl"><thead><tr><th></th><th>Cadera</th><th>Rodilla</th><th>Tobillo</th></tr></thead><tbody id="gaitAng"></tbody></table>
+            <div id="gaitMus"></div>
+            <div class="row"><button class="btn" id="gaitPlay">Pausa</button><button class="btn" id="gaitSlow" aria-pressed="false">Cámara lenta</button><button class="btn" id="gaitView">Vista lateral</button></div>
+          </div>
+        </div>
         <div class="row" style="justify-content:space-between">
           <h3>Articulación</h3>
           <div class="seg" role="group" aria-label="Lado">
@@ -1112,12 +1132,12 @@ function comps(t){const c={};const add=(k,ax,deg)=>{c[k]=c[k]||{x:0,y:0,z:0};c[k
   add(curJ.node,curM.ax,(curM.sg*t+(curM.off||0))*flip(curM.ax));return c;}
 function applyPose(){
   if(!RIG) return;
-  const active=(currentTab==='mov'||contraction)?Object.entries(comps(angle)).map(([k,cm])=>({k,jn:jname(k),q:qOf(jname(k),cm)})):[];
+  const active=(gait.on&&currentTab==='mov')?gaitActive():(currentTab==='mov'||contraction)?Object.entries(comps(angle)).map(([k,cm])=>({k,jn:jname(k),q:qOf(jname(k),cm)})):[];
   active.sort((a,b)=>DEPTH[b.k]-DEPTH[a.k]);
   deform(active);updateArc(active);
 }
 function updateArc(active){
-  if((currentTab!=='mov'&&!contraction)||!RIG){[arcLine,arcFan,arcRays].forEach(o=>o.visible=false);return;}
+  if((currentTab!=='mov'&&!contraction)||!RIG||gait.on){[arcLine,arcFan,arcRays].forEach(o=>o.visible=false);return;}
   const k=curJ.node,J=JOINTS[jname(k)];
   const proxK=PROX[k].filter(p=>active.find(a=>a.k===p));
   // pivot: apply proximal rotations (distal→proximal); parent rotation: product proximal-first
@@ -1137,8 +1157,8 @@ function updateArc(active){
 }
 const enEs=en=>{const r=Object.values(CAT).find(x=>x[1]===en&&x[4]==='muscular');return r?r[2]:(INFO.mus[en]?.es||en);};
 function renderROM(){
-  $('#jointChips').innerHTML='';ROM.forEach(j=>{const b=document.createElement('button');b.textContent=j.n;b.setAttribute('aria-pressed',j===curJ);b.onclick=()=>{curJ=j;curM=j.moves[0];angle=0;stopPlay();renderROM();};$('#jointChips').appendChild(b);});
-  $('#moveChips').innerHTML='';curJ.moves.forEach(mv=>{const b=document.createElement('button');b.textContent=mv.n;b.setAttribute('aria-pressed',mv===curM);b.onclick=()=>{curM=mv;angle=0;stopPlay();renderROM();};$('#moveChips').appendChild(b);});
+  $('#jointChips').innerHTML='';ROM.forEach(j=>{const b=document.createElement('button');b.textContent=j.n;b.setAttribute('aria-pressed',j===curJ);b.onclick=()=>{if(gait.on)setGait(false);curJ=j;curM=j.moves[0];angle=0;stopPlay();renderROM();};$('#jointChips').appendChild(b);});
+  $('#moveChips').innerHTML='';curJ.moves.forEach(mv=>{const b=document.createElement('button');b.textContent=mv.n;b.setAttribute('aria-pressed',mv===curM);b.onclick=()=>{if(gait.on)setGait(false);curM=mv;angle=0;stopPlay();renderROM();};$('#moveChips').appendChild(b);});
   const sideTxt=curJ.sided?(romSide==='R'?'derecho':'izquierdo'):(curM.ax==='x'?'':romSide==='R'?'hacia la derecha':'hacia la izquierda');
   $('#angle').max=Math.round(curM.max*1.25);$('#angle').value=angle;
   const ag=curM.ag.filter(en=>Object.values(CAT).some(r=>r[1]===en));
@@ -1150,7 +1170,7 @@ function renderROM(){
   $('#moveGon').innerHTML=`<h3>Goniometría</h3><dl class="kv" style="margin-top:4px"><dt>Posición</dt><dd>${curM.pos}</dd><dt>${g[1]?'Fulcro':'Método'}</dt><dd>${g[0]}</dd>${g[1]?`<dt>Brazo fijo</dt><dd>${g[1]}</dd><dt>Brazo móvil</dt><dd>${g[2]}</dd>`:''}<dt>Sensación final</dt><dd>${curM.ef}</dd></dl>`;
   updateReadout();applyPose();applyAgonists();renderLog();
 }
-function applyAgonists(){
+function applyAgonists(){if(gait.on){gaitAgonists();return;}
   const ens=(currentTab==='mov'&&agOn)?curM.ag:[];const sideName=romSide==='R'?'derecho':'izquierdo';
   for(const m of meshes){if(m.userData.sys!=='muscular')continue;const c=m.userData.c;
     const want=ens.includes(c.en)&&(!curJ.sided||!c.side||c.side===sideName);if(!!m.userData.ag!==want){m.userData.ag=want;refreshState(m);}}
@@ -1162,11 +1182,71 @@ let poseRaf=0;function schedulePose(){if(poseRaf)return;poseRaf=requestAnimation
 $('#angle').addEventListener('input',e=>{stopPlay();angle=+e.target.value;updateReadout();schedulePose();});
 $('#zero').onclick=()=>{stopPlay();angle=0;$('#angle').value=0;updateReadout();applyPose();};
 function stopPlay(){playing=false;$('#play').textContent='Animar rango';}
-$('#play').onclick=()=>{playing=!playing;playT=0;$('#play').textContent=playing?'Detener':'Animar rango';};
+$('#play').onclick=()=>{if(gait.on)setGait(false);playing=!playing;playT=0;$('#play').textContent=playing?'Detener':'Animar rango';};
 $('#focusJ').onclick=()=>{if(!RIG)return;const J=JOINTS[jname(curJ.node)];focusOn(J.pivot.clone(),Math.max(0.7,curJ.R*6));setView({sag:romSide==='R'?'latd':'lati',fro:'ant',tra:'ant'}[curM.pl]);};
 function setSide(s){romSide=s;store.set('side',s);$('#side-R').setAttribute('aria-pressed',s==='R');$('#side-L').setAttribute('aria-pressed',s==='L');renderROM();}
 $('#side-R').onclick=()=>setSide('R');$('#side-L').onclick=()=>setSide('L');
 $('#agChk').checked=agOn;$('#agChk').onchange=e=>{agOn=e.target.checked;store.set('agon',agOn);applyAgonists();};
+
+/* ───────── Ciclo de la marcha ───────── */
+// ángulos sagitales de referencia (% del ciclo, grados). Cadera y rodilla: + = flexión. Tobillo: + = dorsiflexión.
+const GAIT_K={hip:[[0,30],[10,27],[20,18],[30,8],[40,-2],[50,-10],[60,-4],[70,12],[80,25],[87,32],[95,31],[100,30]],
+ knee:[[0,3],[5,10],[12,18],[20,13],[30,6],[40,3],[50,6],[60,38],[66,52],[73,60],[80,46],[87,24],[95,6],[100,3]],
+ ankle:[[0,0],[6,-6],[12,-2],[30,8],[45,10],[52,6],[60,-14],[64,-18],[72,-8],[80,0],[90,2],[100,0]]};
+const GAIT_PH=[[0,2,'Contacto inicial','CI','El talón toca el suelo con la cadera flexionada unos 30°, la rodilla casi extendida y el tobillo en posición neutra.'],
+ [2,12,'Respuesta a la carga','RC','Se transfiere el peso al miembro: la rodilla se flexiona unos 15–20° para amortiguar y el pie desciende controlado por los dorsiflexores.'],
+ [12,31,'Apoyo medio','AM','Apoyo monopodal: la tibia avanza sobre el pie fijo; el sóleo frena ese avance y el glúteo medio sostiene la pelvis.'],
+ [31,50,'Apoyo final','AF','El talón se despega; la cadera llega a su máxima extensión aparente (~10°) y el tríceps sural impulsa el cuerpo.'],
+ [50,62,'Prebalanceo','PB','Doble apoyo final: flexión plantar rápida (~15–20°) y flexión de rodilla de unos 40° preparan el despegue.'],
+ [62,75,'Balanceo inicial','BI','El pie se despega; la rodilla alcanza ~60° de flexión para que el pie libre el suelo, con los flexores de cadera.'],
+ [75,87,'Balanceo medio','BM','La tibia pasa a la vertical; los dorsiflexores mantienen el tobillo neutro para no arrastrar el pie.'],
+ [87,100,'Balanceo final','BF','La rodilla se extiende y los isquiotibiales frenan la pierna (contracción excéntrica) antes del nuevo contacto.']];
+// actividad muscular (lado de referencia): [en, [[ini,fin],...], tipo, función]
+const GAIT_M=[
+ [['Tibialis anterior muscle','Extensor digitorum longus','Extensor hallucis longus'],[[0,12],[57,100]],'Tibial anterior y extensores largos',{0:'exc',57:'con'},'Controla el descenso del antepié tras el contacto (excéntrico) y dorsiflexiona el tobillo en el balanceo para que el pie no arrastre.'],
+ [['Vastus lateralis muscle','Vastus medialis muscle','Vastus intermedius muscle'],[[0,15],[92,100]],'Vastos (cuádriceps)',{0:'exc',92:'con'},'Absorben la carga controlando la flexión de rodilla en la respuesta a la carga.'],
+ [['Rectus femoris muscle'],[[50,65]],'Recto femoral',{50:'exc'},'Limita la flexión excesiva de la rodilla en el prebalanceo y ayuda a iniciar la flexión de cadera.'],
+ [['Gluteus maximus muscle'],[[0,15],[95,100]],'Glúteo mayor',{0:'con',95:'iso'},'Extiende la cadera y estabiliza el tronco tras el contacto inicial.'],
+ [['Gluteus medius muscle','Gluteus minimus muscle'],[[0,40],[96,100]],'Glúteo medio y menor',{0:'iso'},'Estabiliza la pelvis en el plano frontal durante el apoyo monopodal (su debilidad produce el signo de Trendelenburg).'],
+ [['Long head of biceps femoris','Semitendinosus muscle','Semimembranosus muscle'],[[0,8],[80,100]],'Isquiotibiales',{0:'con',80:'exc'},'Frenan la extensión de rodilla y la flexión de cadera al final del balanceo, y ayudan a extender la cadera al contacto.'],
+ [['Soleus muscle','Medial head of gastrocnemius','Lateral head of gastrocnemius'],[[10,55]],'Sóleo y gastrocnemio',{10:'exc',43:'con'},'Frenan el avance de la tibia en el apoyo medio (excéntrico) y elevan el talón en el apoyo final (concéntrico).'],
+ [['Tibialis posterior muscle','Fibularis longus muscle','Fibularis brevis muscle','Flexor hallucis longus'],[[10,50]],'Tibial posterior, fibulares y flexor largo del dedo gordo',{10:'iso'},'Estabilizan el pie y el retropié durante el apoyo.'],
+ [['Psoas major','Iliacus muscle'],[[50,75]],'Iliopsoas',{50:'con'},'Flexiona la cadera para iniciar el balanceo.'],
+ [['Adductor longus','Adductor magnus','Gracilis muscle'],[[0,10],[50,65]],'Aductores',{0:'iso',50:'con'},'Estabilizan la cadera en el contacto y contribuyen a la flexión de cadera al inicio del balanceo.'],
+ [['Sartorius muscle'],[[55,75]],'Sartorio',{55:'con'},'Colabora en la flexión de cadera y rodilla en el balanceo inicial.']];
+const TY={exc:'excéntrica',con:'concéntrica',iso:'isométrica'};
+const gait={on:false,play:true,p:0,slow:false,last:0};
+function gInterp(arr,p){p=((p%100)+100)%100;for(let i=1;i<arr.length;i++){if(p<=arr[i][0]){const [a,va]=arr[i-1],[b,vb]=arr[i];const t=(p-a)/(b-a),s=t*t*(3-2*t);return va+(vb-va)*s;}}return arr[arr.length-1][1];}
+function gAngles(p){return {hip:gInterp(GAIT_K.hip,p),knee:gInterp(GAIT_K.knee,p),ankle:gInterp(GAIT_K.ankle,p)};}
+function gPhase(p){p=((p%100)+100)%100;return GAIT_PH.find(f=>p>=f[0]&&p<f[1])||GAIT_PH[GAIT_PH.length-1];}
+function gActive(p){p=((p%100)+100)%100;const out=[];for(const m of GAIT_M){for(const [a,b] of m[1]){if(p>=a&&p<b){let ty='';for(const k of Object.keys(m[3]).map(Number).sort((x,y)=>x-y))if(p>=k)ty=m[3][k];if(!ty)ty=Object.values(m[3])[0];out.push({m,ty});break;}}}return out;}
+function gaitActive(){const R=gAngles(gait.p),L=gAngles(gait.p+50),out=[];
+  const add=(k,S,cm)=>{const jn=k+'_'+S;if(JOINTS[jn])out.push({k,jn,q:qOf(jn,cm)});};
+  for(const [S,A] of [['R',R],['L',L]]){add('hip',S,{x:-A.hip,y:0,z:0});add('knee',S,{x:A.knee,y:0,z:0});add('ankle',S,{x:-A.ankle,y:0,z:0});
+    const sh=(A===R?L:R).hip;add('shoulder',S,{x:-(sh-10)*0.55,y:0,z:0});add('elbow',S,{x:-(18+Math.max(0,sh-10)*0.35),y:0,z:0});}
+  return out;}
+function renderGait(){if(!gait.on)return;const p=gait.p,ph=gPhase(p),R=gAngles(p),L=gAngles(p+50);
+  $('#gaitR').value=Math.floor(p);$('#gaitPhase').textContent=ph[2]+' (derecho)';$('#gaitPct').textContent=Math.round(p)+' % del ciclo';$('#gaitGoal').textContent=ph[4];
+  $('#gaitBar').querySelectorAll('span').forEach(s=>s.setAttribute('aria-current',s.dataset.k===ph[3]));
+  const f=v=>(v>=0?'':'−')+Math.abs(Math.round(v))+'°';
+  $('#gaitAng').innerHTML=`<tr><td>Derecho</td><td>${f(R.hip)}</td><td>${f(R.knee)}</td><td>${f(R.ankle)}</td></tr><tr><td>Izquierdo <small class="muted">(${gPhase(p+50)[2].toLowerCase()})</small></td><td>${f(L.hip)}</td><td>${f(L.knee)}</td><td>${f(L.ankle)}</td></tr>`;
+  const act=gActive(p);$('#gaitMus').innerHTML='<h4 class="small" style="margin:8px 0 2px">Músculos activos · miembro derecho</h4>'+(act.map(({m,ty})=>`<div class="gm"><span>${m[2]}<br><small style="text-align:left;display:block">${m[4]}</small></span><span class="ty ${ty}">${TY[ty]}</span></div>`).join('')||'<p class="muted small">Balanceo pasivo: casi sin actividad muscular en este instante.</p>');}
+function gaitAgonists(){const ensR=new Set(),ensL=new Set();if(gait.on){gActive(gait.p).forEach(({m})=>m[0].forEach(e=>ensR.add(e)));gActive(gait.p+50).forEach(({m})=>m[0].forEach(e=>ensL.add(e)));}
+  for(const m of meshes){if(m.userData.sys!=='muscular')continue;const c=m.userData.c;const want=gait.on&&currentTab==='mov'&&((c.side!=='izquierdo'&&ensR.has(c.en))||(c.side!=='derecho'&&ensL.has(c.en)));if(!!m.userData.ag!==want){m.userData.ag=want;refreshState(m);}}}
+function setGait(on){gait.on=on;$('#gaitBtn').setAttribute('aria-pressed',on);$('#gaitBtn').textContent=on?'Salir de la marcha':'Ver marcha';$('#gaitBody').hidden=!on;$('#gaitIntro').hidden=on;
+  if(on){stopPlay();gait.play=true;$('#gaitPlay').textContent='Pausa';if(!SYS.muscular.on)setOn('muscular',true);
+    $('#gaitBar').innerHTML=GAIT_PH.map(f=>`<span data-k="${f[3]}" style="flex:${f[1]-f[0]};background:${f[0]<50?'color-mix(in srgb,var(--accent) 45%,var(--panel2))':'var(--panel2)'}" title="${f[2]}">${f[1]-f[0]>=10?f[3]:''}</span>`).join('');
+    $('#gaitBar').querySelectorAll('span').forEach((s,i)=>s.onclick=()=>{gait.p=GAIT_PH[i][0]+0.5;gait.play=false;$('#gaitPlay').textContent='Reproducir';gaitUpdate();});
+    renderGait();}
+  applyPose();gait.on?gaitAgonists():(gaitAgonists(),applyAgonists());}
+function gaitUpdate(){renderGait();applyPose();gaitAgonists();}
+function gaitTick(dt){if(!gait.on||!gait.play||currentTab!=='mov')return;gait.p=(gait.p+dt*100/(gait.slow?4.4:1.1))%100;gait.last+=dt;
+  if(gait.last>(gait.slow?0.03:0.045)){gait.last=0;gaitUpdate();}}
+$('#gaitBtn').onclick=()=>setGait(!gait.on);
+$('#gaitR').oninput=e=>{gait.p=+e.target.value;gait.play=false;$('#gaitPlay').textContent='Reproducir';gaitUpdate();};
+$('#gaitPlay').onclick=()=>{gait.play=!gait.play;$('#gaitPlay').textContent=gait.play?'Pausa':'Reproducir';};
+$('#gaitSlow').onclick=()=>{gait.slow=!gait.slow;$('#gaitSlow').setAttribute('aria-pressed',gait.slow);};
+$('#gaitView').onclick=()=>{if(!RIG)return;focusOn(new V3(0,0.8,0),2.9);setView('latd');};
 
 /* ───────── Registro de mediciones ───────── */
 let LOG=store.get('log',[]);if(!Array.isArray(LOG))LOG=[];
@@ -1390,7 +1470,7 @@ function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;const k=1-M
   camLight.position.copy(camera.position);
   if(spin) orb.T.th+=dt*0.5;
   for(const m of meshes){const t=m.userData.offT;if(t){m.position.lerp(t,1-Math.pow(0.002,dt));if(m.position.distanceTo(t)<1e-4){m.position.copy(t);if(t.lengthSq()===0)m.userData.offT=null;}}}
-  tickContraction(dt);autoHRTick(dt);fadeTick(dt);
+  tickContraction(dt);autoHRTick(dt);fadeTick(dt);gaitTick(dt);
   if(playing&&currentTab==='mov'){playT+=dt;angle=curM.max*(0.5-0.5*Math.cos(playT*1.4));$('#angle').value=Math.round(angle);updateReadout();applyPose();}
   axisGroup.visible=showAxes;
   renderer.render(scene,camera);
@@ -1408,7 +1488,7 @@ function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;const k=1-M
 setMode(store.get('mode','stu'));
 renderSysList();renderHR();renderDis();planeColors();renderPlanes();updatePlanes();renderInfo();renderViews();
 resize();requestAnimationFrame(frame);
-window.__corpus={orb,HR,loadHR,setDissection,SYS};
+window.__corpus={orb,HR,loadHR,setDissection,SYS,setGait,gait,showTab};
 Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.json').then(r=>{if(!r.ok)throw new Error(n);return r.json();}))).then(([cat,info,rig,les,ex,fem])=>{
   cat=cat.concat(fem.cat);FEM_INFO=fem.info;CAT_READY=true;
   LESSONS=les;EX=ex;
@@ -1421,7 +1501,6 @@ Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data
 })();
 </script>
 
-
 <script>
 /* Descarga completa para estudiar sin conexión (solo en la versión publicada en la web) */
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
@@ -1429,7 +1508,7 @@ Promise.all(['catalog','info','rig','lessons','extras','fem'].map(n=>fetch('data
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 47 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v12');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v13');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();

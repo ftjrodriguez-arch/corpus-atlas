@@ -13,6 +13,7 @@ Funciona en el navegador del ordenador, la tableta o el móvil, sin instalar nad
 - **Disección por capas**: de la piel al hueso, paso a paso.
 - **Fichas en español** con nombre latino: origen, inserción, inervación, irrigación, acción, biomecánica por plano y eje, prueba muscular manual (Daniels) y nota clínica.
 - **Movimiento**: rangos articulares de referencia (AAOS), simulador con deformación del modelo, agonistas, goniometría y registro de mediciones.
+- **Ciclo de la marcha**: las 8 fases de Perry animadas sobre el modelo, con ángulos de cadera, rodilla y tobillo y los músculos activos (concéntrica, excéntrica, isométrica).
 - **Planos y ejes** (sagital, frontal, transversal) con cortes, vista de rayos X, modo estudio, relieves óseos, lecciones guiadas y práctica de identificación.
 - **Alta resolución** por regiones con las mallas originales del atlas.
 
