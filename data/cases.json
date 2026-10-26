@@ -972,5 +972,286 @@
 "fisioterapia": "Movilización y sedestación precoces, posicionamiento del hombro pléjico, terapia orientada a tareas, terapia por restricción del lado sano en fases posteriores y logopedia para la afasia.",
 "camara": "lateral",
 "solo": true
+},
+{
+"id": "fascitis-plantar",
+"titulo": "Fascitis plantar",
+"region": "pie",
+"side": "derecho",
+"presentacion": "Mujer de 45 años, que camina muchas horas en su trabajo, con dolor punzante en el talón derecho en los primeros pasos de la mañana que mejora al caminar y empeora al final del día.",
+"anatomia": "La aponeurosis plantar se origina en la tuberosidad medial del calcáneo y se extiende hasta las falanges proximales. En el despegue, la extensión de los dedos la tensa y eleva el arco (mecanismo de molinete). Las cargas repetidas, el acortamiento del tríceps sural y el pie plano o cavo producen una degeneración (fasciosis) en su origen.",
+"lesion": [
+"Plantar aponeurosis"
+],
+"afectados": [
+"Abductor hallucis",
+"Flexor digitorum brevis",
+"Quadratus plantae muscle"
+],
+"relacionados": [
+"Calcaneus",
+"Medial head of gastrocnemius",
+"Soleus muscle",
+"Long plantar ligament"
+],
+"signos": [
+"Dolor en la tuberosidad medial del calcáneo",
+"Dolor máximo en los primeros pasos tras el reposo",
+"Acortamiento del tríceps sural"
+],
+"pruebas": [
+"Palpación del origen medial de la aponeurosis",
+"Prueba de Windlass (extensión pasiva del dedo gordo reproduce el dolor)",
+"Ecografía: grosor mayor de 4 mm en el origen"
+],
+"fisioterapia": "Estiramiento específico de la aponeurosis y del tríceps sural, fortalecimiento de la musculatura intrínseca y carga progresiva (elevaciones de talón con el dedo gordo en extensión), plantillas y educación sobre la carga.",
+"camara": "inferior"
+},
+{
+"id": "radiculopatia-l5",
+"titulo": "Hernia discal L4–L5 con radiculopatía L5",
+"region": "columna lumbar",
+"side": "izquierdo",
+"presentacion": "Varón de 38 años con lumbalgia que irradia por la cara lateral de la pierna izquierda hasta el dorso del pie, con hormigueo en el dedo gordo, tras levantar una caja pesada.",
+"anatomia": "El núcleo pulposo del disco L4–L5 se hernia en dirección posterolateral, donde el ligamento longitudinal posterior es más débil, y comprime la raíz L5 en el receso lateral. L5 inerva el extensor largo del dedo gordo, el tibial anterior (junto a L4), el glúteo medio y la sensibilidad del dorso del pie.",
+"lesion": [
+"Nucleus pulposus L4-L5",
+"Intervertebral disc L4-L5"
+],
+"afectados": [
+"Extensor hallucis longus",
+"Tibialis anterior muscle",
+"Gluteus medius muscle"
+],
+"relacionados": [
+"Vertebra L4",
+"Vertebra L5",
+"Sciatic nerve",
+"Common fibular nerve",
+"Posterior longitudinal ligament"
+],
+"signos": [
+"Dolor radicular en el dermatoma L5 (cara lateral de la pierna y dorso del pie)",
+"Debilidad de la extensión del dedo gordo",
+"Marcha sobre talones difícil",
+"Reflejos rotuliano y aquíleo conservados"
+],
+"pruebas": [
+"Elevación de la pierna recta (Lasègue) positiva entre 30° y 70°",
+"Balance muscular del extensor largo del dedo gordo",
+"Sensibilidad del dorso del pie",
+"Resonancia si hay déficit progresivo o signos de alarma (cauda equina)"
+],
+"fisioterapia": "Educación y mantenimiento de la actividad, ejercicios de control motor y de carga progresiva, técnicas neurodinámicas y movilización; derivación urgente si aparece debilidad progresiva o alteración de esfínteres.",
+"camara": "posterior"
+},
+{
+"id": "radiculopatia-c6",
+"titulo": "Hernia discal C5–C6 con radiculopatía C6",
+"region": "columna cervical",
+"side": "derecho",
+"presentacion": "Mujer de 47 años con dolor cervical que se irradia al brazo derecho hasta el pulgar y el índice, con hormigueo, que empeora al girar e inclinar la cabeza hacia ese lado.",
+"anatomia": "En la columna cervical cada raíz sale por encima de la vértebra de su número: la hernia C5–C6 comprime la raíz C6. Ésta inerva el bíceps braquial y el braquiorradial (con C5) y los extensores radiales del carpo, y recoge la sensibilidad del borde radial del antebrazo, el pulgar y el índice.",
+"lesion": [
+"Nucleus pulposus C5-C6",
+"Intervertebral disc C5-C6"
+],
+"afectados": [
+"Brachioradialis muscle",
+"Extensor carpi radialis longus",
+"Extensor carpi radialis brevis"
+],
+"relacionados": [
+"Vertebra C5",
+"Vertebra C6",
+"Roots of brachial plexus",
+"Musculocutaneous nerve",
+"Radial nerve"
+],
+"signos": [
+"Dolor y parestesias en el dermatoma C6 (pulgar e índice)",
+"Reflejo bicipital o estilorradial disminuido",
+"Debilidad de la flexión del codo y de la extensión de la muñeca"
+],
+"pruebas": [
+"Prueba de Spurling (extensión, rotación e inclinación con compresión axial)",
+"Prueba de distracción cervical (alivia el dolor)",
+"Prueba neurodinámica del miembro superior (ULNT1)",
+"Reflejos y balance muscular por miotomas"
+],
+"fisioterapia": "Educación, movilización y ejercicios para la columna cervical y torácica, técnicas neurodinámicas, ejercicio de los flexores profundos del cuello y adaptación de posturas; la mayoría mejora en semanas.",
+"camara": "lateral"
+},
+{
+"id": "de-quervain",
+"titulo": "Tenosinovitis de De Quervain",
+"region": "muñeca",
+"side": "derecho",
+"presentacion": "Mujer de 32 años, con un bebé de tres meses, con dolor en el borde radial de la muñeca derecha al levantar al niño y al girar la mano.",
+"anatomia": "El abductor largo y el extensor corto del pulgar pasan juntos por el primer compartimento extensor, bajo el retináculo extensor sobre la apófisis estilodes del radio. El engrosamiento de la vaina y del retináculo por el uso repetido con el pulgar en abducción y la muñeca en desviación produce dolor al deslizar los tendones.",
+"lesion": [
+"Abductor pollicis longus",
+"Extensor pollicis brevis"
+],
+"afectados": [
+"Extensor retinaculum of wrist"
+],
+"relacionados": [
+"Radius",
+"Superficial branch of radial nerve",
+"Brachioradialis muscle"
+],
+"signos": [
+"Dolor y tumefacción sobre la estiloides radial",
+"Dolor al abducir y extender el pulgar contra resistencia",
+"Crepitación ocasional"
+],
+"pruebas": [
+"Prueba de Finkelstein/Eichhoff (desviación cubital con el pulgar en flexión)",
+"Palpación del primer compartimento extensor",
+"Ecografía: engrosamiento de la vaina"
+],
+"fisioterapia": "Ortesis de pulgar y muñeca, modificación de la forma de cargar al bebé, carga progresiva de los tendones y, si persiste, infiltración por el médico.",
+"camara": "anterior"
+},
+{
+"id": "piramidal",
+"titulo": "Síndrome del músculo piramidal (piriforme)",
+"region": "glúteo",
+"side": "derecho",
+"presentacion": "Varón de 41 años, corredor, con dolor glúteo profundo derecho que irradia por la cara posterior del muslo al estar mucho tiempo sentado, sin dolor lumbar.",
+"anatomia": "El nervio ciático sale de la pelvis por el agujero ciático mayor, habitualmente por debajo del piriforme; en algunas personas lo atraviesa o una de sus divisiones pasa por encima. La hipertrofia o el espasmo del piriforme y de los rotadores profundos pueden irritarlo en el espacio subglúteo (síndrome glúteo profundo).",
+"lesion": [
+"Piriformis muscle"
+],
+"afectados": [
+"Sciatic nerve"
+],
+"relacionados": [
+"Gluteus maximus muscle",
+"Obturator internus",
+"Quadratus femoris muscle",
+"Sacrum",
+"Hip bone"
+],
+"signos": [
+"Dolor glúteo profundo que empeora sentado",
+"Dolor a la palpación del piriforme",
+"Sin signos radiculares lumbares"
+],
+"pruebas": [
+"Prueba FAIR (flexión, aducción y rotación interna de la cadera)",
+"Prueba de Freiberg y de Pace",
+"Descartar origen lumbar (Lasègue, reflejos)"
+],
+"fisioterapia": "Estiramiento y fortalecimiento de los rotadores y abductores de la cadera, técnicas de movilización neural del ciático, adaptación de la sedestación y del entrenamiento.",
+"camara": "posterior"
+},
+{
+"id": "menisco-medial",
+"titulo": "Rotura del menisco medial",
+"region": "rodilla",
+"side": "derecho",
+"presentacion": "Varón de 29 años que al pivotar jugando fútbol con el pie apoyado sintió dolor en la cara interna de la rodilla derecha; desde entonces tiene bloqueos y se le hincha al día siguiente de hacer deporte.",
+"anatomia": "El menisco medial, en forma de C, está unido a la cápsula y al ligamento colateral tibial, por lo que se mueve menos que el lateral y se lesiona con más frecuencia en los giros con la rodilla en flexión y carga. Su tercio externo está vascularizado (zona roja) y puede cicatrizar; el interno no.",
+"lesion": [
+"Medial meniscus"
+],
+"afectados": [
+"Vastus medialis muscle"
+],
+"relacionados": [
+"Femur",
+"Tibia",
+"Anterior meniscotibial ligament (Medial meniscus)",
+"Posterior meniscotibial ligament (Medial meniscus)",
+"Anterior cruciate ligament"
+],
+"signos": [
+"Dolor en la interlínea articular medial",
+"Derrame articular diferido (horas)",
+"Bloqueos o sensación de enganche",
+"Dolor al ponerse en cuclillas"
+],
+"pruebas": [
+"Prueba de McMurray",
+"Prueba de Thessaly",
+"Dolor a la palpación de la interlínea medial",
+"Resonancia magnética"
+],
+"fisioterapia": "Control del derrame, recuperación de la movilidad y del cuádriceps, ejercicio de carga progresiva y control neuromuscular; cirugía (sutura o meniscectomía parcial) si hay bloqueo verdadero.",
+"camara": "anterior"
+},
+{
+"id": "femoropatelar",
+"titulo": "Síndrome de dolor femoropatelar",
+"region": "rodilla",
+"side": "derecho",
+"presentacion": "Mujer de 19 años, corredora, con dolor difuso alrededor de la rótula derecha al bajar escaleras, ponerse en cuclillas y al estar sentada mucho tiempo con las rodillas dobladas.",
+"anatomia": "La rótula se desliza en la tróclea femoral guiada por el cuádriceps (con el vasto medial oblicuo), los retináculos rotulianos y la cintilla iliotibial. Las cargas excesivas, la debilidad de los abductores y rotadores laterales de la cadera y el valgo dinámico aumentan la presión en la articulación femoropatelar.",
+"lesion": [
+"Patella",
+"Lateral patellar retinaculum",
+"Medial patellar retinaculum"
+],
+"afectados": [
+"Vastus medialis muscle",
+"Gluteus medius muscle",
+"Rectus femoris muscle"
+],
+"relacionados": [
+"Femur",
+"Iliotibial tract",
+"Tensor fasciae latae",
+"Vastus lateralis muscle"
+],
+"signos": [
+"Dolor anterior de rodilla con cuclillas, escaleras y sedestación prolongada",
+"Valgo dinámico en la sentadilla unipodal",
+"Sin derrame ni bloqueos"
+],
+"pruebas": [
+"Sentadilla unipodal (control del valgo)",
+"Dolor a la compresión rotuliana",
+"Fuerza de abductores y rotadores laterales de cadera"
+],
+"fisioterapia": "Educación y ajuste de la carga, fortalecimiento de cadera y cuádriceps, reentrenamiento de la carrera y, a corto plazo, vendaje o rodillera rotuliana.",
+"camara": "anterior"
+},
+{
+"id": "capsulitis",
+"titulo": "Capsulitis adhesiva (hombro congelado)",
+"region": "hombro",
+"side": "izquierdo",
+"presentacion": "Mujer de 54 años, diabética, con dolor progresivo en el hombro izquierdo desde hace cuatro meses y gran dificultad para peinarse y abrocharse el sujetador; la rotación externa está muy limitada.",
+"anatomia": "La cápsula de la articulación glenohumeral, con el ligamento coracohumeral y el intervalo rotador, se inflama y se fibrosa y pierde volumen. La pérdida de movilidad es capsular: rotación externa más que abducción más que rotación interna, tanto activa como pasiva.",
+"lesion": [
+"Articular capsule of glenohumeral joint",
+"Coracohumeral ligament"
+],
+"afectados": [
+"Subscapularis muscle",
+"Supraspinatus muscle",
+"Infraspinatus muscle"
+],
+"relacionados": [
+"Scapula",
+"Humerus",
+"Superior glenohumeral ligament",
+"Middle glenohumeral ligament",
+"Inferior glenohumeral ligament"
+],
+"signos": [
+"Dolor nocturno",
+"Limitación activa y pasiva de la rotación externa",
+"Fases: dolorosa, rígida y de recuperación (1–3 años)"
+],
+"pruebas": [
+"Rotación externa pasiva menor del 50 % del lado sano",
+"Radiografía normal (descarta artrosis y calcificaciones)",
+"Ecografía: engrosamiento del ligamento coracohumeral"
+],
+"fisioterapia": "Educación sobre la evolución natural, ejercicios de movilidad dentro de la tolerancia en la fase dolorosa y estiramientos capsulares progresivos en la fase rígida; infiltración intraarticular o hidrodilatación indicadas por el médico.",
+"camara": "anterior"
 }
 ]

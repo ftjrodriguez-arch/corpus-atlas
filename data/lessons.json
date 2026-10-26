@@ -1380,5 +1380,540 @@
 "a": 0
 }
 ]
+},
+{
+"id": "pared_abd",
+"t": "Pared abdominal anterolateral",
+"r": "Abdomen",
+"both": true,
+"steps": [
+{
+"t": "Los músculos anchos",
+"x": "De superficial a profundo: oblicuo externo (fibras hacia abajo y adelante, «manos en los bolsillos»), oblicuo interno (fibras perpendiculares a las del externo) y transverso del abdomen (fibras horizontales, el «corsé»). Sus aponeurosis forman la vaina de los rectos.",
+"show": [
+"External abdominal oblique muscle",
+"Internal abdominal oblique muscle",
+"Transversus abdominis muscle"
+],
+"view": "latd"
+},
+{
+"t": "El recto del abdomen",
+"x": "Va de los cartílagos costales 5.º–7.º y la xifoides al pubis. Sus intersecciones tendinosas lo dividen en vientres y se adhieren a la hoja anterior de su vaina. Flexiona el tronco y comprime el abdomen.",
+"show": [
+"Rectus abdominis muscle",
+"Tendinous intersection of rectus abdominis",
+"Pyramidalis muscle"
+],
+"view": "ant"
+},
+{
+"t": "La línea alba",
+"x": "Rafe medio formado por el entrecruzamiento de las aponeurosis de los tres músculos anchos, desde la xifoides hasta el pubis, con el anillo umbilical en su mitad. Su ensanchamiento es la diástasis de los rectos; por ella se hace la laparotomía media.",
+"show": [
+"Linea alba",
+"Rectus abdominis muscle",
+"Tendinous intersection of rectus abdominis"
+],
+"view": "ant"
+},
+{
+"t": "La vaina de los rectos",
+"x": "Por encima de la línea arqueada (unos 4 cm bajo el ombligo) la aponeurosis del oblicuo interno se desdobla: la hoja anterior pasa por delante del recto y la posterior por detrás. Por debajo, todas las aponeurosis pasan por delante y el recto apoya solo sobre la fascia transversal.",
+"show": [
+"Anterior layer of rectus sheath",
+"Posterior layer of rectus sheath",
+"Rectus abdominis muscle",
+"Linea alba"
+],
+"view": "ant"
+},
+{
+"t": "Región inguinal",
+"x": "El ligamento inguinal es el borde inferior engrosado de la aponeurosis del oblicuo externo, de la espina ilíaca anterosuperior al tubérculo del pubis. Por encima de él discurre el conducto inguinal, con los nervios ilioinguinal e iliohipogástrico y los vasos epigástricos inferiores en su pared posterior.",
+"show": [
+"Inguinal ligament",
+"Ilio-inguinal nerve",
+"Iliohypogastric nerve",
+"Inferior epigastric artery",
+"Internal abdominal oblique muscle",
+"Transversus abdominis muscle"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "¿Qué músculo de la pared abdominal tiene las fibras dirigidas hacia abajo y adelante?",
+"o": [
+"Oblicuo externo",
+"Oblicuo interno",
+"Transverso del abdomen",
+"Recto del abdomen"
+],
+"a": 0
+},
+{
+"p": "¿Qué estructura forma el borde inferior engrosado de la aponeurosis del oblicuo externo?",
+"o": [
+"El ligamento inguinal",
+"La línea alba",
+"La línea arqueada",
+"El tendón conjunto"
+],
+"a": 0
+},
+{
+"p": "Por debajo de la línea arqueada, el recto del abdomen apoya por detrás sobre…",
+"o": [
+"La fascia transversal",
+"La hoja posterior de la vaina",
+"El transverso del abdomen",
+"El peritoneo parietal directamente sin fascia"
+],
+"a": 0
+}
+]
+},
+{
+"id": "gluteo",
+"t": "Región glútea y nervio ciático",
+"r": "Cadera",
+"steps": [
+{
+"t": "Glúteo mayor",
+"x": "El músculo más voluminoso del cuerpo: extiende y rota lateralmente la cadera y se inserta en la tuberosidad glútea y la cintilla iliotibial. Es clave para levantarse de una silla y subir escaleras.",
+"show": [
+"Gluteus maximus muscle"
+],
+"view": "post"
+},
+{
+"t": "Glúteos medio y menor",
+"x": "Abductores y estabilizadores de la pelvis en el apoyo monopodal. Su debilidad produce el signo de Trendelenburg. Los inerva el nervio glúteo superior.",
+"show": [
+"Gluteus medius muscle",
+"Gluteus minimus muscle",
+"Superior gluteal nerve",
+"Tensor fasciae latae"
+],
+"view": "latd"
+},
+{
+"t": "Rotadores laterales cortos",
+"x": "Piriforme, gemelos, obturador interno, cuadrado femoral y obturador externo. El piriforme divide el agujero ciático mayor en un espacio suprapiriforme (vasos y nervio glúteos superiores) e infrapiriforme (nervio ciático, glúteo inferior y pudendo).",
+"show": [
+"Piriformis muscle",
+"Obturator internus",
+"Quadratus femoris muscle",
+"Obturator externus"
+],
+"view": "post"
+},
+{
+"t": "El nervio ciático",
+"x": "El nervio más grueso del cuerpo (L4–S3): sale por debajo del piriforme, desciende entre el trocánter mayor y la tuberosidad isquiática y se divide, habitualmente en el vértice de la fosa poplítea, en tibial y peroneo común. Las inyecciones se ponen en el cuadrante superoexterno del glúteo para no lesionarlo.",
+"show": [
+"Sciatic nerve",
+"Piriformis muscle",
+"Gluteus maximus muscle",
+"Tibial nerve",
+"Common fibular nerve"
+],
+"view": "post"
+}
+],
+"q": [
+{
+"p": "¿Qué nervio inerva los glúteos medio y menor?",
+"o": [
+"Glúteo superior",
+"Glúteo inferior",
+"Ciático",
+"Femoral"
+],
+"a": 0
+},
+{
+"p": "¿Por dónde sale habitualmente el nervio ciático de la pelvis?",
+"o": [
+"Por debajo del músculo piriforme",
+"Por encima del piriforme",
+"Por el agujero obturador",
+"Por debajo del ligamento inguinal"
+],
+"a": 0
+},
+{
+"p": "¿En qué cuadrante del glúteo se ponen las inyecciones intramusculares?",
+"o": [
+"Superoexterno",
+"Inferointerno",
+"Inferoexterno",
+"Superointerno"
+],
+"a": 0
+}
+]
+},
+{
+"id": "popliteo",
+"t": "Fosa poplítea",
+"r": "Rodilla",
+"steps": [
+{
+"t": "Límites",
+"x": "Rombo por detrás de la rodilla: por arriba, el bíceps femoral (lateral) y el semimembranoso y semitendinoso (medial); por abajo, las dos cabezas del gastrocnemio.",
+"show": [
+"Long head of biceps femoris",
+"Short head of biceps femoris",
+"Semimembranosus muscle",
+"Semitendinosus muscle",
+"Medial head of gastrocnemius",
+"Lateral head of gastrocnemius"
+],
+"view": "post"
+},
+{
+"t": "Contenido",
+"x": "De superficial a profundo: nervios tibial y peroneo común, vena poplítea y, lo más profundo y junto al hueso, la arteria poplítea. Su pulso se palpa con la rodilla flexionada.",
+"show": [
+"Tibial nerve",
+"Common fibular nerve",
+"Popliteal vein",
+"Popliteal artery"
+],
+"view": "post"
+},
+{
+"t": "El suelo",
+"x": "El músculo poplíteo desbloquea la rodilla al inicio de la flexión rotando la tibia medialmente. Por encima, la cápsula y el ligamento poplíteo oblicuo.",
+"show": [
+"Popliteus muscle",
+"Plantaris muscle",
+"Femur",
+"Tibia"
+],
+"view": "post"
+}
+],
+"q": [
+{
+"p": "¿Cuál es la estructura más profunda de la fosa poplítea?",
+"o": [
+"Arteria poplítea",
+"Vena poplítea",
+"Nervio tibial",
+"Nervio peroneo común"
+],
+"a": 0
+},
+{
+"p": "¿Qué músculo «desbloquea» la rodilla al comenzar la flexión?",
+"o": [
+"Poplíteo",
+"Gastrocnemio",
+"Plantar",
+"Sóleo"
+],
+"a": 0
+}
+]
+},
+{
+"id": "antebrazo",
+"t": "Antebrazo: flexores y pronadores",
+"r": "Antebrazo",
+"steps": [
+{
+"t": "Plano superficial",
+"x": "Desde el epicóndilo medial: pronador redondo, flexor radial del carpo, palmar largo y flexor cubital del carpo. Su tendinopatía es la epitrocleítis (codo de golfista).",
+"show": [
+"Superficial head of pronator teres",
+"Deep head of pronator teres",
+"Flexor carpi radialis",
+"Palmaris longus muscle",
+"Humeral head of flexor carpi ulnaris",
+"Ulnar head of flexor carpi ulnaris"
+],
+"view": "ant"
+},
+{
+"t": "Plano intermedio",
+"x": "El flexor superficial de los dedos flexiona las interfalángicas proximales; sus tendones pasan por el túnel carpiano.",
+"show": [
+"Humero-ulnar head of flexor digitorum superficialis",
+"Radial head of flexor digitorum superficialis"
+],
+"view": "ant"
+},
+{
+"t": "Plano profundo",
+"x": "Flexor profundo de los dedos (interfalángicas distales), flexor largo del pulgar y pronador cuadrado. La mitad lateral del flexor profundo la inerva el mediano (interóseo anterior) y la medial, el cubital.",
+"show": [
+"Flexor digitorum profundus",
+"Flexor pollicis longus",
+"Pronator quadratus"
+],
+"view": "ant"
+},
+{
+"t": "Nervios",
+"x": "El mediano pasa entre las cabezas del pronador redondo y bajo el flexor superficial; el cubital, detrás del epicóndilo medial y bajo el flexor cubital del carpo.",
+"show": [
+"Median nerve",
+"Ulnar nerve",
+"Superficial head of pronator teres",
+"Humeral head of flexor carpi ulnaris"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "¿Qué músculo flexiona la articulación interfalángica distal de los dedos?",
+"o": [
+"Flexor profundo de los dedos",
+"Flexor superficial de los dedos",
+"Palmar largo",
+"Lumbricales"
+],
+"a": 0
+},
+{
+"p": "¿Entre qué estructuras pasa el nervio mediano en el codo?",
+"o": [
+"Entre las cabezas del pronador redondo",
+"Detrás del epicóndilo medial",
+"Bajo el supinador",
+"Por el canal de torsión"
+],
+"a": 0
+}
+]
+},
+{
+"id": "mano",
+"t": "Músculos de la mano",
+"r": "Mano",
+"steps": [
+{
+"t": "Eminencia tenar",
+"x": "Abductor corto, flexor corto y oponente del pulgar: permiten la oposición. Los inerva el ramo recurrente del nervio mediano, salvo la cabeza profunda del flexor corto.",
+"show": [
+"Abductor pollicis brevis",
+"Superficial head of flexor pollicis brevis",
+"Deep head of flexor pollicis brevis",
+"Opponens pollicis muscle"
+],
+"view": "ant"
+},
+{
+"t": "Aductor del pulgar",
+"x": "Con sus cabezas oblicua y transversa aproxima el pulgar a la palma (pinza lateral). Lo inerva el cubital: su debilidad da el signo de Froment.",
+"show": [
+"Oblique head of adductor pollicis",
+"Transverse head of adductor pollicis"
+],
+"view": "ant"
+},
+{
+"t": "Eminencia hipotenar",
+"x": "Abductor, flexor corto y oponente del meñique, inervados por el cubital.",
+"show": [
+"Abductor digiti minimi of hand",
+"Flexor digiti minimi of hand",
+"Opponens digiti minimi muscle of hand"
+],
+"view": "ant"
+},
+{
+"t": "Lumbricales e interóseos",
+"x": "Los lumbricales nacen de los tendones del flexor profundo; con los interóseos flexionan las metacarpofalángicas y extienden las interfalángicas. Los palmares aducen los dedos y los dorsales los abducen («PAD y DAB»).",
+"show": [
+"Lumbrical muscles of hand",
+"Palmar interossei muscles",
+"Dorsal interossei muscles of hand",
+"Palmar aponeurosis"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "¿Qué nervio inerva el aductor del pulgar?",
+"o": [
+"Cubital",
+"Mediano",
+"Radial",
+"Musculocutáneo"
+],
+"a": 0
+},
+{
+"p": "¿Qué músculos abducen los dedos de la mano?",
+"o": [
+"Interóseos dorsales",
+"Interóseos palmares",
+"Lumbricales",
+"Flexor superficial"
+],
+"a": 0
+}
+]
+},
+{
+"id": "pie",
+"t": "Pie y arco plantar",
+"r": "Pie",
+"steps": [
+{
+"t": "Esqueleto del arco",
+"x": "El arco longitudinal medial lo forman calcáneo, astrágalo, navicular, cuñas y los tres primeros metatarsianos; el lateral, calcáneo, cuboides y 4.º–5.º metatarsianos.",
+"show": [
+"Calcaneus",
+"Talus",
+"Navicular bone"
+],
+"view": "latd"
+},
+{
+"t": "Aponeurosis plantar y primer plano",
+"x": "La aponeurosis plantar une el calcáneo a los dedos y tensa el arco en la fase final del apoyo (mecanismo de molinete). Debajo, abductor del dedo gordo, flexor corto de los dedos y abductor del quinto.",
+"show": [
+"Plantar aponeurosis",
+"Abductor hallucis",
+"Flexor digitorum brevis",
+"Abductor digiti minimi of foot"
+],
+"view": "inf"
+},
+{
+"t": "Planos medios y profundos",
+"x": "Cuadrado plantar y lumbricales; después flexor corto y aductor del dedo gordo, flexor corto del quinto e interóseos.",
+"show": [
+"Quadratus plantae muscle",
+"Lumbrical muscles of foot",
+"Oblique head of adductor hallucis",
+"Transverse head of adductor hallucis",
+"Plantar interossei muscles",
+"Dorsal interossei muscles of foot"
+],
+"view": "inf"
+},
+{
+"t": "Soportes ligamentosos y tendinosos",
+"x": "El ligamento plantar largo y el calcaneonavicular plantar («ligamento en hamaca») sostienen el arco, junto con los tendones del tibial posterior y del peroneo largo, que cruzan la planta como un estribo.",
+"show": [
+"Long plantar ligament",
+"Plantar calcaneonavicular ligament",
+"Tibialis posterior muscle",
+"Fibularis longus muscle"
+],
+"view": "inf"
+}
+],
+"q": [
+{
+"p": "¿Qué estructura tensa el arco en el despegue del pie (mecanismo de molinete)?",
+"o": [
+"La aponeurosis plantar",
+"El ligamento deltoideo",
+"El tendón calcáneo",
+"El retináculo extensor"
+],
+"a": 0
+},
+{
+"p": "¿Qué tendones forman el «estribo» del pie?",
+"o": [
+"Tibial posterior y peroneo largo",
+"Tibial anterior y extensor largo del dedo gordo",
+"Peroneo corto y tercer peroneo",
+"Flexor largo de los dedos y plantar"
+],
+"a": 0
+}
+]
+},
+{
+"id": "axila",
+"t": "Axila",
+"r": "Hombro",
+"both": false,
+"steps": [
+{
+"t": "Paredes",
+"x": "Anterior: pectorales mayor y menor. Posterior: subescapular, redondo mayor y dorsal ancho. Medial: serrato anterior sobre la pared torácica. Lateral: surco intertubercular del húmero.",
+"show": [
+"Clavicular head of pectoralis major muscle",
+"Sternocostal head of pectoralis major muscle",
+"Pectoralis minor muscle",
+"Subscapularis muscle",
+"Teres major muscle",
+"Latissimus dorsi muscle",
+"Serratus anterior muscle"
+],
+"view": "ant"
+},
+{
+"t": "Arteria y vena axilares",
+"x": "La arteria axilar continúa a la subclavia desde el borde de la 1.ª costilla y el pectoral menor la divide en tres porciones. La vena axilar queda medial.",
+"show": [
+"Axillary artery",
+"Axillary vein",
+"Pectoralis minor muscle"
+],
+"view": "ant"
+},
+{
+"t": "Plexo braquial",
+"x": "Sus fascículos rodean la 2.ª porción de la arteria axilar y dan los nervios terminales del miembro superior: musculocutáneo, mediano, cubital, axilar y radial.",
+"show": [
+"Posterior cord of brachial plexus",
+"Musculocutaneous nerve",
+"Median nerve",
+"Ulnar nerve",
+"Axillary nerve",
+"Radial nerve",
+"Axillary artery"
+],
+"view": "ant"
+},
+{
+"t": "Ganglios linfáticos",
+"x": "Pectorales (anteriores), centrales, laterales, subescapulares (posteriores) y apicales; drenan el miembro superior y la mayor parte de la mama.",
+"show": [
+"Anterior axillary nodes",
+"Central axillary nodes",
+"Lateral axillary nodes",
+"Posterior axillary nodes",
+"Apical axillary nodes"
+],
+"view": "ant"
+}
+],
+"q": [
+{
+"p": "¿Qué músculo divide la arteria axilar en tres porciones?",
+"o": [
+"Pectoral menor",
+"Pectoral mayor",
+"Subescapular",
+"Redondo mayor"
+],
+"a": 0
+},
+{
+"p": "¿A qué grupo ganglionar llega primero la mayor parte de la linfa de la mama?",
+"o": [
+"Ganglios axilares pectorales (anteriores)",
+"Ganglios apicales",
+"Ganglios paraesternales",
+"Ganglios supraclaviculares"
+],
+"a": 0
+}
+]
 }
 ]

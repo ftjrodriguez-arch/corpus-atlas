@@ -2218,7 +2218,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 53 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v29');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v30');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();
