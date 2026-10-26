@@ -911,7 +911,7 @@ const ATLAS_COL={
    float st=0.5+0.32*(s0-0.5)*f0+0.26*(s1-0.5)*f1+0.2*(s2-0.5)*f2;float fa=max(f0,0.0);ckSt=st;ckFa=fa;
    float tv=dot(vTn.rgb,vec3(0.33));vec3 red=vec3(0.30,0.040,0.026)*mix(0.80,1.18,tv)*mix(0.42,1.24,st)*mix(0.92,1.06,H);
    vec3 ten=vec3(0.56,0.47,0.37)*mix(0.86,1.06,st);diffuseColor.rgb=mix(red,ten,ckTen);if(!gl_FrontFacing&&ckCut<0.5)diffuseColor.rgb*=0.5;}`,
- bone:`if(ckAtlas>0.5){float po=ckN(vObj*190.0),po2=ckN(vObj*48.0);diffuseColor.rgb=mix(vec3(0.66,0.56,0.40),vec3(0.88,0.80,0.62),0.6*po2+0.4*po)*mix(0.78,1.0,ckAO)*mix(1.0,0.82,ckCart*0.0);
+ bone:`if(ckAtlas>0.5){float po=ckN(vObj*190.0),po2=ckN(vObj*48.0);diffuseColor.rgb=mix(vec3(0.66,0.56,0.40),vec3(0.88,0.80,0.62),0.75*po2+0.25*po)*mix(0.78,1.0,ckAO)*mix(1.0,0.82,ckCart*0.0);
    diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.58,0.66,0.74),ckCart*0.8);}`,
  artery:`if(ckAtlas>0.5){diffuseColor.rgb*=vec3(0.82,0.62,0.62);}`,
  vein:`if(ckAtlas>0.5){diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.03,0.13,0.30)*mix(0.85,1.1,H),0.75);}`,
@@ -919,7 +919,7 @@ const ATLAS_COL={
    float fat=smoothstep(0.03,0.12,c.g-c.b)*smoothstep(0.0,0.05,c.r-c.g+0.04)*step(0.25,c.g);
    c*=mix(0.8,1.1,ckSt);if(fat>0.0){float lob=ckN(vObj*380.0);ckSt=mix(ckSt,lob,fat);c=mix(c,c*mix(0.68,1.12,smoothstep(0.25,0.75,lob)),fat);}
    diffuseColor.rgb=c;}`,
- nerve:`if(ckAtlas>0.5){diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.72,0.56,0.16)*mix(0.85,1.08,H),0.6);}`};
+ nerve:`if(ckAtlas>0.5){diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.82,0.58,0.12)*mix(0.86,1.08,H),0.78);}`};
 function corpusShader(sh,kind,noTint,gk){
   sh.uniforms.ckStudio=STUDIO_U;sh.uniforms.ckAtlas=ATLAS_U;sh.uniforms.ckLite=LITE_U;sh.uniforms.ckCut=CUT_U;sh.uniforms.ckImg=IMG_U;sh.uniforms.ckSlab=SLAB_U;sh.uniforms.ckSlabOn=SLABON_U;gk=gk||[0.5,0.45];
   const SSS={bone:0.08,muscle:0.32,soft:0.22,visc:0.3,skin:0.45,artery:0.38,vein:0.42,nerve:0.22}[kind];
@@ -947,7 +947,7 @@ function corpusShader(sh,kind,noTint,gk){
       if(ckAmp>0.01&&ckLite<0.5){float ckE=0.25/ckFq;
         vec3 ckG=vec3(ckF(ckMap(vObj+vec3(ckE,0,0))*ckFq),ckF(ckMap(vObj+vec3(0,ckE,0))*ckFq),ckF(ckMap(vObj+vec3(0,0,ckE))*ckFq))-vec3(H0);
         ckG=(viewMatrix*vec4(ckG/ckE,0.0)).xyz;ckG-=normal*dot(ckG,normal);
-        normal=normalize(normal-ckG*${P.b.toFixed(3)}*ckAmp*(1.0+0.6*ckStudio)*${kind==='bone'?'(1.0-0.6*ckAtlas)':'(1.0-1.0*ckAtlas)'}*(1.0-0.55*ckTen-0.8*ckCart));}`).replace('#include <dithering_fragment>',`#include <dithering_fragment>
+        normal=normalize(normal-ckG*${P.b.toFixed(3)}*ckAmp*(1.0+0.6*ckStudio)*${kind==='bone'?'(1.0-0.75*ckAtlas)':'(1.0-1.0*ckAtlas)'}*(1.0-0.55*ckTen-0.8*ckCart));}`).replace('#include <dithering_fragment>',`#include <dithering_fragment>
       if(ckSlabOn>0.5&&gl_FrontFacing&&dot(ckSlab.xyz,vWp)+ckSlab.w>0.006)discard;
       ${kind==='skin'?`if(ckAtlas>0.5&&ckCut<0.5&&ckImg<0.5){if(!gl_FrontFacing)discard;float fr=pow(1.0-clamp(abs(dot(normal,normalize(vViewPosition))),0.0,1.0),1.6);gl_FragColor=vec4(mix(vec3(0.16,0.165,0.17),vec3(0.62,0.63,0.65),fr),clamp((0.14+0.66*fr)*min(1.0,diffuseColor.a*2.6),0.0,0.92));}`:''}
       {float ckG=ckImg>1.5?${gk[1].toFixed(2)}:${gk[0].toFixed(2)};
@@ -2218,7 +2218,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 53 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v28');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v29');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();
