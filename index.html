@@ -182,6 +182,8 @@ body.phy-on.phy-dock .pbody > .view{display:none!important}
 .phytour:hover{border-color:var(--c)}.phytour .ic{flex:none;width:34px;height:34px;border-radius:10px;background:var(--c);color:#111;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700}
 .phytour b{display:block;font:500 15px/1.2 var(--f-display)}.phytour small{color:var(--muted);font-size:11.5px}
 .phykick{color:var(--phyc,#ff8a8a)!important}.phyctl .btn.pri{background:var(--phyc,#ff4d5e)!important;border-color:var(--phyc,#ff4d5e)!important;color:#111!important}.phydots button[aria-current="true"]{background:var(--phyc,#ff4d5e)!important}
+.prings{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:4px}.pring{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}.pring svg{width:56px;height:56px}.pring b{font-size:12px}.pring small{font-size:10.5px;color:var(--muted)}
+.phytour{position:relative}.pdone{position:absolute;right:6px;top:4px;font-size:10px;font-weight:700;color:var(--ok)}
 .lbl.phyl{background:rgba(14,16,22,.82);color:#fff;border-color:rgba(255,255,255,.2);text-transform:none;letter-spacing:0;font:600 11.5px/1 var(--f-ui);padding:5px 8px;border-radius:999px}
 body.phy-on .actbar,body.phy-on .views,body.phy-on #hintTxt{display:none!important}
 @media (max-width:879px){#phyInset{width:200px;height:104px;left:8px;top:8px}#phyInset.big{width:230px;height:150px}.phy .phycard{left:6px;right:6px;bottom:6px;padding:9px 10px 8px}.phy h2{font-size:16.5px}.phy p{font-size:12.2px;max-height:15vh}}
@@ -581,7 +583,7 @@ details.more > .card{margin-bottom:10px}
         <p class="muted" style="font-size:12px">Valores de referencia de rango articular activo en adultos (AAOS). Las mallas reales se deforman alrededor del centro articular calculado a partir de los huesos; los músculos que cruzan la articulación se curvan de forma aproximada.</p>
       </div>
 
-      <div class="view" id="tab-lec" hidden><p class="femonly card">Las lecciones guiadas usan la musculatura completa. <button class="btn" onclick="setBody('f')">Ver el modelo femenino completo</button></p><div class="phyhost" style="margin-bottom:6px"></div><div id="caseBox" class="maleonly"></div><h3 class="sect maleonly">Lecciones guiadas</h3><div id="lecBox"></div>
+      <div class="view" id="tab-lec" hidden><div id="progBox"></div><p class="femonly card">Las lecciones guiadas usan la musculatura completa. <button class="btn" onclick="setBody('f')">Ver el modelo femenino completo</button></p><div class="phyhost" style="margin-bottom:6px"></div><div id="caseBox" class="maleonly"></div><h3 class="sect maleonly">Lecciones guiadas</h3><div id="lecBox"></div>
 <h3 class="sect">Practicar y repasar</h3>
         <div class="card only-stu">
           <h3>Práctica de identificación</h3>
@@ -1701,7 +1703,7 @@ $('#logClear').onclick=()=>{const p=$('#patId').value.trim();
 
 /* ───────── Pestañas y modo ───────── */
 let currentTab='sistemas';
-function showTab(t){currentTab=t;$$('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));['sistemas','planos','mov','estr','lec','glo'].forEach(x=>$('#tab-'+x).hidden=x!==t);if(t==='glo')gloLoad();
+function showTab(t){currentTab=t;$$('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));['sistemas','planos','mov','estr','lec','glo'].forEach(x=>$('#tab-'+x).hidden=x!==t);if(t==='glo')gloLoad();if(t==='lec'&&typeof renderProg==='function')renderProg();
   applyPose();applyAgonists();store.set('tab',t);}
 $$('.tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 function setMode(m){document.body.classList.toggle('mode-pro',m==='pro');document.body.classList.toggle('mode-stu',m!=='pro');$('#m-stu').setAttribute('aria-pressed',m!=='pro');$('#m-pro').setAttribute('aria-pressed',m==='pro');store.set('mode',m);if(m==='pro'&&quiz.on)stopQuiz();}
@@ -1931,7 +1933,7 @@ function examPick(m){const q=exam.qs[exam.i];if(!q||q.ty!=='find')return;const c
 function finishExam(){if(!exam.on)return;exam.on=false;clearInterval(exam.timer);exClearHl();setXray(false);$('#quizbar').hidden=true;
   while(exam.ans.length<exam.qs.length)exam.ans.push({ok:false,given:'(sin tiempo)'});
   const ok=exam.ans.filter(a=>a.ok).length,n=exam.qs.length,nota=Math.round(ok/n*100)/10,secs=Math.round((performance.now()-exam.t0)/1000);
-  const hist=store.get('exams',[]);hist.unshift({d:Date.now(),sys:exam.cfg.sys,b:exam.cfg.b,ok,n,secs});store.set('exams',hist.slice(0,20));
+  progMark('exam',exam.cfg.sys||'todo',ok,n);const hist=store.get('exams',[]);hist.unshift({d:Date.now(),sys:exam.cfg.sys,b:exam.cfg.b,ok,n,secs});store.set('exams',hist.slice(0,20));
   $('#examRun').innerHTML=`<h2 style="margin:4px 0">Nota: ${nota.toFixed(1).replace('.',',')} / 10</h2><p class="small">${ok} de ${n} correctas · ${Math.floor(secs/60)} min ${secs%60} s</p>
    <div class="tblwrap"><table class="tbl"><thead><tr><th>#</th><th>Pregunta</th><th>Tu respuesta</th></tr></thead><tbody>${exam.qs.map((q,i)=>{const a=exam.ans[i],c=entry(q.id);return`<tr><td>${i+1}</td><td><button class="link small" data-exgo="${q.id}">${esc(label(c))}</button><br><span class="muted small">${q.ty==='find'?'tocar':'reconocer'}</span></td><td style="color:var(${a.ok?'--ok':'--bad'})">${a.ok?'Correcta':esc(a.given)}</td></tr>`;}).join('')}</tbody></table></div>
    <div class="row"><button class="btn pri" id="exAgain">Nuevo examen</button><button class="btn" id="exRetry">Repetir el mismo</button></div>`;
@@ -2004,7 +2006,7 @@ function trNode(root){if(!root)return;const walk=document.createTreeWalker(root,
 let trPending=false;const trObs=new MutationObserver(()=>{if(trPending||LANG==='es')return;trPending=true;requestAnimationFrame(()=>{trPending=false;trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}finally{if(LANG!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});}});});
 async function setLang(l){if(!['es','en','pt'].includes(l))l='es';
   if(l!=='es'&&!I18N){try{I18N=await (await fetch('data/i18n.json')).json();}catch(e){l='es';}}
-  LANG=l;store.set('lang',l);document.documentElement.lang=l;loadInfoTr(l);loadContentTr(l);if(typeof renderPhyTours==='function')renderPhyTours();
+  LANG=l;store.set('lang',l);document.documentElement.lang=l;loadInfoTr(l);loadContentTr(l);if(typeof renderPhyTours==='function'){renderPhyTours();renderProg();}setTimeout(renderProg,0);
 $('#phyBtn').onclick=e=>{e.stopPropagation();togglePop($('#phyBtn'),$('#phyPop'));};document.addEventListener('pointerdown',e=>{if(!e.target.closest('#phyPop,#phyBtn')&&!$('#phyPop').hidden)togglePop($('#phyBtn'),$('#phyPop'),false);});
   $$('#langSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===l));
   if(typeof SEARCH!=='undefined'&&SEARCH.length)buildSearch();
@@ -2165,6 +2167,29 @@ function tickContraction(dt){if(!contraction)return;contraction.t+=dt;const T=2.
   $('#conChip').textContent=`${conc?'Contracción concéntrica':'Fase excéntrica'} · ${curM.n} ${curJ.n.toLowerCase()} · ${Math.round(angle)}°`;
   applyPose();if(contraction.t>4*T){contraction.t=0;}}
 
+
+/* ───────── Mi progreso (guardado en este dispositivo) ───────── */
+const PROG=Object.assign({les:{},tour:{},exam:[],glo:[],gq:[],step:[],days:[]},store.get('prog',{}));
+function progMark(kind,key,ok,n){try{const today=new Date().toISOString().slice(0,10);if(!PROG.days.includes(today)){PROG.days.push(today);PROG.days=PROG.days.slice(-120);}
+  if(kind==='les'||kind==='tour'){const o=PROG[kind][key]||{best:0,n:n,times:0};o.times++;o.n=n;o.best=Math.max(o.best,ok);o.last=Date.now();PROG[kind][key]=o;}
+  else if(kind==='exam'||kind==='gq'){PROG[kind].unshift({k:key,ok,n,d:Date.now()});PROG[kind]=PROG[kind].slice(0,30);}
+  else if(kind==='glo'){if(!PROG.glo.includes(key)){PROG.glo.push(key);}}
+  else if(kind==='step'){if(!PROG.step.includes(key))PROG.step.push(key);}
+  store.set('prog',PROG);if(kind!=='glo'&&kind!=='step'||Math.random()<0.2)renderProg();}catch(e){}}
+function streak(){const ds=new Set(PROG.days);let n=0;const d=new Date();for(;;){const k=d.toISOString().slice(0,10);if(ds.has(k)){n++;d.setDate(d.getDate()-1);}else break;}return n;}
+function renderProg(){const box=$('#progBox');if(!box)return;
+  const nT=Object.keys(TOURS).length,dT=Object.keys(PROG.tour).filter(k=>TOURS[k]).length,nL=LESSONS.length||22,dL=Object.keys(PROG.les).length;
+  const tot=Object.values(TOURS).reduce((a,t)=>a+t.steps.length,0),dS=PROG.step.length;const nG=GLO?GLO.length:1503,dG=PROG.glo.length;
+  const ring=(v,c,lbl,sub)=>{const r=22,C=2*Math.PI*r,f=Math.max(0,Math.min(1,v));return `<div class="pring"><svg viewBox="0 0 56 56"><circle cx="28" cy="28" r="${r}" fill="none" stroke="var(--line)" stroke-width="6"/><circle cx="28" cy="28" r="${r}" fill="none" stroke="${c}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C*f} ${C}" transform="rotate(-90 28 28)"/><text x="28" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">${Math.round(f*100)}%</text></svg><b>${lbl}</b><small>${sub}</small></div>`;};
+  const ex=PROG.exam[0],avg=PROG.exam.length?PROG.exam.slice(0,10).reduce((a,e)=>a+e.ok/e.n,0)/Math.min(10,PROG.exam.length):0;
+  const st=streak();
+  box.innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><h3>${TL('Mi progreso','My progress','Meu progresso')}</h3><span class="small muted">${st?`🔥 ${st} ${TL(st===1?'día seguido':'días seguidos',st===1?'day in a row':'days in a row',st===1?'dia seguido':'dias seguidos')}`:TL('Estudia hoy para empezar una racha','Study today to start a streak','Estude hoje para começar uma sequência')}</span></div>
+   <div class="prings">${ring(dL/nL,'#38bdf8',TL('Lecciones','Lessons','Lições'),`${dL}/${nL}`)}${ring(dS/tot,'#f472b6',TL('Fisiología','Physiology','Fisiologia'),`${dS}/${tot} ${TL('pasos','steps','passos')}`)}${ring(dG/nG,'#a3e635',TL('Glosario','Glossary','Glossário'),`${dG} ${TL('términos','terms','termos')}`)}${ring(avg,'#fbbf24',TL('Exámenes','Exams','Provas'),PROG.exam.length?`${TL('media','average','média')} ${(avg*10).toFixed(1).replace('.',',')}`:'—')}</div>
+   ${Object.keys(PROG.tour).length?`<p class="small muted" style="margin-top:6px">${TL('Repasos de fisiología','Physiology reviews','Revisões de fisiologia')}: ${Object.entries(PROG.tour).filter(([k])=>TOURS[k]).map(([k,o])=>`${esc(tN(TOURS[k]))} ${o.best}/${o.n}`).join(' · ')}</p>`:''}
+   <div class="row"><button class="btn" id="progReset" style="font-size:12px;padding:4px 10px">${TL('Reiniciar progreso','Reset progress','Reiniciar progresso')}</button><span class="muted small">${TL('Se guarda solo en este dispositivo.','Saved only on this device.','Salvo só neste dispositivo.')}</span></div></div>`;
+  $('#progReset').onclick=()=>{if(!confirmReset())return;for(const k of ['les','tour'])PROG[k]={};for(const k of ['exam','glo','gq','step','days'])PROG[k]=[];store.set('prog',PROG);renderProg();};
+  $$('.phytour').forEach(b=>{const o=PROG.tour[b.dataset.tour];let m=b.querySelector('.pdone');if(o&&!m){m=document.createElement('span');m.className='pdone';b.appendChild(m);}if(m&&o)m.textContent=`✓ ${o.best}/${o.n}`;});}
+let _rc=0;function confirmReset(){if(Date.now()-_rc<4000)return true;_rc=Date.now();toast(TL('Pulsa otra vez para borrar el progreso.','Tap again to erase your progress.','Toque de novo para apagar o progresso.'));return false;}
 /* ───────── Lecciones guiadas ───────── */
 let LESSONS=[],lesson=null,lstep=0,lhl=[];
 function renderLessons(){
@@ -2175,7 +2200,7 @@ function renderLessons(){
   if(lstep>=n){const QS=Array.isArray(lesson.q)?lesson.q:[lesson.q];let ok=0,done=0;
     box.innerHTML=`<div class="view"><div class="steps">${lesson.steps.map(()=>'<i class="on"></i>').join('')}</div><h3>${esc(lesson.t)} · ${TL('repaso','review','revisão')}</h3>${QS.map((q,j)=>`<div class="lq" data-q="${j}"><h2>${esc(q.p)}</h2><div>${q.o.map((o,i)=>`<button class="opt" data-o="${i}">${esc(o)}</button>`).join('')}</div><p class="small qres"></p></div>`).join('')}<p id="qRes" class="small"></p><div class="row"><button class="btn" id="lBack">Volver al último paso</button><button class="btn pri" id="lExit">Terminar lección</button></div></div>`;
     box.querySelectorAll('.lq').forEach(w=>{const q=QS[+w.dataset.q];w.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{const i=+b.dataset.o;w.querySelectorAll('[data-o]').forEach(x=>{x.disabled=true;if(+x.dataset.o===q.a)x.classList.add('ok');});if(i!==q.a)b.classList.add('bad');else ok++;done++;
-      w.querySelector('.qres').textContent=i===q.a?'Correcto.':'La respuesta correcta está marcada en verde.';if(QS.length>1&&done===QS.length)$('#qRes').innerHTML=`<b>Resultado: ${ok} de ${QS.length}</b>`;});});
+      w.querySelector('.qres').textContent=i===q.a?'Correcto.':'La respuesta correcta está marcada en verde.';if(done===QS.length)progMark('les',lesson.id||lesson.t,ok,QS.length);if(QS.length>1&&done===QS.length)$('#qRes').innerHTML=`<b>Resultado: ${ok} de ${QS.length}</b>`;});});
     $('#lBack').onclick=()=>{lstep=n-1;showStep();};$('#lExit').onclick=exitLesson;return;}
   const st=lesson.steps[lstep];
   box.innerHTML=`<div class="view"><div class="steps">${lesson.steps.map((_,i)=>`<i class="${i<=lstep?'on':''}"></i>`).join('')}</div>
@@ -2292,7 +2317,7 @@ function renderGlo(){if(!GLO)return;const q=$('#gloQ').value.trim();let L=gloFil
 function gloExLabel(x){const R=gloResolve(x);if(R&&R.org)return oT(R.org);if(LANG==='es'||!R)return x.txt;if(R.lm)return LANG==='pt'&&R.lm[3]?R.lm[3]:R.lm[1];return nameL(CAT[R.id])||x.txt;}
 
 function gloPhy(g){const t=gKey(g.t);let tf=phyTourFor(t);if(!tf&&(g.ej||[]).some(x=>x.org==='corazon'))tf=['heart',0];if(!tf)return '';const T=TOURS[tf[0]];return `<button class="phystart" data-phyg="${tf[0]}|${tf[1]}" style="--c:${T.col}"><span class="ic" style="background:${T.col}">${T.ic}</span><span><b>${TL('Verlo en acción','See it in action','Ver em ação')}</b><small>${esc(tN(T))} · ${esc(pTx(T.steps[tf[1]])[0])}</small></span></button>`;}
-function gloCard(g){const other=[['ES',g.t],['EN',g.en],['PT',g.pt]].filter(([l,n])=>n&&l.toLowerCase()!==LANG);
+function gloCard(g){progMark('glo',g.t);const other=[['ES',g.t],['EN',g.en],['PT',g.pt]].filter(([l,n])=>n&&l.toLowerCase()!==LANG);
   const lbl=(es,en,pt)=>`<h3>${TL(es,en,pt)}</h3>`;
   const ex=(g.ej||[]).map((x,k)=>{const key=g.i+':'+k,img=GLO_IMG.get(key);return `<button data-gex="${k}" title="${esc(TL('Ver en 3D y fotografiar','Show in 3D and photograph','Ver em 3D e fotografar'))}"><span class="ph" data-ph="${key}">${img?`<img src="${img}" alt="">`:TL('Ver en 3D','Show in 3D','Ver em 3D')}</span><span>${esc(gloExLabel(x))}</span></button>`;}).join('');
   const rel=(g.rel||[]).map(r=>{const i=GLO.byKey.get(gKey(r));return i!=null?`<button data-grel="${i}">${esc(gT(GLO[i]))}</button>`:'';}).join('');
@@ -2342,7 +2367,7 @@ function gloQuizStart(){if(!GLO)return;const cat=$('#gloCat').value;let pool=GLO
   pool=pool.slice().sort(()=>Math.random()-.5).slice(0,10);GQ={qs:pool,i:0,ok:0,miss:[],cat};$('#gloMain').hidden=true;$('#gloTools').hidden=true;$('#gloQuiz').hidden=false;gloQuizRender();}
 function gloQuizEnd(){GQ=null;$('#gloQuiz').hidden=true;$('#gloMain').hidden=false;$('#gloTools').hidden=false;}
 function gloQuizRender(){const box=$('#gloQuiz');if(!GQ)return;
-  if(GQ.i>=GQ.qs.length){const n=GQ.qs.length;box.innerHTML=`<div class="card"><h3>${TL('Resultado','Result','Resultado')}</h3><h2>${GQ.ok} / ${n}</h2>
+  if(GQ.i>=GQ.qs.length){const n=GQ.qs.length;if(!GQ.saved){GQ.saved=1;progMark('gq',GQ.cat||'todo',GQ.ok,n);}box.innerHTML=`<div class="card"><h3>${TL('Resultado','Result','Resultado')}</h3><h2>${GQ.ok} / ${n}</h2>
     ${GQ.miss.length?`<p class="small muted">${TL('Repasa:','Review:','Revise:')}</p><div class="gloChips">${GQ.miss.map(i=>`<button data-grel="${i}">${esc(gT(GLO[i]))}</button>`).join('')}</div>`:`<p class="small">${TL('¡Todas correctas!','All correct!','Todas corretas!')}</p>`}
     <div class="row"><button class="btn pri" id="gqAgain">${TL('Otra ronda','Another round','Outra rodada')}</button><button class="btn" id="gqExit">${TL('Volver al glosario','Back to the glossary','Voltar ao glossário')}</button></div></div>`;
     $('#gqAgain').onclick=gloQuizStart;$('#gqExit').onclick=gloQuizEnd;box.querySelectorAll('[data-grel]').forEach(b=>b.onclick=()=>{gloQuizEnd();gloOpenTerm(+b.dataset.grel);});return;}
@@ -2766,7 +2791,7 @@ function phyIso(list){isoOnly=true;isoSet=new Set(list.map(m=>m.userData.c.id));
 function phyCut(on,pos){for(const k in PLANES){PLANES[k].cut=on&&k==='fro';PLANES[k].show=false;}if(on)PLANES.fro.pos=pos;updatePlanes();renderPlanes();}
 function phyClearImps(){for(const i of PHY.imps){PHY.grp.remove(i.tb);PHY.grp.remove(i.sp);i.tb.geometry.dispose();}PHY.imps=[];}
 function phyShowOnly(keep,opMap){for(const k in SYS){if(!PHY.saved.sys[k])continue;SYS[k].on=keep.includes(k);if(SYS[k].on)SYS[k].op=(opMap&&opMap[k])||1;}renderSysList();}
-function phyGo(i){const steps=curSteps(),T=curTour();i=Math.max(0,Math.min(steps.length-1,i));PHY.step=i;const st=steps[i];const [ti,tx]=pTx(st);
+function phyGo(i){const steps=curSteps(),T=curTour();i=Math.max(0,Math.min(steps.length-1,i));PHY.step=i;progMark('step',PHY_TOUR+':'+i);const st=steps[i];const [ti,tx]=pTx(st);
   $('#phyTitle').textContent=ti;$('#phyText').textContent=tx;$('#phyNum').textContent=`${i+1} / ${steps.length}`;$('#phyKick').textContent=tN(T);$('#phyVoice').textContent=TL('Narración','Narration','Narração');if(typeof phyTTS!=='undefined'&&phyTTS.on)setTimeout(()=>phySpeak(ti+'. '+tx),50);
   $('#phyPrev').textContent=TL('← Anterior','← Previous','← Anterior');$('#phySlow').textContent=TL('Cámara lenta','Slow motion','Câmera lenta');$('#phySound').textContent=TL('Sonido','Sound','Som');$('#phyPlay').textContent=PHY.paused?TL('Reanudar','Resume','Retomar'):TL('Pausa','Pause','Pausa');$('#phyMore').textContent=$('.phycard').classList.contains('open')?TL('Leer menos','Show less','Ler menos'):TL('Leer más','Read more','Ler mais');
   $('#phyDots').innerHTML=steps.map((s,k)=>`<button data-pd="${k}" aria-label="${esc(pTx(s)[0])}" aria-current="${k===i}"></button>`).join('');$('#phyDots').querySelectorAll('[data-pd]').forEach(b=>b.onclick=()=>phyGo(+b.dataset.pd));
@@ -3039,7 +3064,7 @@ const PHY_QUIZ={
 };
 function phyQuiz(){const T=curTour(),Q=PHY_QUIZ[PHY_TOUR];if(!Q)return phyStop();const L=o=>TL(o.es,o.en,o.pt);let i=0,ok=0;
   const box=$('#phyText');$('#phyMore').hidden=true;$('#phyDots').innerHTML='';$('#phyNum').textContent=TL('Repaso','Review','Revisão');
-  const draw=()=>{if(i>=Q.length){$('#phyTitle').textContent=TL('Resultado','Result','Resultado')+`: ${ok} / ${Q.length}`;box.innerHTML=`${ok===Q.length?TL('¡Perfecto!','Perfect!','Perfeito!'):TL('Repasa los pasos y vuelve a intentarlo.','Review the steps and try again.','Revise os passos e tente de novo.')}`;$('#phyNext').textContent=TL('Terminar','Finish','Concluir');$('#phyNext').onclick=()=>{phyStop();$('#phyNext').onclick=phyNextDefault;};$('#phyPrev').textContent=TL('Repetir recorrido','Repeat tour','Repetir percurso');$('#phyPrev').disabled=false;$('#phyPrev').onclick=()=>{$('#phyPrev').onclick=()=>phyGo(PHY.step-1);$('#phyNext').onclick=phyNextDefault;phyGo(0);};return;}
+  const draw=()=>{if(i>=Q.length){progMark('tour',PHY_TOUR,ok,Q.length);$('#phyTitle').textContent=TL('Resultado','Result','Resultado')+`: ${ok} / ${Q.length}`;box.innerHTML=`${ok===Q.length?TL('¡Perfecto!','Perfect!','Perfeito!'):TL('Repasa los pasos y vuelve a intentarlo.','Review the steps and try again.','Revise os passos e tente de novo.')}`;$('#phyNext').textContent=TL('Terminar','Finish','Concluir');$('#phyNext').onclick=()=>{phyStop();$('#phyNext').onclick=phyNextDefault;};$('#phyPrev').textContent=TL('Repetir recorrido','Repeat tour','Repetir percurso');$('#phyPrev').disabled=false;$('#phyPrev').onclick=()=>{$('#phyPrev').onclick=()=>phyGo(PHY.step-1);$('#phyNext').onclick=phyNextDefault;phyGo(0);};return;}
     const q=Q[i];$('#phyTitle').textContent=L(q.q);box.innerHTML=q.o.map((o,k)=>`<button class="opt phyopt2" data-k="${k}">${esc(L(o))}</button>`).join('');$('#phyNext').textContent=TL('Siguiente','Next','Próximo');$('#phyNext').disabled=true;
     box.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{if(box.dataset.done)return;box.dataset.done=1;const k=+b.dataset.k;if(k===q.a){ok++;b.classList.add('ok');}else{b.classList.add('bad');box.querySelector(`[data-k="${q.a}"]`).classList.add('ok');}$('#phyNext').disabled=false;});box.dataset.done='';};
   $('#phyNext').onclick=()=>{i++;$('#phyNext').disabled=false;draw();};$('#phyPrev').disabled=true;draw();}
