@@ -70,6 +70,7 @@ main{flex:1;min-height:0;display:grid;gap:10px;grid-template-rows:minmax(0,1.15f
 .conchip{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:600;white-space:nowrap}
 .legend{position:absolute;right:10px;top:52px;display:flex;flex-direction:column;gap:4px;font-size:12px;background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:6px 8px;pointer-events:none}
 .legend span{display:flex;align-items:center;gap:6px}
+.jleg{top:auto;right:auto;left:10px;bottom:96px;flex-direction:row;flex-wrap:wrap;gap:4px 10px;max-width:calc(100% - 100px);font-size:11.5px}
 .views{position:absolute;left:10px;right:10px;bottom:10px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .views::-webkit-scrollbar{display:none}
 .views button{flex:none}
@@ -306,7 +307,7 @@ details.more > .card{margin-bottom:10px}
   .tools{top:8px;right:8px;gap:5px}
   .tools .icon-btn{width:46px;min-height:44px}
   .viewpop{right:62px;top:8px}
-  .actbar{left:8px;right:62px;bottom:calc(var(--sheet,150px) + 8px)}
+  .actbar{left:8px;right:62px;bottom:calc(var(--sheet,150px) + 8px)}.jleg{left:8px;bottom:calc(var(--sheet,150px) + 92px);font-size:10.5px}
   .hint{right:62px}
   .toast{bottom:calc(var(--sheet,150px) + 12px)}
   .loader{top:35%}
@@ -376,6 +377,7 @@ details.more > .card{margin-bottom:10px}
       <div class="actbtns">
         <button id="aPin">Etiquetar</button>
         <button id="aIso">Aislar 360°</button>
+        <button id="aJoint">Ver la articulación</button>
         <button id="aExt">Extraer</button>
         <button id="aHide">Ocultar</button>
         <button id="aVec">Vectores O→I</button>
@@ -385,7 +387,8 @@ details.more > .card{margin-bottom:10px}
     </div>
     <div class="conchip" id="conChip" hidden></div>
     <div class="conchip animchip" id="animChip" hidden></div>
-    <div class="legend" id="legend" hidden><span><i class="dot" style="background:var(--orig)"></i>Origen (proximal)</span><span><i class="dot" style="background:var(--ins)"></i>Inserción (distal)</span></div>
+    <div class="legend jleg" id="jointLeg" hidden><span><i class="dot" style="background:#c3d0de"></i><b data-t>Ligamentos</b></span><span><i class="dot" style="background:#4f9fd0"></i><b data-t>Cartílago, discos y meniscos</b></span><span><i class="dot" style="background:#a9bfd6;opacity:.6"></i><b data-t>Cápsula (translúcida)</b></span><span><i class="dot" style="background:#e9e2cf"></i><b data-t>Hueso</b></span></div>
+     <div class="legend" id="legend" hidden><span><i class="dot" style="background:var(--orig)"></i>Origen (proximal)</span><span><i class="dot" style="background:var(--ins)"></i>Inserción (distal)</span></div>
     <div class="tools" role="toolbar" aria-label="Herramientas de la vista">
       <button class="icon-btn" id="viewMenuBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Vistas" title="Vistas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg><span>Vistas</span></button>
       <button class="icon-btn" id="phyBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Funciones" title="Fisiología en acción: ver cómo funcionan los órganos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-5 3 10 2-6 1.5 3H21"/></svg><span>Funciones</span></button>
@@ -739,7 +742,7 @@ function baseMat(kk,variant,noTint){
     transparent:true,opacity:1,clippingPlanes:clipArr,side:s.dbl?THREE.DoubleSide:THREE.FrontSide});
   if(WET.includes(k)){m.clearcoat=k.startsWith('nervioso')?0.25:0.65;m.clearcoatRoughness=0.28;}
   if(k==='muscular'){m.sheen&&m.sheen.set&&0;}
-  const kind=k==='oseo'?'bone':k==='muscular'?'muscle':(k==='piel'||(SYS[k]&&SYS[k].base==='piel'))?'skin':k==='arterial'?'artery':k==='venoso'?'vein':k==='nervioso_periferico'?'nerve':['digestivo','urinario','respiratorio','reproductor','endocrino'].includes(k)?'visc':'soft';
+  const kind=k==='oseo'?'bone':k==='muscular'?'muscle':(k==='piel'||(SYS[k]&&SYS[k].base==='piel'))?'skin':k==='arterial'?'artery':k==='venoso'?'vein':k==='nervioso_periferico'?'nerve':BS(k)==='articular'?'lig':['digestivo','urinario','respiratorio','reproductor','endocrino'].includes(k)?'visc':'soft';
   if(k!=='importado'){m.extensions={derivatives:true};const gk=GRAYK[k]||GRAYK[kind]||GRAYK.soft;m.onBeforeCompile=sh=>corpusShader(sh,kind,noTint,gk);m.customProgramCacheKey=()=>'ck4_'+kind+(noTint?'_n':'')+gk.join('_');}
   m.userData.baseSide=m.side;return m;
 }
@@ -835,7 +838,7 @@ function loadSys(k){
         const c=entry(o.name)||{id:o.name,en:o.name,es:o.name,la:'',sys:k,side:'',ins:''};
         const m=new THREE.Mesh(geo,matFor(k,c.ins,MEMB.test(c.en)?'memb':SEMI.test(c.en)?'semi':''));m.userData={c,sys:k,state:''};
         applyTint(m);if(HRGEO[c.id]) swapGeo(m,HRGEO[c.id]);
-        if(BS(k)==='muscular') addFiberDir(m);else if(TUBE_SYS.includes(BS(k))) addAxisDir(m);
+        if(BS(k)==='muscular'||fiberOK(m)) addFiberDir(m);else if(TUBE_SYS.includes(BS(k))) addAxisDir(m);
         grp.add(m);meshes.push(m);(byId[c.id]=m);
         o.geometry.dispose();
       });
@@ -906,7 +909,10 @@ const TINT=[
  [/testis|epididym/i,'#d9b9a6',1],[/ovary/i,'#d8b49e',1],[/uterus|uterine/i,'#c78a85',1],[/prostat/i,'#c58f78',1],[/penis|corpus cavernosum|corpus spongiosum|glans/i,'#c88d80',1]
  ,[/\bvein|venous|vena|sinus\b/i,'#3f62ad',1,1],[/artery|arterial|aorta|trunk$/i,'#c53a2f',1,1]];
 const hexRGB=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+const ART_TINT=[[/Nucleus pulposus/i,'#e6cf8e',1],[/fat pad/i,'#e8c77e',1],[/^Pubic symphysis$/i,'#d6e3ee',.8],[/Intervertebral disc|Interpubic disc|meniscus|labrum|Articular disc|symphysis|cartilage/i,'#4f9fd0',1],[/capsul|Synovial|Frenula/i,'#a9bfd6',.9],[/membrane|Oblique cord/i,'#b9c8d6',.8],[/ligament|retinacul|cord|tendon/i,'#c3d0de',1]];
+const LIGRX=/ligament|membrane|cord\b|capsul|frenula|retinacul/i;const fiberOK=m=>BS(m.userData.sys)==='articular'&&LIGRX.test(m.userData.c.en);
 function tintFor(c){if(!c||c.sys==='importado'||c.sys==='insercion')return null;
+  if(BS(c.sys)==='articular'){for(const [re,col,w] of ART_TINT)if(re.test(c.en)){const [r,g,b]=hexRGB(col);return [r,g,b,Math.round(w*255)];}}
   if(BS(c.sys)==='muscular'&&!/tendon/i.test(c.en)){// cada músculo con un matiz levemente distinto, como en el cadáver fresco
     let h=0;for(const ch of c.en)h=(h*31+ch.charCodeAt(0))|0;const f=0.88+((h>>>3)%100)/100*0.2,b=hexRGB(SYS.muscular.c);return [b[0]*f,b[1]*f*(0.97+((h>>>9)%7)/100),b[2]*f,255];}
   for(const [re,col,w,fo] of TINT)if((!fo||isFemLayer(c.sys))&&re.test(c.en)){const [r,g,b]=hexRGB(col);return [r,g,b,Math.round(w*255)];}
@@ -919,7 +925,7 @@ const HR={superior:{n:'Miembro superior',mb:4.3,tris:'1,64 M'},inferior:{n:'Miem
 for(const k in HR){HR[k].state='idle';HR[k].ids=[];}
 let autoHR=store.get('autoHR',true);
 function swapGeo(m,g){const u=m.userData;if(BODY==='f'&&u.geoF)return;if(u.rest){m.geometry.attributes.position.array.set(u.rest);m.geometry.attributes.normal.array.set(u.restN);m.geometry.attributes.position.needsUpdate=true;m.geometry.attributes.normal.needsUpdate=true;}
-  if(!u.lrGeo)u.lrGeo=m.geometry;m.geometry=g;applyTint(m);u.rest=null;u.restN=null;u.W={};deformed.delete(m);if(BS(u.sys)==='muscular')addFiberDir(m);else if(TUBE_SYS.includes(BS(u.sys)))addAxisDir(m);}
+  if(!u.lrGeo)u.lrGeo=m.geometry;m.geometry=g;applyTint(m);u.rest=null;u.restN=null;u.W={};deformed.delete(m);if(BS(u.sys)==='muscular'||fiberOK(m))addFiberDir(m);else if(TUBE_SYS.includes(BS(u.sys)))addAxisDir(m);}
 function unswapGeo(m){const u=m.userData;if(!u.lrGeo)return;const hr=m.geometry;if(u.rest){hr.attributes.position.array.set(u.rest);}m.geometry=u.lrGeo;u.lrGeo=null;u.rest=null;u.restN=null;u.W={};deformed.delete(m);}
 function loadHR(r){const h=HR[r];if(h.state==='loaded'||h.state==='loading')return h.promise;h.state='loading';renderHR();
   const parts=['loc','nv'];
@@ -994,6 +1000,7 @@ const ATLAS_COL={
  bone:`if(ckAtlas>0.5){float po=ckN(vObj*190.0),po2=ckN(vObj*48.0);diffuseColor.rgb=mix(vec3(0.66,0.56,0.40),vec3(0.88,0.80,0.62),0.75*po2+0.25*po)*mix(0.78,1.0,ckAO)*mix(1.0,0.82,ckCart*0.0);
    diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.58,0.66,0.74),ckCart*0.8);}`,
  artery:`if(ckAtlas>0.5){diffuseColor.rgb*=vec3(0.82,0.62,0.62);}`,
+ lig:`if(ckAtlas>0.5){float fl=step(0.5,length(vFd));diffuseColor.rgb*=mix(1.0,mix(0.84,1.08,H),fl);}`,
  vein:`if(ckAtlas>0.5){diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.03,0.13,0.30)*mix(0.85,1.1,H),0.75);}`,
  visc:`if(ckAtlas>0.5){vec3 c=diffuseColor.rgb;float ckM1=ckN(vObj*90.0),ckM2=ckN(vObj*260.0);ckSt=0.6*ckM1+0.4*ckM2;ckFa=1.0;
    float fat=smoothstep(0.03,0.12,c.g-c.b)*smoothstep(0.0,0.05,c.r-c.g+0.04)*step(0.25,c.g);
@@ -1002,12 +1009,12 @@ const ATLAS_COL={
  nerve:`if(ckAtlas>0.5){diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.82,0.58,0.12)*mix(0.86,1.08,H),0.78);}if(vTn.a>0.6)diffuseColor.rgb=mix(diffuseColor.rgb,pow(vTn.rgb,vec3(2.2))*mix(0.8,1.1,H),clamp((vTn.a-0.6)*3.0,0.0,0.92));`};
 function corpusShader(sh,kind,noTint,gk){
   sh.uniforms.ckStudio=STUDIO_U;sh.uniforms.ckAtlas=ATLAS_U;sh.uniforms.ckLite=LITE_U;sh.uniforms.ckCut=CUT_U;sh.uniforms.ckImg=IMG_U;sh.uniforms.ckSlab=SLAB_U;sh.uniforms.ckSlabOn=SLABON_U;sh.uniforms.ckFlow=FLOW_U;sh.uniforms.ckFlowOn=FLOWON_U;gk=gk||[0.5,0.45];
-  const SSS={bone:0.08,muscle:0.32,soft:0.22,visc:0.3,skin:0.45,artery:0.38,vein:0.42,nerve:0.22}[kind];
+  const SSS={bone:0.08,muscle:0.32,soft:0.22,lig:0.26,visc:0.3,skin:0.45,artery:0.38,vein:0.42,nerve:0.22}[kind];
   const SSC={artery:'1.0,0.28,0.22',vein:'0.42,0.32,0.95',nerve:'1.0,0.86,0.55'}[kind]||'1.0,0.42,0.3';
   sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute vec3 fdir;\nattribute vec3 vattr;\nattribute vec4 vtint;\nvarying vec3 vWp;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;')
     .replace('#include <begin_vertex>','#include <begin_vertex>\nvWp=(modelMatrix*vec4(transformed,1.0)).xyz;vObj=position;vFd=fdir;vVa=vattr;vTn=vtint;');
-  const P={bone:{fq:520.0,b:0.0022,c:[0.97,1.02],r:0.12},muscle:{fq:210.0,b:0.016,c:[0.9,1.03],r:0.2},soft:{fq:160.0,b:0.004,c:[0.97,1.02],r:0.0},visc:{fq:160.0,b:0.003,c:[0.96,1.03],r:0.05},artery:{fq:240.0,b:0.002,c:[0.95,1.03],r:0.08},vein:{fq:200.0,b:0.003,c:[0.93,1.04],r:0.06},nerve:{fq:900.0,b:0.007,c:[0.9,1.05],r:0.18},skin:{fq:900.0,b:0.0018,c:[0.985,1.015],r:0.1}}[kind];
-  const map=['muscle','artery','vein','nerve'].includes(kind)?'vec3 ckMap(vec3 p){vec3 f=normalize(vFd+1e-5);return (p-f*dot(p,f))+f*dot(p,f)*'+(kind==='nerve'?'0.03':kind==='muscle'?'0.07':'0.12')+';}':'vec3 ckMap(vec3 p){return p;}';
+  const P={bone:{fq:520.0,b:0.0022,c:[0.97,1.02],r:0.12},muscle:{fq:210.0,b:0.016,c:[0.9,1.03],r:0.2},soft:{fq:160.0,b:0.004,c:[0.97,1.02],r:0.0},visc:{fq:160.0,b:0.003,c:[0.96,1.03],r:0.05},artery:{fq:240.0,b:0.002,c:[0.95,1.03],r:0.08},vein:{fq:200.0,b:0.003,c:[0.93,1.04],r:0.06},nerve:{fq:900.0,b:0.007,c:[0.9,1.05],r:0.18},skin:{fq:900.0,b:0.0018,c:[0.985,1.015],r:0.1},lig:{fq:620.0,b:0.004,c:[0.9,1.06],r:0.16}}[kind];
+  const map=['muscle','artery','vein','nerve','lig'].includes(kind)?'vec3 ckMap(vec3 p){vec3 f=normalize(vFd+1e-5);return (p-f*dot(p,f))+f*dot(p,f)*'+(kind==='nerve'?'0.03':kind==='muscle'?'0.07':kind==='lig'?'0.05':'0.12')+';}':'vec3 ckMap(vec3 p){return p;}';
   const h=`float ckAO=clamp(vVa.r*1.2,0.0,1.0);${kind==='skin'?'ckAO=mix(1.0,ckAO,0.3);':''}float ckTen=${kind==='muscle'?'smoothstep(0.15,0.75,vVa.g)':'0.0'};float ckCart=${kind==='bone'?'smoothstep(0.2,0.8,vVa.b)':'0.0'};float ckSt=0.5;float ckFa=0.0;float ckFq=${P.fq.toFixed(1)};float ckFw=length(fwidth(vObj))*ckFq;float ckAmp=1.0-smoothstep(0.12,0.5,ckFw);
     float H0=ckF(ckMap(vObj)*ckFq);float H=mix(0.5,H0,ckAmp*(1.0+0.6*ckStudio));`+(noTint?'':'diffuseColor.rgb=mix(diffuseColor.rgb,pow(vTn.rgb,vec3(2.2)),vTn.a);');
   sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform float ckStudio;\nuniform float ckAtlas;\nuniform float ckLite;\nuniform float ckCut;\nuniform float ckImg;\nuniform vec4 ckSlab;\nuniform float ckSlabOn;\nuniform vec4 ckFlow;\nuniform float ckFlowOn;\nvarying vec3 vWp;\nvarying vec3 vObj;\nvarying vec3 vFd;\nvarying vec3 vVa;\nvarying vec4 vTn;\n'+NOISE_GLSL+map)
@@ -1035,7 +1042,7 @@ function corpusShader(sh,kind,noTint,gk){
        if(ckCut>0.5&&!gl_FrontFacing){vec3 cc=ckImg>0.5?vec3(ckG*mix(0.9,1.06,H)):pow(max(diffuseColor.rgb*mix(0.82,1.0,H),vec3(0.0)),vec3(0.4545));gl_FragColor=vec4(cc*0.97,max(diffuseColor.a,0.0));}
        else if(ckImg>0.5){float l=dot(gl_FragColor.rgb,vec3(0.333));float b=dot(pow(max(diffuseColor.rgb,vec3(0.001)),vec3(0.4545)),vec3(0.333));gl_FragColor.rgb=vec3(ckG*clamp(l/max(b,0.05),0.35,1.25));}}`);
 }
-const WET=['arterial','venoso','digestivo','respiratorio','urinario','reproductor','endocrino','linfatico','nervioso_central','nervioso_periferico','bolsas'];
+const WET=['articular','arterial','venoso','digestivo','respiratorio','urinario','reproductor','endocrino','linfatico','nervioso_central','nervioso_periferico','bolsas'];
 
 /* ───────── Visibilidad ───────── */
 const hiddenIds=new Set();let patchFocus=null;
@@ -1182,7 +1189,7 @@ function pick(cx,cy){
   if(quiz.on){quizAnswer(hits[0].object);return;}
   select(hits[0].object,hits[0].point);
 }
-const SEMI=/omentum|^Palmar aponeurosis$|^Plantar aponeurosis$/i;
+const SEMI=/omentum|^Palmar aponeurosis$|^Plantar aponeurosis$|^Articular capsules? of|^Pubic symphysis$|Synovial membrane|^Frenula capsulae$/i;
 const MEMB=/^(Pleura|Spinal dura|Pericardium|Peritoneum)$|cornea|conjunctiva|aqueous|vitreous|tear film|anterior chamber|posterior chamber/i;
 function setState(m,st){m.userData.state=st;m.material=matFor(m.userData.sys,m.userData.c.ins,st===''&&MEMB.test(m.userData.c.en)?'memb':st===''&&SEMI.test(m.userData.c.en)?'semi':st);}
 function refreshState(m){const u=m.userData;const st=u.sel&&u.ghost?'ghost':u.sel?'sel':u.hint?'hint':u.ag?'ag':'';if(st!==u.state) setState(m,st);}
@@ -1783,14 +1790,14 @@ function addPin(m,local){if(PINS.some(p=>p.m===m))return;const el=document.creat
 function removePin(P){P.el.remove();P.ln.remove();P.dot.remove();PINS.splice(PINS.indexOf(P),1);}
 function clearPins(){while(PINS.length)removePin(PINS[0]);}
 function layoutPins(r){if(!PINS.length)return;const items=[];const cx=r.width/2,teach=document.body.classList.contains('teach'),gap=teach?40:26,pad=10;
-  for(const P of PINS){const t=label(P.m.userData.c);if(t!==P.txt){P.txt=t;P.el.textContent=t;P.w=P.el.offsetWidth;P.h=P.el.offsetHeight;}
+  for(const P of PINS){const t=P.m.userData.pinShort&&JV?P.m.userData.c.es:label(P.m.userData.c);if(t!==P.txt){P.txt=t;P.el.textContent=t;P.w=P.el.offsetWidth;P.h=P.el.offsetHeight;}
     const v=P.m.localToWorld(P.local.clone()).project(camera);const ok=visibleDeep(P.m)&&v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;
     P.ok=ok;P.el.hidden=!ok;P.ln.style.display=P.dot.style.display=ok?'':'none';if(!ok)continue;
     items.push({P,x:(v.x+1)/2*r.width,y:(1-v.y)/2*r.height});}
   for(const side of [0,1]){const col=items.filter(i=>(i.x>=cx)===!!side).sort((a,b)=>a.y-b.y);let y=-1e9;
-    for(const i of col){i.ly=Math.max(i.y,y+gap,gap/2);y=i.ly;}
+    let ph=0;for(const i of col){const h2=Math.max(gap,(ph+i.P.h)/2+4);i.ly=Math.max(i.y,y+h2,gap/2);y=i.ly;ph=i.P.h;}
     let over=y-(r.height-gap/2);if(over>0)for(let k=col.length-1;k>=0;k--){col[k].ly-=over;if(k>0)over=Math.max(0,col[k-1].ly+gap-col[k].ly);}
-    for(const i of col){const P=i.P;const lx=side?r.width-pad-P.w:pad;P.side=side;P.ax=i.x;P.ay=i.y;P.lx=lx;P.ly=i.ly;
+    for(const i of col){const P=i.P;const lx=side?r.width-pad-P.w-(isPhone()?58:62):pad;P.side=side;P.ax=i.x;P.ay=i.y;P.lx=lx;P.ly=i.ly;
       P.el.style.left=lx+'px';P.el.style.top=(i.ly-P.h/2)+'px';const ex=side?lx-2:lx+P.w+2;
       P.ln.setAttribute('x1',ex);P.ln.setAttribute('y1',i.ly);P.ln.setAttribute('x2',i.x);P.ln.setAttribute('y2',i.y);P.dot.setAttribute('cx',i.x);P.dot.setAttribute('cy',i.y);}}}
 function setPinMode(on){pinMode=on;$('#pinModeBtn').setAttribute('aria-pressed',on);$('#hintTxt').hidden=!on;if(on)$('#hintTxt').textContent='Toca estructuras para etiquetarlas · toca una etiqueta para quitarla';}
@@ -2126,13 +2133,36 @@ function movesFor(c){const own=[c.en,parentName(c.en)];const out=[];
 function renderActbar(){const bar=$('#actbar');if(!selected||lesson){bar.hidden=true;return;}
   const c=selected.m.userData.c;bar.hidden=false;$('#actName').textContent=label(c);
   const isMus=selected.m.userData.sys==='muscular';
-  $('#aVec').hidden=!isMus;$('#aCon').hidden=!(isMus&&movesFor(c).length);$('#aAsk').hidden=!SAMPLE;
+  $('#aVec').hidden=!isMus;$('#aJoint').hidden=!['articular','oseo'].includes(BS(selected.m.userData.sys));$('#aJoint').setAttribute('aria-pressed',!!JV);$('#aCon').hidden=!(isMus&&movesFor(c).length);$('#aAsk').hidden=!SAMPLE;
   $('#aIso').setAttribute('aria-pressed',isoOnly);$('#aExt').setAttribute('aria-pressed',extracted.has(selected.m));
   $('#aVec').setAttribute('aria-pressed',vecGroup.children.length>0);$('#aCon').setAttribute('aria-pressed',!!contraction);}
-function stopTools(){$('#hintTxt').hidden=true;if(isoOnly){isoOnly=false;isoSet=null;spin=false;applySystems();}
+function stopTools(){$('#hintTxt').hidden=true;if(JV)jointOff();if(isoOnly){isoOnly=false;isoSet=null;spin=false;applySystems();}
   removeLabels('vec');
   if(vecGroup.children.length){vecGroup.clear();patchFocus=null;isoSet=null;if(selected){selected.m.userData.ghost=false;refreshState(selected.m);}applySystems();$('#legend').hidden=true;}
   if(contraction){contraction=null;angle=0;$('#conChip').hidden=true;applyPose();}}
+
+/* ───────── Ver la articulación: huesos + todas sus partes (ligamentos, cartílagos, cápsula) etiquetadas ───────── */
+let JV=null;
+function jointOff(){if(!JV)return;if(JV.op!=null){const ko=Object.keys(SYS).find(x=>BS(x)==='oseo'&&sexOk(x));if(ko){SYS[ko].op=JV.op;syncAllMats();}}for(const P of JV.pins)removePin(P);isoOnly=false;isoSet=null;spin=false;$('#jointLeg').hidden=true;JV=null;applySystems();renderActbar();}
+async function jointView(m){if(JV){jointOff();return;}
+  for(const k of ['oseo','articular']){const kk=Object.keys(SYS).find(x=>BS(x)===k&&sexOk(x));if(kk){SYS[kk].on=true;if(SYS[kk].state!=='loaded')await loadSys(kk);}}renderSysList();
+  const box=new THREE.Box3();m.geometry.computeBoundingBox();box.copy(m.geometry.boundingBox);
+  const sz=box.getSize(new V3());const isBone=BS(m.userData.sys)==='oseo';const pad=isBone?0.012:Math.max(0.02,Math.min(0.04,sz.length()*0.35));box.expandByScalar(pad);
+  const ok=x=>sexOk(x.userData.sys)&&!(x.userData.fonly&&BODY!=='f');const bb=x=>{x.geometry.computeBoundingBox();return x.geometry.boundingBox;};
+  let parts=meshes.filter(x=>BS(x.userData.sys)==='articular'&&ok(x)&&(x===m||box.containsPoint(bb(x).getCenter(new V3()))||(bb(x).intersectsBox(box)&&bb(x).getSize(new V3()).length()<sz.length()*0.6))&&bb(x).getSize(new V3()).length()<0.3&&(x===m||!/membrane|Oblique cord/i.test(x.userData.c.en)));
+  if(isBone)parts=parts.filter(x=>{const b=bb(x);return b.intersectsBox(m.geometry.boundingBox.clone().expandByScalar(0.004));});
+  const pb=new THREE.Box3();for(const x of [m,...parts])pb.union(bb(x));pb.expandByScalar(0.01);
+  const bones=meshes.filter(x=>BS(x.userData.sys)==='oseo'&&ok(x)&&bb(x).intersectsBox(pb));
+  if(!parts.length){toast(TL('No hay ligamentos ni cartílagos modelados aquí','No ligaments or cartilage modelled here','Não há ligamentos nem cartilagens modelados aqui'));return;}
+  isoOnly=true;isoSet=new Set([...parts,...bones].map(x=>x.userData.c.id));hiddenIds.clear();applySystems();
+  const pins=[];const seen=new Set();const ctr=pb.getCenter(new V3());
+  const sorted=parts.slice().sort((a,b)=>(a===m?-1:b===m?1:0)||bb(b).getSize(new V3()).length()-bb(a).getSize(new V3()).length());
+  for(const x of sorted){const key=x.userData.c.es+'|'+x.userData.c.side;if(seen.has(key)||pins.length>=(isPhone()?6:8))continue;seen.add(key);
+    const a=x.geometry.attributes.position,c=bb(x).getCenter(new V3());let best=0,bd=1e9;const st=Math.max(1,a.count/400|0);
+    for(let i=0;i<a.count;i+=st){const dx=a.getX(i)-c.x,dy=a.getY(i)-c.y,dz=a.getZ(i)-c.z;const d=dx*dx+dy*dy+dz*dz-0.25*((a.getX(i)-ctr.x)**2+(a.getY(i)-ctr.y)**2+(a.getZ(i)-ctr.z)**2);if(d<bd){bd=d;best=i;}}
+    const n0=PINS.length;x.userData.pinShort=true;addPin(x,new V3(a.getX(best),a.getY(best),a.getZ(best)));if(PINS.length>n0)pins.push(PINS[PINS.length-1]);}
+  const ko=Object.keys(SYS).find(x=>BS(x)==='oseo'&&sexOk(x));JV={m,pins,op:ko?SYS[ko].op:null};if(isPhone())setSheet('peek');if(ko){SYS[ko].op=0.55;syncAllMats();}const r=pb.getSize(new V3()).length();focusOn(ctr,Math.max(0.2,r*2.3));$('#jointLeg').hidden=false;renderActbar();}
+$('#aJoint').onclick=()=>{if(selected)jointView(selected.m);};
 $('#aIso').onclick=()=>{if(!selected)return;if(isoOnly){isoOnly=false;isoSet=null;spin=false;}else{isoOnly=true;isoSet=new Set([selected.m.userData.c.id]);spin=true;focusMesh(selected.m);}applySystems();renderActbar();};
 $('#aHide').onclick=()=>{if(!selected)return;hiddenIds.add(selected.m.userData.c.id);select(null);applySystems();};
 $('#aExt').onclick=()=>{if(!selected)return;const m=selected.m;
@@ -3944,7 +3974,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
 <script>
 /* ───── App instalable y sin conexión (versión publicada en la web) ───── */
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
- const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-1',MB=54;
+ const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-2',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
  navigator.serviceWorker.register('sw.js').catch(()=>{});
  const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
