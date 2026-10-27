@@ -2,7 +2,7 @@
    V  = versión de la aplicación (página, librerías y datos JSON): cambia en cada publicación.
    MV = versión de los modelos 3D (m2/, hr/, draco/): cambiarla solo cuando cambien las mallas,
         así una actualización de la app no obliga a volver a descargar ~50 MB. */
-const V='corpus-v49';
+const V='corpus-v50';
 const MV='1';
 const SHELL='corpus-shell-'+V, MODELS='corpus-models-'+MV;
 const CORE=['./','index.html','manifest.webmanifest','icons/icon.svg','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png',
