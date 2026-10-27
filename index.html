@@ -326,6 +326,7 @@ details.more > .card{margin-bottom:10px}
     <button class="icon-btn" id="setBtn" aria-haspopup="dialog" aria-expanded="false" aria-label="Ajustes" title="Ajustes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </div>
   <div class="pop setpop" id="setPop" role="dialog" aria-label="Ajustes" hidden>
+    <div class="card" id="pwaHint" style="padding:9px 10px;gap:4px"><b style="font-size:13px">Instalar como app (sin conexión)</b><span class="muted small">Abre la versión instalable en Chrome, Edge o Safari, pulsa «Instalar app» y luego «Descargar todo». Funciona sin internet en Android, iPhone, tablet y ordenador.</span><a class="btn" href="https://ftjrodriguez-arch.github.io/corpus-atlas/" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">Abrir versión instalable</a></div>
     <div class="poprow"><span>Idioma</span><div class="seg" role="group" aria-label="Idioma" id="langSeg">
     <button data-lang="es" aria-pressed="true" title="Español">ES</button>
     <button data-lang="en" aria-pressed="false" title="English">EN</button>
@@ -3296,6 +3297,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
   setBody(BODY);
   if(shared)applyShared(shared);
   renderReviewCard();
+  if(/github\.io$/.test(location.hostname)||matchMedia('(display-mode: standalone)').matches){const ph=$('#pwaHint');if(ph)ph.remove();}
   try{const qp=new URLSearchParams(location.search);const qt=qp.get('tab');if(qt&&document.getElementById('tab-'+qt))showTab(qt);const tr=qp.get('tour');if(tr&&TOURS[tr])setTimeout(()=>phyStart(tr,0),600);}catch(e){}
   const exS=readExamHash();if(exS){exam.shared=exS;if(exS.b&&exS.b!==BODY)setBody(exS.b);showTab('lec');renderExamSetup(exS);$('#examCard').scrollIntoView({block:'start'});}else renderExamSetup();
   for(const k in SYS) if(SYS[k].on&&sexOk(k)&&SYS[k].state==='idle') loadSys(k);
