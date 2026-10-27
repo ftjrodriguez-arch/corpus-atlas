@@ -544,6 +544,7 @@ details.more > .card{margin-bottom:10px}
             <div class="row"><button class="btn" id="gaitPlay">Pausa</button><button class="btn" id="gaitSlow" aria-pressed="false">Cámara lenta</button><button class="btn" id="gaitView">Vista lateral</button></div>
           </div>
         </div>
+        <div class="card" id="ctCard"></div>
         <div class="row" style="justify-content:space-between">
           <h3>Articulación</h3>
           <div class="seg" role="group" aria-label="Lado">
@@ -1456,7 +1457,7 @@ function qOf(jn,comp){const J=JOINTS[jn];const long=J.long||new V3(0,1,0);
 function deform(active){
   // active: [{jn,q}] sorted distal→proximal
   const ops=active.map(a=>{const q=a.q;let ang=2*Math.acos(Math.min(1,Math.abs(q.w)));const s=Math.sqrt(Math.max(0,1-q.w*q.w));
-    let ax=s>1e-6?new V3(q.x/s,q.y/s,q.z/s):new V3(1,0,0);if(q.w<0){ax.negate();}return {jn:a.jn,ang,ax,p:JOINTS[a.jn].pivot};}).filter(o=>o.ang>1e-4);
+    let ax=s>1e-6?new V3(q.x/s,q.y/s,q.z/s):new V3(1,0,0);if(q.w<0){ax.negate();}return {jn:a.jn,ang,ax,p:JOINTS[a.jn].pivot,tr:a.tr?a.tr.clone().applyQuaternion(a.q):null};}).filter(o=>o.ang>1e-4||o.tr);
   const touched=new Set();
   for(const m of meshes){
     if(!ops.length) break;
@@ -1468,7 +1469,7 @@ function deform(active){
       for(let k=0;k<ops.length;k++){const W=Ws[k];if(!W)continue;const w=W[i];if(w<0.001)continue;const o=ops[k],th=o.ang*w,c=Math.cos(th),s=Math.sin(th),kx=o.ax.x,ky=o.ax.y,kz=o.ax.z;
         let vx=x-o.p.x,vy=y-o.p.y,vz=z-o.p.z;let d=kx*vx+ky*vy+kz*vz;
         let rx=vx*c+(ky*vz-kz*vy)*s+kx*d*(1-c),ry=vy*c+(kz*vx-kx*vz)*s+ky*d*(1-c),rz=vz*c+(kx*vy-ky*vx)*s+kz*d*(1-c);
-        x=rx+o.p.x;y=ry+o.p.y;z=rz+o.p.z;
+        x=rx+o.p.x;y=ry+o.p.y;z=rz+o.p.z;if(o.tr){x+=o.tr.x*w;y+=o.tr.y*w;z+=o.tr.z*w;}
         d=kx*nx+ky*ny+kz*nz;rx=nx*c+(ky*nz-kz*ny)*s+kx*d*(1-c);ry=ny*c+(kz*nx-kx*nz)*s+ky*d*(1-c);rz=nz*c+(kx*ny-ky*nx)*s+kz*d*(1-c);nx=rx;ny=ry;nz=rz;}
       P[i*3]=x;P[i*3+1]=y;P[i*3+2]=z;N[i*3]=nx;N[i*3+1]=ny;N[i*3+2]=nz;}
     pa.needsUpdate=true;na.needsUpdate=true;g.computeBoundingSphere();touched.add(m);
@@ -1651,6 +1652,99 @@ function mvAxis(k,piv,pq,R){const jn=jname(k);const base=comps(0)[k],full=comps(
   const nm={sag:TL('Eje laterolateral','Mediolateral axis','Eixo laterolateral'),fro:TL('Eje anteroposterior','Anteroposterior axis','Eixo anteroposterior'),tra:TL('Eje longitudinal','Longitudinal axis','Eixo longitudinal')}[curM.pl];if(axisLbl.el.textContent!==nm)axisLbl.el.textContent=nm;}
 function applyAntagonists(){const ens=(currentTab==='mov'&&agOn&&!gait.on)?(curM.ant||[]):[];const sideName=romSide==='R'?'derecho':'izquierdo';
   for(const m of meshes){if(m.userData.sys!=='muscular')continue;const c=m.userData.c;const want=ens.includes(c.en)&&(!curJ.sided||!c.side||c.side===sideName)&&!m.userData.ag;if(!!m.userData.an!==want){m.userData.an=want;refreshState(m);}}}
+/* ───────── Pruebas clínicas animadas ───────── */
+const CTESTS=[
+ {id:'lachman',r:'rodilla',n:['Lachman','Lachman','Lachman'],node:'knee',rad:0.32,view:'latd',mode:'lig',pose:[['knee','x',25]],tr:[['knee',[0,0,0.009]]],tg:['Anterior cruciate ligament'],
+  ex:['Ligamento cruzado anterior (LCA).','Anterior cruciate ligament (ACL).','Ligamento cruzado anterior (LCA).'],
+  how:['Rodilla a 20–30° de flexión. Una mano fija el fémur y la otra tira de la tibia hacia delante.','Knee at 20–30° of flexion. One hand stabilises the femur while the other pulls the tibia forwards.','Joelho a 20–30° de flexão. Uma mão fixa o fêmur e a outra puxa a tíbia para a frente.'],
+  pos:['La tibia se desplaza hacia delante más que en el otro lado y sin un tope firme. Es la prueba más sensible para la rotura del LCA.','The tibia translates forwards more than on the other side, without a firm end point. It is the most sensitive test for an ACL tear.','A tíbia se desloca para a frente mais que do outro lado e sem um batente firme. É o teste mais sensível para a ruptura do LCA.']},
+ {id:'cajonA',r:'rodilla',n:['Cajón anterior','Anterior drawer','Gaveta anterior'],node:'knee',rad:0.4,view:'latd',mode:'lig',pose:[['hip','x',-45],['knee','x',90]],tr:[['knee',[0,0,0.01]]],tg:['Anterior cruciate ligament'],
+  ex:['Ligamento cruzado anterior.','Anterior cruciate ligament.','Ligamento cruzado anterior.'],
+  how:['Decúbito supino, cadera a 45° y rodilla a 90°, el pie fijo. Se tira de la tibia hacia delante.','Supine, hip at 45° and knee at 90°, foot stabilised. The tibia is pulled forwards.','Decúbito dorsal, quadril a 45° e joelho a 90°, pé fixo. Puxa-se a tíbia para a frente.'],
+  pos:['Desplazamiento anterior excesivo de la tibia.','Excessive anterior translation of the tibia.','Deslocamento anterior excessivo da tíbia.']},
+ {id:'cajonP',r:'rodilla',n:['Cajón posterior','Posterior drawer','Gaveta posterior'],node:'knee',rad:0.4,view:'latd',mode:'lig',pose:[['hip','x',-45],['knee','x',90]],tr:[['knee',[0,0,-0.01]]],tg:['Posterior cruciate ligament'],
+  ex:['Ligamento cruzado posterior (LCP).','Posterior cruciate ligament (PCL).','Ligamento cruzado posterior (LCP).'],
+  how:['Misma posición que el cajón anterior; se empuja la tibia hacia atrás.','Same position as the anterior drawer; the tibia is pushed backwards.','Mesma posição da gaveta anterior; empurra-se a tíbia para trás.'],
+  pos:['La tibia se hunde hacia atrás. Típico en el golpe de la rodilla contra el salpicadero.','The tibia sags backwards. Typical of a dashboard injury.','A tíbia cede para trás. Típico do trauma do joelho contra o painel do carro.']},
+ {id:'valgo',r:'rodilla',n:['Estrés en valgo','Valgus stress','Estresse em valgo'],node:'knee',rad:0.36,view:'ant',mode:'lig',pose:[['knee','x',25],['knee','z',-9]],tg:['Superficial part of tibial collateral ligament','Deep part of tibial collateral ligament','Medial meniscus'],
+  ex:['Ligamento colateral tibial (medial).','Tibial (medial) collateral ligament.','Ligamento colateral tibial (medial).'],
+  how:['Rodilla a 20–30°: se empuja la rodilla hacia dentro y el tobillo hacia fuera, abriendo el lado medial.','Knee at 20–30°: push the knee inwards and the ankle outwards, opening the medial side.','Joelho a 20–30°: empurra-se o joelho para dentro e o tornozelo para fora, abrindo o lado medial.'],
+  pos:['La interlínea medial se abre o duele. Si se abre también en extensión completa, hay además lesión de cruzados o cápsula.','The medial joint line opens or hurts. If it also opens in full extension, the cruciates or capsule are injured too.','A interlinha medial se abre ou dói. Se abre também em extensão completa, há lesão associada de cruzados ou cápsula.']},
+ {id:'varo',r:'rodilla',n:['Estrés en varo','Varus stress','Estresse em varo'],node:'knee',rad:0.36,view:'ant',mode:'lig',pose:[['knee','x',25],['knee','z',9]],tg:['Fibular collateral ligament'],
+  ex:['Ligamento colateral peroneo (lateral).','Fibular (lateral) collateral ligament.','Ligamento colateral fibular (lateral).'],
+  how:['Rodilla a 20–30°: se empuja la rodilla hacia fuera y el tobillo hacia dentro.','Knee at 20–30°: push the knee outwards and the ankle inwards.','Joelho a 20–30°: empurra-se o joelho para fora e o tornozelo para dentro.'],
+  pos:['La interlínea lateral se abre o duele.','The lateral joint line opens or hurts.','A interlinha lateral se abre ou dói.']},
+ {id:'mcmurray',r:'rodilla',n:['McMurray','McMurray','McMurray'],node:'knee',rad:0.36,view:'latd',mode:'lig',pose:[['hip','x',-90],['knee','x',110],['knee','y',-20]],tg:['Medial meniscus','Lateral meniscus'],
+  ex:['Meniscos (sobre todo el cuerno posterior).','Menisci (mainly the posterior horn).','Meniscos (sobretudo o corno posterior).'],
+  how:['Rodilla en flexión máxima; se rota la tibia (externa para el menisco medial) y se extiende poco a poco.','Knee fully flexed; the tibia is rotated (externally for the medial meniscus) and the knee slowly extended.','Joelho em flexão máxima; roda-se a tíbia (externa para o menisco medial) e estende-se aos poucos.'],
+  pos:['Chasquido doloroso en la interlínea articular.','A painful click over the joint line.','Estalido doloroso na interlinha articular.']},
+ {id:'cajonT',r:'tobillo',n:['Cajón anterior del tobillo','Ankle anterior drawer','Gaveta anterior do tornozelo'],node:'ankle',rad:0.3,view:'latd',mode:'lig',pose:[['ankle','x',20]],tr:[['ankle',[0,0,0.007]]],tg:['Anterior talofibular ligament'],
+  ex:['Ligamento peroneoastragalino anterior, el primero que se rompe en el esguince.','Anterior talofibular ligament, the first to tear in a sprain.','Ligamento talofibular anterior, o primeiro a romper na entorse.'],
+  how:['Tobillo en ligera flexión plantar; se fija la tibia y se tira del talón hacia delante.','Ankle in slight plantarflexion; stabilise the tibia and pull the heel forwards.','Tornozelo em leve flexão plantar; fixa-se a tíbia e puxa-se o calcanhar para a frente.'],
+  pos:['El astrágalo se desplaza hacia delante, a veces con un hoyuelo en la piel.','The talus translates forwards, sometimes with a dimple in the skin.','O tálus se desloca para a frente, às vezes com uma covinha na pele.']},
+ {id:'tilt',r:'tobillo',n:['Inclinación del astrágalo','Talar tilt','Inclinação do tálus'],node:'ankle',rad:0.3,view:'ant',mode:'lig',pose:[['ankle','z',25]],tg:['Calcaneofibular ligament','Anterior talofibular ligament'],
+  ex:['Ligamento calcaneoperoneo.','Calcaneofibular ligament.','Ligamento calcaneofibular.'],
+  how:['Tobillo neutro; se fuerza la inversión del retropié.','Ankle neutral; the hindfoot is forced into inversion.','Tornozelo neutro; força-se a inversão do retropé.'],
+  pos:['Mayor inversión que en el lado sano: lesión del calcaneoperoneo (esguince de grado II–III).','More inversion than on the healthy side: calcaneofibular injury (grade II–III sprain).','Maior inversão que no lado são: lesão do calcaneofibular (entorse grau II–III).']},
+ {id:'thompson',r:'tobillo',n:['Thompson','Thompson','Thompson'],node:'ankle',rad:0.5,view:'latd',mode:'mus',pose:[['ankle','x',25]],tg:['Calcaneal tendon','Medial head of gastrocnemius','Lateral head of gastrocnemius','Soleus muscle'],
+  ex:['Integridad del tendón de Aquiles.','Integrity of the Achilles tendon.','Integridade do tendão de Aquiles.'],
+  how:['Decúbito prono con el pie fuera de la camilla; se aprieta la pantorrilla.','Prone with the foot over the edge of the couch; squeeze the calf.','Decúbito ventral com o pé fora da maca; aperta-se a panturrilha.'],
+  pos:['Normal: el pie hace flexión plantar (como en la animación). Si no se mueve, el tendón de Aquiles está roto.','Normal: the foot plantarflexes (as in the animation). If it does not move, the Achilles tendon is ruptured.','Normal: o pé faz flexão plantar (como na animação). Se não se mexe, o tendão de Aquiles está rompido.']},
+ {id:'lasegue',r:'cadera',n:['Lasègue (pierna recta)','Straight leg raise','Lasègue (perna estendida)'],node:'hip',rad:0.7,view:'latd',mode:'nerv',pose:[['hip','x',-60],['ankle','x',-10]],tg:['Sciatic nerve','Tibial nerve'],
+  ex:['Tensión del nervio ciático y de las raíces L5–S1.','Tension in the sciatic nerve and the L5–S1 roots.','Tensão do nervo isquiático e das raízes L5–S1.'],
+  how:['Supino; se eleva la pierna con la rodilla recta. La dorsiflexión del tobillo (Bragard) estira aún más el nervio.','Supine; the leg is raised with the knee straight. Ankle dorsiflexion (Bragard) stretches the nerve further.','Decúbito dorsal; eleva-se a perna com o joelho estendido. A dorsiflexão do tornozelo (Bragard) estira ainda mais o nervo.'],
+  pos:['Dolor irradiado por debajo de la rodilla entre 30° y 70°: compresión radicular, típica de la hernia discal L4–L5 o L5–S1.','Pain radiating below the knee between 30° and 70°: root compression, typical of an L4–L5 or L5–S1 disc herniation.','Dor irradiada abaixo do joelho entre 30° e 70°: compressão radicular, típica da hérnia de disco L4–L5 ou L5–S1.']},
+ {id:'faber',r:'cadera',n:['FABER (Patrick)','FABER (Patrick)','FABER (Patrick)'],node:'hip',rad:0.6,view:'ant',mode:'lig',pose:[['hip','x',-50],['hip','z',-40],['hip','y',-35],['knee','x',95]],tg:['Articular capsule of hip joint','Anterior sacro-iliac ligament','Pubofemoral ligament'],
+  ex:['Articulación de la cadera y sacroilíaca.','Hip and sacroiliac joints.','Articulações do quadril e sacroilíaca.'],
+  how:['Flexión, abducción y rotación externa: el tobillo se apoya sobre la rodilla contraria y se empuja la rodilla hacia la camilla.','Flexion, abduction and external rotation: the ankle rests on the opposite knee and the knee is pushed down towards the couch.','Flexão, abdução e rotação externa: o tornozelo apoia-se no joelho oposto e empurra-se o joelho em direção à maca.'],
+  pos:['Dolor en la ingle: cadera. Dolor en la nalga, sobre la sacroilíaca: articulación sacroilíaca.','Groin pain: hip. Buttock pain over the sacroiliac joint: sacroiliac joint.','Dor na virilha: quadril. Dor na nádega, sobre a sacroilíaca: articulação sacroilíaca.']},
+ {id:'hawkins',r:'hombro',n:['Hawkins-Kennedy','Hawkins-Kennedy','Hawkins-Kennedy'],node:'shoulder',rad:0.85,view:'ant',mode:'mus',pose:[['shoulder','x',-90],['elbow','x',-90],['shoulder','y',55]],tg:['Supraspinatus muscle'],
+  ex:['Pinzamiento subacromial del supraespinoso.','Subacromial impingement of supraspinatus.','Impacto subacromial do supraespinal.'],
+  how:['Hombro y codo a 90°; se rota el hombro hacia dentro, llevando el troquíter bajo el arco coracoacromial.','Shoulder and elbow at 90°; the shoulder is rotated internally, bringing the greater tubercle under the coracoacromial arch.','Ombro e cotovelo a 90°; roda-se o ombro para dentro, levando o tubérculo maior sob o arco coracoacromial.'],
+  pos:['Dolor en la cara anterolateral del hombro.','Pain over the anterolateral shoulder.','Dor na face anterolateral do ombro.']},
+ {id:'jobe',r:'hombro',n:['Jobe (lata vacía)','Jobe (empty can)','Jobe (lata vazia)'],node:'shoulder',rad:0.9,view:'ant',mode:'mus',pose:[['shoulder','z',-90],['shoulder','w',30],['shoulder','y',70]],tg:['Supraspinatus muscle'],
+  ex:['Fuerza y dolor del supraespinoso.','Supraspinatus strength and pain.','Força e dor do supraespinal.'],
+  how:['Brazo a 90° de abducción, 30° por delante del plano frontal y en rotación interna (pulgar hacia abajo); el paciente resiste el empuje hacia abajo.','Arm at 90° of abduction, 30° forward of the frontal plane and internally rotated (thumb down); the patient resists a downward push.','Braço a 90° de abdução, 30° à frente do plano frontal e em rotação interna (polegar para baixo); o paciente resiste ao empurrão para baixo.'],
+  pos:['Debilidad o dolor: tendinopatía o rotura del supraespinoso.','Weakness or pain: supraspinatus tendinopathy or tear.','Fraqueza ou dor: tendinopatia ou ruptura do supraespinal.']},
+ {id:'phalen',r:'muñeca',n:['Phalen','Phalen','Phalen'],node:'wrist',rad:0.45,fm:/^(Lunate|Capitate|Scaphoid)$/,view:'latd',mode:'nerv',pose:[['shoulder','z',-20],['elbow','x',-90],['wrist','x',-80]],tg:['Median nerve'],
+  ex:['Compresión del nervio mediano en el túnel carpiano.','Median nerve compression in the carpal tunnel.','Compressão do nervo mediano no túnel do carpo.'],
+  how:['Flexión máxima de ambas muñecas, dorso contra dorso, durante 60 segundos.','Both wrists maximally flexed, back to back, for 60 seconds.','Flexão máxima de ambos os punhos, dorso contra dorso, por 60 segundos.'],
+  pos:['Hormigueo en el pulgar, índice, medio y la mitad del anular: síndrome del túnel carpiano.','Tingling in the thumb, index, middle and half of the ring finger: carpal tunnel syndrome.','Formigamento no polegar, indicador, médio e metade do anelar: síndrome do túnel do carpo.']},
+ {id:'finkelstein',r:'muñeca',n:['Finkelstein','Finkelstein','Finkelstein'],node:'wrist',rad:0.4,fm:/^(Scaphoid|Trapezium bone|First metacarpal bone)$/,view:'ant',mode:'mus',pose:[['cmc','z',15],['mcp1','z',50],['ip1','z',60],['wrist','z',30]],tg:['Abductor pollicis longus','Extensor pollicis brevis'],
+  ex:['Tenosinovitis de De Quervain (primer compartimento extensor).','De Quervain tenosynovitis (first extensor compartment).','Tenossinovite de De Quervain (primeiro compartimento extensor).'],
+  how:['El pulgar se flexiona dentro del puño y se desvía la muñeca hacia el lado cubital.','The thumb is flexed inside the fist and the wrist deviated ulnarly.','O polegar é fletido dentro da mão fechada e o punho é desviado para o lado ulnar.'],
+  pos:['Dolor intenso sobre la apófisis estiloides del radio.','Sharp pain over the radial styloid.','Dor intensa sobre o processo estiloide do rádio.']},
+ {id:'spurling',r:'cuello',n:['Spurling','Spurling','Spurling'],node:'cervical',rad:0.45,view:'ant',mode:'nerv',pose:[['cervical','x',-20],['cervical','z',-25],['cervical','y',15]],tg:['Roots of brachial plexus'],
+  ex:['Compresión de una raíz cervical en el agujero de conjunción.','Compression of a cervical root in the intervertebral foramen.','Compressão de uma raiz cervical no forame intervertebral.'],
+  how:['Extensión, inclinación y rotación del cuello hacia el lado sintomático, con presión axial suave sobre la cabeza.','Extension, lateral flexion and rotation of the neck towards the painful side, with gentle axial pressure on the head.','Extensão, inclinação e rotação do pescoço para o lado sintomático, com leve pressão axial sobre a cabeça.'],
+  pos:['Dolor irradiado al brazo por el territorio de la raíz (por ejemplo, C6 hasta el pulgar).','Pain radiating down the arm in the root’s territory (for example C6 to the thumb).','Dor irradiada para o braço no território da raiz (por exemplo, C6 até o polegar).']}];
+const CT={on:false,test:null,t:0,marks:[],pins:[]};
+function ctComps(k){const c={};for(const [n,ax,d] of CT.test.pose){c[n]=c[n]||{x:0,y:0,z:0,w:0};c[n][ax]+=d*k;}return c;}
+function ctTick(dt){if(!CT.on||currentTab!=='mov')return;CT.t+=dt;const T=4.4,tt=CT.t%T;const k=tt<1.3?0.5-0.5*Math.cos(Math.PI*tt/1.3):tt<2.9?1:tt<4.2?0.5+0.5*Math.cos(Math.PI*(tt-2.9)/1.3):0;
+  const C=ctComps(k),act=[];const trm={};for(const [n,v] of (CT.test.tr||[]))trm[n]=v;
+  for(const n in C){const jn=jname(n);if(!JOINTS[jn])continue;const q=qOf(jn,C[n]);const e={k:n,jn,q};if(trm[n])e.tr=new V3(...trm[n]).multiplyScalar(k);act.push(e);}
+  for(const n in trm)if(!C[n]){const jn=jname(n);if(JOINTS[jn])act.push({k:n,jn,q:new Q(),tr:new V3(...trm[n]).multiplyScalar(k)});}
+  act.sort((a,b)=>(DEPTH[b.k]||0)-(DEPTH[a.k]||0));deform(act);
+  const col=[0xc3+(0xff-0xc3)*k,0xd0+(0x4d-0xd0)*k,0xde+(0x2e-0xde)*k].map(Math.round);
+  for(const m of CT.marks){if(BS(m.userData.sys)!=='articular')continue;const t=m.geometry.attributes.vtint;if(!t)continue;const a=t.array;for(let i=0;i<a.length;i+=4){a[i]=col[0];a[i+1]=col[1];a[i+2]=col[2];a[i+3]=255;}t.needsUpdate=true;}
+  for(const P of CT.pins){P.m.geometry.computeBoundingBox();P.local.copy(P.m.geometry.boundingBox.getCenter(new V3()));}
+  if(CT.focus&&k>0.97&&CT.marks.length){CT.focus=false;const b=new THREE.Box3();const FM=CT.test.fm?meshes.filter(m=>CT.test.fm.test(m.userData.c.en)&&m.userData.c.side==='derecho'):[];for(const m of (FM.length?FM:CT.marks)){m.geometry.computeBoundingBox();b.union(m.geometry.boundingBox);}orb.T.tgt.copy(b.getCenter(new V3()));}}
+function ctStop(){if(!CT.on&&!CT.marks.length)return;CT.on=false;for(const m of CT.marks){m.userData.hint=false;refreshState(m);applyTint(m);delete m.userData.pinTxt;}for(const P of CT.pins)removePin(P);CT.marks=[];CT.pins=[];deform([]);renderCT();if(currentTab==='mov'){applyPose();applyAgonists();}}
+async function ctStart(t){ctStop();stopPlay();if(gait.on)setGait(false);romSide='R';setSide('R');CT.test=t;CT.t=0;
+  const ks=k=>Object.keys(SYS).find(x=>BS(x)===k&&sexOk(x));const need=t.mode==='lig'?['oseo','articular']:t.mode==='nerv'?['oseo','nervioso_periferico','muscular']:['muscular','oseo','articular'];
+  for(const k of need){const kk=ks(k);if(kk){SYS[kk].on=true;if(SYS[kk].state!=='loaded')await loadSys(kk);}}
+  const km=ks('muscular');if(km){SYS[km].on=t.mode!=='lig';SYS[km].op=t.mode==='nerv'?0.22:1;}const kn=ks('nervioso_periferico');if(kn&&t.mode!=='nerv')SYS[kn].on=false;const ka=ks('articular');if(ka&&t.mode==='nerv')SYS[ka].on=false;applySystems();renderSysList();
+  for(const m of meshes)if(m.userData.ag||m.userData.an){m.userData.ag=false;m.userData.an=false;refreshState(m);}
+  [arcLine,arcFan,arcRays,axisLine].forEach(o=>o.visible=false);if(axisLbl)axisLbl.on=false;mvLigReset();
+  for(const m of meshes){if(!t.tg.includes(m.userData.c.en))continue;if(m.userData.c.side&&m.userData.c.side!=='derecho')continue;if(!sexOk(m.userData.sys))continue;m.userData.hint=true;refreshState(m);CT.marks.push(m);
+    if(!CT.pins.some(P=>P.m.userData.c.en===m.userData.c.en)){m.userData.pinTxt=m.userData.c.es;m.geometry.computeBoundingBox();const n0=PINS.length;addPin(m,m.geometry.boundingBox.getCenter(new V3()));if(PINS.length>n0)CT.pins.push(PINS[PINS.length-1]);}}
+  const J=JOINTS[jname(t.node)];if(J){focusOn(J.pivot.clone(),isPhone()?t.rad*1.5:t.rad);setView(t.view);}CT.focus=true;if(isPhone())setSheet('peek');CT.on=true;renderCT();}
+function renderCT(){const el=$('#ctCard');if(!el)return;const R={rodilla:TL('Rodilla','Knee','Joelho'),tobillo:TL('Tobillo','Ankle','Tornozelo'),cadera:TL('Cadera y pelvis','Hip and pelvis','Quadril e pelve'),hombro:TL('Hombro','Shoulder','Ombro'),'muñeca':TL('Mano y muñeca','Hand and wrist','Mão e punho'),cuello:TL('Cuello','Neck','Pescoço')};
+  const L=a=>TL(a[0],a[1],a[2]);const cur=CT.test;
+  el.innerHTML=`<h3>${TL('Pruebas clínicas','Clinical tests','Testes clínicos')}</h3><p class="muted small">${TL('Mira la maniobra en el modelo y qué estructura se explora (resaltada y con su nombre).','Watch the manoeuvre on the model and which structure it examines (highlighted and labelled).','Veja a manobra no modelo e qual estrutura ela explora (destacada e com o nome).')}</p>`+
+   Object.keys(R).map(r=>`<div class="small muted" style="margin:6px 0 3px">${R[r]}</div><div class="chips">${CTESTS.filter(x=>x.r===r).map(x=>`<button data-ct="${x.id}" aria-pressed="${CT.on&&cur===x}">${esc(L(x.n))}</button>`).join('')}</div>`).join('')+
+   (cur&&CT.on?`<dl class="kv" style="margin-top:8px"><dt>${TL('Explora','Examines','Avalia')}</dt><dd>${esc(L(cur.ex))}</dd><dt>${TL('Maniobra','Manoeuvre','Manobra')}</dt><dd>${esc(L(cur.how))}</dd><dt>${TL('Positiva si','Positive if','Positivo se')}</dt><dd>${esc(L(cur.pos))}</dd></dl><button class="btn" id="ctStop">${TL('Detener la prueba','Stop the test','Parar o teste')}</button>`:'');
+  el.querySelectorAll('[data-ct]').forEach(b=>b.onclick=()=>{const x=CTESTS.find(y=>y.id===b.dataset.ct);if(CT.on&&CT.test===x)ctStop();else ctStart(x);});const sb=el.querySelector('#ctStop');if(sb)sb.onclick=ctStop;}
 
 let romSide=store.get('side','R'),curJ=ROM[0],curM=ROM[0].moves[0],angle=0,playing=false,playT=0,agOn=store.get('agon',true);
 const arcLine=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({depthTest:false,transparent:true}));
@@ -1665,7 +1759,7 @@ function comps(t){const c={};const add=(k,ax,deg)=>{c[k]=c[k]||{x:0,y:0,z:0,w:0}
   for(const k in help){const [ax,d]=help[k];add(k,ax,d*flip(ax));}
   add(curM.mainNode||curJ.node,curM.ax,(curM.sg*t+(curM.off||0))*flip(curM.ax));return c;}
 function applyPose(){
-  if(!RIG) return;
+  if(!RIG) return;if(typeof CT!=='undefined'&&CT.on&&currentTab==='mov')return;
   const active=(gait.on&&currentTab==='mov')?gaitActive():(currentTab==='mov'||contraction)?Object.entries(comps(angle)).map(([k,cm])=>({k,jn:jname(k),q:qOf(jname(k),cm)})):[];
   active.sort((a,b)=>DEPTH[b.k]-DEPTH[a.k]);
   deform(active);updateArc(active);
@@ -1691,8 +1785,8 @@ function updateArc(active){
 }
 const enEs=en=>{const r=Object.values(CAT).find(x=>x[1]===en&&x[4]==='muscular');return r?r[2]:(INFO.mus[en]?.es||en);};
 function renderROM(){
-  $('#jointChips').innerHTML='';ROM.forEach(j=>{const b=document.createElement('button');b.textContent=j.n;b.setAttribute('aria-pressed',j===curJ);b.onclick=()=>{if(gait.on)setGait(false);curJ=j;curM=j.moves[0];angle=0;stopPlay();renderROM();};$('#jointChips').appendChild(b);});
-  $('#moveChips').innerHTML='';curJ.moves.forEach(mv=>{const b=document.createElement('button');b.textContent=mv.n;b.setAttribute('aria-pressed',mv===curM);b.onclick=()=>{if(gait.on)setGait(false);curM=mv;angle=0;stopPlay();renderROM();};$('#moveChips').appendChild(b);});
+  $('#jointChips').innerHTML='';ROM.forEach(j=>{const b=document.createElement('button');b.textContent=j.n;b.setAttribute('aria-pressed',j===curJ);b.onclick=()=>{if(CT.on)ctStop();if(gait.on)setGait(false);curJ=j;curM=j.moves[0];angle=0;stopPlay();renderROM();};$('#jointChips').appendChild(b);});
+  $('#moveChips').innerHTML='';curJ.moves.forEach(mv=>{const b=document.createElement('button');b.textContent=mv.n;b.setAttribute('aria-pressed',mv===curM);b.onclick=()=>{if(CT.on)ctStop();if(gait.on)setGait(false);curM=mv;angle=0;stopPlay();renderROM();};$('#moveChips').appendChild(b);});
   const sideTxt=curJ.sided?(romSide==='R'?'derecho':'izquierdo'):(curM.ax==='x'?'':romSide==='R'?'hacia la derecha':'hacia la izquierda');
   $('#angle').max=Math.round(curM.max*1.25);$('#angle').value=angle;
   const ag=curM.ag.filter(en=>Object.values(CAT).some(r=>r[1]===en));
@@ -1702,7 +1796,7 @@ function renderROM(){
   $('#moveTip').innerHTML=`<h3>Cómo razonarlo</h3><p>${TL(`La ${curM.n.toLowerCase()} ocurre en el plano ${PL_N[curM.pl].toLowerCase()} alrededor del eje ${AX_N[curM.pl].split(' ')[0].toLowerCase()}, perpendicular a ese plano. En este plano ocurren las ${pair}.`,`${trW(curM.n)} takes place in the ${{sag:'sagittal',fro:'frontal',tra:'transverse'}[curM.pl]} plane, around the ${{sag:'frontal',fro:'sagittal',tra:'longitudinal'}[curM.pl]} axis, which is perpendicular to that plane. Movements in this plane: ${{sag:'flexion and extension',fro:'abduction, adduction and lateral flexion',tra:'rotations'}[curM.pl]}.`,`${trW(curM.n)} ocorre no plano ${{sag:'sagital',fro:'frontal',tra:'transversal'}[curM.pl]}, em torno do eixo ${{sag:'frontal',fro:'sagital',tra:'longitudinal'}[curM.pl]}, perpendicular a esse plano. Movimentos neste plano: ${{sag:'flexão e extensão',fro:'abdução, adução e inclinações',tra:'rotações'}[curM.pl]}.`)}</p>`;
   const g=curM.gon;
   $('#moveGon').innerHTML=`<h3>Goniometría</h3><dl class="kv" style="margin-top:4px"><dt>Posición</dt><dd>${curM.pos}</dd><dt>${g[1]?TL('Fulcro','Fulcrum','Fulcro'):'Método'}</dt><dd>${g[0]}</dd>${g[1]?`<dt>Brazo fijo</dt><dd>${g[1]}</dd><dt>Brazo móvil</dt><dd>${g[2]}</dd>`:''}<dt>Sensación final</dt><dd>${curM.ef}</dd></dl>`;
-  mvLigSetup();updateReadout();applyPose();applyAgonists();applyAntagonists();renderLog();
+  mvLigSetup();updateReadout();applyPose();applyAgonists();applyAntagonists();renderLog();if(typeof renderCT==='function')renderCT();
 }
 function applyAgonists(){if(gait.on){gaitAgonists();return;}
   const ens=(currentTab==='mov'&&agOn)?curM.ag:[];const sideName=romSide==='R'?'derecho':'izquierdo';
@@ -1717,7 +1811,7 @@ let poseRaf=0;function schedulePose(){if(poseRaf)return;poseRaf=requestAnimation
 $('#angle').addEventListener('input',e=>{stopPlay();angle=+e.target.value;updateReadout();schedulePose();});
 $('#zero').onclick=()=>{stopPlay();angle=0;$('#angle').value=0;updateReadout();applyPose();};
 function stopPlay(){playing=false;$('#play').textContent='Animar rango';}
-$('#play').onclick=()=>{if(gait.on)setGait(false);playing=!playing;playT=0;$('#play').textContent=playing?'Detener':'Animar rango';};
+$('#play').onclick=()=>{if(CT.on)ctStop();if(gait.on)setGait(false);playing=!playing;playT=0;$('#play').textContent=playing?'Detener':'Animar rango';};
 $('#focusJ').onclick=()=>{if(!RIG)return;const J=JOINTS[jname(curM.mainNode||curJ.node)];focusOn(J.pivot.clone(),Math.max(curJ.R<0.1?0.28:0.7,curJ.R*6));setView({sag:romSide==='R'?'latd':'lati',fro:'ant',tra:'ant'}[curM.pl]);};
 function setSide(s){romSide=s;store.set('side',s);$('#side-R').setAttribute('aria-pressed',s==='R');$('#side-L').setAttribute('aria-pressed',s==='L');renderROM();}
 $('#side-R').onclick=()=>setSide('R');$('#side-L').onclick=()=>setSide('L');
@@ -1853,7 +1947,7 @@ $('#logClear').onclick=()=>{const p=$('#patId').value.trim();
 
 /* ───────── Pestañas y modo ───────── */
 let currentTab='sistemas';
-function showTab(t){currentTab=t;$$('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));['sistemas','planos','mov','estr','lec','glo'].forEach(x=>$('#tab-'+x).hidden=x!==t);if(t==='glo')gloLoad();if(t==='lec'&&typeof renderProg==='function')renderProg();if(t==='mov'&&typeof mvLigSetup==='function')mvLigSetup();
+function showTab(t){if(t!=='mov'&&typeof CT!=='undefined'&&CT.on)ctStop();currentTab=t;$$('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));['sistemas','planos','mov','estr','lec','glo'].forEach(x=>$('#tab-'+x).hidden=x!==t);if(t==='glo')gloLoad();if(t==='lec'&&typeof renderProg==='function')renderProg();if(t==='mov'&&typeof mvLigSetup==='function')mvLigSetup();
   applyPose();applyAgonists();store.set('tab',t);}
 $$('.tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 function setMode(m){document.body.classList.toggle('mode-pro',m==='pro');document.body.classList.toggle('mode-stu',m!=='pro');$('#m-stu').setAttribute('aria-pressed',m!=='pro');$('#m-pro').setAttribute('aria-pressed',m==='pro');store.set('mode',m);if(m==='pro'&&quiz.on)stopQuiz();}
@@ -4087,7 +4181,7 @@ function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;const k=1-M
   camLight.position.copy(camera.position);
   if(spin) orb.T.th+=dt*0.5;
   for(const m of meshes){const t=m.userData.offT;if(t){m.position.lerp(t,1-Math.pow(0.002,dt));if(m.position.distanceTo(t)<1e-4){m.position.copy(t);if(t.lengthSq()===0)m.userData.offT=null;}}}
-  tickContraction(dt);autoHRTick(dt);fadeTick(dt);gaitTick(dt);
+  tickContraction(dt);autoHRTick(dt);fadeTick(dt);gaitTick(dt);if(typeof ctTick==='function')ctTick(dt);
   if(playing&&currentTab==='mov'){playT+=dt;angle=curM.max*(0.5-0.5*Math.cos(playT*1.4));$('#angle').value=Math.round(angle);updateReadout();applyPose();}
   axisGroup.visible=showAxes;
   renderer.render(scene,camera);
