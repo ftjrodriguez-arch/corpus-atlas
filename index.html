@@ -70,6 +70,7 @@ main{flex:1;min-height:0;display:grid;gap:10px;grid-template-rows:minmax(0,1.15f
 .conchip{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:600;white-space:nowrap}
 .legend{position:absolute;right:10px;top:52px;display:flex;flex-direction:column;gap:4px;font-size:12px;background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:6px 8px;pointer-events:none}
 .legend span{display:flex;align-items:center;gap:6px}
+.jgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}.jbtn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px}.jbtn small{font-weight:500;opacity:.7;font-size:11px}
 .jleg{top:auto;right:auto;left:10px;bottom:96px;flex-direction:row;flex-wrap:wrap;gap:4px 10px;max-width:calc(100% - 100px);font-size:11.5px}
 .views{position:absolute;left:10px;right:10px;bottom:10px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .views::-webkit-scrollbar{display:none}
@@ -2163,6 +2164,23 @@ async function jointView(m){if(JV){jointOff();return;}
     const n0=PINS.length;x.userData.pinShort=true;addPin(x,new V3(a.getX(best),a.getY(best),a.getZ(best)));if(PINS.length>n0)pins.push(PINS[PINS.length-1]);}
   const ko=Object.keys(SYS).find(x=>BS(x)==='oseo'&&sexOk(x));JV={m,pins,op:ko?SYS[ko].op:null};if(isPhone())setSheet('peek');if(ko){SYS[ko].op=0.55;syncAllMats();}const r=pb.getSize(new V3()).length();focusOn(ctr,Math.max(0.2,r*2.3));$('#jointLeg').hidden=false;renderActbar();}
 $('#aJoint').onclick=()=>{if(selected)jointView(selected.m);};
+const JOINTS_IDX=[
+ {n:['Hombro','Shoulder','Ombro'],t:['Esférica (enartrosis)','Ball and socket','Esferoide (enartrose)'],rx:/^Glenoid labrum$/},
+ {n:['Acromioclavicular','Acromioclavicular','Acromioclavicular'],t:['Plana','Plane','Plana'],rx:/^Articular disc of acromioclavicular joint$|^Acromioclavicular ligament$/},
+ {n:['Codo','Elbow','Cotovelo'],t:['Bisagra + pivote','Hinge + pivot','Gínglimo + pivô'],rx:/^Annular ligament of radius$/},
+ {n:['Muñeca','Wrist','Punho'],t:['Elipsoidea (condílea)','Ellipsoid (condyloid)','Elipsoide (condilar)'],rx:/^Articular disc of distal radio-ulnar joint$/},
+ {n:['Cadera','Hip','Quadril'],t:['Esférica (enartrosis)','Ball and socket','Esferoide (enartrose)'],rx:/^Acetabular labrum$/},
+ {n:['Rodilla','Knee','Joelho'],t:['Bisagra modificada','Modified hinge','Gínglimo modificado'],rx:/^Anterior cruciate ligament$/},
+ {n:['Tobillo','Ankle','Tornozelo'],t:['Bisagra (tróclea)','Hinge','Gínglimo'],rx:/^Anterior talofibular ligament$/},
+ {n:['Columna cervical','Cervical spine','Coluna cervical'],t:['Disco + carillas','Disc + facet joints','Disco + facetas'],rx:/^Intervertebral disc C5-C6$/},
+ {n:['Columna lumbar','Lumbar spine','Coluna lombar'],t:['Disco + carillas','Disc + facet joints','Disco + facetas'],rx:/^Intervertebral disc L4-L5$/},
+ {n:['Sacroilíaca','Sacroiliac','Sacroilíaca'],t:['Sinovial muy firme','Very stable synovial','Sinovial muito firme'],rx:/^Anterior sacro-iliac ligament$/},
+ {n:['Sínfisis del pubis','Pubic symphysis','Sínfise púbica'],t:['Cartilaginosa (anfiartrosis)','Cartilaginous','Cartilagínea (anfiartrose)'],rx:/^Pubic symphysis$/},
+ {n:['Temporomandibular','Temporomandibular','Temporomandibular'],t:['Bicondílea con disco','Bicondylar with disc','Bicondilar com disco'],rx:/^Articular disc of temporomandibular joint$/}];
+async function openJoint(j){if(PHY.on)phyStop();if(JV)jointOff();const ka=Object.keys(SYS).find(x=>BS(x)==='articular'&&sexOk(x));if(ka&&SYS[ka].state!=='loaded'){toast(TL('Cargando articulaciones…','Loading joints…','Carregando articulações…'));await loadSys(ka);}
+  const ms=meshes.filter(m=>j.rx.test(m.userData.c.en)&&sexOk(m.userData.sys)&&!(m.userData.fonly&&BODY!=='f'));const m=ms.find(m=>m.userData.c.side==='derecho')||ms[0];if(!m){toast(TL('No disponible en este modelo','Not available in this model','Não disponível neste modelo'));return;}
+  if(isPhone())setSheet('peek');select(m,null);await jointView(m);}
+
 $('#aIso').onclick=()=>{if(!selected)return;if(isoOnly){isoOnly=false;isoSet=null;spin=false;}else{isoOnly=true;isoSet=new Set([selected.m.userData.c.id]);spin=true;focusMesh(selected.m);}applySystems();renderActbar();};
 $('#aHide').onclick=()=>{if(!selected)return;hiddenIds.add(selected.m.userData.c.id);select(null);applySystems();};
 $('#aExt').onclick=()=>{if(!selected)return;const m=selected.m;
@@ -2970,7 +2988,8 @@ $('#phyPlay').onclick=()=>{PHY.paused=!PHY.paused;$('#phyPlay').setAttribute('ar
 $('#phySlow').onclick=()=>{PHY.slow=!PHY.slow;$('#phySlow').setAttribute('aria-pressed',PHY.slow);};
 $('#phySound').onclick=()=>{PHY.sound=!PHY.sound;$('#phySound').setAttribute('aria-pressed',PHY.sound);if(PHY.sound)phyThump(55,0.12,0.3);};
 function renderPhyTours(){const html=`<button class="btn phyexam" data-exam style="width:100%;margin-bottom:8px">📝 ${TL('Examen de fisiología · 10 preguntas','Physiology exam · 10 questions','Exame de fisiologia · 10 perguntas')}</button><div class="phytours">${Object.entries(TOURS).map(([k,t])=>`<button class="phytour" data-tour="${k}" style="--c:${t.col}"><span class="ic">${t.ic}</span><span><b>${esc(tN(t))}</b><small>${t.steps.length} ${TL('pasos','steps','passos')}</small></span></button>`).join('')}</div>`;
-  $$('.phyhost').forEach(h=>{h.innerHTML=`<h3 style="margin-bottom:8px">${TL('Fisiología en acción','Physiology in action','Fisiologia em ação')}</h3>`+html;h.querySelectorAll('[data-tour]').forEach(b=>b.onclick=()=>{if(isPhone())setSheet('peek');const pp=$('#phyPop');if(pp&&!pp.hidden)togglePop($('#phyBtn'),pp,false);phyStart(b.dataset.tour,0);});h.querySelectorAll('[data-exam]').forEach(b=>b.onclick=()=>{if(typeof phyExam==='function')phyExam(h,renderPhyTours);});});}
+  $$('.phyhost').forEach(h=>{h.innerHTML=`<h3 style="margin-bottom:8px">${TL('Fisiología en acción','Physiology in action','Fisiologia em ação')}</h3>`+html;h.querySelectorAll('[data-tour]').forEach(b=>b.onclick=()=>{if(isPhone())setSheet('peek');const pp=$('#phyPop');if(pp&&!pp.hidden)togglePop($('#phyBtn'),pp,false);phyStart(b.dataset.tour,0);});h.querySelectorAll('[data-exam]').forEach(b=>b.onclick=()=>{if(typeof phyExam==='function')phyExam(h,renderPhyTours);});
+    if(typeof JOINTS_IDX!=='undefined'){const d=document.createElement('div');d.innerHTML=`<h3 style="margin:14px 0 6px">${TL('Articulaciones en detalle','Joints in detail','Articulações em detalhe')}</h3><p class="small muted" style="margin:0 0 8px">${TL('Huesos, ligamentos, cartílagos y cápsula, con sus nombres.','Bones, ligaments, cartilage and capsule, all labelled.','Ossos, ligamentos, cartilagens e cápsula, com seus nomes.')}</p><div class="jgrid">${JOINTS_IDX.map((j,i)=>`<button class="btn jbtn" data-joint="${i}"><b>${esc(TL(...j.n))}</b><small>${esc(TL(...j.t))}</small></button>`).join('')}</div>`;h.appendChild(d);d.querySelectorAll('[data-joint]').forEach(b=>b.onclick=()=>openJoint(JOINTS_IDX[+b.dataset.joint]));}});}
 renderPhyTours();
 
 /* ───── Más recorridos: músculo, visión, audición y reproducción ───── */
@@ -3974,7 +3993,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
 <script>
 /* ───── App instalable y sin conexión (versión publicada en la web) ───── */
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
- const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-2',MB=54;
+ const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
  navigator.serviceWorker.register('sw.js').catch(()=>{});
  const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
