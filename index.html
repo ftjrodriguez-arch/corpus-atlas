@@ -1446,8 +1446,17 @@ function weightsFor(m,jn){
     let w=(b-a)/(2*J.blend)+.5;w=w<0?0:w>1?1:w*w*(3-2*w);
     if(J.twist&&w>0){const t=((x-J.pivot.x)*-J.long.x+(y-J.pivot.y)*-J.long.y+(z-J.pivot.z)*-J.long.z)/J.twist;w*=t<0?0:t>1?1:t;}
     W[i]=w;if(w>0.001)any=true;}
+  if(any&&BS(u.sys)==='muscular'&&/^(shoulder|hip|sc)_/.test(jn))smoothAlong(pos,W,n);
   u.W[jn]=any?W:null;return u.W[jn];
 }
+/* Músculos que cruzan el hombro o la cadera: el peso varía suavemente a lo largo del eje del músculo (de su extremo en el tronco a su extremo en el miembro), así se estira entero en lugar de desgarrarse */
+function smoothAlong(pos,W,n){let cx=0,cy=0,cz=0;for(let i=0;i<n;i++){cx+=pos[i*3];cy+=pos[i*3+1];cz+=pos[i*3+2];}cx/=n;cy/=n;cz/=n;
+  let xx=0,xy=0,xz=0,yy=0,yz=0,zz=0;const st=Math.max(1,n/3000|0);for(let i=0;i<n;i+=st){const x=pos[i*3]-cx,y=pos[i*3+1]-cy,z=pos[i*3+2]-cz;xx+=x*x;xy+=x*y;xz+=x*z;yy+=y*y;yz+=y*z;zz+=z*z;}
+  let v=[0.3,1,0.2];for(let k=0;k<30;k++){const w=[xx*v[0]+xy*v[1]+xz*v[2],xy*v[0]+yy*v[1]+yz*v[2],xz*v[0]+yz*v[1]+zz*v[2]];const l=Math.hypot(...w)||1;v=w.map(t=>t/l);}
+  const t=new Float32Array(n);let lo=1e9,hi=-1e9;for(let i=0;i<n;i++){t[i]=(pos[i*3]-cx)*v[0]+(pos[i*3+1]-cy)*v[1]+(pos[i*3+2]-cz)*v[2];if(t[i]<lo)lo=t[i];if(t[i]>hi)hi=t[i];}
+  const L=hi-lo||1e-6;let a0=0,n0=0,a1=0,n1=0;for(let i=0;i<n;i++){const u=(t[i]-lo)/L;if(u<0.15){a0+=W[i];n0++;}else if(u>0.85){a1+=W[i];n1++;}}
+  const e0=n0?a0/n0:0,e1=n1?a1/n1:0;if(Math.abs(e1-e0)<0.45)return;
+  for(let i=0;i<n;i++){let u=(t[i]-lo)/L;u=u<0.08?0:u>0.92?1:(u-0.08)/0.84;u=u*u*(3-2*u);const sm=e0+(e1-e0)*u;W[i]=0.25*W[i]+0.75*sm;}}
 function segLimb(k){if(!k)return 'T';if(/^(arm|fore|hand|clv|scap)_|^(mc|fp|fm|fd)\d_|^(tm|tp|td)_/.test(k))return 'U';if(/^(thigh|leg|foot|heel)_|^(mt|tp|tm|td)\d_/.test(k))return 'L';return 'T';}
 function prepWeights(){}
 const deformed=new Set();
