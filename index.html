@@ -758,7 +758,7 @@ function matFor(k,ins,state){
   if(state==='sel'){m.emissive=lin(cssVar('--accent'));m.emissiveIntensity=.5;}
   if(state==='ag'){m.color=lin('#f0a040');m.emissive=lin('#ff6a00');m.emissiveIntensity=.45;}
   if(state==='hint'){m.emissive=lin(cssVar('--accent'));m.emissiveIntensity=.6;}
-  if(state==='an'){m.color=lin('#8fb8ff');m.emissive=lin('#1d4ed8');m.emissiveIntensity=.38;}
+  if(state==='an'){m.color=lin('#b8ccf2');m.emissive=lin('#1d4ed8');m.emissiveIntensity=.2;}
   if(state==='memb'){m.userData.memb=true;}
   if(state==='semi'){m.userData.semi=true;}
   if(state==='ghost'){m.emissive=lin(cssVar('--accent'));m.emissiveIntensity=.25;m.userData.ghost=true;}
@@ -1566,6 +1566,7 @@ function buildRig2(){if(!RIG||!RIG.f21_R)return;const P=k=>new V3(...RIG[k]);
   for(const f of FING)Object.assign(PROX,{['mcp'+f]:['wrist','fore','elbow','shoulder','trunk'],['pip'+f]:['mcp'+f,'wrist','fore','elbow','shoulder','trunk'],['dip'+f]:['pip'+f,'mcp'+f,'wrist','fore','elbow','shoulder','trunk']});
   for(const f of TOES)PROX['mtp'+f]=['ankle','knee','hip'];
   SIDED.push('sc','cmc','mcp1','ip1',...FING.flatMap(f=>['mcp'+f,'pip'+f,'dip'+f]),...TOES.map(f=>'mtp'+f));
+  for(const k in PROX){const L=PROX[k];const i=L.indexOf('shoulder');if(i>=0&&!L.includes('sc'))L.splice(i+1,0,'sc');}if(!PROX.shoulder.includes('sc'))PROX.shoulder.unshift('sc');
   for(const m of meshes){if(m.userData.W)m.userData.W={};delete m.userData.home;}}
 
 /* Movimientos nuevos (rangos AAOS y de referencia clínica) */
@@ -1797,7 +1798,7 @@ const CTESTS=[
   how:['Extensión, inclinación y rotación del cuello hacia el lado sintomático, con presión axial suave sobre la cabeza.','Extension, lateral flexion and rotation of the neck towards the painful side, with gentle axial pressure on the head.','Extensão, inclinação e rotação do pescoço para o lado sintomático, com leve pressão axial sobre a cabeça.'],
   pos:['Dolor irradiado al brazo por el territorio de la raíz (por ejemplo, C6 hasta el pulgar).','Pain radiating down the arm in the root’s territory (for example C6 to the thumb).','Dor irradiada para o braço no território da raiz (por exemplo, C6 até o polegar).']}];
 const CT={on:false,test:null,t:0,marks:[],pins:[]};
-function ctComps(k){const c={};for(const [n,ax,d] of CT.test.pose){c[n]=c[n]||{x:0,y:0,z:0,w:0};c[n][ax]+=d*k;}return c;}
+function ctComps(k){const c={};for(const [n,ax,d] of CT.test.pose){c[n]=c[n]||{x:0,y:0,z:0,w:0};c[n][ax]+=d*k;}return physio(c,'R');}
 function ctTick(dt){if(!CT.on||currentTab!=='mov')return;CT.t+=dt;const T=4.4,tt=CT.t%T;const k=tt<1.3?0.5-0.5*Math.cos(Math.PI*tt/1.3):tt<2.9?1:tt<4.2?0.5+0.5*Math.cos(Math.PI*(tt-2.9)/1.3):0;
   const C=ctComps(k),act=[];const trm={};for(const [n,v] of (CT.test.tr||[]))trm[n]=v;
   for(const n in C){const jn=n.includes('_')?n:jname(n);if(!JOINTS[jn])continue;const q=qOf(jn,C[n]);const e={k:n.split('_')[0],jn,q};if(trm[n])e.tr=new V3(...trm[n]).multiplyScalar(k);act.push(e);}
@@ -1834,10 +1835,28 @@ const arcRays=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBa
 const SIDED=['shoulder','elbow','fore','wrist','hip','knee','ankle'];
 const jname=k=>SIDED.includes(k)?k+'_'+romSide:k;
 const sideSign=()=>romSide==='L'?-1:1;
+
+/* ───────── Regla fisiológica: límites articulares, ritmo escapulohumeral y rotaciones acopladas ─────────
+   Toda postura (rango articular, pruebas clínicas y movimientos funcionales) pasa por aquí antes de deformar el modelo.
+   Valores en la convención del lado derecho (grados). */
+const LIM={shoulder:{x:[-180,60],z:[-180,45],y:[-90,70],w:[-45,135]},sc:{z:[-40,10],y:[-15,15]},elbow:{x:[-150,10]},wrist:{x:[-80,70],z:[-25,35]},
+ hip:{x:[-125,30],z:[-45,30],y:[-45,45]},knee:{x:[-10,140],y:[-40,30],z:[-10,10]},ankle:{x:[-25,50],z:[-15,35]},
+ cervical:{x:[-50,50],z:[-45,45],y:[-60,60]},ao:{x:[-25,15]},aa:{y:[-45,45]},trunk:{x:[-30,85],z:[-35,35],y:[-45,45]},lumb:{x:[-25,55],z:[-20,20],y:[-6,6]},thor:{x:[-25,40],z:[-30,30],y:[-40,40]},
+ tmj:{x:[0,35],y:[-12,12]},cmc:{x:[-70,10],z:[-20,20],y:[-10,50]},mcp1:{z:[-10,60]},ip1:{z:[-20,80]}};
+for(const f of [2,3,4,5]){LIM['mcp'+f]={x:[-90,45],z:[-25,25]};LIM['pip'+f]={x:[-110,0]};LIM['dip'+f]={x:[-90,10]};}for(const f of [1,2,3,4,5])LIM['mtp'+f]={x:[-70,45]};
+function physio(c,side){for(const k of Object.keys(c)){const [node,sx]=k.split('_');const S=sx||side,fl=S==='L'?-1:1,v=c[k];
+    if(node==='shoulder'){const ex=-v.x,ab=-(v.z*fl),E=Math.max(ex,ab);
+      if(E>30){const st=(E-30)*0.4*0.6;if(ab>=ex)v.z+=st*fl;else v.x+=st;const kc='sc'+(sx?'_'+sx:'');c[kc]=c[kc]||{x:0,y:0,z:0,w:0};c[kc].z-=st*fl;}
+      if(ab>90)v.y-=(ab-90)*0.5*fl;}}
+  for(const k of Object.keys(c)){const [node,sx]=k.split('_');const S=sx||side,fl=S==='L'?-1:1,v=c[k],L=LIM[node];if(!L)continue;
+    for(const ax of ['x','y','z','w']){if(!L[ax]||!v[ax])continue;const f=ax==='x'?1:fl;let r=v[ax]*f;let [lo,hi]=L[ax];
+      if(node==='knee'&&ax==='y'){const g=Math.max(0,Math.min(1,(v.x||0)/60));lo*=g;hi*=g;}
+      r=Math.max(lo,Math.min(hi,r));v[ax]=r*f;}}
+  return c;}
 function comps(t){const c={};const add=(k,ax,deg)=>{c[k]=c[k]||{x:0,y:0,z:0,w:0};c[k][ax]+=deg;};
   const flip=ax=>(ax==='x'?1:sideSign());const help=curM.helpFn?curM.helpFn(angle):(curM.help||{});
   for(const k in help){const [ax,d]=help[k];add(k,ax,d*flip(ax));}
-  add(curM.mainNode||curJ.node,curM.ax,(curM.sg*t+(curM.off||0))*flip(curM.ax));return c;}
+  add(curM.mainNode||curJ.node,curM.ax,(curM.sg*t+(curM.off||0))*flip(curM.ax));return physio(c,romSide);}
 function applyPose(){
   if(!RIG) return;if(typeof CT!=='undefined'&&CT.on&&currentTab==='mov')return;
   const active=(gait.on&&currentTab==='mov')?gaitActive():(currentTab==='mov'||contraction)?Object.entries(comps(angle)).map(([k,cm])=>({k,jn:jname(k),q:qOf(jname(k),cm)})):[];
@@ -1868,7 +1887,7 @@ function renderROM(){
   $('#jointChips').innerHTML='';ROM.forEach(j=>{const b=document.createElement('button');b.textContent=j.n;b.setAttribute('aria-pressed',j===curJ);b.onclick=()=>{if(CT.on)ctStop();if(gait.on)setGait(false);curJ=j;curM=j.moves[0];angle=0;stopPlay();renderROM();};$('#jointChips').appendChild(b);});
   $('#moveChips').innerHTML='';curJ.moves.forEach(mv=>{const b=document.createElement('button');b.textContent=mv.n;b.setAttribute('aria-pressed',mv===curM);b.onclick=()=>{if(CT.on)ctStop();if(gait.on)setGait(false);curM=mv;angle=0;stopPlay();renderROM();};$('#moveChips').appendChild(b);});
   const sideTxt=curJ.sided?(romSide==='R'?'derecho':'izquierdo'):(curM.ax==='x'?'':romSide==='R'?'hacia la derecha':'hacia la izquierda');
-  $('#angle').max=Math.round(curM.max*1.25);$('#angle').value=angle;
+  $('#angle').max=Math.round(curM.max);$('#angle').value=angle;
   const ag=curM.ag.filter(en=>Object.values(CAT).some(r=>r[1]===en));
   $('#moveInfo').innerHTML=`<dt>Plano</dt><dd><b style="color:var(${planeCols[curM.pl]})">${PL_N[curM.pl]}</b></dd><dt>Eje</dt><dd>${AX_N[curM.pl]}</dd><dt>Rango</dt><dd style="font-family:var(--f-mono)">0–${curM.max}${curM.u||'°'}</dd>${sideTxt?`<dt>Lado</dt><dd>${sideTxt}</dd>`:''}<dt>Agonistas</dt><dd>${ag.map(en=>`<button class="link" data-agon="${esc(en)}">${esc(enEs(en))}</button>`).join(', ')||'—'}</dd><dt>${TL('Se estiran','Stretched','Se alongam')}</dt><dd style="color:#8fb8ff">${(curM.ant||[]).filter(en=>Object.values(CAT).some(r=>r[1]===en)).map(en=>esc(enEs(en))).join(', ')||'—'}</dd><dt>${TL('Ligamentos que se tensan','Ligaments that tighten','Ligamentos que se tensionam')}</dt><dd style="color:#ff8a6b">${(curM.lig||[]).map(en=>{const r=Object.values(CAT).find(x=>x[1]===en);return esc(r?r[2]:en);}).join(', ')||'—'}</dd>`;
   $('#moveInfo').querySelectorAll('[data-agon]').forEach(b=>b.onclick=()=>{const side=curJ.sided?(romSide==='R'?'derecho':'izquierdo'):'derecho';const r=Object.values(CAT).find(x=>x[1]===b.dataset.agon&&x[4]==='muscular'&&(!x[5]||x[5]===side));if(r)goTo(r[0]);});
