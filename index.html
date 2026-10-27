@@ -8,10 +8,6 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Corpus">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Corpus Atlas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,500;0,600;1,400;1,500&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -654,10 +650,10 @@ details.more > .card{margin-bottom:10px}
   </aside>
 </main>
 
-<script src="lib/three.min.js"></script>
-<script src="lib/GLTFLoader.js"></script>
-<script src="lib/RoomEnvironment.js"></script>
-<script src="lib/DRACOLoader.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
 <script>
 (function(){
 'use strict';
@@ -1766,6 +1762,54 @@ const CTESTS=[
   ex:['Nervio mediano en el túnel carpiano.','Median nerve in the carpal tunnel.','Nervo mediano no túnel do carpo.'],
   how:['Se golpea suavemente con el dedo o un martillo sobre el retináculo flexor, en la cara palmar de la muñeca (punto amarillo).','The flexor retinaculum on the palmar wrist is tapped with a finger or reflex hammer (yellow dot).','Percute-se levemente com o dedo ou um martelo sobre o retináculo dos flexores, na face palmar do punho (ponto amarelo).'],
   pos:['Hormigueo que se irradia a los dedos del territorio del mediano: nervio irritado o en regeneración.','Tingling radiating into the median nerve fingers: an irritated or regenerating nerve.','Formigamento irradiado para os dedos do território do mediano: nervo irritado ou em regeneração.']},
+ {id:'ulnt1',r:'neural',n:['ULNT1 (mediano)','ULNT1 (median)','ULNT1 (mediano)'],node:'shoulder',rad:1.0,view:'ant',mode:'nerv',pose:[['sc','z',8],['shoulder','z',-100],['shoulder','y',-55],['wrist','x',50],['mcp2','x',30],['mcp3','x',30],['mcp4','x',30],['mcp5','x',30],['cervical','z',-20]],tg:['Median nerve','Roots of brachial plexus'],
+  ex:['Mecanosensibilidad del nervio mediano y del plexo braquial.','Mechanosensitivity of the median nerve and brachial plexus.','Mecanossensibilidade do nervo mediano e do plexo braquial.'],
+  how:['Se suman tensiones: depresión de la escápula, abducción y rotación externa del hombro, supinación, extensión de muñeca y dedos, extensión del codo y, por último, inclinación del cuello al lado contrario.','Tension is added step by step: scapular depression, shoulder abduction and external rotation, supination, wrist and finger extension, elbow extension and finally contralateral neck side-bending.','Somam-se tensões: depressão da escápula, abdução e rotação externa do ombro, supinação, extensão de punho e dedos, extensão do cotovelo e, por fim, inclinação do pescoço para o lado oposto.'],
+  pos:['Reproduce los síntomas del paciente y cambian al mover una parte alejada (por ejemplo, el cuello): diferenciación estructural que apunta a origen neural.','It reproduces the patient’s symptoms and they change when a distant segment moves (for example the neck): structural differentiation pointing to a neural source.','Reproduz os sintomas do paciente e eles mudam ao mover uma parte distante (por exemplo, o pescoço): diferenciação estrutural que indica origem neural.']},
+ {id:'slump',r:'neural',n:['Slump','Slump','Slump'],node:'hip',rad:1.4,view:'latd',mode:'nerv',pose:[['hip','x',-85],['knee','x',25],['ankle','x',-15],['trunk','x',30],['cervical','x',35]],tg:['Sciatic nerve','Tibial nerve'],
+  ex:['Tensión del neuroeje y del nervio ciático (de la médula al pie).','Tension of the neuraxis and sciatic nerve (from the cord to the foot).','Tensão do neuroeixo e do nervo isquiático (da medula ao pé).'],
+  how:['Sentado: se encorva la columna, se flexiona el cuello, se extiende la rodilla y se lleva el tobillo a dorsiflexión.','Sitting: the spine slumps, the neck flexes, the knee extends and the ankle is dorsiflexed.','Sentado: a coluna se curva, o pescoço flexiona, o joelho se estende e o tornozelo vai para dorsiflexão.'],
+  pos:['Los síntomas aparecen y se alivian al extender el cuello: origen neural (por ejemplo, radiculopatía lumbar).','Symptoms appear and ease when the neck is extended: a neural source (for example lumbar radiculopathy).','Os sintomas aparecem e aliviam ao estender o pescoço: origem neural (por exemplo, radiculopatia lombar).']},
+ {id:'liftoff',r:'hombro',n:['Lift-off (Gerber)','Lift-off (Gerber)','Lift-off (Gerber)'],node:'shoulder',rad:0.9,view:'post',mode:'mus',pose:[['shoulder','x',30],['shoulder','y',70],['elbow','x',-90]],tg:['Subscapularis muscle'],
+  ex:['Subescapular.','Subscapularis.','Subescapular.'],
+  how:['La mano se coloca a la espalda, a la altura lumbar, y el paciente intenta separarla de la espalda.','The hand is placed behind the back at lumbar level and the patient tries to lift it away from the back.','A mão é colocada nas costas, na altura lombar, e o paciente tenta afastá-la das costas.'],
+  pos:['No puede separar la mano: rotura del subescapular.','Unable to lift the hand off: subscapularis tear.','Não consegue afastar a mão: ruptura do subescapular.']},
+ {id:'crossbody',r:'hombro',n:['Aducción cruzada','Cross-body adduction','Adução cruzada'],node:'shoulder',rad:0.8,view:'ant',mode:'lig',pose:[['shoulder','z',-90],['shoulder','w',120]],tg:['Acromioclavicular ligament','Articular capsule of acromioclavicular joint'],
+  ex:['Articulación acromioclavicular.','Acromioclavicular joint.','Articulação acromioclavicular.'],
+  how:['Hombro a 90° de flexión; se lleva el brazo a aducción horizontal máxima, por delante del pecho.','Shoulder at 90° of flexion; the arm is taken into full horizontal adduction across the chest.','Ombro a 90° de flexão; leva-se o braço à adução horizontal máxima, à frente do peito.'],
+  pos:['Dolor localizado sobre la acromioclavicular (artrosis o esguince).','Pain localised over the acromioclavicular joint (arthritis or sprain).','Dor localizada sobre a acromioclavicular (artrose ou entorse).']},
+ {id:'obrien',r:'hombro',n:['O’Brien','O’Brien','O’Brien'],node:'shoulder',rad:0.9,view:'ant',mode:'lig',pose:[['shoulder','x',-90],['shoulder','w',15],['shoulder','y',70]],tg:['Glenoid labrum','Long head of biceps brachii','Acromioclavicular ligament'],
+  ex:['Lesión del rodete superior (SLAP) o de la acromioclavicular.','Superior labral (SLAP) lesion or acromioclavicular joint pathology.','Lesão do lábio superior (SLAP) ou da acromioclavicular.'],
+  how:['Brazo a 90° de flexión y 10–15° de aducción, con rotación interna (pulgar abajo); el paciente resiste el empuje hacia abajo. Se repite con la palma hacia arriba.','Arm at 90° of flexion and 10–15° of adduction, internally rotated (thumb down); the patient resists a downward push. It is repeated with the palm up.','Braço a 90° de flexão e 10–15° de adução, em rotação interna (polegar para baixo); o paciente resiste ao empurrão para baixo. Repete-se com a palma para cima.'],
+  pos:['Dolor profundo con el pulgar abajo que mejora con la palma arriba: SLAP. Dolor en la parte superior del hombro: acromioclavicular.','Deep pain with the thumb down that eases with the palm up: SLAP. Pain on top of the shoulder: acromioclavicular joint.','Dor profunda com o polegar para baixo que melhora com a palma para cima: SLAP. Dor no alto do ombro: acromioclavicular.']},
+ {id:'valgocodo',r:'codo',n:['Estrés en valgo del codo','Elbow valgus stress','Estresse em valgo do cotovelo'],node:'elbow',rad:0.45,view:'ant',mode:'lig',pose:[['elbow','x',-25],['elbow','z',-10]],tg:['Ulnar collateral ligament'],
+  ex:['Ligamento colateral cubital (medial), clave en los lanzadores.','Ulnar (medial) collateral ligament, key in throwers.','Ligamento colateral ulnar (medial), essencial nos arremessadores.'],
+  how:['Codo a 20–30° de flexión; se empuja el antebrazo hacia fuera abriendo el lado medial.','Elbow at 20–30° of flexion; the forearm is pushed outwards, opening the medial side.','Cotovelo a 20–30° de flexão; empurra-se o antebraço para fora, abrindo o lado medial.'],
+  pos:['Dolor o apertura del lado medial del codo.','Pain or gapping on the medial side of the elbow.','Dor ou abertura no lado medial do cotovelo.']},
+ {id:'froment',r:'muñeca',n:['Froment','Froment','Froment'],node:'wrist',rad:0.35,view:'latd',mode:'mus',pose:[['elbow','x',-90],['ip1','z',55],['cmc','y',10]],fm:/^(First metacarpal bone|Distal phalanx of first finger of hand)$/,tg:['Oblique head of adductor pollicis','Transverse head of adductor pollicis','Flexor pollicis longus','Ulnar nerve'],
+  ex:['Aductor del pulgar (nervio cubital).','Adductor pollicis (ulnar nerve).','Adutor do polegar (nervo ulnar).'],
+  how:['El paciente sujeta un papel entre el pulgar y el índice mientras el examinador tira de él.','The patient grips a sheet of paper between thumb and index finger while the examiner pulls it.','O paciente segura um papel entre o polegar e o indicador enquanto o examinador o puxa.'],
+  pos:['El pulgar flexiona la interfalángica (como en la animación): el flexor largo del pulgar (nervio mediano) suple al aductor paralizado. Indica lesión del nervio cubital.','The thumb flexes at the IP joint (as in the animation): flexor pollicis longus (median nerve) substitutes for the paralysed adductor. It indicates ulnar nerve palsy.','O polegar flexiona a interfalângica (como na animação): o flexor longo do polegar (nervo mediano) substitui o adutor paralisado. Indica lesão do nervo ulnar.']},
+ {id:'kleiger',r:'tobillo',n:['Kleiger (rotación externa)','Kleiger (external rotation)','Kleiger (rotação externa)'],node:'ankle',rad:0.35,view:'ant',mode:'lig',pose:[['knee','x',90],['ankle','y',-20]],tg:['Anterior tibiofibular ligament','Posterior tibiofibular ligament','Posterior tibiotalar ligament'],
+  ex:['Sindesmosis tibioperonea (esguince alto) y ligamento deltoideo.','Tibiofibular syndesmosis (high ankle sprain) and deltoid ligament.','Sindesmose tibiofibular (entorse alta) e ligamento deltoide.'],
+  how:['Rodilla a 90° y tobillo neutro; se rota el pie hacia fuera con la pierna fija.','Knee at 90° and ankle neutral; the foot is rotated outwards with the leg stabilised.','Joelho a 90° e tornozelo neutro; roda-se o pé para fora com a perna fixa.'],
+  pos:['Dolor en la cara anterior de la sindesmosis (esguince alto, de recuperación más lenta) o en el lado medial (deltoideo).','Pain over the anterior syndesmosis (high sprain, slower to recover) or the medial side (deltoid).','Dor na face anterior da sindesmose (entorse alta, de recuperação mais lenta) ou no lado medial (deltoide).']},
+ {id:'thessaly',r:'rodilla',n:['Thessaly','Thessaly','Thessaly'],node:'knee',rad:0.6,view:'ant',mode:'lig',pose:[['knee','x',20],['knee','y',-12],['hip','y',-10]],tg:['Medial meniscus','Lateral meniscus'],
+  ex:['Meniscos en carga.','Menisci under load.','Meniscos sob carga.'],
+  how:['De pie sobre una pierna con la rodilla a 20° de flexión, el paciente gira el cuerpo varias veces hacia dentro y hacia fuera.','Standing on one leg with the knee at 20° of flexion, the patient twists the body in and out several times.','Em pé sobre uma perna com o joelho a 20° de flexão, o paciente gira o corpo várias vezes para dentro e para fora.'],
+  pos:['Dolor en la interlínea o sensación de bloqueo o de que la rodilla se va.','Joint-line pain, locking or a sense of giving way.','Dor na interlinha, bloqueio ou sensação de falseio.']},
+ {id:'fadir',r:'cadera',n:['FADIR','FADIR','FADIR'],node:'hip',rad:0.7,view:'ant',mode:'lig',pose:[['hip','x',-90],['hip','z',15],['hip','y',30],['knee','x',90]],tg:['Acetabular labrum','Articular capsule of hip joint'],
+  ex:['Choque femoroacetabular y lesión del rodete.','Femoroacetabular impingement and labral tear.','Impacto femoroacetabular e lesão do lábio.'],
+  how:['Supino: flexión de cadera a 90°, aducción y rotación interna.','Supine: hip flexed to 90°, adducted and internally rotated.','Decúbito dorsal: flexão do quadril a 90°, adução e rotação interna.'],
+  pos:['Dolor inguinal profundo que reproduce el del paciente. Es muy sensible: si es negativo, el choque es poco probable.','Deep groin pain reproducing the patient’s pain. It is very sensitive: if negative, impingement is unlikely.','Dor inguinal profunda que reproduz a do paciente. É muito sensível: se negativo, o impacto é improvável.']},
+ {id:'ely',r:'cadera',n:['Ely','Ely','Ely'],node:'knee',rad:0.9,view:'latd',mode:'mus',pose:[['knee','x',120],['hip','x',-15]],tg:['Rectus femoris muscle'],
+  ex:['Acortamiento del recto femoral.','Rectus femoris tightness.','Encurtamento do reto femoral.'],
+  how:['Decúbito prono; se flexiona pasivamente la rodilla llevando el talón hacia el glúteo.','Prone; the knee is passively flexed bringing the heel towards the buttock.','Decúbito ventral; flexiona-se passivamente o joelho levando o calcanhar em direção ao glúteo.'],
+  pos:['La cadera se flexiona y la pelvis se eleva de la camilla (como en la animación): recto femoral acortado.','The hip flexes and the pelvis lifts off the couch (as in the animation): tight rectus femoris.','O quadril flexiona e a pelve se eleva da maca (como na animação): reto femoral encurtado.']},
+ {id:'gaenslen',r:'cadera',n:['Gaenslen','Gaenslen','Gaenslen'],node:'hip',rad:1.0,view:'latd',mode:'lig',pose:[['hip','x',25],['hip_L','x',-115],['knee_L','x',120]],tg:['Anterior sacro-iliac ligament','Posterior sacro-iliac ligament'],
+  ex:['Articulación sacroilíaca.','Sacroiliac joint.','Articulação sacroilíaca.'],
+  how:['Una cadera se lleva a flexión máxima contra el pecho y la otra cuelga en extensión por el borde de la camilla, torsionando la pelvis.','One hip is held in full flexion to the chest while the other hangs into extension over the edge of the couch, twisting the pelvis.','Um quadril é levado à flexão máxima contra o peito e o outro pende em extensão pela borda da maca, torcendo a pelve.'],
+  pos:['Dolor en la sacroilíaca. Es más útil combinado con otras pruebas de provocación sacroilíaca.','Pain over the sacroiliac joint. It is most useful combined with other sacroiliac provocation tests.','Dor na sacroilíaca. É mais útil combinado com outros testes de provocação sacroilíaca.']},
  {id:'cajonT',r:'tobillo',n:['Cajón anterior del tobillo','Ankle anterior drawer','Gaveta anterior do tornozelo'],node:'ankle',rad:0.3,view:'latd',mode:'lig',pose:[['ankle','x',20]],tr:[['ankle',[0,0,0.007]]],tg:['Anterior talofibular ligament'],
   ex:['Ligamento peroneoastragalino anterior, el primero que se rompe en el esguince.','Anterior talofibular ligament, the first to tear in a sprain.','Ligamento talofibular anterior, o primeiro a romper na entorse.'],
   how:['Tobillo en ligera flexión plantar; se fija la tibia y se tira del talón hacia delante.','Ankle in slight plantarflexion; stabilise the tibia and pull the heel forwards.','Tornozelo em leve flexão plantar; fixa-se a tíbia e puxa-se o calcanhar para a frente.'],
@@ -1829,7 +1873,7 @@ async function ctStart(t){ctStop();stopPlay();if(gait.on)setGait(false);romSide=
     if(!CT.pins.some(P=>P.m.userData.c.en===m.userData.c.en)){m.userData.pinTxt=m.userData.c.es;m.geometry.computeBoundingBox();const n0=PINS.length;addPin(m,m.geometry.boundingBox.getCenter(new V3()));if(PINS.length>n0)CT.pins.push(PINS[PINS.length-1]);}}
   if(t.mk){const mm=meshes.find(m=>t.mk.test(m.userData.c.en)&&(!m.userData.c.side||m.userData.c.side==='derecho'));if(mm){const sp=phyGlow('rgba(255,214,60,1)',0.05);sp.material.depthTest=false;sp.renderOrder=30;scene.add(sp);CT.mk={sp,m:mm};}}
   const J=JOINTS[jname(t.node)];if(J){focusOn(J.pivot.clone(),isPhone()?t.rad*1.5:t.rad);setView(t.view);}CT.focus=true;if(isPhone())setSheet('peek');CT.on=true;renderCT();}
-function renderCT(){const el=$('#ctCard');if(!el)return;const R={rodilla:TL('Rodilla','Knee','Joelho'),tobillo:TL('Tobillo','Ankle','Tornozelo'),cadera:TL('Cadera y pelvis','Hip and pelvis','Quadril e pelve'),hombro:TL('Hombro','Shoulder','Ombro'),'muñeca':TL('Mano y muñeca','Hand and wrist','Mão e punho'),cuello:TL('Cuello','Neck','Pescoço'),funcional:TL('Movimientos funcionales','Functional movements','Movimentos funcionais')};
+function renderCT(){const el=$('#ctCard');if(!el)return;const R={rodilla:TL('Rodilla','Knee','Joelho'),tobillo:TL('Tobillo','Ankle','Tornozelo'),cadera:TL('Cadera y pelvis','Hip and pelvis','Quadril e pelve'),hombro:TL('Hombro','Shoulder','Ombro'),'muñeca':TL('Mano y muñeca','Hand and wrist','Mão e punho'),cuello:TL('Cuello','Neck','Pescoço'),codo:TL('Codo','Elbow','Cotovelo'),neural:TL('Neurodinámica','Neurodynamics','Neurodinâmica'),funcional:TL('Movimientos funcionales','Functional movements','Movimentos funcionais')};
   const L=a=>TL(a[0],a[1],a[2]);const cur=CT.test;
   el.innerHTML=`<h3>${TL('Pruebas clínicas y movimientos funcionales','Clinical tests and functional movements','Testes clínicos e movimentos funcionais')}</h3><p class="muted small">${TL('Mira la maniobra en el modelo y qué estructura se explora (resaltada y con su nombre).','Watch the manoeuvre on the model and which structure it examines (highlighted and labelled).','Veja a manobra no modelo e qual estrutura ela explora (destacada e com o nome).')}</p>`+
    Object.keys(R).map(r=>`<div class="small muted" style="margin:6px 0 3px">${R[r]}</div><div class="chips">${CTESTS.filter(x=>x.r===r).map(x=>`<button data-ct="${x.id}" aria-pressed="${CT.on&&cur===x}">${esc(L(x.n))}</button>`).join('')}</div>`).join('')+
@@ -4338,43 +4382,19 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
 }).catch(()=>{$('#hintTxt').textContent='No se pudieron cargar los datos del atlas. Recarga la página para intentarlo de nuevo.';});
 })();
 </script>
-<style>
-#installBtn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:6px 14px;font-weight:700;font-size:13px}
-.offcard .bar{height:8px;margin:8px 0 4px}.offcard .ok{color:var(--ok);font-weight:700}
-.instsheet{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;padding:16px}
-.instsheet>div{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:460px;width:100%;padding:16px;display:flex;flex-direction:column;gap:10px}
-.instsheet ol{margin:0;padding-left:20px;font-size:14px;line-height:1.6}
-</style>
+
 <script>
-/* ───── App instalable y sin conexión (versión publicada en la web) ───── */
+/* Descarga completa para estudiar sin conexión (solo en la versión publicada en la web) */
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
- const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
- const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
- navigator.serviceWorker.register('sw.js').catch(()=>{});
- const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
- const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
- /* botón Instalar */
- let deferred=null;const hdr=document.querySelector('header');const ib=document.createElement('button');ib.id='installBtn';ib.hidden=true;ib.textContent='⬇ '+L('Instalar app','Install app','Instalar app');
- const seg=hdr&&hdr.querySelector('.seg');if(seg)seg.after(ib);else if(hdr)hdr.appendChild(ib);
- window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;ib.hidden=false;});
- window.addEventListener('appinstalled',()=>{ib.hidden=true;deferred=null;});
- if(!standalone&&ios)ib.hidden=false;
- ib.onclick=async()=>{if(deferred){deferred.prompt();const r=await deferred.userChoice;if(r.outcome==='accepted')ib.hidden=true;deferred=null;return;}
-   const sh=document.createElement('div');sh.className='instsheet';sh.innerHTML=`<div><h2>${L('Instalar Corpus','Install Corpus','Instalar Corpus')}</h2><ol>${ios?L('<li>Toca el botón <b>Compartir</b> (cuadrado con flecha) de Safari.</li><li>Elige <b>Añadir a pantalla de inicio</b>.</li><li>Abre Corpus desde el icono y pulsa <b>Descargar todo</b> para usarlo sin internet.</li>','<li>Tap Safari’s <b>Share</b> button (square with arrow).</li><li>Choose <b>Add to Home Screen</b>.</li><li>Open Corpus from the icon and tap <b>Download everything</b> to use it offline.</li>','<li>Toque o botão <b>Compartilhar</b> do Safari.</li><li>Escolha <b>Adicionar à Tela de Início</b>.</li><li>Abra o Corpus pelo ícone e toque em <b>Baixar tudo</b> para usar sem internet.</li>'):L('<li>En Chrome o Edge, abre el menú <b>⋮</b>.</li><li>Elige <b>Instalar aplicación</b> o <b>Añadir a pantalla de inicio</b>.</li><li>Abre Corpus y pulsa <b>Descargar todo</b> para usarlo sin internet.</li>','<li>In Chrome or Edge open the <b>⋮</b> menu.</li><li>Choose <b>Install app</b> or <b>Add to Home screen</b>.</li><li>Open Corpus and tap <b>Download everything</b> to use it offline.</li>','<li>No Chrome ou Edge, abra o menu <b>⋮</b>.</li><li>Escolha <b>Instalar aplicativo</b> ou <b>Adicionar à tela inicial</b>.</li><li>Abra o Corpus e toque em <b>Baixar tudo</b> para usar sem internet.</li>')}</ol><button class="btn pri">${L('Entendido','Got it','Entendi')}</button></div>`;
-   sh.onclick=e=>{if(e.target===sh||e.target.tagName==='BUTTON')sh.remove();};document.body.appendChild(sh);};
- /* descarga completa */
- const box=document.createElement('div');box.className='card offcard';
- box.innerHTML=`<h3>${L('Usar sin conexión','Use offline','Usar sem conexão')}</h3><p class="muted small">${L(`Guarda en este dispositivo todos los modelos (hombre, mujer y alta resolución, unos ${MB} MB). Después Corpus funciona sin internet en el móvil, la tablet o el ordenador, también instalado como app.`,`Store all the models on this device (male, female and high resolution, about ${MB} MB). Corpus then works without internet on phone, tablet or computer, also as an installed app.`,`Guarda neste dispositivo todos os modelos (homem, mulher e alta resolução, cerca de ${MB} MB). Depois o Corpus funciona sem internet no celular, tablet ou computador, também instalado como app.`)}</p><div class="bar"><i id="offBar"></i></div><div class="row"><button class="btn pri" id="offBtn">${L('Descargar todo','Download everything','Baixar tudo')}</button><span class="muted small" id="offTxt"></span></div>`;
+ const FILES=["hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"];const box=document.createElement('div');box.className='card';
+ box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 53 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
- const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt'),bar=box.querySelector('#offBar');
- const check=async()=>{try{const c=await caches.open(MODELS);let n=0;for(const f of FILES)if(await c.match(f))n++;bar.style.width=(100*n/FILES.length)+'%';
-   if(n===FILES.length){txt.innerHTML=`<span class="ok">✓ ${L('Todo guardado: funciona sin conexión','Everything saved: works offline','Tudo salvo: funciona sem conexão')}</span>`;btn.textContent=L('Comprobar actualizaciones','Check for updates','Verificar atualizações');}
-   else if(n)txt.textContent=` ${n} / ${FILES.length} ${L('archivos guardados','files saved','arquivos salvos')}`;}catch(e){}};
- check();
- navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};if(d.type==='dl-progress'){bar.style.width=(100*d.n/d.tot)+'%';txt.textContent=` ${d.n} / ${d.tot}`;}
-   else if(d.type==='dl-done'){btn.disabled=false;if(d.fail)txt.textContent=' '+L(`Faltaron ${d.fail} archivos: vuelve a pulsar con conexión.`,`${d.fail} files failed: tap again when online.`,`Faltaram ${d.fail} arquivos: toque de novo com conexão.`);else check();}});
- btn.onclick=async()=>{btn.disabled=true;txt.textContent=' '+L('Preparando…','Preparing…','Preparando…');try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist();}catch(e){}
-   const reg=await navigator.serviceWorker.ready;(navigator.serviceWorker.controller||reg.active).postMessage({type:'download',files:FILES});};
- if(!navigator.onLine){const n=document.createElement('div');n.className='toast';n.style.cssText='position:fixed;top:12px;bottom:auto';n.textContent=L('Sin conexión: usando la copia guardada','Offline: using the saved copy','Sem conexão: usando a cópia salva');document.body.appendChild(n);setTimeout(()=>n.remove(),3500);}
+ const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v63');
+   for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
+   txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();
+</script>
+<script>
+if('serviceWorker' in navigator&&location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script>
