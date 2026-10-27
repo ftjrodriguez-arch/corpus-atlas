@@ -1,16 +1,71 @@
 {
-  "name": "Corpus · Atlas anatómico 3D",
-  "short_name": "Corpus",
-  "description": "Atlas anatómico 3D libre en español: hombre y mujer, disección por capas, orígenes e inserciones, rangos articulares y fichas clínicas.",
-  "lang": "es",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "background_color": "#0d1117",
-  "theme_color": "#0d1117",
-  "icons": [
-    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
-    {"src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml"}
-  ]
+ "id": "./",
+ "name": "Corpus · Atlas anatómico 3D",
+ "short_name": "Corpus",
+ "description": "Atlas anatómico 3D libre en español: hombre y mujer, disección por capas, fisiología en acción, glosario médico y fichas clínicas. Funciona sin conexión.",
+ "lang": "es",
+ "dir": "ltr",
+ "start_url": "./?source=pwa",
+ "scope": "./",
+ "display": "standalone",
+ "display_override": [
+  "window-controls-overlay",
+  "standalone"
+ ],
+ "orientation": "any",
+ "background_color": "#0d1117",
+ "theme_color": "#0d1117",
+ "categories": [
+  "education",
+  "medical"
+ ],
+ "icons": [
+  {
+   "src": "icons/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icons/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icons/maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  },
+  {
+   "src": "icons/icon.svg",
+   "sizes": "any",
+   "type": "image/svg+xml"
+  }
+ ],
+ "shortcuts": [
+  {
+   "name": "Glosario médico",
+   "short_name": "Glosario",
+   "url": "./?tab=glo",
+   "icons": [
+    {
+     "src": "icons/icon-192.png",
+     "sizes": "192x192"
+    }
+   ]
+  },
+  {
+   "name": "Fisiología en acción",
+   "short_name": "Funciones",
+   "url": "./?tour=heart",
+   "icons": [
+    {
+     "src": "icons/icon-192.png",
+     "sizes": "192x192"
+    }
+   ]
+  }
+ ]
 }

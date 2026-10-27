@@ -44,9 +44,21 @@ Funciona en el navegador del ordenador, la tableta o el móvil, sin instalar nad
 - **Planos y ejes** (sagital, frontal, transversal) con cortes, vista de rayos X, modo estudio, relieves óseos, lecciones guiadas y práctica de identificación.
 - **Alta resolución** por regiones con las mallas originales del atlas.
 
-## Usar sin conexión
+## Instalar como app y usar sin conexión
 
-En la pestaña *Capas*, pulsa **«Descargar todo»** (≈47 MB). Después el atlas abre sin internet. Desde el menú del navegador puedes **instalarlo como aplicación**.
+Corpus es una **aplicación web progresiva (PWA)**: se instala desde el navegador y, una vez descargada, todo funciona en el propio dispositivo, sin internet (modelos 3D, glosario, fichas, lecciones, recorridos de fisiología y exámenes). Dirección para instalar: **https://ftjrodriguez-arch.github.io/corpus-atlas/**
+
+| Dispositivo | Cómo instalar |
+|---|---|
+| Android (Chrome, Edge, Samsung Internet) | Pulsa **«⬇ Instalar app»** arriba, o menú ⋮ → *Instalar aplicación*. |
+| iPhone / iPad (Safari) | Botón *Compartir* → *Añadir a pantalla de inicio*. |
+| Windows, macOS, Linux, ChromeOS (Chrome o Edge) | Botón **«⬇ Instalar app»** o el icono de instalar de la barra de direcciones. |
+
+Después, abre Corpus desde su icono y, en la pestaña *Capas*, pulsa **«Descargar todo»** (≈54 MB): la descarga la hace el *service worker* en segundo plano y la app queda lista para usarse sin conexión. Las actualizaciones de la app no obligan a volver a descargar los modelos (van en una caché aparte, `corpus-models-N`).
+
+**Archivo APK para Google Play o para instalar a mano:** abre https://www.pwabuilder.com, escribe la dirección de arriba y elige *Android → Generate package*. Genera un APK/AAB (Trusted Web Activity) firmado que abre esta misma app; para publicarlo en Google Play hay que añadir el archivo `.well-known/assetlinks.json` que PWABuilder entrega.
+
+**Activar la publicación (una sola vez):** en GitHub, *Settings → Pages → Build and deployment → Source: Deploy from a branch*, rama `main`, carpeta `/ (root)`. Cada `git push` actualiza la app instalada en todos los dispositivos la próxima vez que se abra con conexión.
 
 ## Ejecutar en tu ordenador
 

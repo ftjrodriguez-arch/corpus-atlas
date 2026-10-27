@@ -8,6 +8,10 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Corpus">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Corpus Atlas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,500;0,600;1,400;1,500&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -638,10 +642,10 @@ details.more > .card{margin-bottom:10px}
   </aside>
 </main>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+<script src="lib/three.min.js"></script>
+<script src="lib/GLTFLoader.js"></script>
+<script src="lib/RoomEnvironment.js"></script>
+<script src="lib/DRACOLoader.js"></script>
 <script>
 (function(){
 'use strict';
@@ -3292,24 +3296,49 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
   setBody(BODY);
   if(shared)applyShared(shared);
   renderReviewCard();
+  try{const qp=new URLSearchParams(location.search);const qt=qp.get('tab');if(qt&&document.getElementById('tab-'+qt))showTab(qt);const tr=qp.get('tour');if(tr&&TOURS[tr])setTimeout(()=>phyStart(tr,0),600);}catch(e){}
   const exS=readExamHash();if(exS){exam.shared=exS;if(exS.b&&exS.b!==BODY)setBody(exS.b);showTab('lec');renderExamSetup(exS);$('#examCard').scrollIntoView({block:'start'});}else renderExamSetup();
   for(const k in SYS) if(SYS[k].on&&sexOk(k)&&SYS[k].state==='idle') loadSys(k);
 }).catch(()=>{$('#hintTxt').textContent='No se pudieron cargar los datos del atlas. Recarga la página para intentarlo de nuevo.';});
 })();
 </script>
-
+<style>
+#installBtn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:6px 14px;font-weight:700;font-size:13px}
+.offcard .bar{height:8px;margin:8px 0 4px}.offcard .ok{color:var(--ok);font-weight:700}
+.instsheet{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;padding:16px}
+.instsheet>div{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:460px;width:100%;padding:16px;display:flex;flex-direction:column;gap:10px}
+.instsheet ol{margin:0;padding-left:20px;font-size:14px;line-height:1.6}
+</style>
 <script>
-/* Descarga completa para estudiar sin conexión (solo en la versión publicada en la web) */
+/* ───── App instalable y sin conexión (versión publicada en la web) ───── */
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
- const FILES=["hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"];const box=document.createElement('div');box.className='card';
- box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 53 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
+ const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-1',MB=54;
+ const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
+ navigator.serviceWorker.register('sw.js').catch(()=>{});
+ const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+ const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+ /* botón Instalar */
+ let deferred=null;const hdr=document.querySelector('header');const ib=document.createElement('button');ib.id='installBtn';ib.hidden=true;ib.textContent='⬇ '+L('Instalar app','Install app','Instalar app');
+ const seg=hdr&&hdr.querySelector('.seg');if(seg)seg.after(ib);else if(hdr)hdr.appendChild(ib);
+ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;ib.hidden=false;});
+ window.addEventListener('appinstalled',()=>{ib.hidden=true;deferred=null;});
+ if(!standalone&&ios)ib.hidden=false;
+ ib.onclick=async()=>{if(deferred){deferred.prompt();const r=await deferred.userChoice;if(r.outcome==='accepted')ib.hidden=true;deferred=null;return;}
+   const sh=document.createElement('div');sh.className='instsheet';sh.innerHTML=`<div><h2>${L('Instalar Corpus','Install Corpus','Instalar Corpus')}</h2><ol>${ios?L('<li>Toca el botón <b>Compartir</b> (cuadrado con flecha) de Safari.</li><li>Elige <b>Añadir a pantalla de inicio</b>.</li><li>Abre Corpus desde el icono y pulsa <b>Descargar todo</b> para usarlo sin internet.</li>','<li>Tap Safari’s <b>Share</b> button (square with arrow).</li><li>Choose <b>Add to Home Screen</b>.</li><li>Open Corpus from the icon and tap <b>Download everything</b> to use it offline.</li>','<li>Toque o botão <b>Compartilhar</b> do Safari.</li><li>Escolha <b>Adicionar à Tela de Início</b>.</li><li>Abra o Corpus pelo ícone e toque em <b>Baixar tudo</b> para usar sem internet.</li>'):L('<li>En Chrome o Edge, abre el menú <b>⋮</b>.</li><li>Elige <b>Instalar aplicación</b> o <b>Añadir a pantalla de inicio</b>.</li><li>Abre Corpus y pulsa <b>Descargar todo</b> para usarlo sin internet.</li>','<li>In Chrome or Edge open the <b>⋮</b> menu.</li><li>Choose <b>Install app</b> or <b>Add to Home screen</b>.</li><li>Open Corpus and tap <b>Download everything</b> to use it offline.</li>','<li>No Chrome ou Edge, abra o menu <b>⋮</b>.</li><li>Escolha <b>Instalar aplicativo</b> ou <b>Adicionar à tela inicial</b>.</li><li>Abra o Corpus e toque em <b>Baixar tudo</b> para usar sem internet.</li>')}</ol><button class="btn pri">${L('Entendido','Got it','Entendi')}</button></div>`;
+   sh.onclick=e=>{if(e.target===sh||e.target.tagName==='BUTTON')sh.remove();};document.body.appendChild(sh);};
+ /* descarga completa */
+ const box=document.createElement('div');box.className='card offcard';
+ box.innerHTML=`<h3>${L('Usar sin conexión','Use offline','Usar sem conexão')}</h3><p class="muted small">${L(`Guarda en este dispositivo todos los modelos (hombre, mujer y alta resolución, unos ${MB} MB). Después Corpus funciona sin internet en el móvil, la tablet o el ordenador, también instalado como app.`,`Store all the models on this device (male, female and high resolution, about ${MB} MB). Corpus then works without internet on phone, tablet or computer, also as an installed app.`,`Guarda neste dispositivo todos os modelos (homem, mulher e alta resolução, cerca de ${MB} MB). Depois o Corpus funciona sem internet no celular, tablet ou computador, também instalado como app.`)}</p><div class="bar"><i id="offBar"></i></div><div class="row"><button class="btn pri" id="offBtn">${L('Descargar todo','Download everything','Baixar tudo')}</button><span class="muted small" id="offTxt"></span></div>`;
  const host=document.querySelector('#hrCard');if(host)host.after(box);
- const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v42');
-   for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
-   txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
+ const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt'),bar=box.querySelector('#offBar');
+ const check=async()=>{try{const c=await caches.open(MODELS);let n=0;for(const f of FILES)if(await c.match(f))n++;bar.style.width=(100*n/FILES.length)+'%';
+   if(n===FILES.length){txt.innerHTML=`<span class="ok">✓ ${L('Todo guardado: funciona sin conexión','Everything saved: works offline','Tudo salvo: funciona sem conexão')}</span>`;btn.textContent=L('Comprobar actualizaciones','Check for updates','Verificar atualizações');}
+   else if(n)txt.textContent=` ${n} / ${FILES.length} ${L('archivos guardados','files saved','arquivos salvos')}`;}catch(e){}};
+ check();
+ navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};if(d.type==='dl-progress'){bar.style.width=(100*d.n/d.tot)+'%';txt.textContent=` ${d.n} / ${d.tot}`;}
+   else if(d.type==='dl-done'){btn.disabled=false;if(d.fail)txt.textContent=' '+L(`Faltaron ${d.fail} archivos: vuelve a pulsar con conexión.`,`${d.fail} files failed: tap again when online.`,`Faltaram ${d.fail} arquivos: toque de novo com conexão.`);else check();}});
+ btn.onclick=async()=>{btn.disabled=true;txt.textContent=' '+L('Preparando…','Preparing…','Preparando…');try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist();}catch(e){}
+   const reg=await navigator.serviceWorker.ready;(navigator.serviceWorker.controller||reg.active).postMessage({type:'download',files:FILES});};
+ if(!navigator.onLine){const n=document.createElement('div');n.className='toast';n.style.cssText='position:fixed;top:12px;bottom:auto';n.textContent=L('Sin conexión: usando la copia guardada','Offline: using the saved copy','Sem conexão: usando a cópia salva');document.body.appendChild(n);setTimeout(()=>n.remove(),3500);}
 })();
-</script>
-<script>
-if('serviceWorker' in navigator&&location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script>
