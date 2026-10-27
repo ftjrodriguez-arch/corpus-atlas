@@ -567,7 +567,9 @@ details.more > .card{margin-bottom:10px}
           </div>
         </div>
         <dl class="kv" id="moveInfo"></dl>
-        <label class="chk"><input type="checkbox" id="agChk"> Resaltar en naranja los músculos agonistas</label>
+        <label class="chk"><input type="checkbox" id="agChk"> Resaltar los músculos: agonistas en naranja, los que se estiran en azul</label>
+        <div class="row" style="align-items:center;gap:8px"><span class="small muted">Ver</span><div class="seg" id="mvView" role="group" aria-label="Capas del movimiento"><button data-v="mus">Músculos</button><button data-v="lig">Ligamentos</button><button data-v="both">Ambos</button></div></div>
+        <p class="small muted" style="margin:4px 0 0">Los ligamentos pasan de blanco a rojo cuando se tensan al final del rango. La línea amarilla discontinua es el eje del movimiento.</p>
         <div class="note only-stu" id="moveTip"></div>
         <div class="note only-pro" id="moveGon"></div>
         <div class="card only-pro">
@@ -754,6 +756,7 @@ function matFor(k,ins,state){
   if(state==='sel'){m.emissive=lin(cssVar('--accent'));m.emissiveIntensity=.5;}
   if(state==='ag'){m.color=lin('#f0a040');m.emissive=lin('#ff6a00');m.emissiveIntensity=.45;}
   if(state==='hint'){m.emissive=lin(cssVar('--accent'));m.emissiveIntensity=.6;}
+  if(state==='an'){m.color=lin('#8fb8ff');m.emissive=lin('#1d4ed8');m.emissiveIntensity=.38;}
   if(state==='memb'){m.userData.memb=true;}
   if(state==='semi'){m.userData.semi=true;}
   if(state==='ghost'){m.emissive=lin(cssVar('--accent'));m.emissiveIntensity=.25;m.userData.ghost=true;}
@@ -1193,7 +1196,7 @@ function pick(cx,cy){
 const SEMI=/omentum|^Palmar aponeurosis$|^Plantar aponeurosis$|^Articular capsules? of|^Pubic symphysis$|Synovial membrane|^Frenula capsulae$/i;
 const MEMB=/^(Pleura|Spinal dura|Pericardium|Peritoneum)$|cornea|conjunctiva|aqueous|vitreous|tear film|anterior chamber|posterior chamber/i;
 function setState(m,st){m.userData.state=st;m.material=matFor(m.userData.sys,m.userData.c.ins,st===''&&MEMB.test(m.userData.c.en)?'memb':st===''&&SEMI.test(m.userData.c.en)?'semi':st);}
-function refreshState(m){const u=m.userData;const st=u.sel&&u.ghost?'ghost':u.sel?'sel':u.hint?'hint':u.ag?'ag':'';if(st!==u.state) setState(m,st);}
+function refreshState(m){const u=m.userData;const st=u.sel&&u.ghost?'ghost':u.sel?'sel':u.hint?'hint':u.ag?'ag':u.an?'an':'';if(st!==u.state) setState(m,st);}
 function select(m,point){
   stopTools();clearLm();
   if(selected){selected.m.userData.sel=false;selected.m.userData.ghost=false;refreshState(selected.m);}
@@ -1426,7 +1429,8 @@ function segDist(px,py,pz,a,b){const abx=b.x-a.x,aby=b.y-a.y,abz=b.z-a.z;const a
   let t=(apx*abx+apy*aby+apz*abz)/(abx*abx+aby*aby+abz*abz);t=t<0?0:t>1?1:t;const dx=apx-abx*t,dy=apy-aby*t,dz=apz-abz*t;return Math.sqrt(dx*dx+dy*dy+dz*dz);}
 function weightsFor(m,jn){
   const u=m.userData;u.W=u.W||{};if(jn in u.W) return u.W[jn];
-  const J=JOINTS[jn],child=J.child.map(k=>SEGS[k]),other=Object.keys(SEGS).filter(k=>!J.child.includes(k)).map(k=>SEGS[k]);
+  const J=JOINTS[jn];if(J.force){const fv=J.force(u.c?u.c.en:'');if(fv===0){u.W[jn]=null;return null;}if(fv===1){const nn=(u.rest||m.geometry.attributes.position.array).length/3;u.W[jn]=new Float32Array(nn).fill(1);return u.W[jn];}}
+  const child=J.child.map(k=>SEGS[k]),other=Object.keys(SEGS).filter(k=>!J.child.includes(k)).map(k=>SEGS[k]);
   const sph=m.geometry.boundingSphere,c=sph.center;
   let dc=Infinity,dp=Infinity;for(const s of child) dc=Math.min(dc,segDist(c.x,c.y,c.z,s[0],s[1]));for(const s of other) dp=Math.min(dp,segDist(c.x,c.y,c.z,s[0],s[1]));
   if(dc-dp>sph.radius*2+J.blend+.02){u.W[jn]=null;return null;}
@@ -1443,7 +1447,7 @@ function prepWeights(){}
 const deformed=new Set();
 function qOf(jn,comp){const J=JOINTS[jn];const long=J.long||new V3(0,1,0);
   const qx=new Q().setFromAxisAngle(new V3(1,0,0),D(comp.x)),qy=new Q().setFromAxisAngle(long,D(comp.y)),qz=new Q().setFromAxisAngle(new V3(0,0,1),D(comp.z));
-  return qx.multiply(qy).multiply(qz);}
+  const q0=qx.multiply(qy).multiply(qz);return comp.w?new Q().setFromAxisAngle(new V3(0,1,0),D(comp.w)).multiply(q0):q0;}
 function deform(active){
   // active: [{jn,q}] sorted distal→proximal
   const ops=active.map(a=>{const q=a.q;let ang=2*Math.acos(Math.min(1,Math.abs(q.w)));const s=Math.sqrt(Math.max(0,1-q.w*q.w));
@@ -1512,6 +1516,123 @@ const ROM=[
   {n:'Inclinación lateral',ax:'z',sg:1,max:35,pl:'fro',dir:[0,1,0],ag:['Quadratus lumborum muscle','External abdominal oblique muscle','Internal abdominal oblique muscle','Iliocostalis lumborum muscle'],gon:['Apófisis espinosa de S1','Perpendicular al suelo','Apófisis espinosa de C7'],pos:'Bipedestación',ef:'Firme'},
   {n:'Rotación',ax:'y',sg:-1,max:45,pl:'tra',dir:[0,0,1],ag:['External abdominal oblique muscle','Internal abdominal oblique muscle','Multifidus lumborum muscle','Rotatores'],gon:['Centro del vértice del cráneo','Paralelo a la línea entre ambas crestas ilíacas','Línea entre ambos acromiones'],pos:'Sedestación para fijar la pelvis',ef:'Firme'}]}
 ];
+/* ───────── Todas las articulaciones: cintura escapular, dedos, pulgar, dedos del pie y ATM ───────── */
+const FING=[2,3,4,5],TOES=[1,2,3,4,5];
+function buildRig2(){if(!RIG||!RIG.f21_R)return;const P=k=>new V3(...RIG[k]);
+  for(const S of ['R','L']){const hs=[],fs=[];
+    SEGS['hand_'+S]=[P('wrist_'+S),P('f31_'+S)];
+    for(const f of FING){SEGS[`mc${f}_${S}`]=[P(`f${f}0_${S}`),P(`f${f}1_${S}`)];SEGS[`fp${f}_${S}`]=[P(`f${f}1_${S}`),P(`f${f}2_${S}`)];SEGS[`fm${f}_${S}`]=[P(`f${f}2_${S}`),P(`f${f}3_${S}`)];SEGS[`fd${f}_${S}`]=[P(`f${f}3_${S}`),P(`f${f}4_${S}`)];hs.push(`mc${f}_${S}`,`fp${f}_${S}`,`fm${f}_${S}`,`fd${f}_${S}`);
+      JOINTS[`mcp${f}_${S}`]={pivot:P(`f${f}1_${S}`),child:[`fp${f}_${S}`,`fm${f}_${S}`,`fd${f}_${S}`],blend:.007};
+      JOINTS[`pip${f}_${S}`]={pivot:P(`f${f}2_${S}`),child:[`fm${f}_${S}`,`fd${f}_${S}`],blend:.005};
+      JOINTS[`dip${f}_${S}`]={pivot:P(`f${f}3_${S}`),child:[`fd${f}_${S}`],blend:.004};}
+    SEGS['tm_'+S]=[P('th0_'+S),P('th1_'+S)];SEGS['tp_'+S]=[P('th1_'+S),P('th2_'+S)];SEGS['td_'+S]=[P('th2_'+S),P('th3_'+S)];hs.push('tm_'+S,'tp_'+S,'td_'+S);
+    const thl=P('th0_'+S).sub(P('th1_'+S)).normalize();
+    JOINTS['cmc_'+S]={pivot:P('th0_'+S),child:['tm_'+S,'tp_'+S,'td_'+S],long:thl,blend:.008};
+    JOINTS['mcp1_'+S]={pivot:P('th1_'+S),child:['tp_'+S,'td_'+S],blend:.006};
+    JOINTS['ip1_'+S]={pivot:P('th2_'+S),child:['td_'+S],blend:.005};
+    SEGS['foot_'+S]=[P('ankle_'+S),P('t21_'+S)];
+    for(const f of TOES){const segs=f===1?[`tp1_${S}`,`td1_${S}`]:[`tp${f}_${S}`,`tm${f}_${S}`,`td${f}_${S}`];
+      SEGS[`mt${f}_${S}`]=[P(`t${f}0_${S}`),P(`t${f}1_${S}`)];SEGS[segs[0]]=[P(`t${f}1_${S}`),P(`t${f}2_${S}`)];SEGS[segs[1]]=[P(`t${f}2_${S}`),P(`t${f}3_${S}`)];if(f>1)SEGS[segs[2]]=[P(`t${f}3_${S}`),P(`t${f}4_${S}`)];
+      fs.push(`mt${f}_${S}`,...segs);JOINTS[`mtp${f}_${S}`]={pivot:P(`t${f}1_${S}`),child:segs,blend:.007};}
+    SEGS['clv_'+S]=[P('sc_'+S),P('ac_'+S)];SEGS['scap_'+S]=[P('scapTop_'+S).lerp(P('scapBot_'+S),.15),P('scapBot_'+S)];
+    const armc=['arm_'+S,'fore_'+S,...hs,'hand_'+S];
+    JOINTS['sc_'+S]={pivot:P('sc_'+S),child:['clv_'+S,'scap_'+S,...armc],blend:.02};
+    for(const j of ['shoulder','elbow','fore','wrist'])JOINTS[j+'_'+S].child=[...new Set([...JOINTS[j+'_'+S].child,...hs])];
+    for(const j of ['hip','knee','ankle'])JOINTS[j+'_'+S].child=[...new Set([...JOINTS[j+'_'+S].child,...fs])];
+    JOINTS['knee_'+S].long=P('knee_'+S).sub(P('ankle_'+S)).normalize();
+    JOINTS.trunk.child=[...new Set([...JOINTS.trunk.child,...hs,'clv_'+S,'scap_'+S])];}
+  const tm=P('tmj_R').lerp(P('tmj_L'),.5);SEGS.jaw=[tm,P('chin')];SEGS.maxilla=[new V3(0,1.6,0.035),new V3(0,1.556,0.074)];
+  JOINTS.tmj={pivot:tm,child:['jaw'],blend:.012,force:en=>/^Mandible$|^Lower /.test(en)?1:/^(Maxilla|Upper |Zygomatic|Temporal bone|Sphenoid|Nasal bone|Palatine|Vomer|Frontal bone|Parietal|Occipital bone|Ethmoid|Lacrimal|Inferior nasal concha|Hyoid)/.test(en)?0:null};
+  JOINTS.cervical.child=[...new Set([...JOINTS.cervical.child,'jaw','maxilla'])];JOINTS.trunk.child=[...new Set([...JOINTS.trunk.child,'jaw','maxilla'])];
+  for(const k in JOINTS)if(k!=='tmj'&&JOINTS[k].force)delete JOINTS[k].force;
+  Object.assign(DEPTH,{sc:0.5,tmj:2,cmc:5,mcp1:6,ip1:7});for(const f of FING)Object.assign(DEPTH,{['mcp'+f]:5,['pip'+f]:6,['dip'+f]:7});for(const f of TOES)DEPTH['mtp'+f]=4;
+  Object.assign(PROX,{sc:['trunk'],tmj:['cervical','trunk'],cmc:['wrist','fore','elbow','shoulder','trunk'],mcp1:['cmc','wrist','fore','elbow','shoulder','trunk'],ip1:['mcp1','cmc','wrist','fore','elbow','shoulder','trunk']});
+  for(const f of FING)Object.assign(PROX,{['mcp'+f]:['wrist','fore','elbow','shoulder','trunk'],['pip'+f]:['mcp'+f,'wrist','fore','elbow','shoulder','trunk'],['dip'+f]:['pip'+f,'mcp'+f,'wrist','fore','elbow','shoulder','trunk']});
+  for(const f of TOES)PROX['mtp'+f]=['ankle','knee','hip'];
+  SIDED.push('sc','cmc','mcp1','ip1',...FING.flatMap(f=>['mcp'+f,'pip'+f,'dip'+f]),...TOES.map(f=>'mtp'+f));
+  for(const m of meshes)if(m.userData.W)m.userData.W={};}
+
+/* Movimientos nuevos (rangos AAOS y de referencia clínica) */
+const fingAll=(mcp,pip,dip)=>t=>{const h={};for(const f of FING){if(f!==3)h['mcp'+f]=['x',mcp*t];h['pip'+f]=['x',pip*t];h['dip'+f]=['x',dip*t];}return h;};
+const ROM_ADD={
+ hombro:[
+  {n:'Aducción',ax:'z',sg:1,max:30,pl:'fro',dir:[0,-1,0],help:{shoulder:['x',-20]},ag:['Latissimus dorsi muscle','Teres major muscle','Sternocostal head of pectoralis major muscle','Long head of triceps brachii','Coracobrachialis muscle'],gon:['Cara anterior del acromion','Paralelo al esternón','Línea media anterior del húmero'],pos:'Bipedestación, brazo por delante del tronco (ligera flexión)',ef:'Firme o blando (contacto con el tronco)'},
+  {n:'Abducción horizontal',ax:'w',sg:-1,max:45,pl:'tra',dir:[0,-1,0],help:{shoulder:['z',-90]},ag:['Scapular spinal part of deltoid muscle','Infraspinatus muscle','Teres minor muscle','Transverse part of trapezius muscle','Rhomboid major muscle','Rhomboid minor muscle'],gon:['Cara superior del acromion','Perpendicular al tronco','Línea media superior del húmero'],pos:'Sedestación, hombro a 90° de abducción',ef:'Firme (cápsula anterior)'},
+  {n:'Aducción horizontal',ax:'w',sg:1,max:135,pl:'tra',dir:[0,-1,0],help:{shoulder:['z',-90]},ag:['Clavicular head of pectoralis major muscle','Sternocostal head of pectoralis major muscle','Clavicular part of deltoid muscle','Coracobrachialis muscle'],gon:['Cara superior del acromion','Perpendicular al tronco','Línea media superior del húmero'],pos:'Sedestación, hombro a 90° de abducción',ef:'Blando o firme (cápsula posterior)'}],
+ codo:[
+  {n:'Extensión',ax:'x',sg:1,max:10,pl:'sag',dir:[0,-1,0],ag:['Long head of triceps brachii','Lateral head of triceps brachii','Medial head of triceps brachii','Anconeus muscle'],gon:['Epicóndilo lateral','Línea media lateral del húmero','Línea media lateral del radio'],pos:'Supino; 0° es el codo recto (hasta 10° de hiperextensión es normal)',ef:'Duro (olécranon en la fosa olecraniana)'}],
+ rodilla:[
+  {n:'Extensión',ax:'x',sg:-1,max:10,pl:'sag',dir:[0,-1,0],ag:['Rectus femoris muscle','Vastus lateralis muscle','Vastus medialis muscle','Vastus intermedius muscle'],gon:['Epicóndilo lateral del fémur','Línea media lateral del fémur hacia el trocánter mayor','Línea media lateral del peroné hacia el maléolo'],pos:'Supino; 0° es la rodilla recta (hasta 10° de recurvatum)',ef:'Firme (cápsula posterior y ligamentos cruzados)'},
+  {n:'Rotación interna',ax:'y',sg:1,max:30,pl:'tra',dir:[0,0,1],help:{knee:['x',90]},ag:['Popliteus muscle','Semitendinosus muscle','Semimembranosus muscle','Gracilis muscle','Sartorius muscle'],gon:['Eje longitudinal de la tibia','Línea del pie en posición neutra','Segundo metatarsiano'],pos:'Sedestación, rodilla a 90° (en extensión completa la rodilla no rota)',ef:'Firme (ligamentos cruzados enrollados)'},
+  {n:'Rotación externa',ax:'y',sg:-1,max:40,pl:'tra',dir:[0,0,1],help:{knee:['x',90]},ag:['Long head of biceps femoris','Short head of biceps femoris'],gon:['Eje longitudinal de la tibia','Línea del pie en posición neutra','Segundo metatarsiano'],pos:'Sedestación, rodilla a 90°',ef:'Firme (ligamentos colaterales)'}]};
+const ROM_NEW=[
+ {id:'escapula',n:'Cintura escapular',node:'sc',sided:true,R:0.12,after:'hombro',moves:[
+  {n:'Elevación',ax:'z',sg:-1,max:40,pl:'fro',dir:[-1,0,0],ag:['Descending part of trapezius muscle','Levator scapulae','Rhomboid major muscle','Rhomboid minor muscle'],gon:['Articulación esternoclavicular','Horizontal','Eje de la clavícula'],pos:'Bipedestación (el movimiento se mide en la clavícula)',ef:'Firme (ligamento costoclavicular)'},
+  {n:'Depresión',ax:'z',sg:1,max:10,pl:'fro',dir:[-1,0,0],ag:['Pectoralis minor muscle','Subclavius muscle','Ascending part of trapezius muscle'],gon:['Articulación esternoclavicular','Horizontal','Eje de la clavícula'],pos:'Bipedestación',ef:'Firme (disco y ligamento interclavicular)'},
+  {n:'Protracción',ax:'y',sg:1,max:15,pl:'tra',dir:[-1,0,0],ag:['Serratus anterior muscle','Pectoralis minor muscle'],gon:['Articulación esternoclavicular','Plano frontal','Eje de la clavícula'],pos:'Bipedestación; la escápula se desliza hacia delante sobre el tórax',ef:'Firme (ligamento esternoclavicular posterior)'},
+  {n:'Retracción',ax:'y',sg:-1,max:15,pl:'tra',dir:[-1,0,0],ag:['Rhomboid major muscle','Rhomboid minor muscle','Transverse part of trapezius muscle'],gon:['Articulación esternoclavicular','Plano frontal','Eje de la clavícula'],pos:'Bipedestación; las escápulas se acercan a la columna',ef:'Firme (ligamento esternoclavicular anterior)'}]},
+ {id:'dedos',n:'Dedos de la mano',node:'mcp3',sided:true,R:0.05,after:'muneca',moves:[
+  {n:'Flexión',ax:'x',sg:-1,max:90,pl:'sag',dir:[0,-1,0],helpFn:t=>fingAll(-1,-100/90,-80/90)(t),ag:['Flexor digitorum profundus','Humero-ulnar head of flexor digitorum superficialis','Radial head of flexor digitorum superficialis','Lumbrical muscles of hand','Palmar interossei muscles','Dorsal interossei muscles of hand'],gon:['Dorso de cada articulación','Dorso del hueso proximal','Dorso del hueso distal'],pos:'Antebrazo y muñeca en posición neutra. MCF 0–90°, IFP 0–100°, IFD 0–90° (aquí, puño completo)',ef:'Firme o duro (MCF, IFP); firme (IFD)'},
+  {n:'Extensión',ax:'x',sg:1,max:45,pl:'sag',dir:[0,-1,0],helpFn:t=>{const h={};for(const f of FING)if(f!==3)h['mcp'+f]=['x',t];return h;},ag:['Extensor digitorum','Extensor indicis','Extensor digiti minimi'],gon:['Dorso de la MCF','Dorso del metacarpiano','Dorso de la falange proximal'],pos:'Muñeca neutra; se mide en las metacarpofalángicas',ef:'Firme (placa palmar)'},
+  {n:'Abducción',ax:'z',sg:-1,max:20,pl:'fro',dir:[0,-1,0],node2:'mcp2',helpFn:t=>({mcp4:['z',t*0.7],mcp5:['z',t*1.2]}),ag:['Dorsal interossei muscles of hand','Abductor digiti minimi of hand'],gon:['Dorso de la MCF','Dorso del metacarpiano','Dorso de la falange proximal'],pos:'Mano plana; los dedos se separan del dedo medio (eje de referencia)',ef:'Firme (ligamentos colaterales)'}]},
+ {id:'pulgar',n:'Pulgar',node:'mcp1',sided:true,R:0.04,after:'dedos',moves:[
+  {n:'Flexión',ax:'z',sg:1,max:50,pl:'fro',dir:[0,-1,0],helpFn:t=>({ip1:['z',t*80/50],cmc:['z',t*15/50]}),ag:['Flexor pollicis longus','Superficial head of flexor pollicis brevis','Deep head of flexor pollicis brevis'],gon:['Dorso de cada articulación','Dorso del hueso proximal','Dorso del hueso distal'],pos:'CMC 0–15°, MCF 0–50°, IF 0–80° (el pulgar cruza la palma)',ef:'Firme o duro'},
+  {n:'Extensión',ax:'z',sg:-1,max:20,pl:'fro',dir:[0,-1,0],helpFn:t=>({cmc:['z',-t],ip1:['z',-t]}),ag:['Extensor pollicis longus','Extensor pollicis brevis','Abductor pollicis longus'],gon:['Dorso de la IF','Dorso de la falange proximal','Dorso de la falange distal'],pos:'CMC hasta 20° e IF hasta 20° de hiperextensión',ef:'Firme (placa palmar)'},
+  {n:'Abducción',ax:'x',sg:-1,max:70,pl:'sag',dir:[0,-1,0],node2:'cmc',ag:['Abductor pollicis brevis','Abductor pollicis longus'],gon:['Unión del 1.º y 2.º metacarpiano','2.º metacarpiano','1.º metacarpiano'],pos:'Abducción palmar: el pulgar se separa de la palma hacia delante (CMC 0–70°)',ef:'Firme (fascia y aductor del pulgar)'},
+  {n:'Oposición',ax:'x',sg:-0.5,max:100,u:'%',pl:'tra',dir:[0,-1,0],node2:'cmc',helpFn:t=>({cmc:['y',0.45*t],mcp1:['z',0.35*t],ip1:['z',0.3*t]}),ag:['Opponens pollicis muscle','Abductor pollicis brevis','Superficial head of flexor pollicis brevis','Opponens digiti minimi muscle of hand'],gon:['Distancia entre la yema del pulgar y la del meñique','Regla','—'],pos:'Se mide en centímetros: 0 cm cuando la yema del pulgar toca la del meñique',ef:'Combinación de abducción, rotación y flexión'}]},
+ {id:'dedospie',n:'Dedos del pie',node:'mtp1',sided:true,R:0.05,after:'tobillo',moves:[
+  {n:'Flexión',ax:'x',sg:1,max:45,pl:'sag',dir:[0,0,1],helpFn:t=>{const h={};for(const f of TOES)if(f>1)h['mtp'+f]=['x',t*40/45];return h;},ag:['Flexor hallucis longus','Flexor digitorum longus','Flexor digitorum brevis','Lumbrical muscles of foot','Quadratus plantae muscle','Lateral head of flexor hallucis brevis','Medial head of flexor hallucis brevis'],gon:['Cara medial de la 1.ª MTF','Cara medial del 1.er metatarsiano','Cara medial de la falange proximal'],pos:'Supino, tobillo neutro. Dedo gordo 0–45°, resto 0–40°',ef:'Firme'},
+  {n:'Extensión',ax:'x',sg:-1,max:70,pl:'sag',dir:[0,0,1],helpFn:t=>{const h={};for(const f of TOES)if(f>1)h['mtp'+f]=['x',-t*40/70];return h;},ag:['Extensor hallucis longus','Extensor digitorum longus','Extensor digitorum brevis','Extensor hallucis brevis'],gon:['Cara medial de la 1.ª MTF','Cara medial del 1.er metatarsiano','Cara medial de la falange proximal'],pos:'Dedo gordo 0–70° (clave para despegar el pie al caminar), resto 0–40°',ef:'Firme (fascia plantar: mecanismo de molinete)'}]},
+ {id:'atm',n:'Mandíbula (ATM)',node:'tmj',sided:false,R:0.08,after:'cervical',moves:[
+  {n:'Apertura',ax:'x',sg:1,max:30,pl:'sag',dir:[0,-0.6,0.8],ag:['Inferior head of lateral pterygoid muscle','Anterior belly of digastric muscle','Posterior belly of digastric muscle','Geniohyoid muscle','Mylohyoid muscle'],gon:['Distancia entre los bordes de los incisivos','Regla','—'],pos:'Normal: 40–50 mm entre incisivos (unos 3 dedos). La mandíbula rota y se desliza hacia delante sobre la eminencia articular',ef:'Firme (ligamento lateral y músculos elevadores)'},
+  {n:'Lateralidad',ax:'y',sg:1,max:10,pl:'tra',dir:[0,-0.6,0.8],ag:['Inferior head of lateral pterygoid muscle','Medial pterygoid muscle','Temporalis muscle'],gon:['Desplazamiento de la línea media de los incisivos inferiores','Regla','—'],pos:'Normal: unos 10 mm hacia cada lado. Lo produce el pterigoideo lateral del lado contrario',ef:'Firme (ligamento lateral de la ATM)'}]}];
+/* Ligamentos que se tensan al final de cada movimiento */
+const ROM_LIG={
+ 'hombro|Flexión':['Articular capsule of glenohumeral joint'],'hombro|Extensión':['Coracohumeral ligament','Superior glenohumeral ligament'],'hombro|Abducción':['Inferior glenohumeral ligament','Middle glenohumeral ligament'],
+ 'hombro|Aducción':['Superior glenohumeral ligament','Coracohumeral ligament'],'hombro|Rotación interna':['Articular capsule of glenohumeral joint'],'hombro|Rotación externa':['Superior glenohumeral ligament','Middle glenohumeral ligament','Inferior glenohumeral ligament','Coracohumeral ligament'],
+ 'hombro|Abducción horizontal':['Middle glenohumeral ligament','Inferior glenohumeral ligament'],'hombro|Aducción horizontal':['Articular capsule of glenohumeral joint'],
+ 'escapula|Elevación':['Costoclavicular ligament'],'escapula|Depresión':['Interclavicular ligament','Articular disc of sternoclavicular joint'],'escapula|Protracción':['Posterior sternoclavicular ligament'],'escapula|Retracción':['Anterior sternoclavicular ligament','Costoclavicular ligament'],
+ 'codo|Flexión':['Articular capsule of elbow joint'],'codo|Extensión':['Ulnar collateral ligament','Radial collateral ligament','Articular capsule of elbow joint'],
+ 'antebrazo|Pronación':['Quadrate ligament','Annular ligament of radius','Interosseous membrane of forearm'],'antebrazo|Supinación':['Quadrate ligament','Palmar radio-ulnar ligament','Interosseous membrane of forearm'],
+ 'muneca|Flexión':['Dorsal radiocarpal ligament','Dorsal ulnocarpal ligament'],'muneca|Extensión':['Articular capsule of radiocarpal joint'],'muneca|Desviación radial':['Ulnar collateral ligament of wrist joint'],'muneca|Desviación cubital':['Radial collateral ligament of wrist joint'],
+ 'dedos|Flexión':['Collateral metacarpophalangeal ligaments','Collateral interphalangeal ligaments of hand'],'dedos|Extensión':['Palmar interphalangeal ligaments','Deep transverse metacarpal ligament'],'dedos|Abducción':['Collateral metacarpophalangeal ligaments','Deep transverse metacarpal ligament'],
+ 'pulgar|Flexión':['Collateral metacarpophalangeal ligaments'],'pulgar|Extensión':['Palmar interphalangeal ligaments'],'pulgar|Abducción':['Palmar carpometacarpal ligaments'],'pulgar|Oposición':['Palmar carpometacarpal ligaments'],
+ 'cadera|Flexión':['Ischiofemoral ligament'],'cadera|Extensión':['Descending part of iliofemoral ligament','Transverse part of iliofemoral ligament','Pubofemoral ligament'],'cadera|Abducción':['Pubofemoral ligament','Ischiofemoral ligament'],'cadera|Aducción':['Transverse part of iliofemoral ligament','Ligament of head of femur'],'cadera|Rotación interna':['Ischiofemoral ligament'],'cadera|Rotación externa':['Transverse part of iliofemoral ligament','Descending part of iliofemoral ligament','Pubofemoral ligament'],
+ 'rodilla|Flexión':['Posterior cruciate ligament'],'rodilla|Extensión':['Anterior cruciate ligament','Fibular collateral ligament','Superficial part of tibial collateral ligament','Oblique popliteal ligament'],'rodilla|Rotación interna':['Anterior cruciate ligament','Posterior cruciate ligament'],'rodilla|Rotación externa':['Fibular collateral ligament','Superficial part of tibial collateral ligament'],
+ 'tobillo|Dorsiflexión':['Posterior talofibular ligament','Posterior tibiotalar ligament','Calcaneofibular ligament'],'tobillo|Flexión plantar':['Anterior talofibular ligament','Anterior tibiofibular ligament'],'tobillo|Inversión':['Anterior talofibular ligament','Calcaneofibular ligament'],'tobillo|Eversión':['Posterior tibiotalar ligament'],
+ 'dedospie|Flexión':['Collateral metatarsophalangeal ligaments'],'dedospie|Extensión':['Plantar metatarsophalangeal ligaments','Long plantar ligament'],
+ 'cervical|Flexión':['Nuchal ligament','Ligamenta flava','Interspinous ligaments','Posterior longitudinal ligament'],'cervical|Extensión':['Anterior longitudinal ligament'],'cervical|Inclinación lateral':['Ligamenta flava'],
+ 'tronco|Flexión':['Supraspinous ligament','Interspinous ligaments','Ligamenta flava','Posterior longitudinal ligament'],'tronco|Extensión':['Anterior longitudinal ligament'],'tronco|Inclinación lateral':['Ligamenta flava'],
+ 'atm|Apertura':['Lateral temporomandibular ligament','Sphenomandibular ligament','Stylomandibular ligament'],'atm|Lateralidad':['Lateral temporomandibular ligament']};
+const OPP_MV={'Flexión':'Extensión','Extensión':'Flexión','Abducción':'Aducción','Aducción':'Abducción','Rotación interna':'Rotación externa','Rotación externa':'Rotación interna','Pronación':'Supinación','Supinación':'Pronación','Dorsiflexión':'Flexión plantar','Flexión plantar':'Dorsiflexión','Inversión':'Eversión','Eversión':'Inversión','Desviación radial':'Desviación cubital','Desviación cubital':'Desviación radial','Elevación':'Depresión','Depresión':'Elevación','Protracción':'Retracción','Retracción':'Protracción','Abducción horizontal':'Aducción horizontal','Aducción horizontal':'Abducción horizontal','Apertura':null};
+(function(){for(const id in ROM_ADD){const j=ROM.find(x=>x.id===id);if(!j)continue;for(const mv of ROM_ADD[id]){const i=j.moves.findIndex(x=>x.n===OPP_MV[mv.n]);if(i>=0&&!j.moves.some(x=>x.n===mv.n))j.moves.splice(i+1,0,mv);else if(!j.moves.some(x=>x.n===mv.n))j.moves.push(mv);}}
+  for(const j of ROM_NEW){const i=ROM.findIndex(x=>x.id===j.after);ROM.splice(i+1,0,j);}
+  for(const j of ROM)for(const mv of j.moves){mv.lig=ROM_LIG[j.id+'|'+mv.n]||[];const o=j.moves.find(x=>x.n===OPP_MV[mv.n]);mv.ant=o?o.ag.filter(a=>!mv.ag.includes(a)):(j.id==='atm'&&mv.n==='Apertura'?['Temporalis muscle','Superficial part of masseter','Deep part of masseter','Medial pterygoid muscle']:[]);
+    if(mv.node2){mv.mainNode=mv.node2;}}})();
+
+/* Músculos que se estiran (azul), ligamentos que se tensan (de blanco a rojo), eje del movimiento y vista */
+const axisLine=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineDashedMaterial({color:0xffe066,dashSize:0.008,gapSize:0.005,depthTest:false,transparent:true}));axisLine.renderOrder=21;axisLine.frustumCulled=false;axisLine.visible=false;scene.add(axisLine);
+let axisLbl=null,mvView=store.get('mvView','mus');const LIGT=[];
+function mvLigReset(){for(const x of LIGT){if(x.L){x.L.el.remove();const i=labels.indexOf(x.L);if(i>=0)labels.splice(i,1);}applyTint(x.m);}LIGT.length=0;}
+function mvLigSetup(){mvLigReset();if(currentTab!=='mov'||gait.on||!curM.lig||!curM.lig.length)return;const sideName=romSide==='R'?'derecho':'izquierdo';
+  for(const m of meshes){if(BS(m.userData.sys)!=='articular'||!curM.lig.includes(m.userData.c.en))continue;if(curJ.sided&&m.userData.c.side&&m.userData.c.side!==sideName)continue;if(LIGT.some(x=>x.m.userData.c.en===m.userData.c.en&&x.m.userData.c.side===m.userData.c.side))continue;
+    const dup=LIGT.some(x=>x.L&&x.m.userData.c.en===m.userData.c.en);const L=dup?null:addLabel(m.userData.c.es,()=>null,'phyl','mvlig');if(L)L.on=false;LIGT.push({m,L});}}
+function mvLigTick(){if(!LIGT.length)return;const f=Math.max(0,Math.min(1,angle/curM.max));const k=f<0.35?0:Math.min(1,(f-0.35)/0.6);const a=[0xc3,0xd0,0xde],b=[0xff,0x4d,0x2e];const col=a.map((v,i)=>Math.round(v+(b[i]-v)*k));
+  for(const x of LIGT){x.tinted=true;const t=x.m.geometry.attributes.vtint;if(t){const arr=t.array;for(let i=0;i<arr.length;i+=4){arr[i]=col[0];arr[i+1]=col[1];arr[i+2]=col[2];arr[i+3]=255;}t.needsUpdate=true;}
+    if(x.L){x.m.geometry.computeBoundingBox();x.L.pos=x.m.geometry.boundingBox.getCenter(new V3());x.L.on=k>0.5&&visibleDeep(x.m);x.L.el.textContent=x.m.userData.c.es+' · '+TL('se tensa','tightens','se tensiona');}}}
+function setMvView(v){mvView=v;store.set('mvView',v);document.querySelectorAll('#mvView [data-v]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
+  const ko=Object.keys(SYS).find(x=>BS(x)==='oseo'&&sexOk(x)),ka=Object.keys(SYS).find(x=>BS(x)==='articular'&&sexOk(x)),km=Object.keys(SYS).find(x=>BS(x)==='muscular'&&sexOk(x));
+  if(v!=='mus'){for(const k of [ko,ka])if(k){SYS[k].on=true;if(SYS[k].state!=='loaded')loadSys(k).then(()=>{mvLigSetup();applyPose();});}}
+  if(km){SYS[km].on=v!=='lig';SYS[km].op=v==='both'?0.3:1;}if(v==='lig'&&ka)SYS[ka].op=1;
+  applySystems();renderSysList();mvLigSetup();applyPose();}
+function mvAxis(k,piv,pq,R){const jn=jname(k);const base=comps(0)[k],full=comps(Math.max(angle,curM.max*0.5))[k];if(!base||!full){axisLine.visible=false;return;}
+  const dq=qOf(jn,full).multiply(qOf(jn,base).invert());const s=Math.sqrt(Math.max(0,1-dq.w*dq.w));let ax=s>1e-4?new V3(dq.x/s,dq.y/s,dq.z/s):new V3(curM.ax==='x'?1:0,curM.ax==='y'||curM.ax==='w'?1:0,curM.ax==='z'?1:0);
+  ax.applyQuaternion(pq).normalize();const L=Math.max(0.05,R*1.4);axisLine.geometry.setFromPoints([piv.clone().addScaledVector(ax,-L),piv.clone().addScaledVector(ax,L)]);axisLine.computeLineDistances();axisLine.visible=true;
+  if(!axisLbl){axisLbl=addLabel('','',null,'mvaxis');axisLbl.el.className='lbl phyl axl';}axisLbl.pos=piv.clone().addScaledVector(ax,L*1.05);axisLbl.on=true;
+  const nm={sag:TL('Eje laterolateral','Mediolateral axis','Eixo laterolateral'),fro:TL('Eje anteroposterior','Anteroposterior axis','Eixo anteroposterior'),tra:TL('Eje longitudinal','Longitudinal axis','Eixo longitudinal')}[curM.pl];if(axisLbl.el.textContent!==nm)axisLbl.el.textContent=nm;}
+function applyAntagonists(){const ens=(currentTab==='mov'&&agOn&&!gait.on)?(curM.ant||[]):[];const sideName=romSide==='R'?'derecho':'izquierdo';
+  for(const m of meshes){if(m.userData.sys!=='muscular')continue;const c=m.userData.c;const want=ens.includes(c.en)&&(!curJ.sided||!c.side||c.side===sideName)&&!m.userData.ag;if(!!m.userData.an!==want){m.userData.an=want;refreshState(m);}}}
+
 let romSide=store.get('side','R'),curJ=ROM[0],curM=ROM[0].moves[0],angle=0,playing=false,playT=0,agOn=store.get('agon',true);
 const arcLine=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({depthTest:false,transparent:true}));
 const arcFan=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshBasicMaterial({depthTest:false,transparent:true,opacity:.28,side:THREE.DoubleSide}));
@@ -1520,10 +1641,10 @@ const arcRays=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBa
 const SIDED=['shoulder','elbow','fore','wrist','hip','knee','ankle'];
 const jname=k=>SIDED.includes(k)?k+'_'+romSide:k;
 const sideSign=()=>romSide==='L'?-1:1;
-function comps(t){const c={};const add=(k,ax,deg)=>{c[k]=c[k]||{x:0,y:0,z:0};c[k][ax]+=deg;};
+function comps(t){const c={};const add=(k,ax,deg)=>{c[k]=c[k]||{x:0,y:0,z:0,w:0};c[k][ax]+=deg;};
   const flip=ax=>(ax==='x'?1:sideSign());const help=curM.helpFn?curM.helpFn(angle):(curM.help||{});
   for(const k in help){const [ax,d]=help[k];add(k,ax,d*flip(ax));}
-  add(curJ.node,curM.ax,(curM.sg*t+(curM.off||0))*flip(curM.ax));return c;}
+  add(curM.mainNode||curJ.node,curM.ax,(curM.sg*t+(curM.off||0))*flip(curM.ax));return c;}
 function applyPose(){
   if(!RIG) return;
   const active=(gait.on&&currentTab==='mov')?gaitActive():(currentTab==='mov'||contraction)?Object.entries(comps(angle)).map(([k,cm])=>({k,jn:jname(k),q:qOf(jname(k),cm)})):[];
@@ -1531,8 +1652,8 @@ function applyPose(){
   deform(active);updateArc(active);
 }
 function updateArc(active){
-  if((currentTab!=='mov'&&!contraction)||!RIG||gait.on||(typeof PHY!=='undefined'&&PHY.on)){[arcLine,arcFan,arcRays].forEach(o=>o.visible=false);return;}
-  const k=curJ.node,J=JOINTS[jname(k)];
+  if((currentTab!=='mov'&&!contraction)||!RIG||gait.on||(typeof PHY!=='undefined'&&PHY.on)){[arcLine,arcFan,arcRays,axisLine].forEach(o=>o.visible=false);if(axisLbl)axisLbl.on=false;for(const x of LIGT){if(x.L)x.L.on=false;if(x.tinted){applyTint(x.m);x.tinted=false;}}return;}
+  const k=curM.mainNode||curJ.node,J=JOINTS[jname(k)];if(!J){[arcLine,arcFan,arcRays,axisLine].forEach(o=>o.visible=false);return;}
   const proxK=PROX[k].filter(p=>active.find(a=>a.k===p));
   // pivot: apply proximal rotations (distal→proximal); parent rotation: product proximal-first
   const piv=J.pivot.clone();
@@ -1540,14 +1661,14 @@ function updateArc(active){
   const pq=new Q();[...proxK].reverse().forEach(pk=>pq.multiply(active.find(x=>x.k===pk).q));
   const base=comps(0)[k],full=comps(angle)[k];
   const N=40,pts=[],dir=new V3(...curM.dir),R=curJ.R;
-  for(let i=0;i<=N;i++){const f=i/N;const cm={x:base.x+(full.x-base.x)*f,y:base.y+(full.y-base.y)*f,z:base.z+(full.z-base.z)*f};
+  for(let i=0;i<=N;i++){const f=i/N;const cm={x:base.x+(full.x-base.x)*f,y:base.y+(full.y-base.y)*f,z:base.z+(full.z-base.z)*f,w:base.w+(full.w-base.w)*f};
     const q=pq.clone().multiply(qOf(jname(k),cm));pts.push(piv.clone().add(dir.clone().applyQuaternion(q).multiplyScalar(R)));}
   arcLine.geometry.setFromPoints(pts);
   const fan=[];for(let i=0;i<N;i++) fan.push(piv.x,piv.y,piv.z,pts[i].x,pts[i].y,pts[i].z,pts[i+1].x,pts[i+1].y,pts[i+1].z);
   arcFan.geometry.setAttribute('position',new THREE.Float32BufferAttribute(fan,3));arcFan.geometry.computeBoundingSphere();
   arcRays.geometry.setFromPoints([piv,piv.clone().add(pts[0].clone().sub(piv).multiplyScalar(1.25)),piv,piv.clone().add(pts[N].clone().sub(piv).multiplyScalar(1.25))]);
   const col=new THREE.Color(cssVar(angle>curM.max?'--warn':'--ok'));
-  [arcLine,arcFan,arcRays].forEach(o=>{o.material.color.copy(col);o.visible=true;});
+  [arcLine,arcFan,arcRays].forEach(o=>{o.material.color.copy(col);o.visible=true;});mvAxis(k,piv,pq,R);mvLigTick();
 }
 const enEs=en=>{const r=Object.values(CAT).find(x=>x[1]===en&&x[4]==='muscular');return r?r[2]:(INFO.mus[en]?.es||en);};
 function renderROM(){
@@ -1556,20 +1677,21 @@ function renderROM(){
   const sideTxt=curJ.sided?(romSide==='R'?'derecho':'izquierdo'):(curM.ax==='x'?'':romSide==='R'?'hacia la derecha':'hacia la izquierda');
   $('#angle').max=Math.round(curM.max*1.25);$('#angle').value=angle;
   const ag=curM.ag.filter(en=>Object.values(CAT).some(r=>r[1]===en));
-  $('#moveInfo').innerHTML=`<dt>Plano</dt><dd><b style="color:var(${planeCols[curM.pl]})">${PL_N[curM.pl]}</b></dd><dt>Eje</dt><dd>${AX_N[curM.pl]}</dd><dt>Referencia</dt><dd style="font-family:var(--f-mono)">0–${curM.max}°</dd>${sideTxt?`<dt>Lado</dt><dd>${sideTxt}</dd>`:''}<dt>Agonistas</dt><dd>${ag.map(en=>`<button class="link" data-agon="${esc(en)}">${esc(enEs(en))}</button>`).join(', ')||'—'}</dd>`;
+  $('#moveInfo').innerHTML=`<dt>Plano</dt><dd><b style="color:var(${planeCols[curM.pl]})">${PL_N[curM.pl]}</b></dd><dt>Eje</dt><dd>${AX_N[curM.pl]}</dd><dt>Rango</dt><dd style="font-family:var(--f-mono)">0–${curM.max}${curM.u||'°'}</dd>${sideTxt?`<dt>Lado</dt><dd>${sideTxt}</dd>`:''}<dt>Agonistas</dt><dd>${ag.map(en=>`<button class="link" data-agon="${esc(en)}">${esc(enEs(en))}</button>`).join(', ')||'—'}</dd><dt>${TL('Se estiran','Stretched','Se alongam')}</dt><dd style="color:#8fb8ff">${(curM.ant||[]).filter(en=>Object.values(CAT).some(r=>r[1]===en)).map(en=>esc(enEs(en))).join(', ')||'—'}</dd><dt>${TL('Ligamentos que se tensan','Ligaments that tighten','Ligamentos que se tensionam')}</dt><dd style="color:#ff8a6b">${(curM.lig||[]).map(en=>{const r=Object.values(CAT).find(x=>x[1]===en);return esc(r?r[2]:en);}).join(', ')||'—'}</dd>`;
   $('#moveInfo').querySelectorAll('[data-agon]').forEach(b=>b.onclick=()=>{const side=curJ.sided?(romSide==='R'?'derecho':'izquierdo'):'derecho';const r=Object.values(CAT).find(x=>x[1]===b.dataset.agon&&x[4]==='muscular'&&(!x[5]||x[5]===side));if(r)goTo(r[0]);});
   const pair={sag:'flexión y extensión',fro:'abducción, aducción e inclinaciones',tra:'rotaciones'}[curM.pl];
   $('#moveTip').innerHTML=`<h3>Cómo razonarlo</h3><p>${TL(`La ${curM.n.toLowerCase()} ocurre en el plano ${PL_N[curM.pl].toLowerCase()} alrededor del eje ${AX_N[curM.pl].split(' ')[0].toLowerCase()}, perpendicular a ese plano. En este plano ocurren las ${pair}.`,`${trW(curM.n)} takes place in the ${{sag:'sagittal',fro:'frontal',tra:'transverse'}[curM.pl]} plane, around the ${{sag:'frontal',fro:'sagittal',tra:'longitudinal'}[curM.pl]} axis, which is perpendicular to that plane. Movements in this plane: ${{sag:'flexion and extension',fro:'abduction, adduction and lateral flexion',tra:'rotations'}[curM.pl]}.`,`${trW(curM.n)} ocorre no plano ${{sag:'sagital',fro:'frontal',tra:'transversal'}[curM.pl]}, em torno do eixo ${{sag:'frontal',fro:'sagital',tra:'longitudinal'}[curM.pl]}, perpendicular a esse plano. Movimentos neste plano: ${{sag:'flexão e extensão',fro:'abdução, adução e inclinações',tra:'rotações'}[curM.pl]}.`)}</p>`;
   const g=curM.gon;
   $('#moveGon').innerHTML=`<h3>Goniometría</h3><dl class="kv" style="margin-top:4px"><dt>Posición</dt><dd>${curM.pos}</dd><dt>${g[1]?TL('Fulcro','Fulcrum','Fulcro'):'Método'}</dt><dd>${g[0]}</dd>${g[1]?`<dt>Brazo fijo</dt><dd>${g[1]}</dd><dt>Brazo móvil</dt><dd>${g[2]}</dd>`:''}<dt>Sensación final</dt><dd>${curM.ef}</dd></dl>`;
-  updateReadout();applyPose();applyAgonists();renderLog();
+  mvLigSetup();updateReadout();applyPose();applyAgonists();applyAntagonists();renderLog();
 }
 function applyAgonists(){if(gait.on){gaitAgonists();return;}
   const ens=(currentTab==='mov'&&agOn)?curM.ag:[];const sideName=romSide==='R'?'derecho':'izquierdo';
   for(const m of meshes){if(m.userData.sys!=='muscular')continue;const c=m.userData.c;
     const want=ens.includes(c.en)&&(!curJ.sided||!c.side||c.side===sideName);if(!!m.userData.ag!==want){m.userData.ag=want;refreshState(m);}}
+  applyAntagonists();
 }
-function updateReadout(){const over=angle>curM.max;$('#deg').innerHTML=`${Math.round(angle)}°<small> / ${curM.max}°</small>`;
+function updateReadout(){const over=angle>curM.max;const U=curM.u||'°';$('#deg').innerHTML=`${Math.round(angle)}${U}<small> / ${curM.max}${U}</small>`;
   const st=$('#status');st.textContent=over?'Por encima de la referencia':angle===0?'Posición de partida':'Dentro del rango de referencia';st.style.color=over?'var(--warn)':angle===0?'var(--muted)':'var(--ok)';
   const mx=curM.max*1.25;$('#scaleOk').style.width=(curM.max/mx*100)+'%';$('#scaleMk').style.left=`calc(${Math.min(100,angle/mx*100)}% - 1.5px)`;}
 let poseRaf=0;function schedulePose(){if(poseRaf)return;poseRaf=requestAnimationFrame(()=>{poseRaf=0;applyPose();});}
@@ -1577,10 +1699,10 @@ $('#angle').addEventListener('input',e=>{stopPlay();angle=+e.target.value;update
 $('#zero').onclick=()=>{stopPlay();angle=0;$('#angle').value=0;updateReadout();applyPose();};
 function stopPlay(){playing=false;$('#play').textContent='Animar rango';}
 $('#play').onclick=()=>{if(gait.on)setGait(false);playing=!playing;playT=0;$('#play').textContent=playing?'Detener':'Animar rango';};
-$('#focusJ').onclick=()=>{if(!RIG)return;const J=JOINTS[jname(curJ.node)];focusOn(J.pivot.clone(),Math.max(0.7,curJ.R*6));setView({sag:romSide==='R'?'latd':'lati',fro:'ant',tra:'ant'}[curM.pl]);};
+$('#focusJ').onclick=()=>{if(!RIG)return;const J=JOINTS[jname(curM.mainNode||curJ.node)];focusOn(J.pivot.clone(),Math.max(curJ.R<0.1?0.28:0.7,curJ.R*6));setView({sag:romSide==='R'?'latd':'lati',fro:'ant',tra:'ant'}[curM.pl]);};
 function setSide(s){romSide=s;store.set('side',s);$('#side-R').setAttribute('aria-pressed',s==='R');$('#side-L').setAttribute('aria-pressed',s==='L');renderROM();}
 $('#side-R').onclick=()=>setSide('R');$('#side-L').onclick=()=>setSide('L');
-$('#agChk').checked=agOn;$('#agChk').onchange=e=>{agOn=e.target.checked;store.set('agon',agOn);applyAgonists();};
+document.querySelectorAll('#mvView [data-v]').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.v===mvView);b.onclick=()=>setMvView(b.dataset.v);});$('#agChk').checked=agOn;$('#agChk').onchange=e=>{agOn=e.target.checked;store.set('agon',agOn);applyAgonists();};
 
 /* ───────── Ciclo de la marcha ───────── */
 // ángulos sagitales de referencia (% del ciclo, grados). Cadera y rodilla: + = flexión. Tobillo: + = dorsiflexión.
@@ -3948,7 +4070,7 @@ function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;const k=1-M
   const r=cv.getBoundingClientRect();
   for(const L of labels){let p=null,show=false;
     if(L.group==='vec'){const gp=L.getPos();show=!!gp;p=gp?gp.clone():null;}
-    else if(L.group==='lm'){show=L.on;p=L.on?L.pos:null;}
+    else if(L.group==='lm'||L.group==='mvlig'||L.group==='mvaxis'){show=L.on&&(L.group==='lm'||currentTab==='mov');p=show?L.pos:null;}
     else if(L.group==='phy'){show=PHY.on&&L.on;p=show?L.pos:null;}
     else if(L.group==='dir') show=showDir; else if(L.group==='axis') show=showAxes; else if(L.group.startsWith('plane:')) show=PLANES[L.group.slice(6)].show;
     else if(L.group==='tag'&&selected&&visibleDeep(selected.m)){show=true;p=selected.m.localToWorld(selected.local.clone());}
@@ -3967,7 +4089,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
   fetch('data/info.json').then(r=>r.json()).then(info=>{INFO=info;INFO_READY=true;if(selected)renderInfo();if(LANG!=='es')loadInfoTr(LANG);}).catch(()=>{});
   cat=cat.concat(fem.cat,fem.full||[]);FEM_INFO=fem.info;FEM_OVR=fem.ovr||[];FEM_ONLY=new Set(fem.fonly||[]);CAT_READY=true;
   LESSONS=les;LESSONS_ES=les;EX=ex;
-  for(const r of cat) CAT[r[0]]=r;RIG=rig;buildRig();
+  for(const r of cat) CAT[r[0]]=r;RIG=rig;buildRig();buildRig2();
   buildSearch();if(LANG!=='es')setLang(LANG);
   setSide(romSide);renderLessons();showTab(store.get('tab','sistemas'));
   const shared=readHash();if(shared&&shared.b)BODY=shared.b;
