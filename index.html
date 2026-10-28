@@ -430,7 +430,7 @@ details.more > .card{margin-bottom:10px}
           <button data-w="dissect"><b>Disección</b><span>Retira el cuerpo capa por capa, de la piel al hueso.</span></button>
           <button data-w="move"><b>Movimiento</b><span>Rangos articulares y el ciclo de la marcha, normal y patológica.</span></button>
           <button data-w="study"><b>Estudiar</b><span>Casos clínicos, lecciones, práctica y repaso espaciado.</span></button>
-          <button data-w="physio"><b>Fisiología en acción</b><span>49 recorridos narrados: corazón, respiración, sinapsis, marcha, palancas… con modo vídeo y subtítulos.</span></button>
+          <button data-w="physio"><b>Fisiología en acción</b><span>47 recorridos narrados: corazón, respiración, sinapsis, marcha, palancas… con modo vídeo y subtítulos.</span></button>
           <button data-w="bio"><b>Biomecánica y kinesiología</b><span>Más de 300 preguntas clave con respuesta, al estilo de la fisiología articular de Kapandji.</span></button>
           <button data-w="ct"><b>Pruebas clínicas</b><span>38 maniobras animadas (Lachman, Neer, FABER…) y movimientos funcionales.</span></button>
         </div>
@@ -4674,7 +4674,7 @@ PHY_QUIZ.ans=[Q3(L3('¿De qué niveles de la médula sale el simpático?','From 
 
 /* ─ Dibujo de palancas ─ */
 function phyArrow(g,x1,y1,x2,y2,col,wd){g.strokeStyle=col;g.fillStyle=col;g.lineWidth=wd||3;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();const a=Math.atan2(y2-y1,x2-x1),L=9;g.beginPath();g.moveTo(x2,y2);g.lineTo(x2-L*Math.cos(a-0.45),y2-L*Math.sin(a-0.45));g.lineTo(x2-L*Math.cos(a+0.45),y2-L*Math.sin(a+0.45));g.closePath();g.fill();g.lineWidth=1;}
-function phyDrawLever(t,c){const S=phyInsetBase('rgba(10,16,10,0.95)');if(!S)return;const {g,w,h}=S;
+function phyDrawLever2(t,c){const S=phyInsetBase('rgba(10,16,10,0.95)');if(!S)return;const {g,w,h}=S;
   synTxt(g,c.title,10,16,'#d9f99d','700 12px system-ui');synTxt(g,c.sub,10,31,'rgba(235,240,255,0.75)','500 10px system-ui');
   const y=h*0.55,x0=w*0.07,x1=w*0.93,X=f=>x0+f*(x1-x0),fx=X(c.F),a=Math.sin(t*1.6)*0.05;
   const P=f=>{const x=X(f);return [fx+(x-fx)*Math.cos(a),y+(x-fx)*Math.sin(a)];};
@@ -4718,24 +4718,24 @@ function phyGoLev(st,ins){const en=m=>m.userData.c.en,R=m=>m.userData.c.side!=='
   const C=(F,E,Rr,Ed,title,sub,fl,el,rl,note)=>({F,E,R:Rr,Edir:Ed,title,sub,fl,el,rl,note});
   if(st.id==='lev1'){const ext=mus(/^(Descending part of trapezius muscle|Splenius capitis muscle|Semispinalis colli muscle|Semispinalis thoracis muscle|Splenius colli muscle)$/);phyAg(ext,true);
     const jn=JOINTS.cervical?'cervical':null;PHY.anim=t=>{const k=Math.sin(t*1.3);if(jn)phyDef([[jn,{x:16*k,y:0,z:0}]]);};
-    PHY.insetFn=t=>phyDrawLever(t,C(0.5,0.12,0.86,-1,PHY_TXT('Palanca de primer grado','First-class lever','Alavanca de primeiro grau'),PHY_TXT('Eje entre la fuerza y la resistencia','Axis between effort and load','Eixo entre a força e a resistência'),PHY_TXT('Eje: atlantooccipital','Axis: atlanto-occipital','Eixo: atlantoccipital'),PHY_TXT('Músculos de la nuca','Neck extensors','Músculos da nuca'),PHY_TXT('Peso de la cabeza (~5 kg)','Head weight (~5 kg)','Peso da cabeça (~5 kg)'),PHY_TXT('Cuello flexionado → más brazo de resistencia → más esfuerzo','Neck bent → longer load arm → more effort','Pescoço flexionado → mais braço de resistência → mais esforço')));
+    PHY.insetFn=t=>phyDrawLever2(t,C(0.5,0.12,0.86,-1,PHY_TXT('Palanca de primer grado','First-class lever','Alavanca de primeiro grau'),PHY_TXT('Eje entre la fuerza y la resistencia','Axis between effort and load','Eixo entre a força e a resistência'),PHY_TXT('Eje: atlantooccipital','Axis: atlanto-occipital','Eixo: atlantoccipital'),PHY_TXT('Músculos de la nuca','Neck extensors','Músculos da nuca'),PHY_TXT('Peso de la cabeza (~5 kg)','Head weight (~5 kg)','Peso da cabeça (~5 kg)'),PHY_TXT('Cuello flexionado → más brazo de resistencia → más esfuerzo','Neck bent → longer load arm → more effort','Pescoço flexionado → mais braço de resistência → mais esforço')));
     phyFocus(new V3(0,1.55,-0.02),0.55);orb.T.ph=1.45;orb.T.th=-Math.PI/2+0.35;}
   else if(st.id==='lev2'){const tri=mus(/^(Soleus muscle|Medial head of gastrocnemius|Lateral head of gastrocnemius)$/);phyAg(tri,true);
     const mt=JOINTS.mtp2_R?JOINTS.mtp2_R.pivot:null,ap=JOINTS.ankle_R?JOINTS.ankle_R.pivot:null;
     PHY.anim=t=>{const k=wave(t,3.2)*32;const qa=JOINTS.ankle_R?qOf('ankle_R',{x:k,y:0,z:0}):null;let tr=null;if(mt&&ap&&qa){const p=mt.clone().sub(ap).applyQuaternion(qa).add(ap);tr=mt.clone().sub(p);tr.x=0;tr.z=0;}
       const L=[['ankle_R',{x:k,y:0,z:0}],['ankle_L',{x:k,y:0,z:0}]];for(const f of [1,2,3,4,5])for(const S of ['R','L'])L.push(['mtp'+f+'_'+S,{x:-k,y:0,z:0}]);phyDef(L,tr);};
-    PHY.insetFn=t=>phyDrawLever(t,C(0.08,0.9,0.45,1,PHY_TXT('Palanca de segundo grado','Second-class lever','Alavanca de segundo grau'),PHY_TXT('Resistencia entre el eje y la fuerza','Load between axis and effort','Resistência entre o eixo e a força'),PHY_TXT('Eje: cabezas metatarsianas','Axis: metatarsal heads','Eixo: cabeças dos metatarsos'),PHY_TXT('Tríceps sural (Aquiles)','Triceps surae (Achilles)','Tríceps sural (Aquiles)'),PHY_TXT('Peso del cuerpo','Body weight','Peso do corpo'),PHY_TXT('Brazo de fuerza más largo → favorece la fuerza','Longer effort arm → favours force','Braço de força mais longo → favorece a força')));
+    PHY.insetFn=t=>phyDrawLever2(t,C(0.08,0.9,0.45,1,PHY_TXT('Palanca de segundo grado','Second-class lever','Alavanca de segundo grau'),PHY_TXT('Resistencia entre el eje y la fuerza','Load between axis and effort','Resistência entre o eixo e a força'),PHY_TXT('Eje: cabezas metatarsianas','Axis: metatarsal heads','Eixo: cabeças dos metatarsos'),PHY_TXT('Tríceps sural (Aquiles)','Triceps surae (Achilles)','Tríceps sural (Aquiles)'),PHY_TXT('Peso del cuerpo','Body weight','Peso do corpo'),PHY_TXT('Brazo de fuerza más largo → favorece la fuerza','Longer effort arm → favours force','Braço de força mais longo → favorece a força')));
     phyFocus(new V3(0.1,0.18,0),1.0);orb.T.ph=1.5;orb.T.th=-Math.PI/2+0.3;}
   else if(st.id==='lev3'){const fl=mus(/^(Long head of biceps brachii|Short head of biceps brachii|Biceps brachii muscle|Brachialis muscle)$/).filter(R);phyAg(fl,true);
     PHY.anim=t=>{phyDef([['elbow_R',{x:-95*wave(t,3.4),y:0,z:0}]]);};
-    PHY.insetFn=t=>phyDrawLever(t,C(0.06,0.18,0.94,1,PHY_TXT('Palanca de tercer grado','Third-class lever','Alavanca de terceiro grau'),PHY_TXT('Fuerza entre el eje y la resistencia','Effort between axis and load','Força entre o eixo e a resistência'),PHY_TXT('Eje: codo','Axis: elbow','Eixo: cotovelo'),PHY_TXT('Bíceps (5 cm)','Biceps (5 cm)','Bíceps (5 cm)'),PHY_TXT('Mano (35 cm)','Hand (35 cm)','Mão (35 cm)'),PHY_TXT('10 kg en la mano ≈ 70 kg de fuerza muscular','10 kg in the hand ≈ 70 kg of muscle force','10 kg na mão ≈ 70 kg de força muscular')));
+    PHY.insetFn=t=>phyDrawLever2(t,C(0.06,0.18,0.94,1,PHY_TXT('Palanca de tercer grado','Third-class lever','Alavanca de terceiro grau'),PHY_TXT('Fuerza entre el eje y la resistencia','Effort between axis and load','Força entre o eixo e a resistência'),PHY_TXT('Eje: codo','Axis: elbow','Eixo: cotovelo'),PHY_TXT('Bíceps (5 cm)','Biceps (5 cm)','Bíceps (5 cm)'),PHY_TXT('Mano (35 cm)','Hand (35 cm)','Mão (35 cm)'),PHY_TXT('10 kg en la mano ≈ 70 kg de fuerza muscular','10 kg in the hand ≈ 70 kg of muscle force','10 kg na mão ≈ 70 kg de força muscular')));
     phyFocus(new V3(-0.25,1.15,0.05),0.75);orb.T.ph=1.45;orb.T.th=-0.6;}
   else if(st.id==='lev4'){const q=mus(/^(Rectus femoris muscle|Vastus lateralis muscle|Vastus medialis muscle|Vastus intermedius muscle)$/).filter(R);phyAg(q,true);
     PHY.anim=t=>{const k=1-wave(t,3.4);phyDef([['hip_R',{x:-60,y:0,z:0}],['knee_R',{x:90*k,y:0,z:0}]]);};PHY.insetFn=t=>phyDrawMoment(t);
     phyDynLabel('pat',meshes.filter(m=>/^Patella$/.test(en(m))&&R(m)),'Rótula','Patella','Patela',[0.04,0,0.03]);phyFocus(new V3(0.1,0.65,0.1),1.0);orb.T.ph=1.5;orb.T.th=-Math.PI/2+0.3;}
   else{const ab=mus(/^(Gluteus medius muscle|Gluteus minimus muscle)$/).filter(R);phyAg(ab,true);
     PHY.anim=t=>{const k=wave(t,4);phyDef([['hip_L',{x:-35*k,y:0,z:0}],['knee_L',{x:70*k,y:0,z:0}]]);};
-    PHY.insetFn=t=>phyDrawLever(t,C(0.32,0.12,0.92,-1,PHY_TXT('Balanza de la cadera (apoyo derecho)','Hip balance (right stance)','Balança do quadril (apoio direito)'),PHY_TXT('Brazo del peso ≈ 3 × brazo de los abductores','Weight arm ≈ 3 × abductor arm','Braço do peso ≈ 3 × braço dos abdutores'),PHY_TXT('Eje: cabeza femoral','Axis: femoral head','Eixo: cabeça femoral'),PHY_TXT('Glúteo medio','Gluteus medius','Glúteo médio'),PHY_TXT('Peso del cuerpo','Body weight','Peso do corpo'),PHY_TXT('Carga en la cadera ≈ 2,5–3 × el peso; bastón del lado sano','Hip load ≈ 2.5–3 × body weight; cane on the healthy side','Carga no quadril ≈ 2,5–3 × o peso; bengala do lado sadio')));
+    PHY.insetFn=t=>phyDrawLever2(t,C(0.32,0.12,0.92,-1,PHY_TXT('Balanza de la cadera (apoyo derecho)','Hip balance (right stance)','Balança do quadril (apoio direito)'),PHY_TXT('Brazo del peso ≈ 3 × brazo de los abductores','Weight arm ≈ 3 × abductor arm','Braço do peso ≈ 3 × braço dos abdutores'),PHY_TXT('Eje: cabeza femoral','Axis: femoral head','Eixo: cabeça femoral'),PHY_TXT('Glúteo medio','Gluteus medius','Glúteo médio'),PHY_TXT('Peso del cuerpo','Body weight','Peso do corpo'),PHY_TXT('Carga en la cadera ≈ 2,5–3 × el peso; bastón del lado sano','Hip load ≈ 2.5–3 × body weight; cane on the healthy side','Carga no quadril ≈ 2,5–3 × o peso; bengala do lado sadio')));
     phyFocus(new V3(0,0.85,0),1.3);orb.T.ph=1.5;orb.T.th=Math.PI;}}
 function phyGoANS(st,ins){const en=m=>m.userData.c.en;const sy=meshes.filter(m=>/^(Sympathetic trunk|Ganglia of sympathetic trunk)$/.test(en(m))),vag=meshes.filter(m=>/^Vagus nerve \(X\)$/.test(en(m)));
   const heart=meshes.filter(m=>BS(m.userData.sys)==='arterial'&&/^(Left atrium|Right atrium|Left ventricle|Right ventricle|Myocardium|Wall of left ventricle|Wall of right ventricle|Interventricular septum|.*auricle)/i.test(en(m)));
@@ -5621,7 +5621,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
  box.innerHTML='<h3>Usar sin conexión</h3><p class="muted small">Guarda todos los modelos (hombre, mujer y alta resolución, unos 53 MB) en este dispositivo. Después el atlas funciona sin internet, también instalado como app desde el menú del navegador.</p><button class="btn" id="offBtn">Descargar todo</button> <span class="muted small" id="offTxt"></span>';
  const host=document.querySelector('#hrCard');if(host)host.after(box);
  const btn=box.querySelector('#offBtn'),txt=box.querySelector('#offTxt');
- btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v73');
+ btn.onclick=async()=>{btn.disabled=true;let n=0;const c=await caches.open('corpus-v74');
    for(const f of FILES){try{if(!(await c.match(f))){const r=await fetch(f);if(r.ok)await c.put(f,r);}}catch(e){}n++;txt.textContent=` ${n} de ${FILES.length} archivos`;}
    txt.textContent=' Listo: el atlas ya funciona sin conexión.';};
 })();
