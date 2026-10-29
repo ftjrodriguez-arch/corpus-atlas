@@ -382,6 +382,11 @@ body.phy-on .qbar,body.wopen .qbar{display:none}
 .solochip button{border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);border-radius:999px;padding:5px 9px;font:600 12px/1 var(--f-ui)}
 body.phy-on .solochip,body.phy-on .solopop,body.wopen .solochip{display:none}
 @media (max-width:879px){#qbar.qbar button{width:44px;height:40px}#qbar.qbar button i{font-size:16px}.solochip{top:auto;bottom:calc(var(--sheet,150px) + 10px)}}
+@media (max-width:879px){
+  .panel{background:rgba(18,26,31,.80);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+  .panel .sys{padding:5px 0;gap:2px 8px}.panel .sys .nm{font-size:14px}.panel .sys .nm small{font-size:11.5px}
+  .panel .sysgrp{margin-top:2px}
+}
 </style>
 
 <header>
@@ -1241,12 +1246,12 @@ cv.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;const p=p
   if(hovMove(e))return;
   if(ptrs.size===1){ if(downInfo&&(downInfo.btn===2||downInfo.shift)) pan(dx,dy); else {orb.T.th-=dx*0.008;orb.T.ph=Math.min(Math.PI-0.05,Math.max(0.05,orb.T.ph-dy*0.008));} }
   else if(ptrs.size===2){const [a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y),mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
-    if(lastPinch){orb.T.r=Math.min(6,Math.max(0.12,orb.T.r*lastPinch.d/d));if(EXPL){orb.T.th-=(mx-lastPinch.mx)*0.008;orb.T.ph=Math.min(Math.PI-0.05,Math.max(0.05,orb.T.ph-(my-lastPinch.my)*0.008));}else pan(mx-lastPinch.mx,my-lastPinch.my);}lastPinch={d,mx,my};}
+    if(lastPinch){orb.T.r=Math.min(12,Math.max(0.12,orb.T.r*lastPinch.d/d));if(EXPL){orb.T.th-=(mx-lastPinch.mx)*0.008;orb.T.ph=Math.min(Math.PI-0.05,Math.max(0.05,orb.T.ph-(my-lastPinch.my)*0.008));}else pan(mx-lastPinch.mx,my-lastPinch.my);}lastPinch={d,mx,my};}
 });
 const endPtr=e=>{if(!ptrs.has(e.pointerId))return;if(hovUp(e))return;ptrs.delete(e.pointerId);if(ptrs.size<2)lastPinch=null;
   if(ptrs.size===0&&downInfo&&downInfo.moved<7&&downInfo.btn===0) pick(e.clientX,e.clientY);if(ptrs.size===0)downInfo=null;};
 cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);downInfo=null;});
-cv.addEventListener('wheel',e=>{e.preventDefault();FIT_USER=true;const f=1+Math.sign(e.deltaY)*0.09;orb.T.r=Math.min(6,Math.max(0.12,orb.T.r*f));
+cv.addEventListener('wheel',e=>{e.preventDefault();FIT_USER=true;const f=1+Math.sign(e.deltaY)*0.09;orb.T.r=Math.min(12,Math.max(0.12,orb.T.r*f));
   if(f<1){const r=cv.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1),camera);
     const n=camera.getWorldDirection(new V3());const pl=new THREE.Plane().setFromNormalAndCoplanarPoint(n,orb.T.tgt);const hit=new V3();if(ray.ray.intersectPlane(pl,hit)) orb.T.tgt.lerp(hit,0.09);}},{passive:false});
 function pan(dx,dy){const right=new V3().setFromMatrixColumn(camera.matrix,0),up=new V3().setFromMatrixColumn(camera.matrix,1);const k=orb.r*0.0011;orb.T.tgt.addScaledVector(right,-dx*k).addScaledVector(up,dy*k);}
@@ -2604,12 +2609,12 @@ $('#fsBtn').onclick=()=>{const d=document;try{if(d.fullscreenElement)d.exitFulls
 document.addEventListener('fullscreenchange',()=>$('#fsBtn').setAttribute('aria-pressed',!!document.fullscreenElement));
 /* hoja inferior (móvil) */
 const isPhone=()=>window.innerWidth<880;
-const SHEET={mini:34,peek:150,half:()=>Math.round(innerHeight*0.52),full:()=>Math.round(innerHeight-70)};
+const SHEET={mini:34,peek:150,half:()=>Math.round(innerHeight*0.42),full:()=>Math.round(innerHeight*0.62)};
 let sheetState='peek';
 function sheetH(st){return st==='mini'?SHEET.mini:st==='peek'?SHEET.peek:st==='half'?SHEET.half():SHEET.full();}
 function applySheet(px){const p=$('#panel');if(!isPhone()){p.style.height='';document.documentElement.style.removeProperty('--sheet');viewOffset();return;}
   p.style.height=px+'px';document.documentElement.style.setProperty('--sheet',px+'px');viewOffset();}
-function setSheet(st){sheetState=st;applySheet(sheetH(st));}
+function setSheet(st){sheetState=st;applySheet(sheetH(st));if(typeof refitSheet==='function')refitSheet();}
 function viewOffset(){const r=stage.getBoundingClientRect();const sh=isPhone()?parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sheet'))||SHEET.peek:0;
   if(sh>0){const off=Math.min(r.height*0.36,sh/2);camera.setViewOffset(r.width,r.height,0,off,r.width,r.height);}else camera.clearViewOffset();}
 (()=>{const h=$('#sheetH'),p=$('#panel');let y0=null,h0=0,moved=false;
@@ -2878,7 +2883,7 @@ $('#xrayBtn').onclick=()=>setXray(!xray);$('#liteChk').onchange=e=>setLite(e.tar
 document.addEventListener('keydown',e=>{const t=e.target;if(t&&(/INPUT|TEXTAREA|SELECT/.test(t.tagName)||t.isContentEditable))return;if(e.ctrlKey||e.metaKey||e.altKey)return;
   const k=e.key;let hit=true;
   if(k==='ArrowLeft')orb.T.th-=0.25;else if(k==='ArrowRight')orb.T.th+=0.25;else if(k==='ArrowUp')orb.T.ph=Math.max(0.1,orb.T.ph-0.2);else if(k==='ArrowDown')orb.T.ph=Math.min(Math.PI-0.1,orb.T.ph+0.2);
-  else if(k==='+'||k==='=')orb.T.r=Math.max(0.15,orb.T.r*0.82);else if(k==='-'||k==='_')orb.T.r=Math.min(6,orb.T.r/0.82);
+  else if(k==='+'||k==='=')orb.T.r=Math.max(0.15,orb.T.r*0.82);else if(k==='-'||k==='_')orb.T.r=Math.min(12,orb.T.r/0.82);
   else if('123456'.includes(k)&&k.length===1)setView(['ant','post','latd','lati','sup','inf'][+k-1]);
   else if(k==='x'||k==='X')setXray(!xray);else if(k==='e'||k==='E')setStudio(!studio);else if(k==='Escape')select(null);else if(k==='/'){$('#q').focus();}else if(k==='f'||k==='F'){$('#fsBtn').click();}else hit=false;
   if(hit)e.preventDefault();});$('#studioBtn').onclick=()=>setStudio(!studio);if(store.get('studio',!lite))setStudio(true);
@@ -7123,16 +7128,17 @@ function fitUsable(){const r=stage.getBoundingClientRect(),W=r.width,H=r.height,
   const q=$('#qbar');if(vis(q)){const b=q.getBoundingClientRect();if(b.width&&b.height>0.25*H)x0=Math.max(x0,b.right-r.left+4);}
   const t=document.querySelector('.tools');if(vis(t)){const b=t.getBoundingClientRect();if(b.height>0.4*H)x1=Math.min(x1,b.left-r.left-4);}
   const c=document.querySelector('.phy .phycard');if(PHY.on&&vis(c)){const b=c.getBoundingClientRect();if(b.top-r.top>H*0.3)y1=Math.min(y1,b.top-r.top-6);}
-  if(ph){const pn=$('#panel');if(vis(pn)){const b=pn.getBoundingClientRect();if(b.top<r.bottom)y1=Math.min(y1,b.top-r.top-6);}}
+  if(ph){const sh=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sheet'))||SHEET.peek;y1=Math.min(y1,innerHeight-sh-r.top-6);}
   const ins=$('#phyInset');if(PHY.on&&vis(ins)){const b=ins.getBoundingClientRect();if(b.width>0.5*W&&b.bottom-r.top<H*0.45)y0=Math.max(y0,b.bottom-r.top+4);}
   return {W,H,x0,x1,y0,y1};}
 function fitNow(c,hx,hy){const U=fitUsable();const sh=isPhone()?parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sheet'))||SHEET.peek:0;const off=sh>0?Math.min(U.H*0.36,sh/2):0;
   const f=(U.H/2)/Math.tan(camera.fov*Math.PI/360),uw=Math.max(90,U.x1-U.x0),uh=Math.max(90,U.y1-U.y0);
-  const d=Math.min(6,Math.max(0.12,hx*f/(0.42*uw),hy*f/(0.42*uh)));
+  const d=Math.min(12,Math.max(0.12,hx*f/(0.42*uw),hy*f/(0.42*uh)));
   const px=(U.x0+U.x1)/2-U.W/2,py=(U.y0+U.y1)/2-(U.H/2-off);const th=orb.T.th,phi=orb.T.ph;
   const fw=new V3(-Math.sin(phi)*Math.sin(th),-Math.cos(phi),-Math.sin(phi)*Math.cos(th)),right=new V3().crossVectors(fw,new V3(0,1,0)).normalize(),up=new V3().crossVectors(right,fw);
   const k=d/f;orb.T.tgt.copy(c).addScaledVector(right,-px*k).addScaledVector(up,py*k);orb.T.r=d;}
-function fitSoon(c,hx,hy,rough){const id=++FIT_ID;FIT_USER=false;orb.T.tgt.copy(c);if(rough)orb.T.r=rough;
+var LAST_FIT=null;function refitSheet(){if(LAST_FIT&&!FIT_USER&&isPhone()){const L=LAST_FIT;fitSoon(L[0],L[1],L[2]);}}
+function fitSoon(c,hx,hy,rough){const id=++FIT_ID;FIT_USER=false;LAST_FIT=[c.clone(),hx,hy];orb.T.tgt.copy(c);if(rough)orb.T.r=rough;
   requestAnimationFrame(()=>requestAnimationFrame(()=>{if(id===FIT_ID)fitNow(c,hx,hy);}));
   setTimeout(()=>{if(id===FIT_ID&&!FIT_USER)fitNow(c,hx,hy);},450);}
 function fitMeshes(ms){const b=new THREE.Box3();for(const m of ms){m.geometry.computeBoundingBox();b.union(m.geometry.boundingBox);}if(b.isEmpty())return;const s=b.getSize(new V3());fitSoon(b.getCenter(new V3()),Math.max(s.x,s.z)/2*1.05,s.y/2*1.05);}
