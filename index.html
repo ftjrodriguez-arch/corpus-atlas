@@ -327,6 +327,39 @@ details.more > .card{margin-bottom:10px}
   body.wopen .stage{z-index:22}
   .welcome{align-items:flex-start;overflow:auto}
 }
+
+/* ── interfaz limpia: barra rápida de capas, herramientas plegables, etiquetas ── */
+.qbar{position:absolute;left:10px;bottom:10px;z-index:7;display:flex;gap:5px;flex-wrap:wrap;max-width:calc(100% - 90px)}
+.qbar button{display:flex;align-items:center;gap:5px;border:1px solid var(--line);background:rgba(14,16,22,.72);color:var(--ink);border-radius:999px;padding:5px 10px 5px 7px;font:600 12px/1 var(--f-ui);backdrop-filter:blur(6px);opacity:.55}
+.qbar button[aria-pressed="true"]{opacity:1;border-color:var(--c,var(--accent));box-shadow:inset 0 0 0 1px var(--c,var(--accent))}
+.qbar button i{font-style:normal;font-size:13px;line-height:1;flex:none}
+body.phy-on .qbar,body.wopen .qbar{display:none}
+.tools .ttog{display:none}
+.sysadv{display:flex;justify-content:flex-end;margin:-4px 0 6px}
+.sysadv button{background:none;border:0;color:var(--accent);font:600 12px var(--f-ui);padding:4px 0;cursor:pointer}
+#sysList:not(.adv) .oprow{display:none}
+.sys small b{color:var(--ink);font-weight:700}
+.phyhead .phyopts{display:none}
+@media (max-width:879px){
+  .qbar{left:8px;top:8px;bottom:auto;max-width:calc(100% - 64px);gap:4px}
+  .qbar button{padding:4px 8px 4px 6px;font-size:11px}
+  .qbar button span{display:none}
+  .qbar button i{font-size:16px}
+  .qbar button{padding:5px 7px}
+  .tools .icon-btn span{display:none}
+  .tools .icon-btn{width:38px;min-height:38px;padding:4px}
+  .tools .ttog{display:inline-flex}
+  .tools.min .icon-btn:not(.ttog){display:none}
+  .lbl.phyl{font-size:10px;padding:3px 6px}
+  .lbl{font-size:9.5px}
+  .phy .phycard{padding:7px 9px 6px}
+  .phy h2{font-size:15px;margin:2px 0}
+  .phycard:not(.open) #phyText{-webkit-line-clamp:2}
+  .phycard:not(.optopen) .phyopt{display:none}
+  .phyhead .phyopts{display:inline-flex;margin-left:auto;margin-right:6px;background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:1px 9px;font-size:13px}
+  .phyctl{margin-top:4px}
+  .phycard .phyPhase{margin:2px 0}
+}
 @media (prefers-reduced-motion: reduce){ .sw::after,.bar i,.panel{transition:none} }
 </style>
 
@@ -366,7 +399,7 @@ details.more > .card{margin-bottom:10px}
     <div class="phy" id="phyBox" hidden>
       <canvas id="phyInset" hidden aria-hidden="true"></canvas><div id="phySub" hidden aria-live="off"></div>
       <div class="phycard" role="region" aria-label="Fisiología en acción">
-        <div class="phyhead"><span class="phykick"><span id="phyKick">Corazón y circulación</span> · <span id="phyNum">1 / 7</span></span><button class="phyx" id="phyClose" aria-label="Cerrar">✕</button></div>
+        <div class="phyhead"><span class="phykick"><span id="phyKick">Corazón y circulación</span> · <span id="phyNum">1 / 7</span></span><button class="phyopts" id="phyOpts" aria-label="Opciones" title="Opciones">⋯</button><button class="phyx" id="phyClose" aria-label="Cerrar">✕</button></div>
         <h2 id="phyTitle">Corazón en acción</h2>
         <div class="phyPhase"><b id="phyPhase">Diástole</b><span id="phyValves"></span></div>
         <p id="phyText"></p><button class="phymore" id="phyMore">Leer más</button>
@@ -400,7 +433,8 @@ details.more > .card{margin-bottom:10px}
     <div class="conchip animchip" id="animChip" hidden></div>
     <div class="legend jleg" id="jointLeg" hidden><span><i class="dot" style="background:#c3d0de"></i><b data-t>Ligamentos</b></span><span><i class="dot" style="background:#4f9fd0"></i><b data-t>Cartílago, discos y meniscos</b></span><span><i class="dot" style="background:#a9bfd6;opacity:.6"></i><b data-t>Cápsula (translúcida)</b></span><span><i class="dot" style="background:#e9e2cf"></i><b data-t>Hueso</b></span></div>
      <div class="legend" id="legend" hidden><span><i class="dot" style="background:var(--orig)"></i>Origen (proximal)</span><span><i class="dot" style="background:var(--ins)"></i>Inserción (distal)</span></div>
-    <div class="tools" role="toolbar" aria-label="Herramientas de la vista">
+    <div class="tools min" role="toolbar" aria-label="Herramientas de la vista">
+      <button class="icon-btn ttog" id="toolsTog" aria-expanded="false" aria-label="Herramientas" title="Herramientas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
       <button class="icon-btn" id="viewMenuBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Vistas" title="Vistas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg><span>Vistas</span></button>
       <button class="icon-btn" id="phyBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Funciones" title="Fisiología en acción: ver cómo funcionan los órganos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-5 3 10 2-6 1.5 3H21"/></svg><span>Funciones</span></button>
       <button class="icon-btn" id="xrayBtn" aria-pressed="false" aria-label="Rayos X" title="Rayos X"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M7 7h3M7 11h3M7 15h3M14 9h3M14 13h3M14 17h3"/></svg><span>Rayos X</span></button>
@@ -2548,9 +2582,9 @@ $('#fsBtn').onclick=()=>{const d=document;try{if(d.fullscreenElement)d.exitFulls
 document.addEventListener('fullscreenchange',()=>$('#fsBtn').setAttribute('aria-pressed',!!document.fullscreenElement));
 /* hoja inferior (móvil) */
 const isPhone=()=>window.innerWidth<880;
-const SHEET={peek:150,half:()=>Math.round(innerHeight*0.52),full:()=>Math.round(innerHeight-70)};
+const SHEET={mini:34,peek:150,half:()=>Math.round(innerHeight*0.52),full:()=>Math.round(innerHeight-70)};
 let sheetState='peek';
-function sheetH(st){return st==='peek'?SHEET.peek:st==='half'?SHEET.half():SHEET.full();}
+function sheetH(st){return st==='mini'?SHEET.mini:st==='peek'?SHEET.peek:st==='half'?SHEET.half():SHEET.full();}
 function applySheet(px){const p=$('#panel');if(!isPhone()){p.style.height='';document.documentElement.style.removeProperty('--sheet');viewOffset();return;}
   p.style.height=px+'px';document.documentElement.style.setProperty('--sheet',px+'px');viewOffset();}
 function setSheet(st){sheetState=st;applySheet(sheetH(st));}
@@ -2558,10 +2592,10 @@ function viewOffset(){const r=stage.getBoundingClientRect();const sh=isPhone()?p
   if(sh>0){const off=Math.min(r.height*0.36,sh/2);camera.setViewOffset(r.width,r.height,0,off,r.width,r.height);}else camera.clearViewOffset();}
 (()=>{const h=$('#sheetH'),p=$('#panel');let y0=null,h0=0,moved=false;
   const start=e=>{if(!isPhone())return;y0=e.clientY;h0=p.getBoundingClientRect().height;moved=false;p.classList.add('dragging');h.setPointerCapture(e.pointerId);};
-  const move=e=>{if(y0==null)return;const d=y0-e.clientY;if(Math.abs(d)>4)moved=true;applySheet(Math.max(110,Math.min(sheetH('full'),h0+d)));};
+  const move=e=>{if(y0==null)return;const d=y0-e.clientY;if(Math.abs(d)>4)moved=true;applySheet(Math.max(PHY.on?30:110,Math.min(sheetH('full'),h0+d)));};
   const end=e=>{if(y0==null)return;p.classList.remove('dragging');const cur=p.getBoundingClientRect().height;y0=null;
-    if(!moved){setSheet(sheetState==='peek'?'half':sheetState==='half'?'full':'peek');return;}
-    const c=[['peek',sheetH('peek')],['half',sheetH('half')],['full',sheetH('full')]].sort((a,b)=>Math.abs(a[1]-cur)-Math.abs(b[1]-cur))[0][0];setSheet(c);};
+    if(!moved){setSheet(sheetState==='mini'||sheetState==='peek'?'half':sheetState==='half'?'full':(PHY.on?'mini':'peek'));return;}
+    const c=[[PHY.on?'mini':'peek',sheetH(PHY.on?'mini':'peek')],['half',sheetH('half')],['full',sheetH('full')]].sort((a,b)=>Math.abs(a[1]-cur)-Math.abs(b[1]-cur))[0][0];setSheet(c);};
   h.addEventListener('pointerdown',start);h.addEventListener('pointermove',move);h.addEventListener('pointerup',end);h.addEventListener('pointercancel',end);
   h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setSheet(sheetState==='peek'?'half':'peek');}});
   $$('.tabs button').forEach(b=>b.addEventListener('click',()=>{if(isPhone()&&sheetState==='peek')setSheet('half');}));
@@ -3360,7 +3394,7 @@ function phyTourFor(q){q=gKey(q||'');if(typeof phyTourFor2==='function'){const x
   return null;}
 function phyPlace(){const card=$('.phycard');if(!card)return;const dock=!isPhone()&&PHY.on;document.body.classList.toggle('phy-dock',dock);
   if(dock){const pb=$('.pbody');if(card.parentElement!==pb){pb.prepend(card);pb.scrollTop=0;}card.classList.add('docked');}
-  else{const box=$('#phyBox');if(card.parentElement!==box)box.appendChild(card);card.classList.remove('docked');card.style.bottom=isPhone()&&PHY.on?(SHEET.peek+8)+'px':'';if(isPhone()&&PHY.on&&sheetState!=='peek')setSheet('peek');}}
+  else{const box=$('#phyBox');if(card.parentElement!==box)box.appendChild(card);card.classList.remove('docked');card.style.bottom=isPhone()&&PHY.on?(SHEET.mini+6)+'px':'';if(isPhone()&&PHY.on&&sheetState!=='mini')setSheet('mini');if(isPhone()&&!PHY.on&&sheetState==='mini')setSheet('peek');}}
 window.addEventListener('resize',()=>{if(PHY.on)phyPlace();});
 function phyFocus(c,r){const v=c.clone();if(isPhone()){r*=1.6;v.y-=r*0.07;}focusOn(v,r);}
 const pick2=(rx,need)=>meshes.filter(m=>rx.test(m.userData.c.en)&&(!need||need.includes(BS(m.userData.sys)))&&!m.userData.c.ins);
@@ -6984,9 +7018,38 @@ function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;const k=1-M
     else if(L.group==='tag'&&selected&&visibleDeep(selected.m)){show=true;p=selected.m.localToWorld(selected.local.clone());}
     if(show){p=p||L.getPos();const v=p.clone().project(camera);if(v.z>1)show=false;else{L.el.style.left=((v.x+1)/2*r.width)+'px';L.el.style.top=((1-v.y)/2*r.height)+'px';}}
     if(L.show!==show){L.el.hidden=!show;L.show=show;}}
+  cullLabels();
   layoutPins(r);animTick&&animTick(dt);phyTick(dt);
   requestAnimationFrame(frame);}
 
+/* ───────── Interfaz limpia: barra rápida de capas, herramientas, conteos, etiquetas ───────── */
+const QIC={skin:'🧍',mus:'💪',bone:'🦴',nerv:'⚡',vas:'🩸',org:'🫁'};
+const QGRP=[['skin',['Piel','Skin','Pele'],'#d29f82',/^(piel|piel_f|f_piel)$/,/^(piel|piel_f|f_piel)$/],
+ ['mus',['Músculos','Muscles','Músculos'],'#c2453a',/^(muscular|f_muscular)$/,/^(muscular|f_muscular|fascia|bolsas|insercion)$/],
+ ['bone',['Huesos','Bones','Ossos'],'#ece2cb',/^(oseo|f_oseo)$/,/^(oseo|f_oseo|articular|f_articular)$/],
+ ['nerv',['Nervios','Nerves','Nervos'],'#e3c23f',/^(nervioso_central|nervioso_periferico|f_nervioso)$/,/^(nervioso_central|nervioso_periferico|f_nervioso)$/],
+ ['vas',['Vasos','Vessels','Vasos'],'#d1453a',/^(arterial|venoso|f_vasos)$/,/^(arterial|venoso|linfatico|f_vasos)$/],
+ ['org',['Órganos','Organs','Órgãos'],'#c98b67',/^(respiratorio|digestivo|urinario|reproductor|reproductor_f|endocrino|f_visceras|f_reproductor)$/,/^(respiratorio|digestivo|urinario|reproductor|reproductor_f|endocrino|f_visceras|f_reproductor|mama|f_mama|f_ojos)$/]];
+function qKeys(re){return Object.keys(SYS).filter(k=>re.test(k)&&sexOk(k));}
+function renderQbar(){let el=$('#qbar');if(!el){el=document.createElement('div');el.id='qbar';el.className='qbar';el.setAttribute('role','toolbar');stage.appendChild(el);}
+  el.innerHTML=QGRP.map(([id,n,c,main,all])=>{const on=qKeys(all).some(k=>SYS[k].on);return qKeys(main).length?`<button data-q="${id}" aria-pressed="${on}" style="--c:${c}" title="${esc(TL(n[0],n[1],n[2]))}" aria-label="${esc(TL(n[0],n[1],n[2]))}"><i>${QIC[id]}</i><span>${esc(TL(n[0],n[1],n[2]))}</span></button>`:'';}).join('');
+  el.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const g=QGRP.find(x=>x[0]===b.dataset.q);const on=qKeys(g[4]).some(k=>SYS[k].on);
+    if(on){for(const k of qKeys(g[4]))SYS[k].on=false;applySystems();renderSysList();}else{for(const k of qKeys(g[3]))setOn(k,true);}});}
+const _renderSysList=renderSysList;
+renderSysList=function(){_renderSysList();const el=$('#sysList');if(!el)return;const adv=store.get('sysAdv',false);el.classList.toggle('adv',!!adv);
+  const t=document.createElement('div');t.className='sysadv';t.innerHTML=`<button>${adv?TL('Ocultar opacidad y rayos X','Hide opacity and X-ray','Ocultar opacidade e raios X'):TL('Opacidad y rayos X por capa','Opacity and X-ray per layer','Opacidade e raios X por camada')}</button>`;t.querySelector('button').onclick=()=>{store.set('sysAdv',!adv);renderSysList();};el.prepend(t);
+  const rows=el.querySelectorAll('.sys');let i=0;for(const k in SYS){const s=SYS[k];if(k==='importado'&&s.state!=='loaded')continue;if(!sexOk(k))continue;const row=rows[i++];if(!row||s.state!=='loaded')continue;const sm=row.querySelector('.nm small');if(!sm)continue;
+    if(k==='oseo')sm.innerHTML=TL('<b>206 huesos</b> · más dientes y cartílagos','<b>206 bones</b> · plus teeth and cartilage','<b>206 ossos</b> · mais dentes e cartilagens');
+    else if(k==='muscular')sm.innerHTML=TL('<b>más de 600 músculos</b> · en '+s.count+' piezas 3D','<b>over 600 muscles</b> · in '+s.count+' 3D pieces','<b>mais de 600 músculos</b> · em '+s.count+' peças 3D');}
+  if(typeof renderQbar==='function')renderQbar();};
+$('#toolsTog').onclick=()=>{const t=$('.tools');const min=t.classList.toggle('min');$('#toolsTog').setAttribute('aria-expanded',!min);};
+$('#phyOpts').onclick=()=>{const c=$('.phycard');if(c)c.classList.toggle('optopen');};
+let LBLF=0;function cullLabels(){if((++LBLF)%3)return;const vis=[];let tag=null;for(const L of labels){if(!L.show)continue;if(L.group==='tag')tag=L;else vis.push(L);}
+  const order=tag?[tag,...vis]:vis;const placed=[];for(const L of order){const el=L.el;if(L._t!==el.textContent){L._t=el.textContent;L.w=el.offsetWidth;L.h=el.offsetHeight;}if(!L.w){L.w=el.offsetWidth;L.h=el.offsetHeight;}
+    const x=parseFloat(el.style.left),y=parseFloat(el.style.top);if(isNaN(x)||isNaN(y)){el.style.visibility='';continue;}const tg=L.group==='tag';const w=L.w,h=L.h;let ok=null;
+    for(const dy of tg?[0]:[0,-(h+3),h+3,-2*(h+3),2*(h+3)]){const R=tg?{x0:x+10,x1:x+10+w,y0:y+dy-h/2,y1:y+dy+h/2}:{x0:x-w/2-2,x1:x+w/2+2,y0:y+dy-h/2-1,y1:y+dy+h/2+1};if(!placed.some(Q=>R.x0<Q.x1&&R.x1>Q.x0&&R.y0<Q.y1&&R.y1>Q.y0)){ok=[R,dy];break;}}
+    if(ok){placed.push(ok[0]);el.style.visibility='';if(ok[1])el.style.top=(y+ok[1])+'px';}else el.style.visibility='hidden';}}
+renderQbar();
 /* ───────── Inicio ───────── */
 setMode(store.get('mode','stu'));
 renderSysList();renderHR();renderDis();planeColors();renderPlanes();updatePlanes();renderInfo();renderViews();
