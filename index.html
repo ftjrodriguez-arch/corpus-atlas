@@ -2614,7 +2614,7 @@ let sheetState='peek';
 function sheetH(st){return st==='mini'?SHEET.mini:st==='peek'?SHEET.peek:st==='half'?SHEET.half():SHEET.full();}
 function applySheet(px){const p=$('#panel');if(!isPhone()){p.style.height='';document.documentElement.style.removeProperty('--sheet');viewOffset();return;}
   p.style.height=px+'px';document.documentElement.style.setProperty('--sheet',px+'px');viewOffset();}
-function setSheet(st){sheetState=st;applySheet(sheetH(st));if(typeof refitSheet==='function')refitSheet();}
+var SHEET_PX=-1;function setSheet(st){sheetState=st;const px=sheetH(st);applySheet(px);if(px!==SHEET_PX){SHEET_PX=px;if(typeof refitSheet==='function')refitSheet();}}
 function viewOffset(){const r=stage.getBoundingClientRect();const sh=isPhone()?parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sheet'))||SHEET.peek:0;
   if(sh>0){const off=Math.min(r.height*0.36,sh/2);camera.setViewOffset(r.width,r.height,0,off,r.width,r.height);}else camera.clearViewOffset();}
 (()=>{const h=$('#sheetH'),p=$('#panel');let y0=null,h0=0,moved=false;
@@ -7137,8 +7137,8 @@ function fitNow(c,hx,hy){const U=fitUsable();const sh=isPhone()?parseFloat(getCo
   const px=(U.x0+U.x1)/2-U.W/2,py=(U.y0+U.y1)/2-(U.H/2-off);const th=orb.T.th,phi=orb.T.ph;
   const fw=new V3(-Math.sin(phi)*Math.sin(th),-Math.cos(phi),-Math.sin(phi)*Math.cos(th)),right=new V3().crossVectors(fw,new V3(0,1,0)).normalize(),up=new V3().crossVectors(right,fw);
   const k=d/f;orb.T.tgt.copy(c).addScaledVector(right,-px*k).addScaledVector(up,py*k);orb.T.r=d;}
-var LAST_FIT=null;function refitSheet(){if(LAST_FIT&&!FIT_USER&&isPhone()){const L=LAST_FIT;fitSoon(L[0],L[1],L[2]);}}
-function fitSoon(c,hx,hy,rough){const id=++FIT_ID;FIT_USER=false;LAST_FIT=[c.clone(),hx,hy];orb.T.tgt.copy(c);if(rough)orb.T.r=rough;
+var LAST_FIT=null;function refitSheet(){if(LAST_FIT&&!FIT_USER&&isPhone()){const L=LAST_FIT,id=++FIT_ID;setTimeout(()=>{if(id===FIT_ID&&!FIT_USER)fitNow(L[0],L[1],L[2]);},320);}}
+function fitSoon(c,hx,hy,rough){const id=++FIT_ID;FIT_USER=false;LAST_FIT=[c.clone(),hx,hy];orb.T.tgt.copy(c);if(rough)orb.T.r=rough;try{fitNow(c,hx,hy);}catch(e){}
   requestAnimationFrame(()=>requestAnimationFrame(()=>{if(id===FIT_ID)fitNow(c,hx,hy);}));
   setTimeout(()=>{if(id===FIT_ID&&!FIT_USER)fitNow(c,hx,hy);},450);}
 function fitMeshes(ms){const b=new THREE.Box3();for(const m of ms){m.geometry.computeBoundingBox();b.union(m.geometry.boundingBox);}if(b.isEmpty())return;const s=b.getSize(new V3());fitSoon(b.getCenter(new V3()),Math.max(s.x,s.z)/2*1.05,s.y/2*1.05);}
