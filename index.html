@@ -366,6 +366,22 @@ body.phy-on .qbar,body.wopen .qbar{display:none}
   .phycard .phyPhase{margin:2px 0}
 }
 @media (prefers-reduced-motion: reduce){ .sw::after,.bar i,.panel{transition:none} }
+.hovtip{position:absolute;z-index:9;transform:translate(-50%,-100%);pointer-events:none;background:rgba(14,16,22,.9);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:6px 10px;font:600 13px/1.2 var(--f-ui);white-space:nowrap;max-width:80vw;overflow:hidden;text-overflow:ellipsis;box-shadow:0 6px 18px rgba(0,0,0,.45)}
+#qbar.qbar{left:6px;top:8px;bottom:auto;right:auto;max-width:none;flex-direction:column;flex-wrap:nowrap;gap:4px;padding:4px;border-radius:16px;background:rgba(14,16,22,.45);backdrop-filter:blur(6px)}
+#qbar.qbar button{flex-direction:column;justify-content:center;gap:2px;width:50px;height:44px;padding:0;border-radius:12px;font:600 9px/1 var(--f-ui);opacity:.5}
+#qbar.qbar button span{display:block;max-width:48px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#qbar.qbar button i{font-size:17px}
+#qbar.qbar button[aria-pressed="true"]{opacity:1}
+#qbar.qbar button[data-x]{--c:var(--accent)}#qbar.qbar button[data-x="all"]{opacity:.85}
+#qbar.qbar hr{border:0;border-top:1px solid var(--line);margin:2px 4px;width:auto}
+.solopop{position:absolute;z-index:9;display:flex;flex-direction:column;gap:3px;background:rgba(14,16,22,.94);border:1px solid var(--line);border-radius:14px;padding:8px;min-width:200px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.solopop p{margin:0 4px 4px;font:600 11px/1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.solopop button{display:flex;align-items:center;gap:9px;text-align:left;border:0;background:transparent;color:var(--ink);font:500 14px/1.2 var(--f-ui);padding:8px 8px;border-radius:9px}
+.solopop button:hover,.solopop button[aria-pressed="true"]{background:rgba(255,255,255,.08)}.solopop button i{font-style:normal;font-size:17px;width:22px;text-align:center}
+.solochip{position:absolute;z-index:8;top:8px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:rgba(14,16,22,.85);border:1px solid var(--accent);border-radius:999px;padding:5px 6px 5px 12px;font:600 13px/1 var(--f-ui);color:var(--ink);white-space:nowrap}
+.solochip button{border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);border-radius:999px;padding:5px 9px;font:600 12px/1 var(--f-ui)}
+body.phy-on .solochip,body.phy-on .solopop,body.wopen .solochip{display:none}
+@media (max-width:879px){#qbar.qbar button{width:44px;height:40px}#qbar.qbar button i{font-size:16px}.solochip{top:auto;bottom:calc(var(--sheet,150px) + 10px)}}
 </style>
 
 <header>
@@ -416,7 +432,7 @@ body.phy-on .qbar,body.wopen .qbar{display:none}
     <div class="labels" id="labels"></div>
     <div class="laser" id="laser" hidden></div>
     <div class="hint">
-      <p id="hintTxt">Arrastra para girar · pellizca o rueda para acercar · dos dedos o clic derecho para desplazar · toca una estructura para identificarla</p>
+      <p id="hintTxt">Arrastra para girar · pasa el ratón para ver nombres · rueda para acercar · clic derecho para desplazar · toca una estructura para identificarla</p>
       <span class="quizbar" id="quizbar" hidden></span>
     </div>
     <div class="loader" id="loader" hidden><span id="loadTxt">Cargando…</span><div class="bar"><i id="loadBar"></i></div></div>
@@ -1211,25 +1227,26 @@ $('#disPrev').onclick=()=>setDissection(disStage-1);$('#disNext').onclick=()=>se
 /* ───────── Cámara orbital ───────── */
 const orb={tgt:new V3(0,0.88,0),r:3.5,th:0.42,ph:1.45,T:{tgt:new V3(0,0.88,0),r:3.5,th:0.42,ph:1.43}};
 const VIEWS={ant:[0,1.45],post:[Math.PI,1.45],latd:[-Math.PI/2,1.45],lati:[Math.PI/2,1.45],sup:[0,0.12],inf:[0,Math.PI-0.12]};
-function setView(v){if(v==='reset'){orb.T.th=0.42;orb.T.ph=1.45;orb.T.r=isPhone()?4.4:3.5;orb.T.tgt.set(0,0.88,0);return;}
+function setView(v){if(v==='reset'){orb.T.th=0.42;orb.T.ph=1.45;orb.T.r=isPhone()?4.4:3.5;orb.T.tgt.set(0,0.88,0);fitSoon(new V3(0,0.9,0),0.34,0.93);return;}
   const [th,ph]=VIEWS[v];let d=th-orb.th;d=Math.atan2(Math.sin(d),Math.cos(d));orb.T.th=orb.th+d;orb.T.ph=ph;}
 $$('[data-view]').forEach(b=>b.onclick=()=>setView(b.dataset.view));
 let hintDone=false;
-if(window.innerWidth<600) $('#hintTxt').textContent='Arrastra para girar · pellizca para acercar · toca para identificar';
+if(window.innerWidth<600) $('#hintTxt').textContent='Arrastra para girar · mantén pulsado y desliza para ver nombres · toca para identificar';
 const ptrs=new Map();let downInfo=null,lastPinch=null;
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('pointerdown',e=>{spin=false;if(!hintDone){hintDone=true;setTimeout(()=>{if(!quiz.on&&!patchFocus)$('#hintTxt').hidden=true;},2500);}cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(ptrs.size===1) downInfo={x:e.clientX,y:e.clientY,moved:0,btn:e.button,shift:e.shiftKey}; else if(downInfo) downInfo.moved=99;lastPinch=null;});
+  if(ptrs.size===1) downInfo={x:e.clientX,y:e.clientY,moved:0,btn:e.button,shift:e.shiftKey}; else if(downInfo) downInfo.moved=99;lastPinch=null;FIT_USER=true;hovDown(e);});
 cv.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;const p=ptrs.get(e.pointerId);const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
   if(downInfo) downInfo.moved+=Math.abs(dx)+Math.abs(dy);
+  if(hovMove(e))return;
   if(ptrs.size===1){ if(downInfo&&(downInfo.btn===2||downInfo.shift)) pan(dx,dy); else {orb.T.th-=dx*0.008;orb.T.ph=Math.min(Math.PI-0.05,Math.max(0.05,orb.T.ph-dy*0.008));} }
   else if(ptrs.size===2){const [a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y),mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
-    if(lastPinch){orb.T.r=Math.min(6,Math.max(0.12,orb.T.r*lastPinch.d/d));pan(mx-lastPinch.mx,my-lastPinch.my);}lastPinch={d,mx,my};}
+    if(lastPinch){orb.T.r=Math.min(6,Math.max(0.12,orb.T.r*lastPinch.d/d));if(EXPL){orb.T.th-=(mx-lastPinch.mx)*0.008;orb.T.ph=Math.min(Math.PI-0.05,Math.max(0.05,orb.T.ph-(my-lastPinch.my)*0.008));}else pan(mx-lastPinch.mx,my-lastPinch.my);}lastPinch={d,mx,my};}
 });
-const endPtr=e=>{if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);if(ptrs.size<2)lastPinch=null;
+const endPtr=e=>{if(!ptrs.has(e.pointerId))return;if(hovUp(e))return;ptrs.delete(e.pointerId);if(ptrs.size<2)lastPinch=null;
   if(ptrs.size===0&&downInfo&&downInfo.moved<7&&downInfo.btn===0) pick(e.clientX,e.clientY);if(ptrs.size===0)downInfo=null;};
 cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);downInfo=null;});
-cv.addEventListener('wheel',e=>{e.preventDefault();const f=1+Math.sign(e.deltaY)*0.09;orb.T.r=Math.min(6,Math.max(0.12,orb.T.r*f));
+cv.addEventListener('wheel',e=>{e.preventDefault();FIT_USER=true;const f=1+Math.sign(e.deltaY)*0.09;orb.T.r=Math.min(6,Math.max(0.12,orb.T.r*f));
   if(f<1){const r=cv.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1),camera);
     const n=camera.getWorldDirection(new V3());const pl=new THREE.Plane().setFromNormalAndCoplanarPoint(n,orb.T.tgt);const hit=new V3();if(ray.ray.intersectPlane(pl,hit)) orb.T.tgt.lerp(hit,0.09);}},{passive:false});
 function pan(dx,dy){const right=new V3().setFromMatrixColumn(camera.matrix,0),up=new V3().setFromMatrixColumn(camera.matrix,1);const k=orb.r*0.0011;orb.T.tgt.addScaledVector(right,-dx*k).addScaledVector(up,dy*k);}
@@ -1257,7 +1274,7 @@ function refreshState(m){const u=m.userData;const st=u.sel&&u.ghost?'ghost':u.se
 function select(m,point){
   stopTools();clearLm();
   if(selected){selected.m.userData.sel=false;selected.m.userData.ghost=false;refreshState(selected.m);}
-  if((patchFocus||isoSet)&&!lesson){patchFocus=null;isoSet=null;applySystems();}
+  if((patchFocus||isoSet)&&!lesson&&!SOLO){patchFocus=null;isoSet=null;applySystems();}
   selected=null;
   if(!m){renderInfo();renderActbar();return;}
   m.userData.sel=true;refreshState(m);
@@ -3401,7 +3418,7 @@ function phyPlace(){const card=$('.phycard');if(!card)return;const dock=!isPhone
   if(dock){const pb=$('.pbody');if(card.parentElement!==pb){pb.prepend(card);pb.scrollTop=0;}card.classList.add('docked');}
   else{const box=$('#phyBox');if(card.parentElement!==box)box.appendChild(card);card.classList.remove('docked');card.style.bottom=isPhone()&&PHY.on?(SHEET.mini+6)+'px':'';if(isPhone()&&PHY.on&&sheetState!=='mini')setSheet('mini');if(isPhone()&&!PHY.on&&sheetState==='mini')setSheet('peek');}}
 window.addEventListener('resize',()=>{if(PHY.on)phyPlace();});
-function phyFocus(c,r){const v=c.clone();if(isPhone()){r*=1.6;v.y-=r*0.07;}focusOn(v,r);}
+function phyFocus(c,r){fitSoon(c.clone(),0.26*r,0.26*r,isPhone()?r*1.7:r);}
 const pick2=(rx,need)=>meshes.filter(m=>rx.test(m.userData.c.en)&&(!need||need.includes(BS(m.userData.sys)))&&!m.userData.c.ins);
 async function phyStart(a,b){let tour='heart',step=0;if(typeof a==='string'){tour=a;step=b||0;}else step=a||0;
   if(PHY.on&&PHY_TOUR===tour){phyGo(step);return;}if(PHY.on)phyStop();PHY_TOUR=tour;const T=curTour();
@@ -6314,7 +6331,7 @@ PHY_QUIZ.pelv=[Q3(L3('El hueso coxal se forma por la fusión de…','The hip bon
  Q3(L3('Sentados, el peso se apoya sobre todo en…','When sitting, weight rests mainly on the…','Sentados, o peso se apoia sobretudo nas…'),[L3('Los acetábulos','Acetabula','Acetábulos'),L3('Las tuberosidades isquiáticas','Ischial tuberosities','Tuberosidades isquiáticas'),L3('El cóccix solo','Coccyx alone','Só no cóccix'),L3('La sínfisis','Symphysis','Sínfise')],1),
  Q3(L3('El ángulo subpúbico es mayor en…','The subpubic angle is wider in…','O ângulo subpúbico é maior na…'),[L3('La pelvis masculina','The male pelvis','Pelve masculina'),L3('La pelvis femenina','The female pelvis','Pelve feminina'),L3('Es igual','It is the same','É igual'),L3('Los niños','Children','Nas crianças')],1)];
 
-function at27Cam(c,r,ph,th){phyFocus(c.clone().add(new V3(0,0.23*r,0)),r);orb.T.ph=ph;orb.T.th=th;}
+function at27Cam(c,r,ph,th){phyFocus(c.clone(),r);orb.T.ph=ph;orb.T.th=th;}
 /* cráneo */
 const AT27_NEU=[['Frontal bone','Frontal','Frontal','Frontal','#60a5fa'],['Parietal bone','Parietales','Parietals','Parietais','#22c55e'],['Temporal bone','Temporales','Temporals','Temporais','#f59e0b'],['Occipital bone','Occipital','Occipital','Occipital','#a855f7'],['Sphenoid bone','Esfenoides','Sphenoid','Esfenoide','#ef4444'],['Ethmoid bone','Etmoides','Ethmoid','Etmoide','#14b8a6']];
 const AT27_VIS=[['Maxilla','Maxilares','Maxillae','Maxilares','#f472b6'],['Zygomatic bone','Cigomáticos','Zygomatic','Zigomáticos','#f59e0b'],['Nasal bone','Nasales','Nasal','Nasais','#22c55e'],['Lacrimal bone','Lagrimales','Lacrimal','Lacrimais','#38bdf8'],['Palatine bone','Palatinos','Palatine','Palatinos','#a855f7'],['Inferior nasal concha bone','Cornetes inferiores','Inferior conchae','Conchas inferiores','#14b8a6'],['Vomer','Vómer','Vomer','Vômer','#eab308'],['Mandible','Mandíbula','Mandible','Mandíbula','#ef4444']];
@@ -6905,7 +6922,7 @@ function phyGoHeartan(st,ins){const en=m=>m.userData.c.en;ins.hidden=false;phyBi
   const ch=f(/^(Right|Left) (atrium|ventricle)$/),valv=f(/(leaflet|papillary muscle)/),cor=f(/(coronary artery|Circumflex artery of heart|branch of right coronary)/),cv=f(/(cardiac vein|^Coronary sinus$|vein of left ventricle)/),gv=f(/^(Ascending aorta|Aortic arch|Pulmonary trunk|Bifurcation of pulmonary trunk|(Left|Right) pulmonary artery|(Left|Right) (superior|inferior) pulmonary vein|Superior vena cava|Inferior vena cava \(thoracic part\)|Brachiocephalic trunk|Left common carotid artery|Left subclavian artery)$/);
   const realPaint=()=>{for(const m of ch)phyTint(m,'#9a3d33',0.92);for(const m of cor)phyTint(m,'#e02424',1);for(const m of cv)phyTint(m,'#2c4fb8',1);for(const m of f(/(aorta|Aortic arch|Brachiocephalic trunk|Left common carotid artery|Left subclavian artery|pulmonary vein)/i))phyTint(m,'#d7263d',0.95);for(const m of f(/(Pulmonary trunk|pulmonary artery|vena cava)/i))phyTint(m,'#3d55c9',0.95);};
   const ligArt=()=>{const ar=f(/^Aortic arch$/),bi=f(/^(Bifurcation of pulmonary trunk|Left pulmonary artery)$/);if(!ar.length||!bi.length)return;const ab=at26Box(ar),b=centerOf(bi);const a=new V3((ab.min.x+ab.max.x)/2,ab.min.y+0.004,(ab.min.z+ab.max.z)/2);const p=[[a.x,a.y,a.z],[(a.x+b.x)/2,(a.y+b.y)/2,(a.z+b.z)/2],[b.x,b.y+0.006,b.z]];phyNerve(p,0xe9d8c4,2,2,0.0028,0.001);phyPtLabel('liga',p[1],'Ligamento arterioso','Ligamentum arteriosum','Ligamento arterial');};
-  const H=centerOf(ch.length?ch:gv);const zf=isPhone()?0.78:1;const cam=(r,th)=>at27Cam(H,r*zf,1.5,th);
+  const H=centerOf(ch.length?ch:gv);const zf=1;const cam=(r,th)=>at27Cam(H,r*zf,1.5,th);
   if(st.id==='ha0'){phyIso([...ch,...gv,...cor,...cv]);PHY.anim=at26Keep(realPaint,2);ligArt();phyDynLabel('arch',f(/^Aortic arch$/),'Cayado aórtico','Aortic arch','Arco da aorta',[0,0.025,0]);phyDynLabel('pt',f(/^Pulmonary trunk$/),'Tronco pulmonar','Pulmonary trunk','Tronco pulmonar',[0.03,0.01,0.03]);
     phyDynLabel('rv',f(/^Right ventricle$/),'Ventrículo derecho','Right ventricle','Ventrículo direito',[-0.03,-0.02,0.04]);phyDynLabel('lv',f(/^Left ventricle$/),'Ventrículo izquierdo','Left ventricle','Ventrículo esquerdo',[0.04,-0.02,0.02]);phyDynLabel('ra',f(/^Right atrium$/),'Aurícula derecha','Right atrium','Átrio direito',[-0.04,0.01,0.02]);PHY.spin=true;cam(0.46,0.2);return;}
   if(st.id==='hacut'){phyIso([...ch,...valv,...gv,...cor,...cv]);PHY.anim=at26Keep(realPaint,2);phyCut(true,H.z+0.004);const lv=f(/^Left ventricle$/),rv=f(/^Right ventricle$/);if(lv.length&&rv.length){const a=centerOf(lv),b=centerOf(rv),m=a.clone().add(b).multiplyScalar(0.5);phyPtLabel('sep',[m.x,m.y-0.01,H.z+0.01],'Tabique interventricular','Interventricular septum','Septo interventricular');phyPtLabel('lvw',[a.x+0.03,a.y-0.01,H.z+0.01],'Pared del VI','LV wall','Parede do VE');}
@@ -7099,6 +7116,92 @@ function cullLabels(){const vis=[],co=[];let tag=null;for(const L of labels){if(
     const x=parseFloat(el.style.left),y=parseFloat(el.style.top);if(isNaN(x)||isNaN(y)){el.style.visibility='';continue;}const tg=L.group==='tag';const w=L.w,h=L.h;let ok=null;
     for(const dy of tg?[0]:[0,-(h+3),h+3,-2*(h+3),2*(h+3)]){const R=tg?{x0:x+10,x1:x+10+w,y0:y+dy-h/2,y1:y+dy+h/2}:{x0:x-w/2-2,x1:x+w/2+2,y0:y+dy-h/2-1,y1:y+dy+h/2+1};if(!placed.some(Q=>R.x0<Q.x1&&R.x1>Q.x0&&R.y0<Q.y1&&R.y1>Q.y0)){ok=[R,dy];break;}}
     if(ok){placed.push(ok[0]);el.style.visibility='';if(ok[1])el.style.top=(y+ok[1])+'px';}else el.style.visibility='hidden';}}
+/* ───── Encuadre según la pantalla: lo que se enfoca cabe entero en la zona libre del visor ───── */
+var FIT_ID=0,FIT_USER=false;
+function fitUsable(){const r=stage.getBoundingClientRect(),W=r.width,H=r.height,ph=isPhone();let x0=6,x1=W-6,y0=6,y1=H-6;
+  const vis=el=>el&&!el.hidden&&el.offsetParent!==null&&getComputedStyle(el).display!=='none'&&getComputedStyle(el).visibility!=='hidden';
+  const q=$('#qbar');if(vis(q)){const b=q.getBoundingClientRect();if(b.width&&b.height>0.25*H)x0=Math.max(x0,b.right-r.left+4);}
+  const t=document.querySelector('.tools');if(vis(t)){const b=t.getBoundingClientRect();if(b.height>0.4*H)x1=Math.min(x1,b.left-r.left-4);}
+  const c=document.querySelector('.phy .phycard');if(PHY.on&&vis(c)){const b=c.getBoundingClientRect();if(b.top-r.top>H*0.3)y1=Math.min(y1,b.top-r.top-6);}
+  if(ph){const pn=$('#panel');if(vis(pn)){const b=pn.getBoundingClientRect();if(b.top<r.bottom)y1=Math.min(y1,b.top-r.top-6);}}
+  const ins=$('#phyInset');if(PHY.on&&vis(ins)){const b=ins.getBoundingClientRect();if(b.width>0.5*W&&b.bottom-r.top<H*0.45)y0=Math.max(y0,b.bottom-r.top+4);}
+  return {W,H,x0,x1,y0,y1};}
+function fitNow(c,hx,hy){const U=fitUsable();const sh=isPhone()?parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sheet'))||SHEET.peek:0;const off=sh>0?Math.min(U.H*0.36,sh/2):0;
+  const f=(U.H/2)/Math.tan(camera.fov*Math.PI/360),uw=Math.max(90,U.x1-U.x0),uh=Math.max(90,U.y1-U.y0);
+  const d=Math.min(6,Math.max(0.12,hx*f/(0.42*uw),hy*f/(0.42*uh)));
+  const px=(U.x0+U.x1)/2-U.W/2,py=(U.y0+U.y1)/2-(U.H/2-off);const th=orb.T.th,phi=orb.T.ph;
+  const fw=new V3(-Math.sin(phi)*Math.sin(th),-Math.cos(phi),-Math.sin(phi)*Math.cos(th)),right=new V3().crossVectors(fw,new V3(0,1,0)).normalize(),up=new V3().crossVectors(right,fw);
+  const k=d/f;orb.T.tgt.copy(c).addScaledVector(right,-px*k).addScaledVector(up,py*k);orb.T.r=d;}
+function fitSoon(c,hx,hy,rough){const id=++FIT_ID;FIT_USER=false;orb.T.tgt.copy(c);if(rough)orb.T.r=rough;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{if(id===FIT_ID)fitNow(c,hx,hy);}));
+  setTimeout(()=>{if(id===FIT_ID&&!FIT_USER)fitNow(c,hx,hy);},450);}
+function fitMeshes(ms){const b=new THREE.Box3();for(const m of ms){m.geometry.computeBoundingBox();b.union(m.geometry.boundingBox);}if(b.isEmpty())return;const s=b.getSize(new V3());fitSoon(b.getCenter(new V3()),Math.max(s.x,s.z)/2*1.05,s.y/2*1.05);}
+
+/* ───── Nombres al pasar: ratón encima, o mantener pulsado y deslizar el dedo ───── */
+var EXPL=store.get('expl',false),scrub=false,LPT=0,HVT=0,hovLast=0,hovM=null;
+const hovTip=document.createElement('div');hovTip.className='hovtip';hovTip.hidden=true;stage.appendChild(hovTip);
+function hitAt(cx,cy){const r=cv.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2(((cx-r.left)/r.width)*2-1,-((cy-r.top)/r.height)*2+1),camera);
+  const h=ray.intersectObjects(meshes.filter(m=>visibleDeep(m)&&m.material.opacity>0.04),false).filter(h=>clipArr.every(pl=>pl.distanceToPoint(h.point)>=-0.0005));return h[0]||null;}
+function hovSet(m){if(hovM===m)return;if(hovM){hovM.userData.hint=hovM.userData._ph;refreshState(hovM);}hovM=m;if(m&&!PHY.on){m.userData._ph=m.userData.hint;m.userData.hint=true;refreshState(m);}else hovM=PHY.on?null:m;}
+function hovHide(){hovTip.hidden=true;hovSet(null);}
+function hovShow(cx,cy,touch){if(quiz.on||exam.on){hovHide();return;}const now=performance.now();if(now-hovLast<70)return;hovLast=now;const h=hitAt(cx,cy),r=stage.getBoundingClientRect();
+  if(!h){hovTip.hidden=true;hovSet(null);return;}hovSet(h.object);hovTip.textContent=label(h.object.userData.c);hovTip.hidden=false;
+  const x=Math.min(r.width-8,Math.max(8,cx-r.left));hovTip.style.left=x+'px';hovTip.style.top=Math.max(14,cy-r.top-(touch?64:20))+'px';}
+cv.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;if(ptrs.size){hovHide();return;}hovShow(e.clientX,e.clientY,false);});
+cv.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')hovHide();});
+function hovDown(e){if(e.pointerType==='mouse')return;clearTimeout(LPT);if(ptrs.size>1){scrub=false;hovHide();return;}
+  LPT=setTimeout(()=>{if(downInfo&&downInfo.moved<9&&ptrs.size===1){scrub=true;hovLast=0;const p=[...ptrs.values()][0];hovShow(p.x,p.y,true);try{navigator.vibrate&&navigator.vibrate(12);}catch(_){}}},380);}
+function hovMove(e){if(e.pointerType==='mouse'||ptrs.size!==1)return false;if(!scrub&&!(EXPL&&downInfo&&downInfo.moved>4))return false;
+  scrub=true;clearTimeout(LPT);if(downInfo)downInfo.moved=99;hovShow(e.clientX,e.clientY,true);return true;}
+function hovUp(e){clearTimeout(LPT);if(!scrub)return false;scrub=false;ptrs.delete(e.pointerId);if(ptrs.size<2)lastPinch=null;downInfo=null;clearTimeout(HVT);HVT=setTimeout(hovHide,1800);return true;}
+
+/* ───── Ver solo un órgano o sistema ───── */
+var SOLO=null,SOLO_SAVE=null;
+const solN=m=>m.userData.c.en;
+const SOLO_DEF=[
+ ['heart','❤️',['Corazón','Heart','Coração'],/^(arterial|venoso|f_vasos)$/,m=>{const n=solN(m);return HRX.atr.test(n)||HRX.ven.test(n)||HRX.av.test(n)||HRX.sl.test(n)||GVRX.test(n);}],
+ ['lungs','🫁',['Pulmones','Lungs','Pulmões'],/^(respiratorio|f_visceras)$/,m=>{const n=solN(m);return BRX.lung.test(n)||BRX.br.test(n)||/^Trachea$/.test(n);}],
+ ['brain','🧠',['Encéfalo','Brain','Encéfalo'],/^(nervioso_central|f_nervioso)$/,m=>{m.geometry.computeBoundingSphere();return m.geometry.boundingSphere.center.y>1.47;}],
+ ['dig','🍽️',['Aparato digestivo','Digestive system','Sistema digestório'],/^(digestivo|f_visceras)$/,null],
+ ['uri','💧',['Riñones y vías urinarias','Kidneys and urinary tract','Rins e vias urinárias'],/^(urinario|f_visceras)$/,null],
+ ['circ','🩸',['Sistema circulatorio','Circulatory system','Sistema circulatório'],/^(arterial|venoso|f_vasos)$/,null],
+ ['nerv','⚡',['Sistema nervioso','Nervous system','Sistema nervoso'],/^(nervioso_central|nervioso_periferico|f_nervioso)$/,null],
+ ['skel','🦴',['Esqueleto y articulaciones','Skeleton and joints','Esqueleto e articulações'],/^(oseo|f_oseo|articular|f_articular)$/,null],
+ ['mus','💪',['Músculos','Muscles','Músculos'],/^(muscular|f_muscular)$/,null]];
+function soloShow(id){const d=SOLO_DEF.find(x=>x[0]===id);if(!d)return;
+  if(!SOLO_SAVE){SOLO_SAVE={};for(const k in SYS)SOLO_SAVE[k]={on:SYS[k].on,op:SYS[k].op};}
+  SOLO=id;select(null);const keys=qKeys(d[3]);
+  for(const k in SYS){SYS[k].on=keys.includes(k);if(SYS[k].on){SYS[k].op=1;if(SYS[k].state!=='loaded')loadSys(k);}}
+  isoOnly=false;isoSet=null;hiddenIds.clear();applySystems();renderSysList();soloRender();
+  let tries=0,lastN=-1;const go=()=>{if(SOLO!==id)return;const ready=keys.every(k=>SYS[k].state==='loaded');
+    let ms=meshes.filter(m=>keys.includes(m.userData.sys)||keys.includes(BS(m.userData.sys)));if(d[4])ms=ms.filter(d[4]);
+    if(d[4]&&ms.length){isoOnly=true;isoSet=new Set(ms.map(m=>m.userData.c.id));applySystems();}
+    if(ms.length&&ms.length!==lastN){lastN=ms.length;fitMeshes(ms);}
+    if((!ready||!ms.length)&&tries++<60)setTimeout(go,500);};go();}
+function soloExit(){if(!SOLO&&!SOLO_SAVE)return;SOLO=null;isoOnly=false;isoSet=null;hiddenIds.clear();
+  if(SOLO_SAVE){for(const k in SOLO_SAVE)if(SYS[k]){SYS[k].on=SOLO_SAVE[k].on;SYS[k].op=SOLO_SAVE[k].op;}SOLO_SAVE=null;}
+  applySystems();renderSysList();soloRender();setView('reset');}
+const soloChip=document.createElement('div');soloChip.id='soloChip';soloChip.className='solochip';soloChip.hidden=true;stage.appendChild(soloChip);
+const soloPop=document.createElement('div');soloPop.id='soloPop';soloPop.className='solopop';soloPop.hidden=true;stage.appendChild(soloPop);
+function soloRender(){const d=SOLO_DEF.find(x=>x[0]===SOLO);soloChip.hidden=!d;
+  if(d){soloChip.innerHTML=`<span>${d[1]} ${esc(TL(...d[2]))}</span><button>✕ ${TL('Ver todo','Show all','Ver tudo')}</button>`;soloChip.querySelector('button').onclick=soloExit;}
+  soloPop.innerHTML=`<p>${TL('Ver solo…','Show only…','Ver só…')}</p>`+SOLO_DEF.map(x=>`<button data-solo="${x[0]}" aria-pressed="${SOLO===x[0]}"><i>${x[1]}</i>${esc(TL(...x[2]))}</button>`).join('');
+  soloPop.querySelectorAll('[data-solo]').forEach(b=>b.onclick=()=>{soloPop.hidden=true;soloShow(b.dataset.solo);});
+  const sb=document.querySelector('#qbar [data-x="solo"]');if(sb)sb.setAttribute('aria-pressed',!!SOLO);}
+document.addEventListener('pointerdown',e=>{if(!soloPop.hidden&&!e.target.closest('#soloPop,[data-x="solo"]'))soloPop.hidden=true;});
+
+/* ───── Barra lateral izquierda: capas, ver solo, nombres al deslizar y vista completa ───── */
+const _renderQbar0=renderQbar;
+renderQbar=function(){_renderQbar0();const el=$('#qbar');if(!el)return;
+  el.querySelectorAll('[data-q]').forEach(b=>{const s=b.querySelector('span');if(s)s.textContent=s.textContent.split(' ')[0];});
+  const xb=(id,ic,t,on)=>`<button data-x="${id}" aria-pressed="${on}" title="${esc(t[1])}" aria-label="${esc(t[1])}"><i>${ic}</i><span>${esc(t[0])}</span></button>`;
+  el.insertAdjacentHTML('beforeend','<hr>'+xb('solo','🎯',[TL('Solo','Only','Só'),TL('Ver solo un órgano o sistema','Show only one organ or system','Ver só um órgão ou sistema')],!!SOLO)
+    +xb('expl','👆',[TL('Nombres','Names','Nomes'),TL('Deslizar un dedo muestra el nombre de cada estructura (gira con dos dedos)','Sliding one finger shows each structure name (rotate with two fingers)','Deslizar um dedo mostra o nome de cada estrutura (gire com dois dedos)')],EXPL)
+    +xb('all','↺',[TL('Todo','All','Tudo'),TL('Ver el cuerpo entero','Show the whole body','Ver o corpo inteiro')],false));
+  el.querySelector('[data-x="solo"]').onclick=e=>{const b=e.currentTarget.getBoundingClientRect(),r=stage.getBoundingClientRect();soloRender();soloPop.style.left=(b.right-r.left+8)+'px';soloPop.style.top=Math.max(6,Math.min(r.height-330,b.top-r.top-40))+'px';soloPop.hidden=!soloPop.hidden;};
+  el.querySelector('[data-x="expl"]').onclick=()=>{EXPL=!EXPL;store.set('expl',EXPL);renderQbar();const h=$('#hintTxt');if(h&&EXPL){h.textContent=TL('Desliza un dedo sobre el modelo para ver los nombres · gira con dos dedos','Slide one finger over the model to see the names · rotate with two fingers','Deslize um dedo sobre o modelo para ver os nomes · gire com dois dedos');h.hidden=false;setTimeout(()=>{h.hidden=true;},4000);}};
+  el.querySelector('[data-x="all"]').onclick=()=>{if(SOLO||SOLO_SAVE)soloExit();else setView('reset');};};
+
 renderQbar();
 /* ───────── Inicio ───────── */
 setMode(store.get('mode','stu'));
@@ -7115,7 +7218,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
   setSide(romSide);renderLessons();showTab(store.get('tab','sistemas'));
   const shared=readHash();if(shared&&shared.b)BODY=shared.b;
   if(!shared&&!store.get('welcomed',false))openWelcome();
-  if(isPhone()){setSheet('peek');orb.T.r=orb.r=4.4;}
+  if(isPhone()){setSheet('peek');orb.T.r=orb.r=4.4;}setView('reset');
   setBody(BODY);
   if(shared)applyShared(shared);
   renderReviewCard();
