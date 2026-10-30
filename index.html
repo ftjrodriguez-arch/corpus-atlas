@@ -392,6 +392,22 @@ body.phy-on .solochip,body.phy-on .solopop,body.wopen .solochip{display:none}
 .mqchip b{font-weight:700}.mqchip small{color:var(--muted);margin-left:6px}.mqchip.ok{border-color:#22c55e}.mqchip.bad{border-color:#ef4444}.mqchip.done{border-color:#facc15}
 .mqchip button{margin-left:8px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--ink);border-radius:999px;padding:4px 10px;font:600 12px/1 var(--f-ui)}
 @media (max-width:879px){.mqbtn{top:112px}.mqchip{top:118px;font-size:12.5px}}
+.wcard{background:linear-gradient(180deg,rgba(18,26,31,.98),rgba(13,19,24,.98))}
+.wcard>h2{font-size:30px;background:linear-gradient(90deg,#7dd3fc,#f0abfc);-webkit-background-clip:text;background-clip:text;color:transparent}
+.wstats{display:flex;flex-wrap:wrap;gap:6px}.wstats span{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:999px;padding:5px 11px;font:500 12px/1.2 var(--f-ui);color:var(--muted)}.wstats b{color:var(--ink);font-size:15px;font-weight:700}
+.wnew{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wfeat{position:relative;text-align:left;border:1px solid var(--c);background:linear-gradient(140deg,color-mix(in srgb,var(--c) 26%,transparent),rgba(255,255,255,.02) 70%);border-radius:14px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:5px;color:var(--ink);overflow:hidden}
+.wfeat i{font-style:normal;font-size:30px;line-height:1}.wfeat em{position:absolute;top:10px;right:10px;font:700 10px/1 var(--f-ui);letter-spacing:.08em;text-transform:uppercase;background:var(--c);color:#0b1014;border-radius:999px;padding:4px 7px}
+.wfeat b{font:650 17px/1.15 var(--f-ui)}.wfeat span{font-size:12.5px;color:#c9d4dc;line-height:1.35}.wfeat:hover{filter:brightness(1.12)}
+.wgrid button{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:start}.wgrid button i{grid-row:span 2;font-style:normal;font-size:24px;line-height:1.1}
+#wClose{background:linear-gradient(90deg,#22d3ee,#38bdf8);color:#04131a;border:0;font-weight:700;padding:10px 18px}
+.phyfeat{width:100%;display:flex;align-items:center;gap:12px;text-align:left;margin-bottom:8px;border:1px solid #f472b6;border-radius:14px;padding:12px 14px;background:linear-gradient(120deg,rgba(244,114,182,.28),rgba(56,189,248,.14));color:var(--ink)}
+.phyfeat i{font-style:normal;font-size:30px}.phyfeat span{display:flex;flex-direction:column;gap:2px}.phyfeat em{font:700 10px/1 var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:#f9a8d4}.phyfeat b{font:650 15px/1.2 var(--f-ui)}.phyfeat small{color:#c9d4dc;font-size:12px}
+.lbl.phyl.hl{background:linear-gradient(90deg,#facc15,#fb923c);color:#1a1205;border-color:#fde68a;font-weight:700;box-shadow:0 0 0 3px rgba(250,204,21,.25),0 6px 18px rgba(0,0,0,.5);z-index:3}
+.leads path.hl{stroke:#facc15;stroke-width:2}.leads circle.hl{fill:#facc15;stroke:#1a1205}
+body.guide .lbl.phyl:not(.hl){opacity:.72}
+@media (max-width:879px){.wgrid{grid-template-columns:1fr 1fr}.wnew{grid-template-columns:1fr 1fr}.wcard>h2{font-size:24px}.wgrid button span{font-size:11.5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.wgrid button{padding:10px}.wgrid b{font-size:15.5px}.wfeat{padding:12px 10px 10px}.wfeat b{font-size:15px}.wfeat span{font-size:11.5px}.wfeat i{font-size:26px}#wClose{width:100%}}
+.phydots:has(button:nth-child(9)){gap:3px;flex-wrap:nowrap}.phydots:has(button:nth-child(9)) button{width:6px;height:6px}.phydots:has(button:nth-child(9)) button[aria-current="true"]{width:14px;border-radius:4px}
 </style>
 
 <header>
@@ -3589,8 +3605,8 @@ function tourGroups(){return [['sis',['Órganos y sistemas','Organs and systems'
 function phyTourGroups(){const btn=([k,t])=>`<button class="phytour" data-tour="${k}" style="--c:${t.col}"><span class="ic">${t.ic}</span><span><b>${esc(tN(t))}</b><small>${t.steps.length} ${TL('pasos','steps','passos')}</small></span></button>`;
   const used=new Set();let out='';for(const [id,n,ks] of tourGroups()){const list=ks.filter(k=>TOURS[k]);list.forEach(k=>used.add(k));if(!list.length)continue;out+=`<h4 class="tgrp">${esc(TL(...n))} <span class="muted">· ${list.length}</span></h4><div class="phytours">${list.map(k=>btn([k,TOURS[k]])).join('')}</div>`;}
   const rest=Object.keys(TOURS).filter(k=>!used.has(k));if(rest.length)out+=`<h4 class="tgrp">${TL('Otros','Others','Outros')}</h4><div class="phytours">${rest.map(k=>btn([k,TOURS[k]])).join('')}</div>`;return out;}
-function renderPhyTours(){const html=`<button class="btn phyexam" data-exam style="width:100%;margin-bottom:8px">📝 ${TL('Examen por regiones · 10 preguntas','Exam by region · 10 questions','Exame por regiões · 10 perguntas')}</button><button class="btn pri" data-serie style="width:100%;margin-bottom:8px">🎬 ${TL('Serie narrada: respiración, corazón, sinapsis y marcha','Narrated series: breathing, heart, synapses and gait','Série narrada: respiração, coração, sinapse e marcha')}</button>${phyTourGroups()}`;
-  $$('.phyhost').forEach(h=>{h.innerHTML=`<h3 style="margin-bottom:8px">${TL('Fisiología en acción','Physiology in action','Fisiologia em ação')}</h3>`+html;h.querySelectorAll('[data-tour]').forEach(b=>b.onclick=()=>{if(isPhone())setSheet('peek');const pp=$('#phyPop');if(pp&&!pp.hidden)togglePop($('#phyBtn'),pp,false);phyStart(b.dataset.tour,0);});h.querySelectorAll('[data-exam]').forEach(b=>b.onclick=()=>{if(typeof phyExamPick==='function')phyExamPick(h,renderPhyTours);else if(typeof phyExam==='function')phyExam(h,renderPhyTours);});h.querySelectorAll('[data-serie]').forEach(b=>b.onclick=()=>{if(isPhone())setSheet('peek');phySerie(['resp','heart','syn','walk']);});
+function renderPhyTours(){const html=`<button class="phyfeat" data-feat="micro"><i>🔬</i><span><em>${TL('Nuevo','New','Novo')}</em><b>${TL('Por dentro: tejidos al microscopio','Inside: tissues under the microscope','Por dentro: tecidos ao microscópio')}</b><small>${TL('Vistas 3D ampliadas en movimiento, con «Ponte a prueba»','Magnified moving 3D views, with «Test yourself»','Vistas 3D ampliadas em movimento, com «Teste-se»')}</small></span></button><button class="btn phyexam" data-exam style="width:100%;margin-bottom:8px">📝 ${TL('Examen por regiones · 10 preguntas','Exam by region · 10 questions','Exame por regiões · 10 perguntas')}</button><button class="btn pri" data-serie style="width:100%;margin-bottom:8px">🎬 ${TL('Serie narrada: respiración, corazón, sinapsis y marcha','Narrated series: breathing, heart, synapses and gait','Série narrada: respiração, coração, sinapse e marcha')}</button>${phyTourGroups()}`;
+  $$('.phyhost').forEach(h=>{h.innerHTML=`<h3 style="margin-bottom:8px">${TL('Fisiología en acción','Physiology in action','Fisiologia em ação')}</h3>`+html;h.querySelectorAll('[data-tour]').forEach(b=>b.onclick=()=>{if(isPhone())setSheet('peek');const pp=$('#phyPop');if(pp&&!pp.hidden)togglePop($('#phyBtn'),pp,false);phyStart(b.dataset.tour,0);});h.querySelectorAll('[data-exam]').forEach(b=>b.onclick=()=>{if(typeof phyExamPick==='function')phyExamPick(h,renderPhyTours);else if(typeof phyExam==='function')phyExam(h,renderPhyTours);});h.querySelectorAll('[data-serie]').forEach(b=>b.onclick=()=>{if(isPhone())setSheet('peek');phySerie(['resp','heart','syn','walk']);});h.querySelectorAll('[data-feat]').forEach(b=>b.onclick=()=>{if(isPhone())setSheet('peek');phyStart('micro',0);});
     if(typeof JOINTS_IDX!=='undefined'){const d=document.createElement('div');d.innerHTML=`<h3 style="margin:14px 0 6px">${TL('Articulaciones en detalle','Joints in detail','Articulações em detalhe')}</h3><p class="small muted" style="margin:0 0 8px">${TL('Huesos, ligamentos, cartílagos y cápsula, con sus nombres.','Bones, ligaments, cartilage and capsule, all labelled.','Ossos, ligamentos, cartilagens e cápsula, com seus nomes.')}</p><div class="jgrid">${JOINTS_IDX.map((j,i)=>`<button class="btn jbtn" data-joint="${i}"><b>${esc(TL(...j.n))}</b><small>${esc(TL(...j.t))}</small></button>`).join('')}</div>`;h.appendChild(d);d.querySelectorAll('[data-joint]').forEach(b=>b.onclick=()=>openJoint(JOINTS_IDX[+b.dataset.joint]));}});}
 renderPhyTours();
 
@@ -7273,7 +7289,7 @@ function renderQbar(){let el=$('#qbar');if(!el){el=document.createElement('div')
   el.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const g=QGRP.find(x=>x[0]===b.dataset.q);const on=qKeys(g[4]).some(k=>SYS[k].on);
     if(on){for(const k of qKeys(g[4]))SYS[k].on=false;applySystems();renderSysList();}else{for(const k of qKeys(g[3]))setOn(k,true);}});}
 const _renderSysList=renderSysList;
-renderSysList=function(){_renderSysList();if(typeof lblTogRender==='function')lblTogRender();try{mqRender();}catch(_){}const el=$('#sysList');if(!el)return;const adv=store.get('sysAdv',false);el.classList.toggle('adv',!!adv);
+renderSysList=function(){_renderSysList();if(typeof lblTogRender==='function')lblTogRender();try{mqRender();}catch(_){}try{renderWelcomeExtra();}catch(_){}const el=$('#sysList');if(!el)return;const adv=store.get('sysAdv',false);el.classList.toggle('adv',!!adv);
   const t=document.createElement('div');t.className='sysadv';t.innerHTML=`<button>${adv?TL('Ocultar opacidad y rayos X','Hide opacity and X-ray','Ocultar opacidade e raios X'):TL('Opacidad y rayos X por capa','Opacity and X-ray per layer','Opacidade e raios X por camada')}</button>`;t.querySelector('button').onclick=()=>{store.set('sysAdv',!adv);renderSysList();};el.prepend(t);
   const rows=el.querySelectorAll('.sys');let i=0;for(const k in SYS){const s=SYS[k];if(k==='importado'&&s.state!=='loaded')continue;if(!sexOk(k))continue;const row=rows[i++];if(!row||s.state!=='loaded')continue;const sm=row.querySelector('.nm small');if(!sm)continue;
     if(k==='oseo')sm.innerHTML=TL('<b>206 huesos</b> · más dientes y cartílagos','<b>206 bones</b> · plus teeth and cartilage','<b>206 ossos</b> · mais dentes e cartilagens');
@@ -7309,9 +7325,9 @@ function coLayout(list,placed){const r=cv.getBoundingClientRect(),W=r.width,H=r.
     S.forEach((L,i)=>{const el=L.el,y=ys[i],h=L.h;if(y-h/2<top-1||y+h/2>bot+1){el.style.visibility='hidden';return;}
       el.style.visibility='';el.style.left=(k?xR:xL)+'px';el.style.top=y+'px';el.style.transform=k?'translate(0,-50%)':'translate(-100%,-50%)';
       placed.push({x0:x0,x1:x1,y0:y-h/2,y1:y+h/2});
-      const ex=k?xR-2:xL+2,sx=k?ex-8:ex+8;svg+=`<path d="M${ex.toFixed(1)} ${y.toFixed(1)}H${sx.toFixed(1)}L${L.ax.toFixed(1)} ${L.ay.toFixed(1)}"/><circle cx="${L.ax.toFixed(1)}" cy="${L.ay.toFixed(1)}" r="2.6"/>`;});});
+      const ex=k?xR-2:xL+2,sx=k?ex-8:ex+8;const hc=L.el.classList.contains('hl')?' class="hl"':'';svg+=`<path${hc} d="M${ex.toFixed(1)} ${y.toFixed(1)}H${sx.toFixed(1)}L${L.ax.toFixed(1)} ${L.ay.toFixed(1)}"/><circle${hc} cx="${L.ax.toFixed(1)}" cy="${L.ay.toFixed(1)}" r="${hc?4.2:2.6}"/>`;});});
   leadSvg.innerHTML=svg;}
-function cullLabels(){const vis=[],co=[];let tag=null;for(const L of labels){if(!L.show)continue;if(L.co)co.push(L);else if(L.group==='tag')tag=L;else vis.push(L);}
+function cullLabels(){if(typeof guideTick==='function')try{guideTick();}catch(_){}const vis=[],co=[];let tag=null;for(const L of labels){if(!L.show)continue;if(L.co)co.push(L);else if(L.group==='tag')tag=L;else vis.push(L);}
   lblTog.hidden=!labels.some(L=>L.co&&L.on&&(L.group==='lm'||PHY.on));if(typeof mqBtn!=='undefined'){const av=mqAvail();mqBtn.hidden=!av;if(MQ&&!av)mqStop();}
   const placed=[];coLayout(co,placed);const order=tag?[tag,...vis]:vis;for(const L of order){const el=L.el;if(L._t!==el.textContent){L._t=el.textContent;L.w=el.offsetWidth;L.h=el.offsetHeight;}if(!L.w){L.w=el.offsetWidth;L.h=el.offsetHeight;}
     const x=parseFloat(el.style.left),y=parseFloat(el.style.top);if(isNaN(x)||isNaN(y)){el.style.visibility='';continue;}const tg=L.group==='tag';const w=L.w,h=L.h;let ok=null;
@@ -7633,7 +7649,7 @@ const _tf24b=phyTourFor24;phyTourFor24=q=>{if(/(tenocito|crimp|paratenon|endoten
 var MQ=null;
 const mqBtn=document.createElement('button');mqBtn.className='lbltog mqbtn';mqBtn.hidden=true;stage.appendChild(mqBtn);
 const mqChip=document.createElement('div');mqChip.className='mqchip';mqChip.hidden=true;stage.appendChild(mqChip);
-function mqAvail(){const z=PHY.lbl&&PHY.lbl.zoom;return !!(PHY.on&&z&&z.el&&z.el.isConnected&&Object.values(PHY.lbl).filter(L=>L.el&&L.el.isConnected).length>3);}
+function mqAvail(){return !!(PHY.on&&PHY.lbl&&Object.entries(PHY.lbl).filter(([k,L])=>k!=='zoom'&&L.el&&L.el.isConnected&&L.on).length>=4);}
 function mqRender(){mqBtn.setAttribute('aria-pressed',!!MQ);mqBtn.innerHTML=`<i>🎯</i><span>${MQ?TL('Salir de la prueba','Exit quiz','Sair do teste'):TL('Ponte a prueba','Test yourself','Teste-se')}</span>`;mqBtn.title=TL('Se ocultan los nombres y tienes que tocar cada estructura en el modelo','Names are hidden and you must tap each structure on the model','Os nomes somem e você deve tocar cada estrutura no modelo');}
 function mqStop(){if(!MQ)return;for(const it of MQ.items)it.L.force=false;MQ=null;mqChip.hidden=true;mqRender();}
 function mqStart(){mqStop();const items=Object.entries(PHY.lbl).filter(([k,L])=>k!=='zoom'&&L.el&&L.el.isConnected&&L.on).map(([k,L])=>({k,L,name:L.el.textContent}));
@@ -7646,6 +7662,26 @@ function mqAnswer(cx,cy){if(!MQ||MQ.wait)return;const it=MQ.items[MQ.i],r=cv.get
   setTimeout(()=>{if(!MQ)return;it.L.force=false;MQ.wait=false;MQ.i++;if(MQ.i>=MQ.items.length){MQ.done=true;MQ.wait=true;mqChip.className='mqchip done';
       mqChip.innerHTML=`${TL('Resultado','Score','Resultado')}: <b>${MQ.ok}/${MQ.items.length}</b> <button>${TL('Repetir','Again','Repetir')}</button>`;mqChip.querySelector('button').onclick=e=>{e.stopPropagation();mqStart();};}else mqAsk();},1500);}
 mqBtn.onclick=()=>{if(MQ)mqStop();else mqStart();};mqRender();
+
+/* ───── Bienvenida: portada con cifras, novedades destacadas y accesos con icono ───── */
+const W_IC={explore:'🧭',dissect:'🩻',move:'🏃',study:'📚',physio:'🎬',bio:'⚙️',rc:'🩺',ct:'🦵'};
+function renderWelcomeExtra(){const card=document.querySelector('#welcome .wcard');if(!card)return;
+  const nT=Object.keys(TOURS).length,nM=(TOURS.micro?TOURS.micro.steps.length:0)+2,nCT=(typeof CT_LIST!=='undefined'&&CT_LIST.length)||56;
+  let hero=card.querySelector('.wstats');if(!hero){hero=document.createElement('div');hero.className='wstats';card.querySelector('p.muted').after(hero);}
+  hero.innerHTML=[[nT,TL('recorridos 3D','3D tours','percursos 3D')],[nM,TL('vistas al microscopio','microscope views','vistas ao microscópio')],['4.719',TL('estructuras','structures','estruturas')],[nCT,TL('pruebas clínicas','clinical tests','testes clínicos')]].map(([n,t])=>`<span><b>${n}</b> ${esc(t)}</span>`).join('');
+  let nw=card.querySelector('.wnew');if(!nw){nw=document.createElement('div');nw.className='wnew';hero.after(nw);}
+  nw.innerHTML=`<button class="wfeat" data-wx="micro" style="--c:#f472b6"><i>🔬</i><em>${TL('Nuevo','New','Novo')}</em><b>${TL('Al microscopio','Under the microscope','Ao microscópio')}</b><span>${TL('Alvéolos, nefrona, sarcómero, disco, nervio, sangre… en 3D y en movimiento.','Alveoli, nephron, sarcomere, disc, nerve, blood… in moving 3D.','Alvéolos, néfron, sarcômero, disco, nervo, sangue… em 3D e em movimento.')}</span></button>
+    <button class="wfeat" data-wx="solo" style="--c:#38bdf8"><i>🎯</i><em>${TL('Nuevo','New','Novo')}</em><b>${TL('Un órgano a la vez','One organ at a time','Um órgão de cada vez')}</b><span>${TL('Elige corazón, pulmones o cerebro y desliza el dedo para ver el nombre de cada parte.','Pick the heart, lungs or brain and slide a finger to see the name of each part.','Escolha coração, pulmões ou cérebro e deslize o dedo para ver o nome de cada parte.')}</span></button>`;
+  nw.querySelector('[data-wx="micro"]').onclick=()=>{closeWelcome();if(isPhone())setSheet('peek');phyStart('micro',0);};
+  nw.querySelector('[data-wx="solo"]').onclick=()=>{closeWelcome();setTimeout(()=>{const b=document.querySelector('#qbar [data-x="solo"]');if(b)b.click();},250);};
+  card.querySelectorAll('.wgrid [data-w]').forEach(b=>{if(!b.querySelector('i')){const i=document.createElement('i');i.textContent=W_IC[b.dataset.w]||'•';b.prepend(i);}if(b.dataset.w==='physio'){const s=b.querySelector('span');if(s)s.textContent=TL(nT+' recorridos narrados: corazón, respiración, sinapsis, marcha, palancas… con modo vídeo y subtítulos.',nT+' narrated tours: heart, breathing, synapses, gait, levers… with video mode and subtitles.',nT+' percursos narrados: coração, respiração, sinapse, marcha, alavancas… com modo vídeo e legendas.');}});}
+try{renderWelcomeExtra();}catch(e){}
+/* ───── Explicación guiada en las vistas ampliadas: cada estructura se resalta por turnos ───── */
+var GUIDE={i:-1,last:0};
+function guideTick(){const z=PHY.on&&PHY.lbl&&PHY.lbl.zoom&&PHY.lbl.zoom.el&&PHY.lbl.zoom.el.isConnected;document.body.classList.toggle('guide',!!z&&!MQ);
+  const ls=z?Object.entries(PHY.lbl).filter(([k,L])=>k!=='zoom'&&L.el&&L.el.isConnected&&L.on).map(([k,L])=>L):[];
+  if(!z||MQ||!ls.length){if(GUIDE.i>=0){for(const L of labels)L.el.classList.remove('hl');GUIDE.i=-1;}return;}
+  const now=performance.now();if(GUIDE.i<0||now-GUIDE.last>2600||!ls[GUIDE.i]){GUIDE.last=now;GUIDE.i=(GUIDE.i+1)%ls.length;for(const L of labels)L.el.classList.remove('hl');ls[GUIDE.i].el.classList.add('hl');}}
 
 renderPhyTours();
 renderQbar();
