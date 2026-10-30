@@ -412,6 +412,7 @@ body.guide .lbl.phyl:not(.hl){opacity:.72}
 .phymicro{display:inline-flex;align-items:center;gap:4px;margin:4px 0 2px;border:1px solid #f472b6;background:linear-gradient(90deg,rgba(244,114,182,.22),rgba(56,189,248,.12));color:#fde7f3;border-radius:999px;padding:5px 11px;font:500 12px/1.2 var(--f-ui)}.phymicro b{font-weight:700;color:#fff}
 .phytour .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.phytour .pb{display:block;height:3px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:2px}.phytour .pb i{display:block;height:100%;background:var(--c);border-radius:3px}
 .phytour.done{border-color:color-mix(in srgb,var(--c) 70%,transparent)}.phytour.done small{color:var(--c)}.phytour .ic{box-shadow:0 4px 14px color-mix(in srgb,var(--c) 45%,transparent)}
+.amicro{border-color:#f472b6!important;background:linear-gradient(90deg,rgba(244,114,182,.25),rgba(56,189,248,.14))!important}
 </style>
 
 <header>
@@ -2743,7 +2744,7 @@ function renderActbar(){const bar=$('#actbar');if(!selected||lesson){bar.hidden=
   const isMus=selected.m.userData.sys==='muscular';
   $('#aVec').hidden=!isMus;$('#aJoint').hidden=!['articular','oseo'].includes(BS(selected.m.userData.sys));$('#aMove').hidden=!romForMesh(selected.m);$('#aJoint').setAttribute('aria-pressed',!!JV);$('#aCon').hidden=!(isMus&&movesFor(c).length);$('#aAsk').hidden=!SAMPLE;
   $('#aIso').setAttribute('aria-pressed',isoOnly);$('#aExt').setAttribute('aria-pressed',extracted.has(selected.m));
-  $('#aVec').setAttribute('aria-pressed',vecGroup.children.length>0);$('#aCon').setAttribute('aria-pressed',!!contraction);}
+  $('#aVec').setAttribute('aria-pressed',vecGroup.children.length>0);$('#aCon').setAttribute('aria-pressed',!!contraction);try{actMicro();}catch(_){}}
 function stopTools(){$('#hintTxt').hidden=true;if(JV)jointOff();if(isoOnly){isoOnly=false;isoSet=null;spin=false;applySystems();}
   removeLabels('vec');
   if(vecGroup.children.length){vecGroup.clear();patchFocus=null;isoSet=null;if(selected){selected.m.userData.ghost=false;refreshState(selected.m);}applySystems();$('#legend').hidden=true;}
@@ -7752,6 +7753,17 @@ const _goMicro3=PHY_GO.micro;PHY_GO.micro=(st,ins)=>/^mi1[34]$/.test(st.id)?phyG
 MICRO_MENU.push(['🔬',['Arteria y ateroma','Artery and atheroma','Artéria e ateroma'],'micro',13],['🔬',['Músculo cardíaco','Cardiac muscle','Músculo cardíaco'],'micro',14]);
 Object.assign(MICRO_LINK,{arter:13,heart:14,heartan:14,exer:13});
 const _tf24c=phyTourFor24;phyTourFor24=q=>{if(/(ateroma|aterosclerosis|placa de colesterol|intima|adventicia|celulas espumosas)/.test(q))return ['micro',13];if(/(musculo cardiaco|cardiomiocito|disco intercalar|uniones gap)/.test(q))return ['micro',14];return _tf24c(q);};
+
+/* ───── Desde cualquier estructura tocada: botón para verla al microscopio ───── */
+function microFor(m){const n=m.userData.c.en,sy=BS(m.userData.sys);
+  if(/Kidney/.test(n))return ['micro',0];if(/^Liver$/.test(n))return ['micro',7];if(/(Jejunum|Ileum|Duodenum)/.test(n))return ['micro',6];
+  if(/(lobe of (left|right) lung|bronch|^Trachea$|^Pleura$)/i.test(n))return ['lungs',4];if(/(Retina|Sclera|Cornea|^Lens$|Choroid)/.test(n))return ['micro',8];
+  if(/Intervertebral disc|^Nucleus pulposus|Anulus fibrosus/i.test(n))return ['micro',11];if(/[Tt]endon/.test(n))return ['micro',9];if(/cartilage/i.test(n)&&sy==='articular')return ['micro',4];
+  if(/(ventricle|atrium)$/i.test(n))return ['micro',14];if(sy==='arterial')return ['micro',13];if(sy==='venoso')return ['micro',12];
+  if(sy==='muscular')return ['micro',1];if(sy==='oseo')return ['micro',2];if(sy==='nervioso_periferico')return ['micro',10];if(/^piel/.test(sy))return ['micro',3];return null;}
+function actMicro(){let b=$('#aMicro');const host=$('#aIso')&&$('#aIso').parentElement;if(!host)return;if(!b){b=document.createElement('button');b.id='aMicro';b.className='btn amicro';host.appendChild(b);}
+  const t=selected&&TOURS.micro?microFor(selected.m):null;b.hidden=!t;if(!t)return;const st=TOURS[t[0]].steps[t[1]];b.innerHTML=`🔬 ${TL('Al microscopio','Microscope','Microscópio')}`;b.title=pTx(st)[0];
+  b.onclick=()=>{select(null);if(isPhone())setSheet('peek');phyStart(t[0],t[1]);};}
 
 renderPhyTours();
 renderQbar();
