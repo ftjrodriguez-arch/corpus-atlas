@@ -12,6 +12,19 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Corpus">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Corpus">
+<meta property="og:title" content="Corpus · Atlas de anatomía 3D libre y gratuito">
+<meta property="og:description" content="79 recorridos narrados, 15 vistas al microscopio, 4.719 estructuras y 56 pruebas clínicas animadas. En español, inglés y portugués, en el teléfono y sin instalar nada.">
+<meta property="og:image" content="https://ftjrodriguez-arch.github.io/corpus-atlas/icons/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://ftjrodriguez-arch.github.io/corpus-atlas/">
+<meta property="og:locale" content="es_ES">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Corpus · Atlas de anatomía 3D libre y gratuito">
+<meta name="twitter:description" content="79 recorridos narrados, 15 vistas al microscopio y 4.719 estructuras del cuerpo humano, gratis en el navegador.">
+<meta name="twitter:image" content="https://ftjrodriguez-arch.github.io/corpus-atlas/icons/og.png">
 <title>Corpus Atlas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,500;0,600;1,400;1,500&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -413,6 +426,7 @@ body.guide .lbl.phyl:not(.hl){opacity:.72}
 .phytour .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.phytour .pb{display:block;height:3px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:2px}.phytour .pb i{display:block;height:100%;background:var(--c);border-radius:3px}
 .phytour.done{border-color:color-mix(in srgb,var(--c) 70%,transparent)}.phytour.done small{color:var(--c)}.phytour .ic{box-shadow:0 4px 14px color-mix(in srgb,var(--c) 45%,transparent)}
 .amicro{border-color:#f472b6!important;background:linear-gradient(90deg,rgba(244,114,182,.25),rgba(56,189,248,.14))!important}
+.wabout{align-self:flex-start;text-decoration:underline;text-underline-offset:3px}
 </style>
 
 <header>
@@ -528,6 +542,7 @@ body.guide .lbl.phyl:not(.hl){opacity:.72}
         </div>
         <p class="small muted wtip">Arrastra para girar · pellizca o rueda para acercar · dos dedos o clic derecho para desplazar.</p>
         <button class="btn" id="wClose">Empezar a explorar</button>
+        <a class="small muted wabout" href="presentacion.html" target="_blank" rel="noopener">Qué es Corpus y cómo compartirlo</a>
       </div>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Corpus · Atlas de anatomía 3D libre</title>
+<meta name="description" content="Corpus es un atlas de anatomía humana en 3D, libre y gratuito, para estudiantes de fisioterapia y medicina. Recorridos narrados, vistas al microscopio y pruebas clínicas animadas en el navegador.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Corpus · Atlas de anatomía 3D libre y gratuito">
+<meta property="og:description" content="79 recorridos narrados, 15 vistas al microscopio, 4.719 estructuras y 56 pruebas clínicas animadas. Gratis, en el teléfono, sin instalar nada.">
+<meta property="og:image" content="https://ftjrodriguez-arch.github.io/corpus-atlas/icons/og.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0d1a20">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,500;0,600;1,500&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#0d1a20;--bg2:#13242c;--ink:#eef3f6;--muted:#9fb0ba;--line:#24363f;
+  --piel:#d29f82;--mus:#c2453a;--hue:#ece2cb;--ner:#e3c23f;--vas:#3d6fd6;--org:#c98b67;
+  --serif:'Spectral',Georgia,serif;--sans:'Public Sans',system-ui,sans-serif}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 var(--sans)}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--ner);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.12;margin:0}
+h1{font-size:clamp(40px,6.4vw,74px);letter-spacing:-.01em}
+h2{font-size:clamp(28px,3.6vw,40px)}
+h3{font-size:22px}
+p{margin:0}
+.muted{color:var(--muted)}
+
+/* Portada: el cuerpo y sus capas */
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;padding:56px 0 40px}
+.hero .lead{font-size:20px;color:#cfdbe2;max-width:34ch;margin:22px 0 30px}
+.btns{display:flex;flex-wrap:wrap;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font:600 17px/1 var(--sans);padding:16px 22px;border-radius:12px;border:1.5px solid var(--line)}
+.btn.main{background:var(--hue);color:#16120b;border-color:var(--hue)}
+.btn.main:hover{background:#fff}
+.btn.alt:hover{border-color:var(--muted)}
+.fig{position:relative;justify-self:center;width:min(100%,380px)}
+.fig img{display:block;width:100%;height:auto;border-radius:24px;background:#0b1419}
+.layers{position:absolute;left:-28px;top:12%;bottom:12%;display:flex;flex-direction:column;justify-content:space-between}
+.layers span{display:flex;align-items:center;gap:8px;font:600 13px/1 var(--sans);color:var(--ink);background:rgba(13,26,32,.86);border:1px solid var(--line);border-left:6px solid var(--c);padding:7px 11px 7px 8px;border-radius:8px;white-space:nowrap}
+
+/* Cifras como un corte de tejido: cada franja es una capa */
+.strata{display:grid;grid-template-columns:repeat(4,1fr);border-radius:16px;overflow:hidden;margin:8px 0 72px;border:1px solid var(--line)}
+.strata div{padding:22px 20px 20px;background:var(--bg2);border-top:6px solid var(--c)}
+.strata div+div{border-left:1px solid var(--line)}
+.strata b{display:block;font:600 40px/1 var(--serif);margin-bottom:6px}
+.strata span{color:var(--muted);font-size:15px;line-height:1.35;display:block}
+
+section{padding:0 0 80px}
+.head{max-width:62ch;margin-bottom:34px}
+.head p{margin-top:12px;color:#cfdbe2}
+
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.feat img{display:block;width:100%;aspect-ratio:390/600;object-fit:cover;object-position:top;border-radius:18px;border:1px solid var(--line);background:#0b1419}
+.feat h3{margin:16px 0 6px}
+.feat p{color:#cfdbe2;font-size:16px}
+
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+.links{list-style:none;padding:0;margin:20px 0 0;display:grid;gap:10px}
+.links a{display:flex;justify-content:space-between;gap:12px;text-decoration:none;padding:14px 16px;border-radius:12px;background:var(--bg2);border:1px solid var(--line);font-weight:500}
+.links a:hover{border-color:var(--muted)}
+.links small{color:var(--muted);font-weight:400;white-space:nowrap}
+.copy{display:flex;gap:8px;margin-top:14px}
+.copy input{flex:1;min-width:0;background:#0a1419;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:12px;font:500 15px var(--sans)}
+.copy button{background:var(--bg2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:0 16px;font:600 15px var(--sans);cursor:pointer}
+
+.steps{list-style:none;padding:0;margin:0;display:grid;gap:18px;counter-reset:s}
+.steps li{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start}
+.steps li::before{counter-increment:s;content:counter(s);width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--bg2);border:1px solid var(--line);font:600 20px var(--serif)}
+.steps b{display:block;margin-bottom:2px}
+.steps span{color:#cfdbe2;font-size:16px}
+
+footer{border-top:1px solid var(--line);padding:36px 0 56px;color:var(--muted);font-size:15px}
+footer .wrap{display:grid;grid-template-columns:1.3fr 1fr;gap:32px}
+footer p+p{margin-top:10px}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;padding-top:36px;gap:28px}
+  .fig{width:min(78%,320px)}
+  .layers{left:-18%}
+  .strata{grid-template-columns:1fr 1fr}
+  .strata div:nth-child(3){border-left:0}
+  .strata div:nth-child(n+3){border-top-width:6px}
+  .feats{grid-template-columns:1fr 1fr}
+  .cols,footer .wrap{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  body{font-size:16px}
+  .wrap{padding:0 16px}
+  .feats{grid-template-columns:1fr}
+  .feat img{aspect-ratio:390/420}
+  .fig{width:min(70%,280px)}
+  .btn{flex:1 1 100%;justify-content:center}
+  .strata b{font-size:32px}
+  .layers span{font-size:12px;padding:6px 9px 6px 7px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .layers span{animation:peel .7s cubic-bezier(.2,.7,.2,1) both}
+  .layers span:nth-child(2){animation-delay:.08s}.layers span:nth-child(3){animation-delay:.16s}.layers span:nth-child(4){animation-delay:.24s}.layers span:nth-child(5){animation-delay:.32s}.layers span:nth-child(6){animation-delay:.4s}
+  @keyframes peel{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+}
+</style>
+</head>
+<body>
+<main>
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <h1>El cuerpo humano, capa por capa, en tu teléfono.</h1>
+      <p class="lead">Corpus es un atlas de anatomía en 3D, libre y gratuito, hecho para estudiantes de fisioterapia y medicina. Se abre en el navegador, sin cuenta y sin instalar nada.</p>
+      <div class="btns">
+        <a class="btn main" href="./">Abrir Corpus</a>
+        <a class="btn alt" href="./?tour=micro">Ver el cuerpo al microscopio</a>
+      </div>
+    </div>
+    <figure class="fig" aria-label="Modelo 3D del cuerpo humano con sus capas">
+      <img src="about/cuerpo.jpg" alt="Modelo 3D de los músculos del cuerpo humano visto de frente" width="420" height="890">
+      <div class="layers" aria-hidden="true">
+        <span style="--c:var(--piel)">Piel</span>
+        <span style="--c:var(--mus)">Músculos</span>
+        <span style="--c:var(--hue)">Huesos</span>
+        <span style="--c:var(--ner)">Nervios</span>
+        <span style="--c:var(--vas)">Vasos</span>
+        <span style="--c:var(--org)">Órganos</span>
+      </div>
+    </figure>
+  </header>
+
+  <div class="strata">
+    <div style="--c:var(--mus)"><b>79</b><span>recorridos narrados, del corazón a la marcha</span></div>
+    <div style="--c:var(--vas)"><b>15</b><span>vistas al microscopio en movimiento</span></div>
+    <div style="--c:var(--hue)"><b>4.719</b><span>estructuras que puedes tocar y aislar</span></div>
+    <div style="--c:var(--ner)"><b>56</b><span>pruebas clínicas animadas</span></div>
+  </div>
+
+  <section>
+    <div class="head">
+      <h2>Aprender viéndolo moverse</h2>
+      <p>Cada tema se explica sobre el modelo: la estructura se ilumina, se mueve y se nombra mientras lees o escuchas la narración.</p>
+    </div>
+    <div class="feats">
+      <article class="feat"><img src="about/heart.jpg" alt="Recorrido del corazón con sus cavidades y grandes vasos" loading="lazy" width="390" height="844"><h3>Recorridos narrados</h3><p>Corazón, pulmones, nervios, articulaciones, marcha y dolor, paso a paso, con voz, subtítulos y modo vídeo.</p></article>
+      <article class="feat"><img src="about/alv.jpg" alt="Sacos alveolares abiertos con el intercambio de oxígeno y dióxido de carbono" loading="lazy" width="390" height="844"><h3>Al microscopio</h3><p>Alvéolos, nefrona, sarcómero, disco, tendón, nervio o placa de ateroma: lo que no se ve a simple vista, en 3D.</p></article>
+      <article class="feat"><img src="about/gu.jpg" alt="Nefrona con una estructura resaltada en amarillo" loading="lazy" width="390" height="844"><h3>Ponte a prueba</h3><p>Se ocultan los nombres y tocas cada estructura en el modelo. También hay casos clínicos y exámenes por región.</p></article>
+    </div>
+  </section>
+
+  <section class="cols">
+    <div>
+      <h2>Para docentes</h2>
+      <p class="muted" style="margin-top:12px">Cada recorrido tiene su propio enlace. Compártelo en clase o en el grupo del curso y se abre directamente en ese tema.</p>
+      <ul class="links">
+        <li><a href="./?tour=heartan">El corazón parte por parte <small>5 pasos</small></a></li>
+        <li><a href="./?tour=lungs">Los pulmones y los alvéolos <small>6 pasos</small></a></li>
+        <li><a href="./?tour=knee">La rodilla en movimiento <small>4 pasos</small></a></li>
+        <li><a href="./?tour=micro">Tejidos al microscopio <small>15 pasos</small></a></li>
+      </ul>
+      <div class="copy"><input id="lnk" value="https://ftjrodriguez-arch.github.io/corpus-atlas/" readonly aria-label="Enlace de Corpus"><button id="cp">Copiar enlace</button></div>
+    </div>
+    <div>
+      <h2>Cómo empezar</h2>
+      <ol class="steps" style="margin-top:24px">
+        <li><div><b>Abre el enlace</b><span>En el teléfono o la computadora. Funciona en Chrome, Safari, Edge y Firefox.</span></div></li>
+        <li><div><b>Elige por dónde entrar</b><span>Un recorrido, un órgano a la vez, la disección por capas o una prueba clínica.</span></div></li>
+        <li><div><b>Guárdalo en tu pantalla de inicio</b><span>Desde el menú del navegador, «Añadir a pantalla de inicio». Así queda como una app y funciona sin internet.</span></div></li>
+      </ol>
+    </div>
+  </section>
+</div>
+</main>
+<footer>
+  <div class="wrap">
+    <div>
+      <p><b style="color:var(--ink)">Corpus es libre y gratuito, y siempre lo será.</b> Sin anuncios y sin cuenta. Disponible en español, inglés y portugués.</p>
+      <p>Los textos de los recorridos pasan por revisión experta. Es una herramienta de estudio y no sustituye la formación clínica ni el criterio profesional.</p>
+    </div>
+    <div>
+      <p>Código con licencia MIT. Modelos y datos con licencia CC BY-SA 4.0, a partir de Z-Anatomy, BodyParts3D y el Visible Human Project (HuBMAP).</p>
+      <p><a href="https://github.com/ftjrodriguez-arch/corpus-atlas">Código fuente y atribuciones</a></p>
+    </div>
+  </div>
+</footer>
+<script>
+document.getElementById('cp').onclick=async function(){const i=document.getElementById('lnk');try{await navigator.clipboard.writeText(i.value);}catch(e){i.select();document.execCommand('copy');}this.textContent='Enlace copiado';setTimeout(()=>{this.textContent='Copiar enlace';},2200);};
+</script>
+</body>
+</html>
