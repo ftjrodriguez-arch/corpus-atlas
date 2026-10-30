@@ -872,10 +872,10 @@ function syncMat(m,key){const [k,,st]=key.split('|');const s=SYS[k];let op=m.use
 function syncAllMats(){for(const key in MAT) syncMat(MAT[key],key);}
 const autoLite=(navigator.deviceMemory&&navigator.deviceMemory<=3)||((navigator.hardwareConcurrency||8)<=4&&matchMedia('(pointer:coarse)').matches);
 let lite=store.get('lite',null);if(lite===null)lite=!!autoLite;
-function setLite(on){lite=on;if(typeof DPR_CUR!=='undefined')DPR_CUR=0;store.set('lite',on);LITE_U.value=on?1:0;renderer.setPixelRatio(on?1:Math.min(window.devicePixelRatio||1,2));if(on){autoHR=false;store.set('autoHR',false);const a=$('#autoHR');if(a)a.checked=false;}const c=$('#liteChk');if(c)c.checked=on;if(typeof resize==='function')resize();}
+function setLite(on){lite=on;if(typeof SHD!=='undefined'&&SHD.base)setTimeout(()=>{try{shadowsSetup();}catch(_){}},0);if(typeof DPR_CUR!=='undefined')DPR_CUR=0;store.set('lite',on);LITE_U.value=on?1:0;renderer.setPixelRatio(on?1:Math.min(window.devicePixelRatio||1,2));if(on){autoHR=false;store.set('autoHR',false);const a=$('#autoHR');if(a)a.checked=false;}const c=$('#liteChk');if(c)c.checked=on;if(typeof resize==='function')resize();}
 let studio=false;const hemi=scene.children.find(o=>o.isHemisphereLight);const LBASE=null;
 function setStudio(on){studio=on;key.position.set(on?-1.2:1.4,on?2.8:2.6,on?2.4:2.6);STUDIO_U.value=on?1:0;ATLAS_U.value=on?1:0;stage.classList.toggle('studio',on);$('#studioBtn').setAttribute('aria-pressed',on);store.set('studio',on);
-  if(hemi)hemi.intensity=on?0.06:(scene.environment?0.35:0.8);key.intensity=on?1.75:(scene.environment?0.85:1.15);rim.intensity=on?0.8:0.6;fill.intensity=on?0.18:0.35;camLight.intensity=on?0.3:0.25;
+  if(hemi)hemi.intensity=on?0.06:(scene.environment?0.35:0.8);key.intensity=on?1.75:(scene.environment?0.85:1.15);rim.intensity=on?0.8:0.6;fill.intensity=on?0.14:0.35;camLight.intensity=on?0.17:0.25;
   rim.color.set(on?0xdbe6ff:0xc9dcff);rim2.intensity=on?0.5:0;renderer.toneMappingExposure=on?1.0:1.05;
   for(const k in MAT){MAT[k].envMapIntensity=(on?0.22:1)*(k.startsWith('oseo')?.55:.5);}syncAllMats();if(typeof applySystems==='function'&&meshes.length)applySystems();}
 function setXray(on){xray=on;$('#xrayBtn').setAttribute('aria-pressed',on);syncAllMats();}
@@ -7258,8 +7258,8 @@ const mq=window.matchMedia('(prefers-color-scheme: dark)');mq.addEventListener&&
 let last=performance.now();
 /* Resolución adaptable: si el teléfono no llega a ~28 cuadros por segundo durante unos segundos, se baja la resolución de dibujo */
 var DPR_EMA=1/60,DPR_T=0,DPR_CUR=0;function dprTick(raw){if(document.hidden||raw>0.5)return;DPR_EMA+=(raw-DPR_EMA)*0.05;DPR_T+=raw;if(DPR_T<5)return;DPR_T=0;
-  if(!DPR_CUR)DPR_CUR=renderer.getPixelRatio();if(DPR_EMA>1/28&&DPR_CUR>1.01){DPR_CUR=Math.max(1,DPR_CUR-0.5);renderer.setPixelRatio(DPR_CUR);if(typeof resize==='function')resize();}}
-function frame(now){const raw=(now-last)/1000;const dt=Math.min(0.05,raw);last=now;dprTick(raw);const k=1-Math.pow(0.0008,dt);
+  if(!DPR_CUR)DPR_CUR=renderer.getPixelRatio();if(DPR_EMA>1/28&&DPR_CUR>1.01){DPR_CUR=Math.max(1,DPR_CUR-0.5);renderer.setPixelRatio(DPR_CUR);if(typeof resize==='function')resize();}else if(DPR_EMA>1/26&&typeof SHD!=='undefined'&&SHD.on){SHD.on=false;renderer.shadowMap.enabled=false;key.castShadow=false;for(const k in MAT)MAT[k].needsUpdate=true;}}
+function frame(now){const raw=(now-last)/1000;const dt=Math.min(0.05,raw);last=now;dprTick(raw);if(typeof shadowsTick==='function')try{shadowsTick(dt);}catch(_){}const k=1-Math.pow(0.0008,dt);
   orb.th+=(orb.T.th-orb.th)*k;orb.ph+=(orb.T.ph-orb.ph)*k;orb.r+=(orb.T.r-orb.r)*k;orb.tgt.lerp(orb.T.tgt,k);
   camera.position.set(orb.tgt.x+orb.r*Math.sin(orb.ph)*Math.sin(orb.th),orb.tgt.y+orb.r*Math.cos(orb.ph),orb.tgt.z+orb.r*Math.sin(orb.ph)*Math.cos(orb.th));camera.lookAt(orb.tgt);
   camLight.position.copy(camera.position);
@@ -7764,6 +7764,18 @@ function microFor(m){const n=m.userData.c.en,sy=BS(m.userData.sys);
 function actMicro(){let b=$('#aMicro');const host=$('#aIso')&&$('#aIso').parentElement;if(!host)return;if(!b){b=document.createElement('button');b.id='aMicro';b.className='btn amicro';host.appendChild(b);}
   const t=selected&&TOURS.micro?microFor(selected.m):null;b.hidden=!t;if(!t)return;const st=TOURS[t[0]].steps[t[1]];b.innerHTML=`🔬 ${TL('Al microscopio','Microscope','Microscópio')}`;b.title=pTx(st)[0];
   b.onclick=()=>{select(null);if(isPhone())setSheet('peek');phyStart(t[0],t[1]);};}
+
+/* ───── Sombras suaves de la luz principal: los músculos proyectan sombra sobre lo que tienen debajo ───── */
+var SHD={on:false,last:new V3(),base:new V3(1.4,2.6,2.6),R:0,f:0,t:0};
+function shadowsSetup(){const on=!lite;renderer.shadowMap.enabled=on;renderer.shadowMap.type=THREE.PCFSoftShadowMap;key.castShadow=on;
+  if(on){const n=isPhone()?1024:2048;if(key.shadow.mapSize.x!==n){key.shadow.mapSize.set(n,n);if(key.shadow.map){key.shadow.map.dispose();key.shadow.map=null;}}key.shadow.bias=-0.0006;key.shadow.normalBias=0.006;key.shadow.radius=4;key.shadow.camera.near=0.05;key.shadow.camera.far=8;}
+  if(!key.target.parent)scene.add(key.target);SHD.on=on;SHD.t=99;for(const k in MAT)MAT[k].needsUpdate=true;}
+function shadowsTick(dt){if(!SHD.on)return;if(!key.position.equals(SHD.last))SHD.base.copy(key.position).sub(key.target.position);
+  const d=SHD.base.clone().normalize();key.target.position.copy(orb.tgt);key.position.copy(orb.tgt).addScaledVector(d,3.5);SHD.last.copy(key.position);
+  const R=Math.min(1.25,Math.max(0.14,orb.r*0.5));if(Math.abs(R-SHD.R)>SHD.R*0.06){SHD.R=R;const c=key.shadow.camera;c.left=-R;c.right=R;c.top=R;c.bottom=-R;c.updateProjectionMatrix();}
+  SHD.t+=dt;if(SHD.t>0.8){SHD.t=0;for(const m of meshes){m.receiveShadow=true;const mt=m.material;m.castShadow=!!(m.visible&&mt&&!mt.transparent&&mt.opacity>0.98);}}
+  if(isPhone()){renderer.shadowMap.autoUpdate=false;if((++SHD.f)%2===0)renderer.shadowMap.needsUpdate=true;}else renderer.shadowMap.autoUpdate=true;}
+try{shadowsSetup();}catch(e){}
 
 renderPhyTours();
 renderQbar();
