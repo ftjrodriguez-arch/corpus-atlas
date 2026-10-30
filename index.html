@@ -49,7 +49,7 @@ main{flex:1;min-height:0;display:grid;gap:10px;grid-template-rows:minmax(0,1.15f
 @media (min-width:880px){ main{grid-template-columns:minmax(0,1fr) 410px;grid-template-rows:minmax(0,1fr)} }
 .stage{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);
   background:radial-gradient(ellipse 70% 60% at 50% 38%,var(--stage2),var(--stage) 78%)}
-.stage.studio{background:#000}
+.stage.studio{background:radial-gradient(110% 85% at 50% 36%,#1d2a35 0%,#0b1218 52%,#020405 100%)}.stage.studio::after{content:"";position:absolute;left:15%;right:15%;bottom:4%;height:12%;background:radial-gradient(50% 50% at 50% 50%,rgba(56,189,248,.10),transparent 70%);pointer-events:none;z-index:0}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
 .labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .labels svg.leads{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible}.leads path{stroke:rgba(255,255,255,.7);stroke-width:1.1;fill:none}.leads circle{fill:#fff;stroke:rgba(0,0,0,.55);stroke-width:1}
@@ -408,6 +408,8 @@ body.phy-on .solochip,body.phy-on .solopop,body.wopen .solochip{display:none}
 body.guide .lbl.phyl:not(.hl){opacity:.72}
 @media (max-width:879px){.wgrid{grid-template-columns:1fr 1fr}.wnew{grid-template-columns:1fr 1fr}.wcard>h2{font-size:24px}.wgrid button span{font-size:11.5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.wgrid button{padding:10px}.wgrid b{font-size:15.5px}.wfeat{padding:12px 10px 10px}.wfeat b{font-size:15px}.wfeat span{font-size:11.5px}.wfeat i{font-size:26px}#wClose{width:100%}}
 .phydots:has(button:nth-child(9)){gap:3px;flex-wrap:nowrap}.phydots:has(button:nth-child(9)) button{width:6px;height:6px}.phydots:has(button:nth-child(9)) button[aria-current="true"]{width:14px;border-radius:4px}
+.actbar{left:70px!important}.actbar div{flex-wrap:wrap!important}.actbar .btn{flex:0 0 auto}@media (max-width:879px){.actbar{left:60px!important}}
+.phymicro{display:inline-flex;align-items:center;gap:4px;margin:4px 0 2px;border:1px solid #f472b6;background:linear-gradient(90deg,rgba(244,114,182,.22),rgba(56,189,248,.12));color:#fde7f3;border-radius:999px;padding:5px 11px;font:500 12px/1.2 var(--f-ui)}.phymicro b{font-weight:700;color:#fff}
 </style>
 
 <header>
@@ -3473,7 +3475,7 @@ function phyCut(on,pos){for(const k in PLANES){PLANES[k].cut=on&&k==='fro';PLANE
 function phyClearImps(){for(const i of PHY.imps){PHY.grp.remove(i.tb);PHY.grp.remove(i.sp);i.tb.geometry.dispose();}PHY.imps=[];}
 function phyShowOnly(keep,opMap){for(const k in SYS){if(!PHY.saved.sys[k])continue;SYS[k].on=keep.includes(k);if(SYS[k].on)SYS[k].op=(opMap&&opMap[k])||1;}renderSysList();}
 function phyGo(i){const steps=curSteps(),T=curTour();i=Math.max(0,Math.min(steps.length-1,i));PHY.step=i;progMark('step',PHY_TOUR+':'+i);const st=steps[i];const [ti,tx]=pTx(st);
-  $('#phyTitle').textContent=ti;$('#phyText').textContent=tx;$('#phyNum').textContent=`${i+1} / ${steps.length}`;$('#phyKick').textContent=tN(T);$('#phyVoice').textContent=TL('Narración','Narration','Narração');$('#phyAuto').textContent=TL('▶ Ver como vídeo','▶ Play as video','▶ Ver como vídeo');voxFillSel();if(typeof phyTTS!=='undefined'&&phyTTS.on)setTimeout(()=>phySpeak(ti+'. '+tx),50);
+  $('#phyTitle').textContent=ti;$('#phyText').textContent=tx;try{phyMicroLink();}catch(_){}$('#phyNum').textContent=`${i+1} / ${steps.length}`;$('#phyKick').textContent=tN(T);$('#phyVoice').textContent=TL('Narración','Narration','Narração');$('#phyAuto').textContent=TL('▶ Ver como vídeo','▶ Play as video','▶ Ver como vídeo');voxFillSel();if(typeof phyTTS!=='undefined'&&phyTTS.on)setTimeout(()=>phySpeak(ti+'. '+tx),50);
   $('#phyPrev').textContent=TL('← Anterior','← Previous','← Anterior');$('#phySlow').textContent=TL('Cámara lenta','Slow motion','Câmera lenta');$('#phySound').textContent=TL('Sonido','Sound','Som');$('#phyPlay').textContent=PHY.paused?TL('Reanudar','Resume','Retomar'):TL('Pausa','Pause','Pausa');$('#phyMore').textContent=$('.phycard').classList.contains('open')?TL('Leer menos','Show less','Ler menos'):TL('Leer más','Read more','Ler mais');
   $('#phyDots').innerHTML=steps.map((s,k)=>`<button data-pd="${k}" aria-label="${esc(pTx(s)[0])}" aria-current="${k===i}"></button>`).join('');$('#phyDots').querySelectorAll('[data-pd]').forEach(b=>b.onclick=()=>phyGo(+b.dataset.pd));
   $('#phyPrev').disabled=i===0;$('#phyNext').textContent=i===steps.length-1?(PHY_QUIZ[PHY_TOUR]?TL('Ir al repaso','Go to review','Ir à revisão'):TL('Terminar','Finish','Concluir')):TL('Siguiente','Next','Próximo');
@@ -7682,6 +7684,12 @@ function guideTick(){const z=PHY.on&&PHY.lbl&&PHY.lbl.zoom&&PHY.lbl.zoom.el&&PHY
   const ls=z?Object.entries(PHY.lbl).filter(([k,L])=>k!=='zoom'&&L.el&&L.el.isConnected&&L.on).map(([k,L])=>L):[];
   if(!z||MQ||!ls.length){if(GUIDE.i>=0){for(const L of labels)L.el.classList.remove('hl');GUIDE.i=-1;}return;}
   const now=performance.now();if(GUIDE.i<0||now-GUIDE.last>2600||!ls[GUIDE.i]){GUIDE.last=now;GUIDE.i=(GUIDE.i+1)%ls.length;for(const L of labels)L.el.classList.remove('hl');ls[GUIDE.i].el.classList.add('hl');}}
+
+/* ───── Enlaces de los recorridos a su vista al microscopio ───── */
+const MICRO_LINK={uri:0,renal:0,musc:1,fib:1,contr:1,bone:2,aging:2,knee:4,pfj:4,neuro:5,dig:6,abdq:7,eye:8,tend:9,neurod:10,nsup:10,ninf:10,disc:11,lbp:11,spine:11,arter:12,veins:12,imm:12,resp:'lungs',rmech:'lungs'};
+function phyMicroLink(){let b=$('#phyMicro');if(!b){b=document.createElement('button');b.id='phyMicro';b.className='phymicro';const m=$('#phyMore');if(!m)return;m.after(b);}
+  const v=MICRO_LINK[PHY_TOUR];if(v===undefined||!TOURS.micro){b.hidden=true;return;}const tour=v==='lungs'?'lungs':'micro',idx=v==='lungs'?4:v;const st=TOURS[tour].steps[idx];if(!st){b.hidden=true;return;}
+  b.hidden=false;b.innerHTML=`🔬 ${TL('Ver al microscopio','See under the microscope','Ver ao microscópio')}: <b>${esc(pTx(st)[0])}</b>`;b.onclick=e=>{e.stopPropagation();phyStart(tour,idx);};}
 
 renderPhyTours();
 renderQbar();
