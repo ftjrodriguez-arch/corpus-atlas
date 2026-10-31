@@ -1579,7 +1579,7 @@ function skinW(m,node,S,jn){const u=m.userData;const pos=(u.rest||m.geometry.att
   /* pared abdominal y ligamento inguinal: se fijan a la pelvis (espina ilíaca, pubis), nunca siguen al muslo */
   if(lowJ&&ABDWALL.test(u.c.en))return null;
   /* trapecio, romboides y elevador: lámina que va de la columna a la escápula; no siguen el giro de la escápula sobre el acromion (la escápula se desliza por debajo) */
-  if(node==='acr'&&/^((Ascending|Descending|Transverse) part of trapezius|Rhomboid (major|minor)|Levator scapulae|Serratus posterior|Serratus anterior)/.test(u.c.en))return null;
+  if(node==='acr'&&/^((Ascending|Descending|Transverse) part of trapezius|Rhomboid (major|minor)|Levator scapulae|Serratus posterior|Serratus anterior|Latissimus dorsi)/.test(u.c.en))return null;
   /* cabeza corta del bíceps y coracobraquial: su tendón sale de la apófisis coracoides y se desliza con el brazo; se mueven como una pieza con el húmero para no estirarse en lámina por la axila */
   if(node==='shoulder'&&CORA.test(u.c.en)){if(u.c.side!==(S==='R'?'derecho':'izquierdo'))return null;const F2=SKIN.f.find(F=>F.side===S&&F.jj[node]);if(F2)return new Float32Array(n).fill(1);}
   const F=SKIN.f.find(F=>F.side===S&&F.jj[node]);if(!F)return undefined;const CTR=node==='sc'||node==='acr';const HIPC=node==='hip';/* por encima de la cresta ilíaca el tejido no sigue a la cadera */const G=F.jj[node],[x0,y0,z0]=F.o,[nx,ny,nz]=F.n,h=SKIN.h,W=new Float32Array(n);let any=false,lo=1,hi=0;
