@@ -1559,7 +1559,7 @@ function buildRig(){
 /* Músculos que unen la escápula al tórax o al cuello: se mueven con la escápula (articulación esternoclavicular), nunca con el húmero */
 const SCAPTHOR=/^(Serratus anterior|Serratus posterior|Rhomboid (major|minor)|(Ascending|Descending|Transverse) part of trapezius|Levator scapulae|Pectoralis minor|Subclavius|Omohyoid)/;
 /* Músculos del tórax o la escápula que insertan en el húmero: solo su extremo humeral acompaña al brazo, el vientre queda sobre el tórax o la escápula */
-const HUM_TAIL=[[/^Latissimus dorsi/,0.72],[/^(Teres major|Teres minor|Infraspinatus|Supraspinatus|Subscapularis)/,0.6],[/pectoralis major/i,0.5]];
+const HUM_TAIL=[[/^Latissimus dorsi/,0.55],[/^(Teres major|Teres minor|Infraspinatus|Supraspinatus|Subscapularis)/,0.6],[/pectoralis major/i,0.5]];
 const VERT_FIX=/^(Hip bone|Sacrum|Coccyx|Gluteus (maximus|medius|minimus)|Iliacus|Piriformis|(Superior|Inferior) gemellus|Obturator|Quadratus femoris|Tensor fasciae latae|Levator ani|Coccygeus)/i;
 const _ab=new V3(),_ap=new V3();
 function segDist(px,py,pz,a,b){const abx=b.x-a.x,aby=b.y-a.y,abz=b.z-a.z;const apx=px-a.x,apy=py-a.y,apz=pz-a.z;
@@ -1571,7 +1571,12 @@ function weightsFor(m,jn){
   if(J.limb===undefined){J.limb='T';for(const k of J.child){const l=segLimb(k);if(l!=='T'){J.limb=l;break;}}}
   if(u.home!=='T'&&J.limb!=='T'&&u.home!==J.limb){u.W[jn]=null;return null;}
   if(/^shoulder_/.test(jn)&&SCAPTHOR.test(u.c?u.c.en:'')){u.W[jn]=null;return null;}
-  if(/^sc_/.test(jn)&&/^Serratus posterior/.test(u.c?u.c.en:'')){u.W[jn]=null;return null;}
+  {const mS=jn.match(/^(shoulder|acr|sc)_([RL])$/);if(mS&&u.homeSeg){const S=mS[2],hs=u.homeSeg;
+    if(new RegExp('^(fore|hand)_'+S+'$|^(mc|fp|fm|fd)\\d_'+S+'$|^(tm|tp|td)_'+S+'$').test(hs)){const n=(u.rest||m.geometry.attributes.position.array).length/3;u.W[jn]=new Float32Array(n).fill(1);return u.W[jn];}
+    if(hs==='arm_'+S&&mS[1]==='shoulder'&&!HUM_TAIL.some(x=>x[0].test(u.c?u.c.en:''))&&!/deltoid/i.test(u.c?u.c.en:'')){/* músculos del brazo: todo lo que está por debajo del hombro gira con el húmero; solo las cabezas largas que suben a la escápula se estiran */
+      const pos=(u.rest||m.geometry.attributes.position.array),n=pos.length/3,W=new Float32Array(n),A=J.pivot,B=SEGS['arm_'+S][1],ax=B.x-A.x,ay=B.y-A.y,az=B.z-A.z,L2=ax*ax+ay*ay+az*az,Lh=Math.sqrt(L2);
+      for(let i=0;i<n;i++){const t=((pos[i*3]-A.x)*ax+(pos[i*3+1]-A.y)*ay+(pos[i*3+2]-A.z)*az)/L2*Lh;let w=(t+0.01)/0.07;W[i]=w<0?0:w>1?1:w*w*(3-2*w);}u.W[jn]=W;return W;}}}
+  if(/^(sc|acr)_/.test(jn)&&/^Serratus posterior/.test(u.c?u.c.en:'')){u.W[jn]=null;return null;}
   if(J.vert){/* Tronco: la columna se curva de forma progresiva por encima del pivote y todo el tórax (costillas, escápulas, músculos de la espalda y del hombro) gira junto; la pelvis queda fija */
     const nm=u.c?u.c.en:'';if(VERT_FIX.test(nm)){u.W[jn]=null;return null;}const pos=(u.rest||m.geometry.attributes.position.array),n=pos.length/3,W=new Float32Array(n),lo=J.pivot.y+J.vert[0],hi=J.pivot.y+J.vert[1];
     const segW=u.home==='U'||/^(head|neck|jaw|maxilla)$/.test(u.homeSeg||''),child=J.child.map(k=>SEGS[k]),other=Object.keys(SEGS).filter(k=>!J.child.includes(k)&&segLimb(k)!=='T').map(k=>SEGS[k]);let any=false;
@@ -1590,7 +1595,7 @@ function weightsFor(m,jn){
     let w=(b-a)/(2*J.blend)+.5;w=w<0?0:w>1?1:w*w*(3-2*w);
     if(J.twist&&w>0){const t=((x-J.pivot.x)*-J.long.x+(y-J.pivot.y)*-J.long.y+(z-J.pivot.z)*-J.long.z)/J.twist;w*=t<0?0:t>1?1:t;}
     W[i]=w;if(w>0.001)any=true;}
-  if(any&&BS(u.sys)==='muscular'&&/^(shoulder|hip|sc)_/.test(jn)){const nm=u.c?u.c.en:'';const ht=/^shoulder_/.test(jn)?HUM_TAIL.find(x=>x[0].test(nm)):null;smoothAlong(pos,W,n,ht?ht[1]:0,ht?SEGS['arm_'+jn.split('_')[1]]:null);}
+  if(any&&BS(u.sys)==='muscular'&&/^(shoulder|hip|sc|acr)_/.test(jn)){const nm=u.c?u.c.en:'';const ht=/^shoulder_/.test(jn)?HUM_TAIL.find(x=>x[0].test(nm)):null;smoothAlong(pos,W,n,ht?ht[1]:0,ht?SEGS['arm_'+jn.split('_')[1]]:null);if(ht||/deltoid/i.test(nm)){u.lin=u.lin||{};u.lin[jn]=true;}}
   u.W[jn]=any?W:null;return u.W[jn];
 }
 /* Músculos que cruzan el hombro o la cadera: el peso varía suavemente a lo largo del eje del músculo (de su extremo en el tronco a su extremo en el miembro), así se estira entero en lugar de desgarrarse */
@@ -1620,14 +1625,14 @@ function deform(active){
   for(const m of meshes){
     if(!ops.length) break;
     const Ws=ops.map(o=>weightsFor(m,o.jn));if(Ws.every(w=>!w)) continue;
-    const u=m.userData,g=m.geometry,pa=g.attributes.position,na=g.attributes.normal;
+    const u=m.userData,g=m.geometry,pa=g.attributes.position,na=g.attributes.normal;const LINs=ops.map(o=>!!(u.lin&&u.lin[o.jn]));
     if(!u.rest){u.rest=pa.array.slice();u.restN=na.array.slice();}
     const R=u.rest,RN=u.restN,P=pa.array,N=na.array,n=R.length/3;
     for(let i=0;i<n;i++){let x=R[i*3],y=R[i*3+1],z=R[i*3+2],nx=RN[i*3],ny=RN[i*3+1],nz=RN[i*3+2];
-      for(let k=0;k<ops.length;k++){const W=Ws[k];if(!W)continue;const w=W[i];if(w<0.001)continue;const o=ops[k],th=o.ang*w,c=Math.cos(th),s=Math.sin(th),kx=o.ax.x,ky=o.ax.y,kz=o.ax.z;
+      for(let k=0;k<ops.length;k++){const W=Ws[k];if(!W)continue;const w=W[i];if(w<0.001)continue;const o=ops[k],LIN=LINs[k]&&w<0.999,th=LIN?o.ang:o.ang*w,c=Math.cos(th),s=Math.sin(th),kx=o.ax.x,ky=o.ax.y,kz=o.ax.z;
         let vx=x-o.p.x,vy=y-o.p.y,vz=z-o.p.z;let d=kx*vx+ky*vy+kz*vz;
         let rx=vx*c+(ky*vz-kz*vy)*s+kx*d*(1-c),ry=vy*c+(kz*vx-kx*vz)*s+ky*d*(1-c),rz=vz*c+(kx*vy-ky*vx)*s+kz*d*(1-c);
-        x=rx+o.p.x;y=ry+o.p.y;z=rz+o.p.z;if(o.tr){x+=o.tr.x*w;y+=o.tr.y*w;z+=o.tr.z*w;}
+        if(LIN){x=x+(rx+o.p.x-x)*w;y=y+(ry+o.p.y-y)*w;z=z+(rz+o.p.z-z)*w;}else{x=rx+o.p.x;y=ry+o.p.y;z=rz+o.p.z;}if(o.tr){x+=o.tr.x*w;y+=o.tr.y*w;z+=o.tr.z*w;}
         d=kx*nx+ky*ny+kz*nz;rx=nx*c+(ky*nz-kz*ny)*s+kx*d*(1-c);ry=ny*c+(kz*nx-kx*nz)*s+ky*d*(1-c);rz=nz*c+(kx*ny-ky*nx)*s+kz*d*(1-c);nx=rx;ny=ry;nz=rz;}
       P[i*3]=x;P[i*3+1]=y;P[i*3+2]=z;N[i*3]=nx;N[i*3+1]=ny;N[i*3+2]=nz;}
     pa.needsUpdate=true;na.needsUpdate=true;g.computeBoundingSphere();touched.add(m);
@@ -1701,6 +1706,7 @@ function buildRig2(){if(!RIG||!RIG.f21_R)return;const P=k=>new V3(...RIG[k]);
     SEGS['clv_'+S]=[P('sc_'+S),P('ac_'+S)];SEGS['scap_'+S]=[P('scapTop_'+S).lerp(P('scapBot_'+S),.15),P('scapBot_'+S)];
     const armc=['arm_'+S,'fore_'+S,...hs,'hand_'+S];
     JOINTS['sc_'+S]={pivot:P('sc_'+S),child:['clv_'+S,'scap_'+S,...armc],blend:.02};
+    JOINTS['acr_'+S]={pivot:P('ac_'+S),child:['scap_'+S,...armc],blend:.02};
     for(const j of ['shoulder','elbow','fore','wrist'])JOINTS[j+'_'+S].child=[...new Set([...JOINTS[j+'_'+S].child,...hs])];
     for(const j of ['hip','knee','ankle'])JOINTS[j+'_'+S].child=[...new Set([...JOINTS[j+'_'+S].child,...fs])];
     JOINTS['knee_'+S].long=P('knee_'+S).sub(P('ankle_'+S)).normalize();
@@ -1719,11 +1725,11 @@ function buildRig2(){if(!RIG||!RIG.f21_R)return;const P=k=>new V3(...RIG[k]);
     JOINTS.aa={pivot:aa,child:['head','jaw','maxilla'],blend:.012,force:en=>SK.test(en)||/^Atlas/.test(en)?1:/^(Axis|Vertebra C)/.test(en)?0:null};
     Object.assign(DEPTH,{aa:1.5,ao:1.8});Object.assign(PROX,{aa:['cervical','trunk'],ao:['aa','cervical','trunk']});}
   for(const k in JOINTS)if(!['tmj','ao','aa'].includes(k)&&JOINTS[k].force)delete JOINTS[k].force;
-  Object.assign(DEPTH,{sc:0.5,tmj:2,cmc:5,mcp1:6,ip1:7});for(const f of FING)Object.assign(DEPTH,{['mcp'+f]:5,['pip'+f]:6,['dip'+f]:7});for(const f of TOES)DEPTH['mtp'+f]=4;
-  Object.assign(PROX,{sc:['trunk'],tmj:['cervical','trunk'],cmc:['wrist','fore','elbow','shoulder','trunk'],mcp1:['cmc','wrist','fore','elbow','shoulder','trunk'],ip1:['mcp1','cmc','wrist','fore','elbow','shoulder','trunk']});
+  Object.assign(DEPTH,{acr:0.7,sc:0.5,tmj:2,cmc:5,mcp1:6,ip1:7});for(const f of FING)Object.assign(DEPTH,{['mcp'+f]:5,['pip'+f]:6,['dip'+f]:7});for(const f of TOES)DEPTH['mtp'+f]=4;
+  Object.assign(PROX,{acr:['sc','trunk'],sc:['trunk'],tmj:['cervical','trunk'],cmc:['wrist','fore','elbow','shoulder','trunk'],mcp1:['cmc','wrist','fore','elbow','shoulder','trunk'],ip1:['mcp1','cmc','wrist','fore','elbow','shoulder','trunk']});
   for(const f of FING)Object.assign(PROX,{['mcp'+f]:['wrist','fore','elbow','shoulder','trunk'],['pip'+f]:['mcp'+f,'wrist','fore','elbow','shoulder','trunk'],['dip'+f]:['pip'+f,'mcp'+f,'wrist','fore','elbow','shoulder','trunk']});
   for(const f of TOES)PROX['mtp'+f]=['ankle','knee','hip'];
-  SIDED.push('sc','cmc','mcp1','ip1',...FING.flatMap(f=>['mcp'+f,'pip'+f,'dip'+f]),...TOES.map(f=>'mtp'+f));
+  SIDED.push('sc','acr','cmc','mcp1','ip1',...FING.flatMap(f=>['mcp'+f,'pip'+f,'dip'+f]),...TOES.map(f=>'mtp'+f));
   for(const k in PROX){const L=PROX[k];const i=L.indexOf('shoulder');if(i>=0&&!L.includes('sc'))L.splice(i+1,0,'sc');}if(!PROX.shoulder.includes('sc'))PROX.shoulder.unshift('sc');
   for(const m of meshes){if(m.userData.W)m.userData.W={};delete m.userData.home;}}
 
@@ -2145,14 +2151,14 @@ const sideSign=()=>romSide==='L'?-1:1;
 /* ───────── Regla fisiológica: límites articulares, ritmo escapulohumeral y rotaciones acopladas ─────────
    Toda postura (rango articular, pruebas clínicas y movimientos funcionales) pasa por aquí antes de deformar el modelo.
    Valores en la convención del lado derecho (grados). */
-const LIM={shoulder:{x:[-180,60],z:[-180,45],y:[-90,70],w:[-45,125]},sc:{z:[-50,10],y:[-15,15]},elbow:{x:[-150,10]},wrist:{x:[-80,70],z:[-25,35]},
+const LIM={shoulder:{x:[-180,60],z:[-180,45],y:[-90,70],w:[-45,125]},sc:{z:[-30,10],y:[-15,15]},acr:{z:[-45,5]},elbow:{x:[-150,10]},wrist:{x:[-80,70],z:[-25,35]},
  hip:{x:[-125,30],z:[-45,30],y:[-45,45]},knee:{x:[-10,140],y:[-40,30],z:[-10,10]},ankle:{x:[-25,50],z:[-15,35]},
  cervical:{x:[-50,50],z:[-45,45],y:[-60,60]},ao:{x:[-25,15]},aa:{y:[-45,45]},trunk:{x:[-30,85],z:[-35,35],y:[-45,45]},lumb:{x:[-25,55],z:[-20,20],y:[-6,6]},thor:{x:[-25,40],z:[-30,30],y:[-40,40]},
  tmj:{x:[0,35],y:[-12,12]},cmc:{x:[-70,10],z:[-20,20],y:[-10,50]},mcp1:{z:[-10,60]},ip1:{z:[-20,80]}};
 for(const f of [2,3,4,5]){LIM['mcp'+f]={x:[-90,45],z:[-25,25]};LIM['pip'+f]={x:[-110,0]};LIM['dip'+f]={x:[-90,10]};}for(const f of [1,2,3,4,5])LIM['mtp'+f]={x:[-70,45]};
 function physio(c,side){for(const k of Object.keys(c)){const [node,sx]=k.split('_');const S=sx||side,fl=S==='L'?-1:1,v=c[k];
     if(node==='shoulder'){const ex=-v.x,ab=-(v.z*fl),E=Math.max(ex,ab);
-      if(E>30){const st=(E-30)*0.33;if(ab>=ex)v.z+=st*fl;else v.x+=st;const kc='sc'+(sx?'_'+sx:'');c[kc]=c[kc]||{x:0,y:0,z:0,w:0};c[kc].z-=st*fl;}
+      if(E>30){const st=Math.min(55,(E-30)*0.36);if(ab>=ex)v.z+=st*fl;else v.x+=st;const kc='sc'+(sx?'_'+sx:''),ka='acr'+(sx?'_'+sx:'');c[kc]=c[kc]||{x:0,y:0,z:0,w:0};c[kc].z-=Math.min(14,st*0.28)*fl;c[ka]=c[ka]||{x:0,y:0,z:0,w:0};c[ka].z-=(st-Math.min(14,st*0.28))*fl;}
       if(ab>90)v.y-=(ab-90)*0.5*fl;
       const hz=(v.w||0)*fl;if(hz>20){const kc='sc'+(sx?'_'+sx:'');c[kc]=c[kc]||{x:0,y:0,z:0,w:0};c[kc].y+=Math.min(15,(hz-20)*0.16)*fl;}}}
   for(const k of Object.keys(c)){const [node,sx]=k.split('_');const S=sx||side,fl=S==='L'?-1:1,v=c[k],L=LIM[node];if(!L)continue;
