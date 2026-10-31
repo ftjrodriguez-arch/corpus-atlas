@@ -1554,17 +1554,25 @@ function buildRig(){
     JOINTS['ankle_'+S]={pivot:P('ankle_'+S),child:['foot_'+S,'heel_'+S],blend:.02};
   }
   JOINTS.cervical={pivot:P('c7').lerp(P('c3'),.35),child:['head'],blend:.035};
-  JOINTS.trunk={pivot:P('l3'),child:['spineUp','head','clav_R','arm_R','fore_R','hand_R','clav_L','arm_L','fore_L','hand_L'],blend:.05};
+  JOINTS.trunk={pivot:P('l3'),child:['spineUp','head','clav_R','arm_R','fore_R','hand_R','clav_L','arm_L','fore_L','hand_L'],blend:.05,vert:[0,0.14]};
 }
+const VERT_FIX=/^(Hip bone|Sacrum|Coccyx|Gluteus (maximus|medius|minimus)|Iliacus|Piriformis|(Superior|Inferior) gemellus|Obturator|Quadratus femoris|Tensor fasciae latae|Levator ani|Coccygeus)/i;
 const _ab=new V3(),_ap=new V3();
 function segDist(px,py,pz,a,b){const abx=b.x-a.x,aby=b.y-a.y,abz=b.z-a.z;const apx=px-a.x,apy=py-a.y,apz=pz-a.z;
   let t=(apx*abx+apy*aby+apz*abz)/(abx*abx+aby*aby+abz*abz);t=t<0?0:t>1?1:t;const dx=apx-abx*t,dy=apy-aby*t,dz=apz-abz*t;return Math.sqrt(dx*dx+dy*dy+dz*dz);}
 function weightsFor(m,jn){
   const u=m.userData;u.W=u.W||{};if(jn in u.W) return u.W[jn];
   const J=JOINTS[jn];if(J.force){const fv=J.force(u.c?u.c.en:'');if(fv===0){u.W[jn]=null;return null;}if(fv===1){const nn=(u.rest||m.geometry.attributes.position.array).length/3;u.W[jn]=new Float32Array(nn).fill(1);return u.W[jn];}}
-  if(u.home===undefined){const c0=m.geometry.boundingSphere.center;let bk=null,bd=1e9;for(const k in SEGS){const d=segDist(c0.x,c0.y,c0.z,SEGS[k][0],SEGS[k][1]);if(d<bd){bd=d;bk=k;}}u.home=segLimb(bk);}
+  if(u.home===undefined){const c0=m.geometry.boundingSphere.center;let bk=null,bd=1e9;for(const k in SEGS){const d=segDist(c0.x,c0.y,c0.z,SEGS[k][0],SEGS[k][1]);if(d<bd){bd=d;bk=k;}}u.home=segLimb(bk);u.homeSeg=bk;}
   if(J.limb===undefined){J.limb='T';for(const k of J.child){const l=segLimb(k);if(l!=='T'){J.limb=l;break;}}}
   if(u.home!=='T'&&J.limb!=='T'&&u.home!==J.limb){u.W[jn]=null;return null;}
+  if(J.vert){/* Tronco: la columna se curva de forma progresiva por encima del pivote y todo el tórax (costillas, escápulas, músculos de la espalda y del hombro) gira junto; la pelvis queda fija */
+    const nm=u.c?u.c.en:'';if(VERT_FIX.test(nm)){u.W[jn]=null;return null;}const pos=(u.rest||m.geometry.attributes.position.array),n=pos.length/3,W=new Float32Array(n),lo=J.pivot.y+J.vert[0],hi=J.pivot.y+J.vert[1];
+    const segW=u.home==='U'||/^(head|neck|jaw|maxilla)$/.test(u.homeSeg||''),child=J.child.map(k=>SEGS[k]),other=Object.keys(SEGS).filter(k=>!J.child.includes(k)&&segLimb(k)!=='T').map(k=>SEGS[k]);let any=false;
+    for(let i=0;i<n;i++){const x=pos[i*3],y=pos[i*3+1],z=pos[i*3+2];let w=(y-lo)/(hi-lo);w=w<0?0:w>1?1:w*w*(3-2*w);
+      if(segW&&w<1){let a=Infinity,b=Infinity;for(const sg of child){const d=segDist(x,y,z,sg[0],sg[1]);if(d<a)a=d;}for(const sg of other){const d=segDist(x,y,z,sg[0],sg[1]);if(d<b)b=d;}let ws=(b-a)/(2*J.blend)+.5;ws=ws<0?0:ws>1?1:ws*ws*(3-2*ws);if(ws>w)w=ws;}
+      W[i]=w;if(w>0.001)any=true;}
+    u.W[jn]=any?W:null;return u.W[jn];}
   const child=J.child.map(k=>SEGS[k]),other=Object.keys(SEGS).filter(k=>!J.child.includes(k)).map(k=>SEGS[k]);
   const sph=m.geometry.boundingSphere,c=sph.center;
   let dc=Infinity,dp=Infinity;for(const s of child) dc=Math.min(dc,segDist(c.x,c.y,c.z,s[0],s[1]));for(const s of other) dp=Math.min(dp,segDist(c.x,c.y,c.z,s[0],s[1]));
@@ -1691,7 +1699,7 @@ function buildRig2(){if(!RIG||!RIG.f21_R)return;const P=k=>new V3(...RIG[k]);
   JOINTS.cervical.child=[...new Set([...JOINTS.cervical.child,'jaw','maxilla'])];JOINTS.trunk.child=[...new Set([...JOINTS.trunk.child,'jaw','maxilla'])];
   if(RIG.s1&&RIG.t12){const s1=P('s1').setZ(-0.025),t12=P('t12');SEGS.spineLow=[P('pelvis'),s1];SEGS.spineL=[s1,t12];SEGS.spineUp=[t12,P('c7')];
     JOINTS.trunk.child=[...new Set([...JOINTS.trunk.child,'spineL'])];
-    JOINTS.lumb={pivot:s1.clone(),child:[...JOINTS.trunk.child],blend:.045};JOINTS.thor={pivot:t12.clone(),child:JOINTS.trunk.child.filter(k=>k!=='spineL'),blend:.04};
+    JOINTS.lumb={pivot:s1.clone(),child:[...JOINTS.trunk.child],blend:.045,vert:[0,0.13]};JOINTS.thor={pivot:t12.clone(),child:JOINTS.trunk.child.filter(k=>k!=='spineL'),blend:.04,vert:[0,0.12]};
     Object.assign(DEPTH,{lumb:0,thor:0.3});Object.assign(PROX,{lumb:[],thor:[]});}
   if(RIG.c0c1&&RIG.c1c2){const oa=P('c0c1'),aa=P('c1c2');SEGS.neck=[P('c7'),oa.clone()];SEGS.head=[oa.clone(),P('headtop')];
     JOINTS.cervical.child=[...new Set([...JOINTS.cervical.child,'neck'])];JOINTS.trunk.child=[...new Set([...JOINTS.trunk.child,'neck'])];for(const k of ['lumb','thor'])if(JOINTS[k])JOINTS[k].child=[...new Set([...JOINTS[k].child,'neck'])];
@@ -4949,7 +4957,7 @@ function phyDrawANS(t,mode){const S=phyInsetBase('rgba(14,12,10,0.95)');if(!S)re
   const pr2=both?8:sy?11:4;g.fillStyle='#6b4f2a';g.beginPath();g.arc(30,h-20,13,0,7);g.fill();g.fillStyle='#000';g.beginPath();g.arc(30,h-20,pr2,0,7);g.fill();synTxt(g,PHY_TXT('pupila','pupil','pupila'),48,h-16,'rgba(255,240,230,0.7)','500 9.5px system-ui');}
 
 /* ─ Animación con deformación del esqueleto ─ */
-function phyDef(list,tr){const act=[];for(const [jn,c] of list){if(JOINTS[jn])act.push({k:jn.split('_')[0],jn,q:qOf(jn,c)});}act.sort((a,b)=>(DEPTH[b.k]||0)-(DEPTH[a.k]||0));
+function phyDef(list,tr){const act=[];if(typeof physio==='function'&&list.some(([jn])=>/^shoulder_/.test(jn))){const o={};for(const [jn,c] of list)o[jn]=Object.assign({x:0,y:0,z:0},o[jn]||{},c);physio(o,'R');list=Object.entries(o);}for(const [jn,c] of list){if(JOINTS[jn])act.push({k:jn.split('_')[0],jn,q:qOf(jn,c)});}act.sort((a,b)=>(DEPTH[b.k]||0)-(DEPTH[a.k]||0));
   if(tr){JOINTS.__root={pivot:new V3(),force:()=>1,child:[]};act.push({k:'__root',jn:'__root',q:new Q(),tr});}deform(act);}
 function phyAg(ms,on){for(const m of ms){if(!!m.userData.ag!==on){m.userData.ag=on;refreshState(m);}}}
 function phyGoLev(st,ins){const en=m=>m.userData.c.en,R=m=>m.userData.c.side!=='izquierdo';const mus=rx=>meshes.filter(m=>BS(m.userData.sys)==='muscular'&&rx.test(en(m)));
@@ -7246,7 +7254,7 @@ function voxPick(){const vs=voxVoices();if(!vs.length)return null;let want=null;
   const chosen=want&&vs.find(v=>v.voiceURI===want||v.name===want);return chosen||vs.slice().sort((a,b)=>voxScore(b)-voxScore(a))[0];}
 function voxChunks(t){const out=[];for(const s of String(t).replace(/\s+/g,' ').match(/[^.!?;]+[.!?;]*/g)||[]){let x=s.trim();while(x.length>220){let k=x.lastIndexOf(',',220);if(k<80)k=x.lastIndexOf(' ',220);out.push(x.slice(0,k+1));x=x.slice(k+1).trim();}if(x)out.push(x);}return out;}
 /* Habla un texto; onend se llama al terminar (o tras un tiempo estimado si no hay voz) */
-function voxSub(t){const el=document.getElementById('phySub');if(!el)return;if(t&&typeof PHY!=='undefined'&&PHY.on){el.textContent=t;el.hidden=false;}else el.hidden=true;}
+function voxSub(t){const el=document.getElementById('phySub');if(!el)return;if(t&&typeof PHY!=='undefined'&&PHY.on){el.textContent=t;el.hidden=false;/* en el teléfono, justo encima de la tarjeta del recorrido para no tapar sus botones */const bx=document.getElementById('phyBox'),st=el.offsetParent;if(bx&&st&&bx.offsetParent!==null){const br=bx.getBoundingClientRect(),sr=st.getBoundingClientRect();el.style.bottom=(br.top<sr.bottom-4?Math.max(10,sr.bottom-br.top+8):10)+'px';}else el.style.bottom='';}else el.hidden=true;}
 function voxSay(txt,onend,rate,onchunk){try{speechSynthesis.cancel();}catch(e){}clearInterval(VOX.tick);const my=++VOX.seq;
   if(!txt){return;}if(!('speechSynthesis' in window)){if(onend)setTimeout(()=>{if(my===VOX.seq)onend();},Math.max(4000,txt.length*65));return;}
   const v=voxPick(),parts=voxChunks(txt);let i=0;
@@ -8208,7 +8216,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
 })();
 </script>
 <style>
-#installBtn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:6px 14px;font-weight:700;font-size:13px}
+#installBtn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:6px 14px;font-weight:700;font-size:13px}#installBtn{white-space:nowrap;flex:0 0 auto}@media(max-width:560px){#installBtn{font-size:0;padding:0;width:38px;height:38px}#installBtn:not([hidden]){display:inline-grid;place-items:center}#installBtn:not([hidden])::before{content:'⬇';font-size:17px;line-height:1}}
 .offcard .bar{height:8px;margin:8px 0 4px}.offcard .ok{color:var(--ok);font-weight:700}
 .instsheet{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;padding:16px}
 .instsheet>div{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:460px;width:100%;padding:16px;display:flex;flex-direction:column;gap:10px}
@@ -8223,7 +8231,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
  const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
  /* botón Instalar */
- let deferred=null;const hdr=document.querySelector('header');const ib=document.createElement('button');ib.id='installBtn';ib.hidden=true;ib.textContent='⬇ '+L('Instalar app','Install app','Instalar app');
+ let deferred=null;const hdr=document.querySelector('header');const ib=document.createElement('button');ib.id='installBtn';ib.hidden=true;ib.textContent='⬇ '+L('Instalar app','Install app','Instalar app');ib.title=ib.getAttribute('aria-label')||L('Instalar app','Install app','Instalar app');ib.setAttribute('aria-label',ib.title);
  const seg=hdr&&hdr.querySelector('.seg');if(seg)seg.after(ib);else if(hdr)hdr.appendChild(ib);
  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;ib.hidden=false;});
  window.addEventListener('appinstalled',()=>{ib.hidden=true;deferred=null;});
