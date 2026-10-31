@@ -1576,6 +1576,10 @@ function skinW(m,node,S,jn){const u=m.userData;const pos=(u.rest||m.geometry.att
   /* la mano nunca sigue a la cadera ni el muslo al hombro, aunque estén juntos en reposo */
   if(u.home===undefined){const c0=m.geometry.boundingSphere.center;let bk=null,bd=1e9;for(const k in SEGS){const d=segDist(c0.x,c0.y,c0.z,SEGS[k][0],SEGS[k][1]);if(d<bd){bd=d;bk=k;}}u.home=segLimb(bk);u.homeSeg=bk;}
   const lowJ=/^(hip|knee|ankle)$/.test(node);if((lowJ&&u.home==='U')||(!lowJ&&u.home==='L'))return null;
+  /* pared abdominal y ligamento inguinal: se fijan a la pelvis (espina ilíaca, pubis), nunca siguen al muslo */
+  if(lowJ&&ABDWALL.test(u.c.en))return null;
+  /* cabeza corta del bíceps y coracobraquial: su tendón sale de la apófisis coracoides y se desliza con el brazo; se mueven como una pieza con el húmero para no estirarse en lámina por la axila */
+  if(node==='shoulder'&&CORA.test(u.c.en)){if(u.c.side!==(S==='R'?'derecho':'izquierdo'))return null;const F2=SKIN.f.find(F=>F.side===S&&F.jj[node]);if(F2)return new Float32Array(n).fill(1);}
   const F=SKIN.f.find(F=>F.side===S&&F.jj[node]);if(!F)return undefined;const CTR=node==='sc'||node==='acr';const HIPC=node==='hip';/* por encima de la cresta ilíaca el tejido no sigue a la cadera */const G=F.jj[node],[x0,y0,z0]=F.o,[nx,ny,nz]=F.n,h=SKIN.h,W=new Float32Array(n);let any=false,lo=1,hi=0;
   for(let v=0;v<n;v++){let fx=(pos[v*3]-x0)/h,fy=(pos[v*3+1]-y0)/h,fz=(pos[v*3+2]-z0)/h;if(fx<0||fy<0||fz<0||fx>nx-1.001||fy>ny-1.001||fz>nz-1.001){W[v]=0;lo=0;continue;}
     const i=fx|0,j=fy|0,k=fz|0,a=fx-i,b=fy-j,c=fz-k,q=i+nx*(j+ny*k),sy=nx,sz=nx*ny;
@@ -1587,6 +1591,7 @@ fetch('data/skinvox.json').then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.f)retu
 const SCAPTHOR=/^(Serratus anterior|Serratus posterior|Rhomboid (major|minor)|(Ascending|Descending|Transverse) part of trapezius|Levator scapulae|Pectoralis minor|Subclavius|Omohyoid)/;
 /* Músculos del tórax o la escápula que insertan en el húmero: solo su extremo humeral acompaña al brazo, el vientre queda sobre el tórax o la escápula */
 const HUM_TAIL=[[/^Latissimus dorsi/,0.55],[/^(Teres major|Teres minor|Infraspinatus|Supraspinatus|Subscapularis)/,0.6],[/pectoralis major/i,0.5]];
+const ABDWALL=/^(External abdominal oblique|Internal abdominal oblique|Transversus abdominis|Rectus abdominis|Pyramidalis|Inguinal ligament|Linea alba|Cremaster|Investing abdominal fascia|Intersectio tendinea|Lamina (anterior|posterior) vaginae|Transversalis fascia)/i,CORA=/^(Short head of biceps brachii|Coracobrachialis|Long head of triceps brachii)/;
 const VERT_FIX=/^(Hip bone|Sacrum|Coccyx|Gluteus (maximus|medius|minimus)|Iliacus|Piriformis|(Superior|Inferior) gemellus|Obturator|Quadratus femoris|Tensor fasciae latae|Levator ani|Coccygeus)/i;
 const _ab=new V3(),_ap=new V3();
 function segDist(px,py,pz,a,b){const abx=b.x-a.x,aby=b.y-a.y,abz=b.z-a.z;const apx=px-a.x,apy=py-a.y,apz=pz-a.z;
