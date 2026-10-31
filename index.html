@@ -861,11 +861,13 @@ const MAT={};
 function baseMat(kk,variant,noTint){
   const s=SYS[kk];let col=s.c;const k=BS(kk);
   if(k==='insercion') col=variant==='o'?cssVar('--orig'):cssVar('--ins');
-  const M=WET.includes(k)?THREE.MeshPhysicalMaterial:THREE.MeshStandardMaterial;
+  const RICH=!lite&&(k==='muscular'||k==='piel'||(SYS[k]&&SYS[k].base==='piel'));/* motor r147: brillo aterciopelado (sheen) de las fibras musculares y de la piel */
+  const M=(WET.includes(k)||RICH)?THREE.MeshPhysicalMaterial:THREE.MeshStandardMaterial;
   const m=new M({color:lin(col),roughness:k==='oseo'?.62:k==='muscular'?.42:.34,metalness:0,envMapIntensity:(k==='oseo'?.55:.5)*(STUDIO_U.value?0.22:1),
     transparent:true,opacity:1,clippingPlanes:clipArr,side:s.dbl?THREE.DoubleSide:THREE.FrontSide});
   if(WET.includes(k)){m.clearcoat=k.startsWith('nervioso')?0.25:0.65;m.clearcoatRoughness=0.28;}
-  if(k==='muscular'){m.sheen&&m.sheen.set&&0;}
+  if(RICH&&k==='muscular'){m.sheen=0.42;m.sheenRoughness=0.45;m.sheenColor=lin('#ffb4a6');m.clearcoat=0.12;m.clearcoatRoughness=0.55;}
+  else if(RICH){m.sheen=0.35;m.sheenRoughness=0.6;m.sheenColor=lin('#ffd8c6');}
   const kind=k==='oseo'?'bone':k==='muscular'?'muscle':(k==='piel'||(SYS[k]&&SYS[k].base==='piel'))?'skin':k==='arterial'?'artery':k==='venoso'?'vein':k==='nervioso_periferico'?'nerve':BS(k)==='articular'?'lig':['digestivo','urinario','respiratorio','reproductor','endocrino'].includes(k)?'visc':'soft';
   if(kind==='skin'){m.roughness=0.58;}
   if(k!=='importado'){m.extensions={derivatives:true};const gk=GRAYK[k]||GRAYK[kind]||GRAYK.soft;m.onBeforeCompile=sh=>corpusShader(sh,kind,noTint,gk);m.customProgramCacheKey=()=>'ck4_'+kind+(noTint?'_n':'')+gk.join('_');}
