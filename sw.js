@@ -2,7 +2,7 @@
    V  = versión de la aplicación (página, librerías y datos JSON): cambia en cada publicación.
    MV = versión de los modelos 3D (m2/, hr/, draco/): cambiarla solo cuando cambien las mallas,
         así una actualización de la app no obliga a volver a descargar ~50 MB. */
-const V='corpus-v105';
+const V='corpus-v106';
 const MV='3';
 const SHELL='corpus-shell-'+V, MODELS='corpus-models-'+MV;
 const CORE=['./','index.html','manifest.webmanifest','icons/icon.svg','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png',
@@ -19,6 +19,7 @@ const isModel=p=>/\/(m2|hr|draco)\//.test(p);
 self.addEventListener('fetch',e=>{
   const r=e.request;if(r.method!=='GET')return;
   const u=new URL(r.url);
+  if(/(^|\.)goatcounter\.com$|(^|\.)zgo\.at$/.test(u.hostname))return; /* estadísticas: siempre a la red, nunca a la caché */
   if(r.mode==='navigate'){const isApp=/\/(index\.html)?$/.test(u.pathname);e.respondWith(fetch(r).then(res=>{if(isApp&&res.ok){const cp=res.clone();caches.open(SHELL).then(c=>c.put('index.html',cp));}else if(res.ok){const cp=res.clone();caches.open(SHELL).then(c=>c.put(r,cp));}return res;}).catch(()=>isApp?caches.match('index.html',{ignoreSearch:true}):caches.match(r,{ignoreSearch:true}).then(h=>h||caches.match('index.html',{ignoreSearch:true}))));return;}
   const store=isModel(u.pathname)?MODELS:SHELL;
   e.respondWith(caches.match(r,{ignoreSearch:u.origin===location.origin}).then(hit=>hit||fetch(r).then(res=>{

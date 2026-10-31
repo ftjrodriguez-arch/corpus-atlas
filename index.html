@@ -3483,7 +3483,7 @@ function phyPlace(){const card=$('.phycard');if(!card)return;const dock=!isPhone
 window.addEventListener('resize',()=>{if(PHY.on)phyPlace();});
 function phyFocus(c,r){fitSoon(c.clone(),0.26*r,0.26*r,isPhone()?r*1.7:r);}
 const pick2=(rx,need)=>meshes.filter(m=>rx.test(m.userData.c.en)&&(!need||need.includes(BS(m.userData.sys)))&&!m.userData.c.ins);
-async function phyStart(a,b){let tour='heart',step=0;if(typeof a==='string'){tour=a;step=b||0;}else step=a||0;
+async function phyStart(a,b){let tour='heart',step=0;if(typeof a==='string'){tour=a;step=b||0;}else step=a||0;try{if(!step&&window.goatcounter&&window.goatcounter.count&&TOURS[tour])window.goatcounter.count({path:'recorrido-'+tour,title:TOURS[tour].n&&TOURS[tour].n.es||tour,event:true});}catch(e){}
   if(PHY.on&&PHY_TOUR===tour){phyGo(step);return;}if(PHY.on)phyStop();PHY_TOUR=tour;const T=curTour();
   if(typeof stopAnim==='function')stopAnim();select(null);clearLm();if(gait&&gait.on)setGait(false);{const wb=T.body||(BODY==='vh'?'m':(BODY==='f'&&tour!=='heart')?'m':null);if(wb&&BODY!==wb)setBody(wb);}
   PHY.orb={th:orb.T.th,ph:orb.T.ph,r:orb.T.r,tgt:orb.T.tgt.clone()};
@@ -8222,6 +8222,10 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
 .instsheet>div{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:460px;width:100%;padding:16px;display:flex;flex-direction:column;gap:10px}
 .instsheet ol{margin:0;padding-left:20px;font-size:14px;line-height:1.6}
 </style>
+<script>
+/* ───── Estadísticas de visitas sin cookies (GoatCounter, solo en el sitio público) ───── */
+(()=>{if(location.protocol!=='https:'||/^(localhost|127\.|192\.168\.)/.test(location.hostname))return;const s=document.createElement('script');s.async=true;s.src='https://gc.zgo.at/count.js';s.dataset.goatcounter='https://corpus-atlas.goatcounter.com/count';document.head.appendChild(s);})();
+</script>
 <script>
 /* ───── App instalable y sin conexión (versión publicada en la web) ───── */
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
