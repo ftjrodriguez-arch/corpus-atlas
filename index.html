@@ -1658,7 +1658,7 @@ function deform(active){
   for(const m of meshes){
     if(!ops.length) break;
     const Ws=ops.map(o=>weightsFor(m,o.jn));if(Ws.every(w=>!w)) continue;
-    const u=m.userData,g=m.geometry,pa=g.attributes.position,na=g.attributes.normal;const LINs=ops.map(o=>!!(u.lin&&u.lin[o.jn]));
+    const u=m.userData,g=m.geometry,pa=g.attributes.position,na=g.attributes.normal;const ARC=/pectoralis major/i.test(u.c.en);/* el pectoral mayor gira en arco alrededor del hombro: la interpolación lineal lo aplastaba contra el tórax en la elevación máxima */const LINs=ops.map(o=>!!(u.lin&&u.lin[o.jn])&&!(ARC&&/^shoulder/.test(o.jn)));
     if(!u.rest){u.rest=pa.array.slice();u.restN=na.array.slice();}
     const R=u.rest,RN=u.restN,P=pa.array,N=na.array,n=R.length/3;
     for(let i=0;i<n;i++){let x=R[i*3],y=R[i*3+1],z=R[i*3+2],nx=RN[i*3],ny=RN[i*3+1],nz=RN[i*3+2];
