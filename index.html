@@ -217,6 +217,7 @@ body.phy-on.phy-dock .pbody > .view{display:none!important}
 .phykick{color:var(--phyc,#ff8a8a)!important}.phyctl .btn.pri{background:var(--phyc,#ff4d5e)!important;border-color:var(--phyc,#ff4d5e)!important;color:#111!important}.phydots button[aria-current="true"]{background:var(--phyc,#ff4d5e)!important}
 .wkgoal{margin-top:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;gap:5px}.wkrow{display:grid;grid-template-columns:120px 1fr 40px;gap:8px;align-items:center;font-size:12px}.wkrow .bar{height:7px}.wkrow b{text-align:right}
 .prings{display:grid;grid-template-columns:repeat(auto-fit,minmax(62px,1fr));gap:6px;margin-top:4px}.pring{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}.pring svg{width:56px;height:56px}.pring b{font-size:10.5px;letter-spacing:-.1px;line-height:1.15}.pring small{font-size:10.5px;color:var(--muted)}
+@media (max-width:400px){.prings{grid-template-columns:repeat(5,minmax(0,1fr));gap:3px}.pring svg{width:46px;height:46px}.pring b{font-size:9.5px;letter-spacing:-.2px}.pring small{font-size:9.5px}}
 .phytour{position:relative}.pdone{position:absolute;right:6px;top:4px;font-size:10px;font-weight:700;color:var(--ok)}
 .lbl.phyl{background:rgba(14,16,22,.82);color:#fff;border-color:rgba(255,255,255,.2);text-transform:none;letter-spacing:0;font:600 11.5px/1 var(--f-ui);padding:5px 8px;border-radius:999px}
 body.phy-on .actbar,body.phy-on .views,body.phy-on #hintTxt{display:none!important}
@@ -2744,7 +2745,7 @@ function trNode(root){if(!root)return;const walk=document.createTreeWalker(root,
 let trPending=false;const trObs=new MutationObserver(()=>{if(trPending||LANG==='es')return;trPending=true;requestAnimationFrame(()=>{trPending=false;trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}finally{if(LANG!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});}});});
 async function setLang(l){if(!['es','en','pt'].includes(l))l='es';
   if(l!=='es'&&!I18N){try{I18N=await (await fetch('data/i18n.json')).json();}catch(e){l='es';}}
-  LANG=l;store.set('lang',l);document.documentElement.lang=l;loadInfoTr(l);loadContentTr(l);if(typeof renderPhyTours==='function'){renderPhyTours();renderProg();}if(typeof renderBio==='function')renderBio();if(typeof renderRC==='function')renderRC();if(typeof renderRoute==='function')renderRoute();setTimeout(renderProg,0);
+  LANG=l;store.set('lang',l);document.documentElement.lang=l;try{for(const m of meshes){const c=m.userData&&m.userData.c;if(c&&c.id&&CAT[c.id])c.es=nameL(CAT[c.id]);}}catch(e){}loadInfoTr(l);loadContentTr(l);if(typeof renderPhyTours==='function'){renderPhyTours();renderProg();}if(typeof renderBio==='function')renderBio();if(typeof renderRC==='function')renderRC();if(typeof renderRoute==='function')renderRoute();setTimeout(renderProg,0);
 $('#phyBtn').onclick=e=>{e.stopPropagation();togglePop($('#phyBtn'),$('#phyPop'));};document.addEventListener('pointerdown',e=>{if(!e.target.closest('#phyPop,#phyBtn')&&!$('#phyPop').hidden)togglePop($('#phyBtn'),$('#phyPop'),false);});
   $$('#langSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===l));
   if(typeof SEARCH!=='undefined'&&SEARCH.length)buildSearch();
