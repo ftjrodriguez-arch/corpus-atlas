@@ -75,6 +75,8 @@ main{flex:1;min-height:0;display:grid;gap:10px;grid-template-rows:minmax(0,1.15f
 .lbl{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;font:600 10.5px/1 var(--f-ui);letter-spacing:.08em;text-transform:uppercase;
   padding:4px 6px;border-radius:5px;background:var(--chip);color:var(--muted);border:1px solid var(--line)}
 .lbl.tag{font:500 13px/1.1 var(--f-display);letter-spacing:0;text-transform:none;color:var(--ink);transform:translate(10px,-50%);border-color:var(--accent)}
+.lbl.tag.flip{transform:translate(calc(-100% - 10px),-50%)}.lbl.tag.flip::before{left:auto;right:-7px}
+.lbl.tag{max-width:min(62vw,520px);white-space:normal;line-height:1.15}
 .lbl.tag::before{content:"";position:absolute;left:-7px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--accent)}
 .hint{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none}
 .hint p{margin:0;font-size:12px;color:var(--muted);background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:5px 8px;max-width:62%}
@@ -167,7 +169,8 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .gaitTbl{width:100%;margin:6px 0;font-size:12.5px}.gaitTbl td,.gaitTbl th{padding:3px 6px;text-align:right}.gaitTbl td:first-child,.gaitTbl th:first-child{text-align:left}
 .gm{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px}.gm small{color:var(--muted);text-align:right}
 .gm .ty{align-self:flex-start;flex:none;font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}.gm .ty.exc{color:#f0a040;border-color:#f0a04066}.gm .ty.con{color:var(--ok);border-color:var(--ok)}.gm .ty.iso{color:var(--accent);border-color:var(--accent)}
-.gloTop{display:flex;gap:6px}.gloTop input{flex:1;min-width:0;border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:8px 10px}.gloTop select{max-width:44%;border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:6px}
+.gloTop{display:flex;gap:6px;flex-wrap:wrap}.gloTop input{flex:1;min-width:0;border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:8px 10px}.gloTop select{max-width:44%;border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:6px}
+@media (max-width:520px){.gloTop input{flex:1 1 100%}.gloTop select{max-width:none;flex:1 1 100%;padding:8px}}
 .gloAZ{display:flex;flex-wrap:wrap;gap:2px}.gloAZ button{border:0;background:transparent;min-width:20px;padding:3px 3px;font:600 12px var(--f-mono);color:var(--muted);border-radius:5px}.gloAZ button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}.gloAZ button:disabled{opacity:.3;cursor:default}
 .gloRow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:transparent;padding:8px 2px}
 .gloRow b{font:500 15.5px/1.25 var(--f-display)}.gloRow small{color:var(--muted);font-size:11px;white-space:nowrap;text-align:right}.gloRow[aria-expanded="true"]{border-bottom-color:transparent}.gloRow[aria-expanded="true"] b{color:var(--accent)}
@@ -213,7 +216,7 @@ body.phy-on.phy-dock .pbody > .view{display:none!important}
 .phytour b{display:block;font:500 15px/1.2 var(--f-display)}.phytour small{color:var(--muted);font-size:11.5px}
 .phykick{color:var(--phyc,#ff8a8a)!important}.phyctl .btn.pri{background:var(--phyc,#ff4d5e)!important;border-color:var(--phyc,#ff4d5e)!important;color:#111!important}.phydots button[aria-current="true"]{background:var(--phyc,#ff4d5e)!important}
 .wkgoal{margin-top:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;gap:5px}.wkrow{display:grid;grid-template-columns:120px 1fr 40px;gap:8px;align-items:center;font-size:12px}.wkrow .bar{height:7px}.wkrow b{text-align:right}
-.prings{display:grid;grid-template-columns:repeat(auto-fit,minmax(62px,1fr));gap:6px;margin-top:4px}.pring{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}.pring svg{width:56px;height:56px}.pring b{font-size:12px}.pring small{font-size:10.5px;color:var(--muted)}
+.prings{display:grid;grid-template-columns:repeat(auto-fit,minmax(62px,1fr));gap:6px;margin-top:4px}.pring{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}.pring svg{width:56px;height:56px}.pring b{font-size:10.5px;letter-spacing:-.1px;line-height:1.15}.pring small{font-size:10.5px;color:var(--muted)}
 .phytour{position:relative}.pdone{position:absolute;right:6px;top:4px;font-size:10px;font-weight:700;color:var(--ok)}
 .lbl.phyl{background:rgba(14,16,22,.82);color:#fff;border-color:rgba(255,255,255,.2);text-transform:none;letter-spacing:0;font:600 11.5px/1 var(--f-ui);padding:5px 8px;border-radius:999px}
 body.phy-on .actbar,body.phy-on .views,body.phy-on #hintTxt{display:none!important}
@@ -554,7 +557,7 @@ body.guide .lbl.phyl:not(.hl){opacity:.72}
     <div class="sheet-h" id="sheetH" role="button" tabindex="0" aria-label="Mostrar u ocultar el panel"><i></i></div>
     <div class="ptop">
       <div class="search">
-        <input id="q" type="search" placeholder="Buscar entre 4.719 estructuras: supraespinoso, LCA, nervio mediano…" autocomplete="off" aria-label="Buscar estructura">
+        <input id="q" type="search" placeholder="Buscar: supraespinoso, LCA, mediano…" autocomplete="off" aria-label="Buscar estructura">
         <div class="results" id="results" hidden></div>
       </div>
       <div class="tabs" role="tablist">
@@ -2744,6 +2747,7 @@ async function setLang(l){if(!['es','en','pt'].includes(l))l='es';
 $('#phyBtn').onclick=e=>{e.stopPropagation();togglePop($('#phyBtn'),$('#phyPop'));};document.addEventListener('pointerdown',e=>{if(!e.target.closest('#phyPop,#phyBtn')&&!$('#phyPop').hidden)togglePop($('#phyBtn'),$('#phyPop'),false);});
   $$('#langSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===l));
   if(typeof SEARCH!=='undefined'&&SEARCH.length)buildSearch();
+  /* paneles generados con textos traducidos: se vuelven a dibujar en el idioma nuevo */for(const f of ['renderPlanes','renderGloCats','renderGlo','renderLessons','renderROM','renderViews','renderSrsDecks']){try{if(typeof window[f]==='function'||eval('typeof '+f)==='function')eval(f+'()');}catch(e){}}
   if(selected)renderInfo();if(typeof renderSysList==='function')renderSysList();
   trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}if(l!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});
   if(typeof tagLabel!=='undefined'&&selected)tagLabel.el.textContent=label(selected.m.userData.c);}
@@ -7410,7 +7414,7 @@ function frame(now){const raw=(now-last)/1000;const dt=Math.min(0.05,raw);last=n
     else if(L.group==='phy'){show=PHY.on&&L.on&&((LBL_ON&&(!MQ||MQ.done))||L.force)&&!L.off;p=show?(L.track?L.getPos():L.pos):null;}
     else if(L.group==='dir') show=showDir; else if(L.group==='axis') show=showAxes; else if(L.group.startsWith('plane:')) show=PLANES[L.group.slice(6)].show;
     else if(L.group==='tag'&&selected&&visibleDeep(selected.m)){show=true;p=selected.m.localToWorld(selected.local.clone());}
-    if(show){p=p||L.getPos();const v=p.clone().project(camera);if(v.z>1)show=false;else{const X=(v.x+1)/2*r.width,Y=(1-v.y)/2*r.height;if(L.co){L.ax=X;L.ay=Y;if(X<-20||X>r.width+20||Y<-20||Y>r.height+20)show=false;}else{L.el.style.left=X+'px';L.el.style.top=Y+'px';}}}
+    if(show){p=p||L.getPos();const v=p.clone().project(camera);if(v.z>1)show=false;else{const X=(v.x+1)/2*r.width,Y=(1-v.y)/2*r.height;if(L.co){L.ax=X;L.ay=Y;if(X<-20||X>r.width+20||Y<-20||Y>r.height+20)show=false;}else{L.el.style.left=X+'px';L.el.style.top=Y+'px';if(L.group==='tag'){/* la etiqueta de la estructura seleccionada nunca se sale de la pantalla: si no cabe a la derecha, se coloca a la izquierda del punto */const room=r.width-X-28;L.el.style.maxWidth=Math.max(130,Math.min(520,room))+'px';}}}}
     if(L.show!==show){L.el.hidden=!show;L.show=show;}}
   cullLabels();
   layoutPins(r);animTick&&animTick(dt);phyTick(dt);
