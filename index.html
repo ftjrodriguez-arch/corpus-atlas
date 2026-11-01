@@ -2276,14 +2276,14 @@ function updateArc(active){
   const col=new THREE.Color(cssVar(angle>curM.max?'--warn':'--ok'));
   [arcLine,arcFan,arcRays].forEach(o=>{o.material.color.copy(col);o.visible=true;});mvAxis(k,piv,pq,R);mvLigTick();
 }
-const enEs=en=>{const r=Object.values(CAT).find(x=>x[1]===en&&x[4]==='muscular');return r?r[2]:(INFO.mus[en]?.es||en);};
+const enEs=en=>{const r=Object.values(CAT).find(x=>x[1]===en&&x[4]==='muscular');return r?nameL(r):(LANG==='en'?en:(INFO.mus[en]?.es||en));};
 function renderROM(){
   $('#jointChips').innerHTML='';ROM.forEach(j=>{const b=document.createElement('button');b.textContent=j.n;b.setAttribute('aria-pressed',j===curJ);b.onclick=()=>{if(CT.on)ctStop();if(gait.on)setGait(false);curJ=j;curM=j.moves[0];angle=0;stopPlay();renderROM();};$('#jointChips').appendChild(b);});
   $('#moveChips').innerHTML='';curJ.moves.forEach(mv=>{const b=document.createElement('button');b.textContent=mv.n;b.setAttribute('aria-pressed',mv===curM);b.onclick=()=>{if(CT.on)ctStop();if(gait.on)setGait(false);curM=mv;angle=0;stopPlay();renderROM();};$('#moveChips').appendChild(b);});
   const sideTxt=curJ.sided?(romSide==='R'?'derecho':'izquierdo'):(curM.ax==='x'?'':romSide==='R'?'hacia la derecha':'hacia la izquierda');
   $('#angle').max=Math.round(curM.max);$('#angle').value=angle;
   const ag=curM.ag.filter(en=>Object.values(CAT).some(r=>r[1]===en));
-  $('#moveInfo').innerHTML=`<dt>Plano</dt><dd><b style="color:var(${planeCols[curM.pl]})">${PL_N[curM.pl]}</b></dd><dt>Eje</dt><dd>${AX_N[curM.pl]}</dd><dt>Rango</dt><dd style="font-family:var(--f-mono)">0–${curM.max}${curM.u||'°'}</dd>${sideTxt?`<dt>Lado</dt><dd>${sideTxt}</dd>`:''}<dt>Agonistas</dt><dd>${ag.map(en=>`<button class="link" data-agon="${esc(en)}">${esc(enEs(en))}</button>`).join(', ')||'—'}</dd><dt>${TL('Se estiran','Stretched','Se alongam')}</dt><dd style="color:#8fb8ff">${(curM.ant||[]).filter(en=>Object.values(CAT).some(r=>r[1]===en)).map(en=>esc(enEs(en))).join(', ')||'—'}</dd><dt>${TL('Ligamentos que se tensan','Ligaments that tighten','Ligamentos que se tensionam')}</dt><dd style="color:#ff8a6b">${(curM.lig||[]).map(en=>{const r=Object.values(CAT).find(x=>x[1]===en);return esc(r?r[2]:en);}).join(', ')||'—'}</dd>`;
+  $('#moveInfo').innerHTML=`<dt>Plano</dt><dd><b style="color:var(${planeCols[curM.pl]})">${PL_N[curM.pl]}</b></dd><dt>Eje</dt><dd>${AX_N[curM.pl]}</dd><dt>Rango</dt><dd style="font-family:var(--f-mono)">0–${curM.max}${curM.u||'°'}</dd>${sideTxt?`<dt>Lado</dt><dd>${sideTxt}</dd>`:''}<dt>Agonistas</dt><dd>${ag.map(en=>`<button class="link" data-agon="${esc(en)}">${esc(enEs(en))}</button>`).join(', ')||'—'}</dd><dt>${TL('Se estiran','Stretched','Se alongam')}</dt><dd style="color:#8fb8ff">${(curM.ant||[]).filter(en=>Object.values(CAT).some(r=>r[1]===en)).map(en=>esc(enEs(en))).join(', ')||'—'}</dd><dt>${TL('Ligamentos que se tensan','Ligaments that tighten','Ligamentos que se tensionam')}</dt><dd style="color:#ff8a6b">${(curM.lig||[]).map(en=>{const r=Object.values(CAT).find(x=>x[1]===en);return esc(r?nameL(r):en);}).join(', ')||'—'}</dd>`;
   $('#moveInfo').querySelectorAll('[data-agon]').forEach(b=>b.onclick=()=>{const side=curJ.sided?(romSide==='R'?'derecho':'izquierdo'):'derecho';const r=Object.values(CAT).find(x=>x[1]===b.dataset.agon&&x[4]==='muscular'&&(!x[5]||x[5]===side));if(r)goTo(r[0]);});
   const pair={sag:'flexión y extensión',fro:'abducción, aducción e inclinaciones',tra:'rotaciones'}[curM.pl];
   $('#moveTip').innerHTML=`<h3>Cómo razonarlo</h3><p>${TL(`La ${curM.n.toLowerCase()} ocurre en el plano ${PL_N[curM.pl].toLowerCase()} alrededor del eje ${AX_N[curM.pl].split(' ')[0].toLowerCase()}, perpendicular a ese plano. En este plano ocurren las ${pair}.`,`${trW(curM.n)} takes place in the ${{sag:'sagittal',fro:'frontal',tra:'transverse'}[curM.pl]} plane, around the ${{sag:'frontal',fro:'sagittal',tra:'longitudinal'}[curM.pl]} axis, which is perpendicular to that plane. Movements in this plane: ${{sag:'flexion and extension',fro:'abduction, adduction and lateral flexion',tra:'rotations'}[curM.pl]}.`,`${trW(curM.n)} ocorre no plano ${{sag:'sagital',fro:'frontal',tra:'transversal'}[curM.pl]}, em torno do eixo ${{sag:'frontal',fro:'sagital',tra:'longitudinal'}[curM.pl]}, perpendicular a esse plano. Movimentos neste plano: ${{sag:'flexão e extensão',fro:'abdução, adução e inclinações',tra:'rotações'}[curM.pl]}.`)}</p>`;
@@ -2365,6 +2365,7 @@ function setGaitPattern(k){gait.pat=GAIT_P[k]?k:'normal';const pat=GAIT_P[gait.p
 function renderGaitPats(){$('#gaitPats').innerHTML=Object.entries(GAIT_P).map(([k,v])=>`<button data-p="${k}" aria-pressed="${k===gait.pat}">${v.n}</button>`).join('');
   $('#gaitPats').querySelectorAll('button').forEach(b=>b.onclick=()=>setGaitPattern(b.dataset.p));}
 const gait={on:false,play:true,p:0,slow:false,last:0,pat:'normal'};
+const G_ABBR={en:{CI:'IC',RC:'LR',AM:'MSt',AF:'TSt',PB:'PSw',BI:'ISw',BM:'MSw',BF:'TSw'},pt:{CI:'CI',RC:'RC',AM:'AM',AF:'AT',PB:'PB',BI:'BI',BM:'BM',BF:'BT'}};const gAbbr=k=>(G_ABBR[LANG]||{})[k]||k;
 function gInterp(arr,p){p=((p%100)+100)%100;for(let i=1;i<arr.length;i++){if(p<=arr[i][0]){const [a,va]=arr[i-1],[b,vb]=arr[i];const t=(p-a)/(b-a),s=t*t*(3-2*t);return va+(vb-va)*s;}}return arr[arr.length-1][1];}
 function gAngles(p){return {hip:gInterp(GAIT_K.hip,p),knee:gInterp(GAIT_K.knee,p),ankle:gInterp(GAIT_K.ankle,p)};}
 function gPhase(p){p=((p%100)+100)%100;return GAIT_PH.find(f=>p>=f[0]&&p<f[1])||GAIT_PH[GAIT_PH.length-1];}
@@ -2383,7 +2384,7 @@ function renderGait(){if(!gait.on)return;const p=gait.p,ph=gPhase(p),R=patAngles
   $('#gaitR').value=Math.floor(p);$('#gaitPhase').textContent=ph[2]+' (derecho)';$('#gaitPct').textContent=Math.round(p)+' % del ciclo';$('#gaitGoal').textContent=ph[4];
   $('#gaitBar').querySelectorAll('span').forEach(s=>s.setAttribute('aria-current',s.dataset.k===ph[3]));
   const f=v=>(v>=0?'':'−')+Math.abs(Math.round(v))+'°';
-  $('#gaitAng').innerHTML=`<tr><td>Derecho</td><td>${f(R.hip)}</td><td>${f(R.knee)}</td><td>${f(R.ankle)}</td></tr><tr><td>Izquierdo <small class="muted">(${gPhase(p+50)[2].toLowerCase()})</small></td><td>${f(L.hip)}</td><td>${f(L.knee)}</td><td>${f(L.ankle)}</td></tr>`;
+  $('#gaitAng').innerHTML=`<tr><td>Derecho</td><td>${f(R.hip)}</td><td>${f(R.knee)}</td><td>${f(R.ankle)}</td></tr><tr><td>Izquierdo <small class="muted">(<span style="text-transform:lowercase">${gPhase(p+50)[2]}</span>)</small></td><td>${f(L.hip)}</td><td>${f(L.knee)}</td><td>${f(L.ankle)}</td></tr>`;
   const act=gActive(p);$('#gaitMus').innerHTML='<h4 class="small" style="margin:8px 0 2px">Músculos activos · miembro derecho</h4>'+(act.map(({m,ty})=>`<div class="gm"><span>${m[2]}<br><small style="text-align:left;display:block">${m[4]}</small></span><span class="ty ${ty}">${TY[ty]}</span></div>`).join('')||'<p class="muted small">Balanceo pasivo: casi sin actividad muscular en este instante.</p>');}
 function gaitAgonists(){const ensR=new Set(),ensL=new Set();if(gait.on){gActive(gait.p).forEach(({m})=>m[0].forEach(e=>ensR.add(e)));gActive(gait.p+50).forEach(({m})=>m[0].forEach(e=>ensL.add(e)));}
   const pat=GAIT_P[gait.pat]||{},weak=new Set(gait.on&&currentTab==='mov'?pat.weak||[]:[]),spa=new Set(gait.on&&currentTab==='mov'?pat.spastic||[]:[]);
@@ -2394,10 +2395,10 @@ function gaitAgonists(){const ensR=new Set(),ensL=new Set();if(gait.on){gActive(
     const want=!wk&&gait.on&&currentTab==='mov'&&((c.side!=='izquierdo'&&ensR.has(c.en))||(c.side!=='derecho'&&ensL.has(c.en)));if(!!m.userData.ag!==want){m.userData.ag=want;refreshState(m);}}}
 function setGait(on){gait.on=on;$('#gaitBtn').setAttribute('aria-pressed',on);$('#gaitBtn').textContent=on?'Salir de la marcha':'Ver marcha';$('#gaitBody').hidden=!on;$('#gaitIntro').hidden=on;
   if(on){stopPlay();gait.play=true;$('#gaitPlay').textContent='Pausa';if(!SYS.muscular.on)setOn('muscular',true);
-    $('#gaitBar').innerHTML=GAIT_PH.map(f=>`<span data-k="${f[3]}" style="flex:${f[1]-f[0]};background:${f[0]<50?'color-mix(in srgb,var(--accent) 45%,var(--panel2))':'var(--panel2)'}" title="${f[2]}">${f[1]-f[0]>=10?f[3]:''}</span>`).join('');
-    $('#gaitBar').querySelectorAll('span').forEach((s,i)=>s.onclick=()=>{gait.p=GAIT_PH[i][0]+0.5;gait.play=false;$('#gaitPlay').textContent='Reproducir';gaitUpdate();});
-    renderGaitPats();setGaitPattern(gait.pat);renderGait();}
+    renderGaitBar();renderGaitPats();setGaitPattern(gait.pat);renderGait();}
   applyPose();gait.on?gaitAgonists():(gaitAgonists(),applyAgonists());}
+function renderGaitBar(){$('#gaitBar').innerHTML=GAIT_PH.map(f=>`<span data-k="${f[3]}" style="flex:${f[1]-f[0]};background:${f[0]<50?'color-mix(in srgb,var(--accent) 45%,var(--panel2))':'var(--panel2)'}" title="${f[2]}">${f[1]-f[0]>=10?gAbbr(f[3]):''}</span>`).join('');
+    $('#gaitBar').querySelectorAll('span').forEach((s,i)=>s.onclick=()=>{gait.p=GAIT_PH[i][0]+0.5;gait.play=false;$('#gaitPlay').textContent='Reproducir';gaitUpdate();});renderGait();}
 function gaitUpdate(){renderGait();applyPose();gaitAgonists();}
 function gaitTick(dt){if(!gait.on||!gait.play||currentTab!=='mov')return;gait.p=(gait.p+dt*100*((GAIT_P[gait.pat]||{}).speed||1)/(gait.slow?4.4:1.1))%100;gait.last+=dt;
   if(gait.last>(gait.slow?0.03:0.045)){gait.last=0;gaitUpdate();}}
@@ -2747,7 +2748,7 @@ async function setLang(l){if(!['es','en','pt'].includes(l))l='es';
 $('#phyBtn').onclick=e=>{e.stopPropagation();togglePop($('#phyBtn'),$('#phyPop'));};document.addEventListener('pointerdown',e=>{if(!e.target.closest('#phyPop,#phyBtn')&&!$('#phyPop').hidden)togglePop($('#phyBtn'),$('#phyPop'),false);});
   $$('#langSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===l));
   if(typeof SEARCH!=='undefined'&&SEARCH.length)buildSearch();
-  /* paneles generados con textos traducidos: se vuelven a dibujar en el idioma nuevo */for(const f of ['renderPlanes','renderGloCats','renderGlo','renderLessons','renderROM','renderViews','renderSrsDecks']){try{if(typeof window[f]==='function'||eval('typeof '+f)==='function')eval(f+'()');}catch(e){}}
+  /* paneles generados con textos traducidos: se vuelven a dibujar en el idioma nuevo */for(const f of ['renderPlanes','renderGloCats','renderGlo','renderLessons','renderROM','renderViews','renderSrsDecks','renderGaitBar']){try{if(typeof window[f]==='function'||eval('typeof '+f)==='function')eval(f+'()');}catch(e){}}
   if(selected)renderInfo();if(typeof renderSysList==='function')renderSysList();
   trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}if(l!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});
   if(typeof tagLabel!=='undefined'&&selected)tagLabel.el.textContent=label(selected.m.userData.c);}
