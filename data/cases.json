@@ -33,8 +33,8 @@
 "Mano péndula: imposibilidad de extender la muñeca",
 "Imposibilidad de extender las articulaciones metacarpofalángicas y el pulgar",
 "Extensión del codo conservada",
-"Hipoestesia en el dorso de la primera comisura (tabaquera anatómica)",
-"Debilidad de la prensión por pérdida del efecto tenodesis de los extensores"
+"Hipoestesia en el dorso de la primera comisura (territorio autónomo de la rama superficial del radial)",
+"Debilidad de la prensión porque, sin la extensión estabilizadora de la muñeca, los flexores de los dedos trabajan en insuficiencia activa"
 ],
 "pruebas": [
 "Balance muscular de extensores de muñeca y dedos (Kendall), con la muñeca estabilizada pasivamente",
@@ -51,7 +51,7 @@
 "region": "miembro superior",
 "side": "derecho",
 "presentacion": "Mujer de 52 años, administrativa, con parestesias nocturnas en los dedos pulgar, índice y medio de la mano derecha que mejoran al sacudir la mano. En los últimos meses se le caen objetos y nota la eminencia tenar más plana.",
-"anatomia": "El túnel carpiano está formado por los huesos del carpo y el retináculo flexor, y por él pasan el nervio mediano y los tendones de los flexores largos de los dedos y del pulgar. Cualquier aumento de presión dentro del túnel (tenosinovitis, edema, embarazo, hipotiroidismo) comprime el nervio. La rama palmar del mediano pasa por encima del retináculo, por lo que la sensibilidad de la palma central se conserva, y este dato ayuda a localizar la lesión. La rama motora recurrente inerva la musculatura tenar lateral y los dos primeros lumbricales.",
+"anatomia": "El túnel carpiano está formado por los huesos del carpo y el retináculo flexor, y por él pasan el nervio mediano y los tendones de los flexores largos de los dedos y del pulgar. Cualquier aumento de presión dentro del túnel (tenosinovitis, edema, embarazo, hipotiroidismo) comprime el nervio. La rama palmar del mediano pasa por encima del retináculo, por lo que la sensibilidad de la palma central se conserva, y este dato ayuda a localizar la lesión. La rama motora recurrente inerva la musculatura tenar lateral (abductor corto, oponente y cabeza superficial del flexor corto del pulgar); los dos primeros lumbricales reciben ramas digitales palmares del nervio mediano.",
 "lesion": [
 "Median nerve"
 ],
@@ -406,7 +406,7 @@
 "signos": [
 "Dolor a la palpación sobre el epicóndilo lateral o justo distal a él",
 "Dolor con la extensión resistida de la muñeca",
-"Disminución de la fuerza de prensión sin dolor",
+"Disminución de la fuerza de prensión libre de dolor (la prensión provoca dolor)",
 "Ausencia de déficit neurológico"
 ],
 "pruebas": [
@@ -507,7 +507,7 @@
 "region": "miembro inferior",
 "side": "derecho",
 "presentacion": "Varón de 44 años, corredor aficionado, con meses de dolor y rigidez matutina en el tendón de Aquiles derecho. Durante un partido de pádel nota un «golpe» en la pantorrilla y desde entonces no puede ponerse de puntillas sobre ese pie.",
-"anatomia": "El tendón calcáneo es la inserción común de los gemelos (gastrocnemio) y del sóleo (tríceps sural) en la tuberosidad del calcáneo. Su porción media, de 2 a 6 cm por encima de la inserción, está poco vascularizada y es donde se concentran la tendinopatía y la mayoría de las roturas. Las roturas se producen por una carga excéntrica brusca (salto, arrancada) sobre un tendón degenerado, a menudo en varones de mediana edad con actividad deportiva intermitente. La tendinopatía insercional se acompaña con frecuencia de bursitis retrocalcánea. Los flexores plantares profundos (tibial posterior, flexores largos y peroneos) pueden mantener una flexión plantar débil, lo que puede retrasar el diagnóstico.",
+"anatomia": "El tendón calcáneo es la inserción común de los gemelos (gastrocnemio) y del sóleo (tríceps sural) en la tuberosidad del calcáneo. Su porción media, de 2 a 6 cm por encima de la inserción, está poco vascularizada y es donde se concentran la tendinopatía y la mayoría de las roturas. Las roturas se producen por una carga excéntrica brusca (salto, arrancada) sobre un tendón degenerado, a menudo en varones de mediana edad con actividad deportiva intermitente. La tendinopatía insercional se acompaña con frecuencia de bursitis retrocalcánea. Los demás flexores plantares (tibial posterior, flexores largos de los dedos y del dedo gordo, y peroneos) pueden mantener una flexión plantar débil, lo que puede retrasar el diagnóstico.",
 "lesion": [
 "Calcaneal tendon"
 ],
@@ -534,7 +534,7 @@
 "Prueba de Thompson: al comprimir la pantorrilla en decúbito prono no hay flexión plantar (rotura completa)",
 "Prueba de Matles: con las rodillas a 90° en prono, el pie afectado cae en posición neutra o en flexión dorsal",
 "Prueba del arco doloroso del tendón: el engrosamiento se desplaza con el movimiento en la tendinopatía de la porción media",
-"Elevaciones de talón a una pierna: número de repeticiones y dolor (escala VISA-A)",
+"Elevaciones de talón a una pierna: número de repeticiones y dolor; cuestionario VISA-A para la gravedad funcional",
 "Ecografía para valorar la tendinopatía y la separación de los cabos"
 ],
 "fisioterapia": "En la tendinopatía, programa progresivo de carga (isométricos y excéntricos o de carga pesada y lenta) con modificación de la actividad. En la rotura, tratamiento funcional o quirúrgico con bota en equino y carga precoz progresiva, y vuelta gradual a la carrera y al salto.",
@@ -546,7 +546,7 @@
 "region": "miembro inferior",
 "side": "derecho",
 "presentacion": "Mujer de 63 años operada de prótesis de cadera derecha por vía lateral. Al caminar, la pelvis cae hacia el lado izquierdo en cada apoyo sobre la pierna derecha y ella inclina el tronco hacia la derecha; también refiere dolor en la cara lateral de la cadera.",
-"anatomia": "El glúteo medio y el glúteo menor se originan en la cara externa del ilion y se insertan en el trocánter mayor. Son los principales abductores de la cadera y, durante el apoyo monopodal, impiden que la pelvis caiga hacia el lado de la pierna oscilante. Los inerva el nervio glúteo superior (L4–S1), que sale por encima del piriforme junto con el tensor de la fascia lata. La debilidad puede deberse a una lesión del nervio (inyección intramuscular mal situada, abordaje quirúrgico lateral), a una tendinopatía o rotura glútea, o a una alteración de la palanca (coxa vara, luxación). El signo de Trendelenburg aparece en el lado contrario a la cadera débil.",
+"anatomia": "El glúteo medio y el glúteo menor se originan en la cara externa del ilion y se insertan en el trocánter mayor. Son los principales abductores de la cadera y, durante el apoyo monopodal, impiden que la pelvis caiga hacia el lado de la pierna oscilante. Los inerva el nervio glúteo superior (L4–S1), que sale por encima del piriforme con los vasos glúteos superiores e inerva también el tensor de la fascia lata. La debilidad puede deberse a una lesión del nervio (inyección intramuscular mal situada, abordaje quirúrgico lateral), a una tendinopatía o rotura glútea, o a una alteración de la palanca (coxa vara, luxación). En el signo de Trendelenburg la pelvis cae hacia el lado contrario a la cadera débil; el signo se considera positivo en el lado del apoyo (el débil).",
 "lesion": [
 "Gluteus medius muscle",
 "Superior gluteal nerve"
@@ -630,7 +630,7 @@
 "side": "derecho",
 "body": "f",
 "presentacion": "Mujer de 58 años, con tres partos vaginales, que nota un bulto en la vagina al final del día, sensación de peso y escapes de orina al toser.",
-"anatomia": "La vejiga, el útero y el recto se sostienen por dos sistemas: la suspensión de los ligamentos cardinales y uterosacros (nivel I), la unión de la vagina a los arcos tendinosos (nivel II) y el apoyo del diafragma pélvico y del cuerpo perineal (nivel III). El parto puede desgarrar o desinervar el elevador del ano y estirar los ligamentos; con la menopausia y la presión abdominal repetida, el hiato urogenital se ensancha y los órganos descienden: la vejiga por la pared anterior (cistocele), el útero por el eje vaginal (histerocele) y el recto por la pared posterior (rectocele).",
+"anatomia": "La vejiga, el útero y el recto se sostienen por tres niveles de soporte (DeLancey): la suspensión de los ligamentos cardinales y uterosacros (nivel I), la unión de la vagina a los arcos tendinosos (nivel II) y el apoyo del diafragma pélvico y del cuerpo perineal (nivel III). El parto puede desgarrar o desinervar el elevador del ano y estirar los ligamentos; con la menopausia y la presión abdominal repetida, el hiato urogenital se ensancha y los órganos descienden: la vejiga por la pared anterior (cistocele), el útero por el eje vaginal (histerocele) y el recto por la pared posterior (rectocele).",
 "lesion": [
 "Pubococcygeus muscle",
 "Pubo-analis muscle",
@@ -688,9 +688,10 @@
 "afectados": [
 "Rectum",
 "Ureter",
-"Vesico-uterine pouch"
+"Uterosacral ligament"
 ],
 "relacionados": [
+"Ovary",
 "Body of uterus",
 "Cervix of uterus",
 "Broad ligament of uterus",
@@ -840,7 +841,7 @@
 "region": "cabeza",
 "side": "derecho",
 "presentacion": "Mujer de 38 años que al despertar no puede cerrar el ojo derecho, se le cae la comisura de la boca y nota la comida acumulada en la mejilla. No tiene otros déficits.",
-"anatomia": "El nervio facial (VII) sale del tronco del encéfalo por el ángulo pontocerebeloso, recorre el conducto facial del hueso temporal, donde se inflama y comprime en la parálisis de Bell, y sale por el agujero estilomastoideo para dividirse en la parótida en sus ramas para la musculatura de la mímica. La lesión periférica paraliza toda la hemicara, incluida la frente; en la central (ictus) la frente se conserva porque su núcleo recibe fibras de ambos hemisferios.",
+"anatomia": "El nervio facial (VII) sale del tronco del encéfalo por el ángulo pontocerebeloso, recorre el conducto facial del hueso temporal, donde se inflama y comprime en la parálisis de Bell, y sale por el agujero estilomastoideo para dividirse en la parótida en sus ramas para la musculatura de la mímica. La lesión periférica paraliza toda la hemicara, incluida la frente; en la central (ictus) la frente se conserva porque la parte del núcleo facial que la inerva recibe fibras corticonucleares de ambos hemisferios.",
 "lesion": [
 "Facial nerve (VII)"
 ],
@@ -864,7 +865,7 @@
 "Escala de House-Brackmann",
 "Exploración de la frente: distingue lesión periférica de central",
 "Otoscopia (descartar herpes zóster ótico)",
-"Electroneurografía si no hay recuperación a las 3 semanas"
+"Electroneurografía entre los días 3 y 14 en la parálisis completa; electromiografía si no hay recuperación a las 3 semanas"
 ],
 "fisioterapia": "Protección ocular, reeducación neuromuscular frente al espejo con ejercicios selectivos y biofeedback, evitando la estimulación eléctrica intensa y los movimientos en masa que favorecen las sincinesias.",
 "camara": "lateral"
@@ -926,7 +927,7 @@
 "Bulto inguinal que aumenta con la tos y el esfuerzo",
 "Reducible en decúbito",
 "Puede descender al escroto (indirecta)",
-"Dolor brusco, irreductible y doloroso: estrangulación, urgencia quirúrgica"
+"Bulto irreductible, tenso y doloroso de aparición brusca: estrangulación, urgencia quirúrgica"
 ],
 "pruebas": [
 "Exploración de pie con tos: impulso en el dedo introducido por el anillo superficial",

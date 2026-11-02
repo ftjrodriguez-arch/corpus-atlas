@@ -33,8 +33,8 @@
 "Mão caída: impossibilidade de estender o punho",
 "Impossibilidade de estender as articulações metacarpofalângicas e o polegar",
 "Extensão do cotovelo preservada",
-"Hipoestesia no dorso do primeiro espaço interdigital (tabaqueira anatômica)",
-"Fraqueza da preensão por perda do efeito de tenodese dos extensores"
+"Hipoestesia no dorso do primeiro espaço interdigital (território autônomo do ramo superficial do nervo radial)",
+"Fraqueza da preensão porque, sem a extensão estabilizadora do punho, os flexores dos dedos trabalham em insuficiência ativa"
 ],
 "pruebas": [
 "Teste muscular manual dos extensores do punho e dos dedos (Kendall), com o punho estabilizado passivamente",
@@ -51,7 +51,7 @@
 "region": "membro superior",
 "side": "derecho",
 "presentacion": "Mulher de 52 anos, auxiliar administrativa, com parestesias noturnas nos dedos polegar, indicador e médio da mão direita que melhoram ao sacudir a mão. Nos últimos meses deixa cair objetos e nota a eminência tenar mais achatada.",
-"anatomia": "O túnel do carpo é formado pelos ossos do carpo e pelo retináculo dos flexores, e por ele passam o nervo mediano e os tendões dos flexores longos dos dedos e do polegar. Qualquer aumento de pressão dentro do túnel (tenossinovite, edema, gravidez, hipotireoidismo) comprime o nervo. O ramo palmar do mediano passa por cima do retináculo, de modo que a sensibilidade da palma central é preservada, e esse dado ajuda a localizar a lesão. O ramo motor recorrente inerva a musculatura tenar lateral e os dois primeiros lumbricais.",
+"anatomia": "O túnel do carpo é formado pelos ossos do carpo e pelo retináculo dos flexores, e por ele passam o nervo mediano e os tendões dos flexores longos dos dedos e do polegar. Qualquer aumento de pressão dentro do túnel (tenossinovite, edema, gravidez, hipotireoidismo) comprime o nervo. O ramo palmar do mediano passa por cima do retináculo, de modo que a sensibilidade da palma central é preservada, e esse dado ajuda a localizar a lesão. O ramo motor recorrente inerva a musculatura tenar lateral (abdutor curto, oponente e cabeça superficial do flexor curto do polegar); os dois primeiros lumbricais recebem ramos digitais palmares do nervo mediano.",
 "lesion": [
 "Median nerve"
 ],
@@ -209,7 +209,7 @@
 "titulo": "Lesão do nervo fibular comum na cabeça da fíbula (pé caído)",
 "region": "membro inferior",
 "side": "derecho",
-"presentacion": "Homem de 40 anos a quem se retira um gesso pelvipodálico mal acolchoado. Não consegue levantar a ponta do pé direito, arrasta os dedos ao caminhar e tem hipoestesia no dorso do pé.",
+"presentacion": "Homem de 40 anos a quem se retira um gesso inguinopodálico mal acolchoado. Não consegue levantar a ponta do pé direito, arrasta os dedos ao caminhar e tem hipoestesia no dorso do pé.",
 "anatomia": "O nervo fibular comum contorna lateralmente o colo da fíbula, logo abaixo da cabeça, em posição muito superficial e fixo contra o osso. Por isso é lesionado por gessos, ao cruzar as pernas, em fraturas do colo da fíbula ou em lesões em varo do joelho. Ali divide-se no nervo fibular profundo (músculos do compartimento anterior e extensor curto dos dedos) e no superficial (fibulares longo e curto e pele do dorso do pé). Seu comprometimento produz déficit da dorsiflexão e da eversão, com a inversão preservada (tibial posterior, inervado pelo nervo tibial).",
 "lesion": [
 "Common fibular nerve",
@@ -406,7 +406,7 @@
 "signos": [
 "Dor à palpação sobre o epicôndilo lateral ou logo distal a ele",
 "Dor com a extensão resistida do punho",
-"Diminuição da força de preensão sem dor",
+"Diminuição da força de preensão livre de dor (a preensão provoca dor)",
 "Ausência de déficit neurológico"
 ],
 "pruebas": [
@@ -503,11 +503,11 @@
 },
 {
 "id": "tendon-calcaneo",
-"titulo": "Tendinopatia aquileu / ruptura do tendão calcâneo",
+"titulo": "Tendinopatia aquiliana / ruptura do tendão calcâneo",
 "region": "membro inferior",
 "side": "derecho",
 "presentacion": "Homem de 44 anos, corredor amador, com meses de dor e rigidez matinal no tendão de Aquiles direito. Durante uma partida de padel sente um \"golpe\" na panturrilha e desde então não consegue ficar na ponta dos pés sobre esse pé.",
-"anatomia": "O tendão calcâneo é a inserção comum dos gastrocnêmios e do sóleo (tríceps sural) na tuberosidade do calcâneo. Sua porção média, de 2 a 6 cm acima da inserção, é pouco vascularizada e é onde se concentram a tendinopatia e a maioria das rupturas. As rupturas ocorrem por carga excêntrica brusca (salto, arrancada) sobre um tendão degenerado, muitas vezes em homens de meia-idade com atividade esportiva intermitente. A tendinopatia insercional costuma vir acompanhada de bursite retrocalcânea. Os flexores plantares profundos (tibial posterior, flexores longos e fibulares) podem manter uma flexão plantar fraca, o que pode atrasar o diagnóstico.",
+"anatomia": "O tendão calcâneo é a inserção comum dos gastrocnêmios e do sóleo (tríceps sural) na tuberosidade do calcâneo. Sua porção média, de 2 a 6 cm acima da inserção, é pouco vascularizada e é onde se concentram a tendinopatia e a maioria das rupturas. As rupturas ocorrem por carga excêntrica brusca (salto, arrancada) sobre um tendão degenerado, muitas vezes em homens de meia-idade com atividade esportiva intermitente. A tendinopatia insercional costuma vir acompanhada de bursite retrocalcânea. Os demais flexores plantares (tibial posterior, flexores longos dos dedos e do hálux, e fibulares) podem manter uma flexão plantar fraca, o que pode atrasar o diagnóstico.",
 "lesion": [
 "Calcaneal tendon"
 ],
@@ -534,7 +534,7 @@
 "Teste de Thompson: ao comprimir a panturrilha em decúbito ventral não há flexão plantar (ruptura completa)",
 "Teste de Matles: com os joelhos a 90° em decúbito ventral, o pé afetado cai em posição neutra ou em dorsiflexão",
 "Teste do arco doloroso do tendão: o espessamento se desloca com o movimento na tendinopatia da porção média",
-"Elevações de calcanhar com uma perna: número de repetições e dor (escala VISA-A)",
+"Elevações de calcanhar com uma perna: número de repetições e dor; questionário VISA-A para a gravidade funcional",
 "Ultrassonografia para avaliar a tendinopatia e a separação dos cotos"
 ],
 "fisioterapia": "Na tendinopatia, programa progressivo de carga (isométricos e excêntricos ou de carga pesada e lenta) com modificação da atividade. Na ruptura, tratamento funcional ou cirúrgico com bota em equino e carga precoce progressiva, e retorno gradual à corrida e ao salto.",
@@ -546,7 +546,7 @@
 "region": "membro inferior",
 "side": "derecho",
 "presentacion": "Mulher de 63 anos operada de prótese de quadril direito por via lateral. Ao caminhar, a pelve cai para o lado esquerdo a cada apoio sobre a perna direita e ela inclina o tronco para a direita; também refere dor na face lateral do quadril.",
-"anatomia": "O glúteo médio e o glúteo mínimo originam-se na face externa do ílio e inserem-se no trocânter maior. São os principais abdutores do quadril e, durante o apoio unipodal, impedem que a pelve caia para o lado da perna oscilante. São inervados pelo nervo glúteo superior (L4–S1), que sai acima do piriforme junto com o tensor da fáscia lata. A fraqueza pode dever-se a uma lesão do nervo (injeção intramuscular mal posicionada, abordagem cirúrgica lateral), a uma tendinopatia ou ruptura glútea, ou a uma alteração da alavanca (coxa vara, luxação). O sinal de Trendelenburg aparece no lado contrário ao do quadril fraco.",
+"anatomia": "O glúteo médio e o glúteo mínimo originam-se na face externa do ílio e inserem-se no trocânter maior. São os principais abdutores do quadril e, durante o apoio unipodal, impedem que a pelve caia para o lado da perna oscilante. São inervados pelo nervo glúteo superior (L4–S1), que sai acima do piriforme com os vasos glúteos superiores e inerva também o tensor da fáscia lata. A fraqueza pode dever-se a uma lesão do nervo (injeção intramuscular mal posicionada, abordagem cirúrgica lateral), a uma tendinopatia ou ruptura glútea, ou a uma alteração da alavanca (coxa vara, luxação). No sinal de Trendelenburg a pelve cai para o lado contrário ao do quadril fraco; o sinal é considerado positivo no lado do apoio (o fraco).",
 "lesion": [
 "Gluteus medius muscle",
 "Superior gluteal nerve"
@@ -630,7 +630,7 @@
 "side": "derecho",
 "body": "f",
 "presentacion": "Mulher de 58 anos, com três partos vaginais, que nota um abaulamento na vagina no fim do dia, sensação de peso e perda de urina ao tossir.",
-"anatomia": "A bexiga, o útero e o reto são sustentados por dois sistemas: a suspensão dos ligamentos cardinais e uterossacros (nível I), a união da vagina aos arcos tendíneos (nível II) e o apoio do diafragma pélvico e do corpo perineal (nível III). O parto pode lacerar ou desnervar o levantador do ânus e estirar os ligamentos; com a menopausa e a pressão abdominal repetida, o hiato urogenital se alarga e os órgãos descem: a bexiga pela parede anterior (cistocele), o útero pelo eixo vaginal (histerocele) e o reto pela parede posterior (retocele).",
+"anatomia": "A bexiga, o útero e o reto são sustentados por três níveis de suporte (DeLancey): a suspensão dos ligamentos cardinais e uterossacros (nível I), a união da vagina aos arcos tendíneos (nível II) e o apoio do diafragma pélvico e do corpo perineal (nível III). O parto pode lacerar ou desnervar o levantador do ânus e estirar os ligamentos; com a menopausa e a pressão abdominal repetida, o hiato urogenital se alarga e os órgãos descem: a bexiga pela parede anterior (cistocele), o útero pelo eixo vaginal (histerocele) e o reto pela parede posterior (retocele).",
 "lesion": [
 "Pubococcygeus muscle",
 "Pubo-analis muscle",
@@ -688,9 +688,10 @@
 "afectados": [
 "Rectum",
 "Ureter",
-"Vesico-uterine pouch"
+"Uterosacral ligament"
 ],
 "relacionados": [
+"Ovary",
 "Body of uterus",
 "Cervix of uterus",
 "Broad ligament of uterus",
@@ -725,7 +726,7 @@
 "region": "pelve e abdome · mulher",
 "side": "derecho",
 "body": "f",
-"presentacion": "Mulher de 33 anos, grávida de 30 semanas, com dor sobre a sínfise púbica e nas nádegas ao caminhar, subir escadas ou virar na cama. Após o parto nota um abaulamento na linha mediana do abdome ao se levantar.",
+"presentacion": "Mulher de 33 anos, grávida de 30 semanas, com dor sobre a sínfise púbica e nas nádegas ao caminhar, subir escadas ou virar na cama. Após o parto nota um abaulamento na linha mediana do abdome ao erguer o tronco a partir do decúbito.",
 "anatomia": "A relaxina e os estrógenos aumentam a frouxidão dos ligamentos da sínfise púbica e das articulações sacroilíacas para ampliar o canal de parto: a sínfise pode se afastar alguns milímetros. O aumento de peso e o deslocamento anterior do centro de gravidade sobrecarregam essas articulações. O útero em crescimento estira a parede abdominal: a linha alba se afina e os retos do abdome se separam (diástase), enquanto os oblíquos e o transverso perdem eficácia.",
 "lesion": [
 "Pubic symphysis",
@@ -746,7 +747,7 @@
 "signos": [
 "Dor na sínfise e nas sacroilíacas ao apoiar-se sobre uma perna",
 "Marcha antálgica e dor ao virar na cama",
-"Abaulamento na linha mediana ao se levantar (diástase)"
+"Abaulamento na linha mediana ao erguer o tronco a partir do decúbito (diástase)"
 ],
 "pruebas": [
 "Teste de elevação ativa da perna estendida (ASLR)",
@@ -840,7 +841,7 @@
 "region": "cabeça",
 "side": "derecho",
 "presentacion": "Mulher de 38 anos que ao acordar não consegue fechar o olho direito, tem a comissura da boca caída e nota comida acumulada na bochecha. Não tem outros déficits.",
-"anatomia": "O nervo facial (VII) sai do tronco encefálico pelo ângulo pontocerebelar, percorre o canal do facial do osso temporal, onde se inflama e é comprimido na paralisia de Bell, e sai pelo forame estilomastóideo para se dividir na parótida em seus ramos para a musculatura da mímica. A lesão periférica paralisa toda a hemiface, incluindo a testa; na central (AVC) a testa é preservada porque seu núcleo recebe fibras de ambos os hemisférios.",
+"anatomia": "O nervo facial (VII) sai do tronco encefálico pelo ângulo pontocerebelar, percorre o canal do facial do osso temporal, onde se inflama e é comprimido na paralisia de Bell, e sai pelo forame estilomastóideo para se dividir na parótida em seus ramos para a musculatura da mímica. A lesão periférica paralisa toda a hemiface, incluindo a testa; na central (AVC) a testa é preservada porque a parte do núcleo facial que a inerva recebe fibras corticonucleares de ambos os hemisférios.",
 "lesion": [
 "Facial nerve (VII)"
 ],
@@ -864,7 +865,7 @@
 "Escala de House-Brackmann",
 "Exame da testa: distingue lesão periférica de central",
 "Otoscopia (descartar herpes-zóster ótico)",
-"Eletroneurografia se não houver recuperação em 3 semanas"
+"Eletroneurografia entre o 3º e o 14º dia na paralisia completa; eletromiografia se não houver recuperação em 3 semanas"
 ],
 "fisioterapia": "Proteção ocular, reeducação neuromuscular diante do espelho com exercícios seletivos e biofeedback, evitando a estimulação elétrica intensa e os movimentos em massa que favorecem as sincinesias.",
 "camara": "lateral"
@@ -926,7 +927,7 @@
 "Abaulamento inguinal que aumenta com a tosse e o esforço",
 "Redutível em decúbito",
 "Pode descer ao escroto (indireta)",
-"Dor súbita, irredutível e intensa: estrangulamento, urgência cirúrgica"
+"Abaulamento irredutível, tenso e doloroso de início súbito: estrangulamento, urgência cirúrgica"
 ],
 "pruebas": [
 "Exame em pé com tosse: impulso no dedo introduzido pelo anel superficial",
@@ -1233,7 +1234,7 @@
 "titulo": "Capsulite adesiva (ombro congelado)",
 "region": "ombro",
 "side": "izquierdo",
-"presentacion": "Mulher de 54 anos, diabética, com dor progressiva no ombro esquerdo há quatro meses e grande dificuldade para pentear o cabelo e abotoar o sutiã; a rotação lateral está muito limitada.",
+"presentacion": "Mulher de 54 anos, diabética, com dor progressiva no ombro esquerdo há quatro meses e grande dificuldade para pentear o cabelo e fechar o sutiã; a rotação lateral está muito limitada.",
 "anatomia": "A cápsula da articulação glenoumeral, com o ligamento coracoumeral e o intervalo dos rotadores, inflama-se, fibrosa-se e perde volume. A perda de mobilidade é capsular: rotação lateral mais que abdução mais que rotação medial, tanto ativa quanto passiva.",
 "lesion": [
 "Articular capsule of glenohumeral joint",

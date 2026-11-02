@@ -33,8 +33,8 @@
 "Wrist drop: inability to extend the wrist",
 "Inability to extend the metacarpophalangeal joints and the thumb",
 "Elbow extension preserved",
-"Hypoesthesia over the dorsum of the first web space (anatomical snuffbox)",
-"Weak grip due to loss of the tenodesis effect of the extensors"
+"Hypoesthesia over the dorsum of the first web space (autonomous zone of the superficial radial nerve)",
+"Weak grip because, without stabilizing wrist extension, the finger flexors work in active insufficiency"
 ],
 "pruebas": [
 "Manual muscle testing of the wrist and finger extensors (Kendall), with the wrist passively stabilized",
@@ -51,7 +51,7 @@
 "region": "upper limb",
 "side": "derecho",
 "presentacion": "52-year-old woman, office worker, with nocturnal paresthesias in the thumb, index and middle fingers of the right hand that improve with shaking the hand. In recent months she drops objects and notices a flatter thenar eminence.",
-"anatomia": "The carpal tunnel is formed by the carpal bones and the flexor retinaculum, and the median nerve and the tendons of the long flexors of the fingers and thumb pass through it. Any increase in pressure within the tunnel (tenosynovitis, edema, pregnancy, hypothyroidism) compresses the nerve. The palmar branch of the median nerve passes over the retinaculum, so sensation in the central palm is preserved, and this finding helps localize the lesion. The recurrent motor branch supplies the lateral thenar muscles and the first two lumbricals.",
+"anatomia": "The carpal tunnel is formed by the carpal bones and the flexor retinaculum, and the median nerve and the tendons of the long flexors of the fingers and thumb pass through it. Any increase in pressure within the tunnel (tenosynovitis, edema, pregnancy, hypothyroidism) compresses the nerve. The palmar branch of the median nerve passes over the retinaculum, so sensation in the central palm is preserved, and this finding helps localize the lesion. The recurrent motor branch supplies the lateral thenar muscles (abductor pollicis brevis, opponens pollicis and the superficial head of flexor pollicis brevis); the first two lumbricals are supplied by palmar digital branches of the median nerve.",
 "lesion": [
 "Median nerve"
 ],
@@ -209,7 +209,7 @@
 "titulo": "Common fibular (peroneal) nerve injury at the fibular head (foot drop)",
 "region": "lower limb",
 "side": "derecho",
-"presentacion": "40-year-old man whose poorly padded hip spica cast has just been removed. He cannot lift the tip of the right foot, drags his toes when walking and has hypoesthesia over the dorsum of the foot.",
+"presentacion": "40-year-old man whose poorly padded long leg cast (groin to foot) has just been removed. He cannot lift the tip of the right foot, drags his toes when walking and has hypoesthesia over the dorsum of the foot.",
 "anatomia": "The common fibular (peroneal) nerve winds around the lateral side of the neck of the fibula, just below its head, in a very superficial position and fixed against the bone. That is why it is injured by casts, by crossing the legs, in fractures of the fibular neck or in varus injuries of the knee. There it divides into the deep fibular nerve (muscles of the anterior compartment and extensor digitorum brevis) and the superficial one (fibularis longus and brevis and the skin of the dorsum of the foot). Its involvement produces a deficit of dorsiflexion and eversion, with inversion preserved (tibialis posterior, supplied by the tibial nerve).",
 "lesion": [
 "Common fibular nerve",
@@ -406,7 +406,7 @@
 "signos": [
 "Tenderness on palpation over the lateral epicondyle or just distal to it",
 "Pain with resisted wrist extension",
-"Decreased grip strength without pain",
+"Decreased pain-free grip strength (gripping provokes pain)",
 "No neurological deficit"
 ],
 "pruebas": [
@@ -507,7 +507,7 @@
 "region": "lower limb",
 "side": "derecho",
 "presentacion": "44-year-old man, a recreational runner, with months of pain and morning stiffness in the right Achilles tendon. During a padel match he feels a \"blow\" in the calf and since then cannot rise onto his toes on that foot.",
-"anatomia": "The calcaneal tendon is the common insertion of the gastrocnemius and the soleus (triceps surae) on the calcaneal tuberosity. Its midportion, 2 to 6 cm above the insertion, is poorly vascularized and is where tendinopathy and most ruptures are concentrated. Ruptures occur from a sudden eccentric load (jump, sprint start) on a degenerated tendon, often in middle-aged men with intermittent sporting activity. Insertional tendinopathy is frequently accompanied by retrocalcaneal bursitis. The deep plantar flexors (tibialis posterior, long flexors and fibularis muscles) can maintain a weak plantar flexion, which can delay the diagnosis.",
+"anatomia": "The calcaneal tendon is the common insertion of the gastrocnemius and the soleus (triceps surae) on the calcaneal tuberosity. Its midportion, 2 to 6 cm above the insertion, is poorly vascularized and is where tendinopathy and most ruptures are concentrated. Ruptures occur from a sudden eccentric load (jump, sprint start) on a degenerated tendon, often in middle-aged men with intermittent sporting activity. Insertional tendinopathy is frequently accompanied by retrocalcaneal bursitis. The other plantar flexors (tibialis posterior, the long toe flexors and the fibularis muscles) can maintain a weak plantar flexion, which can delay the diagnosis.",
 "lesion": [
 "Calcaneal tendon"
 ],
@@ -534,7 +534,7 @@
 "Thompson test: when squeezing the calf in the prone position there is no plantar flexion (complete rupture)",
 "Matles test: with the knees at 90° in prone, the affected foot falls into neutral or dorsiflexion",
 "Painful arc sign of the tendon: the thickening moves with ankle motion in midportion tendinopathy",
-"Single-leg heel raises: number of repetitions and pain (VISA-A scale)",
+"Single-leg heel raises: number of repetitions and pain; VISA-A questionnaire for functional severity",
 "Ultrasound to assess the tendinopathy and the gap between the tendon ends"
 ],
 "fisioterapia": "In tendinopathy, a progressive loading program (isometrics and eccentric or heavy slow resistance) with activity modification. In rupture, functional or surgical treatment with an equinus boot and early progressive weight bearing, and gradual return to running and jumping.",
@@ -546,7 +546,7 @@
 "region": "lower limb",
 "side": "derecho",
 "presentacion": "63-year-old woman who underwent a right hip replacement through a lateral approach. When walking, the pelvis drops to the left side at each stance on the right leg and she leans the trunk to the right; she also reports pain over the lateral aspect of the hip.",
-"anatomia": "Gluteus medius and gluteus minimus originate from the external surface of the ilium and insert on the greater trochanter. They are the main abductors of the hip and, during single-leg stance, they prevent the pelvis from dropping toward the side of the swinging leg. They are supplied by the superior gluteal nerve (L4–S1), which exits above the piriformis together with tensor fasciae latae. Weakness can be due to a nerve injury (misplaced intramuscular injection, lateral surgical approach), to a gluteal tendinopathy or tear, or to an alteration of the lever arm (coxa vara, dislocation). The Trendelenburg sign appears on the side opposite the weak hip.",
+"anatomia": "Gluteus medius and gluteus minimus originate from the external surface of the ilium and insert on the greater trochanter. They are the main abductors of the hip and, during single-leg stance, they prevent the pelvis from dropping toward the side of the swinging leg. They are supplied by the superior gluteal nerve (L4–S1), which exits above the piriformis with the superior gluteal vessels and also supplies tensor fasciae latae. Weakness can be due to a nerve injury (misplaced intramuscular injection, lateral surgical approach), to a gluteal tendinopathy or tear, or to an alteration of the lever arm (coxa vara, dislocation). In the Trendelenburg sign the pelvis drops toward the side opposite the weak hip; the sign is recorded as positive on the stance (weak) side.",
 "lesion": [
 "Gluteus medius muscle",
 "Superior gluteal nerve"
@@ -630,7 +630,7 @@
 "side": "derecho",
 "body": "f",
 "presentacion": "58-year-old woman, with three vaginal deliveries, who notices a bulge in the vagina at the end of the day, a sensation of heaviness and urine leakage when coughing.",
-"anatomia": "The bladder, uterus and rectum are supported by two systems: the suspension of the cardinal and uterosacral ligaments (level I), the attachment of the vagina to the tendinous arches (level II) and the support of the pelvic diaphragm and perineal body (level III). Childbirth can tear or denervate the levator ani and stretch the ligaments; with menopause and repeated abdominal pressure, the urogenital hiatus widens and the organs descend: the bladder through the anterior wall (cystocele), the uterus along the vaginal axis (hysterocele) and the rectum through the posterior wall (rectocele).",
+"anatomia": "The bladder, uterus and rectum are supported by three levels of support (DeLancey): the suspension of the cardinal and uterosacral ligaments (level I), the attachment of the vagina to the tendinous arches (level II) and the support of the pelvic diaphragm and perineal body (level III). Childbirth can tear or denervate the levator ani and stretch the ligaments; with menopause and repeated abdominal pressure, the urogenital hiatus widens and the organs descend: the bladder through the anterior wall (cystocele), the uterus along the vaginal axis (hysterocele) and the rectum through the posterior wall (rectocele).",
 "lesion": [
 "Pubococcygeus muscle",
 "Pubo-analis muscle",
@@ -688,9 +688,10 @@
 "afectados": [
 "Rectum",
 "Ureter",
-"Vesico-uterine pouch"
+"Uterosacral ligament"
 ],
 "relacionados": [
+"Ovary",
 "Body of uterus",
 "Cervix of uterus",
 "Broad ligament of uterus",
@@ -840,7 +841,7 @@
 "region": "head",
 "side": "derecho",
 "presentacion": "38-year-old woman who on waking cannot close the right eye, the corner of her mouth droops and she notices food accumulating in the cheek. She has no other deficits.",
-"anatomia": "The facial nerve (VII) leaves the brainstem at the cerebellopontine angle, runs through the facial canal of the temporal bone, where it becomes inflamed and compressed in Bell palsy, and exits through the stylomastoid foramen to divide in the parotid into its branches for the muscles of facial expression. A peripheral lesion paralyzes the entire hemiface, including the forehead; in a central lesion (stroke) the forehead is spared because its nucleus receives fibers from both hemispheres.",
+"anatomia": "The facial nerve (VII) leaves the brainstem at the cerebellopontine angle, runs through the facial canal of the temporal bone, where it becomes inflamed and compressed in Bell palsy, and exits through the stylomastoid foramen to divide in the parotid into its branches for the muscles of facial expression. A peripheral lesion paralyzes the entire hemiface, including the forehead; in a central lesion (stroke) the forehead is spared because the part of the facial nucleus supplying it receives corticonuclear fibers from both hemispheres.",
 "lesion": [
 "Facial nerve (VII)"
 ],
@@ -864,7 +865,7 @@
 "House-Brackmann scale",
 "Examination of the forehead: distinguishes peripheral from central lesion",
 "Otoscopy (rule out herpes zoster oticus)",
-"Electroneurography if there is no recovery at 3 weeks"
+"Electroneurography between days 3 and 14 in complete paralysis; electromyography if there is no recovery at 3 weeks"
 ],
 "fisioterapia": "Eye protection, neuromuscular reeducation in front of a mirror with selective exercises and biofeedback, avoiding intense electrical stimulation and mass movements that promote synkinesis.",
 "camara": "lateral"

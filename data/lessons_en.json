@@ -218,7 +218,7 @@
 "steps": [
 {
 "t": "Bones",
-"x": "The tibiofibular mortise embraces the talus. The lateral malleolus descends lower than the medial one, which favors inversion sprains.",
+"x": "The tibiofibular mortise embraces the talus. The lateral malleolus descends lower than the medial one and blocks eversion, while the shorter medial malleolus leaves inversion freer: that is why inversion sprains predominate.",
 "show": [
 "Tibia",
 "Fibula",
@@ -317,7 +317,7 @@
 },
 {
 "t": "Terminal branches",
-"x": "The musculocutaneous, median, ulnar, axillary and radial nerves supply the entire upper limb.",
+"x": "The musculocutaneous, median, ulnar, axillary and radial nerves supply most of the upper limb.",
 "show": [
 "Musculocutaneous nerve",
 "Median nerve",
@@ -949,7 +949,7 @@
 },
 {
 "t": "Limbic system",
-"x": "The hippocampus, in the wall of the temporal horn of the lateral ventricle, consolidates memory; the fornix carries its fibers to the mammillary bodies of the hypothalamus. The amygdala, in front of the hippocampus, processes fear and emotions. Its involvement explains the recent memory loss of Alzheimer disease.",
+"x": "The hippocampus, in the wall of the temporal horn of the lateral ventricle, consolidates memory; the fornix carries its fibers to the mammillary bodies of the hypothalamus. The amygdala, in front of the hippocampus, processes fear and emotions. Involvement of the hippocampus explains the recent memory loss of Alzheimer disease.",
 "show": [
 "Hippocampus",
 "Fornix",
@@ -1135,7 +1135,7 @@
 },
 {
 "t": "Infrahyoid muscles",
-"x": "The sternohyoid and omohyoid lower the hyoid in swallowing and phonation; the mylohyoid forms the floor of the mouth.",
+"x": "The sternohyoid and omohyoid lower the hyoid in swallowing and phonation; the mylohyoid, by contrast, is a suprahyoid muscle that forms the floor of the mouth.",
 "show": [
 "Sternohyoid muscle",
 "Omohyoid muscle",
@@ -1311,7 +1311,7 @@
 },
 {
 "t": "Pancreas and duodenum",
-"x": "The head of the pancreas lies in the duodenal C-loop; the body crosses in front of the aorta and the vena cava, and the tail reaches the spleen. The common bile duct and the pancreatic duct open together at the ampulla of Vater, in the 2nd part of the duodenum.",
+"x": "The head of the pancreas lies in the duodenal C-loop; the head rests on the inferior vena cava, the neck and body cross in front of the superior mesenteric vessels and the aorta, and the tail reaches the spleen. The common bile duct and the pancreatic duct open together at the ampulla of Vater, in the 2nd part of the duodenum.",
 "show": [
 "Pancreas",
 "Duodenum",
@@ -1346,7 +1346,7 @@
 },
 {
 "t": "Blood supply of the digestive tract",
-"x": "The abdominal aorta gives off the celiac trunk (foregut: stomach, liver, spleen), the superior mesenteric artery (midgut: from the duodenum to the transverse colon) and the inferior mesenteric artery (hindgut: down to the rectum). Venous blood returns to the liver through the portal vein.",
+"x": "The abdominal aorta gives off the celiac trunk (foregut: stomach, liver, spleen), the superior mesenteric artery (midgut: from the 2nd part of the duodenum to the proximal two thirds of the transverse colon) and the inferior mesenteric artery (hindgut: from the distal third of the transverse colon to the upper rectum). Venous blood returns to the liver through the portal vein.",
 "show": [
 "Abdominal aorta",
 "Superior mesenteric artery",
@@ -1430,7 +1430,7 @@
 },
 {
 "t": "Inguinal region",
-"x": "The inguinal ligament is the thickened inferior border of the external oblique aponeurosis, from the anterior superior iliac spine to the pubic tubercle. Above it runs the inguinal canal, with the ilioinguinal and iliohypogastric nerves and the inferior epigastric vessels in its posterior wall.",
+"x": "The inguinal ligament is the thickened inferior border of the external oblique aponeurosis, from the anterior superior iliac spine to the pubic tubercle. Above it runs the inguinal canal, which contains the spermatic cord (the round ligament in women) and the ilioinguinal nerve; the iliohypogastric nerve runs above the canal, and the inferior epigastric vessels lie in its posterior wall, medial to the deep ring.",
 "show": [
 "Inguinal ligament",
 "Ilio-inguinal nerve",
@@ -1858,7 +1858,7 @@
 },
 {
 "t": "Axillary artery and vein",
-"x": "The axillary artery continues the subclavian from the border of the 1st rib and pectoralis minor divides it into three parts. The axillary vein lies medial.",
+"x": "The axillary artery continues the subclavian from the lateral border of the 1st rib and pectoralis minor divides it into three parts. The axillary vein lies medial.",
 "show": [
 "Axillary artery",
 "Axillary vein",

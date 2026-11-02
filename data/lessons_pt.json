@@ -218,7 +218,7 @@
 "steps": [
 {
 "t": "Ossos",
-"x": "A pinça tibiofibular abraça o tálus. O maléolo lateral desce mais que o medial, o que favorece as entorses por inversão.",
+"x": "A pinça tibiofibular abraça o tálus. O maléolo lateral desce mais que o medial e bloqueia a eversão, enquanto o medial, mais curto, deixa a inversão mais livre: por isso predominam as entorses por inversão.",
 "show": [
 "Tibia",
 "Fibula",
@@ -317,7 +317,7 @@
 },
 {
 "t": "Ramos terminais",
-"x": "Musculocutâneo, mediano, ulnar, axilar e radial inervam todo o membro superior.",
+"x": "Musculocutâneo, mediano, ulnar, axilar e radial inervam a maior parte do membro superior.",
 "show": [
 "Musculocutaneous nerve",
 "Median nerve",
@@ -949,7 +949,7 @@
 },
 {
 "t": "Sistema límbico",
-"x": "O hipocampo, na parede do corno temporal do ventrículo lateral, consolida a memória; o fórnice leva suas fibras até os corpos mamilares do hipotálamo. A amígdala, anterior ao hipocampo, processa o medo e as emoções. Seu comprometimento explica a perda de memória recente da doença de Alzheimer.",
+"x": "O hipocampo, na parede do corno temporal do ventrículo lateral, consolida a memória; o fórnice leva suas fibras até os corpos mamilares do hipotálamo. A amígdala, anterior ao hipocampo, processa o medo e as emoções. O comprometimento do hipocampo explica a perda de memória recente da doença de Alzheimer.",
 "show": [
 "Hippocampus",
 "Fornix",
@@ -1135,7 +1135,7 @@
 },
 {
 "t": "Músculos infra-hióideos",
-"x": "O esterno-hióideo e o omo-hióideo abaixam o osso hioide na deglutição e na fonação; o milo-hióideo forma o assoalho da boca.",
+"x": "O esterno-hióideo e o omo-hióideo abaixam o osso hioide na deglutição e na fonação; o milo-hióideo, por outro lado, é um músculo supra-hióideo que forma o assoalho da boca.",
 "show": [
 "Sternohyoid muscle",
 "Omohyoid muscle",
@@ -1311,7 +1311,7 @@
 },
 {
 "t": "Pâncreas e duodeno",
-"x": "A cabeça do pâncreas se aloja na moldura duodenal; o corpo cruza anteriormente à aorta e à veia cava, e a cauda chega ao baço. O ducto colédoco e o pancreático desembocam juntos na ampola de Vater, na 2ª parte do duodeno.",
+"x": "A cabeça do pâncreas se aloja na moldura duodenal; a cabeça repousa sobre a veia cava inferior, o colo e o corpo cruzam anteriormente aos vasos mesentéricos superiores e à aorta, e a cauda chega ao baço. O ducto colédoco e o pancreático desembocam juntos na ampola de Vater, na 2ª parte do duodeno.",
 "show": [
 "Pancreas",
 "Duodenum",
@@ -1346,7 +1346,7 @@
 },
 {
 "t": "A irrigação do tubo digestório",
-"x": "A aorta abdominal dá o tronco celíaco (intestino anterior: estômago, fígado, baço), a mesentérica superior (intestino médio: do duodeno ao colo transverso) e a mesentérica inferior (intestino posterior: até o reto). O sangue venoso retorna ao fígado pela veia porta.",
+"x": "A aorta abdominal dá o tronco celíaco (intestino anterior: estômago, fígado, baço), a mesentérica superior (intestino médio: da 2ª parte do duodeno aos dois terços proximais do colo transverso) e a mesentérica inferior (intestino posterior: do terço distal do colo transverso à parte superior do reto). O sangue venoso retorna ao fígado pela veia porta.",
 "show": [
 "Abdominal aorta",
 "Superior mesenteric artery",
@@ -1430,7 +1430,7 @@
 },
 {
 "t": "Região inguinal",
-"x": "O ligamento inguinal é a borda inferior espessada da aponeurose do oblíquo externo, da espinha ilíaca anterossuperior ao tubérculo púbico. Acima dele corre o canal inguinal, com os nervos ilioinguinal e ílio-hipogástrico e os vasos epigástricos inferiores em sua parede posterior.",
+"x": "O ligamento inguinal é a borda inferior espessada da aponeurose do oblíquo externo, da espinha ilíaca anterossuperior ao tubérculo púbico. Acima dele corre o canal inguinal, que contém o funículo espermático (o ligamento redondo na mulher) e o nervo ilioinguinal; o ílio-hipogástrico corre acima do canal, e os vasos epigástricos inferiores ficam em sua parede posterior, mediais ao anel profundo.",
 "show": [
 "Inguinal ligament",
 "Ilio-inguinal nerve",
@@ -1803,7 +1803,7 @@
 },
 {
 "t": "Suportes ligamentares e tendíneos",
-"x": "O ligamento plantar longo e o calcaneonavicular plantar (\"ligamento em rede\") sustentam o arco, junto com os tendões do tibial posterior e do fibular longo, que cruzam a planta como um estribo.",
+"x": "O ligamento plantar longo e o calcaneonavicular plantar (\"ligamento mola\") sustentam o arco, junto com os tendões do tibial posterior e do fibular longo, que cruzam a planta como um estribo.",
 "show": [
 "Long plantar ligament",
 "Plantar calcaneonavicular ligament",
@@ -1858,7 +1858,7 @@
 },
 {
 "t": "Artéria e veia axilares",
-"x": "A artéria axilar continua a subclávia a partir da borda da 1ª costela e o peitoral menor a divide em três partes. A veia axilar fica medial.",
+"x": "A artéria axilar continua a subclávia a partir da margem lateral da 1ª costela e o peitoral menor a divide em três partes. A veia axilar fica medial.",
 "show": [
 "Axillary artery",
 "Axillary vein",

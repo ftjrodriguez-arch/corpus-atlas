@@ -218,7 +218,7 @@
 "steps": [
 {
 "t": "Huesos",
-"x": "La mortaja tibioperonea abraza el astrágalo. El maléolo lateral desciende más que el medial, lo que favorece los esguinces por inversión.",
+"x": "La mortaja tibioperonea abraza el astrágalo. El maléolo lateral desciende más que el medial y bloquea la eversión, mientras que el medial, más corto, deja más libre la inversión: por eso predominan los esguinces por inversión.",
 "show": [
 "Tibia",
 "Fibula",
@@ -317,7 +317,7 @@
 },
 {
 "t": "Ramas terminales",
-"x": "Musculocutáneo, mediano, cubital, axilar y radial inervan todo el miembro superior.",
+"x": "Musculocutáneo, mediano, cubital, axilar y radial inervan la mayor parte del miembro superior.",
 "show": [
 "Musculocutaneous nerve",
 "Median nerve",
@@ -949,7 +949,7 @@
 },
 {
 "t": "Sistema límbico",
-"x": "El hipocampo, en la pared del asta temporal del ventrículo lateral, consolida la memoria; el fórnix lleva sus fibras hasta los cuerpos mamilares del hipotálamo. La amígdala, por delante del hipocampo, procesa el miedo y las emociones. Su afectación explica la pérdida de memoria reciente del alzhéimer.",
+"x": "El hipocampo, en la pared del asta temporal del ventrículo lateral, consolida la memoria; el fórnix lleva sus fibras hasta los cuerpos mamilares del hipotálamo. La amígdala, por delante del hipocampo, procesa el miedo y las emociones. La afectación del hipocampo explica la pérdida de memoria reciente del alzhéimer.",
 "show": [
 "Hippocampus",
 "Fornix",
@@ -1135,7 +1135,7 @@
 },
 {
 "t": "Músculos infrahioideos",
-"x": "El esternohioideo y el omohioideo descienden el hioides en la deglución y la fonación; el milohioideo forma el suelo de la boca.",
+"x": "El esternohioideo y el omohioideo descienden el hioides en la deglución y la fonación; el milohioideo, en cambio, es un músculo suprahioideo que forma el suelo de la boca.",
 "show": [
 "Sternohyoid muscle",
 "Omohyoid muscle",
@@ -1311,7 +1311,7 @@
 },
 {
 "t": "Páncreas y duodeno",
-"x": "La cabeza del páncreas se aloja en el marco duodenal; el cuerpo cruza por delante de la aorta y la vena cava, y la cola llega al bazo. El conducto colédoco y el pancreático desembocan juntos en la ampolla de Vater, en la 2.ª porción del duodeno.",
+"x": "La cabeza del páncreas se aloja en el marco duodenal; la cabeza descansa sobre la vena cava inferior, el cuello y el cuerpo cruzan por delante de los vasos mesentéricos superiores y la aorta, y la cola llega al bazo. El conducto colédoco y el pancreático desembocan juntos en la ampolla de Vater, en la 2.ª porción del duodeno.",
 "show": [
 "Pancreas",
 "Duodenum",
@@ -1346,7 +1346,7 @@
 },
 {
 "t": "La irrigación del tubo digestivo",
-"x": "La aorta abdominal da el tronco celíaco (intestino anterior: estómago, hígado, bazo), la mesentérica superior (intestino medio: del duodeno al colon transverso) y la mesentérica inferior (intestino posterior: hasta el recto). La sangre venosa vuelve al hígado por la vena porta.",
+"x": "La aorta abdominal da el tronco celíaco (intestino anterior: estómago, hígado, bazo), la mesentérica superior (intestino medio: desde la 2.ª porción del duodeno hasta los dos tercios proximales del colon transverso) y la mesentérica inferior (intestino posterior: del tercio distal del colon transverso a la parte superior del recto). La sangre venosa vuelve al hígado por la vena porta.",
 "show": [
 "Abdominal aorta",
 "Superior mesenteric artery",
@@ -1430,7 +1430,7 @@
 },
 {
 "t": "Región inguinal",
-"x": "El ligamento inguinal es el borde inferior engrosado de la aponeurosis del oblicuo externo, de la espina ilíaca anterosuperior al tubérculo del pubis. Por encima de él discurre el conducto inguinal, con los nervios ilioinguinal e iliohipogástrico y los vasos epigástricos inferiores en su pared posterior.",
+"x": "El ligamento inguinal es el borde inferior engrosado de la aponeurosis del oblicuo externo, de la espina ilíaca anterosuperior al tubérculo del pubis. Por encima de él discurre el conducto inguinal, que contiene el cordón espermático (el ligamento redondo en la mujer) y el nervio ilioinguinal; el iliohipogástrico discurre por encima del conducto, y los vasos epigástricos inferiores quedan en su pared posterior, medial al anillo profundo.",
 "show": [
 "Inguinal ligament",
 "Ilio-inguinal nerve",
@@ -1858,7 +1858,7 @@
 },
 {
 "t": "Arteria y vena axilares",
-"x": "La arteria axilar continúa a la subclavia desde el borde de la 1.ª costilla y el pectoral menor la divide en tres porciones. La vena axilar queda medial.",
+"x": "La arteria axilar continúa a la subclavia desde el borde lateral de la 1.ª costilla y el pectoral menor la divide en tres porciones. La vena axilar queda medial.",
 "show": [
 "Axillary artery",
 "Axillary vein",
