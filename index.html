@@ -1230,7 +1230,7 @@ $('#autoHR').checked=autoHR;$('#autoHR').onchange=e=>{autoHR=e.target.checked;st
 $('#unhide').onclick=()=>{hiddenIds.clear();DIS_EXC=null;isoSet=null;patchFocus=null;if(selected){selected.m.userData.ghost=false;refreshState(selected.m);}applySystems();};
 
 /* ───────── Cuerpo: hombre (Z-Anatomy) o mujer (Visible Human Female) ───────── */
-function setBody(b){if(b!==BODY){select(null);stopTools&&stopTools();}BODY=b;store.set('body',b);document.body.classList.toggle('body-f',b==='vh');document.body.classList.toggle('body-w',b==='f');
+function setBody(b){if(b!==BODY){select(null);stopTools&&stopTools();STC=null;STC_C.clear();}BODY=b;store.set('body',b);document.body.classList.toggle('body-f',b==='vh');document.body.classList.toggle('body-w',b==='f');
   $('#b-m').setAttribute('aria-pressed',b==='m');$('#b-f').setAttribute('aria-pressed',b!=='m');
   isoSet=null;patchFocus=null;DIS_FLT=null;DIS_EXC=null;disStage=-1;hiddenIds.clear();
   if(b==='f'&&currentTab==='mov'){playing=false;}
@@ -1698,7 +1698,8 @@ function prepWeights(){}
 const deformed=new Set();
 function qOf(jn,comp){const J=JOINTS[jn];const long=J.long||new V3(0,1,0);
   const qx=new Q().setFromAxisAngle(J.xax||new V3(1,0,0),D(comp.x)),qy=new Q().setFromAxisAngle(long,D(comp.y)),qz=new Q().setFromAxisAngle(J.zax||new V3(0,0,1),D(comp.z));
-  const q0=qx.multiply(qy).multiply(qz);return comp.w?new Q().setFromAxisAngle(new V3(0,1,0),D(comp.w)).multiply(q0):q0;}
+  /* orden clínico (como un goniómetro): flexión, luego abducción y por último la rotación alrededor del eje largo del hueso ya colocado; así la rotación externa con el brazo abducido levanta el antebrazo en lugar de llevar el brazo hacia atrás */
+  const q0=qx.multiply(qz).multiply(qy);return comp.w?new Q().setFromAxisAngle(new V3(0,1,0),D(comp.w)).multiply(q0):q0;}
 function deform(active){
   // active: [{jn,q}] sorted distal→proximal
   const ops=active.map(a=>{const q=a.q;let ang=2*Math.acos(Math.min(1,Math.abs(q.w)));const s=Math.sqrt(Math.max(0,1-q.w*q.w));
@@ -2301,6 +2302,48 @@ const LIM={shoulder:{x:[-180,60],z:[-180,45],y:[-90,110],w:[-45,125]},sc:{z:[-30
  cervical:{x:[-50,50],z:[-45,45],y:[-60,60]},ao:{x:[-25,15]},aa:{y:[-45,45]},trunk:{x:[-30,85],z:[-35,35],y:[-45,45]},lumb:{x:[-25,55],z:[-20,20],y:[-6,6]},thor:{x:[-25,40],z:[-30,30],y:[-40,40]},
  tmj:{x:[0,35],y:[-12,12]},cmc:{x:[-70,10],z:[-20,20],y:[-10,50]},mcp1:{z:[-10,60]},ip1:{z:[-20,80]}};
 for(const f of [2,3,4,5]){LIM['mcp'+f]={x:[-90,45],z:[-25,25]};LIM['pip'+f]={x:[-110,0]};LIM['dip'+f]={x:[-90,10]};}for(const f of [1,2,3,4,5])LIM['mtp'+f]={x:[-70,45]};
+/* ───── Articulación escapulotorácica ─────
+   El contorno real del tórax se guarda como un mapa de radios (por altura y ángulo alrededor del eje del tórax),
+   construido con las costillas 1.ª a 10.ª y rellenando los espacios intercostales. La escápula debe deslizarse sobre
+   ese contorno: en cada postura se busca la menor corrección de su báscula (x) y de su rotación interna-externa (y)
+   que la deja apoyada con la misma separación que en reposo (serrato anterior y subescapular), sin atravesar nunca
+   las costillas ni separarse de ellas (escápula alada). */
+let STC=null;const STC_DY=0.01,STC_DT=2,STC_C=new Map();
+function stcInit(){if(STC&&STC.ok)return STC;
+  const ribs=meshes.filter(m=>m.userData.c&&/^(First|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|Ninth|Tenth) rib$/.test(m.userData.c.en));
+  const scs={R:null,L:null};for(const m of meshes){const c=m.userData.c;if(c&&c.en==='Scapula'){if(c.side==='derecho')scs.R=m;else if(c.side==='izquierdo')scs.L=m;}}
+  if(ribs.length<16||!scs.R)return null;
+  let zc=0,n0=0,y0=1e9,y1=-1e9;const P=[];for(const m of ribs){const a=m.userData.rest||m.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3){P.push(a[i],a[i+1],a[i+2]);zc+=a[i+2];n0++;if(a[i+1]<y0)y0=a[i+1];if(a[i+1]>y1)y1=a[i+1];}}zc/=n0;
+  const NY=Math.ceil((y1-y0)/STC_DY)+1,NT=360/STC_DT,R=new Float32Array(NY*NT).fill(-1);
+  for(let i=0;i<P.length;i+=3){const x=P[i],y=P[i+1],z=P[i+2]-zc,r=Math.hypot(x,z);const iy=Math.round((y-y0)/STC_DY),it=((Math.round(Math.atan2(x,z)*180/Math.PI/STC_DT)%NT)+NT)%NT,q=iy*NT+it;if(r>R[q])R[q]=r;}
+  /* espacios intercostales: se rellenan por interpolación vertical entre costillas, y luego se suaviza en ángulo */
+  for(let it=0;it<NT;it++){let last=-1;for(let iy=0;iy<NY;iy++){const q=iy*NT+it;if(R[q]<0)continue;if(last>=0&&iy-last>1){const a=R[last*NT+it],b=R[q];for(let k=last+1;k<iy;k++)R[k*NT+it]=a+(b-a)*(k-last)/(iy-last);}last=iy;}}
+  const R2=new Float32Array(R);for(let iy=0;iy<NY;iy++)for(let it=0;it<NT;it++){let m=R[iy*NT+it];for(const d of [-1,1]){const v=R[iy*NT+((it+d+NT)%NT)];if(v>m)m=v;}R2[iy*NT+it]=m;}
+  const map={y0,NY,NT,zc,R:R2};
+  const side={};for(const s of ['R','L']){const m=scs[s];if(!m)continue;const a=m.userData.rest||m.geometry.attributes.position.array,n=a.length/3,st=Math.max(1,(n/500)|0),pts=[];
+    for(let i=0;i<n;i+=st)pts.push(new V3(a[i*3],a[i*3+1],a[i*3+2]));
+    let g0=1e9;const gs=pts.map(p=>{const g=stcG(map,p);if(g<g0)g0=g;return g;});
+    /* solo cuentan los puntos de la cara costal: los que en reposo están a menos de 3 cm del tórax */
+    const near=pts.filter((p,i)=>gs[i]<g0+0.03);side[s]={pts:near,g0};}
+  STC={ok:true,map,side};return STC;}
+/* separación de un punto al contorno torácico (positiva fuera, negativa dentro); fuera del mapa no limita */
+function stcG(M,p){const iy=Math.round((p.y-M.y0)/STC_DY);if(iy<0||iy>=M.NY)return 1;const z=p.z-M.zc,it=((Math.round(Math.atan2(p.x,z)*180/Math.PI/STC_DT)%M.NT)+M.NT)%M.NT,R=M.R[iy*M.NT+it];if(R<0)return 1;return Math.hypot(p.x,z)-R;}
+const _stq=new V3();
+function stcMin(T,S,qa,pa,qs,ps){let mn=1e9;for(const p of T.side[S].pts){_stq.copy(p).sub(pa).applyQuaternion(qa).add(pa).sub(ps).applyQuaternion(qs).add(ps);const g=stcG(T.map,_stq);if(g<mn)mn=g;}return mn;}
+function stcApply(c,side){const T=stcInit();if(!T)return;
+  for(const k of Object.keys(c)){const [node,sx]=k.split('_');if(node!=='acr')continue;const S=sx||side;if(!T.side[S])continue;
+    const ja=JOINTS['acr_'+S],js=JOINTS['sc_'+S];if(!ja||!js)continue;const ks='sc'+(sx?'_'+sx:'');
+    const ca=c[k],cs=c[ks]||{x:0,y:0,z:0,w:0},qs=qOf('sc_'+S,cs),g0=T.side[S].g0,tol=0.003;
+    const ck=S+[ca.x,ca.y,ca.z,ca.w||0,cs.x,cs.y,cs.z,cs.w||0].map(v=>Math.round(v*2)).join(',');const hit=STC_C.get(ck);if(hit){ca.x+=hit[0];ca.y+=hit[1];continue;}
+    const ev=(dx,dy)=>stcMin(T,S,qOf('acr_'+S,{x:ca.x+dx,y:ca.y+dy,z:ca.z,w:ca.w||0}),ja.pivot,qs,js.pivot);
+    const m0=ev(0,0);if(m0>=g0-tol&&m0<=g0+0.012){STC_C.set(ck,[0,0]);continue;}
+    /* corrección mínima que la deja apoyada: búsqueda gruesa (4°) y fina (1°) */
+    const cost=(dx,dy,m)=>{const d=m-g0;return (d<-tol?1e3*(-d-tol):0)+(d>0.012?30*(d-0.012):0)+0.0003*(dx*dx+dy*dy);};
+    let best={dx:0,dy:0,v:cost(0,0,m0)};
+    for(let dx=-32;dx<=32;dx+=4)for(let dy=-32;dy<=32;dy+=4){const v=cost(dx,dy,ev(dx,dy));if(v<best.v)best={dx,dy,v};}
+    const b0=best;for(let dx=b0.dx-3;dx<=b0.dx+3;dx++)for(let dy=b0.dy-3;dy<=b0.dy+3;dy++){const v=cost(dx,dy,ev(dx,dy));if(v<best.v)best={dx,dy,v};}
+    if(STC_C.size>4000)STC_C.clear();STC_C.set(ck,[best.dx,best.dy]);ca.x+=best.dx;ca.y+=best.dy;}}
+
 let TILT=-0.8,WRAP=0.15,SCY=0.8;function physio(c,side){for(const k of Object.keys(c)){const [node,sx]=k.split('_');const S=sx||side,fl=S==='L'?-1:1,v=c[k];
     if(node==='shoulder'){const ex=-v.x,ab=-(v.z*fl),E=Math.max(ex,ab);
       if(E>30){const st=Math.min(55,(E-30)*0.36);if(ab>=ex)v.z+=st*fl;else v.x+=st;const kc='sc'+(sx?'_'+sx:''),ka='acr'+(sx?'_'+sx:'');c[kc]=c[kc]||{x:0,y:0,z:0,w:0};c[kc].z-=Math.min(14,st*0.28)*fl;c[ka]=c[ka]||{x:0,y:0,z:0,w:0};c[ka].z-=(st-Math.min(14,st*0.28))*fl;/* en la flexión la escápula gira en su propio plano y bascula hacia atrás para seguir pegada al tórax; en la abducción pura se mantiene el giro frontal */const fx=Math.max(0,ex),fa=Math.max(0,ab),fs=fx+fa>0?fx/(fx+fa):0;const J=JOINTS['acr_'+S];if(J&&J.zax0){J.zax=new V3(0,0,1).lerp(J.zax0,fs).normalize();J.xax=new V3(1,0,0).lerp(J.xax0,fs).normalize();}c[ka].x+=TILT*st*0.5;const wr=WRAP*st*0.6*(1-fs)*fl;c[ka].y+=wr+SCY*st*fs*fl;/* el brazo no hereda ese giro: la abducción sigue en su plano */v.w=(v.w||0)-wr;}
@@ -2310,6 +2353,7 @@ let TILT=-0.8,WRAP=0.15,SCY=0.8;function physio(c,side){for(const k of Object.ke
     for(const ax of ['x','y','z','w']){if(!L[ax]||!v[ax])continue;const f=ax==='x'?1:fl;let r=v[ax]*f;let [lo,hi]=L[ax];
       if(node==='knee'&&ax==='y'){const g=Math.max(0,Math.min(1,(v.x||0)/60));lo*=g;hi*=g;}
       r=Math.max(lo,Math.min(hi,r));v[ax]=r*f;}}
+  try{stcApply(c,side);}catch(e){}
   return c;}
 function comps(t){const c={};const add=(k,ax,deg)=>{c[k]=c[k]||{x:0,y:0,z:0,w:0};c[k][ax]+=deg;};
   const flip=ax=>(ax==='x'?1:sideSign());const help=curM.helpFn?curM.helpFn(angle):(curM.help||{});
