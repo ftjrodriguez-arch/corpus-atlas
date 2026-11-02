@@ -217,6 +217,7 @@ body.phy-on.phy-dock .pbody > .view{display:none!important}
 .phykick{color:var(--phyc,#ff8a8a)!important}.phyctl .btn.pri{background:var(--phyc,#ff4d5e)!important;border-color:var(--phyc,#ff4d5e)!important;color:#111!important}.phydots button[aria-current="true"]{background:var(--phyc,#ff4d5e)!important}
 .wkgoal{margin-top:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;gap:5px}.wkrow{display:grid;grid-template-columns:120px 1fr 40px;gap:8px;align-items:center;font-size:12px}.wkrow .bar{height:7px}.wkrow b{text-align:right}
 .prings{display:grid;grid-template-columns:repeat(auto-fit,minmax(62px,1fr));gap:6px;margin-top:4px}.pring{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}.pring svg{width:56px;height:56px}.pring b{font-size:10.5px;letter-spacing:-.1px;line-height:1.15}.pring small{font-size:10.5px;color:var(--muted)}
+.lbl.gonl{background:rgba(15,23,42,.82);border-color:rgba(229,231,235,.5);color:#e5e7eb;font-size:10.5px}.lbl.gonl.gonm{border-color:rgba(45,212,191,.7);color:#99f6e4}
 @media (max-width:400px){.prings{grid-template-columns:repeat(5,minmax(0,1fr));gap:3px}.pring svg{width:46px;height:46px}.pring b{font-size:9.5px;letter-spacing:-.2px}.pring small{font-size:9.5px}}
 .phytour{position:relative}.pdone{position:absolute;right:6px;top:4px;font-size:10px;font-weight:700;color:var(--ok)}
 .lbl.phyl{background:rgba(14,16,22,.82);color:#fff;border-color:rgba(255,255,255,.2);text-transform:none;letter-spacing:0;font:600 11.5px/1 var(--f-ui);padding:5px 8px;border-radius:999px}
@@ -690,6 +691,7 @@ body.guide .lbl.phyl:not(.hl){opacity:.72}
         </div>
         <dl class="kv" id="moveInfo"></dl>
         <label class="chk"><input type="checkbox" id="agChk"> Resaltar los músculos: agonistas en naranja, los que se estiran en azul</label>
+        <label class="chk"><input type="checkbox" id="gonChk"> Mostrar el goniómetro: fulcro en la articulación, brazo fijo y brazo móvil</label>
         <div class="row" style="align-items:center;gap:8px"><span class="small muted">Ver</span><div class="seg" id="mvView" role="group" aria-label="Capas del movimiento"><button data-v="mus">Músculos</button><button data-v="lig">Ligamentos</button><button data-v="both">Ambos</button></div></div>
         <p class="small muted" style="margin:4px 0 0">Los ligamentos pasan de blanco a rojo cuando se tensan al final del rango. La línea amarilla discontinua es el eje del movimiento.</p>
         <div class="note only-stu" id="moveTip"></div>
@@ -836,6 +838,8 @@ const MALE_ONLY=/testicular|of penis|penile|cremaster|spermatic|scrot|prostat|^U
 const isFemLayer=k=>!!k&&(k.startsWith('f_')||sexOf(k)==='f');
 const saved=store.get('sys',null);
 if(saved) for(const k in saved) if(SYS[k]){SYS[k].on=!!saved[k].on;SYS[k].op=+saved[k].op||1;}
+/* hasta v126 una transparencia temporal (recorridos, vista de articulación, pruebas neurales) podía quedar guardada: se restablece una vez */
+if(saved&&!store.get('opfix127',false)){for(const k in SYS)SYS[k].op=1;}store.set('opfix127',true);
 for(const k in SYS){SYS[k].state='idle';SYS[k].group=null;SYS[k].count=0;}
 
 /* ───────── Escena ───────── */
@@ -1201,7 +1205,7 @@ function applySystems(){
     m.visible=v;}
   $('#unhide').hidden=hiddenIds.size===0&&!isoSet&&!DIS_EXC;
   $('#legend').hidden=!(SYS.insercion.on&&SYS.insercion.state==='loaded');
-  store.set('sys',Object.fromEntries(Object.entries(SYS).map(([k,v])=>[k,{on:v.on,op:v.op}])));
+  store.set('sys',Object.fromEntries(Object.entries(SYS).map(([k,v])=>{let on=v.on,op=v.op;try{const sv=(PHY.on&&PHY.saved&&PHY.saved.sys[k])||(CT.saved&&CT.saved[k]);if(sv){on=sv.on;op=sv.op;}if(JV&&JV.op!=null&&BS(k)==='oseo')op=JV.op;}catch(e){}return [k,{on,op}];})));
 }
 let isoSet=null;let DIS_FLT=null,DIS_EXC=null;
 function setOn(k,on){DIS_FLT=null;DIS_EXC=null;if(on&&!sexOk(k)){setBody(sexOf(k)||'m');}SYS[k].on=on;if(on&&SYS[k].state!=='loaded') loadSys(k);applySystems();renderSysList();}
@@ -2191,7 +2195,7 @@ const CTESTS=[
   ex:['Mecanosensibilidad del nervio radial y de su rama superficial.','Mechanosensitivity of the radial nerve and its superficial branch.','Mecanossensibilidade do nervo radial e de seu ramo superficial.'],
   how:['Depresión de la escápula, ligera abducción y rotación interna del hombro, codo extendido, pronación, flexión de muñeca y dedos con desviación cubital y, por último, inclinación del cuello al lado contrario.','Scapular depression, slight shoulder abduction and internal rotation, elbow extension, pronation, wrist and finger flexion with ulnar deviation and, finally, contralateral neck side-bending.','Depressão da escápula, leve abdução e rotação interna do ombro, cotovelo estendido, pronação, flexão de punho e dedos com desvio ulnar e, por fim, inclinação do pescoço para o lado oposto.'],
   pos:['Reproduce los síntomas del paciente (cara lateral del codo y del antebrazo o dorso de la mano) y estos cambian al mover el cuello: diferenciación estructural que apunta a origen neural. Ayuda a distinguir un componente neural en el dolor lateral del codo.','It reproduces the patient’s symptoms (lateral elbow and forearm or dorsum of the hand) and they change when the neck moves: structural differentiation pointing to a neural source. It helps identify a neural component in lateral elbow pain.','Reproduz os sintomas do paciente (face lateral do cotovelo e do antebraço ou dorso da mão) e eles mudam ao mover o pescoço: diferenciação estrutural que indica origem neural. Ajuda a identificar um componente neural na dor lateral do cotovelo.']},
- {id:'ulnt3',r:'neural',n:['ULNT3 (cubital)','ULNT3 (ulnar)','ULNT3 (ulnar)'],node:'shoulder',rad:1.0,view:'ant',mode:'nerv',pose:[['sc','z',8],['shoulder','z',-90],['shoulder','y',-60],['elbow','x',-120],['fore','y',160],['wrist','x',50],['mcp4','x',30],['mcp5','x',30],['cervical','z',-20]],tg:['Ulnar nerve','Inferior trunk of brachial plexus'],
+ {id:'ulnt3',r:'neural',n:['ULNT3 (cubital)','ULNT3 (ulnar)','ULNT3 (ulnar)'],node:'shoulder',rad:1.0,view:'ant',mode:'nerv',pose:[['sc','z',8],['shoulder','z',-90],['shoulder','y',-85],['elbow','x',-130],['fore','y',160],['wrist','x',50],['mcp4','x',30],['mcp5','x',30],['cervical','z',-20]],tg:['Ulnar nerve','Inferior trunk of brachial plexus'],
   ex:['Mecanosensibilidad del nervio cubital y del tronco inferior del plexo braquial (C8–T1).','Mechanosensitivity of the ulnar nerve and the inferior trunk of the brachial plexus (C8–T1).','Mecanossensibilidade do nervo ulnar e do tronco inferior do plexo braquial (C8–T1).'],
   how:['Depresión de la escápula, abducción y rotación externa del hombro, flexión completa del codo, pronación y extensión de muñeca y de los dedos 4.º y 5.º; la mano se acerca a la oreja. Al final, inclinación del cuello al lado contrario.','Scapular depression, shoulder abduction and external rotation, full elbow flexion, pronation and extension of the wrist and of the 4th and 5th fingers; the hand approaches the ear. Finally, contralateral neck side-bending.','Depressão da escápula, abdução e rotação externa do ombro, flexão completa do cotovelo, pronação e extensão do punho e do 4.º e 5.º dedos; a mão se aproxima da orelha. Por fim, inclinação do pescoço para o lado oposto.'],
   pos:['Reproduce los síntomas en el borde cubital del antebrazo y en los dedos 4.º y 5.º, y cambian con el movimiento del cuello: origen neural. Útil ante sospecha de neuropatía cubital en el codo o de afectación de la raíz C8.','It reproduces symptoms along the ulnar forearm and the 4th and 5th fingers, and they change with neck movement: a neural source. Useful when ulnar neuropathy at the elbow or C8 root involvement is suspected.','Reproduz os sintomas na borda ulnar do antebraço e no 4.º e 5.º dedos, e eles mudam com o movimento do pescoço: origem neural. Útil na suspeita de neuropatia ulnar no cotovelo ou de acometimento da raiz C8.']},
@@ -2219,7 +2223,7 @@ const CTESTS=[
   ex:['Superficie articular de la cadera: rodete acetabular, cartílago y cápsula.','Hip joint surfaces: acetabular labrum, cartilage and capsule.','Superfície articular do quadril: lábio do acetábulo, cartilagem e cápsula.'],
   how:['Paciente boca arriba: cadera a 90° de flexión y rodilla flexionada; el examinador comprime a lo largo del fémur y barre la cadera en un arco de aducción a abducción.','Patient supine: hip flexed to 90° and knee flexed; the examiner compresses along the femur and sweeps the hip in an arc from adduction to abduction.','Paciente de barriga para cima: quadril a 90° de flexão e joelho flexionado; o examinador comprime ao longo do fêmur e varre o quadril num arco de adução para abdução.'],
   pos:['Dolor en la ingle, chasquido o bloqueo durante el barrido: patología intraarticular (rodete, cartílago o artrosis). Es moderadamente sensible pero poco específica.','Groin pain, clicking or catching during the sweep: intra-articular pathology (labrum, cartilage or osteoarthritis). It is moderately sensitive but not very specific.','Dor na virilha, estalido ou bloqueio durante a varredura: patologia intra-articular (lábio, cartilagem ou artrose). É moderadamente sensível, mas pouco específico.']}];
-const CT={on:false,test:null,t:0,marks:[],pins:[]};
+const CT={on:false,saved:null,test:null,t:0,marks:[],pins:[]};
 function ctComps(k){const c={};for(const [n,ax,d] of CT.test.pose){c[n]=c[n]||{x:0,y:0,z:0,w:0};c[n][ax]+=d*k;}return physio(c,'R');}
 function ctTick(dt){if(!CT.on||currentTab!=='mov')return;CT.t+=dt;const T=4.4,tt=CT.t%T;const k=tt<1.3?0.5-0.5*Math.cos(Math.PI*tt/1.3):tt<2.9?1:tt<4.2?0.5+0.5*Math.cos(Math.PI*(tt-2.9)/1.3):0;
   const C=ctComps(k),act=[];const trm={};for(const [n,v] of (CT.test.tr||[]))trm[n]=v;
@@ -2235,13 +2239,13 @@ function ctTick(dt){if(!CT.on||currentTab!=='mov')return;CT.t+=dt;const T=4.4,tt
   for(const P of CT.pins){P.m.geometry.computeBoundingBox();P.local.copy(P.m.geometry.boundingBox.getCenter(new V3()));}
   if(CT.mk){CT.mk.m.geometry.computeBoundingBox();const bb=CT.mk.m.geometry.boundingBox;CT.mk.sp.position.copy(bb.getCenter(new V3())).add(new V3(0,0,0.012));const sc=0.03+0.02*Math.abs(Math.sin(CT.t*5));CT.mk.sp.scale.set(sc,sc,sc);}
   if(CT.focus&&k>0.97&&CT.marks.length){CT.focus=false;const b=new THREE.Box3();const FM=CT.test.fm?meshes.filter(m=>CT.test.fm.test(m.userData.c.en)&&m.userData.c.side==='derecho'):[];for(const m of (FM.length?FM:CT.marks)){m.geometry.computeBoundingBox();b.union(m.geometry.boundingBox);}orb.T.tgt.copy(b.getCenter(new V3()));}}
-function ctStop(){if(!CT.on&&!CT.marks.length)return;CT.on=false;for(const m of CT.marks){m.userData.hint=false;refreshState(m);applyTint(m);delete m.userData.pinTxt;}for(const P of CT.pins)removePin(P);if(CT.mk){scene.remove(CT.mk.sp);CT.mk=null;}CT.marks=[];CT.pins=[];deform([]);renderCT();if(currentTab==='mov'){applyPose();applyAgonists();}}
-async function ctStart(t){ctStop();stopPlay();if(gait.on)setGait(false);romSide='R';setSide('R');CT.test=t;CT.t=0;
+function ctStop(){if(!CT.on&&!CT.marks.length){CT.saved=null;return;}CT.on=false;if(CT.saved){for(const k in CT.saved)if(SYS[k]){SYS[k].op=CT.saved[k].op;SYS[k].on=CT.saved[k].on;}CT.saved=null;try{syncAllMats();applySystems();renderSysList();}catch(e){}}for(const m of CT.marks){m.userData.hint=false;refreshState(m);applyTint(m);delete m.userData.pinTxt;}for(const P of CT.pins)removePin(P);if(CT.mk){scene.remove(CT.mk.sp);CT.mk=null;}CT.marks=[];CT.pins=[];deform([]);renderCT();if(currentTab==='mov'){applyPose();applyAgonists();}}
+async function ctStart(t){ctStop();stopPlay();CT.saved=Object.fromEntries(Object.keys(SYS).map(k=>[k,{on:SYS[k].on,op:SYS[k].op}]));if(gait.on)setGait(false);romSide='R';setSide('R');CT.test=t;CT.t=0;
   const ks=k=>Object.keys(SYS).find(x=>BS(x)===k&&sexOk(x));const need=t.mode==='lig'?['oseo','articular']:t.mode==='nerv'?['oseo','nervioso_periferico','muscular']:['muscular','oseo','articular'];
   for(const k of need){const kk=ks(k);if(kk){SYS[kk].on=true;if(SYS[kk].state!=='loaded')await loadSys(kk);}}
   const km=ks('muscular');if(km){SYS[km].on=t.mode!=='lig';SYS[km].op=t.mode==='nerv'?0.22:1;}const kn=ks('nervioso_periferico');if(kn&&t.mode!=='nerv')SYS[kn].on=false;const ka=ks('articular');if(ka&&t.mode==='nerv')SYS[ka].on=false;applySystems();renderSysList();
   for(const m of meshes)if(m.userData.ag||m.userData.an){m.userData.ag=false;m.userData.an=false;refreshState(m);}
-  [arcLine,arcFan,arcRays,axisLine].forEach(o=>o.visible=false);if(axisLbl)axisLbl.on=false;mvLigReset();
+  [arcLine,arcFan,arcRays,axisLine].forEach(o=>o.visible=false);if(axisLbl)axisLbl.on=false;gonHide();mvLigReset();
   for(const m of meshes){if(!t.tg.includes(m.userData.c.en))continue;if(m.userData.c.side&&m.userData.c.side!=='derecho')continue;if(!sexOk(m.userData.sys))continue;m.userData.hint=true;refreshState(m);CT.marks.push(m);
     if(!CT.pins.some(P=>P.m.userData.c.en===m.userData.c.en)){m.userData.pinTxt=m.userData.c.es;m.geometry.computeBoundingBox();const n0=PINS.length;addPin(m,m.geometry.boundingBox.getCenter(new V3()));if(PINS.length>n0)CT.pins.push(PINS[PINS.length-1]);}}
   if(t.mk){const mm=meshes.find(m=>t.mk.test(m.userData.c.en)&&(!m.userData.c.side||m.userData.c.side==='derecho'));if(mm){const sp=phyGlow('rgba(255,214,60,1)',0.05);sp.material.depthTest=false;sp.renderOrder=30;scene.add(sp);CT.mk={sp,m:mm};}}
@@ -2258,6 +2262,28 @@ const arcLine=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMater
 const arcFan=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshBasicMaterial({depthTest:false,transparent:true,opacity:.28,side:THREE.DoubleSide}));
 const arcRays=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({depthTest:false,transparent:true}));
 [arcLine,arcFan,arcRays].forEach(o=>{o.renderOrder=20;o.frustumCulled=false;scene.add(o);o.visible=false;});
+/* Goniómetro sobre el modelo: fulcro en la articulación, brazo fijo en la posición 0 y brazo móvil con el segmento */
+const GON={on:store.get('gon',true),g:new THREE.Group(),lf:null,lm:null};
+(()=>{const mk=(c,o)=>new THREE.MeshBasicMaterial({color:c,depthTest:false,transparent:true,opacity:o,side:THREE.DoubleSide});
+  GON.disk=new THREE.Mesh(new THREE.CircleGeometry(1,48),mk(0xe5e7eb,.16));
+  const tk=[];for(let a=0;a<360;a+=10){const r0=a%30?0.86:0.72,c=Math.cos(a*Math.PI/180),sn=Math.sin(a*Math.PI/180);tk.push(c*r0,sn*r0,0,c,sn,0);}
+  const tg=new THREE.BufferGeometry();tg.setAttribute('position',new THREE.Float32BufferAttribute(tk,3));
+  GON.ticks=new THREE.LineSegments(tg,new THREE.LineBasicMaterial({color:0xe5e7eb,depthTest:false,transparent:true,opacity:.75}));
+  GON.fix=new THREE.Mesh(new THREE.PlaneGeometry(1,1),mk(0xe5e7eb,.9));GON.mov=new THREE.Mesh(new THREE.PlaneGeometry(1,1),mk(0x2dd4bf,.95));
+  GON.pin=new THREE.Mesh(new THREE.CircleGeometry(1,20),mk(0x0f172a,1));
+  [GON.disk,GON.ticks,GON.fix,GON.mov,GON.pin].forEach((o,i)=>{o.renderOrder=22+i;o.frustumCulled=false;GON.g.add(o);});GON.g.visible=false;scene.add(GON.g);})();
+function gonHide(){GON.g.visible=false;if(GON.lf)GON.lf.on=GON.lm.on=false;}
+function gonUpdate(piv,u0,u1,n,R,col){if(!GON.on||!n){gonHide();return;}
+  const flat=u=>{const v=u.clone().addScaledVector(n,-u.dot(n));return v.lengthSq()>1e-8?v.normalize():null;};const a0=flat(u0),a1=flat(u1);if(!a0||!a1){gonHide();return;}
+  const L=R*1.45,W=Math.max(0.005,R*0.085),rd=R*0.45;
+  const place=(o,u,len,wid)=>{const y=new V3().crossVectors(n,u).normalize();o.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(u,y,n));o.position.copy(piv).addScaledVector(u,len/2);o.scale.set(len,wid,1);};
+  place(GON.fix,a0,L,W);place(GON.mov,a1,L,W);GON.mov.material.color.copy(col);
+  const qd=new Q().setFromRotationMatrix(new THREE.Matrix4().makeBasis(a0,new V3().crossVectors(n,a0).normalize(),n));
+  for(const o of [GON.disk,GON.ticks]){o.quaternion.copy(qd);o.position.copy(piv);o.scale.set(rd,rd,rd);}
+  GON.pin.quaternion.copy(qd);GON.pin.position.copy(piv);GON.pin.scale.setScalar(W*0.55);GON.g.visible=true;
+  if(!GON.lf){GON.lf=addLabel('','',null,'mvaxis');GON.lf.el.className='lbl phyl axl gonl';GON.lm=addLabel('','',null,'mvaxis');GON.lm.el.className='lbl phyl axl gonl gonm';}
+  const tf=TL('Brazo fijo','Stationary arm','Braço fixo'),tm=TL('Brazo móvil','Moving arm','Braço móvel');if(GON.lf.el.textContent!==tf)GON.lf.el.textContent=tf;if(GON.lm.el.textContent!==tm)GON.lm.el.textContent=tm;
+  GON.lf.pos=piv.clone().addScaledVector(a0,L*1.04);GON.lm.pos=piv.clone().addScaledVector(a1,L*1.04);const far=a0.angleTo(a1)>0.2;GON.lf.on=far;GON.lm.on=true;}
 const SIDED=['shoulder','elbow','fore','wrist','hip','knee','ankle'];
 const jname=k=>SIDED.includes(k)?k+'_'+romSide:k;
 const sideSign=()=>romSide==='L'?-1:1;
@@ -2290,24 +2316,33 @@ function applyPose(){
   active.sort((a,b)=>DEPTH[b.k]-DEPTH[a.k]);
   deform(active);updateArc(active);
 }
+/* cadena proximal real: el húmero cuelga de la escápula (acromioclavicular y esternoclavicular), no solo del tronco */
+function arcChain(k){const P=PROX[k]||[];if(k==='shoulder')return ['acr','sc',...P];return P.flatMap(p=>p==='shoulder'?['shoulder','acr','sc']:[p]);}
+function posedPivot(k,active){const J=JOINTS[jname(k)];if(!J)return null;const p=J.pivot.clone();for(const pk of arcChain(k)){const a=active.find(x=>x.k===pk);if(!a)continue;const pv=JOINTS[a.jn].pivot;p.sub(pv).applyQuaternion(a.q).add(pv);}return p;}
+const GON_REF={shoulder:'hip',elbow:'shoulder',wrist:'elbow',hip:'shoulder',knee:'hip',ankle:'knee'};for(const f of [2,3,4,5]){GON_REF['mcp'+f]='wrist';GON_REF['pip'+f]='mcp'+f;GON_REF['dip'+f]='pip'+f;}
 function updateArc(active){
-  if((currentTab!=='mov'&&!contraction)||!RIG||gait.on||(typeof PHY!=='undefined'&&PHY.on)){[arcLine,arcFan,arcRays,axisLine].forEach(o=>o.visible=false);if(axisLbl)axisLbl.on=false;for(const x of LIGT){if(x.P){removePin(x.P);x.P=null;}if(x.tinted){applyTint(x.m);x.tinted=false;}}return;}
-  const k=curM.mainNode||curJ.node,J=JOINTS[jname(k)];if(!J){[arcLine,arcFan,arcRays,axisLine].forEach(o=>o.visible=false);return;}
-  const proxK=PROX[k].filter(p=>active.find(a=>a.k===p));
+  if((currentTab!=='mov'&&!contraction)||!RIG||gait.on||(typeof PHY!=='undefined'&&PHY.on)){[arcLine,arcFan,arcRays,axisLine].forEach(o=>o.visible=false);if(axisLbl)axisLbl.on=false;gonHide();for(const x of LIGT){if(x.P){removePin(x.P);x.P=null;}if(x.tinted){applyTint(x.m);x.tinted=false;}}return;}
+  const k=curM.mainNode||curJ.node,J=JOINTS[jname(k)];if(!J){[arcLine,arcFan,arcRays,axisLine].forEach(o=>o.visible=false);gonHide();return;}
+  const proxK=arcChain(k).filter(p=>active.find(a=>a.k===p));
   // pivot: apply proximal rotations (distal→proximal); parent rotation: product proximal-first
   const piv=J.pivot.clone();
   for(const pk of proxK){const a=active.find(x=>x.k===pk);const pv=JOINTS[a.jn].pivot;piv.sub(pv).applyQuaternion(a.q).add(pv);}
   const pq=new Q();[...proxK].reverse().forEach(pk=>pq.multiply(active.find(x=>x.k===pk).q));
   const base=comps(0)[k],full=comps(angle)[k];
+  /* el arco va del 0 real (sin el giro de la escápula) a la posición final del hueso, que sí lo incluye: así mide el movimiento total, como el goniómetro */
+  const pq0=new Q();[...proxK].filter(p=>p!=='acr'&&p!=='sc').reverse().forEach(pk=>pq0.multiply(active.find(x=>x.k===pk).q));
   const N=40,pts=[],dir=new V3(...curM.dir),R=curJ.R;
   for(let i=0;i<=N;i++){const f=i/N;const cm={x:base.x+(full.x-base.x)*f,y:base.y+(full.y-base.y)*f,z:base.z+(full.z-base.z)*f,w:base.w+(full.w-base.w)*f};
-    const q=pq.clone().multiply(qOf(jname(k),cm));pts.push(piv.clone().add(dir.clone().applyQuaternion(q).multiplyScalar(R)));}
+    const q=pq0.clone().slerp(pq,f).multiply(qOf(jname(k),cm));pts.push(piv.clone().add(dir.clone().applyQuaternion(q).multiplyScalar(R)));}
   arcLine.geometry.setFromPoints(pts);
   const fan=[];for(let i=0;i<N;i++) fan.push(piv.x,piv.y,piv.z,pts[i].x,pts[i].y,pts[i].z,pts[i+1].x,pts[i+1].y,pts[i+1].z);
   arcFan.geometry.setAttribute('position',new THREE.Float32BufferAttribute(fan,3));arcFan.geometry.computeBoundingSphere();
   arcRays.geometry.setFromPoints([piv,piv.clone().add(pts[0].clone().sub(piv).multiplyScalar(1.25)),piv,piv.clone().add(pts[N].clone().sub(piv).multiplyScalar(1.25))]);
   const col=new THREE.Color(cssVar(angle>curM.max?'--warn':'--ok'));
   [arcLine,arcFan,arcRays].forEach(o=>{o.material.color.copy(col);o.visible=true;});mvAxis(k,piv,pq,R);mvLigTick();
+  {const u0=pts[0].clone().sub(piv).normalize(),u1=pts[N].clone().sub(piv).normalize();const hc=comps(Math.max(curM.max*0.5,10))[k];const uh=hc?dir.clone().applyQuaternion(pq.clone().multiply(qOf(jname(k),hc))).normalize():null;let n=uh?new V3().crossVectors(u0,uh):null;n=n&&n.lengthSq()>1e-6?n.normalize():null;
+    let uf=u0;const rk=GON_REF[k];if(rk&&curM.pl!=='tra'&&!(curM.pl==='fro'&&(k==='hip'||k==='ankle'))){const rp=posedPivot(rk,active);if(rp){const d=rp.sub(piv);if(d.lengthSq()>1e-8)uf=d.normalize();}}
+    gonUpdate(piv,uf,u1,n,R,col);}
 }
 const enEs=en=>{const r=Object.values(CAT).find(x=>x[1]===en&&x[4]==='muscular');return r?nameL(r):(LANG==='en'?en:(INFO.mus[en]?.es||en));};
 function renderROM(){
@@ -2341,7 +2376,7 @@ $('#play').onclick=()=>{if(CT.on)ctStop();if(gait.on)setGait(false);playing=!pla
 $('#focusJ').onclick=()=>{if(!RIG)return;const J=JOINTS[jname(curM.mainNode||curJ.node)];focusOn(J.pivot.clone(),Math.max(curJ.R<0.1?0.28:0.7,curJ.R*6));setView({sag:romSide==='R'?'latd':'lati',fro:'ant',tra:'ant'}[curM.pl]);};
 function setSide(s){romSide=s;store.set('side',s);$('#side-R').setAttribute('aria-pressed',s==='R');$('#side-L').setAttribute('aria-pressed',s==='L');renderROM();}
 $('#side-R').onclick=()=>setSide('R');$('#side-L').onclick=()=>setSide('L');
-document.querySelectorAll('#mvView [data-v]').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.v===mvView);b.onclick=()=>setMvView(b.dataset.v);});$('#agChk').checked=agOn;$('#agChk').onchange=e=>{agOn=e.target.checked;store.set('agon',agOn);applyAgonists();};
+document.querySelectorAll('#mvView [data-v]').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.v===mvView);b.onclick=()=>setMvView(b.dataset.v);});$('#agChk').checked=agOn;$('#agChk').onchange=e=>{agOn=e.target.checked;store.set('agon',agOn);applyAgonists();};$('#gonChk').checked=GON.on;$('#gonChk').onchange=e=>{GON.on=e.target.checked;store.set('gon',GON.on);applyPose();};
 
 /* ───────── Ciclo de la marcha ───────── */
 // ángulos sagitales de referencia (% del ciclo, grados). Cadera y rodilla: + = flexión. Tobillo: + = dorsiflexión.
@@ -3712,7 +3747,7 @@ function phyStop(){if(!PHY.on)return;voxStop();PHY.auto=false;PHY.serie=null;try
   PHY.grp.clear();removeLabels('phy');PHY.cond=[];$('#phyBox').hidden=true;document.body.classList.remove('phy-on');phyPlace();
   const s=PHY.saved;if(s){for(const k in s.sys)if(SYS[k]){SYS[k].on=s.sys[k].on;SYS[k].op=s.sys[k].op;}for(const k in s.planes){Object.assign(PLANES[k],s.planes[k]);}updatePlanes();renderPlanes();if(studio!==s.studio)setStudio(s.studio);if(s.depth){DEPTH_OFF.clear();s.depth.forEach(d=>DEPTH_OFF.add(d));}}
   isoOnly=false;isoSet=null;applySystems();renderSysList();if(PHY.orb){orb.T.th=PHY.orb.th;orb.T.ph=PHY.orb.ph;orb.T.r=PHY.orb.r;orb.T.tgt.copy(PHY.orb.tgt);}}
-function phyTick(dt){if(!PHY.on||!PHY.saved)return;arcLine.visible=arcFan.visible=arcRays.visible=false;const steps=curSteps();if(!steps[PHY.step])return;const sp=(PHY.slow?0.3:1)*(PHY.paused?0:1);PHY.t+=dt*sp;
+function phyTick(dt){if(!PHY.on||!PHY.saved)return;arcLine.visible=arcFan.visible=arcRays.visible=false;if(typeof gonHide==='function')gonHide();const steps=curSteps();if(!steps[PHY.step])return;const sp=(PHY.slow?0.3:1)*(PHY.paused?0:1);PHY.t+=dt*sp;
   const tot=PHY.t/PHY_T,ph=((tot%1)+1)%1,st=steps[PHY.step].id,T=curTour();
   if(T.heart){if(PHY.sound&&!PHY.paused){if(PHY.lastPh<0.165&&ph>=0.165)phyThump(55,0.16,0.55);if(PHY.lastPh<0.465&&ph>=0.465)phyThump(75,0.11,0.35);}
     PHY.lastPh=ph;if(st!=='body')phyHeartPose(ph);if(st==='anat'&&!PHY.paused)orb.T.th+=dt*0.22;}
