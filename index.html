@@ -1560,8 +1560,8 @@ function buildRig(){
     JOINTS['fore_'+S]={pivot:P('elbow_'+S),child:['fore_'+S,'hand_'+S],long:up('elbow_'+S,'wrist_'+S),blend:.025,twist:P('wrist_'+S).distanceTo(P('elbow_'+S))};
     JOINTS['wrist_'+S]={pivot:P('wrist_'+S),child:['hand_'+S],blend:.014};
     JOINTS['hip_'+S]={pivot:P('hip_'+S),child:['thigh_','leg_','foot_','heel_'].map(x=>x+S),long:up('hip_'+S,'knee_'+S),blend:.04};
-    JOINTS['knee_'+S]={pivot:P('knee_'+S),child:['leg_'+S,'foot_'+S,'heel_'+S],blend:.03};
-    JOINTS['ankle_'+S]={pivot:P('ankle_'+S),child:['foot_'+S,'heel_'+S],blend:.02};
+    /* eje de flexión de la rodilla: centro de los círculos de los cóndilos femorales posteriores (ajustado a la malla: 23,5 mm por encima de la interlínea); girando alrededor de la línea articular, la meseta tibial atravesaba los cóndilos en flexión profunda */JOINTS['knee_'+S]={pivot:P('knee_'+S).add(new V3(0,0.0235,-0.0007)),child:['leg_'+S,'foot_'+S,'heel_'+S],blend:.03};
+    /* eje talocrural de Inman: pasa por el punto medio entre las puntas de los maléolos (medido en la malla: 10,5 mm por debajo y 2,7 mm por detrás del pivote anterior); con el pivote más alto, el astrágalo chocaba con la mortaja en flexión plantar */JOINTS['ankle_'+S]={pivot:P('ankle_'+S).add(new V3(0,-0.0105,-0.0027)),child:['foot_'+S,'heel_'+S],blend:.02};
   }
   JOINTS.cervical={pivot:P('c7').lerp(P('c3'),.35),child:['head'],blend:.035};
   JOINTS.trunk={pivot:P('l3'),child:['spineUp','head','clav_R','arm_R','fore_R','hand_R','clav_L','arm_L','fore_L','hand_L'],blend:.05,vert:[0,0.14]};
@@ -1769,27 +1769,47 @@ function musPost(m,ops){const u=m.userData,c=u.c,S=c.side==='derecho'?'R':c.side
     if(!any)break;for(let i=0;i<n;i++){if(D[i*3]===D[i*3]){P[i*3]=P[i*3]*0.4+D[i*3]*0.6;P[i*3+1]=P[i*3+1]*0.4+D[i*3+1]*0.6;P[i*3+2]=P[i*3+2]*0.4+D[i*3+2]*0.6;}}keep();}
   m.geometry.computeVertexNormals();}
 
+/* desplazamiento de la tibia (mm, en el sistema de la tibia: y = a lo largo de la tibia, z = anteroposterior) según los grados de flexión */
+let KNEE_TR=[[0,0,0]];
+function kneeTr(q,jn){const J=JOINTS[jn];if(!J)return null;const ax=J.xax||new V3(1,0,0);let ang=2*Math.acos(Math.min(1,Math.abs(q.w)))*180/Math.PI;const s=Math.sqrt(Math.max(0,1-q.w*q.w));if(s>1e-6){const d=(q.x*ax.x+q.y*ax.y+q.z*ax.z)/s*(q.w<0?-1:1);ang*=Math.abs(d);}
+  const T=(typeof window!=='undefined'&&window.__kneeTrOv)?window.__kneeTrOv(ang):(()=>{const K=KNEE_TR;if(ang<=K[0][0])return [K[0][1],K[0][2]];for(let i=1;i<K.length;i++){if(ang<=K[i][0]){const f=(ang-K[i-1][0])/(K[i][0]-K[i-1][0]);return [K[i-1][1]+(K[i][1]-K[i-1][1])*f,K[i-1][2]+(K[i][2]-K[i-1][2])*f];}}const L=K[K.length-1];return [L[1],L[2]];})();
+  if(!T||(!T[0]&&!T[1]))return null;return new V3(0,T[0]/1000,T[1]/1000);}
+/* tobillo: el giro se separa en su parte talocrural (alrededor del eje transversal, en la mortaja) y el resto
+   (inversión-eversión), que ocurre en la articulación subastragalina, por debajo del astrágalo */
+let STJ_OFF=[0.006,-0.018,0],STJ_OB=0;
+function ankleSplit(o){const J=JOINTS[o.jn],a=J.xax||new V3(1,0,0),q=new Q().setFromAxisAngle(o.ax,o.ang),pr=q.x*a.x+q.y*a.y+q.z*a.z,tw=new Q(a.x*pr,a.y*pr,a.z*pr,q.w).normalize(),sw=tw.clone().invert().multiply(q);/* q = talocrural · subastragalina: primero gira el pie bajo el astrágalo y luego todo en la mortaja */
+  const toOp=(qq,p)=>{const an=2*Math.acos(Math.min(1,Math.abs(qq.w))),s=Math.sqrt(Math.max(0,1-qq.w*qq.w));let ax=s>1e-6?new V3(qq.x/s,qq.y/s,qq.z/s):new V3(1,0,0);if(qq.w<0)ax.negate();return Object.assign({},o,{ang:an,ax,p,tr:null});};
+  const off=(typeof window!=='undefined'&&window.__stjOff)||STJ_OFF,fl=/_L$/.test(o.jn)?-1:1,ps=J.pivot.clone().add(new V3(off[0]*fl,off[1],off[2]));
+  const T=toOp(tw,J.pivot);T.tr=o.tr;const S=toOp(sw,ps);
+  /* eje subastragalino oblicuo (Inman): unos 42° sobre la horizontal y 23° hacia medial; la inversión medida en el plano frontal es la componente de ese giro alrededor del eje anteroposterior */
+  const OB=(typeof window!=='undefined'&&window.__stjOb!==undefined)?window.__stjOb:STJ_OB;if(OB&&S.ang>1e-4){const d=new V3(0.29*fl,0.67,0.68).normalize(),sg=Math.sign(S.ax.z)||1;S.ax=d.multiplyScalar(sg);S.ang=S.ang/0.68;}/* la subastragalina gira con el pie ya colocado por la talocrural */S.p=ps;return {tw:T,sw:S};}
 function deform(active){
   // active: [{jn,q}] sorted distal→proximal
+  /* rodilla: en flexión el fémur rueda y se desliza hacia atrás sobre la meseta tibial; el desplazamiento de la tibia
+     se toma de una tabla calculada para que los cóndilos no atraviesen la tibia en ningún ángulo (ver KNEE_TR) */
+  active=active.map(a=>{if(a.tr||!/^knee_/.test(a.jn))return a;const t=kneeTr(a.q,a.jn);return t?Object.assign({},a,{tr:t}):a;});
   const ops=active.map(a=>{const q=a.q;let ang=2*Math.acos(Math.min(1,Math.abs(q.w)));const s=Math.sqrt(Math.max(0,1-q.w*q.w));
     let ax=s>1e-6?new V3(q.x/s,q.y/s,q.z/s):new V3(1,0,0);if(q.w<0){ax.negate();}return {jn:a.jn,ang,ax,p:JOINTS[a.jn].pivot,tr:a.tr?a.tr.clone().applyQuaternion(a.q):null};}).filter(o=>o.ang>1e-4||o.tr);
   const touched=new Set();
   for(const m of meshes){
     if(!ops.length) break;
     const Ws=ops.map(o=>weightsFor(m,o.jn));if(Ws.every(w=>!w)) continue;
-    const u=m.userData,g=m.geometry,pa=g.attributes.position,na=g.attributes.normal;const ARC=!u.arcm&&/pectoralis major/i.test(u.c.en);/* el pectoral mayor gira en arco alrededor del hombro: la interpolación lineal lo aplastaba contra el tórax en la elevación máxima */const LINs=ops.map(o=>!!(u.lin&&u.lin[o.jn])&&!(ARC&&/^shoulder/.test(o.jn)));
+    /* el astrágalo queda en la mortaja: solo sigue la flexión dorsal/plantar (giro alrededor del eje talocrural); la inversión y la eversión ocurren por debajo, en la subastragalina */
+    const TAL=m.userData.c&&m.userData.c.en==='Talus';const opsM=ops.some(o=>/^ankle_/.test(o.jn))?ops.flatMap(o=>{if(!/^ankle_/.test(o.jn))return [o];const sp=ankleSplit(o);return TAL?[sp.tw]:[sp.sw,sp.tw];}):ops;
+    const WsM=opsM===ops?Ws:opsM.map(o=>weightsFor(m,o.jn));
+    const u=m.userData,g=m.geometry,pa=g.attributes.position,na=g.attributes.normal;const ARC=!u.arcm&&/pectoralis major/i.test(u.c.en);/* el pectoral mayor gira en arco alrededor del hombro: la interpolación lineal lo aplastaba contra el tórax en la elevación máxima */const LINs=opsM.map(o=>!!(u.lin&&u.lin[o.jn])&&!(ARC&&/^shoulder/.test(o.jn)));
     if(!u.rest){u.rest=pa.array.slice();u.restN=na.array.slice();}
     const R=u.rest,RN=u.restN,P=pa.array,N=na.array,n=R.length/3;
     /* músculos del hombro por fibra: cada punto se desplaza la fracción de su fibra del desplazamiento de la inserción (la fibra sigue recta del origen a la inserción); solo junto al tendón gira con el hueso */
-    let FIB=null;if(u.arcm&&u.shS){FIB=[];const b=u.shS.bi;let Ix=R[b*3],Iy=R[b*3+1],Iz=R[b*3+2];for(let k=0;k<ops.length;k++){if(!Ws[k]){FIB.push(null);continue;}const o=ops[k],c=Math.cos(o.ang),s=Math.sin(o.ang),kx=o.ax.x,ky=o.ax.y,kz=o.ax.z,vx=Ix-o.p.x,vy=Iy-o.p.y,vz=Iz-o.p.z,d=kx*vx+ky*vy+kz*vz;
+    let FIB=null;if(u.arcm&&u.shS){FIB=[];const b=u.shS.bi;let Ix=R[b*3],Iy=R[b*3+1],Iz=R[b*3+2];for(let k=0;k<opsM.length;k++){if(!WsM[k]){FIB.push(null);continue;}const o=opsM[k],c=Math.cos(o.ang),s=Math.sin(o.ang),kx=o.ax.x,ky=o.ax.y,kz=o.ax.z,vx=Ix-o.p.x,vy=Iy-o.p.y,vz=Iz-o.p.z,d=kx*vx+ky*vy+kz*vz;
       const rx=vx*c+(ky*vz-kz*vy)*s+kx*d*(1-c)+o.p.x,ry=vy*c+(kz*vx-kx*vz)*s+ky*d*(1-c)+o.p.y,rz=vz*c+(kx*vy-ky*vx)*s+kz*d*(1-c)+o.p.z;FIB.push([rx-Ix,ry-Iy,rz-Iz]);Ix=rx;Iy=ry;Iz=rz;}}
     for(let i=0;i<n;i++){let x=R[i*3],y=R[i*3+1],z=R[i*3+2],nx=RN[i*3],ny=RN[i*3+1],nz=RN[i*3+2];
-      for(let k=0;k<ops.length;k++){const W=Ws[k];if(!W)continue;const w=W[i];if(w<0.001)continue;
-        if(FIB&&FIB[k]){const o=ops[k],F=FIB[k],c=Math.cos(o.ang),s=Math.sin(o.ang),kx=o.ax.x,ky=o.ax.y,kz=o.ax.z,vx=x-o.p.x,vy=y-o.p.y,vz=z-o.p.z;let d=kx*vx+ky*vy+kz*vz;
+      for(let k=0;k<opsM.length;k++){const W=WsM[k];if(!W)continue;const w=W[i];if(w<0.001)continue;
+        if(FIB&&FIB[k]){const o=opsM[k],F=FIB[k],c=Math.cos(o.ang),s=Math.sin(o.ang),kx=o.ax.x,ky=o.ax.y,kz=o.ax.z,vx=x-o.p.x,vy=y-o.p.y,vz=z-o.p.z;let d=kx*vx+ky*vy+kz*vz;
           const rx=vx*c+(ky*vz-kz*vy)*s+kx*d*(1-c)+o.p.x,ry=vy*c+(kz*vx-kx*vz)*s+ky*d*(1-c)+o.p.y,rz=vz*c+(kx*vy-ky*vx)*s+kz*d*(1-c)+o.p.z,q=w*w*w;
           const tx=x+w*F[0],ty=y+w*F[1],tz=z+w*F[2];x=tx+(rx-tx)*q;y=ty+(ry-ty)*q;z=tz+(rz-tz)*q;
           const tn=o.ang*q,cn=Math.cos(tn),sn=Math.sin(tn);d=kx*nx+ky*ny+kz*nz;const ax2=nx*cn+(ky*nz-kz*ny)*sn+kx*d*(1-cn),ay2=ny*cn+(kz*nx-kx*nz)*sn+ky*d*(1-cn),az2=nz*cn+(kx*ny-ky*nx)*sn+kz*d*(1-cn);nx=ax2;ny=ay2;nz=az2;continue;}
-        const o=ops[k],LIN=LINs[k]&&w<0.999,th=LIN?o.ang:o.ang*w,c=Math.cos(th),s=Math.sin(th),kx=o.ax.x,ky=o.ax.y,kz=o.ax.z;
+        const o=opsM[k],LIN=LINs[k]&&w<0.999,th=LIN?o.ang:o.ang*w,c=Math.cos(th),s=Math.sin(th),kx=o.ax.x,ky=o.ax.y,kz=o.ax.z;
         let vx=x-o.p.x,vy=y-o.p.y,vz=z-o.p.z;let d=kx*vx+ky*vy+kz*vz;
         let rx=vx*c+(ky*vz-kz*vy)*s+kx*d*(1-c),ry=vy*c+(kz*vx-kx*vz)*s+ky*d*(1-c),rz=vz*c+(kx*vy-ky*vx)*s+kz*d*(1-c);
         if(LIN){x=x+(rx+o.p.x-x)*w;y=y+(ry+o.p.y-y)*w;z=z+(rz+o.p.z-z)*w;}else{x=rx+o.p.x;y=ry+o.p.y;z=rz+o.p.z;}if(o.tr){x+=o.tr.x*w;y+=o.tr.y*w;z+=o.tr.z*w;}
