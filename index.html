@@ -844,6 +844,18 @@ for(const k in SYS){SYS[k].state='idle';SYS[k].group=null;SYS[k].count=0;}
 
 /* ───────── Escena ───────── */
 const stage=$('#stage'), cv=$('#cv');
+/* Protección de WebGL: en algunas tarjetas (visto en NVIDIA) un color de material llegaba a la GPU sin su componente r
+   durante la carga; three.js lo enviaba como lista y el fotograma entero fallaba, dejando la vista en negro. Aquí cada
+   vector o color incompleto se completa (r,g,b o x,y,z; lo que falte vale 1) y la primera vez se guarda qué uniforme y
+   qué material lo causaron (localStorage 'corpus-glwarn') para poder corregir el origen. */
+let GL_LO=null,GL_LM=null;
+(function(){const G=(typeof WebGL2RenderingContext!=='undefined')?[WebGL2RenderingContext.prototype]:[];if(typeof WebGLRenderingContext!=='undefined')G.push(WebGLRenderingContext.prototype);
+  let warned=false;const fix=(v,n)=>{const g=k=>{const x=v[k];return typeof x==='number'&&isFinite(x)?x:1;};const out=new Float32Array(n);const ks=v.r!==undefined||v.g!==undefined||v.isColor?['r','g','b']:['x','y','z','w'];for(let i=0;i<n;i++)out[i]=g(ks[i]);return out;};
+  for(const P of G){if(P.__corpusShim)continue;P.__corpusShim=1;const gl=P.getUniformLocation;P.getUniformLocation=function(pg,name){const l=gl.call(this,pg,name);if(l)try{l.__n=name;}catch(e){}return l;};
+    for(const [fn,n] of [['uniform3fv',3],['uniform4fv',4]]){const o=P[fn];P[fn]=function(l,v,...a){if(v!=null&&typeof v[Symbol.iterator]!=='function'&&typeof v==='object'){
+        if(!warned){warned=true;const m=GL_LM,ob=GL_LO;const info={u:l&&l.__n,cls:v.constructor&&v.constructor.name,keys:Object.keys(v).join(','),obj:ob&&(ob.userData&&ob.userData.c?ob.userData.c.en+' / '+ob.userData.sys:ob.type+' '+ob.name),mat:m&&(m.type+' '+(m.name||'')),t:new Date().toISOString()};console.warn('corpus: uniforme incompleto',info);try{localStorage.setItem('corpus-glwarn',JSON.stringify(info));}catch(e){}}
+        v=fix(v,n);}return o.call(this,l,v,...a);};}}
+  if(typeof THREE!=='undefined'&&THREE.Object3D&&THREE.Object3D.prototype.onBeforeRender&&!THREE.Object3D.prototype.__corpusObr){const ob=THREE.Object3D.prototype.onBeforeRender;THREE.Object3D.prototype.onBeforeRender=function(r,s,c,g,m){GL_LO=this;GL_LM=m;return ob.call(this,r,s,c,g,m);};THREE.Object3D.prototype.__corpusObr=1;}})();
 const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 renderer.outputEncoding=THREE.sRGBEncoding;
@@ -1739,7 +1751,7 @@ function musRebuild(m,ops,S){const u=m.userData,f=musFib(m,S);if(!f||f.none)retu
   return true;}
 
 /* la reconstrucción por fibras queda desactivada: en las pruebas reducía la penetración pero separaba en jirones el dorsal y el pectoral junto a la axila */
-const MUS_REBUILD=false;
+const MUS_REBUILD=false;let MUS_RB_ORG={};
 const SHM=/^((Clavicular|Acromial|Scapular spinal) part of deltoid muscle|(Supraspinatus|Infraspinatus|Teres major|Teres minor|Subscapularis|Coracobrachialis) muscle|Latissimus dorsi muscle|(Sternocostal head|Clavicular head|Abdominal part) of pectoralis major muscle|Long head of (biceps|triceps) brachii|Short head of biceps brachii)$/;
 const HUMHEAD={};
 function humHead(S){if(HUMHEAD[S])return HUMHEAD[S];const J=JOINTS['shoulder_'+S];const h=meshes.find(m=>m.userData.c&&m.userData.c.en==='Humerus'&&sexOk(m.userData.sys)&&m.userData.c.side===(S==='R'?'derecho':'izquierdo'));if(!J||!h)return null;
@@ -1796,7 +1808,8 @@ function musPost(m,ops){const u=m.userData,c=u.c,S=c.side==='derecho'?'R':c.side
       x=dx*f.ex.x+dy*f.ex.y+dz*f.ex.z,y=dx*f.ey.x+dy*f.ey.y+dz*f.ey.z,z=dx*f.ez.x+dy*f.ez.y+dz*f.ez.z,d=bsdfAt(F,x,y,z);if(d===null||d>=bc[b][i])continue;
       const e=F.h*0.5,gx=(bsdfAt(F,x+e,y,z)??d)-(bsdfAt(F,x-e,y,z)??d),gy=(bsdfAt(F,x,y+e,z)??d)-(bsdfAt(F,x,y-e,z)??d),gz=(bsdfAt(F,x,y,z+e)??d)-(bsdfAt(F,x,y,z-e)??d),gl=Math.sqrt((gx)**2+(gy)**2+(gz)**2);if(gl<1e-9)continue;
       const k=(bc[b][i]-d)/gl,wx=gx*k,wy=gy*k,wz=gz*k;P[i*3]+=f.ex.x*wx+f.ey.x*wy+f.ez.x*wz;P[i*3+1]+=f.ex.y*wx+f.ey.y*wy+f.ez.y*wz;P[i*3+2]+=f.ex.z*wx+f.ey.z*wy+f.ez.z*wz;}}};
-  if(MUS_REBUILD&&!ops.some(o=>/^(elbow|fore|wrist)_/.test(o.jn)))musRebuild(m,ops,S);
+  /* los músculos que nacen en la escápula se reconstruyen entre su origen (que sigue a la escápula) y su inserción en el húmero */
+  {const RB=(typeof window!=='undefined'&&window.__mrb)||MUS_RB_ORG,f0=MUS_ORG.find(x=>x[0].test(c.en));if((MUS_REBUILD||(f0&&RB[f0[1]]))&&!ops.some(o=>/^(elbow|fore|wrist)_/.test(o.jn)))musRebuild(m,ops,S);}
   const keep=()=>{bonePush();for(let i=0;i<n;i++){if(dh[i]>0){const x=P[i*3]-C.x,y=P[i*3+1]-C.y,z=P[i*3+2]-C.z,r=Math.sqrt((x)**2+(y)**2+(z)**2);if(r<dh[i]&&r>1e-6){const f=dh[i]/r;P[i*3]=C.x+x*f;P[i*3+1]=C.y+y*f;P[i*3+2]=C.z+z*f;}}
       if(T&&gt[i]<1){p.set(P[i*3],P[i*3+1],P[i*3+2]);const g=stcG(T.map,p);if(g<gt[i]){const zc=T.map.zc,x=p.x,z=p.z-zc,r=Math.hypot(x,z);if(r>1e-6){const f=(r+gt[i]-g)/r;P[i*3]=x*f;P[i*3+2]=zc+z*f;}}}}};
   keep();
