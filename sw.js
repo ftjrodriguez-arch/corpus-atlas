@@ -2,7 +2,7 @@
    V  = versión de la aplicación (página, librerías y datos JSON): cambia en cada publicación.
    MV = versión de los modelos 3D (m2/, hr/, draco/): cambiarla solo cuando cambien las mallas,
         así una actualización de la app no obliga a volver a descargar ~50 MB. */
-const V='corpus-v136';
+const V='corpus-v137';
 const MV='3';
 const SHELL='corpus-shell-'+V, MODELS='corpus-models-'+MV;
 const CORE=['./','index.html','manifest.webmanifest','icons/icon.svg','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png',
@@ -11,7 +11,8 @@ const CORE=['./','index.html','manifest.webmanifest','icons/icon.svg','icons/ico
  'data/info_en.json','data/info_pt.json','data/lessons_en.json','data/lessons_pt.json','data/cases_en.json','data/cases_pt.json'];
 const MODEL_CORE=['draco/draco_wasm_wrapper.js','draco/draco_decoder.wasm','draco/draco_decoder.js','m2/oseo.txt','m2/muscular.txt'];
 self.addEventListener('install',e=>{e.waitUntil(Promise.all([
-  caches.open(SHELL).then(c=>Promise.all(CORE.map(u=>c.add(u).catch(()=>{})))),
+  /* cache:'reload' salta la caché HTTP del navegador: cada versión guarda las librerías y los datos recién descargados */
+  caches.open(SHELL).then(c=>Promise.all(CORE.map(u=>c.add(new Request(u,{cache:'reload'})).catch(()=>{})))),
   caches.open(MODELS).then(c=>Promise.all(MODEL_CORE.map(u=>c.match(u).then(h=>h||c.add(u).catch(()=>{})))))
  ]).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==SHELL&&k!==MODELS&&k.startsWith('corpus-')).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
