@@ -8104,7 +8104,7 @@ function needDraw(now){let go=DRAW.force||now-DRAW.inp<1500||now-DRAW.t>500;
   if(go){DRAW.t=now;DRAW.p.copy(camera.position);DRAW.g.copy(orb.tgt);DRAW.force=false;}
   return go;}
 let FRAME_ERR=0;function frame(now){requestAnimationFrame(frame);try{frame0(now);}catch(e){if(FRAME_ERR++<3)console.error('frame',e);}}
-function frame0(now){const raw=(now-last)/1000;const dt=Math.min(0.05,raw);last=now;dprTick(raw);if(typeof shadowsTick==='function')try{shadowsTick(dt);}catch(_){}const k=1-Math.pow(0.0008,dt);
+function frame0(now){if(!cv.clientWidth||!cv.clientHeight){last=now;return;}/* lienzo oculto o sin tamaño: no se dibuja (evita búferes de tamaño cero) */const raw=(now-last)/1000;const dt=Math.min(0.05,raw);last=now;dprTick(raw);if(typeof shadowsTick==='function')try{shadowsTick(dt);}catch(_){}const k=1-Math.pow(0.0008,dt);
   orb.th+=(orb.T.th-orb.th)*k;orb.ph+=(orb.T.ph-orb.ph)*k;orb.r+=(orb.T.r-orb.r)*k;orb.tgt.lerp(orb.T.tgt,k);
   camera.position.set(orb.tgt.x+orb.r*Math.sin(orb.ph)*Math.sin(orb.th),orb.tgt.y+orb.r*Math.cos(orb.ph),orb.tgt.z+orb.r*Math.sin(orb.ph)*Math.cos(orb.th));camera.lookAt(orb.tgt);
   camLight.position.copy(camera.position);
