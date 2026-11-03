@@ -1696,10 +1696,79 @@ function smoothAlong(pos,W,n,tail,arm){let cx=0,cy=0,cz=0;for(let i=0;i<n;i++){c
 function segLimb(k){if(!k)return 'T';if(/^(arm|fore|hand|clv|scap)_|^(mc|fp|fm|fd)\d_|^(tm|tp|td)_/.test(k))return 'U';if(/^(thigh|leg|foot|heel)_|^(mt|tp|tm|td)\d_/.test(k))return 'L';return 'T';}
 function prepWeights(){}
 const deformed=new Set();
-function qOf(jn,comp){const J=JOINTS[jn];const long=J.long||new V3(0,1,0);
+function qOf(jn,comp){if(comp&&comp.q)return comp.q.clone();const J=JOINTS[jn];const long=J.long||new V3(0,1,0);
   const qx=new Q().setFromAxisAngle(J.xax||new V3(1,0,0),D(comp.x)),qy=new Q().setFromAxisAngle(long,D(comp.y)),qz=new Q().setFromAxisAngle(J.zax||new V3(0,0,1),D(comp.z));
   /* orden clínico (como un goniómetro): flexión, luego abducción y por último la rotación alrededor del eje largo del hueso ya colocado; así la rotación externa con el brazo abducido levanta el antebrazo en lugar de llevar el brazo hacia atrás */
   const q0=qx.multiply(qz).multiply(qy);return comp.w?new Q().setFromAxisAngle(new V3(0,1,0),D(comp.w)).multiply(q0):q0;}
+/* ───── Músculos del hombro: envoltura sobre el hueso y reparto de la tensión ─────
+   Como en los modelos musculoesqueléticos (OpenSim), los músculos que pasan sobre la cabeza del húmero la rodean y no
+   la atraviesan, y los que se apoyan en el tórax no entran en él. Tras deformar cada músculo:
+   1) cada punto que en reposo estaba junto a la cabeza humeral conserva su distancia a ella (su capa: tendón, bolsa,
+      deltoides), medida desde el centro de la cabeza ya colocado;
+   2) cada punto que en reposo estaba sobre la pared torácica conserva su separación del contorno costal;
+   3) donde la malla se ha estirado o plegado de forma brusca, el desplazamiento se suaviza con sus vecinos (la
+      tensión se reparte a lo largo del músculo en lugar de concentrarse en un pliegue) y se vuelven a aplicar 1 y 2. */
+/* Reconstrucción por fibras (modelo de origen–inserción): cada punto del músculo tiene un parámetro t entre su origen (0)
+   y su inserción en el húmero (1), calculado en reposo como dO/(dO+dH), siendo dO la distancia al hueso de origen y dH
+   la distancia al húmero. En cada postura el punto se coloca en la mezcla (1−t)·[hueso de origen] + t·[húmero]: el
+   estiramiento se reparte a lo largo de toda la fibra, como en un músculo real, en lugar de concentrarse en un pliegue. */
+const MUS_ORG=[[/^Clavicular (part of deltoid|head of pectoralis major) muscle$/,'clv'],[/^((Acromial|Scapular spinal) part of deltoid|Supraspinatus|Infraspinatus|Teres minor|Teres major|Subscapularis|Coracobrachialis) muscle$/,'scap'],[/^(Latissimus dorsi|(Sternocostal head|Abdominal part) of pectoralis major) muscle$/,'thx']];
+function boneHash(list){const cs=0.01,H=new Map();for(const m of list){const a=m.userData.rest||m.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3){const k=Math.floor(a[i]/cs)+','+Math.floor(a[i+1]/cs)+','+Math.floor(a[i+2]/cs);let b=H.get(k);if(!b)H.set(k,b=[]);b.push(a[i],a[i+1],a[i+2]);}}
+  return p=>{const fx=Math.floor(p[0]/cs),fy=Math.floor(p[1]/cs),fz=Math.floor(p[2]/cs);let best=1e9;for(let r=1;r<=12;r++){for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++)for(let c=-r;c<=r;c++){if(Math.max(Math.abs(a),Math.abs(b),Math.abs(c))!==r)continue;const L=H.get((fx+a)+','+(fy+b)+','+(fz+c));if(!L)continue;for(let t=0;t<L.length;t+=3){const d=(L[t]-p[0])**2+(L[t+1]-p[1])**2+(L[t+2]-p[2])**2;if(d<best)best=d;}}if(best<1e9&&Math.sqrt(best)<(r-1)*cs)break;}return Math.sqrt(best);};}
+const BONEH={};
+function boneSet(kind,S){const k=kind+S;if(BONEH[k])return BONEH[k];const sd=S==='R'?'derecho':'izquierdo';
+  const re=kind==='hum'?/^Humerus$/:kind==='scap'?/^Scapula$/:kind==='clv'?/^Clavicle$/:/^(.* rib|Body of sternum|Manubrium of sternum|Xiphoid process|Vertebra [TL]\d+|Hip bone)$/;
+  const L=meshes.filter(m=>m.userData.c&&BS(m.userData.sys)==='oseo'&&re.test(m.userData.c.en)&&(!m.userData.c.side||m.userData.c.side===sd||/Vertebra|sternum|Xiphoid/.test(m.userData.c.en)));if(!L.length)return null;return BONEH[k]=boneHash(L);}
+function musFib(m,S){const u=m.userData;if(u.mf&&u.mf.S===S)return u.mf;const og=MUS_ORG.find(x=>x[0].test(u.c.en));if(!og)return u.mf={S,none:1};
+  const dH=boneSet('hum',S),dO=boneSet(og[1],S);if(!dH||!dO)return null;const R=u.rest,n=R.length/3,t=new Float32Array(n);
+  for(let i=0;i<n;i++){const p=[R[i*3],R[i*3+1],R[i*3+2]],a=dO(p),b=dH(p);t[i]=a/(a+b+1e-6);}
+  /* se estira a [0,1]: los puntos pegados al origen quedan en 0 y los de la inserción en 1 */
+  let lo=1,hi=0;for(const v of t){if(v<lo)lo=v;if(v>hi)hi=v;}for(let i=0;i<n;i++){let v=(t[i]-lo)/((hi-lo)||1);t[i]=v<0.04?0:v>0.96?1:(v-0.04)/0.92;}
+  return u.mf={S,org:og[1],t};}
+/* músculos cortos que rodean la cabeza humeral: se interpola el giro; los largos (dorsal, redondo mayor, pectoral esternal) se reparten en línea recta entre origen e inserción, que es como se estiran (medido: menos pliegues en cada caso) */
+const MUS_ROT=/^(Teres minor|Infraspinatus|Coracobrachialis) muscle$|^Clavicular (part of deltoid|head of pectoralis major) muscle$/;
+function chainXf(ops,set,x,y,z){const p=new V3(x,y,z);for(const o of ops){if(!set.has(o.jn))continue;p.sub(o.p).applyAxisAngle(o.ax,o.ang).add(o.p);if(o.tr)p.add(o.tr);}return p;}
+function musRebuild(m,ops,S){const u=m.userData,f=musFib(m,S);if(!f||f.none)return false;const R=u.rest,P=m.geometry.attributes.position.array,n=R.length/3,t=f.t;
+  const prox=new Set(ops.filter(o=>!/_(R|L)$/.test(o.jn)).map(o=>o.jn));/* tronco y columna */
+  const so=new Set(prox),si=new Set(prox);if(f.org==='clv'){so.add('sc_'+S);}else if(f.org==='scap'){so.add('sc_'+S);so.add('acr_'+S);}
+  ['sc_'+S,'acr_'+S,'shoulder_'+S].forEach(j=>si.add(j));
+  /* se interpola el GIRO (no la posición): cada articulación entre origen e inserción actúa con la fracción t de su ángulo;
+     interpolar posiciones de puntos girados mucho (más de 90°) acorta y retuerce la parte media del músculo */
+  if(!MUS_ROT.test(u.c.en)){for(let i=0;i<n;i++){const a=chainXf(ops,so,R[i*3],R[i*3+1],R[i*3+2]),b=chainXf(ops,si,R[i*3],R[i*3+1],R[i*3+2]),w=t[i];P[i*3]=a.x+(b.x-a.x)*w;P[i*3+1]=a.y+(b.y-a.y)*w;P[i*3+2]=a.z+(b.z-a.z)*w;}return true;}
+  const p=new V3();for(let i=0;i<n;i++){p.set(R[i*3],R[i*3+1],R[i*3+2]);const w=t[i];for(const o of ops){const f=so.has(o.jn)?1:si.has(o.jn)?w:0;if(f<=0)continue;p.sub(o.p).applyAxisAngle(o.ax,o.ang*f).add(o.p);if(o.tr)p.addScaledVector(o.tr,f);}P[i*3]=p.x;P[i*3+1]=p.y;P[i*3+2]=p.z;}
+  return true;}
+
+/* la reconstrucción por fibras queda desactivada: en las pruebas reducía la penetración pero separaba en jirones el dorsal y el pectoral junto a la axila */
+const MUS_REBUILD=false;
+const SHM=/^((Clavicular|Acromial|Scapular spinal) part of deltoid muscle|(Supraspinatus|Infraspinatus|Teres major|Teres minor|Subscapularis|Coracobrachialis) muscle|Latissimus dorsi muscle|(Sternocostal head|Clavicular head|Abdominal part) of pectoralis major muscle|Long head of (biceps|triceps) brachii|Short head of biceps brachii)$/;
+const HUMHEAD={};
+function humHead(S){if(HUMHEAD[S])return HUMHEAD[S];const J=JOINTS['shoulder_'+S];const h=meshes.find(m=>m.userData.c&&m.userData.c.en==='Humerus'&&m.userData.c.side===(S==='R'?'derecho':'izquierdo'));if(!J||!h)return null;
+  const a=h.userData.rest||h.geometry.attributes.position.array,C=J.pivot,ds=[];for(let i=0;i<a.length;i+=3){const d=Math.hypot(a[i]-C.x,a[i+1]-C.y,a[i+2]-C.z);if(d<0.045)ds.push(d);}if(ds.length<20)return null;ds.sort((x,y)=>x-y);
+  /* radio de la cabeza: percentil 75 de la superficie ósea alrededor del centro articular */
+  return HUMHEAD[S]={r:ds[(ds.length*0.75)|0]};}
+function musPrep(m,S){const u=m.userData;if(u.mp&&u.mp.S===S)return u.mp;const R=u.rest,n=R.length/3,J=JOINTS['shoulder_'+S],H=humHead(S);if(!J||!H)return null;
+  const C=J.pivot,dh=new Float32Array(n).fill(-1);for(let i=0;i<n;i++){const d=Math.hypot(R[i*3]-C.x,R[i*3+1]-C.y,R[i*3+2]-C.z);if(d<H.r+0.035)dh[i]=Math.max(d,H.r+0.002);}
+  let gt=null;const T=typeof stcInit==='function'?stcInit():null;if(T){gt=new Float32Array(n).fill(9);const p=new V3();for(let i=0;i<n;i++){p.set(R[i*3],R[i*3+1],R[i*3+2]);const g=stcG(T.map,p);if(g<0.035)gt[i]=Math.max(0.002,g);}}
+  const I=m.geometry.index?m.geometry.index.array:null,nb=[...Array(n)].map(()=>[]);if(I){for(let t=0;t<I.length;t+=3){const a=I[t],b=I[t+1],c=I[t+2];nb[a].push(b,c);nb[b].push(a,c);nb[c].push(a,b);}}
+  const NB=nb.map(l=>Int32Array.from(new Set(l)));const L0=NB.map((l,i)=>Float32Array.from(l,j=>Math.hypot(R[i*3]-R[j*3],R[i*3+1]-R[j*3+1],R[i*3+2]-R[j*3+2])));
+  return u.mp={S,dh,gt,NB,L0};}
+function musPost(m,ops){const u=m.userData,c=u.c,S=c.side==='derecho'?'R':c.side==='izquierdo'?'L':null;if(!S)return;
+  const chain=['acr_'+S,'sc_'+S],used=ops.filter(o=>chain.includes(o.jn)||o.jn==='shoulder_'+S);if(!used.length)return;const mp=musPrep(m,S);if(!mp)return;
+  const trunk=ops.some(o=>/^(trunk|thor|lumbar)/.test(o.jn));const T=!trunk&&mp.gt?stcInit():null;
+  /* centro de la cabeza humeral colocado: sigue a la escápula (la glenoide lo lleva) */
+  const C=JOINTS['shoulder_'+S].pivot.clone();for(const o of ops){if(!chain.includes(o.jn))continue;C.sub(o.p).applyAxisAngle(o.ax,o.ang).add(o.p);}
+  const P=m.geometry.attributes.position.array,R=u.rest,n=R.length/3,{dh,gt,NB,L0}=mp,p=new V3();
+  if(MUS_REBUILD&&!ops.some(o=>/^(elbow|fore|wrist)_/.test(o.jn)))musRebuild(m,ops,S);
+  const keep=()=>{for(let i=0;i<n;i++){if(dh[i]>0){const x=P[i*3]-C.x,y=P[i*3+1]-C.y,z=P[i*3+2]-C.z,r=Math.hypot(x,y,z);if(r<dh[i]&&r>1e-6){const f=dh[i]/r;P[i*3]=C.x+x*f;P[i*3+1]=C.y+y*f;P[i*3+2]=C.z+z*f;}}
+      if(T&&gt[i]<1){p.set(P[i*3],P[i*3+1],P[i*3+2]);const g=stcG(T.map,p);if(g<gt[i]){const zc=T.map.zc,x=p.x,z=p.z-zc,r=Math.hypot(x,z);if(r>1e-6){const f=(r+gt[i]-g)/r;P[i*3]=x*f;P[i*3+2]=zc+z*f;}}}}};
+  keep();
+  /* reparto de la tensión: solo donde las aristas se han estirado más de 1,5 veces o encogido a menos de 0,6 */
+  const D=new Float32Array(n*3);for(let it=0;it<4;it++){let any=false;
+    for(let i=0;i<n;i++){const l=NB[i];if(!l.length)continue;let bad=0;for(let k=0;k<l.length;k++){const j=l[k],r=Math.hypot(P[i*3]-P[j*3],P[i*3+1]-P[j*3+1],P[i*3+2]-P[j*3+2])/(L0[i][k]||1e-6);if(r>1.5||r<0.6){bad=1;break;}}
+      if(!bad){D[i*3]=D[i*3+1]=D[i*3+2]=NaN;continue;}any=true;let sx=0,sy=0,sz=0;for(const j of l){sx+=P[j*3]-R[j*3];sy+=P[j*3+1]-R[j*3+1];sz+=P[j*3+2]-R[j*3+2];}const k=l.length;D[i*3]=R[i*3]+sx/k;D[i*3+1]=R[i*3+1]+sy/k;D[i*3+2]=R[i*3+2]+sz/k;}
+    if(!any)break;for(let i=0;i<n;i++){if(D[i*3]===D[i*3]){P[i*3]=P[i*3]*0.4+D[i*3]*0.6;P[i*3+1]=P[i*3+1]*0.4+D[i*3+1]*0.6;P[i*3+2]=P[i*3+2]*0.4+D[i*3+2]*0.6;}}keep();}
+  m.geometry.computeVertexNormals();}
+
 function deform(active){
   // active: [{jn,q}] sorted distal→proximal
   const ops=active.map(a=>{const q=a.q;let ang=2*Math.acos(Math.min(1,Math.abs(q.w)));const s=Math.sqrt(Math.max(0,1-q.w*q.w));
@@ -1726,6 +1795,7 @@ function deform(active){
         if(LIN){x=x+(rx+o.p.x-x)*w;y=y+(ry+o.p.y-y)*w;z=z+(rz+o.p.z-z)*w;}else{x=rx+o.p.x;y=ry+o.p.y;z=rz+o.p.z;}if(o.tr){x+=o.tr.x*w;y+=o.tr.y*w;z+=o.tr.z*w;}
         /* la normal gira según el peso (también en la interpolación lineal): si no, el tejido poco ponderado se sombrea como si hubiera girado entero */let cn=c,sn=s;if(LIN){const tn=o.ang*w;cn=Math.cos(tn);sn=Math.sin(tn);}d=kx*nx+ky*ny+kz*nz;rx=nx*cn+(ky*nz-kz*ny)*sn+kx*d*(1-cn);ry=ny*cn+(kz*nx-kx*nz)*sn+ky*d*(1-cn);rz=nz*cn+(kx*ny-ky*nx)*sn+kz*d*(1-cn);nx=rx;ny=ry;nz=rz;}
       P[i*3]=x;P[i*3+1]=y;P[i*3+2]=z;N[i*3]=nx;N[i*3+1]=ny;N[i*3+2]=nz;}
+    if(u.c&&SHM.test(u.c.en)){try{musPost(m,ops);}catch(e){}}
     if(FIB){/* músculos por fibra: sombreado recalculado con la forma estirada (si no, la fibra estirada brilla pálida como si mirara a la luz) */g.computeVertexNormals();}
     pa.needsUpdate=true;na.needsUpdate=true;g.computeBoundingSphere();touched.add(m);
   }
@@ -2344,16 +2414,42 @@ function stcApply(c,side){const T=stcInit();if(!T)return;
     const b0=best;for(let dx=b0.dx-3;dx<=b0.dx+3;dx++)for(let dy=b0.dy-3;dy<=b0.dy+3;dy++){const v=cost(dx,dy,ev(dx,dy));if(v<best.v)best={dx,dy,v};}
     if(STC_C.size>4000)STC_C.clear();STC_C.set(ck,[best.dx,best.dy]);ca.x+=best.dx;ca.y+=best.dy;}}
 
-let TILT=-0.8,WRAP=0.15,SCY=0.8;function physio(c,side){for(const k of Object.keys(c)){const [node,sx]=k.split('_');const S=sx||side,fl=S==='L'?-1:1,v=c[k];
-    if(node==='shoulder'){const ex=-v.x,ab=-(v.z*fl),E=Math.max(ex,ab);
-      if(E>30){const st=Math.min(55,(E-30)*0.36);if(ab>=ex)v.z+=st*fl;else v.x+=st;const kc='sc'+(sx?'_'+sx:''),ka='acr'+(sx?'_'+sx:'');c[kc]=c[kc]||{x:0,y:0,z:0,w:0};c[kc].z-=Math.min(14,st*0.28)*fl;c[ka]=c[ka]||{x:0,y:0,z:0,w:0};c[ka].z-=(st-Math.min(14,st*0.28))*fl;/* en la flexión la escápula gira en su propio plano y bascula hacia atrás para seguir pegada al tórax; en la abducción pura se mantiene el giro frontal */const fx=Math.max(0,ex),fa=Math.max(0,ab),fs=fx+fa>0?fx/(fx+fa):0;const J=JOINTS['acr_'+S];if(J&&J.zax0){J.zax=new V3(0,0,1).lerp(J.zax0,fs).normalize();J.xax=new V3(1,0,0).lerp(J.xax0,fs).normalize();}c[ka].x+=TILT*st*0.5;const wr=WRAP*st*0.6*(1-fs)*fl;c[ka].y+=wr+SCY*st*fs*fl;/* el brazo no hereda ese giro: la abducción sigue en su plano */v.w=(v.w||0)-wr;}
-      if(ab>90)v.y-=(ab-90)*0.5*fl;
+let TILT=-0.8,WRAP=0.15,SCY=0.8;
+/* ───── Complejo del hombro según la ISB (Wu 2005) ─────
+   Los valores del hombro que recibe physio son la posición del húmero respecto al TÓRAX (plano de elevación, elevación
+   y rotación axial), que es lo que mide el goniómetro. A partir de la elevación real del húmero se colocan la clavícula
+   y la escápula con datos medidos in vivo con agujas óseas (Ludewig et al. 2009; Borstad y Ludewig 2002), la escápula
+   se apoya sobre el contorno de las costillas (stcApply) y por último se calcula la glenohumeral que falta para que el
+   húmero quede exactamente donde se pidió: GH = (clavícula·escápula)⁻¹ · húmero-tórax. */
+/* rotación superior escapulotorácica añadida a la de reposo (°) según la elevación húmero-torácica (°) */
+const ST_UR=[[0,0],[20,3],[40,11],[60,17],[80,24],[100,30],[120,35],[150,42],[180,47]];
+function stInterp(T,e){if(e<=T[0][0])return T[0][1];for(let i=1;i<T.length;i++){if(e<=T[i][0]){const [a,va]=T[i-1],[b,vb]=T[i];return va+(vb-va)*(e-a)/(b-a);}}return T[T.length-1][1];}
+const _cl=(v,a,b)=>v<a?a:v>b?b:v,_ss=t=>{t=_cl(t,0,1);return t*t*(3-2*t);};
+function physio(c,side){
+  for(const k of Object.keys(c)){const [node,sx]=k.split('_');const S=sx||side,fl=S==='L'?-1:1,v=c[k];
+    if(node==='shoulder'){const ab=-(v.z*fl);
+      if(ab>90)v.y-=(ab-90)*0.5*fl;/* rotación externa glenohumeral necesaria para que el troquíter pase bajo el acromion */
       const hz=(v.w||0)*fl;if(hz>20){const kc='sc'+(sx?'_'+sx:'');c[kc]=c[kc]||{x:0,y:0,z:0,w:0};c[kc].y+=Math.min(15,(hz-20)*0.16)*fl;}}}
   for(const k of Object.keys(c)){const [node,sx]=k.split('_');const S=sx||side,fl=S==='L'?-1:1,v=c[k],L=LIM[node];if(!L)continue;
     for(const ax of ['x','y','z','w']){if(!L[ax]||!v[ax])continue;const f=ax==='x'?1:fl;let r=v[ax]*f;let [lo,hi]=L[ax];
       if(node==='knee'&&ax==='y'){const g=Math.max(0,Math.min(1,(v.x||0)/60));lo*=g;hi*=g;}
       r=Math.max(lo,Math.min(hi,r));v[ax]=r*f;}}
+  /* clavícula y escápula a partir de la posición real del húmero */
+  const HT=[];
+  for(const k of Object.keys(c)){const [node,sx]=k.split('_');if(node!=='shoulder')continue;const S=sx||side,fl=S==='L'?-1:1,v=c[k],J=JOINTS['shoulder_'+S],JA=JOINTS['acr_'+S];if(!J||!JA)continue;
+    const qHT=qOf('shoulder_'+S,{x:v.x||0,y:v.y||0,z:v.z||0,w:v.w||0});const d0=J.long.clone().negate(),d=d0.clone().applyQuaternion(qHT);
+    const E=Math.acos(_cl(d.dot(d0),-1,1))*180/Math.PI,az=Math.atan2(d.z,-d.x*fl)*180/Math.PI;
+    /* con el brazo por detrás del plano frontal (extensión) la escápula apenas rota hacia arriba */
+    const hm=Math.hypot(d.x,d.z),wa=_ss((az+45)/35),wgt=wa+(1-wa)*(1-_ss((hm-0.2)/0.35)),e=E*wgt;/* cerca de la vertical el plano no está definido: se cuenta toda la elevación */if(e<0.5)continue;
+    const kc='sc'+(sx?'_'+sx:''),ka='acr'+(sx?'_'+sx:'');c[kc]=c[kc]||{x:0,y:0,z:0,w:0};c[ka]=c[ka]||{x:0,y:0,z:0,w:0};
+    if(JA.zax0){JA.zax=JA.zax0.clone();JA.xax=JA.xax0.clone();}/* ejes propios de la escápula: rotación superior en su plano y báscula sobre su espina */
+    c[kc].z-=6*_cl(e/150,0,1)*fl;            /* elevación esternoclavicular: unos 6° (Ludewig 2009) */
+    c[kc].y-=16*_ss((e-20)/140)*fl;          /* retracción esternoclavicular: unos 16° */
+    c[ka].z-=stInterp(ST_UR,e)*fl;           /* rotación superior escapulotorácica */
+    c[ka].x-=21*_ss((e-20)/150);             /* báscula posterior: unos 21° */
+    HT.push([k,S,kc,ka,qHT]);}
   try{stcApply(c,side);}catch(e){}
+  for(const [k,S,kc,ka,qHT] of HT){const qs=qOf('sc_'+S,c[kc]),qa=qOf('acr_'+S,c[ka]);c[k].q=qs.multiply(qa).invert().multiply(qHT);}
   return c;}
 function comps(t){const c={};const add=(k,ax,deg)=>{c[k]=c[k]||{x:0,y:0,z:0,w:0};c[k][ax]+=deg;};
   const flip=ax=>(ax==='x'?1:sideSign());const help=curM.helpFn?curM.helpFn(angle):(curM.help||{});
@@ -2382,7 +2478,7 @@ function updateArc(active){
   const pq0=new Q();[...proxK].filter(p=>p!=='acr'&&p!=='sc').reverse().forEach(pk=>pq0.multiply(active.find(x=>x.k===pk).q));
   const N=40,pts=[],dir=new V3(...curM.dir),R=curJ.R;
   for(let i=0;i<=N;i++){const f=i/N;const cm={x:base.x+(full.x-base.x)*f,y:base.y+(full.y-base.y)*f,z:base.z+(full.z-base.z)*f,w:base.w+(full.w-base.w)*f};
-    const q=pq0.clone().slerp(pq,f).multiply(qOf(jname(k),cm));pts.push(piv.clone().add(dir.clone().applyQuaternion(q).multiplyScalar(R)));}
+    const q=(k==='shoulder'?pq0.clone():pq0.clone().slerp(pq,f)).multiply(qOf(jname(k),cm));/* en el hombro los valores ya son húmero-tórax (ISB) */pts.push(piv.clone().add(dir.clone().applyQuaternion(q).multiplyScalar(R)));}
   arcLine.geometry.setFromPoints(pts);
   const fan=[];for(let i=0;i<N;i++) fan.push(piv.x,piv.y,piv.z,pts[i].x,pts[i].y,pts[i].z,pts[i+1].x,pts[i+1].y,pts[i+1].z);
   arcFan.geometry.setAttribute('position',new THREE.Float32BufferAttribute(fan,3));arcFan.geometry.computeBoundingSphere();
