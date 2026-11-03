@@ -1826,7 +1826,7 @@ const ROM=[
   {n:'Flexión',ax:'x',sg:-1,max:120,pl:'sag',dir:[0,-1,0],helpFn:t=>({knee:['x',Math.min(t,110)]}),ag:['Psoas major','Iliacus muscle','Rectus femoris muscle','Sartorius muscle','Tensor fasciae latae'],gon:['Trocánter mayor','Línea media lateral de la pelvis','Línea media lateral del fémur hacia el epicóndilo lateral'],pos:'Supino, rodilla flexionada',ef:'Blando (contacto muslo-abdomen)'},
   {n:'Extensión',ax:'x',sg:1,max:30,pl:'sag',dir:[0,-1,0],ag:['Gluteus maximus muscle','Long head of biceps femoris','Semitendinosus muscle','Semimembranosus muscle','Adductor magnus'],gon:['Trocánter mayor','Línea media lateral de la pelvis','Línea media lateral del fémur'],pos:'Prono, rodilla extendida',ef:'Firme (cápsula anterior, ligamento iliofemoral)'},
   {n:'Abducción',ax:'z',sg:-1,max:45,pl:'fro',dir:[0,-1,0],ag:['Gluteus medius muscle','Gluteus minimus muscle','Tensor fasciae latae'],gon:['EIAS del lado medido','Línea entre ambas EIAS','Línea media anterior del fémur hacia el centro de la rótula'],pos:'Supino',ef:'Firme (aductores, cápsula medial)'},
-  {n:'Aducción',ax:'z',sg:1,max:30,pl:'fro',dir:[0,-1,0],ag:['Adductor longus','Adductor brevis','Adductor magnus','Gracilis muscle','Pectineus muscle'],gon:['EIAS del lado medido','Línea entre ambas EIAS','Línea media anterior del fémur'],pos:'Supino, pierna contraria en abducción',ef:'Firme'},
+  {n:'Aducción',ax:'z',sg:1,max:30,pl:'fro',dir:[0,-1,0],/* como en la exploración: la pierna contraria se abduce para que los muslos no se atraviesen */helpFn:t=>({['hip_'+(romSide==='R'?'L':'R')]:['z',Math.min(t*0.9,25)]}),ag:['Adductor longus','Adductor brevis','Adductor magnus','Gracilis muscle','Pectineus muscle'],gon:['EIAS del lado medido','Línea entre ambas EIAS','Línea media anterior del fémur'],pos:'Supino, pierna contraria en abducción',ef:'Firme'},
   {n:'Rotación interna',ax:'y',sg:1,max:45,pl:'tra',dir:[0,0,-1],help:{hip:['x',-90],knee:['x',90]},ag:['Gluteus minimus muscle','Gluteus medius muscle','Tensor fasciae latae'],gon:['Centro de la rótula','Perpendicular al suelo','Cresta tibial hacia el punto medio de los maléolos'],pos:'Sedestación, cadera y rodilla a 90°',ef:'Firme'},
   {n:'Rotación externa',ax:'y',sg:-1,max:45,pl:'tra',dir:[0,0,-1],help:{hip:['x',-90],knee:['x',90]},ag:['Piriformis muscle','Obturator internus','Obturator externus','Superior gemellus muscle','Inferior gemellus muscle','Quadratus femoris muscle','Gluteus maximus muscle'],gon:['Centro de la rótula','Perpendicular al suelo','Cresta tibial hacia el punto medio de los maléolos'],pos:'Sedestación, cadera y rodilla a 90°',ef:'Firme'}]},
  {id:'rodilla',n:'Rodilla',node:'knee',sided:true,R:0.2,moves:[
@@ -2458,7 +2458,7 @@ function comps(t){const c={};const add=(k,ax,deg)=>{c[k]=c[k]||{x:0,y:0,z:0,w:0}
 function applyPose(){
   if(!RIG) return;if(typeof CT!=='undefined'&&CT.on&&currentTab==='mov')return;
   const active=(gait.on&&currentTab==='mov')?gaitActive():(currentTab==='mov'||contraction)?Object.entries(comps(angle)).map(([k,cm])=>({k,jn:jname(k),q:qOf(jname(k),cm)})):[];
-  active.sort((a,b)=>DEPTH[b.k]-DEPTH[a.k]);
+  active.sort((a,b)=>(DEPTH[b.k.split('_')[0]]||0)-(DEPTH[a.k.split('_')[0]]||0));
   deform(active);updateArc(active);
 }
 /* cadena proximal real: el húmero cuelga de la escápula (acromioclavicular y esternoclavicular), no solo del tronco */
