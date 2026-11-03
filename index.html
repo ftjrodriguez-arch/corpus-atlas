@@ -1230,7 +1230,7 @@ $('#autoHR').checked=autoHR;$('#autoHR').onchange=e=>{autoHR=e.target.checked;st
 $('#unhide').onclick=()=>{hiddenIds.clear();DIS_EXC=null;isoSet=null;patchFocus=null;if(selected){selected.m.userData.ghost=false;refreshState(selected.m);}applySystems();};
 
 /* ───────── Cuerpo: hombre (Z-Anatomy) o mujer (Visible Human Female) ───────── */
-function setBody(b){if(b!==BODY){select(null);stopTools&&stopTools();STC=null;STC_C.clear();}BODY=b;store.set('body',b);document.body.classList.toggle('body-f',b==='vh');document.body.classList.toggle('body-w',b==='f');
+function setBody(b){if(b!==BODY){select(null);stopTools&&stopTools();STC=null;STC_C.clear();try{for(const o of [BSDF,HUMHEAD,BONEH])for(const k in o)delete o[k];for(const m of meshes){delete m.userData.mp;delete m.userData.mf;}}catch(e){}}BODY=b;store.set('body',b);document.body.classList.toggle('body-f',b==='vh');document.body.classList.toggle('body-w',b==='f');
   $('#b-m').setAttribute('aria-pressed',b==='m');$('#b-f').setAttribute('aria-pressed',b!=='m');
   isoSet=null;patchFocus=null;DIS_FLT=null;DIS_EXC=null;disStage=-1;hiddenIds.clear();
   if(b==='f'&&currentTab==='mov'){playing=false;}
@@ -1718,13 +1718,13 @@ function boneHash(list){const cs=0.01,H=new Map();for(const m of list){const a=m
 const BONEH={};
 function boneSet(kind,S){const k=kind+S;if(BONEH[k])return BONEH[k];const sd=S==='R'?'derecho':'izquierdo';
   const re=kind==='hum'?/^Humerus$/:kind==='scap'?/^Scapula$/:kind==='clv'?/^Clavicle$/:/^(.* rib|Body of sternum|Manubrium of sternum|Xiphoid process|Vertebra [TL]\d+|Hip bone)$/;
-  const L=meshes.filter(m=>m.userData.c&&BS(m.userData.sys)==='oseo'&&re.test(m.userData.c.en)&&(!m.userData.c.side||m.userData.c.side===sd||/Vertebra|sternum|Xiphoid/.test(m.userData.c.en)));if(!L.length)return null;return BONEH[k]=boneHash(L);}
-function musFib(m,S){const u=m.userData;if(u.mf&&u.mf.S===S)return u.mf;const og=MUS_ORG.find(x=>x[0].test(u.c.en));if(!og)return u.mf={S,none:1};
+  const L=meshes.filter(m=>m.userData.c&&BS(m.userData.sys)==='oseo'&&sexOk(m.userData.sys)&&re.test(m.userData.c.en)&&(!m.userData.c.side||m.userData.c.side===sd||/Vertebra|sternum|Xiphoid/.test(m.userData.c.en)));if(!L.length)return null;return BONEH[k]=boneHash(L);}
+function musFib(m,S){const u=m.userData;if(u.mf&&u.mf.S===S&&u.mf.g===m.geometry.uuid)return u.mf;const og=MUS_ORG.find(x=>x[0].test(u.c.en));if(!og)return u.mf={S,g:m.geometry.uuid,none:1};
   const dH=boneSet('hum',S),dO=boneSet(og[1],S);if(!dH||!dO)return null;const R=u.rest,n=R.length/3,t=new Float32Array(n);
   for(let i=0;i<n;i++){const p=[R[i*3],R[i*3+1],R[i*3+2]],a=dO(p),b=dH(p);t[i]=a/(a+b+1e-6);}
   /* se estira a [0,1]: los puntos pegados al origen quedan en 0 y los de la inserción en 1 */
   let lo=1,hi=0;for(const v of t){if(v<lo)lo=v;if(v>hi)hi=v;}for(let i=0;i<n;i++){let v=(t[i]-lo)/((hi-lo)||1);t[i]=v<0.04?0:v>0.96?1:(v-0.04)/0.92;}
-  return u.mf={S,org:og[1],t};}
+  return u.mf={S,g:m.geometry.uuid,org:og[1],t};}
 /* músculos cortos que rodean la cabeza humeral: se interpola el giro; los largos (dorsal, redondo mayor, pectoral esternal) se reparten en línea recta entre origen e inserción, que es como se estiran (medido: menos pliegues en cada caso) */
 const MUS_ROT=/^(Teres minor|Infraspinatus|Coracobrachialis) muscle$|^Clavicular (part of deltoid|head of pectoralis major) muscle$/;
 function chainXf(ops,set,x,y,z){const p=new V3(x,y,z);for(const o of ops){if(!set.has(o.jn))continue;p.sub(o.p).applyAxisAngle(o.ax,o.ang).add(o.p);if(o.tr)p.add(o.tr);}return p;}
@@ -1742,32 +1742,93 @@ function musRebuild(m,ops,S){const u=m.userData,f=musFib(m,S);if(!f||f.none)retu
 const MUS_REBUILD=false;
 const SHM=/^((Clavicular|Acromial|Scapular spinal) part of deltoid muscle|(Supraspinatus|Infraspinatus|Teres major|Teres minor|Subscapularis|Coracobrachialis) muscle|Latissimus dorsi muscle|(Sternocostal head|Clavicular head|Abdominal part) of pectoralis major muscle|Long head of (biceps|triceps) brachii|Short head of biceps brachii)$/;
 const HUMHEAD={};
-function humHead(S){if(HUMHEAD[S])return HUMHEAD[S];const J=JOINTS['shoulder_'+S];const h=meshes.find(m=>m.userData.c&&m.userData.c.en==='Humerus'&&m.userData.c.side===(S==='R'?'derecho':'izquierdo'));if(!J||!h)return null;
+function humHead(S){if(HUMHEAD[S])return HUMHEAD[S];const J=JOINTS['shoulder_'+S];const h=meshes.find(m=>m.userData.c&&m.userData.c.en==='Humerus'&&sexOk(m.userData.sys)&&m.userData.c.side===(S==='R'?'derecho':'izquierdo'));if(!J||!h)return null;
   const a=h.userData.rest||h.geometry.attributes.position.array,C=J.pivot,ds=[];for(let i=0;i<a.length;i+=3){const d=Math.hypot(a[i]-C.x,a[i+1]-C.y,a[i+2]-C.z);if(d<0.045)ds.push(d);}if(ds.length<20)return null;ds.sort((x,y)=>x-y);
   /* radio de la cabeza: percentil 75 de la superficie ósea alrededor del centro articular */
   return HUMHEAD[S]={r:ds[(ds.length*0.75)|0]};}
-function musPrep(m,S){const u=m.userData;if(u.mp&&u.mp.S===S)return u.mp;const R=u.rest,n=R.length/3,J=JOINTS['shoulder_'+S],H=humHead(S);if(!J||!H)return null;
+/* campo de distancias con signo de cada hueso rígido del hombro (húmero, escápula, clavícula), calculado una vez en su
+   posición de reposo sobre una rejilla de 4 mm. En cada postura un punto del músculo se lleva al marco de reposo del hueso
+   y se consulta su distancia: si ha quedado más cerca de la superficie que en reposo (o dentro), se empuja hacia fuera
+   siguiendo el gradiente. Es la misma idea que usan los simuladores de tejidos blandos para el contacto con el hueso. */
+const BSDF={};
+function bsdf(name,S){const key=name+S;if(BSDF[key])return BSDF[key];const sd=S==='R'?'derecho':'izquierdo';
+  const m=meshes.find(x=>x.userData.c&&x.userData.c.en===name&&x.userData.c.side===sd&&BS(x.userData.sys)==='oseo'&&sexOk(x.userData.sys));if(!m)return null;
+  const A=m.userData.rest||m.geometry.attributes.position.array,nv=A.length/3,I=m.geometry.index?m.geometry.index.array:null,N=new Float32Array(A.length);
+  if(I){for(let t=0;t<I.length;t+=3){const a=I[t]*3,b=I[t+1]*3,c=I[t+2]*3,ux=A[b]-A[a],uy=A[b+1]-A[a+1],uz=A[b+2]-A[a+2],vx=A[c]-A[a],vy=A[c+1]-A[a+1],vz=A[c+2]-A[a+2],nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;for(const k of [a,b,c]){N[k]+=nx;N[k+1]+=ny;N[k+2]+=nz;}}}
+  const h=0.004,M=0.035;let x0=1e9,y0=1e9,z0=1e9,x1=-1e9,y1=-1e9,z1=-1e9;for(let i=0;i<A.length;i+=3){x0=Math.min(x0,A[i]);x1=Math.max(x1,A[i]);y0=Math.min(y0,A[i+1]);y1=Math.max(y1,A[i+1]);z0=Math.min(z0,A[i+2]);z1=Math.max(z1,A[i+2]);}
+  x0-=M;y0-=M;z0-=M;const NX=Math.ceil((x1+M-x0)/h)+1,NY=Math.ceil((y1+M-y0)/h)+1,NZ=Math.ceil((z1+M-z0)/h)+1,NC=NX*NY*NZ,near=new Int32Array(NC).fill(-1),dd=new Float32Array(NC).fill(1e9);
+  const cx=i=>x0+i*h,cy=j=>y0+j*h,cz=k=>z0+k*h,id=(i,j,k)=>(k*NY+j)*NX+i;
+  const tryc=(c,i,j,k,v)=>{const d=(cx(i)-A[v*3])**2+(cy(j)-A[v*3+1])**2+(cz(k)-A[v*3+2])**2;if(d<dd[c]){dd[c]=d;near[c]=v;}};
+  for(let v=0;v<nv;v++){const i=Math.round((A[v*3]-x0)/h),j=Math.round((A[v*3+1]-y0)/h),k=Math.round((A[v*3+2]-z0)/h);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)for(let c=-1;c<=1;c++){const ii=i+a,jj=j+b,kk=k+c;if(ii<0||jj<0||kk<0||ii>=NX||jj>=NY||kk>=NZ)continue;tryc(id(ii,jj,kk),ii,jj,kk,v);}}
+  const NB=[];for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)for(let c=-1;c<=1;c++)if(a||b||c)NB.push([a,b,c]);
+  for(let pass=0;pass<4;pass++){const fw=pass%2===0;for(let k0=0;k0<NZ;k0++)for(let j0=0;j0<NY;j0++)for(let i0=0;i0<NX;i0++){const i=fw?i0:NX-1-i0,j=fw?j0:NY-1-j0,k=fw?k0:NZ-1-k0,c=id(i,j,k);
+    for(const [a,b,e] of NB){const ii=i+a,jj=j+b,kk=k+e;if(ii<0||jj<0||kk<0||ii>=NX||jj>=NY||kk>=NZ)continue;const v=near[id(ii,jj,kk)];if(v>=0&&v!==near[c])tryc(c,i,j,k,v);}}}
+  const D=new Float32Array(NC);for(let k=0;k<NZ;k++)for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const c=id(i,j,k),v=near[c];if(v<0){D[c]=1;continue;}const dx=cx(i)-A[v*3],dy=cy(j)-A[v*3+1],dz=cz(k)-A[v*3+2];D[c]=Math.sqrt(dd[c])*((dx*N[v*3]+dy*N[v*3+1]+dz*N[v*3+2])<0?-1:1);}
+  return BSDF[key]={x0,y0,z0,h,NX,NY,NZ,D};}
+/* distancia en el punto (x,y,z) del marco de reposo, interpolada; null fuera de la rejilla */
+function bsdfAt(F,x,y,z){const fx=(x-F.x0)/F.h,fy=(y-F.y0)/F.h,fz=(z-F.z0)/F.h,i=Math.floor(fx),j=Math.floor(fy),k=Math.floor(fz);if(i<0||j<0||k<0||i>=F.NX-1||j>=F.NY-1||k>=F.NZ-1)return null;
+  const u=fx-i,v=fy-j,w=fz-k,NX=F.NX,NXY=F.NX*F.NY,D=F.D,c=(k*F.NY+j)*NX+i;
+  return ((D[c]*(1-u)+D[c+1]*u)*(1-v)+(D[c+NX]*(1-u)+D[c+NX+1]*u)*v)*(1-w)+((D[c+NXY]*(1-u)+D[c+NXY+1]*u)*(1-v)+(D[c+NXY+NX]*(1-u)+D[c+NXY+NX+1]*u)*v)*w;}
+const MUS_BONES=['Humerus','Scapula','Clavicle'];
+/* marco de cada hueso en la postura: imagen del origen y de los tres ejes por la cadena de articulaciones que lo mueve */
+function boneFrames(ops,S){const prox=ops.filter(o=>!/_(R|L)$/.test(o.jn)).map(o=>o.jn),out=[];
+  for(const b of MUS_BONES){const set=new Set(prox);set.add('sc_'+S);if(b!=='Clavicle')set.add('acr_'+S);if(b==='Humerus')set.add('shoulder_'+S);
+    const c0=chainXf(ops,set,0,0,0),ex=chainXf(ops,set,1,0,0).sub(c0),ey=chainXf(ops,set,0,1,0).sub(c0),ez=chainXf(ops,set,0,0,1).sub(c0);out.push({c0,ex,ey,ez});}
+  return out;}
+function musPrep(m,S){const u=m.userData,bk=MUS_BONES.map(b=>bsdf(b,S)?1:0).join('');if(u.mp&&u.mp.S===S&&u.mp.bk===bk&&u.mp.g===m.geometry.uuid)return u.mp;const R=u.rest,n=R.length/3,J=JOINTS['shoulder_'+S],H=humHead(S);if(!J||!H)return null;
   const C=J.pivot,dh=new Float32Array(n).fill(-1);for(let i=0;i<n;i++){const d=Math.hypot(R[i*3]-C.x,R[i*3+1]-C.y,R[i*3+2]-C.z);if(d<H.r+0.035)dh[i]=Math.max(d,H.r+0.002);}
   let gt=null;const T=typeof stcInit==='function'?stcInit():null;if(T){gt=new Float32Array(n).fill(9);const p=new V3();for(let i=0;i<n;i++){p.set(R[i*3],R[i*3+1],R[i*3+2]);const g=stcG(T.map,p);if(g<0.035)gt[i]=Math.max(0.002,g);}}
   const I=m.geometry.index?m.geometry.index.array:null,nb=[...Array(n)].map(()=>[]);if(I){for(let t=0;t<I.length;t+=3){const a=I[t],b=I[t+1],c=I[t+2];nb[a].push(b,c);nb[b].push(a,c);nb[c].push(a,b);}}
   const NB=nb.map(l=>Int32Array.from(new Set(l)));const L0=NB.map((l,i)=>Float32Array.from(l,j=>Math.hypot(R[i*3]-R[j*3],R[i*3+1]-R[j*3+1],R[i*3+2]-R[j*3+2])));
-  return u.mp={S,dh,gt,NB,L0};}
+  /* holgura de reposo respecto a cada hueso: nunca más cerca que en reposo, y como mucho 3 mm */
+  const BF=MUS_BONES.map(b=>bsdf(b,S)),bi=[],bc=BF.map(F=>{if(!F){bi.push(null);return null;}const a=new Float32Array(n),ix=[];for(let i=0;i<n;i++){const d=bsdfAt(F,R[i*3],R[i*3+1],R[i*3+2]);a[i]=d===null?0.003:Math.max(-0.008,Math.min(d,0.003));if(d!==null&&d<0.06)ix.push(i);}bi.push(Int32Array.from(ix));return a;});
+  /* solo se vigilan los puntos que en reposo están a menos de 6 cm de cada hueso */
+  return u.mp={S,bk,g:m.geometry.uuid,dh,gt,BF,bc,bi,NB,L0};}
 function musPost(m,ops){const u=m.userData,c=u.c,S=c.side==='derecho'?'R':c.side==='izquierdo'?'L':null;if(!S)return;
   const chain=['acr_'+S,'sc_'+S],used=ops.filter(o=>chain.includes(o.jn)||o.jn==='shoulder_'+S);if(!used.length)return;const mp=musPrep(m,S);if(!mp)return;
+  if(MUS_HQ&&u.hq&&u.hq.sig===MUS_SIG&&u.hq.g===m.geometry.uuid){const G=m.geometry.attributes;G.position.array.set(u.hq.P);G.normal.array.set(u.hq.N);G.position.needsUpdate=true;G.normal.needsUpdate=true;return;}
   const trunk=ops.some(o=>/^(trunk|thor|lumbar)/.test(o.jn));const T=!trunk&&mp.gt?stcInit():null;
   /* centro de la cabeza humeral colocado: sigue a la escápula (la glenoide lo lleva) */
   const C=JOINTS['shoulder_'+S].pivot.clone();for(const o of ops){if(!chain.includes(o.jn))continue;C.sub(o.p).applyAxisAngle(o.ax,o.ang).add(o.p);}
-  const P=m.geometry.attributes.position.array,R=u.rest,n=R.length/3,{dh,gt,NB,L0}=mp,p=new V3();
+  const P=m.geometry.attributes.position.array,R=u.rest,n=R.length/3,{dh,gt,BF,bc,bi,NB,L0}=mp,p=new V3();
+  const FR=boneFrames(ops,S);
+  const bonePush=()=>{for(let b=0;b<BF.length;b++){const F=BF[b];if(!F)continue;const f=FR[b],L=bi[b];for(let q=0;q<L.length;q++){const i=L[q],dx=P[i*3]-f.c0.x,dy=P[i*3+1]-f.c0.y,dz=P[i*3+2]-f.c0.z,
+      x=dx*f.ex.x+dy*f.ex.y+dz*f.ex.z,y=dx*f.ey.x+dy*f.ey.y+dz*f.ey.z,z=dx*f.ez.x+dy*f.ez.y+dz*f.ez.z,d=bsdfAt(F,x,y,z);if(d===null||d>=bc[b][i])continue;
+      const e=F.h*0.5,gx=(bsdfAt(F,x+e,y,z)??d)-(bsdfAt(F,x-e,y,z)??d),gy=(bsdfAt(F,x,y+e,z)??d)-(bsdfAt(F,x,y-e,z)??d),gz=(bsdfAt(F,x,y,z+e)??d)-(bsdfAt(F,x,y,z-e)??d),gl=Math.sqrt((gx)**2+(gy)**2+(gz)**2);if(gl<1e-9)continue;
+      const k=(bc[b][i]-d)/gl,wx=gx*k,wy=gy*k,wz=gz*k;P[i*3]+=f.ex.x*wx+f.ey.x*wy+f.ez.x*wz;P[i*3+1]+=f.ex.y*wx+f.ey.y*wy+f.ez.y*wz;P[i*3+2]+=f.ex.z*wx+f.ey.z*wy+f.ez.z*wz;}}};
   if(MUS_REBUILD&&!ops.some(o=>/^(elbow|fore|wrist)_/.test(o.jn)))musRebuild(m,ops,S);
-  const keep=()=>{for(let i=0;i<n;i++){if(dh[i]>0){const x=P[i*3]-C.x,y=P[i*3+1]-C.y,z=P[i*3+2]-C.z,r=Math.hypot(x,y,z);if(r<dh[i]&&r>1e-6){const f=dh[i]/r;P[i*3]=C.x+x*f;P[i*3+1]=C.y+y*f;P[i*3+2]=C.z+z*f;}}
+  const keep=()=>{bonePush();for(let i=0;i<n;i++){if(dh[i]>0){const x=P[i*3]-C.x,y=P[i*3+1]-C.y,z=P[i*3+2]-C.z,r=Math.sqrt((x)**2+(y)**2+(z)**2);if(r<dh[i]&&r>1e-6){const f=dh[i]/r;P[i*3]=C.x+x*f;P[i*3+1]=C.y+y*f;P[i*3+2]=C.z+z*f;}}
       if(T&&gt[i]<1){p.set(P[i*3],P[i*3+1],P[i*3+2]);const g=stcG(T.map,p);if(g<gt[i]){const zc=T.map.zc,x=p.x,z=p.z-zc,r=Math.hypot(x,z);if(r>1e-6){const f=(r+gt[i]-g)/r;P[i*3]=x*f;P[i*3+2]=zc+z*f;}}}}};
   keep();
   /* reparto de la tensión: solo donde las aristas se han estirado más de 1,5 veces o encogido a menos de 0,6 */
   const D=new Float32Array(n*3);for(let it=0;it<4;it++){let any=false;
-    for(let i=0;i<n;i++){const l=NB[i];if(!l.length)continue;let bad=0;for(let k=0;k<l.length;k++){const j=l[k],r=Math.hypot(P[i*3]-P[j*3],P[i*3+1]-P[j*3+1],P[i*3+2]-P[j*3+2])/(L0[i][k]||1e-6);if(r>1.5||r<0.6){bad=1;break;}}
+    for(let i=0;i<n;i++){const l=NB[i];if(!l.length)continue;let bad=0;for(let k=0;k<l.length;k++){const j=l[k],r=Math.sqrt((P[i*3]-P[j*3])**2+(P[i*3+1]-P[j*3+1])**2+(P[i*3+2]-P[j*3+2])**2)/(L0[i][k]||1e-6);if(r>1.5||r<0.6){bad=1;break;}}
       if(!bad){D[i*3]=D[i*3+1]=D[i*3+2]=NaN;continue;}any=true;let sx=0,sy=0,sz=0;for(const j of l){sx+=P[j*3]-R[j*3];sy+=P[j*3+1]-R[j*3+1];sz+=P[j*3+2]-R[j*3+2];}const k=l.length;D[i*3]=R[i*3]+sx/k;D[i*3+1]=R[i*3+1]+sy/k;D[i*3+2]=R[i*3+2]+sz/k;}
     if(!any)break;for(let i=0;i<n;i++){if(D[i*3]===D[i*3]){P[i*3]=P[i*3]*0.4+D[i*3]*0.6;P[i*3+1]=P[i*3+1]*0.4+D[i*3+1]*0.6;P[i*3+2]=P[i*3+2]*0.4+D[i*3+2]*0.6;}}keep();}
-  m.geometry.computeVertexNormals();}
+  musRelax(m,S,mp,P,keep);
+  m.geometry.computeVertexNormals();
+  if(MUS_HQ)u.hq={sig:MUS_SIG,g:m.geometry.uuid,P:P.slice(),N:m.geometry.attributes.normal.array.slice()};else u.hq=null;}
+/* reparto del estiramiento a lo largo del músculo (dinámica basada en posiciones): cada arista puede alargarse o acortarse
+   dentro de una banda fisiológica; las que se salen se corrigen moviendo sus dos extremos, salvo los puntos pegados al hueso
+   de origen o al húmero (inserción), que quedan fijos. Así el alargamiento que exige la nueva posición del húmero se
+   reparte por todo el vientre muscular en lugar de concentrarse en una franja, y el músculo no atraviesa el tórax ni la cabeza humeral. */
+let MUS_RLX={k:160,kq:30,lo:0.75,hi:1.75},MUS_HQ=false,MUS_T=null,MUS_LAST=null,MUS_SIG='',MUS_PREV='';
+function musRelax(m,S,mp,P,keep){const o=(typeof window!=='undefined'&&window.__mr)||MUS_RLX;if(!o||!o.k)return;const u=m.userData,f=musFib(m,S);if(!f||!f.t)return;
+  if(!mp.E){const I=m.geometry.index?m.geometry.index.array:null;if(!I)return;const R=u.rest,seen=new Set(),E=[],L=[];
+    for(let t=0;t<I.length;t+=3)for(const [a,b] of [[I[t],I[t+1]],[I[t+1],I[t+2]],[I[t+2],I[t]]]){const k=a<b?a*1e6+b:b*1e6+a;if(seen.has(k))continue;seen.add(k);
+      if((f.t[a]<=0||f.t[a]>=1)&&(f.t[b]<=0||f.t[b]>=1))continue;/* arista entre dos puntos fijos: no hace falta */
+      const l=Math.sqrt((R[a*3]-R[b*3])**2+(R[a*3+1]-R[b*3+1])**2+(R[a*3+2]-R[b*3+2])**2);if(l<1e-6)continue;E.push(a,b);L.push(l);}
+    const n=R.length/3,iw=new Float32Array(n);for(let i=0;i<n;i++)iw[i]=(f.t[i]<=0||f.t[i]>=1)?0:1;
+    mp.E=Int32Array.from(E);mp.EL=Float32Array.from(L);mp.iw=iw;}
+  const E=mp.E,EL=mp.EL,iw=mp.iw,K=MUS_HQ?o.k:(o.kq||o.k),lo=o.lo,hi=o.hi;
+  /* solo se revisan las aristas que tocan un punto movido en la pasada anterior */
+  const n=iw.length;let cur=new Uint8Array(n).fill(1),nxt=new Uint8Array(n);
+  for(let it=0;it<K;it++){let any=false;
+    for(let e=0;e<E.length;e+=2){const ia=E[e],ib=E[e+1];if(!cur[ia]&&!cur[ib])continue;const a=ia*3,b=ib*3,wa=iw[ia],wb=iw[ib],ws=wa+wb;if(ws<=0)continue;const dx=P[b]-P[a],dy=P[b+1]-P[a+1],dz=P[b+2]-P[a+2],l=Math.sqrt(dx*dx+dy*dy+dz*dz)||1e-9,l0=EL[e>>1];
+      const tgt=l>l0*hi?l0*hi:l<l0*lo?l0*lo:l;if(tgt===l)continue;any=true;nxt[ia]=nxt[ib]=1;const c=(l-tgt)/l/ws;
+      P[a]+=dx*c*wa;P[a+1]+=dy*c*wa;P[a+2]+=dz*c*wa;P[b]-=dx*c*wb;P[b+1]-=dy*c*wb;P[b+2]-=dz*c*wb;}
+    if(it%10===9||it===K-1||!any){keep();if(!any)break;cur.fill(1);nxt.fill(0);continue;}
+    const t=cur;cur=nxt;nxt=t;nxt.fill(0);}}
 
 /* desplazamiento de la tibia (mm, en el sistema de la tibia: y = a lo largo de la tibia, z = anteroposterior) según los grados de flexión */
 let KNEE_TR=[[0,0,0]];
@@ -1784,6 +1845,13 @@ function ankleSplit(o){const J=JOINTS[o.jn],a=J.xax||new V3(1,0,0),q=new Q().set
   /* eje subastragalino oblicuo (Inman): unos 42° sobre la horizontal y 23° hacia medial; la inversión medida en el plano frontal es la componente de ese giro alrededor del eje anteroposterior */
   const OB=(typeof window!=='undefined'&&window.__stjOb!==undefined)?window.__stjOb:STJ_OB;if(OB&&S.ang>1e-4){const d=new V3(0.29*fl,0.67,0.68).normalize(),sg=Math.sign(S.ax.z)||1;S.ax=d.multiplyScalar(sg);S.ang=S.ang/0.68;}/* la subastragalina gira con el pie ya colocado por la talocrural */S.p=ps;return {tw:T,sw:S};}
 function deform(active){
+  /* mientras el hombro se está moviendo los músculos se relajan con pocas iteraciones; cuando la postura se queda quieta
+     (180 ms sin cambios) se repite una vez con el cálculo completo */
+  /* si la postura es la misma que en la llamada anterior (animación detenida en un punto) también se usa el cálculo completo,
+     y su resultado se guarda para no repetirlo en cada fotograma */
+  MUS_SIG=active.map(a=>a.jn+(a.q?[a.q.x,a.q.y,a.q.z,a.q.w].map(v=>v.toFixed(4)).join(','):'')+(a.tr?[a.tr.x,a.tr.y,a.tr.z].map(v=>v.toFixed(4)).join(','):'')).join('|');
+  const _st=MUS_SIG===MUS_PREV;MUS_PREV=MUS_SIG;
+  if(!MUS_HQ){const A0=active;MUS_LAST=A0;clearTimeout(MUS_T);if(A0.some(a=>/^(shoulder|sc|acr)_/.test(a.jn))){if(_st){MUS_HQ=true;try{return deform(A0);}finally{MUS_HQ=false;}}MUS_T=setTimeout(()=>{if(MUS_LAST!==A0)return;MUS_HQ=true;try{deform(A0);}finally{MUS_HQ=false;}},180);}}
   // active: [{jn,q}] sorted distal→proximal
   /* rodilla: en flexión el fémur rueda y se desliza hacia atrás sobre la meseta tibial; el desplazamiento de la tibia
      se toma de una tabla calculada para que los cóndilos no atraviesen la tibia en ningún ángulo (ver KNEE_TR) */
@@ -2400,8 +2468,8 @@ for(const f of [2,3,4,5]){LIM['mcp'+f]={x:[-90,45],z:[-25,25]};LIM['pip'+f]={x:[
    las costillas ni separarse de ellas (escápula alada). */
 let STC=null;const STC_DY=0.01,STC_DT=2,STC_C=new Map();
 function stcInit(){if(STC&&STC.ok)return STC;
-  const ribs=meshes.filter(m=>m.userData.c&&/^(First|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|Ninth|Tenth) rib$/.test(m.userData.c.en));
-  const scs={R:null,L:null};for(const m of meshes){const c=m.userData.c;if(c&&c.en==='Scapula'){if(c.side==='derecho')scs.R=m;else if(c.side==='izquierdo')scs.L=m;}}
+  const ribs=meshes.filter(m=>m.userData.c&&sexOk(m.userData.sys)&&/^(First|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|Ninth|Tenth) rib$/.test(m.userData.c.en));
+  const scs={R:null,L:null};for(const m of meshes){const c=m.userData.c;if(c&&c.en==='Scapula'&&sexOk(m.userData.sys)){if(c.side==='derecho')scs.R=m;else if(c.side==='izquierdo')scs.L=m;}}
   if(ribs.length<16||!scs.R)return null;
   let zc=0,n0=0,y0=1e9,y1=-1e9;const P=[];for(const m of ribs){const a=m.userData.rest||m.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3){P.push(a[i],a[i+1],a[i+2]);zc+=a[i+2];n0++;if(a[i+1]<y0)y0=a[i+1];if(a[i+1]>y1)y1=a[i+1];}}zc/=n0;
   const NY=Math.ceil((y1-y0)/STC_DY)+1,NT=360/STC_DT,R=new Float32Array(NY*NT).fill(-1);
@@ -2417,7 +2485,7 @@ function stcInit(){if(STC&&STC.ok)return STC;
     const near=pts.filter((p,i)=>gs[i]<g0+0.03);side[s]={pts:near,g0};}
   STC={ok:true,map,side};return STC;}
 /* separación de un punto al contorno torácico (positiva fuera, negativa dentro); fuera del mapa no limita */
-function stcG(M,p){const iy=Math.round((p.y-M.y0)/STC_DY);if(iy<0||iy>=M.NY)return 1;const z=p.z-M.zc,it=((Math.round(Math.atan2(p.x,z)*180/Math.PI/STC_DT)%M.NT)+M.NT)%M.NT,R=M.R[iy*M.NT+it];if(R<0)return 1;return Math.hypot(p.x,z)-R;}
+function stcG(M,p){const iy=Math.round((p.y-M.y0)/STC_DY);if(iy<0||iy>=M.NY)return 1;const z=p.z-M.zc,it=((Math.round(Math.atan2(p.x,z)*180/Math.PI/STC_DT)%M.NT)+M.NT)%M.NT,R=M.R[iy*M.NT+it];if(R<0)return 1;return Math.sqrt(p.x*p.x+z*z)-R;}
 const _stq=new V3();
 function stcMin(T,S,qa,pa,qs,ps){let mn=1e9;for(const p of T.side[S].pts){_stq.copy(p).sub(pa).applyQuaternion(qa).add(pa).sub(ps).applyQuaternion(qs).add(ps);const g=stcG(T.map,_stq);if(g<mn)mn=g;}return mn;}
 function stcApply(c,side){const T=stcInit();if(!T)return;
