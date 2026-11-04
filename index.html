@@ -1933,7 +1933,7 @@ function skF(part,node,S){if(part==='ax'||!part.endsWith('_'+S))return 0;const t
 function skinW(m,node,S,jn){const u=m.userData;const pos=(u.rest||m.geometry.attributes.position.array),n=pos.length/3;
   if(BS(u.sys)==='oseo'){const pr=skPartOf(m);if(pr==='ax'||/_$/.test(pr))return null;const fv=skF(pr,node,S);return fv?new Float32Array(n).fill(fv):null;}
   /* la mano nunca sigue a la cadera ni el muslo al hombro, aunque estén juntos en reposo */
-  if(u.home===undefined){const c0=m.geometry.boundingSphere.center;let bk=null,bd=1e9;for(const k in SEGS){const d=segDist(c0.x,c0.y,c0.z,SEGS[k][0],SEGS[k][1]);if(d<bd){bd=d;bk=k;}}u.home=segLimb(bk);u.homeSeg=bk;}
+  if(u.home===undefined){const c0=restSphere(m).center;let bk=null,bd=1e9;for(const k in SEGS){const d=segDist(c0.x,c0.y,c0.z,SEGS[k][0],SEGS[k][1]);if(d<bd){bd=d;bk=k;}}u.home=segLimb(bk);u.homeSeg=bk;}
   const lowJ=/^(hip|knee|ankle)$/.test(node);if((lowJ&&u.home==='U')||(!lowJ&&u.home==='L'))return null;
   /* pared abdominal y ligamento inguinal: se fijan a la pelvis (espina ilíaca, pubis), nunca siguen al muslo */
   if(lowJ&&ABDWALL.test(u.c.en))return null;
@@ -1993,6 +1993,10 @@ function weightsFor(m,jn){const u=m.userData;if(u.W&&jn in u.W)return u.W[jn];co
   /* tendón del dorsal ancho: origen fijo en el tronco y tendón clavado al húmero (surco intertubercular); el vientre solo se alarga entre ambos */
   if(u.shS&&u.shS.pin&&/^(shoulder|acr|sc)_/.test(jn)&&u.shS.S===jn.split('_')[1]){const s=u.shS.s,n=s.length,V=W||new Float32Array(n);for(let i=0;i<n;i++){let t=(s[i]-0.8)/0.15;t=t<0?0:t>1?1:t*t*(3-2*t);if(t>V[i])V[i]=t;}u.W[jn]=V;u.lin=u.lin||{};u.lin[jn]=true;return V;}
   return W;}
+/* esfera envolvente en la postura de reposo: los pesos de cada articulación se calculan una sola vez y se guardan, así que no
+   pueden depender de dónde esté la malla en ese momento (si el brazo ya estaba levantado, el radio se asignaba al tórax) */
+function restSphere(m){const u=m.userData;if(u.restSph)return u.restSph;const R=u.rest||m.geometry.attributes.position.array;
+  return u.restSph=new THREE.Box3().setFromArray(R).getBoundingSphere(new THREE.Sphere());}
 function weightsFor0(m,jn){
   const u=m.userData;u.W=u.W||{};if(jn in u.W) return u.W[jn];
   const J=JOINTS[jn];
@@ -2000,7 +2004,7 @@ function weightsFor0(m,jn){
   /* los huesos son piezas rígidas: cada uno sigue entero a su articulación o no se mueve (aunque falten los datos de contacto) */
   if(!SKIN&&BS(u.sys)==='oseo'){const MJ=jn.match(/^(sc|acr|shoulder|elbow|fore|wrist|hip|knee|ankle)_([RL])$/);if(MJ){const pr=skPartOf(m),fv=(pr==='ax'||/_$/.test(pr))?0:skF(pr,MJ[1],MJ[2]);u.W[jn]=fv?new Float32Array((u.rest||m.geometry.attributes.position.array).length/3).fill(fv):null;return u.W[jn];}}
   if(SKIN){const MJ=jn.match(/^(sc|acr|shoulder|elbow|fore|wrist|hip|knee|ankle)_([RL])$/);if(MJ){const r=skinW(m,MJ[1],MJ[2],jn);if(r!==undefined){u.W[jn]=r;return r;}}}if(J.force){const fv=J.force(u.c?u.c.en:'');if(fv===0){u.W[jn]=null;return null;}if(fv===1){const nn=(u.rest||m.geometry.attributes.position.array).length/3;u.W[jn]=new Float32Array(nn).fill(1);return u.W[jn];}}
-  if(u.home===undefined){const c0=m.geometry.boundingSphere.center;let bk=null,bd=1e9;for(const k in SEGS){const d=segDist(c0.x,c0.y,c0.z,SEGS[k][0],SEGS[k][1]);if(d<bd){bd=d;bk=k;}}u.home=segLimb(bk);u.homeSeg=bk;}
+  if(u.home===undefined){const c0=restSphere(m).center;let bk=null,bd=1e9;for(const k in SEGS){const d=segDist(c0.x,c0.y,c0.z,SEGS[k][0],SEGS[k][1]);if(d<bd){bd=d;bk=k;}}u.home=segLimb(bk);u.homeSeg=bk;}
   if(J.limb===undefined){J.limb='T';for(const k of J.child){const l=segLimb(k);if(l!=='T'){J.limb=l;break;}}}
   if(u.home!=='T'&&J.limb!=='T'&&u.home!==J.limb){u.W[jn]=null;return null;}
   if(/^shoulder_/.test(jn)&&SCAPTHOR.test(u.c?u.c.en:'')){u.W[jn]=null;return null;}
@@ -2018,7 +2022,7 @@ function weightsFor0(m,jn){
       W[i]=w;if(w>0.001)any=true;}
     u.W[jn]=any?W:null;return u.W[jn];}
   const child=J.child.map(k=>SEGS[k]),other=Object.keys(SEGS).filter(k=>!J.child.includes(k)).map(k=>SEGS[k]);
-  const sph=m.geometry.boundingSphere,c=sph.center;
+  const sph=restSphere(m),c=sph.center;
   let dc=Infinity,dp=Infinity;for(const s of child) dc=Math.min(dc,segDist(c.x,c.y,c.z,s[0],s[1]));for(const s of other) dp=Math.min(dp,segDist(c.x,c.y,c.z,s[0],s[1]));
   if(dc-dp>sph.radius*2+J.blend+.02){u.W[jn]=null;return null;}
   const pos=(u.rest||m.geometry.attributes.position.array),n=pos.length/3,W=new Float32Array(n);let any=false;
@@ -9349,8 +9353,8 @@ function sqRootNoBase(A){let pitch=0,qs={},rq=new Q();for(let pass=0;pass<3;pass
 function sqActive(){const A=sqAngles(SQ.p);SQ.cur=A;const R=sqRoot(A),out=[];SQ.root=R;
   for(const S of ['R','L']){const sg=S==='R'?1:-1;for(const k of ['hip','knee','ankle'])out.push({k,jn:k+'_'+S,q:R.qs[S][k]});
     out.push({k:'shoulder',jn:'shoulder_'+S,q:qOf('shoulder_'+S,{x:-A.F*Math.min(1,0.25+A.f*1.6),y:0,z:0,w:10*sg})});
-    out.push({k:'fore',jn:'fore_'+S,q:qOf('fore_'+S,{x:0,y:90*sg,z:0})});}
-  if(A.L>2)out.push({k:'trunk',jn:'trunk',q:qOf('trunk',{x:A.L,y:0,z:0})});
+    if(!window.__noFore)out.push({k:'fore',jn:'fore_'+S,q:qOf('fore_'+S,{x:0,y:90*sg,z:0})});}
+  {const Lq=window.__forceL!==undefined?window.__forceL:A.L;if(Lq>2)out.push({k:'trunk',jn:'trunk',q:qOf('trunk',{x:Lq,y:0,z:0})});}
   /* cabeza en línea con el tronco (columna cervical neutra, como se enseña la técnica) */
   return out;}
 function sqApplyRoot(on){if(on&&SQ.root){body.quaternion.copy(SQ.root.q);body.position.copy(SQ.root.pos);}else{body.quaternion.identity();body.position.set(0,0,0);}body.updateMatrixWorld(true);}

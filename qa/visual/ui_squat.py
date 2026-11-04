@@ -17,9 +17,13 @@ async def one(b, out, w, h, lang, mobile):
         document.querySelectorAll('dialog[open]').forEach(d=>d.close());
         showTab('mov');setSq(true);SQ.play=false;SQ.p=50;sqUpdate();
         const d=document.querySelector('#sqCard details');if(d)d.open=true;
-        document.getElementById('sqCard').scrollIntoView({{block:'start'}});}})()`)""")
+        /* para la captura: la tarjeta se coloca en una capa fija, con el mismo ancho que tiene en el panel */
+        const c=document.getElementById('sqCard'),cw=c.getBoundingClientRect().width||Math.min(380,innerWidth-24);
+        const h=document.createElement('div');h.id='qaHost';h.style.cssText='position:fixed;left:0;top:0;z-index:99999;background:var(--bg);padding:12px;width:'+(cw+24)+'px;max-height:none;overflow:visible';
+        c.parentNode.insertBefore(document.createComment('sq'),c);h.appendChild(c);document.body.appendChild(h);}})()`)""")
+    await pg.set_viewport_size({'width': w, 'height': 2400})
     await pg.wait_for_timeout(2500)
-    card = await pg.query_selector('#sqCard')
+    card = await pg.query_selector('#qaHost')
     await card.screenshot(path=os.path.join(out, f'ui_{lang}_{w}.png'), timeout=300000)
     box = await card.bounding_box()
     overflow = await pg.evaluate("()=>{const c=document.getElementById('sqCard');return {cardW:c.scrollWidth,clientW:c.clientWidth,docOverflow:document.documentElement.scrollWidth>window.innerWidth}}")
