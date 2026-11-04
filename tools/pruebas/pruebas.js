@@ -36,9 +36,13 @@ const buscar=(p,t)=>p.evaluate(async t=>{const q=document.querySelector('#q');q.
  await p.evaluate(()=>document.querySelector('#langSeg [data-lang="es"]').click());await espera(1500);
  await p.evaluate(()=>document.querySelector('#b-f').click());await espera(9000);
  const fem=await p.evaluate(()=>{const v=o=>{if(!o.visible)return false;let q=o.parent;while(q){if(!q.visible)return false;q=q.parent;}return true;};
-   const M=['x29','x33','x35','x37','x39','x41','x44'],ok=['x1','x3','x42','x46'];const g=i=>__corpus.meshes.find(m=>m.userData.c.id===i);
-   return {ocultos:M.filter(i=>g(i)&&!v(g(i))).length,deM:M.length,vis:ok.filter(i=>g(i)&&v(g(i))).length,deV:ok.length};});
- ok(fem.ocultos===fem.deM,'Mujer: se ocultan las piezas de pelvis/fémur masculinos',fem.ocultos+'/'+fem.deM);ok(fem.vis===fem.deV,'Mujer: se ven las de cabeza y cuello',fem.vis+'/'+fem.deV);
+   const M=['x29','x33','x37','x38','x52','x60'],ok=['x1','x3','x42','x46','x35','x44'];const g=i=>__corpus.meshes.find(m=>m.userData.c.id===i);
+   return {ocultos:M.filter(i=>g(i)&&!v(g(i))).length,deM:M.length,vis:ok.filter(i=>g(i)&&v(g(i))).length,deV:ok.length,geoF:['x35','x36','x44','x45','x39','x40','x41'].filter(i=>g(i)&&g(i).userData.geoF&&g(i).geometry===g(i).userData.geoF).length};});
+ ok(fem.ocultos===fem.deM,'Mujer: se ocultan las piezas solo modeladas en el hombre',fem.ocultos+'/'+fem.deM);ok(fem.vis===fem.deV,'Mujer: se ven cabeza, cuello, psoas menor y articular de la rodilla',fem.vis+'/'+fem.deV);
+ ok(fem.geoF===7,'Mujer: psoas menor, articular de la rodilla y periné profundo con geometría femenina',fem.geoF+'/7');
+ await p.evaluate(()=>document.querySelector('#b-m').click());await espera(5000);
+ const vuelta=await p.evaluate(()=>['x35','x44'].filter(i=>{const m=__corpus.meshes.find(x=>x.userData.c.id===i);return m&&m.geometry!==m.userData.geoF;}).length);
+ ok(vuelta===2,'Hombre otra vez: recuperan la geometría masculina',vuelta+'/2');
  ok(!errs.length,'Sin errores de JavaScript (escritorio)',errs.slice(0,2).join(' | '));ok(!bad.length,'Sin descargas fallidas',bad.slice(0,3).join(' | '));
  await p.close();
  /* ── teléfono ── */

@@ -812,6 +812,54 @@ details.fsec > .fbody > .card{border:0;background:none;padding:0}
 #welcome .wgrid button b,#welcome .wfeat b{font-family:var(--f-ui)!important;font-weight:600!important}
 #welcome #wClose{background:var(--accent)!important;color:var(--accent-ink)!important;border-color:var(--accent)!important;font-weight:700}
 #welcome .wcard>h2{font-size:24px}
+/* ───── Tema claro (Ajustes → Tema). Contraste del texto ≥ 4,5:1 sobre blanco ───── */
+html[data-theme="light"]{color-scheme:light;--bg:#f3f6f8;--panel:#ffffff;--panel2:#eef2f5;--ink:#122230;--muted:#4f6270;--line:#d4dde3;
+  --accent:#0b7c84;--accent-ink:#ffffff;--accent-soft:#d6eff0;--stage:#e6ecf0;--stage2:#fbfcfd;--chip:rgba(255,255,255,.92);
+  --soft:rgba(18,34,48,.05);--soft2:rgba(18,34,48,.09);--glass:rgba(255,255,255,.86)}
+html[data-theme="light"] body{background:var(--bg);color:var(--ink)}
+html[data-theme="light"] header{background:rgba(255,255,255,.92)!important;border-bottom:1px solid var(--line)!important}
+html[data-theme="light"] .stage,html[data-theme="light"] .stage.studio{background:radial-gradient(110% 85% at 50% 36%,#ffffff 0%,#eef2f5 55%,#dfe6eb 100%)!important;box-shadow:inset 0 0 0 1px var(--line)!important}
+html[data-theme="light"] #qbar.qbar{background:rgba(255,255,255,.85)!important}
+html[data-theme="light"] #qbar.qbar button{background:rgba(255,255,255,.9)!important;color:var(--muted)!important}
+html[data-theme="light"] #qbar.qbar button[aria-pressed="true"]{color:var(--ink)!important;background:var(--accent-soft)!important}
+html[data-theme="light"] header #qbar.qbar{background:var(--soft)!important}
+html[data-theme="light"] header #qbar.qbar button{background:transparent!important}
+html[data-theme="light"] .wcard{background:#ffffff!important}
+html[data-theme="light"] .sys{border-bottom:0!important}
+html[data-theme="light"] .lbl:not(.phyl):not(.gonl){background:rgba(255,255,255,.95)!important;color:#122230!important;border-color:var(--line)!important}
+html[data-theme="light"] .lbl.tag{background:rgba(255,255,255,.96)!important;border-color:var(--accent)!important;color:#122230!important}
+html[data-theme="light"] .lbltog{background:rgba(255,255,255,.9);color:var(--ink)}
+html[data-theme="light"] #qbar.qbar button i{filter:drop-shadow(0 0 .7px rgba(18,34,48,.55))}
+html[data-theme="light"] .phytour .ic,html[data-theme="light"] .ic{filter:grayscale(1) contrast(1.1)}
+html[data-theme="light"] .emo{filter:grayscale(1) brightness(.6)}
+html[data-theme="light"] .amenu,html[data-theme="light"] .pop{box-shadow:0 14px 34px rgba(18,34,48,.18)}
+html[data-theme="light"] .note{background:var(--accent-soft)}
+html[data-theme="light"] body{background:var(--bg)!important}
+html[data-theme="light"] .panel{background:rgba(255,255,255,.96)!important;border:1px solid var(--line)!important}
+@media (max-width:879px){html[data-theme="light"] .panel{border:0!important;border-top:1px solid var(--line)!important;box-shadow:0 -8px 24px rgba(18,34,48,.10)}}
+html[data-theme="light"] .results{background:#ffffff!important;box-shadow:0 12px 30px rgba(18,34,48,.16)!important}
+html[data-theme="light"] .card{background:var(--soft)!important;border:1px solid var(--line)!important}
+html[data-theme="light"] .tabfold .fbody > .card,html[data-theme="light"] #romBox > .card,html[data-theme="light"] details.fsec > .fbody > .card{background:none!important;border:0!important}
+html[data-theme="light"] details.fsec,html[data-theme="light"] #welcome details.wmore{border-top:1px solid var(--line)!important}
+html[data-theme="light"] .pbody select option{background:#fff}
+html[data-theme="light"] .pbody::-webkit-scrollbar-thumb{background:rgba(18,34,48,.22)}
+html[data-theme="light"] .stage{box-shadow:inset 0 0 0 1px var(--line)!important}
+html[data-theme="light"] .tabs button{color:var(--muted)!important}
+html[data-theme="light"] .tabs button[aria-selected="true"]{background:var(--accent-soft)!important;color:#065a61!important}
+html[data-theme="light"] .seg button{color:var(--muted)!important}
+html[data-theme="light"] .seg button[aria-pressed="true"]{color:var(--accent-ink)!important}
+html[data-theme="light"] .chips button[aria-pressed="true"],html[data-theme="light"] .presets button[aria-pressed="true"],html[data-theme="light"] .depth button[aria-pressed="true"],html[data-theme="light"] .lms button[aria-pressed="true"]{color:#065a61!important;background:var(--accent-soft)!important}
+html[data-theme="light"] .actbar{background:rgba(255,255,255,.92)!important;border:1px solid var(--line)!important}
+html[data-theme="light"] .dis{background:var(--soft)!important}
+html[data-theme="light"] #goalEdit,html[data-theme="light"] .note h3,html[data-theme="light"] #moveTip h3,html[data-theme="light"] .pbody a{color:#065a61!important}
+html[data-theme="light"] .phyfeat small,html[data-theme="light"] .wfeat span{color:var(--muted)!important}
+html[data-theme="light"] .phyfeat em,html[data-theme="light"] .wfeat em{color:#a3215f!important}
+html[data-theme="light"] .phyfeat b,html[data-theme="light"] .wfeat b{color:var(--ink)!important}
+html[data-theme="light"]{--sag:#1f55c4;--fro:#16773a;--tra:#c0261f}
+html[data-theme="light"] #moveInfo dd.cAg{color:#1f4fa8!important}html[data-theme="light"] #moveInfo dd.cAn{color:#a83a1c!important}
+html[data-theme="light"] .link{color:#065a61!important}
+html[data-theme="light"] .seg .btn:not(.pri){color:#3a4c59!important}
+html[data-theme="light"] .seg .btn.pri{background:var(--accent)!important;color:#fff!important}
 </style>
 
 <header>
@@ -829,7 +877,10 @@ details.fsec > .fbody > .card{border:0;background:none;padding:0}
     <button data-lang="es" aria-pressed="true" title="Español">ES</button>
     <button data-lang="en" aria-pressed="false" title="English">EN</button>
     <button data-lang="pt" aria-pressed="false" title="Português">PT</button>
+    <button data-lang="fr" aria-pressed="false" title="Français">FR</button>
+    <button data-lang="de" aria-pressed="false" title="Deutsch">DE</button>
   </div></div>
+    <div class="poprow"><span>Tema</span><div class="seg" role="group" aria-label="Tema de color" id="themeSeg"><button data-theme-set="dark" aria-pressed="true">Oscuro</button><button data-theme-set="light" aria-pressed="false">Claro</button><button data-theme-set="auto" aria-pressed="false">Auto</button></div></div>
     <div class="poprow"><span>Modo</span><div class="seg" role="group" aria-label="Modo de uso">
     <button id="m-stu" aria-pressed="true">Estudiante</button>
     <button id="m-pro" aria-pressed="false">Profesional</button>
@@ -1213,7 +1264,7 @@ const sexOf=k=>(SYS[k]&&SYS[k].sex)||null;
 const SEXKEY=k=>BODY==='f'?({piel:'piel_f',reproductor:'reproductor_f'}[k]||k):BODY==='m'?({piel_f:'piel',reproductor_f:'reproductor',mama:null}[k]===undefined?k:{piel_f:'piel',reproductor_f:'reproductor',mama:null}[k]):k;
 const MALE_ONLY=/testicular|of penis|penile|cremaster|spermatic|scrot|prostat|^Urethra$/i;
 /* músculos nuevos modelados sobre la pelvis, la columna lumbar y el fémur masculinos (que la mujer tiene con otra forma): en el cuerpo de mujer se ocultan; del periné se usan los suyos (gBsp*, gIsc*, gSTP*) */
-const MALE_NEW=new Set(['x29','x30','x31','x32','x33','x34','x37','x38','x39','x40','x41']);
+const MALE_NEW=new Set(['x29','x30','x31','x32','x33','x34','x37','x38','x52','x53','x54','x55','x56','x57','x58','x59','x60','x61','x62','x63']);
 const isFemLayer=k=>!!k&&(k.startsWith('f_')||sexOf(k)==='f');
 const saved=store.get('sys',null);
 if(saved) for(const k in saved) if(SYS[k]){SYS[k].on=!!saved[k].on;SYS[k].op=+saved[k].op||1;}
@@ -1307,7 +1358,7 @@ const fam=n=>n.replace(/^(First|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|N
 const parentName=en=>en.replace(/^.*?\b(head|part|belly|parts|heads) of (the )?/i,'');
 const mnorm=s=>norm(s).replace(/\bmuscles?\b/g,'').replace(/\s+/g,' ').trim();
 let INFO_TR_L=null,TRM=null;
-async function loadInfoTr(l){if(l==='es'||INFO_TR_L===l||!INFO_READY)return;try{const j=await (await fetch('data/info_'+l+'.json')).json();const W=new WeakMap();
+async function loadInfoTr(l){if(l==='es'||INFO_TR_L===l||!INFO_READY)return;try{const j=await (await fetch('data/info_'+LBL(l)+'.json')).json();const W=new WeakMap();
   for(const key in j){const i=key.indexOf('|'),cat=key.slice(0,i),k=key.slice(i+1);const src=cat==='fem'?FEM_INFO[k]:(INFO[cat]||{})[k];if(src)W.set(src,j[key]);}
   TRM=W;INFO_TR_L=l;if(selected){renderInfo();if(LANG!=='es')trNode($('#infoBox'));}}catch(e){}}
 function infoFor(c){const r=infoForEs(c);if(r&&LANG!=='es'&&INFO_TR_L===LANG&&TRM&&TRM.has(r.d))return {kind:r.kind,d:TRM.get(r.d),es:r.d,tr:true};return r;}
@@ -1810,13 +1861,13 @@ function renderInfo(){
     if(d.biomecanica) extra+=`<div class="card"><h3>Función biomecánica (plano / eje)</h3><p class="small">${esc(d.biomecanica)}</p>${mv.length?`<div class="chips" style="margin-top:4px">${mv.map(([j,v],i)=>`<button data-mv="${i}">${esc(v.n)} ${esc(j.n.toLowerCase())}</button>`).join('')}</div><p class="muted" style="font-size:11.5px">Toca un movimiento para verlo en el simulador.</p>`:''}</div>`;
     if(d.prueba) extra+=`<div class="card"><h3>Prueba muscular manual</h3><p class="small">${esc(d.prueba)}</p></div>`;}
   const lms=EX.lm[c.id]||[];
-  if(lms.length) extra+=`<div class="card"><h3>${TL('Accidentes óseos','Bony landmarks','Acidentes ósseos')} (${lms.length})</h3><div class="lms">${lms.map((l,i)=>`<button data-lm="${i}">${esc(LANG==='en'?l[1]:LANG==='pt'&&l[3]?l[3]:l[0])}</button>`).join('')}</div><div class="row"><button class="btn" id="lmAll">Mostrar todos</button><button class="btn" id="lmNone">Ocultar marcas</button></div></div>`;
+  if(lms.length) extra+=`<div class="card"><h3>${TL('Accidentes óseos','Bony landmarks','Acidentes ósseos')} (${lms.length})</h3><div class="lms">${lms.map((l,i)=>`<button data-lm="${i}">${esc(LEN()?l[1]:LANG==='pt'&&l[3]?l[3]:l[0])}</button>`).join('')}</div><div class="row"><button class="btn" id="lmAll">Mostrar todos</button><button class="btn" id="lmNone">Ocultar marcas</button></div></div>`;
   extra+=gloInfoCard(c,lms);
   extra+=aiCard();
   const patches=(m.userData.sys==='muscular')?patchesFor(c):[];
   box.innerHTML=`<div class="view" style="gap:10px">
     <span class="info-sys"><span class="dot" style="background:${m.userData.sys==='insercion'?(c.ins==='origen'?'var(--orig)':'var(--ins)'):s.c}"></span>${esc(s.n)}${c.side?'<span> · '+TL('lado '+c.side,c.side==='izquierdo'?'left side':'right side',c.side==='izquierdo'?'lado esquerdo':'lado direito')+'</span>':''}</span>
-    <h2>${esc((inf&&inf.tr&&inf.d.es)||c.es)}${c.ins?` <span class="muted" style="font-size:15px">(${TL(c.ins,c.ins==='origen'?'origin':'insertion',c.ins==='origen'?'origem':'inserção')})</span>`:''}</h2>
+    <h2>${esc((LANG==='fr'||LANG==='de')?c.es:(inf&&inf.tr&&inf.d.es)||c.es)}${c.ins?` <span class="muted" style="font-size:15px">(${TL(c.ins,c.ins==='origen'?'origin':'insertion',c.ins==='origen'?'origem':'inserção')})</span>`:''}</h2>
     ${c.la?`<p class="latin">${esc(c.la)}</p>`:''}
     ${LANG!=='es'&&!(inf&&inf.tr)?(INFO_READY?'<p class="muted small">Ficha disponible por ahora solo en español.</p>':'<p class="muted small">Cargando la ficha…</p>'):''}
     ${body}
@@ -1886,7 +1937,7 @@ $('#q').addEventListener('input',e=>{
     {const tf=qo.length>=3&&phyTourFor(qo);if(tf){const T=TOURS[tf[0]];const b=document.createElement('button');b.innerHTML=`<span><span class="muted">${TL('En acción:','In action:','Em ação:')}</span> ${esc(tN(T))} · ${esc(pTx(T.steps[tf[1]])[0])}</span><small>${T.steps.length} ${TL('pasos','steps','passos')}</small>`;b.onclick=()=>{out.hidden=true;e.target.value='';phyStart(tf[0],tf[1]);};out.appendChild(b);if(!res.length&&!oh.length)out.querySelectorAll('p').forEach(x=>x.remove());}}
     {const clr=()=>{if(!res.length&&!oh.length)out.querySelectorAll('p').forEach(x=>x.remove());};
      if(qo.length>=3&&typeof CTESTS!=='undefined'){const cs=CTESTS.filter(t=>t.n.some(n=>gKey(n).includes(qo))).slice(0,2);cs.forEach(t=>{clr();const b=document.createElement('button');b.innerHTML=`<span><span class="muted">${t.fx?TL('Movimiento funcional:','Functional movement:','Movimento funcional:'):TL('Prueba clínica:','Clinical test:','Teste clínico:')}</span> ${esc(TL(...t.n))}</span><small>${TL('animada','animated','animado')}</small>`;b.onclick=()=>{out.hidden=true;e.target.value='';showTab('mov');if(isPhone())setSheet('half');setTimeout(()=>{const x=document.querySelector(`#ctCard [data-ct="${t.id}"]`);if(x){x.click();setTimeout(()=>{const c=$('#ctCard');if(c)c.scrollIntoView({block:'start'});},60);}},80);};out.appendChild(b);});}
-     if(qo.length>=4&&typeof BIO_Q!=='undefined'){const L=LANG==='en'?1:LANG==='pt'?2:0;const bq=BIO_Q.filter(x=>gKey(x.q[L]).includes(qo)||gKey(x.a[L]).includes(qo)).slice(0,2);bq.forEach(x=>{clr();const b=document.createElement('button');b.innerHTML=`<span><span class="muted">${TL('Biomecánica:','Biomechanics:','Biomecânica:')}</span> ${esc(x.q[L])}</span><small>${esc(TL(...BIO_R[x.r]))}</small>`;b.onclick=()=>{out.hidden=true;e.target.value='';showTab('lec');if(isPhone())setSheet('full');BIO.r=x.r;BIO.mode='list';BIO.order=[];renderBio();setTimeout(()=>{const d=document.querySelector(`#bioCard details[data-id="${x.id}"]`);if(d){d.open=true;d.scrollIntoView({block:'center'});}},100);};out.appendChild(b);});}}
+     if(qo.length>=4&&typeof BIO_Q!=='undefined'){const L=LEN()?1:LANG==='pt'?2:0;const bq=BIO_Q.filter(x=>gKey(x.q[L]).includes(qo)||gKey(x.a[L]).includes(qo)).slice(0,2);bq.forEach(x=>{clr();const b=document.createElement('button');b.innerHTML=`<span><span class="muted">${TL('Biomecánica:','Biomechanics:','Biomecânica:')}</span> ${esc(x.q[L])}</span><small>${esc(TL(...BIO_R[x.r]))}</small>`;b.onclick=()=>{out.hidden=true;e.target.value='';showTab('lec');if(isPhone())setSheet('full');BIO.r=x.r;BIO.mode='list';BIO.order=[];renderBio();setTimeout(()=>{const d=document.querySelector(`#bioCard details[data-id="${x.id}"]`);if(d){d.open=true;d.scrollIntoView({block:'center'});}},100);};out.appendChild(b);});}}
     oh.forEach(o=>{const b=document.createElement('button');b.innerHTML=`<span><span class="muted">${TL('Órgano completo:','Whole organ:','Órgão inteiro:')}</span> ${esc(oT(o))}</span><small>${o.parts.length} ${TL('piezas','parts','peças')}</small>`;b.onclick=()=>{out.hidden=true;e.target.value='';showOrgan(o);};out.appendChild(b);});}
   if(GLO){const qq=gKey(e.target.value);const gh=GLO.filter(g=>g.k.split(' | ').some(n=>n.startsWith(qq))).map(g=>[(gKey(gT(g)).startsWith(qq)?0:gKey(g.t).startsWith(qq)?1:2)*100+gT(g).length,g]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]).slice(0,3);
     if(gh.length&&!res.length)out.innerHTML='';
@@ -3012,14 +3063,14 @@ function updateArc(active){
     let uf=u0;const rk=GON_REF[k];if(rk&&curM.pl!=='tra'&&!(curM.pl==='fro'&&(k==='hip'||k==='ankle'))){const rp=posedPivot(rk,active);if(rp){const d=rp.sub(piv);if(d.lengthSq()>1e-8)uf=d.normalize();}}
     gonUpdate(piv,uf,u1,n,R,col);}
 }
-const enEs=en=>{const r=Object.values(CAT).find(x=>x[1]===en&&x[4]==='muscular');return r?nameL(r):(LANG==='en'?en:(INFO.mus[en]?.es||en));};
+const enEs=en=>{const r=Object.values(CAT).find(x=>x[1]===en&&x[4]==='muscular');return r?nameL(r):(LEN()?en:(INFO.mus[en]?.es||en));};
 function renderROM(){
   $('#jointChips').innerHTML='';ROM.forEach(j=>{const b=document.createElement('button');b.textContent=j.n;b.setAttribute('aria-pressed',j===curJ);b.onclick=()=>{if(CT.on)ctStop();if(gait.on)setGait(false);if(PHY.on)phyStop();curJ=j;curM=j.moves[0];angle=0;stopPlay();renderROM();};$('#jointChips').appendChild(b);});
   $('#moveChips').innerHTML='';curJ.moves.forEach(mv=>{const b=document.createElement('button');b.textContent=mv.n;b.setAttribute('aria-pressed',mv===curM);b.onclick=()=>{if(CT.on)ctStop();if(gait.on)setGait(false);curM=mv;angle=0;stopPlay();renderROM();};$('#moveChips').appendChild(b);});
   const sideTxt=curJ.sided?(romSide==='R'?'derecho':'izquierdo'):(curM.ax==='x'?'':romSide==='R'?'hacia la derecha':'hacia la izquierda');
   $('#angle').max=Math.round(curM.max);$('#angle').value=angle;
   const ag=curM.ag.filter(en=>Object.values(CAT).some(r=>r[1]===en));
-  $('#moveInfo').innerHTML=`<dt>Plano</dt><dd><b style="color:var(${planeCols[curM.pl]})">${PL_N[curM.pl]}</b></dd><dt>Eje</dt><dd>${AX_N[curM.pl]}</dd><dt>Rango</dt><dd style="font-family:var(--f-mono)">0–${curM.max}${curM.u||'°'}</dd>${sideTxt?`<dt>Lado</dt><dd>${sideTxt}</dd>`:''}<dt>Agonistas</dt><dd>${ag.map(en=>`<button class="link" data-agon="${esc(en)}">${esc(enEs(en))}</button>`).join(', ')||'—'}</dd><dt>${TL('Se estiran','Stretched','Se alongam')}</dt><dd style="color:#8fb8ff">${(curM.ant||[]).filter(en=>Object.values(CAT).some(r=>r[1]===en)).map(en=>esc(enEs(en))).join(', ')||'—'}</dd><dt>${TL('Ligamentos que se tensan','Ligaments that tighten','Ligamentos que se tensionam')}</dt><dd style="color:#ff8a6b">${(curM.lig||[]).map(en=>{const r=Object.values(CAT).find(x=>x[1]===en);return esc(r?nameL(r):en);}).join(', ')||'—'}</dd>`;
+  $('#moveInfo').innerHTML=`<dt>Plano</dt><dd><b style="color:var(${planeCols[curM.pl]})">${PL_N[curM.pl]}</b></dd><dt>Eje</dt><dd>${AX_N[curM.pl]}</dd><dt>Rango</dt><dd style="font-family:var(--f-mono)">0–${curM.max}${curM.u||'°'}</dd>${sideTxt?`<dt>Lado</dt><dd>${sideTxt}</dd>`:''}<dt>Agonistas</dt><dd>${ag.map(en=>`<button class="link" data-agon="${esc(en)}">${esc(enEs(en))}</button>`).join(', ')||'—'}</dd><dt>${TL('Se estiran','Stretched','Se alongam')}</dt><dd class="cAg" style="color:#8fb8ff">${(curM.ant||[]).filter(en=>Object.values(CAT).some(r=>r[1]===en)).map(en=>esc(enEs(en))).join(', ')||'—'}</dd><dt>${TL('Ligamentos que se tensan','Ligaments that tighten','Ligamentos que se tensionam')}</dt><dd class="cAn" style="color:#ff8a6b">${(curM.lig||[]).map(en=>{const r=Object.values(CAT).find(x=>x[1]===en);return esc(r?nameL(r):en);}).join(', ')||'—'}</dd>`;
   $('#moveInfo').querySelectorAll('[data-agon]').forEach(b=>b.onclick=()=>{const side=curJ.sided?(romSide==='R'?'derecho':'izquierdo'):'derecho';const r=Object.values(CAT).find(x=>x[1]===b.dataset.agon&&x[4]==='muscular'&&(!x[5]||x[5]===side));if(r)goTo(r[0]);});
   const pair={sag:'flexión y extensión',fro:'abducción, aducción e inclinaciones',tra:'rotaciones'}[curM.pl];
   $('#moveTip').innerHTML=`<h3>Cómo razonarlo</h3><p>${TL(`La ${curM.n.toLowerCase()} ocurre en el plano ${PL_N[curM.pl].toLowerCase()} alrededor del eje ${AX_N[curM.pl].split(' ')[0].toLowerCase()}, perpendicular a ese plano. En este plano ocurren las ${pair}.`,`${trW(curM.n)} takes place in the ${{sag:'sagittal',fro:'frontal',tra:'transverse'}[curM.pl]} plane, around the ${{sag:'frontal',fro:'sagittal',tra:'longitudinal'}[curM.pl]} axis, which is perpendicular to that plane. Movements in this plane: ${{sag:'flexion and extension',fro:'abduction, adduction and lateral flexion',tra:'rotations'}[curM.pl]}.`,`${trW(curM.n)} ocorre no plano ${{sag:'sagital',fro:'frontal',tra:'transversal'}[curM.pl]}, em torno do eixo ${{sag:'frontal',fro:'sagital',tra:'longitudinal'}[curM.pl]}, perpendicular a esse plano. Movimentos neste plano: ${{sag:'flexão e extensão',fro:'abdução, adução e inclinações',tra:'rotações'}[curM.pl]}.`)}</p>`;
@@ -3103,7 +3154,7 @@ function setGaitPattern(k){gait.pat=GAIT_P[k]?k:'normal';const pat=GAIT_P[gait.p
 function renderGaitPats(){$('#gaitPats').innerHTML=Object.entries(GAIT_P).map(([k,v])=>`<button data-p="${k}" aria-pressed="${k===gait.pat}">${v.n}</button>`).join('');
   $('#gaitPats').querySelectorAll('button').forEach(b=>b.onclick=()=>setGaitPattern(b.dataset.p));}
 const gait={on:false,play:true,p:0,slow:false,last:0,pat:'normal'};
-const G_ABBR={en:{CI:'IC',RC:'LR',AM:'MSt',AF:'TSt',PB:'PSw',BI:'ISw',BM:'MSw',BF:'TSw'},pt:{CI:'CI',RC:'RC',AM:'AM',AF:'AT',PB:'PB',BI:'BI',BM:'BM',BF:'BT'}};const gAbbr=k=>(G_ABBR[LANG]||{})[k]||k;
+const G_ABBR={en:{CI:'IC',RC:'LR',AM:'MSt',AF:'TSt',PB:'PSw',BI:'ISw',BM:'MSw',BF:'TSw'},pt:{CI:'CI',RC:'RC',AM:'AM',AF:'AT',PB:'PB',BI:'BI',BM:'BM',BF:'BT'}};const gAbbr=k=>(G_ABBR[LANG]||G_ABBR[LBL(LANG)]||{})[k]||k;
 function gInterp(arr,p){p=((p%100)+100)%100;for(let i=1;i<arr.length;i++){if(p<=arr[i][0]){const [a,va]=arr[i-1],[b,vb]=arr[i];const t=(p-a)/(b-a),s=t*t*(3-2*t);return va+(vb-va)*s;}}return arr[arr.length-1][1];}
 function gAngles(p){return {hip:gInterp(GAIT_K.hip,p),knee:gInterp(GAIT_K.knee,p),ankle:gInterp(GAIT_K.ankle,p)};}
 function gPhase(p){p=((p%100)+100)%100;return GAIT_PH.find(f=>p>=f[0]&&p<f[1])||GAIT_PH[GAIT_PH.length-1];}
@@ -3459,16 +3510,20 @@ $('#srsStop').onclick=()=>{srs.on=false;isoSet=null;applySystems();if(srs.cur&&s
 $('#srsDeck').onchange=srsStat;$('#srsMode').onchange=srsStat;
 
 /* ───────── Idiomas: español, inglés, portugués ───────── */
-let LANG=store.get('lang',null)||(/^pt/i.test(navigator.language||'')?'pt':/^en/i.test(navigator.language||'')?'en':'es');
+let LANG=store.get('lang',null)||(/^pt/i.test(navigator.language||'')?'pt':/^en/i.test(navigator.language||'')?'en':/^fr/i.test(navigator.language||'')?'fr':/^de/i.test(navigator.language||'')?'de':'es');
+/* francés y alemán: interfaz y nombres propios; el contenido largo (fichas, lecciones, casos) usa el inglés */
+const LEN=()=>LANG==='en'||LANG==='fr'||LANG==='de',LBL=l=>l==='fr'||l==='de'?'en':l;
 let I18N=null;const _orig=new WeakMap(),_origA=new WeakMap();
-const nameL=r=>LANG==='en'?r[1]:LANG==='pt'&&I18N&&I18N.names[r[2]]||r[2];
+const nameL=r=>{if(LANG==='es')return r[2];if(LANG==='en')return r[1];const N=I18N&&(LANG==='pt'?I18N.names:I18N['names_'+LANG]);return N&&N[r[2]]||(LANG==='pt'?r[2]:r[1]);};
 const SIDE_L=sd=>sd;
 const RX={en:[[/^(\d+) estructuras$/,'$1 structures'],[/^(\d+) % del ciclo$/,'$1 % of the cycle'],[/^ ?(\d+) de (\d+) archivos$/,' $1 of $2 files'],[/^Cargando (.*)$/,'Loading $1'],[/^Puntuación: (\d+) de (\d+)(.*)$/,'Score: $1 of $2$3'],[/^(.*) \(derecho\)$/,(m,a)=>trW(a)+' (right)'],[/^(.*) \(izquierdo\)$/,(m,a)=>trW(a)+' (left)'],[/^(.*) triángulos$/,'$1 triangles'],[/^Región · (.*)$/,'Region · $1'],[/^Sistema · (.*)$/,'System · $1'],[/^Mujer · (.*)$/,'Female · $1'],[/^(\d+) tarjetas · (\d+) pendientes hoy · (\d+) nuevas · (\d+) dominadas$/,'$1 cards · $2 due today · $3 new · $4 mastered'],[/^lado (izquierdo|derecho)$/,(m,a)=>a==='izquierdo'?'left side':'right side']],
- pt:[[/^(\d+) estructuras$/,'$1 estruturas'],[/^(\d+) % del ciclo$/,'$1 % do ciclo'],[/^ ?(\d+) de (\d+) archivos$/,' $1 de $2 arquivos'],[/^Cargando (.*)$/,'Carregando $1'],[/^Puntuación: (\d+) de (\d+)(.*)$/,'Pontuação: $1 de $2$3'],[/^(.*) \(derecho\)$/,(m,a)=>trW(a)+' (direito)'],[/^(.*) \(izquierdo\)$/,(m,a)=>trW(a)+' (esquerdo)'],[/^(.*) triángulos$/,'$1 triângulos'],[/^Región · (.*)$/,'Região · $1'],[/^Sistema · (.*)$/,'Sistema · $1'],[/^Mujer · (.*)$/,'Mulher · $1'],[/^(\d+) tarjetas · (\d+) pendientes hoy · (\d+) nuevas · (\d+) dominadas$/,'$1 cartões · $2 para hoje · $3 novos · $4 dominados'],[/^lado (izquierdo|derecho)$/,(m,a)=>a==='izquierdo'?'lado esquerdo':'lado direito']]};
-const trW=w=>{const D=I18N&&I18N.ui[LANG]||{};return D[w]??w;};
+ pt:[[/^(\d+) estructuras$/,'$1 estruturas'],[/^(\d+) % del ciclo$/,'$1 % do ciclo'],[/^ ?(\d+) de (\d+) archivos$/,' $1 de $2 arquivos'],[/^Cargando (.*)$/,'Carregando $1'],[/^Puntuación: (\d+) de (\d+)(.*)$/,'Pontuação: $1 de $2$3'],[/^(.*) \(derecho\)$/,(m,a)=>trW(a)+' (direito)'],[/^(.*) \(izquierdo\)$/,(m,a)=>trW(a)+' (esquerdo)'],[/^(.*) triángulos$/,'$1 triângulos'],[/^Región · (.*)$/,'Região · $1'],[/^Sistema · (.*)$/,'Sistema · $1'],[/^Mujer · (.*)$/,'Mulher · $1'],[/^(\d+) tarjetas · (\d+) pendientes hoy · (\d+) nuevas · (\d+) dominadas$/,'$1 cartões · $2 para hoje · $3 novos · $4 dominados'],[/^lado (izquierdo|derecho)$/,(m,a)=>a==='izquierdo'?'lado esquerdo':'lado direito']],
+ fr:[[/^(\d+) estructuras$/,'$1 structures'],[/^(\d+) % del ciclo$/,'$1 % du cycle'],[/^ ?(\d+) de (\d+) archivos$/,' $1 sur $2 fichiers'],[/^Cargando (.*)$/,'Chargement : $1'],[/^Puntuación: (\d+) de (\d+)(.*)$/,'Score : $1 sur $2$3'],[/^(.*) \(derecho\)$/,(m,a)=>trW(a)+' (droit)'],[/^(.*) \(izquierdo\)$/,(m,a)=>trW(a)+' (gauche)'],[/^(.*) triángulos$/,'$1 triangles'],[/^Región · (.*)$/,'Région · $1'],[/^Sistema · (.*)$/,'Système · $1'],[/^Mujer · (.*)$/,'Femme · $1'],[/^(\d+) tarjetas · (\d+) pendientes hoy · (\d+) nuevas · (\d+) dominadas$/,'$1 cartes · $2 à revoir aujourd’hui · $3 nouvelles · $4 maîtrisées'],[/^lado (izquierdo|derecho)$/,(m,a)=>a==='izquierdo'?'côté gauche':'côté droit']],
+ de:[[/^(\d+) estructuras$/,'$1 Strukturen'],[/^(\d+) % del ciclo$/,'$1 % des Zyklus'],[/^ ?(\d+) de (\d+) archivos$/,' $1 von $2 Dateien'],[/^Cargando (.*)$/,'Lade $1'],[/^Puntuación: (\d+) de (\d+)(.*)$/,'Punkte: $1 von $2$3'],[/^(.*) \(derecho\)$/,(m,a)=>trW(a)+' (rechts)'],[/^(.*) \(izquierdo\)$/,(m,a)=>trW(a)+' (links)'],[/^(.*) triángulos$/,'$1 Dreiecke'],[/^Región · (.*)$/,'Region · $1'],[/^Sistema · (.*)$/,'System · $1'],[/^Mujer · (.*)$/,'Frau · $1'],[/^(\d+) tarjetas · (\d+) pendientes hoy · (\d+) nuevas · (\d+) dominadas$/,'$1 Karten · $2 heute fällig · $3 neu · $4 beherrscht'],[/^lado (izquierdo|derecho)$/,(m,a)=>a==='izquierdo'?'linke Seite':'rechte Seite']]};
+const trW=w=>{const D=I18N&&I18N.ui[LANG]||{};return D[w]??(LANG==='fr'||LANG==='de'?((I18N['names_'+LANG]||{})[w]??(I18N.ui.en||{})[w]):null)??w;};
 const PREF=['Mostrar','Opacidad','Alta resolución','Posición del plano'];
 function trText(t){if(LANG==='es'||!I18N)return null;const D=I18N.ui[LANG]||{};const k=t.trim();if(!k)return null;
-  if(D[k]!=null)return t.replace(k,D[k]);for(const p of PREF){if(k.startsWith(p+' ')&&D[p]){const rest=k.slice(p.length+1);return t.replace(k,D[p]+' '+(D[rest]??(I18N.names&&LANG==='pt'&&I18N.names[rest])??rest));}}for(const [re,to] of RX[LANG]||[]){if(re.test(k))return t.replace(k,k.replace(re,to));}return null;}
+  if(D[k]!=null)return t.replace(k,D[k]);if(LANG==='fr'||LANG==='de'){const N=I18N['names_'+LANG];if(N&&N[k]!=null)return t.replace(k,N[k]);const E=I18N.ui.en||{};if(E[k]!=null)return t.replace(k,E[k]);}for(const p of PREF){if(k.startsWith(p+' ')&&D[p]){const rest=k.slice(p.length+1);return t.replace(k,D[p]+' '+(D[rest]??(I18N&&(LANG==='pt'?I18N.names:I18N['names_'+LANG]||{})[rest])??rest));}}for(const [re,to] of RX[LANG]||[]){if(re.test(k))return t.replace(k,k.replace(re,to));}return null;}
 const SKIP_TR=el=>el&&el.closest&&el.closest('.phycard,#gloList,#gloQuiz,#gloCat,#gloCount,#gloAZ,.gloZoom,#infoBox .kv dd,#infoBox > .view > p:not(.muted),.latin,#caseBox p,#caseBox li,#srsA,.refs,script,style');
 function trNode(root){if(!root)return;const walk=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;
   const list=[];while((n=walk.nextNode()))list.push(n);
@@ -3480,8 +3535,9 @@ function trNode(root){if(!root)return;const walk=document.createTreeWalker(root,
     for(const a of ['placeholder','aria-label','title']){const v=el.getAttribute(a);if(v==null)continue;if(o[a]==null||(v!==o[a]&&v!==o['_'+a]))o[a]=v;
       const tr=LANG==='es'?null:trText(o[a]);const want=tr??o[a];if(v!==want){o['_'+a]=want;el.setAttribute(a,want);}}}}
 let trPending=false;const trObs=new MutationObserver(()=>{if(trPending||LANG==='es')return;trPending=true;requestAnimationFrame(()=>{trPending=false;trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}finally{if(LANG!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});}});});
-async function setLang(l){if(!['es','en','pt'].includes(l))l='es';
+async function setLang(l){if(!['es','en','pt','fr','de'].includes(l))l='es';
   if(l!=='es'&&!I18N){try{I18N=await (await fetch('data/i18n.json')).json();}catch(e){l='es';}}
+  if((l==='fr'||l==='de')&&I18N&&!I18N['names_'+l]){try{const x=await (await fetch('data/i18n_'+l+'.json')).json();I18N.ui[l]=x.ui;I18N['names_'+l]=x.names;}catch(e){l='en';}}
   LANG=l;store.set('lang',l);document.documentElement.lang=l;try{for(const m of meshes){const c=m.userData&&m.userData.c;if(c&&c.id&&CAT[c.id])c.es=nameL(CAT[c.id]);}}catch(e){}loadInfoTr(l);loadContentTr(l);if(typeof renderPhyTours==='function'){renderPhyTours();renderProg();}if(typeof renderBio==='function')renderBio();if(typeof renderRC==='function')renderRC();if(typeof renderRoute==='function')renderRoute();setTimeout(renderProg,0);
 $('#phyBtn').onclick=e=>{e.stopPropagation();togglePop($('#phyBtn'),$('#phyPop'));};document.addEventListener('pointerdown',e=>{if(!e.target.closest('#phyPop,#phyBtn')&&!$('#phyPop').hidden)togglePop($('#phyBtn'),$('#phyPop'),false);});
   $$('#langSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===l));
@@ -3491,7 +3547,7 @@ $('#phyBtn').onclick=e=>{e.stopPropagation();togglePop($('#phyBtn'),$('#phyPop')
   trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}if(l!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});
   if(typeof tagLabel!=='undefined'&&selected)tagLabel.el.textContent=label(selected.m.userData.c);}
 $$('#langSeg button').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
-function buildSearch(){SEARCH=Object.values(CAT).map(r=>({k:norm([r[2],r[3],r[1],I18N&&I18N.names[r[2]]||''].join(' | ')),c:r}));}
+function buildSearch(){SEARCH=Object.values(CAT).map(r=>({k:norm([r[2],r[3],r[1],I18N&&I18N.names[r[2]]||'',I18N&&I18N.names_fr&&I18N.names_fr[r[2]]||'',I18N&&I18N.names_de&&I18N.names_de[r[2]]||''].join(' | ')),c:r}));}
 
 
 /* ───────── Interfaz: ajustes, menú de vistas, pantalla completa, bienvenida y hoja inferior ───────── */
@@ -3539,10 +3595,10 @@ $$('[data-w]').forEach(b=>b.onclick=()=>{const w=b.dataset.w;closeWelcome();
   else if(w==='ct'){if(BODY==='vh')setBody('m');showTab('mov');if(isPhone())setSheet('full');setTimeout(()=>{const c=$('#ctCard');if(c)c.scrollIntoView({behavior:'smooth'});},150);}});
 
 /* ───────── Casos clínicos ───────── */
-const TL=(es,en,pt)=>LANG==='en'?en:LANG==='pt'?pt:es;
+const TL=(es,en,pt)=>LANG==='en'?en:LANG==='pt'?pt:LANG==='es'?es:((I18N&&I18N.ui[LANG]||{})[es]??en);
 let CASES=[],caseOn=null,CASES_ES=null,LESSONS_ES=null;const CONTENT_TR={};
 async function loadContentTr(l){try{let d={les:LESSONS_ES,cas:CASES_ES};
-  if(l!=='es'){d=CONTENT_TR[l];if(!d){const [a,b]=await Promise.all(['lessons','cases'].map(n=>fetch('data/'+n+'_'+l+'.json').then(r=>r.ok?r.json():null).catch(()=>null)));d=CONTENT_TR[l]={les:a,cas:b};}}
+  if(l!=='es'){d=CONTENT_TR[l];if(!d){const [a,b]=await Promise.all(['lessons','cases'].map(n=>fetch('data/'+n+'_'+LBL(l)+'.json').then(r=>r.ok?r.json():null).catch(()=>null)));d=CONTENT_TR[l]={les:a,cas:b};}}
   if(LANG!==l)return;
   if(d.les&&d.les.length&&!lesson){LESSONS=d.les;if(typeof renderLessons==='function')renderLessons();}
   if(d.cas&&d.cas.length&&!caseOn){CASES=d.cas;renderCases();}}catch(e){}}
@@ -3738,7 +3794,13 @@ const LOCAL_ACT=[
  [/^Articularis genus/,['tira de la bolsa suprarrotuliana hacia arriba','pulls the suprapatellar bursa upwards','puxa a bolsa suprapatelar para cima']],
  [/^Auricularis superior/,['eleva la oreja','elevates the auricle','eleva a orelha']],
  [/^Auricularis anterior/,['lleva la oreja hacia delante','draws the auricle forwards','leva a orelha para a frente']],
- [/^Auricularis posterior/,['lleva la oreja hacia atrás','draws the auricle backwards','leva a orelha para trás']]];
+ [/^Auricularis posterior/,['lleva la oreja hacia atrás','draws the auricle backwards','leva a orelha para trás']],
+ [/^Subcostales\smuscles/,['deprime las costillas (espiración forzada)', 'depresses the ribs (forced expiration)', 'abaixa as costelas (expiração forçada)']],
+ [/^Scalenus\sminimus/,['tensa la cúpula pleural', 'tenses the pleural cupula', 'tensiona a cúpula pleural']],
+ [/^Articularis\scubiti\smuscle/,['tira de la cápsula posterior del codo', 'pulls the posterior elbow capsule', 'puxa a cápsula posterior do cotovelo']],
+ [/^Intertransversarii\scervicis/,['inclina el cuello hacia su lado', 'bends the neck to its side', 'inclina o pescoço para o seu lado']],
+ [/^Vocalis\smuscle/,['ajusta la tensión del pliegue vocal', 'adjusts vocal fold tension', 'ajusta a tensão da prega vocal']],
+ [/^Lacrimal\spart\sof\sorbicularis\soculi/,['bombea las lágrimas al parpadear', 'pumps tears when blinking', 'bombeia as lágrimas ao piscar']]];
 function localAct(c){for(const [re,t] of LOCAL_ACT)if(re.test(c.en)){const v=t.map(x=>typeof x==='function'?x():x);return TL(v[0],v[1],v[2]);}return TL('acorta su vientre muscular','shortens its muscle belly','encurta o ventre muscular');}
 function conLocal(m,c){const [A,B]=pca(m);const ax=B.clone().sub(A);if(ax.lengthSq()<1e-12)ax.set(0,1,0);ax.normalize();
   contraction={t:0,c,local:{m,ctr:centroid([m]),q:new THREE.Quaternion().setFromUnitVectors(new V3(0,1,0),ax),txt:localAct(c)}};
@@ -4083,7 +4145,7 @@ const PHY_STEPS=[
   en:['The double circulation','Two circuits in series, completed in a little under a minute. Pulmonary (lesser) circulation: right heart → lungs → left heart, to oxygenate the blood. Systemic (greater) circulation: left heart → whole body → right heart, to deliver oxygen to the tissues. That is why the left ventricle, which works against the pressure of the whole body, has a wall about three times thicker than the right.'],
   pt:['A dupla circulação','Dois circuitos em série, percorridos em pouco menos de um minuto. Circulação pulmonar (pequena): coração direito → pulmões → coração esquerdo, para oxigenar o sangue. Circulação sistêmica (grande): coração esquerdo → todo o corpo → coração direito, para levar oxigênio aos tecidos. Por isso o ventrículo esquerdo, que vence a pressão de todo o corpo, tem a parede cerca de três vezes mais grossa que o direito.']}
 ];
-const pTx=st=>LANG==='en'?st.en:LANG==='pt'?st.pt:st.es;
+const pTx=st=>LEN()?st.en:LANG==='pt'?st.pt:st.es;
 /* Partículas de sangre */
 const PHY_N=260;
 const phyPtsGeo=new THREE.BufferGeometry();
@@ -8135,7 +8197,7 @@ renderRoute();
 /* Narración por voz (síntesis del navegador) */
 /* Narración por voz: elige la voz más natural disponible, trocea el texto en frases y permite reproducir el recorrido como un vídeo */
 const VOX={list:[],tick:null,seq:0};
-function voxLang(){return LANG==='en'?'en':LANG==='pt'?'pt':'es';}
+function voxLang(){return LEN()?'en':LANG==='pt'?'pt':'es';}
 function voxScore(v){const n=(v.name+' '+(v.voiceURI||'')).toLowerCase(),L=(v.lang||'').toLowerCase().replace('_','-');let s=0;
   if(/natural|neural|online|premium|enhanced|wavenet|studio|journey/.test(n))s+=60;if(/google/.test(n))s+=30;if(/microsoft/.test(n)&&/online/.test(n))s+=10;
   if(/siri|paulina|monica|mónica|jorge|juan|diego|camila|francisca|luciana|dalia|elvira|alvaro|helena|thalita|antonio|francisco|daniel|samantha|serena|libby|sonia|ryan|aria|jenny|guy/.test(n))s+=12;
@@ -8152,7 +8214,7 @@ function voxSay(txt,onend,rate,onchunk){try{speechSynthesis.cancel();}catch(e){}
   if(!txt){return;}if(!('speechSynthesis' in window)){if(onend)setTimeout(()=>{if(my===VOX.seq)onend();},Math.max(4000,txt.length*65));return;}
   const v=voxPick(),parts=voxChunks(txt);let i=0;
   const next=()=>{if(my!==VOX.seq)return;if(i>=parts.length){clearInterval(VOX.tick);if(onchunk)onchunk('');if(onend)setTimeout(()=>{if(my===VOX.seq)onend();},900);return;}
-    if(onchunk)onchunk(parts[i]);const u=new SpeechSynthesisUtterance(parts[i++]);if(v){u.voice=v;u.lang=v.lang;}else u.lang=LANG==='en'?'en-GB':LANG==='pt'?'pt-BR':'es-ES';u.rate=(rate||1)*(v&&/google/i.test(v.name)?1:0.97);u.pitch=1;
+    if(onchunk)onchunk(parts[i]);const u=new SpeechSynthesisUtterance(parts[i++]);if(v){u.voice=v;u.lang=v.lang;}else u.lang=LEN()?'en-GB':LANG==='pt'?'pt-BR':'es-ES';u.rate=(rate||1)*(v&&/google/i.test(v.name)?1:0.97);u.pitch=1;
     u.onend=next;u.onerror=()=>{if(my===VOX.seq){clearInterval(VOX.tick);if(onchunk)onchunk('');if(onend)setTimeout(onend,Math.max(2500,txt.length*40));}};speechSynthesis.speak(u);};
   next();VOX.tick=setInterval(()=>{try{if(speechSynthesis.speaking&&!speechSynthesis.paused){speechSynthesis.pause();speechSynthesis.resume();}}catch(e){}},9000);}
 function voxStop(){voxSub('');VOX.seq++;clearInterval(VOX.tick);try{speechSynthesis.cancel();}catch(e){}}
@@ -8175,7 +8237,7 @@ const lmGroup=new THREE.Group();scene.add(lmGroup);
 function clearLm(){lmGroup.clear();removeLabels('lm');}
 function showLm(list,focus){clearLm();if(SYS.muscular.on)setXray(true);for(const [es,en,p,pt] of list){const v=new V3(...p);
   const s=new THREE.Mesh(new THREE.SphereGeometry(0.0045,14,10),new THREE.MeshBasicMaterial({color:0xffd34d,depthTest:false,transparent:true}));s.position.copy(v);s.renderOrder=32;lmGroup.add(s);
-  const L=addLabel(LANG==='en'?en:LANG==='pt'&&pt?pt:es,()=>v,'','lm');L.on=true;L.pos=v;}
+  const L=addLabel(LEN()?en:LANG==='pt'&&pt?pt:es,()=>v,'','lm');L.on=true;L.pos=v;}
   if(focus&&list.length===1) focusOn(new V3(...list[0][2]),0.35);}
 
 /* ───────── Bucle ───────── */
@@ -8449,7 +8511,7 @@ async function bgStart(){if(BG.run||BG.fin||!BG.on||!window.caches||!window.__CC
   const dp=d.querySelector('p.muted');if(dp)h.title=dp.textContent;}
  const _rd=renderDis;renderDis=function(){_rd.apply(this,arguments);const nm=$('#disName'),tx=$('#disTxt');if(nm&&tx)nm.title=tx.textContent;
   const SS={'Piel':['Skin','Pele'],'Fascia':['Fascia','Fáscia'],'Sup.':['Sup.','Sup.'],'Int.':['Int.','Int.'],'Prof.':['Deep','Prof.'],'V-N':['V-N','V-N'],'Lig.':['Lig.','Lig.'],'Hueso':['Bone','Osso'],'Mama':['Breast','Mama'],'Vísc.':['Visc.','Vísc.'],'Pelvis':['Pelvis','Pelve']};
-  if(LANG!=='es')document.querySelectorAll('#disSteps button[data-s]').forEach(x=>{const t=SS[x.dataset.s];if(t)x.dataset.s=t[LANG==='en'?0:1];});
+  if(LANG!=='es')document.querySelectorAll('#disSteps button[data-s]').forEach(x=>{const t=SS[x.dataset.s];if(t)x.dataset.s=t[LEN()?0:1];});
   const r=$('#disR');if(r){$('#disPrev').disabled=+r.value<=0&&disStage>=0;$('#disNext').disabled=+r.value>=+r.max;}};
  const _rs=renderSysList;renderSysList=function(){_rs.apply(this,arguments);document.querySelectorAll('#sysList .sys').forEach(row=>{const sm=row.querySelector('.nm small'),nm=row.querySelector('.nm');if(!sm||!nm)return;
    const t=sm.textContent.trim();if(/descarg|error|downloading|baixando/i.test(t))sm.classList.add('live');nm.title=nm.firstChild&&nm.firstChild.nodeType===3?nm.firstChild.textContent.trim()+(t?' · '+t:''):t;});};
@@ -8557,6 +8619,13 @@ let BANKS_P=null;function loadBanks(){if(BANKS_P)return BANKS_P;
 (function bankIdle(t0){const ok=typeof SYS!=='undefined'&&SYS.muscular&&SYS.muscular.state==='loaded';if(!ok&&performance.now()-t0<15000)return setTimeout(()=>bankIdle(t0),800);setTimeout(loadBanks,1500);})(performance.now());
 {const _st=showTab;showTab=function(t){if(t==='lec')loadBanks();return _st.apply(this,arguments);};}
 $('#q').addEventListener('input',e=>{if(e.target.value.trim().length>=4)loadBanks();});
+/* tema: oscuro (por defecto), claro o automático según el sistema */
+(function(){const mq=matchMedia('(prefers-color-scheme: light)');let pref='dark';try{pref=store.get('theme','dark');}catch(e){}
+ function apply(){const t=pref==='auto'?(mq.matches?'light':'dark'):pref;document.documentElement.dataset.theme=t;
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',t==='light'?'#f3f6f8':'#0d1117');
+  document.querySelectorAll('#themeSeg [data-theme-set]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.themeSet===pref));}
+ document.querySelectorAll('#themeSeg [data-theme-set]').forEach(b=>b.onclick=()=>{pref=b.dataset.themeSet;try{store.set('theme',pref);}catch(e){}apply();});
+ try{mq.addEventListener('change',()=>{if(pref==='auto')apply();});}catch(e){}apply();})();
 /* ───── Móvil simplificado: menú «Más» con todas las herramientas etiquetadas, aviso breve y hoja inferior más baja ───── */
 (()=>{
   const tg=$('#toolsTog');if(!tg)return;
