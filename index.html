@@ -28,10 +28,12 @@
 <title>Corpus Atlas</title>
 <script>/* Caché local de modelos y datos: cada petición de m2/, hr/, data/ y draco/ se sirve desde el almacenamiento del navegador si ya se descargó; lo nuevo se guarda. La caché lleva la versión publicada en el nombre y las versiones viejas se borran. */
 /* Modelos (m2/, hr/, draco/) en una caché estable que sobrevive a las actualizaciones (subir MODELOS_V si cambian las mallas); textos y datos (data/) en una caché por versión. */
-(function(){try{if(!window.caches||!/^https?:$/.test(location.protocol))return;const MODELOS_V=1,CM='corpus-modelos:'+MODELOS_V,CD='corpus-datos:'+location.pathname,OK=/^(m2|hr|data|draco)\//,of=window.fetch.bind(window);
+/* Si la página la controla un service worker (sitio publicado en GitHub), él ya guarda todo con su propia versión: esta capa no actúa, para que las dos cachés no se borren entre sí. Los datos (data/) se piden primero a la red y la caché solo se usa sin conexión, para que una actualización llegue siempre. */
+(function(){try{if(!window.caches||!/^https?:$/.test(location.protocol))return;if(navigator.serviceWorker&&navigator.serviceWorker.controller){caches.keys().then(ks=>ks.forEach(k=>{if(k.indexOf('corpus-modelos:')===0||k.indexOf('corpus-datos:')===0)caches.delete(k);})).catch(()=>{});return;}const MODELOS_V=1,CM='corpus-modelos:'+MODELOS_V,CD='corpus-datos:'+location.pathname,OK=/^(m2|hr|data|draco)\//,of=window.fetch.bind(window);
 const cn=u=>/^data\//.test(u)?CD:CM;window.__CC=cn;
-caches.keys().then(ks=>ks.forEach(k=>{if((k.indexOf('corpus-')===0||k.indexOf('corpus:')===0)&&k!==CM&&k!==CD)caches.delete(k);})).catch(()=>{});
+caches.keys().then(ks=>ks.forEach(k=>{if((k.indexOf('corpus-modelos:')===0||k.indexOf('corpus-datos:')===0)&&k!==CM&&k!==CD)caches.delete(k);})).catch(()=>{});
 window.fetch=function(u,o){if(typeof u!=='string'||!OK.test(u)||(o&&o.method&&o.method!=='GET'))return of(u,o);
+  if(/^data\//.test(u))return of(u,o).then(r=>{if(r.ok&&r.status===200)caches.open(CD).then(c=>c.put(u,r.clone())).catch(()=>{});return r;}).catch(e=>caches.open(CD).then(c=>c.match(u)).then(h=>h||Promise.reject(e)));
   return caches.open(cn(u)).then(c=>c.match(u).then(h=>h||of(u,o).then(r=>{if(r.ok&&r.status===200)c.put(u,r.clone()).catch(()=>{});return r;}))).catch(()=>of(u,o));};
 }catch(e){}})();</script>
 <script>/* Carga rápida: pide ya los modelos que se usaron la última vez (o los de inicio), en paralelo con el resto de la página */
