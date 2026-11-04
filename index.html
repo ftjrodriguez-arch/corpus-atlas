@@ -179,7 +179,7 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .gaitTbl{width:100%;margin:6px 0;font-size:12.5px}.gaitTbl td,.gaitTbl th{padding:3px 6px;text-align:right}.gaitTbl td:first-child,.gaitTbl th:first-child{text-align:left}
 .gm{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px}.gm small{color:var(--muted);text-align:right}
 .gm .ty{align-self:flex-start;flex:none;font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}.gm .ty.exc{color:#f0a040;border-color:#f0a04066}.gm .ty.con{color:var(--ok);border-color:var(--ok)}.gm .ty.iso{color:var(--accent);border-color:var(--accent)}
-.sqProf{margin-top:8px}.sqProf summary{cursor:pointer;font-size:13px;font-weight:600;padding:4px 0}.sqGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:8px 0}.sqGrid label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}.sqGrid input,.sqGrid select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:13px}
+.sqProf{margin-top:8px}.sqProf summary{cursor:pointer;font-size:13px;font-weight:600;padding:4px 0}.sqGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:8px 0}.sqGrid label{display:flex;flex-direction:column;justify-content:flex-end;gap:3px;font-size:12px;color:var(--muted)}.sqGrid input,.sqGrid select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:13px}
 .gloTop{display:flex;gap:6px;flex-wrap:wrap}.gloTop input{flex:1;min-width:0;border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:8px 10px}.gloTop select{max-width:44%;border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:6px}
 @media (max-width:520px){.gloTop input{flex:1 1 100%}.gloTop select{max-width:none;flex:1 1 100%;padding:8px}}
 .gloAZ{display:flex;flex-wrap:wrap;gap:2px}.gloAZ button{border:0;background:transparent;min-width:20px;padding:3px 3px;font:600 12px var(--f-mono);color:var(--muted);border-radius:5px}.gloAZ button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}.gloAZ button:disabled{opacity:.3;cursor:default}
@@ -9318,7 +9318,7 @@ function sqLegFoot(S,A,rq,v,st){const res=v=>{const f=sqFootState(S,sqLegQ0(S,A,
     const d=sqLin(J,r0.map(x=>-x));if(!d)break;for(let j=0;j<3;j++)v[j]=Math.max(lim[j][0],Math.min(lim[j][1],v[j]+Math.max(-12,Math.min(12,d[j]))));}
   return v;}
 function sqLegSolve(S,A,rq){const st=sqStance(S);SQ.lv=SQ.lv||{};const prev=(SQ.lv[S]||st.v).slice();
-  const lim=30*Math.min(1,A.K/70);
+  const lim=30*Math.min(1,A.K/50);/* rotación de la tibia disponible: casi nula en extensión, plena hacia los 50° de flexión */
   const at=r=>{const v=sqLegFoot(S,A,rq,[prev[0],prev[1],prev[2],r],st);return {v,off:sqFootState(S,sqLegQ0(S,A,v),rq)[3]-SQ_KNEE_OFF};};
   let best=at(Math.max(-lim,Math.min(lim,prev[3]||0)));
   if(lim>0.5&&Math.abs(best.off)>1){/* la desviación de la rodilla cambia de forma monótona con la rotación de la tibia */
@@ -9353,8 +9353,8 @@ function sqRootNoBase(A){let pitch=0,qs={},rq=new Q();for(let pass=0;pass<3;pass
 function sqActive(){const A=sqAngles(SQ.p);SQ.cur=A;const R=sqRoot(A),out=[];SQ.root=R;
   for(const S of ['R','L']){const sg=S==='R'?1:-1;for(const k of ['hip','knee','ankle'])out.push({k,jn:k+'_'+S,q:R.qs[S][k]});
     out.push({k:'shoulder',jn:'shoulder_'+S,q:qOf('shoulder_'+S,{x:-A.F*Math.min(1,0.25+A.f*1.6),y:0,z:0,w:10*sg})});
-    if(!window.__noFore)out.push({k:'fore',jn:'fore_'+S,q:qOf('fore_'+S,{x:0,y:90*sg,z:0})});}
-  {const Lq=window.__forceL!==undefined?window.__forceL:A.L;if(Lq>2)out.push({k:'trunk',jn:'trunk',q:qOf('trunk',{x:Lq,y:0,z:0})});}
+    out.push({k:'fore',jn:'fore_'+S,q:qOf('fore_'+S,{x:0,y:90*sg,z:0})});}
+  if(A.L>2)out.push({k:'trunk',jn:'trunk',q:qOf('trunk',{x:A.L,y:0,z:0})});
   /* cabeza en línea con el tronco (columna cervical neutra, como se enseña la técnica) */
   return out;}
 function sqApplyRoot(on){if(on&&SQ.root){body.quaternion.copy(SQ.root.q);body.position.copy(SQ.root.pos);}else{body.quaternion.identity();body.position.set(0,0,0);}body.updateMatrixWorld(true);}
@@ -9373,11 +9373,11 @@ function renderSqCard(){const c=$('#sqCard');if(!c)return;const P=sqProf(),on=SQ
    <input type="range" id="sqR" min="0" max="99" step="1" value="${Math.floor(SQ.p)}" aria-label="${TL('Porcentaje del ciclo','Percent of cycle','Porcentagem do ciclo')}">
    <div class="gaitBar" id="sqBar" aria-hidden="true">${SQ_PH.map((f,i)=>`<span data-i="${i}" data-k="${f[3]}" style="flex:${f[1]-f[0]};background:${f[3]==='FO'||f[3]==='DE'?'color-mix(in srgb,var(--accent) 45%,var(--panel2))':'var(--panel2)'}">${f[1]-f[0]>=10?sqT(SQ_PHN[f[3]]).split(' (')[0]:''}</span>`).join('')}</div>
    <div class="row" style="justify-content:space-between;align-items:baseline"><b id="sqPhase"></b><span class="mono" id="sqPct"></span></div>
+   <div class="row"><button class="btn" id="sqPlay">${SQ.play?TL('Pausa','Pause','Pausa'):TL('Reproducir','Play','Reproduzir')}</button><button class="btn" id="sqSlow" aria-pressed="${SQ.slow}">${TL('Cámara lenta','Slow motion','Câmera lenta')}</button><button class="btn" id="sqLat">${TL('Vista lateral','Side view','Vista lateral')}</button><button class="btn" id="sqAnt">${TL('Vista frontal','Front view','Vista frontal')}</button></div>
    <p class="muted small" id="sqGoal"></p>
    <table class="tbl gaitTbl"><thead><tr><th></th><th>${TL('Cadera','Hip','Quadril')}</th><th>${TL('Rodilla','Knee','Joelho')}</th><th>${TL('Tobillo','Ankle','Tornozelo')}</th><th>${TL('Tronco','Trunk','Tronco')}</th></tr></thead><tbody id="sqAng"></tbody></table>
    <p class="small" id="sqWarn"></p>
    <div id="sqMus"></div>
-   <div class="row"><button class="btn" id="sqPlay">${SQ.play?TL('Pausa','Pause','Pausa'):TL('Reproducir','Play','Reproduzir')}</button><button class="btn" id="sqSlow" aria-pressed="${SQ.slow}">${TL('Cámara lenta','Slow motion','Câmera lenta')}</button><button class="btn" id="sqLat">${TL('Vista lateral','Side view','Vista lateral')}</button><button class="btn" id="sqAnt">${TL('Vista frontal','Front view','Vista frontal')}</button></div>
    <details class="sqProf"><summary>${TL('Movilidad de la persona','Person\'s mobility','Mobilidade da pessoa')}</summary>
     <div class="sqGrid">
      <label>${TL('Sexo','Sex','Sexo')}<select id="sqSex"><option value="M" ${P.sex!=='F'?'selected':''}>${TL('Hombre','Male','Homem')}</option><option value="F" ${P.sex==='F'?'selected':''}>${TL('Mujer','Female','Mulher')}</option></select></label>

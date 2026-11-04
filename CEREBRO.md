@@ -72,13 +72,14 @@ centro de masas (Winter) quede sobre el centro del pie; pelvis T = H − θ; si 
 |---|---|---|
 | Pies quietos | deslizamiento < 5 mm, despegue < 5 mm en talón y punta | marcas `heel_*`, `toe_*` en coordenadas de mundo |
 | Profundidad «paralela» | muslo ≈ horizontal (θ ≈ 90°) | ángulo cadera–rodilla respecto a la horizontal |
-| Rodilla (paralela) | 110–125° | solver |
+| Rodilla (paralela) | 110–130° (= muslo 90° + tobillo; con 36° de tobillo sale 126°) | solver |
 | Dorsiflexión en el fondo | 25–38° (tope personal) | solver |
 | Inclinación del tronco | 30–50° respecto a la vertical | solver (T + flexión lumbar) |
 | Columna | neutra salvo tope de cadera (aviso) | flexión lumbar L |
 | Rodillas | sobre la línea del pie (sin valgo) | distancia lateral rodilla–línea talón→punta |
 | Equilibrio | centro de masas sobre el centro del pie ±20 mm | `sqCOM` |
-| Malla | sin NaN; músculos del muslo y pierna < 3 % de vértices dentro del hueso | prueba de `dev/musq.js` adaptada |
+| Pies en la malla real | deslizamiento y despegue < 5 mm en calcáneo, 1.er y 5.º metatarsiano y punta del dedo | vértices reales (`qa/visual/squat.js`) |
+| Malla | sin NaN; músculos dentro del hueso: no peor que la misma flexión en el simulador de rango | prueba de `dev/musq.js` adaptada |
 Pendiente de revisión clínica: el 27 %, el 38° de dorsiflexión en carga y las tolerancias. Algunas fuentes de cinemática de la sentadilla no se pudieron leer completas (PMC bloquea lectores automáticos).
 
 ## Convenciones
@@ -96,10 +97,20 @@ Pendiente de revisión clínica: el 27 %, el 38° de dorsiflexión en carga y la
 
 ## Registro de verificación
 (fecha · elemento · iteraciones · defectos corregidos · pendientes)
+- 2026-11-03 · Sentadilla v140 · 6 rondas (5 cámaras × 4 fases + primeros planos, 5 perfiles de movilidad, tarjeta en es/en/pt en 375 y 1280 px) ·
+  corregidos: el solver se detenía a 55° de rodilla (centro de masas del tronco mal situado); pies que resbalaban 118 mm con las puntas hacia fuera
+  (se añadió una cadena cerrada por pierna: rotación y abducción de cadera, inversión/eversión y rotación de la tibia); la cadena no reproducía el
+  deslizamiento de la tibia ni la subastragalina (5 mm en la malla real); antagonistas morados que dejaba el simulador de rango; radio y cúbito
+  asignados al tórax si el brazo ya estaba levantado al calcular los pesos del tronco (fallo previo de la app, ahora los pesos salen de la postura
+  de reposo); controles enterrados bajo la lista de músculos en el teléfono ·
+  resultado final: pies 0,1 mm / 0,3 mm, rodilla sobre la línea del pie ≤ 15 mm, muslo paralelo (3°), centro de masas sobre el pie, sin NaN;
+  marcha y simulador de rango sin regresiones ·
+  pendiente: los gemelos y el semimembranoso entran 6–8 % en el hueso con la rodilla a 127°, igual que en el simulador de rango (limitación previa
+  de la deformación de rodilla, no visible desde fuera).
 
 ## Estado actual
 - Hecho (v139): atlas completo, disección, fichas, glosario, lecciones, casos, pruebas clínicas, rangos articulares con goniómetro, marcha normal y patológica, fisiología animada, 3 idiomas, PWA.
-- En curso: sentadilla personalizada (v140) con bucle de verificación visual.
+- Hecho (v140, rama `sentadilla-v140`, sin publicar): sentadilla personalizada verificada.
 - Siguiente: usar las mediciones guardadas del paciente para rellenar su perfil de movilidad; más ejercicios en cadena cerrada (zancada, peso muerto, puente); intensidad de activación muscular continua (no solo activo/inactivo).
 
 ## Deuda y riesgos
@@ -107,3 +118,5 @@ Pendiente de revisión clínica: el 27 %, el 38° de dorsiflexión en carga y la
 - El modelo femenino no tiene rig: la sentadilla y la marcha solo funcionan en el masculino.
 - Fichas en inglés y portugués con traducción automática pendiente de revisión.
 - Las tolerancias de la sentadilla necesitan revisión de un fisioterapeuta.
+- Deformación de rodilla en flexión profunda: gemelos e isquiotibiales entran algo en el fémur (envoltura tipo hombro v134 pendiente para la rodilla).
+- La tarjeta de la sentadilla es larga en el teléfono (11 grupos musculares): valorar plegar la lista.
