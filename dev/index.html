@@ -2042,10 +2042,12 @@ const MUS_ORG=[[/^Clavicular (part of deltoid|head of pectoralis major) muscle$/
 function boneHash(list){const cs=0.01,H=new Map();for(const m of list){const a=m.userData.rest||m.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3){const k=Math.floor(a[i]/cs)+','+Math.floor(a[i+1]/cs)+','+Math.floor(a[i+2]/cs);let b=H.get(k);if(!b)H.set(k,b=[]);b.push(a[i],a[i+1],a[i+2]);}}
   return p=>{const fx=Math.floor(p[0]/cs),fy=Math.floor(p[1]/cs),fz=Math.floor(p[2]/cs);let best=1e9;for(let r=1;r<=12;r++){for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++)for(let c=-r;c<=r;c++){if(Math.max(Math.abs(a),Math.abs(b),Math.abs(c))!==r)continue;const L=H.get((fx+a)+','+(fy+b)+','+(fz+c));if(!L)continue;for(let t=0;t<L.length;t+=3){const d=(L[t]-p[0])**2+(L[t+1]-p[1])**2+(L[t+2]-p[2])**2;if(d<best)best=d;}}if(best<1e9&&Math.sqrt(best)<(r-1)*cs)break;}return Math.sqrt(best);};}
 const BONEH={};
-function boneSet(kind,S){const k=kind+S;if(BONEH[k])return BONEH[k];const sd=S==='R'?'derecho':'izquierdo';
+function boneSet(...A){const _t=performance.now();try{return boneSet_0(...A);}finally{const P=(window.__prof=window.__prof||{});P['boneSet']=(P['boneSet']||0)+performance.now()-_t;}}
+function boneSet_0(kind,S){const k=kind+S;if(BONEH[k])return BONEH[k];const sd=S==='R'?'derecho':'izquierdo';
   const re=kind==='hum'?/^Humerus$/:kind==='scap'?/^Scapula$/:kind==='clv'?/^Clavicle$/:/^(.* rib|Body of sternum|Manubrium of sternum|Xiphoid process|Vertebra [TL]\d+|Hip bone)$/;
   const L=meshes.filter(m=>m.userData.c&&BS(m.userData.sys)==='oseo'&&sexOk(m.userData.sys)&&re.test(m.userData.c.en)&&(!m.userData.c.side||m.userData.c.side===sd||/Vertebra|sternum|Xiphoid/.test(m.userData.c.en)));if(!L.length)return null;return BONEH[k]=boneHash(L);}
-function musFib(m,S){const u=m.userData;if(u.mf&&u.mf.S===S&&u.mf.g===m.geometry.uuid)return u.mf;const og=MUS_ORG.find(x=>x[0].test(u.c.en));if(!og)return u.mf={S,g:m.geometry.uuid,none:1};
+function musFib(...A){const _t=performance.now();try{return musFib_0(...A);}finally{const P=(window.__prof=window.__prof||{});P['musFib']=(P['musFib']||0)+performance.now()-_t;}}
+function musFib_0(m,S){const u=m.userData;if(u.mf&&u.mf.S===S&&u.mf.g===m.geometry.uuid)return u.mf;const og=MUS_ORG.find(x=>x[0].test(u.c.en));if(!og)return u.mf={S,g:m.geometry.uuid,none:1};
   const dH=boneSet(og[2]||'hum',S),dO=boneSet(og[1],S);if(!dH||!dO)return null;const R=u.rest,n=R.length/3,t=new Float32Array(n);
   for(let i=0;i<n;i++){const p=[R[i*3],R[i*3+1],R[i*3+2]],a=dO(p),b=dH(p);t[i]=a/(a+b+1e-6);}
   /* se estira a [0,1]: los puntos pegados al origen quedan en 0 y los de la inserción en 1 */
@@ -2068,7 +2070,8 @@ function musRebuild(m,ops,S){const u=m.userData,f=musFib(m,S);if(!f||f.none)retu
 const MUS_REBUILD=false;
 const SHM=/^((Clavicular|Acromial|Scapular spinal) part of deltoid muscle|(Supraspinatus|Infraspinatus|Teres major|Teres minor|Subscapularis|Coracobrachialis) muscle|Latissimus dorsi muscle|(Sternocostal head|Clavicular head|Abdominal part) of pectoralis major muscle|Long head of (biceps|triceps) brachii|Short head of biceps brachii|(Ascending|Descending|Transverse) part of trapezius muscle|Levator scapulae|Rhomboid (major|minor) muscle|Musculus rhomboideus (major|minor)|Serratus anterior muscle|Pectoralis minor muscle)$/;
 const HUMHEAD={};
-function humHead(S){if(HUMHEAD[S])return HUMHEAD[S];const J=JOINTS['shoulder_'+S];const h=meshes.find(m=>m.userData.c&&m.userData.c.en==='Humerus'&&sexOk(m.userData.sys)&&m.userData.c.side===(S==='R'?'derecho':'izquierdo'));if(!J||!h)return null;
+function humHead(...A){const _t=performance.now();try{return humHead_0(...A);}finally{const P=(window.__prof=window.__prof||{});P['humHead']=(P['humHead']||0)+performance.now()-_t;}}
+function humHead_0(S){if(HUMHEAD[S])return HUMHEAD[S];const J=JOINTS['shoulder_'+S];const h=meshes.find(m=>m.userData.c&&m.userData.c.en==='Humerus'&&sexOk(m.userData.sys)&&m.userData.c.side===(S==='R'?'derecho':'izquierdo'));if(!J||!h)return null;
   const a=h.userData.rest||h.geometry.attributes.position.array,C=J.pivot,ds=[];for(let i=0;i<a.length;i+=3){const d=Math.hypot(a[i]-C.x,a[i+1]-C.y,a[i+2]-C.z);if(d<0.045)ds.push(d);}if(ds.length<20)return null;ds.sort((x,y)=>x-y);
   /* radio de la cabeza: percentil 75 de la superficie ósea alrededor del centro articular */
   return HUMHEAD[S]={r:ds[(ds.length*0.75)|0]};}
@@ -2077,7 +2080,8 @@ function humHead(S){if(HUMHEAD[S])return HUMHEAD[S];const J=JOINTS['shoulder_'+S
    y se consulta su distancia: si ha quedado más cerca de la superficie que en reposo (o dentro), se empuja hacia fuera
    siguiendo el gradiente. Es la misma idea que usan los simuladores de tejidos blandos para el contacto con el hueso. */
 const BSDF={};
-function bsdf(name,S){const key=name+S;if(BSDF[key])return BSDF[key];const sd=S==='R'?'derecho':'izquierdo';
+function bsdf(...A){const _t=performance.now();try{return bsdf_0(...A);}finally{const P=(window.__prof=window.__prof||{});P['bsdf']=(P['bsdf']||0)+performance.now()-_t;}}
+function bsdf_0(name,S){const key=name+S;if(BSDF[key])return BSDF[key];const sd=S==='R'?'derecho':'izquierdo';
   const m=meshes.find(x=>x.userData.c&&x.userData.c.en===name&&x.userData.c.side===sd&&BS(x.userData.sys)==='oseo'&&sexOk(x.userData.sys));if(!m)return null;
   const A=m.userData.rest||m.geometry.attributes.position.array,nv=A.length/3,I=m.geometry.index?m.geometry.index.array:null,N=new Float32Array(A.length);
   if(I){for(let t=0;t<I.length;t+=3){const a=I[t]*3,b=I[t+1]*3,c=I[t+2]*3,ux=A[b]-A[a],uy=A[b+1]-A[a+1],uz=A[b+2]-A[a+2],vx=A[c]-A[a],vy=A[c+1]-A[a+1],vz=A[c+2]-A[a+2],nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;for(const k of [a,b,c]){N[k]+=nx;N[k+1]+=ny;N[k+2]+=nz;}}}
@@ -2101,7 +2105,8 @@ function boneFrames(ops,S){const prox=ops.filter(o=>!/_(R|L)$/.test(o.jn)).map(o
   for(const b of MUS_BONES){const set=new Set(prox);set.add('sc_'+S);if(b!=='Clavicle')set.add('acr_'+S);if(b==='Humerus')set.add('shoulder_'+S);
     const c0=chainXf(ops,set,0,0,0),ex=chainXf(ops,set,1,0,0).sub(c0),ey=chainXf(ops,set,0,1,0).sub(c0),ez=chainXf(ops,set,0,0,1).sub(c0);out.push({c0,ex,ey,ez});}
   return out;}
-function musPrep(m,S){const u=m.userData,bk=MUS_BONES.map(b=>bsdf(b,S)?1:0).join('');if(u.mp&&u.mp.S===S&&u.mp.bk===bk&&u.mp.g===m.geometry.uuid)return u.mp;const R=u.rest,n=R.length/3,J=JOINTS['shoulder_'+S],H=humHead(S);if(!J||!H)return null;
+function musPrep(...A){const _t=performance.now();try{return musPrep_0(...A);}finally{const P=(window.__prof=window.__prof||{});P['musPrep']=(P['musPrep']||0)+performance.now()-_t;}}
+function musPrep_0(m,S){const u=m.userData,bk=MUS_BONES.map(b=>bsdf(b,S)?1:0).join('');if(u.mp&&u.mp.S===S&&u.mp.bk===bk&&u.mp.g===m.geometry.uuid)return u.mp;const R=u.rest,n=R.length/3,J=JOINTS['shoulder_'+S],H=humHead(S);if(!J||!H)return null;
   const C=J.pivot,dh=new Float32Array(n).fill(-1);for(let i=0;i<n;i++){const d=Math.hypot(R[i*3]-C.x,R[i*3+1]-C.y,R[i*3+2]-C.z);if(d<H.r+0.035)dh[i]=Math.max(d,H.r+0.002);}
   let gt=null;const T=typeof stcInit==='function'?stcInit():null;if(T){gt=new Float32Array(n).fill(9);const p=new V3();for(let i=0;i<n;i++){p.set(R[i*3],R[i*3+1],R[i*3+2]);const g=stcG(T.map,p);if(g<0.035)gt[i]=Math.max(0.002,g);}}
   const I=m.geometry.index?m.geometry.index.array:null,nb=[...Array(n)].map(()=>[]);if(I){for(let t=0;t<I.length;t+=3){const a=I[t],b=I[t+1],c=I[t+2];nb[a].push(b,c);nb[b].push(a,c);nb[c].push(a,b);}}
@@ -2799,7 +2804,8 @@ for(const f of [2,3,4,5]){LIM['mcp'+f]={x:[-90,45],z:[-25,25]};LIM['pip'+f]={x:[
    que la deja apoyada con la misma separación que en reposo (serrato anterior y subescapular), sin atravesar nunca
    las costillas ni separarse de ellas (escápula alada). */
 let STC=null;window.__stc=()=>{try{const r=stcInit();return r?{s:Object.fromEntries(Object.entries(r.side).map(([k,v])=>[k,[v.pts.length,v.g0]]))}:'null'}catch(e){return 'ERR '+e.message}};const STC_DY=0.01,STC_DT=2,STC_C=new Map();
-function stcInit(){if(STC&&STC.ok)return STC;
+function stcInit(...A){const _t=performance.now();try{return stcInit_0(...A);}finally{const P=(window.__prof=window.__prof||{});P['stcInit']=(P['stcInit']||0)+performance.now()-_t;}}
+function stcInit_0(){if(STC&&STC.ok)return STC;
   const ribs=meshes.filter(m=>m.userData.c&&sexOk(m.userData.sys)&&/^(First|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|Ninth|Tenth) rib$/.test(m.userData.c.en));
   const scs={R:null,L:null};for(const m of meshes){const c=m.userData.c;if(c&&c.en==='Scapula'&&sexOk(m.userData.sys)){if(c.side==='derecho')scs.R=m;else if(c.side==='izquierdo')scs.L=m;}}
   if(ribs.length<16||!scs.R)return null;
@@ -2933,7 +2939,7 @@ function applyAgonists(){if(gait.on){gaitAgonists();return;}
 function updateReadout(){const over=angle>curM.max;const U=curM.u||'°';$('#deg').innerHTML=`${Math.round(angle)}${U}<small> / ${curM.max}${U}</small>`;
   const st=$('#status');st.textContent=over?'Por encima de la referencia':angle===0?'Posición de partida':'Dentro del rango de referencia';st.style.color=over?'var(--warn)':angle===0?'var(--muted)':'var(--ok)';
   const mx=curM.max*1.25;$('#scaleOk').style.width=(curM.max/mx*100)+'%';$('#scaleMk').style.left=`calc(${Math.min(100,angle/mx*100)}% - 1.5px)`;}
-window.__applyPose=()=>applyPose();let poseRaf=0;function schedulePose(){if(poseRaf)return;poseRaf=requestAnimationFrame(()=>{poseRaf=0;applyPose();});}
+let poseRaf=0;function schedulePose(){if(poseRaf)return;poseRaf=requestAnimationFrame(()=>{poseRaf=0;applyPose();});}
 $('#angle').addEventListener('input',e=>{stopPlay();angle=+e.target.value;updateReadout();schedulePose();});
 $('#zero').onclick=()=>{stopPlay();angle=0;$('#angle').value=0;updateReadout();applyPose();};
 function stopPlay(){playing=false;$('#play').textContent='Animar rango';}
