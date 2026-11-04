@@ -863,6 +863,43 @@ html[data-theme="light"] .seg .btn:not(.pri){color:#3a4c59!important}
 html[data-theme="light"] .seg .btn.pri{background:var(--accent)!important;color:#fff!important}
 </style>
 
+<style>
+/* ───── Interfaz móvil v147: barra inferior Explorar · Mover · Estudiar · Más, capas en fila y hoja de la estructura tocada ───── */
+#mnav,#mmore{display:none}
+@media (max-width:879px){
+  body.mnav #mnav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;height:var(--mnav-h,62px);padding-bottom:env(safe-area-inset-bottom,0px);z-index:40;background:var(--panel);border-top:1px solid var(--line)}
+  #mnav button{border:0;background:transparent;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font:600 11.5px/1 var(--f-ui);min-height:48px;cursor:pointer}
+  #mnav button svg{width:22px;height:22px}
+  #mnav button[aria-current="page"]{color:var(--accent)}
+  body.mnav .panel .tabs{display:none!important}
+  body.mnav .panel{padding-bottom:0!important;border-radius:18px 18px 0 0!important}
+  /* capas: fila horizontal arriba en lugar de columna a la izquierda */
+  body.mnav #qbar.qbar{position:absolute!important;top:8px!important;left:8px!important;right:8px!important;bottom:auto!important;max-width:none!important;max-height:none!important;width:auto!important;height:auto!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;gap:6px!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;scrollbar-width:none;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  body.mnav #qbar.qbar::-webkit-scrollbar{display:none}
+  body.mnav #qbar.qbar button{flex:none!important;flex-direction:row!important;width:auto!important;height:36px!important;min-height:36px!important;padding:0 12px!important;gap:6px!important;border-radius:999px!important;font:600 12.5px/1 var(--f-ui)!important;border:1px solid var(--line)!important;background:var(--panel)!important;opacity:1!important}
+  body.mnav #qbar.qbar button[aria-pressed="true"]{border-color:var(--c,var(--accent))!important;color:var(--ink)!important}
+  body.mnav #qbar.qbar button[aria-pressed="false"]{color:var(--muted)!important}
+  body.mnav #qbar.qbar hr{display:none!important}
+  body.mnav #qbar.qbar button span{display:inline!important;font-size:12.5px!important;max-width:none!important;letter-spacing:0!important;overflow:visible!important}
+  body.mnav[data-sheet="half"] .actbar #actLat,body.mnav[data-sheet="full"] .actbar #actLat{display:none!important}
+  body.mnav .lbltog{top:52px!important}
+  /* estructura tocada: nombre grande, latín y cuatro acciones grandes */
+  body.mnav .actbar{flex-direction:column!important;align-items:stretch!important;gap:8px!important;padding:12px!important;border-radius:16px!important}
+  body.mnav .actbar .actname{font:600 18px/1.2 var(--f-display)!important;white-space:normal!important;overflow:visible!important;max-width:none!important}
+  body.mnav .actbar #actLat{display:block;font:italic 14px/1.2 var(--f-display);color:var(--muted);margin-top:-4px}
+  body.mnav .actbar .actbtns{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;overflow:visible!important;-webkit-mask-image:none!important;mask-image:none!important}
+  body.mnav .actbar .actbtns > button:not([hidden]){min-height:52px!important;height:auto!important;border-radius:14px!important;font:600 12px/1.15 var(--f-ui)!important;white-space:normal!important;padding:6px 4px!important;display:flex!important;align-items:center;justify-content:center;text-align:center}
+  body.mnav .actbar .actbtns > button:first-child{background:var(--accent)!important;color:var(--accent-ink,#062124)!important;border-color:var(--accent)!important}
+  body.mnav .actbar .amenu{bottom:calc(100% + 6px)!important}
+  /* menú «Más» */
+  body.mnav #mmore:not([hidden]){display:block;position:fixed;inset:0;z-index:45;background:rgba(0,0,0,.45)}
+  #mmore .mm{position:absolute;left:0;right:0;bottom:var(--mnav-h,62px);max-height:70vh;overflow:auto;background:var(--panel);border-radius:18px 18px 0 0;border-top:1px solid var(--line);padding:14px 14px 10px;display:flex;flex-direction:column;gap:12px}
+  #mmore h3{margin:0;font:600 12px/1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  #mmore .mg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  #mmore .mg button{min-height:64px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--ink);font:600 12.5px/1.2 var(--f-ui);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:6px;cursor:pointer}
+  #mmore .mg button svg{width:20px;height:20px;color:var(--accent)}
+}
+</style>
 <nav id="mnav" aria-label="Secciones"></nav>
 <div id="mmore" hidden><div class="mm" role="dialog" aria-label="Más"></div></div>
 <header>
@@ -9865,7 +9902,7 @@ window.MNAV_H=62;
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
  const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
- const APP_V='corpus-v147';/* igual que V en sw.js: se cambian juntos en cada publicación */
+ const APP_V='corpus-v148';/* igual que V en sw.js: se cambian juntos en cada publicación */
  const hadCtl=!!navigator.serviceWorker.controller;let upShown=false;
  /* aviso de versión nueva: si alguien tiene abierta (o instalada) una versión antigua, se le ofrece actualizar */
  const upBar=v=>{if(upShown)return;upShown=true;const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');
