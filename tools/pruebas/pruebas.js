@@ -36,6 +36,10 @@ const buscar=(p,t)=>p.evaluate(async t=>{const q=document.querySelector('#q');q.
    document.querySelector('#sqBtn').click();await new Promise(r=>setTimeout(r,800));r.after=__corpus.meshes.filter(m=>m.userData.sq).length;return r;});
  ok(sq.n>=8&&sq.after===0,'Sentadilla de cadena cerrada: músculos activos en magenta y se limpian al salir',JSON.stringify(sq));
  const zan=await buscar(p,'zancada');ok(zan.some(x=>/Zancada/.test(x.t)),'Búsqueda: ejercicio nuevo (zancada)',zan[0]&&zan[0].t.slice(0,60));
+ const kin=await p.evaluate(async()=>{openKin();for(let i=0;i<60&&!document.querySelector('#bioCard #bioMode');i++)await new Promise(r=>setTimeout(r,500));const c=document.querySelector('#bioCard');if(!c)return {};
+   const n=+((c.querySelector('#bioR [data-r="all"]')||{}).textContent||'').replace(/\D/g,'');c.querySelector('#bioMode [data-m="exam"]').click();await new Promise(r=>setTimeout(r,200));c.querySelector('[data-b="exgo"]').click();await new Promise(r=>setTimeout(r,200));
+   const o=c.querySelectorAll('.bioopts .btn');o[0].click();await new Promise(r=>setTimeout(r,200));return {n,opts:o.length,ok:c.querySelectorAll('.bioopts .btn.ok').length,link:!!document.querySelector('.kinlink')};});
+ ok(kin.n>=450&&kin.opts===4&&kin.ok===1&&kin.link,'Kinesiología: acceso directo, banco de preguntas y examen con la correcta marcada',JSON.stringify(kin));
  const hdr=await p.evaluate(()=>{const h=document.querySelector('header');return h.scrollWidth-h.clientWidth;});ok(hdr<=0,'Cabecera sin desbordar a 1280 px');
  await p.evaluate(()=>document.querySelector('#langSeg [data-lang="en"]').click());await espera(2500);
  const en=await buscar(p,'femur');ok(en.length&&/Bones|Ligaments|Brain/.test(en.map(x=>x.t).join(' ')),'Inglés: sistema traducido en la búsqueda',en[0]&&en[0].t.slice(0,50));
