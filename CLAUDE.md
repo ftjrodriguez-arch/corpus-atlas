@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v148**.
+(GitHub Pages desde `main`). Versión actual: **v149**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -36,7 +36,14 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 - Post-procesos: `kneePush` (gemelos/isquios fuera del hueso en flexión profunda de rodilla) y `latHug`
   (dorsal ancho y redondo mayor pegados al tórax al elevar el brazo).
 
+## Contenido educativo (v149)
+- Lecciones en `data/lessons*.json` (es/en/pt, mismos ids y pasos): `{id,t,r,a,obj,steps[{t,x,show,view}],q:[5 preguntas]}`; `a` = asignatura.
+  Los nombres de `show` y `en` deben existir en el catálogo del modelo. Fallar una pregunta con `en` la manda al repaso espaciado.
+- Variantes anatómicas en `data/variants.json` (incluido en el CORE de `sw.js`).
+- Textos de técnica de ejercicios en `EJ_TXT` (errores, progresiones, precauciones) y escenas de ergonomía en `CTESTS` con `r:'ergonomia'`.
+
 ## Pendiente
+- Modo docente con resultados de la clase (necesita cuentas y servidor).
 - Interfaz móvil nueva programada en v147–v148 (barra inferior, capas en fila, hoja de estructura tocada): recoger opiniones y pulir.
 - Al fusionar el artefacto con la web, los bloques nuevos al principio o al final del archivo se pierden: ponerlos en mitad (p. ej. antes de `<header>`).
 - Revisión por un fisioterapeuta de los parámetros de la sentadilla.
