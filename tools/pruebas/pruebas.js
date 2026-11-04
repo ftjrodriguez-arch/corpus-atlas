@@ -30,7 +30,7 @@ const buscar=(p,t)=>p.evaluate(async t=>{const q=document.querySelector('#q');q.
  ok(c.on&&/lengua/.test(c.t),'Contracción en el sitio (estilogloso)',c.t.slice(0,60));ok(c.back,'Al parar, la malla vuelve a su forma');
  const iso=await p.evaluate(async()=>{const m=__corpus.meshes.find(x=>x.userData.c.id==='x2');__corpus.select(m);await new Promise(r=>setTimeout(r,300));const th0=__corpus.orb.T.th;document.querySelector('#iIso').click();const th=((__corpus.orb.T.th%(2*Math.PI))+2*Math.PI)%(2*Math.PI);return Math.round(th*57.3);});
  ok(iso>100&&iso<260,'Aislar orienta la cámara hacia la nuca (semiespinoso)',iso+'°');
- const sq=await p.evaluate(async()=>{__corpus.showTab('mov');await new Promise(r=>setTimeout(r,500));const b=document.querySelector('#sqBtn');if(!b)return {err:'sin botón'};b.click();await new Promise(r=>setTimeout(r,3500));
+ const sq=await p.evaluate(async()=>{__corpus.showTab('mov');await new Promise(r=>setTimeout(r,500));const b=document.querySelector('#sqBtn');if(!b)return {err:'sin botón'};b.click();await new Promise(r=>setTimeout(r,1500));const sr=document.querySelector('#sqR');sr.value=30;sr.dispatchEvent(new Event('input'));await new Promise(r=>setTimeout(r,1500));
    const n=__corpus.meshes.filter(m=>m.userData.sq).length;const body=__corpus.meshes[0].parent;let q=__corpus.meshes.find(m=>m.userData.c.en==='Femur');
    const r={n,ph:(document.querySelector('#sqPhase')||{}).textContent||'',bodyMoved:false};let g=q;while(g&&g.parent){if(g.position&&g.position.lengthSq()>1e-8)r.bodyMoved=true;g=g.parent;}
    document.querySelector('#sqBtn').click();await new Promise(r=>setTimeout(r,800));r.after=__corpus.meshes.filter(m=>m.userData.sq).length;return r;});

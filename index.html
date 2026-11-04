@@ -2275,7 +2275,10 @@ function musPrep(m,S){const u=m.userData,bk=MUS_BONES.map(b=>bsdf(b,S)?1:0).join
   const BF=MUS_BONES.map(b=>bsdf(b,S)),bi=[],bc=BF.map(F=>{if(!F){bi.push(null);return null;}const a=new Float32Array(n),ix=[];for(let i=0;i<n;i++){const d=bsdfAt(F,R[i*3],R[i*3+1],R[i*3+2]);a[i]=d===null?0.003:Math.max(-0.008,Math.min(d,0.003));if(d!==null&&d<0.06)ix.push(i);}bi.push(Int32Array.from(ix));return a;});
   /* solo se vigilan los puntos que en reposo están a menos de 6 cm de cada hueso */
   return u.mp={S,bk,g:m.geometry.uuid,dh,gt,BF,bc,bi,NB,L0};}
-function musPost(m,ops){const u=m.userData,c=u.c,S=c.side==='derecho'?'R':c.side==='izquierdo'?'L':null;if(!S)return;
+/* durante la reproducción de la sentadilla se omite el ajuste fino de los músculos del hombro (es lo más caro de deform);
+   al pausar, o 180 ms después de quedarse quieta la postura, se recalcula completo */
+let MUS_SKIP=false;
+function musPost(m,ops){if(MUS_SKIP)return;const u=m.userData,c=u.c,S=c.side==='derecho'?'R':c.side==='izquierdo'?'L':null;if(!S)return;
   const chain=['acr_'+S,'sc_'+S],used=ops.filter(o=>chain.includes(o.jn)||o.jn==='shoulder_'+S);if(!used.length)return;const mp=musPrep(m,S);if(!mp)return;
   if(MUS_HQ&&u.hq&&u.hq.sig===MUS_SIG&&u.hq.g===m.geometry.uuid){const G=m.geometry.attributes;G.position.array.set(u.hq.P);G.normal.array.set(u.hq.N);G.position.needsUpdate=true;G.normal.needsUpdate=true;return;}
   const trunk=ops.some(o=>/^(trunk|thor|lumbar)/.test(o.jn));const T=!trunk&&mp.gt?stcInit():null;
@@ -2345,7 +2348,7 @@ function kneePush(touched,sides){const cs=0.008,key=(x,y,z)=>((Math.floor(x/cs)*
     if(!nb)continue;
     for(const m of touched){const c=m.userData.c;if(!c||c.side!==side||m.userData.sys!=='muscular'||!KP_MUS.test(c.en))continue;
       const pa=m.geometry.attributes.position,P=pa.array,n=P.length/3;let ch=0;
-      for(let i=0;i<n;i++){const x=P[i*3],y=P[i*3+1],z=P[i*3+2],fx=Math.floor(x/cs),fy=Math.floor(y/cs),fz=Math.floor(z/cs);let bd=1e9,L0=null,o0=0;
+      for(let i=0;i<n;i++){const x=P[i*3],y=P[i*3+1],z=P[i*3+2];if(!H.has(key(x,y,z))&&!H.has(key(x+cs,y,z))&&!H.has(key(x-cs,y,z))&&!H.has(key(x,y+cs,z))&&!H.has(key(x,y-cs,z))&&!H.has(key(x,y,z+cs))&&!H.has(key(x,y,z-cs)))continue;const fx=Math.floor(x/cs),fy=Math.floor(y/cs),fz=Math.floor(z/cs);let bd=1e9,L0=null,o0=0;
         for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)for(let d=-1;d<=1;d++){const L=H.get(((fx+a)*73856093)^((fy+b)*19349663)^((fz+d)*83492791));if(!L)continue;for(let t=0;t<L.length;t+=6){const q=(L[t]-x)**2+(L[t+1]-y)**2+(L[t+2]-z)**2;if(q<bd){bd=q;L0=L;o0=t;}}}
         if(!L0)continue;const dot=(x-L0[o0])*L0[o0+3]+(y-L0[o0+1])*L0[o0+4]+(z-L0[o0+2])*L0[o0+5];
         if(dot<0.0008&&bd<1.44e-4&&dot>-0.012){const s=0.0008-dot;P[i*3]+=L0[o0+3]*s;P[i*3+1]+=L0[o0+4]*s;P[i*3+2]+=L0[o0+5]*s;ch++;}}
@@ -2355,22 +2358,24 @@ function kneePush(touched,sides){const cs=0.008,key=(x,y,z)=>((Math.floor(x/cs)*
    holgura permitida crece solo cerca del húmero (pliegue axilar posterior) y el resto se devuelve contra el tronco. */
 const LH_MUS=/^(Latissimus dorsi|Teres major) muscle$/,LH_BONE=/(rib|^Costal cartilage|sternum|^Hip bone$)/i;
 function latHug(touched,ops){const sides=[...new Set(ops.filter(o=>/^shoulder_/.test(o.jn)&&o.ang>0.45).map(o=>o.jn.endsWith('_L')?'izquierdo':'derecho'))];if(!sides.length)return;
-  const cs=0.06,key=(x,y,z)=>((Math.floor(x/cs)*73856093)^(Math.floor(y/cs)*19349663)^(Math.floor(z/cs)*83492791));
-  for(const side of sides){const bones=meshes.filter(m=>{const c=m.userData.c;return c&&/oseo/.test(m.userData.sys||'')&&LH_BONE.test(c.en)&&(c.side===side||!c.side);});if(!bones.length)continue;
-    const mk=cur=>{const H=new Map();for(const m of bones){const a=cur?m.geometry.attributes.position.array:(m.userData.rest||m.geometry.attributes.position.array);for(let i=0;i<a.length;i+=6){const k=key(a[i],a[i+1],a[i+2]);let b=H.get(k);if(!b)H.set(k,b=[]);b.push(a[i],a[i+1],a[i+2]);}}return H;};
-    const near=(H,x,y,z)=>{const fx=Math.floor(x/cs),fy=Math.floor(y/cs),fz=Math.floor(z/cs);let bd=1e9,bx=0,by=0,bz=0;
-      for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)for(let d=-1;d<=1;d++){const L=H.get(((fx+a)*73856093)^((fy+b)*19349663)^((fz+d)*83492791));if(!L)continue;for(let t=0;t<L.length;t+=3){const q=(L[t]-x)**2+(L[t+1]-y)**2+(L[t+2]-z)**2;if(q<bd){bd=q;bx=L[t];by=L[t+1];bz=L[t+2];}}}
-      return bd<1e8?[Math.sqrt(bd),bx,by,bz]:null;};
-    let Hc=null;
+  /* rendimiento: la búsqueda del punto de costilla más cercano se hace UNA vez, en reposo; en cada fotograma solo se mide
+     la distancia a ese mismo punto (ya movido si el tronco se mueve) */
+  for(const side of sides){LH_B[side]=LH_B[side]||meshes.filter(m=>{const c=m.userData.c;return c&&/oseo/.test(m.userData.sys||'')&&LH_BONE.test(c.en)&&(c.side===side||!c.side);});const bones=LH_B[side];if(!bones.length)continue;
     for(const m of touched){const u=m.userData,c=u.c;if(!c||c.side!==side||!LH_MUS.test(c.en)||!u.rest)continue;
       const R=u.rest,n=R.length/3,P=m.geometry.attributes.position.array;
-      if(!u.lhD0||u.lhD0.length!==n){const H0=mk(false);u.lhD0=new Float32Array(n);for(let i=0;i<n;i++){const r=near(H0,R[i*3],R[i*3+1],R[i*3+2]);u.lhD0[i]=r?r[0]:-1;}}
-      /* holgura: cuanto más se mueve el punto con el húmero (peso del hombro), más puede separarse del tronco */
-      const W=weightsFor(m,'shoulder_'+(side==='izquierdo'?'L':'R'));if(!Hc)Hc=mk(true);let ch=0;
+      if(!u.lhD0||u.lhD0.length!==n){const cs=0.04,H=new Map(),key=(x,y,z)=>((Math.floor(x/cs)*73856093)^(Math.floor(y/cs)*19349663)^(Math.floor(z/cs)*83492791));
+        bones.forEach((b,bi)=>{const a=b.userData.rest||b.geometry.attributes.position.array;for(let i=0;i<a.length;i+=6){const k=key(a[i],a[i+1],a[i+2]);let L=H.get(k);if(!L)H.set(k,L=[]);L.push(a[i],a[i+1],a[i+2],bi,i);}});
+        u.lhD0=new Float32Array(n);u.lhA=new Int32Array(n*2);
+        for(let i=0;i<n;i++){const x=R[i*3],y=R[i*3+1],z=R[i*3+2],fx=Math.floor(x/cs),fy=Math.floor(y/cs),fz=Math.floor(z/cs);let bd=1e9,ab=-1,ai=0;
+          for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)for(let d=-1;d<=1;d++){const L=H.get(((fx+a)*73856093)^((fy+b)*19349663)^((fz+d)*83492791));if(!L)continue;for(let t=0;t<L.length;t+=5){const q=(L[t]-x)**2+(L[t+1]-y)**2+(L[t+2]-z)**2;if(q<bd){bd=q;ab=L[t+3];ai=L[t+4];}}}
+          u.lhD0[i]=ab<0?-1:Math.sqrt(bd);u.lhA[i*2]=ab;u.lhA[i*2+1]=ai;}}
+      const W=weightsFor(m,'shoulder_'+(side==='izquierdo'?'L':'R'));let ch=0;
       for(let i=0;i<n;i++){const d0=u.lhD0[i];if(d0<0)continue;const w=W?W[i]:0;const free=w>0.85?1:w<0.25?0:(w-0.25)/0.6;if(free>=1)continue;
-        const x=P[i*3],y=P[i*3+1],z=P[i*3+2],r=near(Hc,x,y,z);if(!r)continue;const allow=d0+0.006+free*free*0.07;if(r[0]<=allow)continue;
-        const k=allow/r[0];P[i*3]=r[1]+(x-r[1])*k;P[i*3+1]=r[2]+(y-r[2])*k;P[i*3+2]=r[3]+(z-r[3])*k;ch++;}
+        const B=bones[u.lhA[i*2]].geometry.attributes.position.array,j=u.lhA[i*2+1],qx=B[j],qy=B[j+1],qz=B[j+2];
+        const x=P[i*3],y=P[i*3+1],z=P[i*3+2],dx=x-qx,dy=y-qy,dz=z-qz,d=Math.sqrt(dx*dx+dy*dy+dz*dz);const allow=d0+0.006+free*free*0.07;if(d<=allow)continue;
+        const k=allow/d;P[i*3]=qx+dx*k;P[i*3+1]=qy+dy*k;P[i*3+2]=qz+dz*k;ch++;}
       if(ch){m.geometry.attributes.position.needsUpdate=true;m.geometry.computeVertexNormals();m.geometry.computeBoundingSphere();}}}}
+const LH_B={};
 function deform(active){
   /* mientras el hombro se está moviendo los músculos se relajan con pocas iteraciones; cuando la postura se queda quieta
      (180 ms sin cambios) se repite una vez con el cálculo completo */
@@ -8406,11 +8411,13 @@ function coLayout(list,placed){const r=cv.getBoundingClientRect(),W=r.width,H=r.
       placed.push({x0:x0,x1:x1,y0:y-h/2,y1:y+h/2});
       const ex=k?xR-2:xL+2,sx=k?ex-8:ex+8;const hc=L.el.classList.contains('hl')?' class="hl"':'';svg+=`<path${hc} d="M${ex.toFixed(1)} ${y.toFixed(1)}H${sx.toFixed(1)}L${L.ax.toFixed(1)} ${L.ay.toFixed(1)}"/><circle${hc} cx="${L.ax.toFixed(1)}" cy="${L.ay.toFixed(1)}" r="${hc?4.2:2.6}"/>`;});});
   leadSvg.innerHTML=svg;}
-function cullLabels(){if(typeof guideTick==='function')try{guideTick();}catch(_){}const vis=[],co=[];let tag=null;for(const L of labels){if(!L.show)continue;if(L.co)co.push(L);else if(L.group==='tag')tag=L;else vis.push(L);}
+function cullLabels(){/* la etiqueta del eje no puede quedar debajo de la barra de capas de la izquierda (teléfono) */
+  try{if(typeof axisLbl!=='undefined'&&axisLbl&&axisLbl.el&&!axisLbl.el.hidden){const cr=cv.getBoundingClientRect();for(const rail of document.querySelectorAll('#qbar,.tools')){const rr=rail.getBoundingClientRect(),el=axisLbl.el,x=parseFloat(el.style.left),y=parseFloat(el.style.top);
+    if(rr.width&&rr.left<cr.left+120&&!isNaN(x)&&!isNaN(y)){const minX=rr.right-cr.left+6,top=rr.top-cr.top,bot=rr.bottom-cr.top;if(y>top-20&&y<bot&&x-el.offsetWidth/2<minX)el.style.left=(minX+el.offsetWidth/2)+'px';}}}}catch(_){}if(typeof guideTick==='function')try{guideTick();}catch(_){}const vis=[],co=[];let tag=null;for(const L of labels){if(!L.show)continue;if(L.co)co.push(L);else if(L.group==='tag')tag=L;else vis.push(L);}
   lblTog.hidden=!labels.some(L=>L.co&&L.on&&(L.group==='lm'||PHY.on));if(typeof mqBtn!=='undefined'){const av=mqAvail();mqBtn.hidden=!av;if(MQ&&!av)mqStop();}
   const placed=[];coLayout(co,placed);const order=tag?[tag,...vis]:vis;for(const L of order){const el=L.el;if(L._t!==el.textContent){L._t=el.textContent;L.w=el.offsetWidth;L.h=el.offsetHeight;}if(!L.w){L.w=el.offsetWidth;L.h=el.offsetHeight;}
-    const x=parseFloat(el.style.left),y=parseFloat(el.style.top);if(isNaN(x)||isNaN(y)){el.style.visibility='';continue;}const tg=L.group==='tag';const w=L.w,h=L.h;let ok=null;
-    for(const dy of tg?[0]:[0,-(h+3),h+3,-2*(h+3),2*(h+3)]){const R=tg?{x0:x+10,x1:x+10+w,y0:y+dy-h/2,y1:y+dy+h/2}:{x0:x-w/2-2,x1:x+w/2+2,y0:y+dy-h/2-1,y1:y+dy+h/2+1};if(!placed.some(Q=>R.x0<Q.x1&&R.x1>Q.x0&&R.y0<Q.y1&&R.y1>Q.y0)){ok=[R,dy];break;}}
+    const x=parseFloat(el.style.left),y=parseFloat(el.style.top);if(isNaN(x)||isNaN(y)){el.style.visibility='';continue;}const tg=L.group==='tag';const w=L.w,h=L.h;let ok=null;/* la etiqueta de la estructura tocada se da la vuelta si no cabe a la derecha */let fl=false;if(tg){const W=cv.clientWidth;fl=x+10+w>W-6&&x-10-w>6;el.classList.toggle('flip',fl);}
+    for(const dy of tg?[0]:[0,-(h+3),h+3,-2*(h+3),2*(h+3)]){const R=tg?{x0:fl?x-10-w:x+10,x1:fl?x-10:x+10+w,y0:y+dy-h/2,y1:y+dy+h/2}:{x0:x-w/2-2,x1:x+w/2+2,y0:y+dy-h/2-1,y1:y+dy+h/2+1};if(!placed.some(Q=>R.x0<Q.x1&&R.x1>Q.x0&&R.y0<Q.y1&&R.y1>Q.y0)){ok=[R,dy];break;}}
     if(ok){placed.push(ok[0]);el.style.visibility='';if(ok[1])el.style.top=(y+ok[1])+'px';}else el.style.visibility='hidden';}}
 /* ───── Encuadre según la pantalla: lo que se enfoca cabe entero en la zona libre del visor ───── */
 var FIT_ID=0,FIT_USER=false;
@@ -9725,7 +9732,7 @@ function renderSqCard(){const c=$('#sqCard');if(!c)return;const P=sqProf(),on=SQ
   c.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{SQ.depth=b.dataset.d;store.set('sqDepth',SQ.depth);SQ.bottom=null;c.querySelectorAll('[data-d]').forEach(x=>x.setAttribute('aria-pressed',x===b));sqUpdate();});
   $('#sqR').oninput=e=>{SQ.p=+e.target.value;SQ.play=false;$('#sqPlay').textContent=TL('Reproducir','Play','Reproduzir');sqUpdate();};
   $('#sqBar').querySelectorAll('span').forEach(s=>s.onclick=()=>{const f=SQ_PH[+s.dataset.i];SQ.p=f[3]==='FO'?50:(f[0]+f[1])/2;SQ.play=false;$('#sqPlay').textContent=TL('Reproducir','Play','Reproduzir');sqUpdate();});
-  $('#sqPlay').onclick=()=>{SQ.play=!SQ.play;$('#sqPlay').textContent=SQ.play?TL('Pausa','Pause','Pausa'):TL('Reproducir','Play','Reproduzir');};
+  $('#sqPlay').onclick=()=>{SQ.play=!SQ.play;if(!SQ.play)sqUpdate();$('#sqPlay').textContent=SQ.play?TL('Pausa','Pause','Pausa'):TL('Reproducir','Play','Reproduzir');};
   $('#sqSlow').onclick=()=>{SQ.slow=!SQ.slow;$('#sqSlow').setAttribute('aria-pressed',SQ.slow);};
   $('#sqLat').onclick=()=>{focusOn(new V3(0,0.7,0),2.7);setView('latd');};$('#sqAnt').onclick=()=>{focusOn(new V3(0,0.7,0),2.7);setView('ant');};
   const prof=()=>{const v=id=>+$(id).value;const P=sqProf();Object.assign(P,{sex:$('#sqSex').value,age:Math.max(3,Math.min(100,v('#sqAge')||30)),df:Math.max(0,Math.min(60,v('#sqDf'))),hip:Math.max(60,Math.min(160,v('#sqHip'))),knee:Math.max(60,Math.min(165,v('#sqKnee')))});store.set('sqProf',P);SQ.bottom=null;sqUpdate();};
@@ -9749,7 +9756,8 @@ function renderSq(){if(!SQ.on||!$('#sqPhase'))return;const A=SQ.cur||sqAngles(SQ
 function sqUpdate(){applyPose();renderSq();sqAgonists();}
 function setSq(on){if(on){try{if(CT.on)ctStop();if(PHY.on)phyStop();if(gait.on)setGait(false);}catch(e){}stopPlay();angle=0;SQ.depth=store.get('sqDepth','par');if(!SQ_DEPTH[SQ.depth])SQ.depth='par';SQ.bottom=null;SQ.base=null;SQ.st=null;SQ.lv=null;SQ.lastPitch=0;SQ.p=0;SQ.play=true;if(!SYS.muscular.on)setOn('muscular',true);}
   SQ.on=on;renderSqCard();applyPose();if(on){renderSq();sqAgonists();focusOn(new V3(0,0.75,0),2.9);setView('latd');}else{sqAgonists();applyAgonists();}}
-function sqTick(dt){if(!SQ.on||!SQ.play||currentTab!=='mov')return;SQ.p=(SQ.p+dt*100/(SQ.slow?16:4))%100;SQ.last+=dt;if(SQ.last>(SQ.slow?0.03:0.045)){SQ.last=0;sqUpdate();}}
+/* el intervalo entre posturas se adapta a lo que tarda cada una, para que la página siga respondiendo en equipos lentos */
+function sqTick(dt){if(!SQ.on||!SQ.play||currentTab!=='mov')return;SQ.p=(SQ.p+dt*100/(SQ.slow?16:4))%100;SQ.last+=dt;if(SQ.last>Math.max(SQ.slow?0.03:0.045,(SQ.cost||0)*1.5/1000)){SQ.last=0;const t0=performance.now();MUS_SKIP=true;try{sqUpdate();}finally{MUS_SKIP=false;}SQ.cost=performance.now()-t0;}}
 renderSqCard();
 
 /* ───────── Inicio ───────── */
@@ -9797,7 +9805,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
  const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
- const APP_V='corpus-v145';/* igual que V en sw.js: se cambian juntos en cada publicación */
+ const APP_V='corpus-v146';/* igual que V en sw.js: se cambian juntos en cada publicación */
  const hadCtl=!!navigator.serviceWorker.controller;let upShown=false;
  /* aviso de versión nueva: si alguien tiene abierta (o instalada) una versión antigua, se le ofrece actualizar */
  const upBar=v=>{if(upShown)return;upShown=true;const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');
@@ -9808,7 +9816,8 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
    const poll=()=>{reg.update().catch(()=>{});fetch('sw.js?v='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(s=>{const m=s.match(/const V='([^']+)'/);if(m&&m[1]!==APP_V)upBar(m[1]);}).catch(()=>{});};
    setTimeout(poll,4000);setInterval(poll,30*60*1000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')poll();});
  }).catch(()=>{});
- navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtl)upBar('');});
+ /* al cambiar de service worker no se avisa a ciegas: se compara la versión (la página puede ser ya la nueva) */
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtl)fetch('sw.js?v='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(s=>{const m=s.match(/const V='([^']+)'/);if(m&&m[1]!==APP_V)upBar(m[1]);}).catch(()=>{});});
  const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
  /* botón Instalar */
