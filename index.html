@@ -9293,7 +9293,7 @@ function sqChain(p,S,Pq,from){p=p.clone();const ks=from==='knee'?['hip']:from===
 /* orientación del pie (en grados) y posición lateral del tobillo para una postura de la pierna y un giro de la pelvis */
 function sqFootState(S,Pq,rq){const lat=new V3(S==='R'?-0.05:0.05,0,0),h0=new V3(...RIG['heel_'+S]);
   const h=sqChain(h0,S,Pq).applyQuaternion(rq),t=sqChain(new V3(...RIG['toe_'+S]),S,Pq).applyQuaternion(rq),l=sqChain(h0.clone().add(lat),S,Pq).applyQuaternion(rq);
-  const ax=sqChain(JOINTS['ankle_'+S].pivot,S,Pq,'ankle').x;const r=180/Math.PI;
+  const ax=h.x;const r=180/Math.PI;
   const k=sqChain(JOINTS['knee_'+S].pivot,S,Pq,'knee').applyQuaternion(rq),d=t.clone().sub(h);d.y=0;d.normalize();const kv=k.clone().sub(h);
   /* rodilla respecto a la línea talón→punta del pie (mm, + = hacia fuera) */const off=(kv.x*d.z-kv.z*d.x)*(S==='R'?1:-1)*1000;
   return [Math.atan2(t.x-h.x,t.z-h.z)*r,Math.asin(Math.max(-1,Math.min(1,(l.y-h.y)/0.05)))*r,ax*1000,off];}
@@ -9335,14 +9335,17 @@ function sqRoot(A){let pitch=SQ.lastPitch||0,qs={},rq=new Q();
     /* el giro alrededor del eje mediolateral cambia la pendiente del pie en proporción al coseno de su dirección */
     const yaw=Math.atan2(Math.abs(new V3(...RIG.toe_R).x-new V3(...RIG.heel_R).x),1);pitch=pr/Math.max(0.5,Math.cos(SQ.st&&SQ.st.R?SQ.st.R.yaw*Math.PI/180:yaw));}
   SQ.lastPitch=pitch;rq=new Q().setFromAxisAngle(new V3(1,0,0),pitch);
-  let mid=new V3();for(const S of ['R','L'])mid.add(sqChain(JOINTS['ankle_'+S].pivot,S,qs[S],'ankle').multiplyScalar(0.5));
+  /* el cuerpo se ancla en los puntos reales del pie (talón y punta de ambos pies): el pie gira bajo el astrágalo, así que el pivote del tobillo no basta */
+  const footMid=qq=>{const m=new V3();for(const S of ['R','L'])for(const k of ['heel','toe'])m.add(sqChain(new V3(...RIG[k+'_'+S]),S,qq[S]).multiplyScalar(0.25));return m;};
+  let mid=footMid(qs);
   if(!SQ.base){const A0=sqSolve(0);A0.f=0;const keep={lv:SQ.lv,lp:SQ.lastPitch};SQ.base=null;SQ.lv={};SQ.lastPitch=0;const R0=sqRootNoBase(A0);SQ.base=R0.mid;SQ.lv=keep.lv;SQ.lastPitch=keep.lp;}
   const pos=SQ.base.clone().sub(mid.clone().applyQuaternion(rq));return {q:rq,pos,qs,pitch:pitch*180/Math.PI,mid};}
 function sqRootNoBase(A){let pitch=0,qs={},rq=new Q();for(let pass=0;pass<3;pass++){rq=new Q().setFromAxisAngle(new V3(1,0,0),pitch);for(const S of ['R','L'])qs[S]=sqLegQ0(S,A,sqLegSolve(S,A,rq));
     let pr=0;for(const S of ['R','L']){const h=sqChain(new V3(...RIG['heel_'+S]),S,qs[S]),t=sqChain(new V3(...RIG['toe_'+S]),S,qs[S]),h0=new V3(...RIG['heel_'+S]),t0=new V3(...RIG['toe_'+S]);const d=t.clone().sub(h),d0=t0.clone().sub(h0);pr+=0.5*(Math.atan2(d.y,Math.hypot(d.z,d.x))-Math.atan2(d0.y,Math.hypot(d0.z,d0.x)));}
     pitch=pr/Math.max(0.5,Math.cos(SQ.st.R.yaw*Math.PI/180));}
-  rq=new Q().setFromAxisAngle(new V3(1,0,0),pitch);const mid=new V3();for(const S of ['R','L'])mid.add(sqChain(JOINTS['ankle_'+S].pivot,S,qs[S],'ankle').applyQuaternion(rq).multiplyScalar(0.5));
-  mid.y=Math.min(JOINTS.ankle_R.pivot.y,JOINTS.ankle_L.pivot.y);return {mid};}
+  rq=new Q().setFromAxisAngle(new V3(1,0,0),pitch);const mid=new V3();for(const S of ['R','L'])for(const k of ['heel','toe'])mid.add(sqChain(new V3(...RIG[k+'_'+S]),S,qs[S]).applyQuaternion(rq).multiplyScalar(0.25));
+  /* altura: la de los mismos puntos en reposo, para que la planta quede sobre el suelo */
+  mid.y=['R','L'].reduce((a,S)=>a+0.25*(RIG['heel_'+S][1]+RIG['toe_'+S][1]),0);return {mid};}
 function sqActive(){const A=sqAngles(SQ.p);SQ.cur=A;const R=sqRoot(A),out=[];SQ.root=R;
   for(const S of ['R','L']){const sg=S==='R'?1:-1;for(const k of ['hip','knee','ankle'])out.push({k,jn:k+'_'+S,q:R.qs[S][k]});
     out.push({k:'shoulder',jn:'shoulder_'+S,q:qOf('shoulder_'+S,{x:-A.F*Math.min(1,0.25+A.f*1.6),y:0,z:0,w:10*sg})});

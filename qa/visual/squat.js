@@ -35,6 +35,9 @@ const metrics = E(`(()=>{
      thighFromHoriz:+(Math.atan2(o.hipR.y-o.kneeR.y,Math.hypot(o.hipR.x-o.kneeR.x,o.hipR.z-o.kneeR.z))*180/Math.PI).toFixed(1),
      K:+SQ.cur.K.toFixed(0),H:+SQ.cur.H.toFixed(0),A:+SQ.cur.A.toFixed(0),trunk:+SQ.cur.tau.toFixed(0),com_mm:+((sqCOM(SQ.cur.K,SQ.cur.A,SQ.cur.H,SQ.cur.L)-sqGeo().foot)*1000).toFixed(1),nan};}
  SQ.p=50;sqUpdate();const bot=inBone();
+ /* referencia: la misma flexión de rodilla en el simulador de rango (sin sentadilla), para saber si el defecto es de la sentadilla o de la deformación de rodilla */
+ const Kb=SQ.bottom.K;setSq(false);showTab('mov');const jr=ROM.find(j=>j.id==='rodilla');curJ=jr;curM=jr.moves[0];setSide('R');angle=Kb;applyPose();const romK=inBone();angle=0;applyPose();setSq(true);SQ.play=false;SQ.p=50;sqUpdate();
+ res.kneeFlexRomRef=Object.fromEntries(['Medial head of gastrocnemius','Lateral head of gastrocnemius','Semimembranosus muscle','Semitendinosus muscle'].map(k=>[k,romK[k]]));
  res.muscleInBone=Object.keys(bot).map(k=>[k,rest[k],bot[k],+(bot[k]-rest[k]).toFixed(1)]).sort((a,b)=>b[3]-a[3]).slice(0,10);
  return res;})()`);
 const views = [['frontal',0,1.5],['posterior',Math.PI,1.5],['lateral_d',-Math.PI/2,1.5],['lateral_i',Math.PI/2,1.5],['tres_cuartos',-0.75,1.35]];
@@ -46,8 +49,9 @@ for (const pp of [0,26,50,74]) {
   }
 }
 E(`SQ.p=50;sqUpdate();`);
-for (const [n,th,ph,tgt,r] of [['rodilla_lat',-Math.PI/2,1.5,'-0.1,0.4,0.15',1.0],['rodilla_front',0,1.5,'0,0.4,0.2',1.0],['cadera_post',Math.PI,1.3,'0,0.45,-0.15',1.1]]) {
-  E(`orb.th=orb.T.th=${th};orb.ph=orb.T.ph=${ph};orb.r=orb.T.r=${r};orb.tgt.set(${tgt});orb.T.tgt.set(${tgt});`);
+const tg = E(`(()=>{const W=p=>p.clone().applyMatrix4(body.matrixWorld);const k=W(sqChain(JOINTS.knee_R.pivot,'R',SQ.root.qs.R,'knee'));const h=W(JOINTS.hip_R.pivot);return {k:k.toArray(),h:h.toArray()};})()`);
+for (const [n,th,ph,t,r] of [['rodilla_lat',-Math.PI/2,1.5,tg.k,0.75],['rodilla_post',Math.PI,1.45,tg.k,0.75],['rodilla_front',-0.35,1.5,tg.k,0.75],['cadera_post',Math.PI,1.3,[0,tg.h[1],tg.h[2]],1.0]]) {
+  E(`orb.th=orb.T.th=${th};orb.ph=orb.T.ph=${ph};orb.r=orb.T.r=${r};orb.tgt.set(${t.join(',')});orb.T.tgt.set(${t.join(',')});`);
   await shot(`sq_${depth}_zoom_${n}`);
 }
 return metrics;
