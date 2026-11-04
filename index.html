@@ -9357,7 +9357,9 @@ function sqApplyRoot(on){if(on&&SQ.root){body.quaternion.copy(SQ.root.q);body.po
 function sqTypeAt(p){const k=sqPhase(p)[3];return k==='DE'?0:k==='FO'?1:k==='AS'?2:-1;}
 function sqMuscles(p){const i=sqTypeAt(p);if(i<0)return [];return SQ_M.map(m=>({m,ty:m[3][i]}));}
 function sqAgonists(){const on=SQ.on&&currentTab==='mov',ens=new Set();if(on)sqMuscles(SQ.p).forEach(({m})=>m[0].forEach(e=>ens.add(e)));
-  for(const m of meshes){if(m.userData.sys!=='muscular')continue;const want=on&&ens.has(m.userData.c.en);if(!!m.userData.ag!==want){m.userData.ag=want;refreshState(m);}}}
+  for(const m of meshes){if(m.userData.sys!=='muscular')continue;const u=m.userData,want=on&&ens.has(u.c.en);
+    /* se borran los antagonistas y avisos que dejara el simulador de rango o la marcha patológica */if(on&&(u.an||u.hint)){u.an=false;u.hint=false;refreshState(m);}
+    if(!!u.ag!==want){u.ag=want;refreshState(m);}}}
 const sqF=v=>(v<0?'−':'')+Math.abs(Math.round(v))+'°';
 function renderSqCard(){const c=$('#sqCard');if(!c)return;const P=sqProf(),on=SQ.on;
   c.innerHTML=`<div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">${TL('Sentadilla','Squat','Agachamento')}</h3><button class="btn" id="sqBtn" aria-pressed="${on}">${on?TL('Salir de la sentadilla','Exit squat','Sair do agachamento'):TL('Ver sentadilla','Show squat','Ver agachamento')}</button></div>
