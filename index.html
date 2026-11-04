@@ -180,6 +180,7 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .gaitTbl{width:100%;margin:6px 0;font-size:12.5px}.gaitTbl td,.gaitTbl th{padding:3px 6px;text-align:right}.gaitTbl td:first-child,.gaitTbl th:first-child{text-align:left}
 .gm{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px}.gm small{color:var(--muted);text-align:right}
 .gm .ty{align-self:flex-start;flex:none;font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}.gm .ty.exc{color:#f0a040;border-color:#f0a04066}.gm .ty.con{color:var(--ok);border-color:var(--ok)}.gm .ty.iso{color:var(--accent);border-color:var(--accent)}
+.sqProf{margin-top:8px}.sqProf summary{cursor:pointer;font-size:13px;font-weight:600;padding:4px 0}.sqGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:8px 0}.sqGrid label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}.sqGrid input,.sqGrid select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:13px}
 .gloTop{display:flex;gap:6px;flex-wrap:wrap}.gloTop input{flex:1;min-width:0;border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:8px 10px}.gloTop select{max-width:44%;border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:6px}
 @media (max-width:520px){.gloTop input{flex:1 1 100%}.gloTop select{max-width:none;flex:1 1 100%;padding:8px}}
 .gloAZ{display:flex;flex-wrap:wrap;gap:2px}.gloAZ button{border:0;background:transparent;min-width:20px;padding:3px 3px;font:600 12px var(--f-mono);color:var(--muted);border-radius:5px}.gloAZ button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}.gloAZ button:disabled{opacity:.3;cursor:default}
@@ -1094,6 +1095,7 @@ html[data-theme="light"] .seg .btn.pri{background:var(--accent)!important;color:
             <div class="row"><button class="btn" id="gaitPlay">Pausa</button><button class="btn" id="gaitSlow" aria-pressed="false">Cámara lenta</button><button class="btn" id="gaitView">Vista lateral</button></div>
           </div>
         </div>
+        <div class="card gait" id="sqCard"></div>
         <div class="card" id="ctCard"></div>
         <div class="row" style="justify-content:space-between">
           <h3>Articulación</h3>
@@ -1264,7 +1266,9 @@ const sexOf=k=>(SYS[k]&&SYS[k].sex)||null;
 const SEXKEY=k=>BODY==='f'?({piel:'piel_f',reproductor:'reproductor_f'}[k]||k):BODY==='m'?({piel_f:'piel',reproductor_f:'reproductor',mama:null}[k]===undefined?k:{piel_f:'piel',reproductor_f:'reproductor',mama:null}[k]):k;
 const MALE_ONLY=/testicular|of penis|penile|cremaster|spermatic|scrot|prostat|^Urethra$/i;
 /* músculos nuevos modelados sobre la pelvis, la columna lumbar y el fémur masculinos (que la mujer tiene con otra forma): en el cuerpo de mujer se ocultan; del periné se usan los suyos (gBsp*, gIsc*, gSTP*) */
-const MALE_NEW=new Set(['x29','x30','x31','x32','x33','x34','x37','x38','x52','x53','x54','x55','x56','x57','x58','x59','x60','x61','x62','x63']);
+const /* x52–x63 (músculos menores de cuello, laringe, órbita, tórax y codo) quedan fuera de la deformación pélvica femenina:
+   el cuerpo de mujer usa ahí el mismo esqueleto, así que se muestran tal cual */
+MALE_NEW=new Set(['x29','x30','x31','x32','x33','x34','x37','x38']);
 const isFemLayer=k=>!!k&&(k.startsWith('f_')||sexOf(k)==='f');
 const saved=store.get('sys',null);
 if(saved) for(const k in saved) if(SYS[k]){SYS[k].on=!!saved[k].on;SYS[k].op=+saved[k].op||1;}
@@ -1326,9 +1330,10 @@ function baseMat(kk,variant,noTint){
 function matFor(k,ins,state){
   const key=k+'|'+(ins||'')+'|'+(state||'');
   if(MAT[key]) return MAT[key];
-  const m=baseMat(k,ins==='origen'?'o':'e',state==='ag');
+  const m=baseMat(k,ins==='origen'?'o':'e',state==='ag'||state==='sq');
   if(state==='sel'){m.emissive=lin(cssVar('--accent'));m.emissiveIntensity=.5;}
   if(state==='ag'){m.color=lin('#f0a040');m.emissive=lin('#ff6a00');m.emissiveIntensity=.45;}
+  if(state==='sq'){m.color=lin('#e23fbf');m.emissive=lin('#ff1fb4');m.emissiveIntensity=.45;}/* sentadilla: músculos activos en magenta */
   if(state==='hint'){m.emissive=lin(cssVar('--accent'));m.emissiveIntensity=.6;}
   if(state==='an'){m.color=lin('#b8ccf2');m.emissive=lin('#1d4ed8');m.emissiveIntensity=.2;}
   if(state==='memb'){m.userData.memb=true;}
@@ -1816,7 +1821,7 @@ function pick(cx,cy){
 const SEMI=/omentum|^Palmar aponeurosis$|^Plantar aponeurosis$|^Articular capsules? of|^Pubic symphysis$|Synovial membrane|^Frenula capsulae$/i;
 const MEMB=/^(Pleura|Spinal dura|Pericardium|Peritoneum)$|cornea|conjunctiva|aqueous|vitreous|tear film|anterior chamber|posterior chamber/i;
 function setState(m,st){m.userData.state=st;m.material=matFor(m.userData.sys,m.userData.c.ins,st===''&&MEMB.test(m.userData.c.en)?'memb':st===''&&SEMI.test(m.userData.c.en)?'semi':st);}
-function refreshState(m){const u=m.userData;const st=u.sel&&u.ghost?'ghost':u.sel?'sel':u.hint?'hint':u.ag?'ag':u.an?'an':'';if(st!==u.state) setState(m,st);}
+function refreshState(m){const u=m.userData;const st=u.sel&&u.ghost?'ghost':u.sel?'sel':u.hint?'hint':u.sq?'sq':u.ag?'ag':u.an?'an':'';if(st!==u.state) setState(m,st);}
 function select(m,point){
   if(m&&!INFO_REQ)loadInfoMain();
   stopTools();clearLm();
@@ -2330,6 +2335,42 @@ function ankleSplit(o){const J=JOINTS[o.jn],a=J.xax||new V3(1,0,0),q=new Q().set
   const T=toOp(tw,J.pivot);T.tr=o.tr;const S=toOp(sw,ps);
   /* eje subastragalino oblicuo (Inman): unos 42° sobre la horizontal y 23° hacia medial; la inversión medida en el plano frontal es la componente de ese giro alrededor del eje anteroposterior */
   const OB=(typeof window!=='undefined'&&window.__stjOb!==undefined)?window.__stjOb:STJ_OB;if(OB&&S.ang>1e-4){const d=new V3(0.29*fl,0.67,0.68).normalize(),sg=Math.sign(S.ax.z)||1;S.ax=d.multiplyScalar(sg);S.ang=S.ang/0.68;}/* la subastragalina gira con el pie ya colocado por la talocrural */S.p=ps;return {tw:T,sw:S};}
+/* flexión profunda de rodilla (sentadilla, cuclillas): los gemelos, el plantar, el poplíteo y los isquiotibiales
+   mediales se pliegan contra los cóndilos y la tibia; los puntos que quedan dentro del hueso se sacan por su normal */
+const KP_BONE=/^(Femur|Tibia|Patella|Fibula)$/,KP_MUS=/gastrocnemius|^Plantaris|^Popliteus|^Semimembranosus|^Semitendinosus/;
+function kneePush(touched,sides){const cs=0.008,key=(x,y,z)=>((Math.floor(x/cs)*73856093)^(Math.floor(y/cs)*19349663)^(Math.floor(z/cs)*83492791));
+  for(const side of sides){const H=new Map();let nb=0;
+    for(const m of meshes){const c=m.userData.c;if(!c||c.side!==side||!KP_BONE.test(c.en)||!/oseo/.test(m.userData.sys||''))continue;
+      const P=m.geometry.attributes.position.array,N=m.geometry.attributes.normal.array;for(let i=0;i<P.length;i+=3){const k=key(P[i],P[i+1],P[i+2]);let b=H.get(k);if(!b)H.set(k,b=[]);b.push(P[i],P[i+1],P[i+2],N[i],N[i+1],N[i+2]);nb++;}}
+    if(!nb)continue;
+    for(const m of touched){const c=m.userData.c;if(!c||c.side!==side||m.userData.sys!=='muscular'||!KP_MUS.test(c.en))continue;
+      const pa=m.geometry.attributes.position,P=pa.array,n=P.length/3;let ch=0;
+      for(let i=0;i<n;i++){const x=P[i*3],y=P[i*3+1],z=P[i*3+2],fx=Math.floor(x/cs),fy=Math.floor(y/cs),fz=Math.floor(z/cs);let bd=1e9,L0=null,o0=0;
+        for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)for(let d=-1;d<=1;d++){const L=H.get(((fx+a)*73856093)^((fy+b)*19349663)^((fz+d)*83492791));if(!L)continue;for(let t=0;t<L.length;t+=6){const q=(L[t]-x)**2+(L[t+1]-y)**2+(L[t+2]-z)**2;if(q<bd){bd=q;L0=L;o0=t;}}}
+        if(!L0)continue;const dot=(x-L0[o0])*L0[o0+3]+(y-L0[o0+1])*L0[o0+4]+(z-L0[o0+2])*L0[o0+5];
+        if(dot<0.0008&&bd<1.44e-4&&dot>-0.012){const s=0.0008-dot;P[i*3]+=L0[o0+3]*s;P[i*3+1]+=L0[o0+4]*s;P[i*3+2]+=L0[o0+5]*s;ch++;}}
+      if(ch){pa.needsUpdate=true;m.geometry.computeBoundingSphere();}}}}
+/* dorsal ancho y redondo mayor con el brazo elevado: el vientre no puede despegarse del tórax como una cortina.
+   Cada punto guarda su distancia de reposo a la parrilla costal (costillas, esternón, hueso coxal); al deformar, la
+   holgura permitida crece solo cerca del húmero (pliegue axilar posterior) y el resto se devuelve contra el tronco. */
+const LH_MUS=/^(Latissimus dorsi|Teres major) muscle$/,LH_BONE=/(rib|^Costal cartilage|sternum|^Hip bone$)/i;
+function latHug(touched,ops){const sides=[...new Set(ops.filter(o=>/^shoulder_/.test(o.jn)&&o.ang>0.45).map(o=>o.jn.endsWith('_L')?'izquierdo':'derecho'))];if(!sides.length)return;
+  const cs=0.06,key=(x,y,z)=>((Math.floor(x/cs)*73856093)^(Math.floor(y/cs)*19349663)^(Math.floor(z/cs)*83492791));
+  for(const side of sides){const bones=meshes.filter(m=>{const c=m.userData.c;return c&&/oseo/.test(m.userData.sys||'')&&LH_BONE.test(c.en)&&(c.side===side||!c.side);});if(!bones.length)continue;
+    const mk=cur=>{const H=new Map();for(const m of bones){const a=cur?m.geometry.attributes.position.array:(m.userData.rest||m.geometry.attributes.position.array);for(let i=0;i<a.length;i+=6){const k=key(a[i],a[i+1],a[i+2]);let b=H.get(k);if(!b)H.set(k,b=[]);b.push(a[i],a[i+1],a[i+2]);}}return H;};
+    const near=(H,x,y,z)=>{const fx=Math.floor(x/cs),fy=Math.floor(y/cs),fz=Math.floor(z/cs);let bd=1e9,bx=0,by=0,bz=0;
+      for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)for(let d=-1;d<=1;d++){const L=H.get(((fx+a)*73856093)^((fy+b)*19349663)^((fz+d)*83492791));if(!L)continue;for(let t=0;t<L.length;t+=3){const q=(L[t]-x)**2+(L[t+1]-y)**2+(L[t+2]-z)**2;if(q<bd){bd=q;bx=L[t];by=L[t+1];bz=L[t+2];}}}
+      return bd<1e8?[Math.sqrt(bd),bx,by,bz]:null;};
+    let Hc=null;
+    for(const m of touched){const u=m.userData,c=u.c;if(!c||c.side!==side||!LH_MUS.test(c.en)||!u.rest)continue;
+      const R=u.rest,n=R.length/3,P=m.geometry.attributes.position.array;
+      if(!u.lhD0||u.lhD0.length!==n){const H0=mk(false);u.lhD0=new Float32Array(n);for(let i=0;i<n;i++){const r=near(H0,R[i*3],R[i*3+1],R[i*3+2]);u.lhD0[i]=r?r[0]:-1;}}
+      /* holgura: cuanto más se mueve el punto con el húmero (peso del hombro), más puede separarse del tronco */
+      const W=weightsFor(m,'shoulder_'+(side==='izquierdo'?'L':'R'));if(!Hc)Hc=mk(true);let ch=0;
+      for(let i=0;i<n;i++){const d0=u.lhD0[i];if(d0<0)continue;const w=W?W[i]:0;const free=w>0.85?1:w<0.25?0:(w-0.25)/0.6;if(free>=1)continue;
+        const x=P[i*3],y=P[i*3+1],z=P[i*3+2],r=near(Hc,x,y,z);if(!r)continue;const allow=d0+0.006+free*free*0.07;if(r[0]<=allow)continue;
+        const k=allow/r[0];P[i*3]=r[1]+(x-r[1])*k;P[i*3+1]=r[2]+(y-r[2])*k;P[i*3+2]=r[3]+(z-r[3])*k;ch++;}
+      if(ch){m.geometry.attributes.position.needsUpdate=true;m.geometry.computeVertexNormals();m.geometry.computeBoundingSphere();}}}}
 function deform(active){
   /* mientras el hombro se está moviendo los músculos se relajan con pocas iteraciones; cuando la postura se queda quieta
      (180 ms sin cambios) se repite una vez con el cálculo completo */
@@ -2373,6 +2414,8 @@ function deform(active){
     if(FIB){/* músculos por fibra: sombreado recalculado con la forma estirada (si no, la fibra estirada brilla pálida como si mirara a la luz) */g.computeVertexNormals();}
     pa.needsUpdate=true;na.needsUpdate=true;g.computeBoundingSphere();touched.add(m);
   }
+  try{latHug(touched,ops);}catch(e){}
+  {const ks=ops.filter(o=>/^knee_/.test(o.jn)&&o.ang>1.4).map(o=>o.jn.endsWith('_L')?'izquierdo':'derecho');if(ks.length)try{kneePush(touched,ks);}catch(e){}}
   for(const m of deformed){if(!touched.has(m)){const u=m.userData,g=m.geometry;g.attributes.position.array.set(u.rest);g.attributes.normal.array.set(u.restN);g.attributes.position.needsUpdate=true;g.attributes.normal.needsUpdate=true;g.computeBoundingSphere();}}
   deformed.clear();touched.forEach(m=>deformed.add(m));
 }
@@ -2617,6 +2660,30 @@ const CTESTS=[
   ex:['Cuádriceps, glúteos y tríceps sural, que amortiguan el impacto alargándose (trabajo excéntrico).','Quadriceps, gluteals and triceps surae, absorbing the impact while lengthening (eccentric work).','Quadríceps, glúteos e tríceps sural, que amortecem o impacto alongando-se (trabalho excêntrico).'],
   how:['Un buen aterrizaje es «blando»: caderas y rodillas se flexionan (~60°), los tobillos se doblan y las rodillas quedan alineadas sobre los pies.','A good landing is “soft”: hips and knees flex (~60°), the ankles bend and the knees stay aligned over the feet.','Uma boa aterrissagem é “macia”: quadris e joelhos se flexionam (~60°), os tornozelos se dobram e os joelhos ficam alinhados sobre os pés.'],
   pos:['Caer con la rodilla rígida y hacia dentro (valgo dinámico) es el mecanismo típico de rotura del ligamento cruzado anterior; un control deficiente de la cadera (glúteo medio) puede favorecerlo.','Landing with a stiff knee that collapses inwards (dynamic valgus) is the typical mechanism of anterior cruciate ligament rupture; poor hip control (gluteus medius) may contribute.','Cair com o joelho rígido e para dentro (valgo dinâmico) é o mecanismo típico de ruptura do ligamento cruzado anterior; um controle deficiente do quadril (glúteo médio) pode favorecê-lo.']},
+ {id:'curl',fx:1,r:'funcional',n:['Curl de bíceps','Biceps curl','Rosca bíceps'],node:'elbow',rad:1.0,view:'latd',mode:'mus',pose:[['elbow','x',-135],['elbow_L','x',-135],['shoulder','x',-10],['shoulder_L','x',-10]],tg:['Biceps brachii muscle','Brachialis muscle','Brachioradialis muscle'],
+  ex:['Flexores del codo: bíceps braquial, braquial anterior y braquiorradial.','Elbow flexors: biceps brachii, brachialis and brachioradialis.','Flexores do cotovelo: bíceps braquial, braquial e braquiorradial.'],
+  how:['El codo pasa de extendido a ~135° de flexión con el brazo pegado al cuerpo; al subir el peso los flexores se acortan (concéntrica) y al bajarlo lo frenan (excéntrica).','The elbow goes from straight to ~135° of flexion with the upper arm by the side; lifting the weight the flexors shorten (concentric), lowering it they brake (eccentric).','O cotovelo passa de estendido a ~135° de flexão com o braço junto ao corpo; ao subir o peso os flexores encurtam (concêntrica) e ao descer o freiam (excêntrica).'],
+  pos:['El bíceps también supina el antebrazo, por eso trabaja más con la palma hacia arriba; con la palma hacia abajo el braquiorradial y el braquial cargan más. La rotura distal del bíceps produce el signo del «Popeye» invertido y pérdida de fuerza de supinación.','Biceps also supinates the forearm, so it works hardest palm-up; palm-down, brachioradialis and brachialis take more load. A distal biceps rupture weakens supination and changes the muscle bulge.','O bíceps também supina o antebraço, por isso trabalha mais com a palma para cima; com a palma para baixo o braquiorradial e o braquial são mais exigidos. A ruptura distal do bíceps reduz a força de supinação.']},
+ {id:'latraise',fx:1,r:'funcional',n:['Elevación lateral','Lateral raise','Elevação lateral'],node:'shoulder',rad:1.1,view:'ant',mode:'mus',pose:[['shoulder','z',-85],['shoulder_L','z',85],['sc','z',-10],['sc_L','z',10],['elbow','x',-10],['elbow_L','x',-10]],tg:['Acromial part of deltoid muscle','Supraspinatus muscle','Descending part of trapezius muscle','Serratus anterior muscle'],
+  ex:['Deltoides medio y supraespinoso, que abducen el brazo; trapecio superior y serrato anterior, que giran la escápula.','Middle deltoid and supraspinatus abducting the arm; upper trapezius and serratus anterior rotating the scapula.','Deltoide médio e supraespinal, que abduzem o braço; trapézio superior e serrátil anterior, que giram a escápula.'],
+  how:['Los brazos suben de lado hasta la horizontal (~85–90° de abducción) con los codos casi rectos; el supraespinoso inicia el movimiento y el deltoides medio lo continúa.','The arms rise sideways to horizontal (~85–90° of abduction) with nearly straight elbows; supraspinatus initiates the movement and the middle deltoid carries it on.','Os braços sobem de lado até a horizontal (~85–90° de abdução) com os cotovelos quase retos; o supraespinal inicia o movimento e o deltoide médio o continua.'],
+  pos:['Subir por encima de la horizontal con rotación interna («vaciar la lata») puede pinzar el manguito bajo el acromion; con dolor entre 60° y 120° se sospecha un síndrome subacromial (arco doloroso).','Going above horizontal with internal rotation ("empty can") can pinch the cuff under the acromion; pain between 60° and 120° suggests subacromial pain syndrome (painful arc).','Subir acima da horizontal com rotação interna («esvaziar a lata») pode pinçar o manguito sob o acrômio; dor entre 60° e 120° sugere síndrome subacromial (arco doloroso).']},
+ {id:'frontraise',fx:1,r:'funcional',n:['Elevación frontal','Front raise','Elevação frontal'],node:'shoulder',rad:1.1,view:'latd',mode:'mus',pose:[['shoulder','x',-90],['shoulder_L','x',-90],['sc','z',-8],['sc_L','z',-8]],tg:['Clavicular part of deltoid muscle','Clavicular head of pectoralis major muscle','Biceps brachii muscle','Serratus anterior muscle'],
+  ex:['Deltoides anterior y fascículo clavicular del pectoral mayor, con ayuda del bíceps; el serrato anterior estabiliza la escápula.','Anterior deltoid and the clavicular head of pectoralis major, helped by biceps; serratus anterior stabilises the scapula.','Deltoide anterior e porção clavicular do peitoral maior, com ajuda do bíceps; o serrátil anterior estabiliza a escápula.'],
+  how:['Los brazos se elevan por delante hasta la horizontal (~90° de flexión del hombro) con los codos extendidos.','The arms are raised in front up to horizontal (~90° of shoulder flexion) with the elbows straight.','Os braços se elevam à frente até a horizontal (~90° de flexão do ombro) com os cotovelos estendidos.'],
+  pos:['Arquear la zona lumbar para «ayudar» a subir el peso indica una carga excesiva; el brazo de palanca largo hace que pesos pequeños ya exijan mucho al hombro.','Arching the lower back to "help" lift the weight means the load is too heavy; the long lever arm makes even light weights demanding for the shoulder.','Arquear a lombar para «ajudar» a subir o peso indica carga excessiva; o braço de alavanca longo faz com que pesos pequenos já exijam muito do ombro.']},
+ {id:'lunge',fx:1,anchor:['ankle','knee','hip'],r:'funcional',n:['Zancada','Lunge','Avanço (afundo)'],node:'knee',rad:1.7,view:'latd',mode:'mus',pose:[['hip','x',-85],['knee','x',90],['ankle','x',-10],['hip_L','x',15],['knee_L','x',95],['ankle_L','x',20],['trunk','x',5]],tg:['Gluteus maximus muscle','Vastus lateralis muscle','Vastus medialis muscle','Rectus femoris muscle','Gluteus medius muscle'],
+  ex:['Glúteo mayor y cuádriceps de la pierna adelantada; glúteo medio para mantener la pelvis nivelada; la pierna de atrás estira el recto femoral y el psoas.','Gluteus maximus and quadriceps of the front leg; gluteus medius keeps the pelvis level; the back leg stretches rectus femoris and psoas.','Glúteo máximo e quadríceps da perna da frente; glúteo médio para manter a pelve nivelada; a perna de trás alonga o reto femoral e o psoas.'],
+  how:['La rodilla y la cadera de delante se flexionan ~90° mientras la rodilla de atrás baja hacia el suelo; al subir, la pierna adelantada empuja el cuerpo.','The front hip and knee flex to ~90° while the back knee drops towards the floor; on the way up the front leg pushes the body.','O quadril e o joelho da frente se flexionam ~90° enquanto o joelho de trás desce em direção ao chão; ao subir, a perna da frente empurra o corpo.'],
+  pos:['Un paso corto lleva la rodilla delantera por delante de los dedos y carga más la rótula; uno largo carga más la cadera. Si la rodilla se va hacia dentro, falta control del glúteo medio.','A short step pushes the front knee past the toes and loads the patella more; a long step loads the hip more. If the knee caves in, gluteus medius control is lacking.','Um passo curto leva o joelho da frente à frente dos dedos e carrega mais a patela; um passo longo carrega mais o quadril. Se o joelho vai para dentro, falta controle do glúteo médio.']},
+ {id:'deadlift',fx:1,anchor:['ankle','knee','hip'],r:'funcional',n:['Peso muerto','Deadlift','Levantamento terra'],node:'hip',rad:2.0,view:'latd',mode:'mus',pose:[['hip','x',-90],['hip_L','x',-90],['knee','x',60],['knee_L','x',60],['ankle','x',-15],['ankle_L','x',-15],['shoulder','x',-15],['shoulder_L','x',-15]],tg:['Gluteus maximus muscle','Long head of biceps femoris','Semitendinosus muscle','Vastus lateralis muscle','Iliocostalis lumborum muscle','Longissimus thoracis muscle'],
+  ex:['Glúteo mayor, isquiotibiales y cuádriceps extienden cadera y rodilla; los erectores de la columna mantienen la espalda recta.','Gluteus maximus, hamstrings and quadriceps extend hip and knee; the spinal erectors keep the back straight.','Glúteo máximo, isquiotibiais e quadríceps estendem quadril e joelho; os eretores da coluna mantêm as costas retas.'],
+  how:['Desde el suelo la cadera está muy flexionada (~90°) y la rodilla a ~60°; al subir, rodillas y caderas se extienden a la vez con la barra pegada a las piernas.','From the floor the hip is deeply flexed (~90°) and the knee at ~60°; on the way up knees and hips extend together with the bar close to the legs.','Do chão o quadril está muito flexionado (~90°) e o joelho a ~60°; ao subir, joelhos e quadris se estendem juntos com a barra junto às pernas.'],
+  pos:['Más flexión de rodilla y menos de cadera se parece a una sentadilla; menos rodilla y más cadera (peso muerto rumano) trabaja más los isquiotibiales. Redondear la zona lumbar con carga aumenta la presión sobre los discos.','More knee and less hip flexion looks like a squat; less knee and more hip (Romanian deadlift) works the hamstrings more. Rounding the lower back under load raises disc pressure.','Mais flexão de joelho e menos de quadril se parece com um agachamento; menos joelho e mais quadril (terra romeno) trabalha mais os isquiotibiais. Arredondar a lombar com carga aumenta a pressão sobre os discos.']},
+ {id:'hipabd',fx:1,r:'funcional',n:['Abducción de cadera de pie','Standing hip abduction','Abdução de quadril em pé'],node:'hip',rad:1.4,view:'ant',mode:'mus',pose:[['hip','z',-35],['trunk','z',4]],tg:['Gluteus medius muscle','Gluteus minimus muscle','Tensor fasciae latae'],
+  ex:['Glúteo medio y menor y tensor de la fascia lata de la pierna que se separa; los mismos músculos de la pierna de apoyo sujetan la pelvis.','Gluteus medius and minimus and tensor fasciae latae of the moving leg; the same muscles of the standing leg hold the pelvis.','Glúteo médio e mínimo e tensor da fáscia lata da perna que se afasta; os mesmos músculos da perna de apoio sustentam a pelve.'],
+  how:['La pierna se separa hacia el lado (~35° de abducción) con la rodilla recta y la pelvis quieta; más allá de unos 35° la pelvis empieza a inclinarse.','The leg moves out to the side (~35° of abduction) with a straight knee and a still pelvis; beyond about 35° the pelvis starts to tilt.','A perna se afasta para o lado (~35° de abdução) com o joelho reto e a pelve parada; além de uns 35° a pelve começa a inclinar.'],
+  pos:['Es un ejercicio básico para la debilidad del glúteo medio (signo de Trendelenburg, dolor lateral de cadera, valgo de rodilla). Si el pie gira hacia fuera, trabaja más el psoas y menos el glúteo medio.','A basic exercise for gluteus medius weakness (Trendelenburg sign, lateral hip pain, knee valgus). If the foot turns out, psoas does more and gluteus medius less.','É um exercício básico para a fraqueza do glúteo médio (sinal de Trendelenburg, dor lateral do quadril, valgo do joelho). Se o pé gira para fora, o psoas trabalha mais e o glúteo médio menos.']},
  {id:'lachman',r:'rodilla',n:['Lachman','Lachman','Lachman'],node:'knee',rad:0.32,view:'latd',mode:'lig',pose:[['knee','x',25]],tr:[['knee',[0,0,0.012]]],tg:['Anterior cruciate ligament'],
   ex:['Ligamento cruzado anterior (LCA).','Anterior cruciate ligament (ACL).','Ligamento cruzado anterior (LCA).'],
   how:['Rodilla a 20–30° de flexión. Una mano fija el fémur y la otra tira de la tibia hacia delante.','Knee at 20–30° of flexion. One hand stabilises the femur while the other pulls the tibia forwards.','Joelho a 20–30° de flexão. Uma mão fixa o fêmur e a outra puxa a tíbia para a frente.'],
@@ -2882,21 +2949,23 @@ function ctTick(dt){if(!CT.on||currentTab!=='mov')return;CT.t+=dt;const T=4.4,tt
   act.sort((a,b)=>(DEPTH[b.k]||0)-(DEPTH[a.k]||0));
   if(CT.test.anchor){const ch=CT.test.anchor.map(k=>act.find(e=>e.k===k&&!e.jn.endsWith('_L'))).filter(Boolean);
     if(ch.length){const a0=JOINTS[ch[0].jn].pivot.clone(),p=a0.clone(),Qc=new Q();for(const e of ch){const P=JOINTS[e.jn].pivot;p.sub(P).applyQuaternion(e.q).add(P);if(e.tr)p.add(e.tr.clone().applyQuaternion(e.q));Qc.premultiply(e.q);}
-      JOINTS.__root={pivot:p,force:()=>1,child:[]};act.push({k:'__root',jn:'__root',q:Qc.clone().invert(),tr:a0.clone().sub(p).applyQuaternion(Qc)});}}
+      /* el pie queda fijo moviendo el grupo del cuerpo entero (como la sentadilla), no como una articulación más: así ningún músculo con deformación propia (pectoral, hombro) se queda atrás */const Rq=Qc.clone().invert();CT.root={q:Rq,pos:a0.clone().sub(p.clone().applyQuaternion(Rq))};}}else CT.root=null;
   deform(act);
+  if(CT.root){body.quaternion.copy(CT.root.q);body.position.copy(CT.root.pos);}else{body.quaternion.identity();body.position.set(0,0,0);}body.updateMatrixWorld(true);
   const col=[0xc3+(0xff-0xc3)*k,0xd0+(0x4d-0xd0)*k,0xde+(0x2e-0xde)*k].map(Math.round);
   for(const m of CT.marks){if(BS(m.userData.sys)!=='articular')continue;const t=m.geometry.attributes.vtint;if(!t)continue;const a=t.array;for(let i=0;i<a.length;i+=4){a[i]=col[0];a[i+1]=col[1];a[i+2]=col[2];a[i+3]=255;}t.needsUpdate=true;}
   for(const P of CT.pins){P.m.geometry.computeBoundingBox();P.local.copy(P.m.geometry.boundingBox.getCenter(new V3()));}
   if(CT.mk){CT.mk.m.geometry.computeBoundingBox();const bb=CT.mk.m.geometry.boundingBox;CT.mk.sp.position.copy(bb.getCenter(new V3())).add(new V3(0,0,0.012));const sc=0.03+0.02*Math.abs(Math.sin(CT.t*5));CT.mk.sp.scale.set(sc,sc,sc);}
   if(CT.focus&&k>0.97&&CT.marks.length){CT.focus=false;const b=new THREE.Box3();const FM=CT.test.fm?meshes.filter(m=>CT.test.fm.test(m.userData.c.en)&&m.userData.c.side==='derecho'):[];for(const m of (FM.length?FM:CT.marks)){m.geometry.computeBoundingBox();b.union(m.geometry.boundingBox);}orb.T.tgt.copy(b.getCenter(new V3()));}}
-function ctStop(){if(!CT.on&&!CT.marks.length){CT.saved=null;return;}CT.on=false;if(CT.saved){for(const k in CT.saved)if(SYS[k]){SYS[k].op=CT.saved[k].op;SYS[k].on=CT.saved[k].on;}CT.saved=null;try{syncAllMats();applySystems();renderSysList();}catch(e){}}for(const m of CT.marks){m.userData.hint=false;refreshState(m);applyTint(m);delete m.userData.pinTxt;}for(const P of CT.pins)removePin(P);if(CT.mk){scene.remove(CT.mk.sp);CT.mk=null;}CT.marks=[];CT.pins=[];deform([]);renderCT();if(currentTab==='mov'){applyPose();applyAgonists();}}
-async function ctStart(t){ctStop();resetActivity('ct');CT.saved=Object.fromEntries(Object.keys(SYS).map(k=>[k,{on:SYS[k].on,op:SYS[k].op}]));if(gait.on)setGait(false);romSide='R';setSide('R');CT.test=t;CT.t=0;
+function ctStop(){if(!CT.on&&!CT.marks.length){CT.saved=null;return;}CT.on=false;if(CT.saved){for(const k in CT.saved)if(SYS[k]){SYS[k].op=CT.saved[k].op;SYS[k].on=CT.saved[k].on;}CT.saved=null;try{syncAllMats();applySystems();renderSysList();}catch(e){}}for(const m of CT.marks){m.userData.hint=false;m.userData.sq=false;refreshState(m);applyTint(m);delete m.userData.pinTxt;}for(const P of CT.pins)removePin(P);if(CT.mk){scene.remove(CT.mk.sp);CT.mk=null;}CT.marks=[];CT.pins=[];deform([]);CT.root=null;if(!(SQ.on&&currentTab==='mov')){body.quaternion.identity();body.position.set(0,0,0);body.updateMatrixWorld(true);}renderCT();if(currentTab==='mov'){applyPose();applyAgonists();}}
+async function ctStart(t){if(t&&t.id==='squat'){/* la sentadilla funcional abre el módulo de cadena cerrada */ctStop();if(currentTab!=='mov')showTab('mov');setSq(true);const c=$('#sqCard');if(c)c.scrollIntoView({block:'nearest'});return;}ctStop();resetActivity('ct');CT.saved=Object.fromEntries(Object.keys(SYS).map(k=>[k,{on:SYS[k].on,op:SYS[k].op}]));if(gait.on)setGait(false);romSide='R';setSide('R');CT.test=t;CT.t=0;
   const ks=k=>Object.keys(SYS).find(x=>BS(x)===k&&sexOk(x));const need=t.mode==='lig'?['oseo','articular']:t.mode==='nerv'?['oseo','nervioso_periferico','muscular']:['muscular','oseo','articular'];
   for(const k of need){const kk=ks(k);if(kk){SYS[kk].on=true;if(SYS[kk].state!=='loaded')await loadSys(kk);}}
   const km=ks('muscular');if(km){SYS[km].on=t.mode!=='lig';SYS[km].op=t.mode==='nerv'?0.22:1;}const kn=ks('nervioso_periferico');if(kn&&t.mode!=='nerv')SYS[kn].on=false;const ka=ks('articular');if(ka&&t.mode==='nerv')SYS[ka].on=false;applySystems();renderSysList();
   for(const m of meshes)if(m.userData.ag||m.userData.an){m.userData.ag=false;m.userData.an=false;refreshState(m);}
   [arcLine,arcFan,arcRays,axisLine].forEach(o=>o.visible=false);if(axisLbl)axisLbl.on=false;gonHide();mvLigReset();
-  for(const m of meshes){if(!t.tg.includes(m.userData.c.en))continue;if(m.userData.c.side&&m.userData.c.side!=='derecho')continue;if(!sexOk(m.userData.sys))continue;m.userData.hint=true;refreshState(m);CT.marks.push(m);
+  const both=t.fx&&t.pose.some(p=>/_L$/.test(p[0]));/* movimientos funcionales: los músculos que trabajan en magenta (como la sentadilla), en los dos lados si el ejercicio es bilateral */
+  for(const m of meshes){if(!t.tg.includes(m.userData.c.en))continue;const sd=m.userData.c.side;if(sd&&sd!=='derecho'&&!(both&&sd==='izquierdo'))continue;if(!sexOk(m.userData.sys))continue;if(t.fx)m.userData.sq=true;else m.userData.hint=true;refreshState(m);CT.marks.push(m);if(sd==='izquierdo')continue;
     if(!CT.pins.some(P=>P.m.userData.c.en===m.userData.c.en)){m.userData.pinTxt=m.userData.c.es;m.geometry.computeBoundingBox();const n0=PINS.length;addPin(m,m.geometry.boundingBox.getCenter(new V3()));if(PINS.length>n0)CT.pins.push(PINS[PINS.length-1]);}}
   if(t.mk){const mm=meshes.find(m=>t.mk.test(m.userData.c.en)&&(!m.userData.c.side||m.userData.c.side==='derecho'));if(mm){const sp=phyGlow('rgba(255,214,60,1)',0.05);sp.material.depthTest=false;sp.renderOrder=30;scene.add(sp);CT.mk={sp,m:mm};}}
   const J=JOINTS[jname(t.node)];if(J){focusOn(J.pivot.clone(),isPhone()?t.rad*1.5:t.rad);setView(t.view);}CT.focus=true;if(isPhone())setSheet('peek');CT.on=true;renderCT();}
@@ -3031,16 +3100,16 @@ function comps(t){const c={};const add=(k,ax,deg)=>{c[k]=c[k]||{x:0,y:0,z:0,w:0}
   add(curM.mainNode||curJ.node,curM.ax,(curM.sg*t+(curM.off||0))*flip(curM.ax));return physio(c,romSide);}
 function applyPose(){
   if(!RIG) return;if(typeof CT!=='undefined'&&CT.on&&currentTab==='mov')return;
-  const active=(gait.on&&currentTab==='mov')?gaitActive():(currentTab==='mov'||contraction)?Object.entries(comps(angle)).map(([k,cm])=>({k,jn:jname(k),q:qOf(jname(k),cm)})):[];
+  const sqOn=SQ.on&&currentTab==='mov';const active=(gait.on&&currentTab==='mov')?gaitActive():sqOn?sqActive():(currentTab==='mov'||contraction)?Object.entries(comps(angle)).map(([k,cm])=>({k,jn:jname(k),q:qOf(jname(k),cm)})):[];
   active.sort((a,b)=>(DEPTH[b.k.split('_')[0]]||0)-(DEPTH[a.k.split('_')[0]]||0));
-  deform(active);updateArc(active);
+  sqApplyRoot(sqOn);deform(active);updateArc(active);
 }
 /* cadena proximal real: el húmero cuelga de la escápula (acromioclavicular y esternoclavicular), no solo del tronco */
 function arcChain(k){const P=PROX[k]||[];if(k==='shoulder')return ['acr','sc',...P];return P.flatMap(p=>p==='shoulder'?['shoulder','acr','sc']:[p]);}
 function posedPivot(k,active){const J=JOINTS[jname(k)];if(!J)return null;const p=J.pivot.clone();for(const pk of arcChain(k)){const a=active.find(x=>x.k===pk);if(!a)continue;const pv=JOINTS[a.jn].pivot;p.sub(pv).applyQuaternion(a.q).add(pv);}return p;}
 const GON_REF={shoulder:'hip',elbow:'shoulder',wrist:'elbow',hip:'shoulder',knee:'hip',ankle:'knee'};for(const f of [2,3,4,5]){GON_REF['mcp'+f]='wrist';GON_REF['pip'+f]='mcp'+f;GON_REF['dip'+f]='pip'+f;}
 function updateArc(active){
-  if((currentTab!=='mov'&&!contraction)||!RIG||gait.on||(typeof PHY!=='undefined'&&PHY.on)){[arcLine,arcFan,arcRays,axisLine].forEach(o=>o.visible=false);if(axisLbl)axisLbl.on=false;gonHide();for(const x of LIGT){if(x.P){removePin(x.P);x.P=null;}if(x.tinted){applyTint(x.m);x.tinted=false;}}return;}
+  if((currentTab!=='mov'&&!contraction)||!RIG||gait.on||SQ.on||(typeof PHY!=='undefined'&&PHY.on)){[arcLine,arcFan,arcRays,axisLine].forEach(o=>o.visible=false);if(axisLbl)axisLbl.on=false;gonHide();for(const x of LIGT){if(x.P){removePin(x.P);x.P=null;}if(x.tinted){applyTint(x.m);x.tinted=false;}}return;}
   const k=curM.mainNode||curJ.node,J=JOINTS[jname(k)];if(!J){[arcLine,arcFan,arcRays,axisLine].forEach(o=>o.visible=false);gonHide();return;}
   const proxK=arcChain(k).filter(p=>active.find(a=>a.k===p));
   // pivot: apply proximal rotations (distal→proximal); parent rotation: product proximal-first
@@ -3078,7 +3147,7 @@ function renderROM(){
   $('#moveGon').innerHTML=`<h3>Goniometría</h3><dl class="kv" style="margin-top:4px"><dt>Posición</dt><dd>${curM.pos}</dd><dt>${g[1]?TL('Fulcro','Fulcrum','Fulcro'):'Método'}</dt><dd>${g[0]}</dd>${g[1]?`<dt>Brazo fijo</dt><dd>${g[1]}</dd><dt>Brazo móvil</dt><dd>${g[2]}</dd>`:''}<dt>Sensación final</dt><dd>${curM.ef}</dd></dl>`;
   mvLigSetup();updateReadout();applyPose();applyAgonists();applyAntagonists();renderLog();if(typeof renderCT==='function')renderCT();
 }
-function applyAgonists(){if(gait.on){gaitAgonists();return;}
+function applyAgonists(){if(gait.on){gaitAgonists();return;}if(SQ.on){sqAgonists();return;}
   const ens=(currentTab==='mov'&&agOn)?curM.ag:[];const sideName=romSide==='R'?'derecho':'izquierdo';
   for(const m of meshes){if(m.userData.sys!=='muscular')continue;const c=m.userData.c;
     const want=ens.includes(c.en)&&(!curJ.sided||!c.side||c.side===sideName);if(!!m.userData.ag!==want){m.userData.ag=want;refreshState(m);}}
@@ -3092,7 +3161,7 @@ $('#angle').addEventListener('input',e=>{stopPlay();angle=+e.target.value;update
 $('#zero').onclick=()=>{stopPlay();angle=0;$('#angle').value=0;updateReadout();applyPose();};
 function stopPlay(){playing=false;$('#play').textContent='Animar rango';}
 /* al entrar en un módulo (recorrido, prueba, marcha o caso) se detiene lo anterior y el cuerpo vuelve a la posición anatómica */
-function resetActivity(keep){try{if(keep!=='ct'&&typeof CT!=='undefined'&&CT.on)ctStop();}catch(e){}try{if(keep!=='phy'&&typeof PHY!=='undefined'&&PHY.on)phyStop();}catch(e){}try{if(keep!=='gait'&&gait.on)setGait(false);}catch(e){}stopPlay();if(angle!==0){angle=0;try{const r=$('#angle');if(r)r.value=0;renderROM();}catch(e){}}applyPose();}
+function resetActivity(keep){try{if(keep!=='ct'&&typeof CT!=='undefined'&&CT.on)ctStop();}catch(e){}try{if(keep!=='phy'&&typeof PHY!=='undefined'&&PHY.on)phyStop();}catch(e){}try{if(keep!=='gait'&&gait.on)setGait(false);}catch(e){}try{if(keep!=='sq'&&SQ.on)setSq(false);}catch(e){}stopPlay();if(angle!==0){angle=0;try{const r=$('#angle');if(r)r.value=0;renderROM();}catch(e){}}applyPose();}
 $('#play').onclick=()=>{if(CT.on)ctStop();if(gait.on)setGait(false);playing=!playing;playT=0;$('#play').textContent=playing?'Detener':'Animar rango';};
 $('#focusJ').onclick=()=>{if(!RIG)return;const J=JOINTS[jname(curM.mainNode||curJ.node)];focusOn(J.pivot.clone(),Math.max(curJ.R<0.1?0.28:0.7,curJ.R*6));setView({sag:romSide==='R'?'latd':'lati',fro:'ant',tra:'ant'}[curM.pl]);};
 function setSide(s){romSide=s;store.set('side',s);$('#side-R').setAttribute('aria-pressed',s==='R');$('#side-L').setAttribute('aria-pressed',s==='L');renderROM();}
@@ -3182,7 +3251,7 @@ function gaitAgonists(){const ensR=new Set(),ensL=new Set();if(gait.on){gActive(
     const wk=weak.has(c.en)&&sideOk,sp=spa.has(c.en)&&sideOk;if(!!m.userData.hint!==wk){m.userData.hint=wk;refreshState(m);}
     if(sp){if(!m.userData.ag){m.userData.ag=true;refreshState(m);}continue;}
     const want=!wk&&gait.on&&currentTab==='mov'&&((c.side!=='izquierdo'&&ensR.has(c.en))||(c.side!=='derecho'&&ensL.has(c.en)));if(!!m.userData.ag!==want){m.userData.ag=want;refreshState(m);}}}
-function setGait(on){if(on){try{if(CT.on)ctStop();if(PHY.on)phyStop();}catch(e){}stopPlay();angle=0;}gait.on=on;$('#gaitBtn').setAttribute('aria-pressed',on);$('#gaitBtn').textContent=on?'Salir de la marcha':'Ver marcha';$('#gaitBody').hidden=!on;$('#gaitIntro').hidden=on;
+function setGait(on){if(on){try{if(CT.on)ctStop();if(PHY.on)phyStop();if(SQ.on)setSq(false);}catch(e){}stopPlay();angle=0;}gait.on=on;$('#gaitBtn').setAttribute('aria-pressed',on);$('#gaitBtn').textContent=on?'Salir de la marcha':'Ver marcha';$('#gaitBody').hidden=!on;$('#gaitIntro').hidden=on;
   if(on){stopPlay();gait.play=true;$('#gaitPlay').textContent='Pausa';if(!SYS.muscular.on)setOn('muscular',true);
     renderGaitBar();renderGaitPats();setGaitPattern(gait.pat);renderGait();}
   applyPose();gait.on?gaitAgonists():(gaitAgonists(),applyAgonists());}
@@ -3542,7 +3611,7 @@ async function setLang(l){if(!['es','en','pt','fr','de'].includes(l))l='es';
 $('#phyBtn').onclick=e=>{e.stopPropagation();togglePop($('#phyBtn'),$('#phyPop'));};document.addEventListener('pointerdown',e=>{if(!e.target.closest('#phyPop,#phyBtn')&&!$('#phyPop').hidden)togglePop($('#phyBtn'),$('#phyPop'),false);});
   $$('#langSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===l));
   if(typeof SEARCH!=='undefined'&&SEARCH.length)buildSearch();
-  /* paneles generados con textos traducidos: se vuelven a dibujar en el idioma nuevo */for(const f of ['renderPlanes','renderGloCats','renderGlo','renderLessons','renderROM','renderViews','renderSrsDecks','renderGaitBar']){try{if(typeof window[f]==='function'||eval('typeof '+f)==='function')eval(f+'()');}catch(e){}}
+  /* paneles generados con textos traducidos: se vuelven a dibujar en el idioma nuevo */for(const f of ['renderPlanes','renderGloCats','renderGlo','renderLessons','renderROM','renderViews','renderSrsDecks','renderGaitBar','renderSqCard']){try{if(typeof window[f]==='function'||eval('typeof '+f)==='function')eval(f+'()');}catch(e){}}
   if(selected)renderInfo();if(typeof renderSysList==='function')renderSysList();try{renderDis();}catch(e){}try{window.retitleFolds&&retitleFolds();}catch(e){}
   trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}if(l!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});
   if(typeof tagLabel!=='undefined'&&selected)tagLabel.el.textContent=label(selected.m.userData.c);}
@@ -8268,7 +8337,7 @@ function frame0(now){if(!cv.clientWidth||!cv.clientHeight){last=now;return;}/* l
   camLight.position.copy(camera.position);
   if(spin) orb.T.th+=dt*0.5;
   for(const m of meshes){const t=m.userData.offT;if(t){m.position.lerp(t,1-Math.pow(0.002,dt));if(m.position.distanceTo(t)<1e-4){m.position.copy(t);if(t.lengthSq()===0)m.userData.offT=null;}}}
-  tickContraction(dt);autoHRTick(dt);fadeTick(dt);gaitTick(dt);if(typeof ctTick==='function')ctTick(dt);
+  tickContraction(dt);autoHRTick(dt);fadeTick(dt);gaitTick(dt);sqTick(dt);if(typeof ctTick==='function')ctTick(dt);
   if(playing&&currentTab==='mov'){playT+=dt;angle=curM.max*(0.5-0.5*Math.cos(playT*1.4));$('#angle').value=Math.round(angle);updateReadout();applyPose();}
   axisGroup.visible=showAxes;
   if(needDraw(now)){renderer.render(scene,camera);if(typeof aoRender==='function')try{aoRender();}catch(e){AO.on=false;console.warn('AO',e);}}
@@ -9470,11 +9539,226 @@ const _tf24f=phyTourFor24;phyTourFor24=q=>{if(/(miotoma|escala de (daniels|oxfor
 
 renderPhyTours();
 renderQbar();
+/* ───────── Sentadilla: cadena cerrada con los pies fijos en el suelo ─────────
+   A diferencia de la marcha, aquí la pelvis no está fija: se inclina hacia delante y desciende para que los pies
+   sigan planos y quietos. Para cada flexión de rodilla K se resuelve la postura completa:
+   · tobillo A = flexión dorsal natural (≈27 % de K) limitada por la dorsiflexión en carga de la persona;
+   · muslo θ = K − A respecto a la vertical (con el pie plano, la tibia se inclina tanto como dorsiflexiona el tobillo);
+   · cadera H tal que el centro de masas (segmentos de Winter) quede sobre el centro del pie: es lo que obliga a
+     inclinar más el tronco cuando el tobillo se mueve poco;
+   · pelvis T = H − θ (anteversión), aplicada como giro del cuerpo entero; si H supera la flexión de cadera de la
+     persona, el resto lo aporta la columna lumbar (retroversión al final, «butt wink»).
+   Rangos de referencia por edad y sexo: CDC Normal Joint Range of Motion Study (Soucie et al., Haemophilia 2011). */
+var SQ={on:false,play:true,p:0,slow:false,last:0,depth:'par',bottom:null,cur:null,prof:null};
+const SQ_CDC={/* media del grupo, grados: flexión de cadera, flexión de rodilla, dorsiflexión pasiva sin carga */
+ F:{'2-8':[140.8,152.6,24.8],'9-19':[134.9,142.3,17.3],'20-44':[133.8,141.9,13.8],'45-69':[130.8,137.8,11.6]},
+ M:{'2-8':[131.1,147.8,22.8],'9-19':[135.2,142.2,16.3],'20-44':[130.4,137.7,12.7],'45-69':[127.2,132.9,11.9]}};
+const SQ_DF_WB=38;/* dorsiflexión en carga (prueba de estocada con rodilla flexionada) de un adulto joven sano; se escala con la edad como la pasiva */
+function sqAgeGroup(a){return a<9?'2-8':a<20?'9-19':a<45?'20-44':'45-69';}
+function sqRef(sex,age){const r=SQ_CDC[sex==='F'?'F':'M'][sqAgeGroup(age)],y=SQ_CDC[sex==='F'?'F':'M']['20-44'];
+  return {hip:Math.round(r[0]),knee:Math.round(r[1]),df:Math.round(SQ_DF_WB*r[2]/y[2])};}
+function sqProf(){if(!SQ.prof){const s=store.get('sqProf',null);SQ.prof=s&&typeof s==='object'?s:{sex:'M',age:30,...sqRef('M',30)};}return SQ.prof;}
+const SQ_DEPTH={med:{th:50,n:['Media','Half','Meia']},par:{th:90,n:['Paralela','Parallel','Paralela']},prof:{th:118,n:['Profunda','Deep','Profunda']}};
+const SQ_STANCE={ab:9,er:14};/* separación (abducción) y rotación externa de cadera de la posición de partida: pies a la anchura de hombros, puntas algo hacia fuera */
+let SQ_GEO=null;
+function sqGeo(){if(SQ_GEO)return SQ_GEO;const a=JOINTS.ankle_R.pivot,k=JOINTS.knee_R.pivot,h=JOINTS.hip_R.pivot,sh=JOINTS.shoulder_R.pivot;
+  const heel=new V3(...RIG.heel_R),toe=new V3(...RIG.toe_R);
+  SQ_GEO={Ls:k.distanceTo(a),Lt:h.distanceTo(k),Ltr:sh.y-h.y,foot:(heel.z+toe.z)/2-a.z};return SQ_GEO;}
+/* centro de masas en el plano sagital (z hacia delante, origen en el tobillo) para unos ángulos dados */
+function sqCOM(K,A,H,L){const g=sqGeo(),r=Math.PI/180,th=(K-A)*r,tau=(H-(K-A)+L)*r;
+  const kz=g.Ls*Math.sin(A*r),hz=kz-g.Lt*Math.sin(th);
+  const F=(90+0.5*(H-(K-A)+L))*r,armA=F-tau;/* brazos al frente, algo por debajo de la horizontal */
+  const shz=hz+g.Ltr*Math.sin(tau),armz=shz+0.5*g.Ltr*1.15*Math.sin(armA);
+  const parts=[[0.029,g.foot],[0.093,kz*0.567],[0.2,hz+0.433*(kz-hz)],[0.578,hz+0.6*g.Ltr*Math.sin(tau)],[0.1,armz]];
+  let m=0,z=0;for(const [w,p] of parts){m+=w;z+=w*p;}return z/m;}
+/* postura completa para una flexión de rodilla K y el perfil de la persona */
+function sqSolve(K){const P=sqProf(),g=sqGeo(),out={K,L:0,warn:[]};
+  /* estrategia habitual con el peso corporal: tronco paralelo a la tibia (flexión de cadera ≈ flexión de rodilla);
+     el tobillo dorsiflexiona lo que haga falta para que el centro de masas quede sobre el centro del pie */
+  let lo=0,hi=Math.min(P.df,60);
+  if(sqCOM(K,hi,K,0)<g.foot){/* ni con todo el tobillo se equilibra: el tronco se inclina más (cadera > rodilla) */
+    out.A=hi;if(K>8)out.warn.push('df');let a=K,b=K+150;for(let i=0;i<40;i++){const m=(a+b)/2;if(sqCOM(K,out.A,m,0)<g.foot)a=m;else b=m;}out.H=(a+b)/2;}
+  else{for(let i=0;i<40;i++){const m=(lo+hi)/2;if(sqCOM(K,m,K,0)<g.foot)lo=m;else hi=m;}out.A=(lo+hi)/2;out.H=K;}
+  if(out.H>P.hip-4){/* la cadera llega a su tope: el resto lo aporta la columna lumbar (retroversión pélvica) */
+    const Hc=P.hip-4;let l0=0,l1=60;for(let i=0;i<30;i++){const m=(l0+l1)/2;if(sqCOM(K,out.A,Hc,m)<g.foot)l0=m;else l1=m;}
+    out.L=(l0+l1)/2;out.H=Hc;if(out.L>3)out.warn.push('hip');}
+  const th=K-out.A;out.th=th;out.T=out.H-th;out.tau=out.T+out.L;out.F=90+0.5*out.tau;return out;}
+/* fondo de la sentadilla: se baja hasta el muslo objetivo o hasta que un tope de la persona lo impide */
+function sqBottom(){const P=sqProf(),tgt=SQ_DEPTH[SQ.depth].th;let best=sqSolve(0),why='';
+  for(let K=1;K<=170;K++){const s=sqSolve(K);
+    if(K>P.knee-6){why='knee';break;}
+    if(s.L>22){why='hip';break;}
+    best=s;if(s.th>=tgt){why='';break;}}
+  best.limit=why;return best;}
+const SQ_PH=[[0,8,'De pie','DP'],[8,45,'Descenso','DE'],[45,55,'Fondo','FO'],[55,92,'Ascenso','AS'],[92,100,'De pie','DP']];
+const SQ_PHN={DP:['De pie','Standing','Em pé'],DE:['Descenso (fase excéntrica)','Descent (eccentric phase)','Descida (fase excêntrica)'],FO:['Fondo (transición isométrica)','Bottom (isometric transition)','Fundo (transição isométrica)'],AS:['Ascenso (fase concéntrica)','Ascent (concentric phase)','Subida (fase concêntrica)']};
+const SQ_PHG={DP:['Pies a la anchura de los hombros, puntas algo hacia fuera, peso repartido entre talón y antepié.','Feet shoulder-width apart, toes slightly out, weight shared between heel and forefoot.','Pés na largura dos ombros, pontas um pouco para fora, peso entre calcanhar e antepé.'],
+ DE:['Cadera, rodilla y tobillo se flexionan a la vez; los extensores frenan el descenso alargándose. Las rodillas siguen la dirección de los pies.','Hip, knee and ankle flex together; the extensors brake the descent while lengthening. The knees follow the line of the feet.','Quadril, joelho e tornozelo flexionam juntos; os extensores freiam a descida alongando-se. Os joelhos seguem a direção dos pés.'],
+ FO:['Máxima flexión: el centro de masas sigue sobre el centro del pie. Sin rebote, el cambio de dirección exige la mayor fuerza del ciclo.','Maximum flexion: the centre of mass stays over the middle of the foot. Without a bounce, changing direction needs the most force of the cycle.','Flexão máxima: o centro de massa continua sobre o meio do pé. Sem rebote, a mudança de direção exige a maior força do ciclo.'],
+ AS:['Los mismos músculos se acortan para extender cadera y rodilla; el tronco y la tibia se enderezan a la par.','The same muscles shorten to extend hip and knee; trunk and shin straighten together.','Os mesmos músculos encurtam para estender quadril e joelho; tronco e tíbia se endireitam juntos.']};
+/* músculos: [nombres del atlas], nombre, función, tipo por fase (DE, FO, AS) */
+const SQ_M=[
+ [['Vastus lateralis muscle','Vastus medialis muscle','Vastus intermedius muscle'],['Vastos (cuádriceps)','Vasti (quadriceps)','Vastos (quadríceps)'],['Frenan la flexión de rodilla al bajar y la extienden al subir; su esfuerzo crece con la profundidad.','Brake knee flexion going down and extend the knee coming up; their effort grows with depth.','Freiam a flexão do joelho na descida e o estendem na subida; o esforço cresce com a profundidade.'],['exc','iso','con']],
+ [['Gluteus maximus muscle'],['Glúteo mayor','Gluteus maximus','Glúteo máximo'],['Controla la flexión de cadera y la extiende al subir; trabaja más cuanto más baja la cadera.','Controls hip flexion and extends the hip on the way up; works harder the lower the hips go.','Controla a flexão do quadril e o estende na subida; trabalha mais quanto mais baixo o quadril.'],['exc','iso','con']],
+ [['Adductor magnus'],['Aductor mayor','Adductor magnus','Adutor magno'],['Con la cadera muy flexionada actúa como extensor potente junto al glúteo mayor.','With the hip deeply flexed it acts as a strong hip extensor alongside gluteus maximus.','Com o quadril bem flexionado atua como extensor potente junto ao glúteo máximo.'],['exc','iso','con']],
+ [['Rectus femoris muscle'],['Recto femoral','Rectus femoris','Reto femoral'],['Biarticular: extiende la rodilla pero flexiona la cadera, así que cambia poco de longitud y trabaja menos que los vastos.','Two-joint muscle: extends the knee but flexes the hip, so its length changes little and it works less than the vasti.','Biarticular: estende o joelho mas flexiona o quadril; muda pouco de comprimento e trabalha menos que os vastos.'],['exc','iso','con']],
+ [['Long head of biceps femoris','Semitendinosus muscle','Semimembranosus muscle'],['Isquiotibiales','Hamstrings','Isquiotibiais'],['Cocontracción moderada: ayudan a extender la cadera y estabilizan la rodilla (reducen el cizallamiento anterior de la tibia).','Moderate co-contraction: help extend the hip and stabilise the knee (reduce anterior tibial shear).','Cocontração moderada: ajudam a estender o quadril e estabilizam o joelho (reduzem o cisalhamento anterior da tíbia).'],['iso','iso','con']],
+ [['Gluteus medius muscle','Gluteus minimus muscle'],['Glúteo medio y menor','Gluteus medius and minimus','Glúteo médio e mínimo'],['Mantienen la rodilla alineada con el pie e impiden que se vaya hacia dentro (valgo dinámico).','Keep the knee in line with the foot and stop it caving inwards (dynamic valgus).','Mantêm o joelho alinhado com o pé e impedem que vá para dentro (valgo dinâmico).'],['iso','iso','iso']],
+ [['Soleus muscle','Medial head of gastrocnemius','Lateral head of gastrocnemius'],['Tríceps sural','Triceps surae','Tríceps sural'],['Frena el avance de la tibia sobre el pie y mantiene el equilibrio sobre el antepié.','Controls how far the shin travels over the foot and keeps balance over the forefoot.','Controla o avanço da tíbia sobre o pé e mantém o equilíbrio sobre o antepé.'],['exc','iso','con']],
+ [['Tibialis anterior muscle'],['Tibial anterior','Tibialis anterior','Tibial anterior'],['Lleva la tibia hacia delante al iniciar la bajada y corrige el equilibrio si el peso se va hacia los talones.','Pulls the shin forward as the descent starts and corrects balance if weight drifts to the heels.','Leva a tíbia para frente no início da descida e corrige o equilíbrio se o peso vai para os calcanhares.'],['con','iso','iso']],
+ [['Iliocostalis lumborum muscle','Longissimus thoracis muscle','Multifidus lumborum muscle','Iliocostalis thoracis muscle'],['Erectores de la columna','Erector spinae','Eretores da espinha'],['Isométricos: sostienen la columna neutra mientras el tronco se inclina; su carga aumenta con la inclinación.','Isometric: hold the spine neutral while the trunk leans; their load rises with the lean.','Isométricos: mantêm a coluna neutra enquanto o tronco se inclina; a carga aumenta com a inclinação.'],['iso','iso','iso']],
+ [['Rectus abdominis muscle','Transversus abdominis muscle','External abdominal oblique muscle','Internal abdominal oblique muscle'],['Pared abdominal','Abdominal wall','Parede abdominal'],['Rigidizan el tronco y elevan la presión intraabdominal junto con los erectores.','Stiffen the trunk and raise intra-abdominal pressure together with the erectors.','Enrijecem o tronco e elevam a pressão intra-abdominal junto com os eretores.'],['iso','iso','iso']],
+ [['Clavicular part of deltoid muscle','Acromial part of deltoid muscle'],['Deltoides anterior y medio','Anterior and middle deltoid','Deltoide anterior e médio'],['Sostienen los brazos al frente como contrapeso.','Hold the arms forward as a counterweight.','Sustentam os braços à frente como contrapeso.'],['iso','iso','iso']]];
+const sqT=(a)=>TL(a[0],a[1],a[2]);
+function sqPhase(p){p=((p%100)+100)%100;return SQ_PH.find(f=>p>=f[0]&&p<f[1])||SQ_PH[0];}
+/* fracción de profundidad (0 de pie, 1 en el fondo) con aceleración y frenado suaves */
+function sqFrac(p){p=((p%100)+100)%100;const e=t=>t*t*(3-2*t);if(p<8||p>=92)return 0;if(p<45)return e((p-8)/37);if(p<55)return 1;return 1-e((p-55)/37);}
+function sqAngles(p){if(!SQ.bottom)SQ.bottom=sqBottom();const s=sqSolve(SQ.bottom.K*sqFrac(p));s.p=p;s.f=sqFrac(p);return s;}
+/* posición de partida: pies separados; las referencias del suelo se toman en esta postura */
+function sqLegQ0(S,A,v){const sg=S==='R'?1:-1;return {hip:qOf('hip_'+S,{x:-A.H,y:-v[0]*sg,z:-v[1]*sg}),knee:qOf('knee_'+S,{x:A.K,y:-(v[3]||0)*sg,z:0}),ankle:qOf('ankle_'+S,{x:-A.A,y:0,z:v[2]*sg})};}
+/* misma cadena que deform(): el tobillo se reparte entre la subastragalina y la talocrural (cada una con su pivote)
+   y la rodilla añade el deslizamiento de la tibia (KNEE_TR); así las marcas del pie caen donde caen las mallas */
+function sqOps(k,S,q){const jn=k+'_'+S,J=JOINTS[jn];
+  if(k==='ankle'){const ang=2*Math.acos(Math.min(1,Math.abs(q.w))),s=Math.sqrt(Math.max(0,1-q.w*q.w));let ax=s>1e-6?new V3(q.x/s,q.y/s,q.z/s):new V3(1,0,0);if(q.w<0)ax.negate();
+    if(ang<1e-6)return [];const sp=ankleSplit({jn,ang,ax,p:J.pivot,tr:null});return [sp.sw,sp.tw].filter(o=>o.ang>1e-6).map(o=>({p:o.p,q:new Q().setFromAxisAngle(o.ax,o.ang),tr:null}));}
+  if(k==='knee'){const t=kneeTr(q,jn);return [{p:J.pivot,q,tr:t?t.clone().applyQuaternion(q):null}];}
+  return [{p:J.pivot,q,tr:null}];}
+function sqChain(p,S,Pq,from){p=p.clone();const ks=from==='knee'?['hip']:from==='ankle'?['knee','hip']:['ankle','knee','hip'];
+  for(const k of ks)for(const o of sqOps(k,S,Pq[k])){p.sub(o.p).applyQuaternion(o.q).add(o.p);if(o.tr)p.add(o.tr);}return p;}
+/* orientación del pie (en grados) y posición lateral del tobillo para una postura de la pierna y un giro de la pelvis */
+function sqFootState(S,Pq,rq){const lat=new V3(S==='R'?-0.05:0.05,0,0),h0=new V3(...RIG['heel_'+S]);
+  const h=sqChain(h0,S,Pq).applyQuaternion(rq),t=sqChain(new V3(...RIG['toe_'+S]),S,Pq).applyQuaternion(rq),l=sqChain(h0.clone().add(lat),S,Pq).applyQuaternion(rq);
+  const ax=h.x;const r=180/Math.PI;
+  const k=sqChain(JOINTS['knee_'+S].pivot,S,Pq,'knee').applyQuaternion(rq),d=t.clone().sub(h);d.y=0;d.normalize();const kv=k.clone().sub(h);
+  /* rodilla respecto a la línea talón→punta del pie (mm, + = hacia fuera) */const off=(kv.x*d.z-kv.z*d.x)*(S==='R'?1:-1)*1000;
+  return [Math.atan2(t.x-h.x,t.z-h.z)*r,Math.asin(Math.max(-1,Math.min(1,(l.y-h.y)/0.05)))*r,ax*1000,off];}
+/* posición de partida: separación y puntas hacia fuera; es la referencia del pie para todo el ciclo */
+function sqStance(S){SQ.st=SQ.st||{};if(SQ.st[S])return SQ.st[S];const v=[SQ_STANCE.er,SQ_STANCE.ab,0,0],P=sqLegQ0(S,{H:0,K:0,A:0},v),f=sqFootState(S,P,new Q());
+  return SQ.st[S]={yaw:f[0],ax:f[2],v};}
+/* cadena cerrada: rotación y abducción de cadera e inversión/eversión del tobillo se ajustan (Newton 3×3) para que
+   el pie conserve su dirección, quede plano y el tobillo no se desplace hacia los lados */
+const SQ_KNEE_OFF=0;/* objetivo: rodilla sobre la línea del pie (segundo dedo) */
+/* cadena cerrada en dos niveles:
+   1) obligatorio: rotación y abducción de cadera e inversión/eversión del tobillo (Newton 3×3) mantienen el pie en su
+      dirección, plano y con el tobillo sin desplazarse hacia los lados;
+   2) preferencia: la rotación de la tibia (posible solo con la rodilla flexionada) lleva la rodilla sobre la línea del pie. */
+function sqLegFoot(S,A,rq,v,st){const res=v=>{const f=sqFootState(S,sqLegQ0(S,A,v),rq);return [f[0]-st.yaw,f[1],f[2]-st.ax];};
+  const lim=[[-25,50],[-15,40],[-20,20]];
+  for(let it=0;it<8;it++){const r0=res(v);if(Math.abs(r0[0])<0.05&&Math.abs(r0[1])<0.05&&Math.abs(r0[2])<0.1)break;
+    const J=[[],[],[]];for(let j=0;j<3;j++){const w=v.slice();w[j]+=0.5;const r1=res(w);for(let i=0;i<3;i++)J[i][j]=(r1[i]-r0[i])/0.5;}
+    const d=sqLin(J,r0.map(x=>-x));if(!d)break;for(let j=0;j<3;j++)v[j]=Math.max(lim[j][0],Math.min(lim[j][1],v[j]+Math.max(-12,Math.min(12,d[j]))));}
+  return v;}
+function sqLegSolve(S,A,rq){const st=sqStance(S);SQ.lv=SQ.lv||{};const prev=(SQ.lv[S]||st.v).slice();
+  const lim=30*Math.min(1,A.K/70);
+  const at=r=>{const v=sqLegFoot(S,A,rq,[prev[0],prev[1],prev[2],r],st);return {v,off:sqFootState(S,sqLegQ0(S,A,v),rq)[3]-SQ_KNEE_OFF};};
+  let best=at(Math.max(-lim,Math.min(lim,prev[3]||0)));
+  if(lim>0.5&&Math.abs(best.off)>1){/* la desviación de la rodilla cambia de forma monótona con la rotación de la tibia */
+    let a=-lim,b=lim,fa=at(a),fb=at(b);
+    if(fa.off*fb.off>0)best=Math.abs(fa.off)<Math.abs(fb.off)?fa:fb;
+    else for(let i=0;i<14;i++){const m=(a+b)/2,fm=at(m);if(fm.off*fa.off>0){a=m;fa=fm;}else{b=m;fb=fm;}best=Math.abs(fa.off)<Math.abs(fb.off)?fa:fb;}}
+  SQ.lv[S]=best.v;return best.v;}
+/* sistema lineal pequeño por eliminación de Gauss con pivote parcial */
+function sqLin(M,b){const n=b.length,a=M.map((r,i)=>[...r,b[i]]);for(let c=0;c<n;c++){let p=c;for(let r=c+1;r<n;r++)if(Math.abs(a[r][c])>Math.abs(a[p][c]))p=r;if(Math.abs(a[p][c])<1e-9)return null;[a[c],a[p]]=[a[p],a[c]];
+    for(let r=0;r<n;r++){if(r===c)continue;const f=a[r][c]/a[c][c];for(let k=c;k<=n;k++)a[r][k]-=f*a[c][k];}}return a.map((r,i)=>r[n]/r[i]);}
+/* giro de pelvis (anteversión) que deja los pies planos, resuelto junto con las piernas, y desplazamiento que deja los tobillos en su sitio */
+function sqRoot(A){let pitch=SQ.lastPitch||0,qs={},rq=new Q();
+  for(let pass=0;pass<3;pass++){rq=new Q().setFromAxisAngle(new V3(1,0,0),pitch);
+    for(const S of ['R','L'])qs[S]=sqLegQ0(S,A,sqLegSolve(S,A,rq));
+    let pr=0;for(const S of ['R','L']){const h=sqChain(new V3(...RIG['heel_'+S]),S,qs[S]),t=sqChain(new V3(...RIG['toe_'+S]),S,qs[S]),h0=new V3(...RIG['heel_'+S]),t0=new V3(...RIG['toe_'+S]);
+      /* pendiente del pie a lo largo de su propio eje, comparada con la de reposo */
+      const d=t.clone().sub(h),d0=t0.clone().sub(h0);pr+=0.5*(Math.atan2(d.y,Math.hypot(d.z,d.x))-Math.atan2(d0.y,Math.hypot(d0.z,d0.x)));}
+    /* el giro alrededor del eje mediolateral cambia la pendiente del pie en proporción al coseno de su dirección */
+    const yaw=Math.atan2(Math.abs(new V3(...RIG.toe_R).x-new V3(...RIG.heel_R).x),1);pitch=pr/Math.max(0.5,Math.cos(SQ.st&&SQ.st.R?SQ.st.R.yaw*Math.PI/180:yaw));}
+  SQ.lastPitch=pitch;rq=new Q().setFromAxisAngle(new V3(1,0,0),pitch);
+  /* el cuerpo se ancla en los puntos reales del pie (talón y punta de ambos pies): el pie gira bajo el astrágalo, así que el pivote del tobillo no basta */
+  const footMid=qq=>{const m=new V3();for(const S of ['R','L'])for(const k of ['heel','toe'])m.add(sqChain(new V3(...RIG[k+'_'+S]),S,qq[S]).multiplyScalar(0.25));return m;};
+  let mid=footMid(qs);
+  if(!SQ.base){const A0=sqSolve(0);A0.f=0;const keep={lv:SQ.lv,lp:SQ.lastPitch};SQ.base=null;SQ.lv={};SQ.lastPitch=0;const R0=sqRootNoBase(A0);SQ.base=R0.mid;SQ.lv=keep.lv;SQ.lastPitch=keep.lp;}
+  const pos=SQ.base.clone().sub(mid.clone().applyQuaternion(rq));return {q:rq,pos,qs,pitch:pitch*180/Math.PI,mid};}
+function sqRootNoBase(A){let pitch=0,qs={},rq=new Q();for(let pass=0;pass<3;pass++){rq=new Q().setFromAxisAngle(new V3(1,0,0),pitch);for(const S of ['R','L'])qs[S]=sqLegQ0(S,A,sqLegSolve(S,A,rq));
+    let pr=0;for(const S of ['R','L']){const h=sqChain(new V3(...RIG['heel_'+S]),S,qs[S]),t=sqChain(new V3(...RIG['toe_'+S]),S,qs[S]),h0=new V3(...RIG['heel_'+S]),t0=new V3(...RIG['toe_'+S]);const d=t.clone().sub(h),d0=t0.clone().sub(h0);pr+=0.5*(Math.atan2(d.y,Math.hypot(d.z,d.x))-Math.atan2(d0.y,Math.hypot(d0.z,d0.x)));}
+    pitch=pr/Math.max(0.5,Math.cos(SQ.st.R.yaw*Math.PI/180));}
+  rq=new Q().setFromAxisAngle(new V3(1,0,0),pitch);const mid=new V3();for(const S of ['R','L'])for(const k of ['heel','toe'])mid.add(sqChain(new V3(...RIG[k+'_'+S]),S,qs[S]).applyQuaternion(rq).multiplyScalar(0.25));
+  /* altura: la de los mismos puntos en reposo, para que la planta quede sobre el suelo */
+  mid.y=['R','L'].reduce((a,S)=>a+0.25*(RIG['heel_'+S][1]+RIG['toe_'+S][1]),0);return {mid};}
+function sqActive(){const A=sqAngles(SQ.p);SQ.cur=A;const R=sqRoot(A),out=[];SQ.root=R;
+  for(const S of ['R','L']){const sg=S==='R'?1:-1;for(const k of ['hip','knee','ankle'])out.push({k,jn:k+'_'+S,q:R.qs[S][k]});
+    out.push({k:'shoulder',jn:'shoulder_'+S,q:qOf('shoulder_'+S,{x:-A.F*Math.min(1,0.25+A.f*1.6),y:0,z:0,w:10*sg})});
+    out.push({k:'fore',jn:'fore_'+S,q:qOf('fore_'+S,{x:0,y:90*sg,z:0})});}
+  if(A.L>2)out.push({k:'trunk',jn:'trunk',q:qOf('trunk',{x:A.L,y:0,z:0})});
+  /* cabeza en línea con el tronco (columna cervical neutra, como se enseña la técnica) */
+  return out;}
+function sqApplyRoot(on){if(on&&SQ.root){body.quaternion.copy(SQ.root.q);body.position.copy(SQ.root.pos);}else{body.quaternion.identity();body.position.set(0,0,0);}body.updateMatrixWorld(true);}
+function sqTypeAt(p){const k=sqPhase(p)[3];return k==='DE'?0:k==='FO'?1:k==='AS'?2:-1;}
+function sqMuscles(p){const i=sqTypeAt(p);if(i<0)return [];return SQ_M.map(m=>({m,ty:m[3][i]}));}
+function sqAgonists(){const on=SQ.on&&currentTab==='mov',ens=new Set();if(on)sqMuscles(SQ.p).forEach(({m})=>m[0].forEach(e=>ens.add(e)));
+  for(const m of meshes){if(m.userData.sys!=='muscular')continue;const u=m.userData,want=on&&ens.has(u.c.en);if(u.ag){u.ag=false;refreshState(m);}
+    /* se borran los antagonistas y avisos que dejara el simulador de rango o la marcha patológica */if(on&&(u.an||u.hint)){u.an=false;u.hint=false;refreshState(m);}
+    if(!!u.sq!==want){u.sq=want;refreshState(m);}}}
+const sqF=v=>(v<0?'−':'')+Math.abs(Math.round(v))+'°';
+function renderSqCard(){const c=$('#sqCard');if(!c)return;const P=sqProf(),on=SQ.on;
+  c.innerHTML=`<div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">${TL('Sentadilla','Squat','Agachamento')}</h3><button class="btn" id="sqBtn" aria-pressed="${on}">${on?TL('Salir de la sentadilla','Exit squat','Sair do agachamento'):TL('Ver sentadilla','Show squat','Ver agachamento')}</button></div>
+  <p class="muted small" ${on?'hidden':''}>${TL('Sentadilla con el peso corporal en cadena cerrada: los pies quedan fijos en el suelo, la pelvis desciende y se inclina, y cada articulación se adapta al rango de movimiento de la persona.','Bodyweight closed-chain squat: the feet stay fixed on the floor, the pelvis drops and tilts, and every joint adapts to the person\'s range of motion.','Agachamento com o peso corporal em cadeia fechada: os pés ficam fixos no chão, a pelve desce e inclina, e cada articulação se adapta à amplitude da pessoa.')}</p>
+  <div ${on?'':'hidden'}>
+   <div class="patchips" role="group" aria-label="${TL('Profundidad','Depth','Profundidade')}">${Object.entries(SQ_DEPTH).map(([k,v])=>`<button data-d="${k}" aria-pressed="${k===SQ.depth}">${sqT(v.n)}</button>`).join('')}</div>
+   <input type="range" id="sqR" min="0" max="99" step="1" value="${Math.floor(SQ.p)}" aria-label="${TL('Porcentaje del ciclo','Percent of cycle','Porcentagem do ciclo')}">
+   <div class="gaitBar" id="sqBar" aria-hidden="true">${SQ_PH.map((f,i)=>`<span data-i="${i}" data-k="${f[3]}" style="flex:${f[1]-f[0]};background:${f[3]==='FO'||f[3]==='DE'?'color-mix(in srgb,var(--accent) 45%,var(--panel2))':'var(--panel2)'}">${f[1]-f[0]>=10?sqT(SQ_PHN[f[3]]).split(' (')[0]:''}</span>`).join('')}</div>
+   <div class="row" style="justify-content:space-between;align-items:baseline"><b id="sqPhase"></b><span class="mono" id="sqPct"></span></div>
+   <p class="muted small" id="sqGoal"></p>
+   <table class="tbl gaitTbl"><thead><tr><th></th><th>${TL('Cadera','Hip','Quadril')}</th><th>${TL('Rodilla','Knee','Joelho')}</th><th>${TL('Tobillo','Ankle','Tornozelo')}</th><th>${TL('Tronco','Trunk','Tronco')}</th></tr></thead><tbody id="sqAng"></tbody></table>
+   <p class="small" id="sqWarn"></p>
+   <div id="sqMus"></div>
+   <div class="row"><button class="btn" id="sqPlay">${SQ.play?TL('Pausa','Pause','Pausa'):TL('Reproducir','Play','Reproduzir')}</button><button class="btn" id="sqSlow" aria-pressed="${SQ.slow}">${TL('Cámara lenta','Slow motion','Câmera lenta')}</button><button class="btn" id="sqLat">${TL('Vista lateral','Side view','Vista lateral')}</button><button class="btn" id="sqAnt">${TL('Vista frontal','Front view','Vista frontal')}</button></div>
+   <details class="sqProf"><summary>${TL('Movilidad de la persona','Person\'s mobility','Mobilidade da pessoa')}</summary>
+    <div class="sqGrid">
+     <label>${TL('Sexo','Sex','Sexo')}<select id="sqSex"><option value="M" ${P.sex!=='F'?'selected':''}>${TL('Hombre','Male','Homem')}</option><option value="F" ${P.sex==='F'?'selected':''}>${TL('Mujer','Female','Mulher')}</option></select></label>
+     <label>${TL('Edad','Age','Idade')}<input type="number" id="sqAge" min="3" max="100" value="${P.age}"></label>
+     <label>${TL('Dorsiflexión en carga','Weight-bearing dorsiflexion','Dorsiflexão com carga')} (°)<input type="number" id="sqDf" min="0" max="60" value="${P.df}"></label>
+     <label>${TL('Flexión de cadera','Hip flexion','Flexão do quadril')} (°)<input type="number" id="sqHip" min="60" max="160" value="${P.hip}"></label>
+     <label>${TL('Flexión de rodilla','Knee flexion','Flexão do joelho')} (°)<input type="number" id="sqKnee" min="60" max="165" value="${P.knee}"></label>
+    </div>
+    <div class="row"><button class="btn" id="sqRef">${TL('Valores de referencia por edad y sexo','Reference values for age and sex','Valores de referência por idade e sexo')}</button></div>
+    <p class="refs">${TL('Cadera y rodilla: medias del','Hip and knee: group means from the','Quadril e joelho: médias do')} <b>CDC Normal Joint ROM Study</b> (Soucie et al., <i>Haemophilia</i> 2011)${P.age>69?TL(' — el estudio llega a 69 años; se usan los valores de 45–69.',' — the study covers up to age 69; the 45–69 values are used.',' — o estudo vai até 69 anos; usam-se os valores de 45–69.'):'.'} ${TL('La dorsiflexión en carga (prueba de estocada) parte de 38° en el adulto joven y se reduce con la edad en la misma proporción que la pasiva; mídela si puedes, porque es la que más cambia de una persona a otra.','Weight-bearing dorsiflexion (lunge test) starts at 38° for a young adult and is reduced with age in the same proportion as the passive value; measure it if you can, since it varies most between people.','A dorsiflexão com carga (teste do avanço) parte de 38° no adulto jovem e diminui com a idade na mesma proporção que a passiva; meça-a se puder, pois é a que mais varia entre pessoas.')}</p>
+   </details>
+  </div>`;
+  $('#sqBtn').onclick=()=>setSq(!SQ.on);if(!on)return;
+  c.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{SQ.depth=b.dataset.d;store.set('sqDepth',SQ.depth);SQ.bottom=null;c.querySelectorAll('[data-d]').forEach(x=>x.setAttribute('aria-pressed',x===b));sqUpdate();});
+  $('#sqR').oninput=e=>{SQ.p=+e.target.value;SQ.play=false;$('#sqPlay').textContent=TL('Reproducir','Play','Reproduzir');sqUpdate();};
+  $('#sqBar').querySelectorAll('span').forEach(s=>s.onclick=()=>{const f=SQ_PH[+s.dataset.i];SQ.p=f[3]==='FO'?50:(f[0]+f[1])/2;SQ.play=false;$('#sqPlay').textContent=TL('Reproducir','Play','Reproduzir');sqUpdate();});
+  $('#sqPlay').onclick=()=>{SQ.play=!SQ.play;$('#sqPlay').textContent=SQ.play?TL('Pausa','Pause','Pausa'):TL('Reproducir','Play','Reproduzir');};
+  $('#sqSlow').onclick=()=>{SQ.slow=!SQ.slow;$('#sqSlow').setAttribute('aria-pressed',SQ.slow);};
+  $('#sqLat').onclick=()=>{focusOn(new V3(0,0.7,0),2.7);setView('latd');};$('#sqAnt').onclick=()=>{focusOn(new V3(0,0.7,0),2.7);setView('ant');};
+  const prof=()=>{const v=id=>+$(id).value;const P=sqProf();Object.assign(P,{sex:$('#sqSex').value,age:Math.max(3,Math.min(100,v('#sqAge')||30)),df:Math.max(0,Math.min(60,v('#sqDf'))),hip:Math.max(60,Math.min(160,v('#sqHip'))),knee:Math.max(60,Math.min(165,v('#sqKnee')))});store.set('sqProf',P);SQ.bottom=null;sqUpdate();};
+  ['#sqDf','#sqHip','#sqKnee'].forEach(id=>$(id).onchange=prof);
+  const ref=()=>{const P=sqProf();P.sex=$('#sqSex').value;P.age=Math.max(3,Math.min(100,+$('#sqAge').value||30));Object.assign(P,sqRef(P.sex,P.age));store.set('sqProf',P);SQ.bottom=null;renderSqCard();sqUpdate();c.querySelector('details').open=true;};
+  $('#sqSex').onchange=ref;$('#sqAge').onchange=ref;$('#sqRef').onclick=ref;
+  renderSq();}
+function renderSq(){if(!SQ.on||!$('#sqPhase'))return;const A=SQ.cur||sqAngles(SQ.p),ph=sqPhase(SQ.p),B=SQ.bottom;
+  $('#sqR').value=Math.floor(SQ.p);$('#sqPhase').textContent=sqT(SQ_PHN[ph[3]]);$('#sqPct').textContent=Math.round(SQ.p)+' %';$('#sqGoal').textContent=sqT(SQ_PHG[ph[3]]);
+  $('#sqBar').querySelectorAll('span').forEach(s=>s.setAttribute('aria-current',s.dataset.k===ph[3]&&(ph[3]!=='DP'||+s.dataset.i===(SQ.p<50?0:4))));
+  const row=(n,X)=>`<tr><td>${n}</td><td>${sqF(X.H)}</td><td>${sqF(X.K)}</td><td>${sqF(X.A)}</td><td>${sqF(X.tau)}</td></tr>`;
+  $('#sqAng').innerHTML=row(TL('Ahora','Now','Agora'),A)+(B?row(TL('Fondo','Bottom','Fundo'),B):'');
+  const P=sqProf(),w=[];
+  if(B){if(B.warn.includes('df'))w.push(TL(`El tobillo llega a su tope (${P.df}° en carga): la tibia no avanza más y el tronco se inclina para no perder el equilibrio.`,`The ankle reaches its limit (${P.df}° weight-bearing): the shin cannot travel further, so the trunk leans to keep balance.`,`O tornozelo chega ao limite (${P.df}° com carga): a tíbia não avança mais e o tronco se inclina para manter o equilíbrio.`));
+   if(B.warn.includes('hip'))w.push(TL(`La cadera llega a su tope (${P.hip}°): el final lo aporta la columna lumbar, que se flexiona ${Math.round(B.L)}° (retroversión pélvica).`,`The hip reaches its limit (${P.hip}°): the lumbar spine provides the rest, flexing ${Math.round(B.L)}° (posterior pelvic tilt).`,`O quadril chega ao limite (${P.hip}°): a coluna lombar completa o movimento, flexionando ${Math.round(B.L)}° (retroversão pélvica).`));
+   if(B.limit==='knee')w.push(TL('La flexión de rodilla de la persona limita la profundidad.','The person\'s knee flexion limits the depth.','A flexão do joelho da pessoa limita a profundidade.'));
+   if(B.limit==='hip')w.push(TL('No se alcanza la profundidad elegida sin una flexión lumbar excesiva: la sentadilla se detiene antes.','The chosen depth cannot be reached without excessive lumbar flexion, so the squat stops earlier.','A profundidade escolhida não é alcançada sem flexão lombar excessiva; o agachamento para antes.'));}
+  $('#sqWarn').innerHTML=w.length?w.map(x=>`<span style="color:var(--warn)">⚠</span> ${x}`).join('<br>'):`<span class="muted">${TL('La persona alcanza esta profundidad con la columna neutra y los talones apoyados.','The person reaches this depth with a neutral spine and heels down.','A pessoa alcança esta profundidade com a coluna neutra e os calcanhares apoiados.')}</span>`;
+  const act=sqMuscles(SQ.p);
+  $('#sqMus').innerHTML=`<h4 class="small" style="margin:8px 0 2px">${TL('Músculos activos','Active muscles','Músculos ativos')}</h4>`+(act.map(({m,ty})=>`<div class="gm"><span>${sqT(m[1])}<br><small style="text-align:left;display:block">${sqT(m[2])}</small></span><span class="ty ${ty}">${TL(TY[ty],{exc:'eccentric',con:'concentric',iso:'isometric'}[ty],{exc:'excêntrica',con:'concêntrica',iso:'isométrica'}[ty])}</span></div>`).join('')||`<p class="muted small">${TL('De pie: solo la actividad postural mínima.','Standing: only minimal postural activity.','Em pé: apenas atividade postural mínima.')}</p>`);}
+function sqUpdate(){applyPose();renderSq();sqAgonists();}
+function setSq(on){if(on){try{if(CT.on)ctStop();if(PHY.on)phyStop();if(gait.on)setGait(false);}catch(e){}stopPlay();angle=0;SQ.depth=store.get('sqDepth','par');if(!SQ_DEPTH[SQ.depth])SQ.depth='par';SQ.bottom=null;SQ.base=null;SQ.st=null;SQ.lv=null;SQ.lastPitch=0;SQ.p=0;SQ.play=true;if(!SYS.muscular.on)setOn('muscular',true);}
+  SQ.on=on;renderSqCard();applyPose();if(on){renderSq();sqAgonists();focusOn(new V3(0,0.75,0),2.9);setView('latd');}else{sqAgonists();applyAgonists();}}
+function sqTick(dt){if(!SQ.on||!SQ.play||currentTab!=='mov')return;SQ.p=(SQ.p+dt*100/(SQ.slow?16:4))%100;SQ.last+=dt;if(SQ.last>(SQ.slow?0.03:0.045)){SQ.last=0;sqUpdate();}}
+renderSqCard();
+
 /* ───────── Inicio ───────── */
 setMode(store.get('mode','stu'));
 renderSysList();renderHR();renderDis();planeColors();renderPlanes();updatePlanes();renderInfo();renderViews();
 resize();requestAnimationFrame(frame);
 window.__corpus={orb,HR,loadHR,setDissection,SYS,setGait,gait,showTab,setGaitPattern,shareLink,applyShared,get meshes(){return meshes},select:m=>select(m),get selected(){return selected},get body(){return BODY},get contraction(){return contraction}};
+/* Gancho de verificación visual (qa/visual): solo existe con ?qa en la dirección; evalúa dentro del ámbito de la app para medir y capturar */
+if(/[?&]qa\b/.test(location.search))window.__qa={ev:src=>eval(src),get ready(){return !!RIG&&meshes.length>0},render:()=>{camera.position.set(orb.tgt.x+orb.r*Math.sin(orb.ph)*Math.sin(orb.th),orb.tgt.y+orb.r*Math.cos(orb.ph),orb.tgt.z+orb.r*Math.sin(orb.ph)*Math.cos(orb.th));camera.lookAt(orb.tgt);camLight.position.copy(camera.position);renderer.render(scene,camera);return renderer.domElement.toDataURL('image/jpeg',0.85);}};
 fetch('data/cases.json').then(r=>r.ok?r.json():[]).then(c=>{CASES=c;CASES_ES=c;renderCases();if(LANG!=='es')loadContentTr(LANG);}).catch(()=>{});
 Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.json').then(r=>{if(!r.ok)throw new Error(n);return r.json();}))).then(([cat,rig,les,ex,fem])=>{
   cat=cat.concat(fem.cat,fem.full||[]);FEM_INFO=fem.info;FEM_OVR=fem.ovr||[];FEM_ONLY=new Set(fem.fonly||[]);CAT_READY=true;

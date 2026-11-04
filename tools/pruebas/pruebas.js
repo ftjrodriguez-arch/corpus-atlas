@@ -30,15 +30,21 @@ const buscar=(p,t)=>p.evaluate(async t=>{const q=document.querySelector('#q');q.
  ok(c.on&&/lengua/.test(c.t),'Contracción en el sitio (estilogloso)',c.t.slice(0,60));ok(c.back,'Al parar, la malla vuelve a su forma');
  const iso=await p.evaluate(async()=>{const m=__corpus.meshes.find(x=>x.userData.c.id==='x2');__corpus.select(m);await new Promise(r=>setTimeout(r,300));const th0=__corpus.orb.T.th;document.querySelector('#iIso').click();const th=((__corpus.orb.T.th%(2*Math.PI))+2*Math.PI)%(2*Math.PI);return Math.round(th*57.3);});
  ok(iso>100&&iso<260,'Aislar orienta la cámara hacia la nuca (semiespinoso)',iso+'°');
+ const sq=await p.evaluate(async()=>{__corpus.showTab('mov');await new Promise(r=>setTimeout(r,500));const b=document.querySelector('#sqBtn');if(!b)return {err:'sin botón'};b.click();await new Promise(r=>setTimeout(r,3500));
+   const n=__corpus.meshes.filter(m=>m.userData.sq).length;const body=__corpus.meshes[0].parent;let q=__corpus.meshes.find(m=>m.userData.c.en==='Femur');
+   const r={n,ph:(document.querySelector('#sqPhase')||{}).textContent||'',bodyMoved:false};let g=q;while(g&&g.parent){if(g.position&&g.position.lengthSq()>1e-8)r.bodyMoved=true;g=g.parent;}
+   document.querySelector('#sqBtn').click();await new Promise(r=>setTimeout(r,800));r.after=__corpus.meshes.filter(m=>m.userData.sq).length;return r;});
+ ok(sq.n>=8&&sq.after===0,'Sentadilla de cadena cerrada: músculos activos en magenta y se limpian al salir',JSON.stringify(sq));
+ const zan=await buscar(p,'zancada');ok(zan.some(x=>/Zancada/.test(x.t)),'Búsqueda: ejercicio nuevo (zancada)',zan[0]&&zan[0].t.slice(0,60));
  const hdr=await p.evaluate(()=>{const h=document.querySelector('header');return h.scrollWidth-h.clientWidth;});ok(hdr<=0,'Cabecera sin desbordar a 1280 px');
  await p.evaluate(()=>document.querySelector('#langSeg [data-lang="en"]').click());await espera(2500);
  const en=await buscar(p,'femur');ok(en.length&&/Bones|Ligaments|Brain/.test(en.map(x=>x.t).join(' ')),'Inglés: sistema traducido en la búsqueda',en[0]&&en[0].t.slice(0,50));
  await p.evaluate(()=>document.querySelector('#langSeg [data-lang="es"]').click());await espera(1500);
  await p.evaluate(()=>document.querySelector('#b-f').click());await espera(9000);
  const fem=await p.evaluate(()=>{const v=o=>{if(!o.visible)return false;let q=o.parent;while(q){if(!q.visible)return false;q=q.parent;}return true;};
-   const M=['x29','x33','x37','x38','x52','x60'],ok=['x1','x3','x42','x46','x35','x44'];const g=i=>__corpus.meshes.find(m=>m.userData.c.id===i);
+   const M=['x29','x33','x37','x38'],ok=['x1','x3','x42','x46','x35','x44','x52','x60'];const g=i=>__corpus.meshes.find(m=>m.userData.c.id===i);
    return {ocultos:M.filter(i=>g(i)&&!v(g(i))).length,deM:M.length,vis:ok.filter(i=>g(i)&&v(g(i))).length,deV:ok.length,geoF:['x35','x36','x44','x45','x39','x40','x41'].filter(i=>g(i)&&g(i).userData.geoF&&g(i).geometry===g(i).userData.geoF).length};});
- ok(fem.ocultos===fem.deM,'Mujer: se ocultan las piezas solo modeladas en el hombre',fem.ocultos+'/'+fem.deM);ok(fem.vis===fem.deV,'Mujer: se ven cabeza, cuello, psoas menor y articular de la rodilla',fem.vis+'/'+fem.deV);
+ ok(fem.ocultos===fem.deM,'Mujer: se ocultan las piezas solo modeladas en el hombre',fem.ocultos+'/'+fem.deM);ok(fem.vis===fem.deV,'Mujer: se ven cabeza, cuello, psoas menor, articular de la rodilla y músculos menores',fem.vis+'/'+fem.deV);
  ok(fem.geoF===7,'Mujer: psoas menor, articular de la rodilla y periné profundo con geometría femenina',fem.geoF+'/7');
  await p.evaluate(()=>document.querySelector('#b-m').click());await espera(5000);
  const vuelta=await p.evaluate(()=>['x35','x44'].filter(i=>{const m=__corpus.meshes.find(x=>x.userData.c.id===i);return m&&m.geometry!==m.userData.geoF;}).length);
