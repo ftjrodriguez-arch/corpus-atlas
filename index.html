@@ -863,6 +863,8 @@ html[data-theme="light"] .seg .btn:not(.pri){color:#3a4c59!important}
 html[data-theme="light"] .seg .btn.pri{background:var(--accent)!important;color:#fff!important}
 </style>
 
+<nav id="mnav" aria-label="Secciones"></nav>
+<div id="mmore" hidden><div class="mm" role="dialog" aria-label="Más"></div></div>
 <header>
   <div class="brand"><b>Corpus</b><span>Atlas anatómico 3D</span></div>
   <div class="seg" role="group" aria-label="Cuerpo">
@@ -1684,6 +1686,7 @@ function applySystems(){
   $('#unhide').hidden=hiddenIds.size===0&&!isoSet&&!DIS_EXC;
   $('#legend').hidden=!(SYS.insercion.on&&SYS.insercion.state==='loaded');
   store.set('sys',Object.fromEntries(Object.entries(SYS).map(([k,v])=>{let on=v.on,op=v.op;try{const sv=(PHY.on&&PHY.saved&&PHY.saved.sys[k])||(CT.saved&&CT.saved[k]);if(sv){on=sv.on;op=sv.op;}if(JV&&JV.op!=null&&BS(k)==='oseo')op=JV.op;}catch(e){}return [k,{on,op}];})));
+  if(typeof SQ!=='undefined'&&RIG&&currentTab==='mov'&&(SQ.on||gait.on||angle)){clearTimeout(applySystems.t);applySystems.t=setTimeout(()=>{try{applyPose();}catch(e){}},0);}
 }
 let isoSet=null;let DIS_FLT=null,DIS_EXC=null;
 function setOn(k,on){DIS_FLT=null;DIS_EXC=null;if(on&&!sexOk(k)){setBody(sexOf(k)||'m');}SYS[k].on=on;if(on&&SYS[k].state!=='loaded') loadSys(k);applySystems();renderSysList();}
@@ -2343,7 +2346,7 @@ function ankleSplit(o){const J=JOINTS[o.jn],a=J.xax||new V3(1,0,0),q=new Q().set
 const KP_BONE=/^(Femur|Tibia|Patella|Fibula)$/,KP_MUS=/gastrocnemius|^Plantaris|^Popliteus|^Semimembranosus|^Semitendinosus/;
 function kneePush(touched,sides){const cs=0.008,key=(x,y,z)=>((Math.floor(x/cs)*73856093)^(Math.floor(y/cs)*19349663)^(Math.floor(z/cs)*83492791));
   for(const side of sides){const H=new Map();let nb=0;
-    for(const m of meshes){const c=m.userData.c;if(!c||c.side!==side||!KP_BONE.test(c.en)||!/oseo/.test(m.userData.sys||''))continue;
+    for(const m of meshes){const c=m.userData.c;if(!c||c.side!==side||!KP_BONE.test(c.en)||!/oseo/.test(m.userData.sys||'')||!visibleDeep(m))continue;
       const P=m.geometry.attributes.position.array,N=m.geometry.attributes.normal.array;for(let i=0;i<P.length;i+=3){const k=key(P[i],P[i+1],P[i+2]);let b=H.get(k);if(!b)H.set(k,b=[]);b.push(P[i],P[i+1],P[i+2],N[i],N[i+1],N[i+2]);nb++;}}
     if(!nb)continue;
     for(const m of touched){const c=m.userData.c;if(!c||c.side!==side||m.userData.sys!=='muscular'||!KP_MUS.test(c.en))continue;
@@ -2393,6 +2396,8 @@ function deform(active){
   const touched=new Set();
   for(const m of meshes){
     if(!ops.length) break;
+    /* rendimiento: las mallas ocultas (sistemas apagados, piezas escondidas) no se deforman; al mostrarlas se vuelve a colocar la postura */
+    if(!visibleDeep(m)) continue;
     const Ws=ops.map(o=>weightsFor(m,o.jn));if(Ws.every(w=>!w)) continue;
     /* el astrágalo queda en la mortaja: solo sigue la flexión dorsal/plantar (giro alrededor del eje talocrural); la inversión y la eversión ocurren por debajo, en la subastragalina */
     const TAL=m.userData.c&&m.userData.c.en==='Talus';const opsM=ops.some(o=>/^ankle_/.test(o.jn))?ops.flatMap(o=>{if(!/^ankle_/.test(o.jn))return [o];const sp=ankleSplit(o);return TAL?[sp.tw]:[sp.sw,sp.tw];}):ops;
@@ -2689,6 +2694,22 @@ const CTESTS=[
   ex:['Glúteo medio y menor y tensor de la fascia lata de la pierna que se separa; los mismos músculos de la pierna de apoyo sujetan la pelvis.','Gluteus medius and minimus and tensor fasciae latae of the moving leg; the same muscles of the standing leg hold the pelvis.','Glúteo médio e mínimo e tensor da fáscia lata da perna que se afasta; os mesmos músculos da perna de apoio sustentam a pelve.'],
   how:['La pierna se separa hacia el lado (~35° de abducción) con la rodilla recta y la pelvis quieta; más allá de unos 35° la pelvis empieza a inclinarse.','The leg moves out to the side (~35° of abduction) with a straight knee and a still pelvis; beyond about 35° the pelvis starts to tilt.','A perna se afasta para o lado (~35° de abdução) com o joelho reto e a pelve parada; além de uns 35° a pelve começa a inclinar.'],
   pos:['Es un ejercicio básico para la debilidad del glúteo medio (signo de Trendelenburg, dolor lateral de cadera, valgo de rodilla). Si el pie gira hacia fuera, trabaja más el psoas y menos el glúteo medio.','A basic exercise for gluteus medius weakness (Trendelenburg sign, lateral hip pain, knee valgus). If the foot turns out, psoas does more and gluteus medius less.','É um exercício básico para a fraqueza do glúteo médio (sinal de Trendelenburg, dor lateral do quadril, valgo do joelho). Se o pé gira para fora, o psoas trabalha mais e o glúteo médio menos.']},
+ {id:'press',fx:1,r:'funcional',n:['Press de hombros','Overhead press','Desenvolvimento de ombros'],node:'shoulder',rad:1.2,view:'ant',mode:'mus',pose:[['shoulder','z',-165,-85],['shoulder_L','z',165,85],['shoulder','y',-40,-90],['shoulder_L','y',40,90],['elbow','x',-10,-95],['elbow_L','x',-10,-95]],tg:['Clavicular part of deltoid muscle','Acromial part of deltoid muscle','Long head of triceps brachii','Lateral head of triceps brachii','Serratus anterior muscle','Descending part of trapezius muscle'],
+  ex:['Deltoides anterior y medio, que elevan el brazo; tríceps, que extiende el codo; serrato anterior y trapecio, que giran la escápula hacia arriba.','Anterior and middle deltoid raising the arm; triceps extending the elbow; serratus anterior and trapezius rotating the scapula upwards.','Deltoide anterior e médio, que elevam o braço; tríceps, que estende o cotovelo; serrátil anterior e trapézio, que giram a escápula para cima.'],
+  how:['Desde los brazos en «portería» (hombro a 90°, codo a 90°) el peso sube por encima de la cabeza: el hombro llega a ~165° de elevación y el codo se extiende casi por completo.','From a “goal-post” position (shoulder at 90°, elbow at 90°) the weight goes overhead: the shoulder reaches ~165° of elevation and the elbow almost fully extends.','A partir dos braços em «trave» (ombro a 90°, cotovelo a 90°) o peso sobe acima da cabeça: o ombro chega a ~165° de elevação e o cotovelo se estende quase totalmente.'],
+  pos:['Necesita buena movilidad del hombro y de la columna torácica; si falta, se compensa arqueando la zona lumbar. Con dolor subacromial conviene limitar el recorrido o hacerlo en el plano de la escápula.','It needs good shoulder and thoracic mobility; when they are lacking, people arch the lower back instead. With subacromial pain, limit the range or press in the scapular plane.','Exige boa mobilidade do ombro e da coluna torácica; quando faltam, compensa-se arqueando a lombar. Com dor subacromial, limite a amplitude ou faça no plano da escápula.']},
+ {id:'triceps',fx:1,r:'funcional',n:['Extensión de tríceps por encima de la cabeza','Overhead triceps extension','Extensão de tríceps acima da cabeça'],node:'elbow',rad:1.1,view:'latd',mode:'mus',pose:[['shoulder','x',-160,-160],['shoulder_L','x',-160,-160],['elbow','x',-10,-140],['elbow_L','x',-10,-140]],tg:['Long head of triceps brachii','Lateral head of triceps brachii','Medial head of triceps brachii','Anconeus muscle'],
+  ex:['Las tres cabezas del tríceps braquial y el ancóneo, que extienden el codo.','The three heads of triceps brachii and anconeus, extending the elbow.','As três cabeças do tríceps braquial e o ancôneo, que estendem o cotovelo.'],
+  how:['Con el brazo elevado junto a la cabeza, el codo pasa de ~140° de flexión a casi extendido; el brazo no se mueve.','With the arm raised beside the head, the elbow goes from ~140° of flexion to almost straight; the upper arm stays still.','Com o braço elevado junto à cabeça, o cotovelo passa de ~140° de flexão a quase estendido; o braço não se move.'],
+  pos:['Con el hombro elevado, la cabeza larga del tríceps (que cruza el hombro) está estirada y trabaja más que en las extensiones con el brazo pegado al cuerpo.','With the shoulder raised, the long head of triceps (which crosses the shoulder) is stretched and works harder than in extensions with the arm by the side.','Com o ombro elevado, a cabeça longa do tríceps (que cruza o ombro) está alongada e trabalha mais do que nas extensões com o braço junto ao corpo.']},
+ {id:'row',fx:1,anchor:['ankle','knee','hip'],r:'funcional',n:['Remo inclinado','Bent-over row','Remada curvada'],node:'shoulder',rad:1.8,view:'latd',mode:'mus',pose:[['hip','x',-70,-70],['hip_L','x',-70,-70],['knee','x',20,20],['knee_L','x',20,20],['ankle','x',-8,-8],['ankle_L','x',-8,-8],['shoulder','x',35,-70],['shoulder_L','x',35,-70],['elbow','x',-95,-5],['elbow_L','x',-95,-5]],tg:['Latissimus dorsi muscle','Teres major muscle','Rhomboid major muscle','Transverse part of trapezius muscle','Scapular spinal part of deltoid muscle','Biceps brachii muscle','Iliocostalis lumborum muscle'],
+  ex:['Dorsal ancho y redondo mayor, que llevan el brazo atrás; romboides y trapecio medio, que juntan las escápulas; deltoides posterior y bíceps; los erectores sostienen el tronco inclinado.','Latissimus dorsi and teres major taking the arm back; rhomboids and middle trapezius pulling the scapulae together; posterior deltoid and biceps; the erectors hold the inclined trunk.','Latíssimo do dorso e redondo maior, que levam o braço para trás; romboides e trapézio médio, que aproximam as escápulas; deltoide posterior e bíceps; os eretores sustentam o tronco inclinado.'],
+  how:['Con la cadera flexionada ~70° y la espalda recta, los brazos pasan de colgar a llevar los codos por detrás del tronco (codo a ~95°).','With the hips flexed ~70° and a straight back, the arms go from hanging to pulling the elbows behind the trunk (elbow at ~95°).','Com o quadril flexionado ~70° e as costas retas, os braços passam de pendurados a levar os cotovelos para trás do tronco (cotovelo a ~95°).'],
+  pos:['La posición inclinada carga la zona lumbar de forma isométrica durante toda la serie: si duele o se redondea la espalda, es mejor apoyar una mano en un banco.','The inclined position loads the lower back isometrically during the whole set: if it hurts or the back rounds, support one hand on a bench.','A posição inclinada carrega a lombar de forma isométrica durante toda a série: se doer ou as costas arredondarem, apoie uma mão num banco.']},
+ {id:'kickback',fx:1,r:'funcional',n:['Patada de glúteo de pie','Standing glute kickback','Coice de glúteo em pé'],node:'hip',rad:1.4,view:'latd',mode:'mus',pose:[['hip','x',25],['trunk','x',8]],tg:['Gluteus maximus muscle','Long head of biceps femoris','Semitendinosus muscle'],
+  ex:['Glúteo mayor e isquiotibiales, que extienden la cadera.','Gluteus maximus and hamstrings, extending the hip.','Glúteo máximo e isquiotibiais, que estendem o quadril.'],
+  how:['La pierna va hacia atrás con la rodilla recta hasta ~25° de extensión de cadera; el tronco se inclina un poco hacia delante y la pelvis no rota.','The leg moves back with a straight knee to ~25° of hip extension; the trunk tips slightly forward and the pelvis does not rotate.','A perna vai para trás com o joelho reto até ~25° de extensão do quadril; o tronco inclina um pouco para frente e a pelve não roda.'],
+  pos:['La extensión de cadera es corta (10–20° en muchas personas); si se fuerza más, la pelvis se inclina y la zona lumbar se arquea en lugar de trabajar el glúteo.','Hip extension is short (10–20° in many people); pushing further tilts the pelvis and arches the lower back instead of working the gluteus.','A extensão do quadril é curta (10–20° em muitas pessoas); forçar mais inclina a pelve e arqueia a lombar em vez de trabalhar o glúteo.']},
  {id:'lachman',r:'rodilla',n:['Lachman','Lachman','Lachman'],node:'knee',rad:0.32,view:'latd',mode:'lig',pose:[['knee','x',25]],tr:[['knee',[0,0,0.012]]],tg:['Anterior cruciate ligament'],
   ex:['Ligamento cruzado anterior (LCA).','Anterior cruciate ligament (ACL).','Ligamento cruzado anterior (LCA).'],
   how:['Rodilla a 20–30° de flexión. Una mano fija el fémur y la otra tira de la tibia hacia delante.','Knee at 20–30° of flexion. One hand stabilises the femur while the other pulls the tibia forwards.','Joelho a 20–30° de flexão. Uma mão fixa o fêmur e a outra puxa a tíbia para a frente.'],
@@ -2946,7 +2967,8 @@ const CTESTS=[
   how:['Paciente boca arriba: cadera a 90° de flexión y rodilla flexionada; el examinador comprime a lo largo del fémur y barre la cadera en un arco de aducción a abducción.','Patient supine: hip flexed to 90° and knee flexed; the examiner compresses along the femur and sweeps the hip in an arc from adduction to abduction.','Paciente em decúbito dorsal: quadril a 90° de flexão e joelho flexionado; o examinador comprime ao longo do fêmur e varre o quadril num arco de adução para abdução.'],
   pos:['Dolor en la ingle, chasquido o bloqueo durante el barrido: patología intraarticular (rodete, cartílago o artrosis). Es moderadamente sensible pero poco específica.','Groin pain, clicking or catching during the sweep: intra-articular pathology (labrum, cartilage or osteoarthritis). It is moderately sensitive but not very specific.','Dor na virilha, estalido ou bloqueio durante a varredura: patologia intra-articular (lábio, cartilagem ou artrose). É moderadamente sensível, mas pouco específico.']}];
 const CT={on:false,saved:null,test:null,t:0,marks:[],pins:[]};
-function ctComps(k){const c={};for(const [n,ax,d] of CT.test.pose){c[n]=c[n]||{x:0,y:0,z:0,w:0};c[n][ax]+=d*k;}return physio(c,'R');}
+/* cada entrada de la postura es [articulación, eje, grados al final, grados al inicio (opcional, 0 si falta)] */
+function ctComps(k){const c={};for(const [n,ax,d,d0] of CT.test.pose){c[n]=c[n]||{x:0,y:0,z:0,w:0};c[n][ax]+=(d0||0)+(d-(d0||0))*k;}return physio(c,'R');}
 function ctTick(dt){if(!CT.on||currentTab!=='mov')return;CT.t+=dt;const T=4.4,tt=CT.t%T;const k=tt<1.3?0.5-0.5*Math.cos(Math.PI*tt/1.3):tt<2.9?1:tt<4.2?0.5+0.5*Math.cos(Math.PI*(tt-2.9)/1.3):0;
   const C=ctComps(k),act=[];const trm={};for(const [n,v] of (CT.test.tr||[]))trm[n]=v;
   for(const n in C){const jn=n.includes('_')?n:jname(n);if(!JOINTS[jn])continue;const q=qOf(jn,C[n]);const e={k:n.split('_')[0],jn,q};if(trm[n])e.tr=new V3(...trm[n]).multiplyScalar(k);act.push(e);}
@@ -3639,7 +3661,7 @@ const SHEET={mini:34,peek:150,half:()=>Math.round(innerHeight*0.42),full:()=>Mat
 let sheetState='peek';
 function sheetH(st){return st==='mini'?SHEET.mini:st==='peek'?SHEET.peek:st==='half'?SHEET.half():SHEET.full();}
 function applySheet(px){const p=$('#panel');if(!isPhone()){p.style.height='';document.documentElement.style.removeProperty('--sheet');viewOffset();return;}
-  p.style.height=px+'px';document.documentElement.style.setProperty('--sheet',px+'px');viewOffset();}
+  const nv=(typeof window.MNAV_H==='number'&&document.body.classList.contains('mnav'))?window.MNAV_H:0;p.style.height=px+'px';p.style.bottom=nv+'px';document.documentElement.style.setProperty('--sheet',(px+nv)+'px');viewOffset();}
 var SHEET_PX=-1;function setSheet(st){sheetState=st;const px=sheetH(st);applySheet(px);if(px!==SHEET_PX){SHEET_PX=px;if(typeof refitSheet==='function')refitSheet();}}
 function viewOffset(){const r=stage.getBoundingClientRect();const sh=isPhone()?parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sheet'))||SHEET.peek:0;
   if(sh>0){const off=Math.min(r.height*0.36,sh/2);camera.setViewOffset(r.width,r.height,0,off,r.width,r.height);}else camera.clearViewOffset();}
@@ -9786,6 +9808,44 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
   const exS=readExamHash();if(exS){exam.shared=exS;if(exS.b&&exS.b!==BODY)setBody(exS.b);showTab('lec');renderExamSetup(exS);$('#examCard').scrollIntoView({block:'start'});}else renderExamSetup();
   for(const k in SYS) if(SYS[k].on&&sexOk(k)&&SYS[k].state==='idle') loadSys(k);
 }).catch(()=>{$('#hintTxt').textContent='No se pudieron cargar los datos del atlas. Recarga la página para intentarlo de nuevo.';});
+
+/* Interfaz móvil v147 */
+window.MNAV_H=62;
+(()=>{const ic={
+  exp:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="5" r="2.5"/><path d="M12 8v7M8 11h8M9.5 21l2.5-6 2.5 6"/></svg>',
+  mov:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="14" cy="4.5" r="2"/><path d="M8 21l3-6 3 2 1 4M11 15l1-5 4 3 3-1M12 10l-4 2-2 3"/></svg>',
+  lec:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/></svg>',
+  mas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  ficha:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7M9 8h4"/></svg>',
+  pla:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18"/></svg>',
+  glo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z"/><path d="M8 7h6M8 11h6"/></svg>',
+  tool:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>'};
+  const T=(es,en,pt)=>typeof TL==='function'?TL(es,en,pt):es;
+  const nav=document.getElementById('mnav'),more=document.getElementById('mmore'),mm=more.querySelector('.mm');
+  const tabOf={exp:'sistemas',mov:'mov',lec:'lec'};
+  const render=()=>{const cur=typeof currentTab!=='undefined'?currentTab:'';const sec=cur==='sistemas'?'exp':cur==='mov'?'mov':cur==='lec'?'lec':'mas';
+    nav.innerHTML=[['exp',T('Explorar','Explore','Explorar')],['mov',T('Mover','Move','Mover')],['lec',T('Estudiar','Study','Estudar')],['mas',T('Más','More','Mais')]].map(([k,n])=>`<button type="button" data-k="${k}"${k===sec?' aria-current="page"':''}>${ic[k]}<span>${n}</span></button>`).join('');};
+  const go=k=>{if(k==='mas'){openMore();return;}more.hidden=true;const t=tabOf[k];const same=currentTab===t;showTab(t);
+    if(typeof setSheet==='function'){if(k==='exp')setSheet(same&&sheetState!=='full'?(sheetState==='peek'?'half':'peek'):'peek');else setSheet(same&&sheetState==='full'?'half':(same?'full':'half'));}render();};
+  nav.addEventListener('click',e=>{const b=e.target.closest('button[data-k]');if(b)go(b.dataset.k);});
+  const tools=[['#viewMenuBtn',T('Vistas','Views','Vistas')],['#phyBtn',T('Funciones','Functions','Funções')],['#xrayBtn',T('Rayos X','X-ray','Raios X')],['#studioBtn','Atlas'],['#shareBtn',T('Compartir','Share','Compartilhar')],['#helpBtn',T('Ayuda','Help','Ajuda')],['#setBtn',T('Ajustes','Settings','Ajustes')]];
+  function openMore(){const tb=(id,n)=>`<button type="button" data-tab="${id}">${id==='estr'?ic.ficha:id==='planos'?ic.pla:ic.glo}<span>${n}</span></button>`;
+    mm.innerHTML=`<h3>${T('Secciones','Sections','Seções')}</h3><div class="mg">${tb('estr',T('Ficha','Card','Ficha'))}${tb('planos',T('Planos','Planes','Planos'))}${tb('glo',T('Glosario','Glossary','Glossário'))}</div>
+      <h3>${T('Herramientas','Tools','Ferramentas')}</h3><div class="mg">${tools.filter(([s])=>document.querySelector(s)).map(([s,n],i)=>`<button type="button" data-tool="${s}">${ic.tool}<span>${n}</span></button>`).join('')}</div>`;
+    more.hidden=false;render();nav.querySelectorAll('button').forEach(b=>b.toggleAttribute('aria-current',b.dataset.k==='mas'));}
+  more.addEventListener('click',e=>{if(e.target===more){more.hidden=true;render();return;}const b=e.target.closest('button');if(!b)return;more.hidden=true;
+    if(b.dataset.tab){showTab(b.dataset.tab);if(typeof setSheet==='function')setSheet('half');render();}
+    else if(b.dataset.tool){const el=document.querySelector(b.dataset.tool);render();if(el)setTimeout(()=>el.click(),30);}});
+  /* latín bajo el nombre de la estructura tocada */
+  const _ra=renderActbar;renderActbar=function(){_ra.apply(this,arguments);try{const bar=document.getElementById('actbar');let la=document.getElementById('actLat');if(!la){la=document.createElement('span');la.id='actLat';const nm=document.getElementById('actName');nm.after(la);}
+    const c=selected&&selected.m.userData.c;la.textContent=c&&c.la?c.la:'';la.hidden=!la.textContent;}catch(_){}};
+  /* las pestañas siguen mandando: cuando cambian, la barra se actualiza */
+  const _st=showTab;showTab=function(t){_st.apply(this,arguments);render();};
+  const apply=()=>{const on=isPhone();document.body.classList.toggle('mnav',on);document.documentElement.style.setProperty('--mnav-h',window.MNAV_H+'px');
+    if(on&&typeof SHEET==='object')SHEET.peek=112;if(typeof setSheet==='function'&&on)setSheet(sheetState||'peek');render();};
+  apply();addEventListener('resize',()=>{clearTimeout(apply.t);apply.t=setTimeout(apply,150);});
+})();
+
 })();
 </script>
 
@@ -9805,7 +9865,7 @@ Promise.all(['catalog','rig','lessons','extras','fem'].map(n=>fetch('data/'+n+'.
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
  const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
- const APP_V='corpus-v146';/* igual que V en sw.js: se cambian juntos en cada publicación */
+ const APP_V='corpus-v147';/* igual que V en sw.js: se cambian juntos en cada publicación */
  const hadCtl=!!navigator.serviceWorker.controller;let upShown=false;
  /* aviso de versión nueva: si alguien tiene abierta (o instalada) una versión antigua, se le ofrece actualizar */
  const upBar=v=>{if(upShown)return;upShown=true;const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');
