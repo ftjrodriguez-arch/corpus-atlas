@@ -2933,7 +2933,7 @@ function applyAgonists(){if(gait.on){gaitAgonists();return;}
 function updateReadout(){const over=angle>curM.max;const U=curM.u||'°';$('#deg').innerHTML=`${Math.round(angle)}${U}<small> / ${curM.max}${U}</small>`;
   const st=$('#status');st.textContent=over?'Por encima de la referencia':angle===0?'Posición de partida':'Dentro del rango de referencia';st.style.color=over?'var(--warn)':angle===0?'var(--muted)':'var(--ok)';
   const mx=curM.max*1.25;$('#scaleOk').style.width=(curM.max/mx*100)+'%';$('#scaleMk').style.left=`calc(${Math.min(100,angle/mx*100)}% - 1.5px)`;}
-let poseRaf=0;function schedulePose(){if(poseRaf)return;poseRaf=requestAnimationFrame(()=>{poseRaf=0;applyPose();});}
+window.__applyPose=()=>applyPose();let poseRaf=0;function schedulePose(){if(poseRaf)return;poseRaf=requestAnimationFrame(()=>{poseRaf=0;applyPose();});}
 $('#angle').addEventListener('input',e=>{stopPlay();angle=+e.target.value;updateReadout();schedulePose();});
 $('#zero').onclick=()=>{stopPlay();angle=0;$('#angle').value=0;updateReadout();applyPose();};
 function stopPlay(){playing=false;$('#play').textContent='Animar rango';}
