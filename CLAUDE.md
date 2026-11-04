@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v149**.
+(GitHub Pages desde `main`). Versión actual: **v150**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -39,6 +39,9 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 ## Contenido educativo (v149)
 - Lecciones en `data/lessons*.json` (es/en/pt, mismos ids y pasos): `{id,t,r,a,obj,steps[{t,x,show,view}],q:[5 preguntas]}`; `a` = asignatura.
   Los nombres de `show` y `en` deben existir en el catálogo del modelo. Fallar una pregunta con `en` la manda al repaso espaciado.
+- Kinesiología y biomecánica (`renderBio`, `bioShow`, `bioMove`, `bioExam`): banco en `data/bio.json` `{id,r,q,a,x,tg,d?,nota?,mv?,view?,nuevo?}`.
+  `d` = 3 distractores [es,en,pt]; `mv` = `{ct:'<id de CTESTS>'}` o `{pose,anchor}` (mismos signos que CTESTS). Si cambia el tamaño de bio.json,
+  actualiza su entrada en `BG_FILES`.
 - Variantes anatómicas en `data/variants.json` (incluido en el CORE de `sw.js`).
 - Textos de técnica de ejercicios en `EJ_TXT` (errores, progresiones, precauciones) y escenas de ergonomía en `CTESTS` con `r:'ergonomia'`.
 
