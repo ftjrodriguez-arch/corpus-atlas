@@ -99,7 +99,8 @@ Pendiente de revisión clínica: el 27 %, el 38° de dorsiflexión en carga y la
 
 ## Estado actual
 - Hecho (v139): atlas completo, disección, fichas, glosario, lecciones, casos, pruebas clínicas, rangos articulares con goniómetro, marcha normal y patológica, fisiología animada, 3 idiomas, PWA.
-- En curso: sentadilla personalizada (v140) con bucle de verificación visual.
+- Hecho (v140–v145): 26 músculos nuevos modelados en Blender, tema claro, francés y alemán, sentadilla en cadena cerrada con músculos activos en magenta, seis ejercicios nuevos (curl, elevación lateral y frontal, zancada, peso muerto, abducción de cadera), gemelos y dorsal ancho sin atravesar ni despegarse, aviso de versión nueva.
+- En curso: interfaz móvil nueva (ver CLAUDE.md).
 - Siguiente: usar las mediciones guardadas del paciente para rellenar su perfil de movilidad; más ejercicios en cadena cerrada (zancada, peso muerto, puente); intensidad de activación muscular continua (no solo activo/inactivo).
 
 ## Deuda y riesgos
