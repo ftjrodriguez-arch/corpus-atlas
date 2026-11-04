@@ -733,6 +733,43 @@ header{background:transparent}
 .sys .depth{gap:4px}.sys .depth button{padding:2px 8px!important;font-size:11px!important}
 .sysadv{margin:0 0 2px!important}.sysadv button{font-size:11px!important;font-weight:500!important;color:var(--muted)!important}
 .sysadv button:hover{color:var(--accent)!important}
+/* ───── Ficha minimalista: lo esencial arriba, el resto en secciones plegables ───── */
+#infoBox .empty{font-size:13px;line-height:1.45;padding:12px 2px;border:0;background:none;color:var(--muted)}
+#infoBox .row .btn{padding:6px 11px;font-size:12.5px}
+details.fsec{border-top:1px solid rgba(255,255,255,.06);padding:0}
+details.fsec > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:11px 2px;font-size:13px;font-weight:600;color:var(--ink)}
+details.fsec > summary::-webkit-details-marker{display:none}
+details.fsec > summary::after{content:"";margin-left:auto;width:7px;height:7px;border-right:1.6px solid var(--muted);border-bottom:1.6px solid var(--muted);transform:rotate(45deg);transition:transform .15s}
+details.fsec[open] > summary::after{transform:rotate(-135deg)}
+details.fsec > summary small{font-weight:500;color:var(--muted);font-size:11.5px}
+details.fsec > .fbody{display:flex;flex-direction:column;gap:8px;padding:0 2px 12px}
+details.fsec > .fbody > .card{border:0;background:none;padding:0}
+#infoBox details.refs{border:0;padding:0}
+#infoBox details.refs > summary{display:none}
+#infoBox .fmeta{font-size:11px!important}
+/* ───── Barra de acciones: lo principal a la vista, el resto en «⋯» ───── */
+.actbar{overflow:visible!important}
+.actbtns #aMoreBtn{min-width:34px;font-size:16px;line-height:1;letter-spacing:1px}
+.amenu{position:absolute;right:6px;bottom:calc(100% + 6px);display:flex;flex-direction:column;gap:2px;padding:6px;min-width:190px;border-radius:12px;background:var(--panel);border:1px solid var(--line);box-shadow:0 14px 34px rgba(0,0,0,.45);z-index:20}
+.amenu[hidden]{display:none!important}
+.actbar .amenu{-webkit-mask-image:none!important;mask-image:none!important;overflow:visible!important;flex-wrap:nowrap!important;flex-direction:column!important}
+.amenu button{all:unset;cursor:pointer;padding:8px 10px;border-radius:8px;font:500 13px var(--f-ui);color:var(--ink);display:flex;align-items:center;gap:8px}
+.amenu button:hover{background:var(--soft2)}
+.amenu button[hidden]{display:none}
+.amenu button[aria-pressed="true"]{color:var(--accent)}
+/* ───── Pestañas Estudiar, Movimiento y Planos: núcleo arriba, lo demás plegado ───── */
+.tabfold .fbody > .card,.tabfold .fbody > div > .card{border:0;background:none;padding:0}
+.tabfold .fbody > .card > h3:first-child,.tabfold .fbody > div > h3:first-child,.tabfold .fbody > .card > .plane-h:first-child + p{display:none}
+#tab-lec > .phyhost{display:none!important}
+.phylink{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:var(--soft);font:600 13px var(--f-ui);color:var(--ink)}
+.phylink:hover{background:var(--soft2)}.phylink span{margin-left:auto;color:var(--muted);font-weight:500}
+#romBox{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:var(--soft)}
+#romBox > .rhd{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700}
+#romBox > .card{background:none;border:0;padding:0}
+#romBox .chips{gap:4px!important}#romBox .chips button{padding:4px 10px!important;font-size:12px!important;min-height:0!important}
+#tab-planos > p.muted:first-child{display:none}
+#planeCards .card p.small,#planeCards .card > p{display:none}
+#sectCard > p.muted,#sectCard > p.small{display:none}
 </style>
 
 <header>
@@ -3401,7 +3438,7 @@ $('#phyBtn').onclick=e=>{e.stopPropagation();togglePop($('#phyBtn'),$('#phyPop')
   $$('#langSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===l));
   if(typeof SEARCH!=='undefined'&&SEARCH.length)buildSearch();
   /* paneles generados con textos traducidos: se vuelven a dibujar en el idioma nuevo */for(const f of ['renderPlanes','renderGloCats','renderGlo','renderLessons','renderROM','renderViews','renderSrsDecks','renderGaitBar']){try{if(typeof window[f]==='function'||eval('typeof '+f)==='function')eval(f+'()');}catch(e){}}
-  if(selected)renderInfo();if(typeof renderSysList==='function')renderSysList();
+  if(selected)renderInfo();if(typeof renderSysList==='function')renderSysList();try{renderDis();}catch(e){}try{window.retitleFolds&&retitleFolds();}catch(e){}
   trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}if(l!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});
   if(typeof tagLabel!=='undefined'&&selected)tagLabel.el.textContent=label(selected.m.userData.c);}
 $$('#langSeg button').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
@@ -8354,10 +8391,86 @@ async function bgStart(){if(BG.run||BG.fin||!BG.on||!window.caches||!window.__CC
   p.textContent='‹';n.textContent='›';p.title=TL('Capa más superficial','More superficial layer','Camada mais superficial');n.title=TL('Capa más profunda','Deeper layer','Camada mais profunda');
   const dp=d.querySelector('p.muted');if(dp)h.title=dp.textContent;}
  const _rd=renderDis;renderDis=function(){_rd.apply(this,arguments);const nm=$('#disName'),tx=$('#disTxt');if(nm&&tx)nm.title=tx.textContent;
+  const SS={'Piel':['Skin','Pele'],'Fascia':['Fascia','Fáscia'],'Sup.':['Sup.','Sup.'],'Int.':['Int.','Int.'],'Prof.':['Deep','Prof.'],'V-N':['V-N','V-N'],'Lig.':['Lig.','Lig.'],'Hueso':['Bone','Osso'],'Mama':['Breast','Mama'],'Vísc.':['Visc.','Vísc.'],'Pelvis':['Pelvis','Pelve']};
+  if(LANG!=='es')document.querySelectorAll('#disSteps button[data-s]').forEach(x=>{const t=SS[x.dataset.s];if(t)x.dataset.s=t[LANG==='en'?0:1];});
   const r=$('#disR');if(r){$('#disPrev').disabled=+r.value<=0&&disStage>=0;$('#disNext').disabled=+r.value>=+r.max;}};
  const _rs=renderSysList;renderSysList=function(){_rs.apply(this,arguments);document.querySelectorAll('#sysList .sys').forEach(row=>{const sm=row.querySelector('.nm small'),nm=row.querySelector('.nm');if(!sm||!nm)return;
    const t=sm.textContent.trim();if(/descarg|error|downloading|baixando/i.test(t))sm.classList.add('live');nm.title=nm.firstChild&&nm.firstChild.nodeType===3?nm.firstChild.textContent.trim()+(t?' · '+t:''):t;});};
  try{renderDis();renderSysList();}catch(e){}})();
+/* Ficha: reorganiza la ficha ya montada en secciones plegables (los botones conservan sus eventos) */
+(function(){const KEY='fsecOpen';const getOpen=()=>{try{return new Set(store.get(KEY,[]))}catch(e){return new Set()}};
+ function sec(title,nodes,key,count){const d=document.createElement('details');d.className='fsec';d.dataset.k=key;if(getOpen().has(key))d.open=true;
+  d.innerHTML=`<summary>${esc(title)}${count?` <small>${count}</small>`:''}</summary><div class="fbody"></div>`;const b=d.querySelector('.fbody');nodes.forEach(n=>b.appendChild(n));
+  d.addEventListener('toggle',()=>{const o=getOpen();d.open?o.add(key):o.delete(key);store.set(KEY,[...o]);});return d;}
+ const _ri=renderInfo;renderInfo=function(){_ri.apply(this,arguments);try{const box=$('#infoBox'),v=box&&box.querySelector('.view');if(!v)return;
+  if(!selected){const e=v.querySelector('.empty');if(e)e.textContent=TL('Toca una estructura del modelo o búscala arriba para ver su ficha.','Tap a structure on the model or search above to see its record.','Toque uma estrutura do modelo ou busque acima para ver a ficha.');
+   const ai=v.querySelector(':scope > .card.ai');if(ai){const h=ai.querySelector('h3');if(h)h.remove();v.appendChild(sec(TL('Asistente IA','AI assistant','Assistente IA'),[ai],'ai'));}return;}
+  const kids=[...v.children];const firstRow=kids.find(k=>k.classList.contains('row')&&k.querySelector('#iFocus'));
+  const cards=kids.filter(k=>k.classList.contains('card'));
+  for(const c of cards){const h=c.querySelector(':scope > h3');let t=h?h.textContent.trim():'';let cnt='';const m=t.match(/^(.*?)\s*\((\d+)\)$/);if(m){t=m[1];cnt=m[2];}
+   const key=c.classList.contains('ai')?'ai':t.toLowerCase().replace(/[^a-záéíóúñ]+/g,'-').slice(0,30);if(h)h.remove();
+   const d=sec(t||TL('Más','More','Mais'),[c],key,cnt);v.appendChild(d);}
+  /* región y plano muscular: a la línea del sistema */
+  {const isys=v.querySelector(':scope > .info-sys');for(const dl of [...v.querySelectorAll(':scope > dl.kv')]){const dts=[...dl.querySelectorAll('dt')].map(x=>x.textContent.trim());
+    if(isys&&dts.length&&dts.every(t=>/^(Región|Region|Região|Plano muscular|Muscle plane|Plano muscular)$/i.test(t))){[...dl.querySelectorAll('dd')].forEach(dd=>{const sp=document.createElement('span');sp.textContent=' · '+dd.textContent.trim();isys.appendChild(sp);});dl.remove();}}}
+  const tail=[];const refs=v.querySelector(':scope > details.refs');if(refs)tail.push(refs);
+  const shareRow=$('#iShare')&&$('#iShare').closest('.row');if(shareRow)tail.push(shareRow);const rev=$('#revBox');if(rev)tail.push(rev);
+  const meta=[...v.children].filter(k=>k.tagName==='P'&&/id /.test(k.textContent)&&k.classList.contains('muted')).pop();if(meta){meta.classList.add('fmeta');tail.push(meta);}
+  if(tail.length)v.appendChild(sec(TL('Bibliografía y compartir','References & sharing','Bibliografia e compartilhar'),tail,'refs'));
+  /* orden: el asistente IA siempre el último antes de bibliografía */
+  const aiS=v.querySelector(':scope > details.fsec[data-k="ai"]'),rf=v.querySelector(':scope > details.fsec[data-k="refs"]');if(aiS&&rf)v.insertBefore(aiS,rf);
+ }catch(e){console.warn('ficha',e);}};
+ try{renderInfo();}catch(e){}})();
+/* barra de acciones: Etiquetar, Extraer, Preguntar a la IA y Al microscopio pasan al menú «⋯» */
+(function(){const bar=$('#actbar'),bt=bar&&bar.querySelector('.actbtns');if(!bt)return;
+ const more=document.createElement('button');more.id='aMoreBtn';more.textContent='⋯';more.setAttribute('aria-haspopup','menu');more.setAttribute('aria-expanded','false');more.title=TL('Más acciones','More actions','Mais ações');bt.appendChild(more);
+ const menu=document.createElement('div');menu.className='amenu';menu.hidden=true;menu.setAttribute('role','menu');bar.appendChild(menu);
+ const OV=['aPin','aExt','aAsk','aMicro'];
+ const close=()=>{menu.hidden=true;more.setAttribute('aria-expanded','false');};
+ more.onclick=e=>{e.stopPropagation();menu.hidden=!menu.hidden;more.setAttribute('aria-expanded',!menu.hidden);if(!menu.hidden){const br=bar.getBoundingClientRect(),mr=more.getBoundingClientRect(),w=menu.offsetWidth;let l=mr.left-br.left;l=Math.max(6,Math.min(l,br.width-w-6));menu.style.left=l+'px';menu.style.right='auto';}};
+ menu.addEventListener('click',()=>setTimeout(close,0));
+ document.addEventListener('pointerdown',e=>{if(!menu.hidden&&!e.target.closest('.amenu,#aMoreBtn'))close();});
+ const PH=['aHide','aVec'];
+ const _ra=renderActbar;renderActbar=function(){const r=_ra.apply(this,arguments);try{for(const id of OV){const b=document.getElementById(id);if(b&&b.parentNode!==menu)menu.appendChild(b);}
+   for(const id of PH){const b=document.getElementById(id);if(!b)continue;if(innerWidth<600){if(b.parentNode!==menu)menu.insertBefore(b,menu.firstChild);}else if(b.parentNode!==bt)bt.insertBefore(b,$('#aCon'));}
+   more.hidden=![...menu.children].some(b=>!b.hidden);bt.appendChild(more);if(more.hidden)close();}catch(e){}return r;};
+ addEventListener('resize',()=>{if(!bar.hidden)try{renderActbar();}catch(e){}});
+ try{renderActbar();}catch(e){}})();
+/* Estudiar / Movimiento / Planos: el núcleo de cada pestaña arriba y los bloques largos en secciones plegables */
+(function(){const KEY='tabFold';const open=()=>{try{return new Set(store.get(KEY,[]))}catch(e){return new Set()}};
+ function fold(el,title,key,count){if(!el||el.closest('details.fsec'))return null;const d=document.createElement('details');d.className='fsec tabfold';d.dataset.k=key;if(open().has(key))d.open=true;
+  d.innerHTML=`<summary>${esc(title)}${count?` <small>${count}</small>`:''}</summary><div class="fbody"></div>`;el.parentNode.insertBefore(d,el);d.querySelector('.fbody').appendChild(el);
+  d.addEventListener('toggle',()=>{const o=open();d.open?o.add(key):o.delete(key);store.set(KEY,[...o]);});return d;}
+ const h3=el=>{const h=el&&el.querySelector('h3');return h?h.textContent.replace(/\s+/g,' ').trim():'';};
+ const TT={cases:['Casos clínicos','Clinical cases','Casos clínicos'],lec:['Lecciones guiadas','Guided lessons','Lições guiadas'],route:['Ruta de estudio','Study route','Rota de estudo'],bio:['Biomecánica y kinesiología','Biomechanics & kinesiology','Biomecânica e cinesiologia'],rc:['Razonamiento clínico','Clinical reasoning','Raciocínio clínico'],rev:['Revisión experta','Expert review','Revisão especializada'],exam:['Modo examen','Exam mode','Modo exame'],srs:['Repaso espaciado','Spaced review','Revisão espaçada'],practice:['Práctica de identificación','Identification practice','Prática de identificação'],phy:['Fisiología en acción','Physiology in action','Fisiologia em ação'],gait:['Ciclo de la marcha','Gait cycle','Ciclo da marcha'],ct:['Pruebas clínicas y movimientos funcionales','Clinical tests & functional movements','Testes clínicos e movimentos funcionais'],ptbl:['Tabla de planos, ejes y movimientos','Planes, axes and movements table','Tabela de planos, eixos e movimentos']};
+ window.retitleFolds=function(){document.querySelectorAll('details.tabfold').forEach(d=>{const t=TT[d.dataset.k],sm=d.querySelector(':scope > summary');if(t&&sm&&sm.firstChild)sm.firstChild.textContent=TL(...t);});
+  const pl=document.querySelector('.phylink');if(pl)pl.innerHTML=`⚡ ${esc(TL('Fisiología en acción','Physiology in action','Fisiologia em ação'))}<span>${esc(TL('en Movimiento','in Movement','em Movimento'))} →</span>`;
+  const rh=document.querySelector('#romBox > .rhd');if(rh)rh.textContent=TL('Rango articular','Range of motion','Amplitude articular');};
+ /* si algo del programa desplaza la vista hacia un bloque plegado, se abre primero */
+ const _siv=Element.prototype.scrollIntoView;Element.prototype.scrollIntoView=function(){let p=this.closest&&this.closest('details.fsec');while(p){p.open=true;p=p.parentElement&&p.parentElement.closest('details.fsec');}return _siv.apply(this,arguments);};
+ function go(){try{
+  /* Estudiar */
+  const L=$('#tab-lec');if(L&&!L.dataset.fold){L.dataset.fold=1;
+   const ph=L.querySelector(':scope > .phyhost');if(ph){const b=document.createElement('button');b.className='phylink';b.innerHTML=`⚡ ${esc(TL('Fisiología en acción','Physiology in action','Fisiologia em ação'))}<span>${esc(TL('en Movimiento','in Movement','em Movimento'))} →</span>`;
+     b.onclick=()=>{showTab('mov');const d=$('#tab-mov details.fsec[data-k="phy"]');if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'});}};ph.after(b);}
+   const T=[['#caseBox',TL('Casos clínicos','Clinical cases','Casos clínicos'),'cases'],['#routeCard',TL('Ruta de estudio','Study route','Rota de estudo'),'route'],['#bioCard',TL('Biomecánica y kinesiología','Biomechanics & kinesiology','Biomecânica e cinesiologia'),'bio'],['#rcCard',TL('Razonamiento clínico','Clinical reasoning','Raciocínio clínico'),'rc'],['#revCard',TL('Revisión experta','Expert review','Revisão especializada'),'rev'],['#examCard',TL('Modo examen','Exam mode','Modo exame'),'exam'],['#srsCard',TL('Repaso espaciado','Spaced review','Revisão espaçada'),'srs']];
+   const lh=[...L.children].find(x=>x.matches('h3.sect')&&/Lecciones|Lessons|Lições/.test(x.textContent)),lb=$('#lecBox');
+   if(lh&&lb){const w=document.createElement('div');lh.parentNode.insertBefore(w,lh);w.append(lh,lb);fold(w,lh.textContent.trim(),'lec');}
+   for(const [q,t,k] of T){const el=$(q);if(el)fold(el,t||h3(el)||k,k);}
+   const pr=[...L.children].find(x=>x.matches('.card.only-stu'));if(pr)fold(pr,TL('Práctica de identificación','Identification practice','Prática de identificação'),'practice');
+   [...L.children].filter(x=>x.matches('h3.sect')&&/Practicar|Practice|Praticar/.test(x.textContent)).forEach(x=>x.remove());}
+  /* Movimiento: rango articular arriba */
+  const M=$('#tab-mov');if(M&&!M.dataset.fold){const jc=$('#jointChips');if(jc){M.dataset.fold=1;const start=jc.previousElementSibling&&jc.previousElementSibling.matches('.row')?jc.previousElementSibling:jc;
+    const box=document.createElement('div');box.id='romBox';box.innerHTML=`<div class="rhd">${esc(TL('Rango articular','Range of motion','Amplitude articular'))}</div>`;
+    const nodes=[];let n=start;while(n){nodes.push(n);n=n.nextElementSibling;}M.insertBefore(box,M.firstChild);nodes.forEach(x=>box.appendChild(x));
+    const an=$('#animCard');if(an)fold(an,TL('Fisiología en acción','Physiology in action','Fisiologia em ação'),'phy');
+    const g=$('#gaitCard');if(g)fold(g,TL('Ciclo de la marcha','Gait cycle','Ciclo da marcha'),'gait');const ct=$('#ctCard');if(ct)fold(ct,TL('Pruebas clínicas y movimientos funcionales','Clinical tests & functional movements','Testes clínicos e movimentos funcionais'),'ct');}}
+  /* Planos: tabla plegada y explicaciones como información emergente */
+  const P=$('#tab-planos');if(P&&!P.dataset.fold){const tw=P.querySelector(':scope > .tblwrap');if(tw){P.dataset.fold=1;fold(tw,TL('Tabla de planos, ejes y movimientos','Planes, axes and movements table','Tabela de planos, eixos e movimentos'),'ptbl');}
+   const ip=P.querySelector(':scope > p.muted');if(ip)P.title=ip.textContent.trim();}
+ }catch(e){console.warn('pestañas',e);}}
+ go();setTimeout(go,1500);setTimeout(go,6000);
+ const _st=showTab;showTab=function(){const r=_st.apply(this,arguments);go();return r;};})();
 /* ───── Móvil simplificado: menú «Más» con todas las herramientas etiquetadas, aviso breve y hoja inferior más baja ───── */
 (()=>{
   const tg=$('#toolsTog');if(!tg)return;
