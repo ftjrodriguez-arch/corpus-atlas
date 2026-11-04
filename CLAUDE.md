@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v146**.
+(GitHub Pages desde `main`). Versión actual: **v148**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -37,8 +37,8 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
   (dorsal ancho y redondo mayor pegados al tórax al elevar el brazo).
 
 ## Pendiente
-- Interfaz móvil nueva: el usuario eligió la pantalla «Estructura tocada» del lienzo de diseño
-  «Corpus Atlas · Nueva interfaz móvil» (claude.ai). Falta su opinión sobre Explorar, Mover, Estudiar y Más y programarla.
+- Interfaz móvil nueva programada en v147–v148 (barra inferior, capas en fila, hoja de estructura tocada): recoger opiniones y pulir.
+- Al fusionar el artefacto con la web, los bloques nuevos al principio o al final del archivo se pierden: ponerlos en mitad (p. ej. antes de `<header>`).
 - Revisión por un fisioterapeuta de los parámetros de la sentadilla.
 - Dividir `index.html` en módulos sin romper el modo sin conexión.
 - Ideas: perfil de movilidad desde las mediciones del paciente; puente de glúteo; activación muscular continua.
