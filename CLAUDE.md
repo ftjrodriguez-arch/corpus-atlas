@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v145**.
+(GitHub Pages desde `main`). Versión actual: **v146**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
