@@ -904,6 +904,15 @@ html[data-theme="light"] .seg .btn.pri{background:var(--accent)!important;color:
 </style>
 <nav id="mnav" aria-label="Secciones"></nav>
 <div id="mmore" hidden><div class="mm" role="dialog" aria-label="Más"></div></div>
+<style id="sheetFast">
+@media (max-width:879px){
+  *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .panel{transition:none!important;background:var(--panel)!important;contain:layout paint}
+  .panel.sheetmove{will-change:transform}
+  .sheet-h{padding:12px 0 8px!important;margin-top:-4px}
+  .ptop{touch-action:pan-x}
+}
+</style>
 <header>
   <div class="brand"><b>Corpus</b><span>Atlas anatómico 3D</span></div>
   <div class="seg" role="group" aria-label="Cuerpo">
@@ -3728,7 +3737,7 @@ function viewOffset(){const r=stage.getBoundingClientRect();const sh=isPhone()?p
   const end=e=>{if(y0==null)return;p.classList.remove('dragging');const cur=p.getBoundingClientRect().height;y0=null;
     if(!moved){setSheet(sheetState==='mini'||sheetState==='peek'?'half':sheetState==='half'?'full':(PHY.on?'mini':'peek'));return;}
     const c=[[PHY.on?'mini':'peek',sheetH(PHY.on?'mini':'peek')],['half',sheetH('half')],['full',sheetH('full')]].sort((a,b)=>Math.abs(a[1]-cur)-Math.abs(b[1]-cur))[0][0];setSheet(c);};
-  h.addEventListener('pointerdown',start);h.addEventListener('pointermove',move);h.addEventListener('pointerup',end);h.addEventListener('pointercancel',end);
+  /* arrastre: ver «hoja inferior fluida» al final */
   h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setSheet(sheetState==='peek'?'half':'peek');}});
   $$('.tabs button').forEach(b=>b.addEventListener('click',()=>{if(isPhone()&&sheetState==='peek')setSheet('half');}));
   $('#q').addEventListener('focus',()=>{if(isPhone()&&sheetState==='peek')setSheet('half');});
@@ -8424,7 +8433,7 @@ var DPR_EMA=1/60,DPR_T=0,DPR_CUR=0;function dprTick(raw){if(document.hidden||raw
    Se dibuja si se mueve la cámara, si hubo un toque o tecla hace poco, si hay cualquier animación o carga en curso,
    y como red de seguridad al menos dos veces por segundo. */
 const DRAW={t:0,inp:-1e9,p:new THREE.Vector3(1e9,0,0),g:new THREE.Vector3(),force:true};
-['pointerdown','pointermove','wheel','keydown','touchstart','resize'].forEach(ev=>addEventListener(ev,()=>{DRAW.inp=performance.now();},{passive:true,capture:true}));
+['pointerdown','pointermove','wheel','keydown','touchstart','resize'].forEach(ev=>addEventListener(ev,e=>{const t=e&&e.target;if(t&&t.closest&&t.closest('#panel,#mnav,#mmore'))return;DRAW.inp=performance.now();},{passive:true,capture:true}));
 document.addEventListener('visibilitychange',()=>{DRAW.force=true;});
 function needDraw(now){let go=DRAW.force||now-DRAW.inp<1500||now-DRAW.t>500;
   if(!go&&(camera.position.distanceToSquared(DRAW.p)>1e-12||orb.tgt.distanceToSquared(DRAW.g)>1e-12))go=true;
@@ -9926,6 +9935,37 @@ window.MNAV_H=62;
     if(on&&typeof SHEET==='object')SHEET.peek=112;if(typeof setSheet==='function'&&on)setSheet(sheetState||'peek');render();};
   apply();addEventListener('resize',()=>{clearTimeout(apply.t);apply.t=setTimeout(apply,150);});
 })();
+/* ───── Hoja inferior fluida (teléfono) ─────
+   Antes cada movimiento del dedo cambiaba la altura del panel (miles de nodos), la variable --sheet de toda la página
+   y la cámara 3D: el navegador recalculaba todo y redibujaba el modelo en cada fotograma. Ahora, mientras se arrastra
+   o se anima, el panel solo se desplaza con transform (lo hace la GPU) y la altura real se aplica una vez al final. */
+(()=>{const p=$('#panel'),h=$('#sheetH'),top=p&&p.querySelector('.ptop');if(!p||!h)return;
+  const base=setSheet;let anim=0,raf=0,cur=0,hF=0;
+  const nv=()=>(typeof window.MNAV_H==='number'&&document.body.classList.contains('mnav'))?window.MNAV_H:0;
+  const visH=()=>Math.round((innerHeight-nv())-p.getBoundingClientRect().top);
+  const hold=H=>{p.classList.add('dragging','sheetmove');p.style.height=H+'px';p.style.bottom=nv()+'px';};
+  const finish=st=>{p.style.transition='';p.style.transform='';base(st);requestAnimationFrame(()=>p.classList.remove('dragging','sheetmove'));};
+  function animTo(st,from){clearTimeout(anim);const tgt=sheetH(st);if(from==null)from=visH();
+    if(!isPhone()||Math.abs(tgt-from)<3||document.hidden){finish(st);return;}
+    const H=Math.max(tgt,from,p.getBoundingClientRect().height);hold(H);p.style.transition='none';p.style.transform=`translate3d(0,${H-from}px,0)`;p.getBoundingClientRect();
+    p.style.transition='transform .22s cubic-bezier(.2,.8,.2,1)';p.style.transform=`translate3d(0,${H-tgt}px,0)`;anim=setTimeout(()=>finish(st),235);}
+  setSheet=function(st){if(!isPhone()||!p.getClientRects().length)return base(st);sheetState=st;animTo(st);};
+  /* arrastre: desde el asa o desde la cabecera del panel (buscador y pestañas) */
+  let y0=null,h0=0,moved=false,src=null,pid=null,lastEnd=0;
+  const down=e=>{if(!isPhone()||(e.button||0)>0)return;const fromTop=e.currentTarget===top;if(fromTop&&e.target.closest('.results'))return;
+    clearTimeout(anim);y0=e.clientY;h0=visH();moved=false;src=e.currentTarget;pid=e.pointerId;};
+  const move=e=>{if(y0==null||e.pointerId!==pid)return;const d=y0-e.clientY;
+    if(!moved){if(Math.abs(d)<(src===h?4:10))return;moved=true;hF=Math.max(sheetH('full'),h0);hold(hF);p.style.transition='none';p.style.transform=`translate3d(0,${hF-h0}px,0)`;
+      try{src.setPointerCapture(pid);}catch(_){}const q=$('#q');if(src===top&&document.activeElement===q)q.blur();}
+    cur=Math.max(PHY.on?30:110,Math.min(hF,h0+d));if(!raf)raf=requestAnimationFrame(()=>{raf=0;p.style.transform=`translate3d(0,${hF-cur}px,0)`;});};
+  const up=e=>{if(y0==null||e.pointerId!==pid)return;y0=null;cancelAnimationFrame(raf);raf=0;
+    if(!moved){if(src===h)setSheet(sheetState==='mini'||sheetState==='peek'?'half':sheetState==='half'?'full':(PHY.on?'mini':'peek'));return;}
+    lastEnd=Date.now();const lo=PHY.on?'mini':'peek';const c=[[lo,sheetH(lo)],['half',sheetH('half')],['full',sheetH('full')]].sort((a,b)=>Math.abs(a[1]-cur)-Math.abs(b[1]-cur))[0][0];
+    sheetState=c;animTo(c,cur);};
+  for(const el of [h,top]){if(!el)continue;el.addEventListener('pointerdown',down);el.addEventListener('pointermove',move);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);}
+  /* el toque que termina un arrastre no abre pestañas ni el buscador */
+  top&&top.addEventListener('click',e=>{if(Date.now()-lastEnd<350){e.stopPropagation();e.preventDefault();}},true);
+})();
 
 })();
 </script>
@@ -9946,7 +9986,7 @@ window.MNAV_H=62;
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
  const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
- const APP_V='corpus-v150';/* igual que V en sw.js: se cambian juntos en cada publicación */
+ const APP_V='corpus-v151';/* igual que V en sw.js: se cambian juntos en cada publicación */
  const hadCtl=!!navigator.serviceWorker.controller;let upShown=false;
  /* aviso de versión nueva: si alguien tiene abierta (o instalada) una versión antigua, se le ofrece actualizar */
  const upBar=v=>{if(upShown)return;upShown=true;const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');
