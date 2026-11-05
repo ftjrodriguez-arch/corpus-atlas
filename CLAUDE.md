@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v152**.
+(GitHub Pages desde `main`). Versión actual: **v153**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -51,6 +51,11 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 - Lecciones FR/DE en `data/lessons_fr.json` y `lessons_de.json` (validar con lec/validar_trad.py del flujo de Claude).
 - Tipografías locales en `fonts/`; `fusion_web.py` debe sustituir el enlace de Google Fonts por `fonts/fonts.css`.
 - Sin internet: `ABRIR CORPUS - Windows.bat` → `tools/servidor_local.ps1`; Mac `.command`; Linux `abrir-corpus-linux.sh`. El .zip es el de GitHub (main).
+
+## v153
+- ECOE (`ECOE`, `ecoeMk`, `ecoeShow`, `renderEcoe`): estaciones generadas a partir de los datos existentes; guarda y restaura las capas.
+- `printLesson(L)`: vista imprimible (`#printArea`, `body.printing`).
+- Protocolos en `data/protocols.json` (`renderProt`), casos en `data/rc.json` agrupados por `r` (deporte, neuro, pediatria, geriatria…).
 
 ## Pendiente
 - Decisión del usuario: NUNCA servidor propio, cuentas ni base de datos. Todo debe funcionar en local y sin conexión (GitHub Pages solo sirve los archivos estáticos).
