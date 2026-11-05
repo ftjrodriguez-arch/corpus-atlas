@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v150**.
+(GitHub Pages desde `main`). Versión actual: **v152**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -44,6 +44,13 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
   actualiza su entrada en `BG_FILES`.
 - Variantes anatómicas en `data/variants.json` (incluido en el CORE de `sw.js`).
 - Textos de técnica de ejercicios en `EJ_TXT` (errores, progresiones, precauciones) y escenas de ergonomía en `CTESTS` con `r:'ergonomia'`.
+
+## Valoración clínica y sin internet (v152)
+- Goniómetro manipulable (`GONI`, `setGoni`, `renderGoniCard`): lo coloca el usuario; nunca colocarlo automáticamente (decisión del usuario).
+- ASIA (`ASIA_PTS`, `asiaCompute`, `renderAsia`): puntos calculados sobre los huesos y proyectados a la piel con rayos cortos.
+- Lecciones FR/DE en `data/lessons_fr.json` y `lessons_de.json` (validar con lec/validar_trad.py del flujo de Claude).
+- Tipografías locales en `fonts/`; `fusion_web.py` debe sustituir el enlace de Google Fonts por `fonts/fonts.css`.
+- Sin internet: `ABRIR CORPUS - Windows.bat` → `tools/servidor_local.ps1`; Mac `.command`; Linux `abrir-corpus-linux.sh`. El .zip es el de GitHub (main).
 
 ## Pendiente
 - Decisión del usuario: NUNCA servidor propio, cuentas ni base de datos. Todo debe funcionar en local y sin conexión (GitHub Pages solo sirve los archivos estáticos).
