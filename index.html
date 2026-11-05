@@ -905,6 +905,16 @@ html[data-theme="light"] .seg .btn.pri{background:var(--accent)!important;color:
 </style>
 <nav id="mnav" aria-label="Secciones"></nav>
 <div id="mmore" hidden><div class="mm" role="dialog" aria-label="Más"></div></div>
+<style id="ecoeCss">
+.ecoebox{position:absolute;left:50%;transform:translateX(-50%);top:10px;z-index:13;width:min(440px,calc(100% - 16px));max-height:60%;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.ecoebox .ecoeq{margin:6px 0}.ecoebar{height:4px;background:var(--panel2);border-radius:2px;overflow:hidden;margin-top:6px}.ecoebar i{display:block;height:100%;background:var(--accent);transition:width 1s linear}
+@media (max-width:879px){.ecoebox{top:52px;max-height:46%}}
+#printArea{display:none}
+@media print{body.printing>*:not(#printArea){display:none!important}body.printing #printArea{display:block!important;color:#000;background:#fff;font:12pt/1.45 Georgia,serif;padding:0 8mm}
+ #printArea h1{font-size:20pt;margin:0 0 4pt}#printArea h2{font-size:13pt;margin:12pt 0 3pt}#printArea p,#printArea li{margin:2pt 0}#printArea .pmeta{color:#555;font-size:9.5pt}#printArea .pkey{margin-top:10pt;font-size:10pt;border-top:1px solid #999;padding-top:4pt}
+ body.printing{background:#fff!important}}
+.protph{border-left:3px solid var(--accent);padding:2px 0 2px 10px;margin:10px 0}.protph h4{margin:0 0 4px;font-size:13.5px}.protej{display:flex;gap:8px;align-items:baseline;justify-content:space-between;border-top:1px solid var(--line);padding:5px 0;font-size:13px}
+</style>
 <style id="asiaCss">
 .asiaList{display:flex;flex-direction:column;gap:2px;margin-top:6px}
 .asiaRow{display:flex;gap:10px;align-items:baseline;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:7px 2px;font-size:13px;color:inherit;cursor:pointer}
@@ -1180,6 +1190,7 @@ html[data-theme="light"] .seg .btn.pri{background:var(--accent)!important;color:
         </div>
         <div class="card gait" id="sqCard"></div>
         <div class="card" id="ctCard"></div>
+        <div class="card" id="protCard"></div>
         <div class="row" style="justify-content:space-between">
           <h3>Articulación</h3>
           <div class="seg" role="group" aria-label="Lado">
@@ -1229,7 +1240,7 @@ html[data-theme="light"] .seg .btn.pri{background:var(--accent)!important;color:
         <p class="muted" style="font-size:12px">Valores de referencia de rango articular activo en adultos (AAOS). Las mallas reales se deforman alrededor del centro articular calculado a partir de los huesos; los músculos que cruzan la articulación se curvan de forma aproximada.</p>
       </div>
 
-      <div class="view" id="tab-lec" hidden><div id="progBox"></div><p class="femonly card">Las lecciones guiadas usan la musculatura completa. <button class="btn" onclick="setBody('f')">Ver el modelo femenino completo</button></p><div class="phyhost" style="margin-bottom:6px"></div><div id="caseBox" class="maleonly"></div><h3 class="sect maleonly">Lecciones guiadas</h3><div id="lecBox"></div><h3 class="sect maleonly">Exploración neurológica (ASIA)</h3><div id="asiaBox" class="maleonly"></div><h3 class="sect maleonly">Variantes anatómicas</h3><div id="varBox" class="maleonly"></div>
+      <div class="view" id="tab-lec" hidden><div id="progBox"></div><p class="femonly card">Las lecciones guiadas usan la musculatura completa. <button class="btn" onclick="setBody('f')">Ver el modelo femenino completo</button></p><div class="phyhost" style="margin-bottom:6px"></div><div id="caseBox" class="maleonly"></div><h3 class="sect maleonly">Lecciones guiadas</h3><div id="lecBox"></div><h3 class="sect maleonly">Práctica ECOE</h3><div id="ecoeCard" class="maleonly"></div><h3 class="sect maleonly">Exploración neurológica (ASIA)</h3><div id="asiaBox" class="maleonly"></div><h3 class="sect maleonly">Variantes anatómicas</h3><div id="varBox" class="maleonly"></div>
 <div class="card" id="routeCard"></div>
 <div class="card" id="bioCard"></div>
 <div class="card" id="rcCard"></div>
@@ -3739,7 +3750,7 @@ async function setLang(l){if(!['es','en','pt','fr','de'].includes(l))l='es';
 $('#phyBtn').onclick=e=>{e.stopPropagation();togglePop($('#phyBtn'),$('#phyPop'));};document.addEventListener('pointerdown',e=>{if(!e.target.closest('#phyPop,#phyBtn')&&!$('#phyPop').hidden)togglePop($('#phyBtn'),$('#phyPop'),false);});
   $$('#langSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===l));
   if(typeof SEARCH!=='undefined'&&SEARCH.length)buildSearch();
-  /* paneles generados con textos traducidos: se vuelven a dibujar en el idioma nuevo */for(const f of ['renderPlanes','renderGloCats','renderGlo','renderLessons','renderROM','renderViews','renderSrsDecks','renderGaitBar','renderSqCard','renderVars','renderGoniCard','goniRefresh','renderAsia']){try{if(typeof window[f]==='function'||eval('typeof '+f)==='function')eval(f+'()');}catch(e){}}
+  /* paneles generados con textos traducidos: se vuelven a dibujar en el idioma nuevo */for(const f of ['renderPlanes','renderGloCats','renderGlo','renderLessons','renderROM','renderViews','renderSrsDecks','renderGaitBar','renderSqCard','renderVars','renderGoniCard','goniRefresh','renderAsia','renderEcoe','renderProt']){try{if(typeof window[f]==='function'||eval('typeof '+f)==='function')eval(f+'()');}catch(e){}}
   if(selected)renderInfo();if(typeof renderSysList==='function')renderSysList();try{renderDis();}catch(e){}try{window.retitleFolds&&retitleFolds();}catch(e){}
   trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}if(l!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});
   if(typeof tagLabel!=='undefined'&&selected)tagLabel.el.textContent=label(selected.m.userData.c);}
@@ -4061,7 +4072,7 @@ function renderVars(){const box=$('#varBox');if(!box)return;loadVars().then(V=>{
 function varInfoBox(c){const L=VAR_BY[c.en];if(!L||!L.length)return '';const i=VI();return `<div class="card varcard"><h3>${TL('Variante anatómica','Anatomical variant','Variante anatômica')}</h3>${L.map(x=>`<p><b>${esc(x.t[i])}</b> · <span class="muted small">${esc(x.prev[i])}</span><br><span class="small">${esc(x.x[i])} ${esc(x.clin[i])}</span></p>`).join('')}</div>`;}
 function renderLessons(){
   const box=$('#lecBox');
-  if(!lesson){const AORD=[['Osteología','Osteology','Osteologia','Ostéologie','Osteologie'],['Artrología','Arthrology','Artrologia','Arthrologie'],['Miología','Myology','Miologia','Myologie'],['Neuroanatomía','Neuroanatomy','Neuroanatomia','Neuroanatomie'],['Esplacnología','Splanchnology','Esplancnologia','Splanchnologie'],['Angiología','Angiology','Angiologia','Angiologie'],['Valoración clínica','Clinical assessment','Avaliação clínica','Évaluation clinique','Klinische Untersuchung']];
+  if(!lesson){const AORD=[['Osteología','Osteology','Osteologia','Ostéologie','Osteologie'],['Artrología','Arthrology','Artrologia','Arthrologie'],['Miología','Myology','Miologia','Myologie'],['Neuroanatomía','Neuroanatomy','Neuroanatomia','Neuroanatomie'],['Esplacnología','Splanchnology','Esplancnologia','Splanchnologie'],['Angiología','Angiology','Angiologia','Angiologie'],['Valoración clínica','Clinical assessment','Avaliação clínica','Évaluation clinique','Klinische Untersuchung'],['Desarrollo motor','Motor development','Desenvolvimento motor','Développement moteur','Motorische Entwicklung']];
     const gi=a=>{const k=AORD.findIndex(x=>x.includes(a));return k<0?99:k;};const groups={};LESSONS.forEach((l,i)=>{const g=l.a||TL('Otras','Other','Outras');(groups[g]=groups[g]||[]).push([l,i]);});
     const LROW=(l,i)=>`<div class="lesson"><div><b>${esc(l.t)}</b><span class="muted small">${esc(l.r)} · ${l.steps.length} ${TL('pasos','steps','passos')}${l.obj?' · '+(Array.isArray(l.q)?l.q.length:1)+' '+TL('preguntas','questions','perguntas'):''}${PROG.les[l.id||l.t]?` · <span class="ok">✓ ${PROG.les[l.id||l.t].best}/${PROG.les[l.id||l.t].n}</span>`:''}</span></div><div class="row" style="gap:6px;flex-wrap:nowrap">${LES_TOUR[l.id]&&TOURS[LES_TOUR[l.id][0]]?`<button class="btn" data-ltour="${LES_TOUR[l.id].join('|')}" title="${esc(TL('Ver la fisiología en acción','See physiology in action','Ver a fisiologia em ação'))}" style="padding:6px 9px">${TOURS[LES_TOUR[l.id][0]].ic}</button>`:''}<button class="btn pri" data-les="${i}">Empezar</button></div></div>`;
     box.innerHTML=`<div class="view"><p class="muted small">${TL('Lecciones por asignatura: cada una empieza con sus objetivos, muestra en el modelo solo lo que explica y termina con un examen de 5 preguntas. Lo que falles pasa al repaso espaciado.','Lessons by subject: each one starts with its objectives, shows on the model only what it explains and ends with a 5-question quiz. What you miss goes to spaced review.','Lições por disciplina: cada uma começa com seus objetivos, mostra no modelo só o que explica e termina com uma prova de 5 perguntas. O que errar vai para a revisão espaçada.')}</p>${Object.keys(groups).sort((a,b)=>gi(a)-gi(b)).map((g,k)=>`<details class="lgrp"${k===0?' open':''}><summary><b>${esc(g)}</b> <span class="muted small">${groups[g].length}</span></summary>${groups[g].map(([l,i])=>LROW(l,i)).join('')}</details>`).join('')}</div>`;
@@ -4077,7 +4088,8 @@ function renderLessons(){
   box.innerHTML=`<div class="view"><div class="steps">${lesson.steps.map((_,i)=>`<i class="${i<=lstep?'on':''}"></i>`).join('')}</div>
     <h3>${esc(lesson.t)} · ${TL('paso','step','passo')} ${lstep+1} ${TL('de','of','de')} ${n}</h3>${lstep===0&&lesson.obj?`<div class="card lobj"><h3>${TL('Al terminar sabrás','By the end you will be able to','Ao terminar você saberá')}</h3><ul>${lesson.obj.map(o=>`<li>${esc(o)}</li>`).join('')}</ul></div>`:''}<h2>${esc(st.t)}</h2><p>${esc(st.x)}</p>
     <div class="card"><h3>En pantalla</h3><div style="display:flex;flex-direction:column;gap:4px">${[...new Set(st.show)].map(en=>{const r=Object.values(CAT).find(x=>x[1]===en&&x[4]!=='insercion'&&(!x[5]||x[5]==='derecho'))||Object.values(CAT).find(x=>x[1]===en);return r?`<button class="link small" data-goto="${r[0]}">${esc(nameL(r))}</button>`:'';}).join('')}</div></div>
-    <div class="row"><button class="btn" id="lPrev" ${lstep?'':'disabled'}>Paso anterior</button><button class="btn pri" id="lNext">${lstep===n-1?TL('Examen final','Final quiz','Prova final'):TL('Siguiente','Next','Próximo')}</button><button class="btn" id="lExit">Salir</button></div></div>`;
+    <div class="row"><button class="btn" id="lPrev" ${lstep?'':'disabled'}>Paso anterior</button><button class="btn pri" id="lNext">${lstep===n-1?TL('Examen final','Final quiz','Prova final'):TL('Siguiente','Next','Próximo')}</button><button class="btn" id="lExit">Salir</button><button class="btn" id="lPrint" title="${TL('Imprimir o guardar en PDF','Print or save as PDF','Imprimir ou salvar em PDF')}">🖨 ${TL('Imprimir / PDF','Print / PDF','Imprimir / PDF')}</button></div></div>`;
+  {const pb=box.querySelector('#lPrint');if(pb)pb.onclick=()=>printLesson(lesson);}
   box.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>{const m=findMesh(b.dataset.goto);if(m){select(m,null);focusMesh(m);showTab('lec');}});
   $('#lPrev').onclick=()=>{lstep--;showStep();};$('#lNext').onclick=()=>{lstep++;showStep();};$('#lExit').onclick=exitLesson;
 }
@@ -5820,13 +5832,15 @@ function rcOpenTest(id){showTab('mov');if(isPhone())setSheet('half');setTimeout(
 function renderRC(){const el=$('#rcCard');if(!el||typeof RC_CASES==='undefined')return;const L=a=>TL(a[0],a[1],a[2]),done=rcStore();
   const head=`<h3>${TL('Razonamiento clínico','Clinical reasoning','Raciocínio clínico')}</h3>`;
   if(RC.i<0){const n=Object.keys(done).length;el.innerHTML=head+`<p class="muted small">${TL(`${RC_CASES.length} casos para practicar como en un examen práctico: lee la historia, elige qué prueba harías (puedes verla animada en el modelo), decide el diagnóstico y repasa el plan de fisioterapia.`,`${RC_CASES.length} cases to practise as in a practical exam: read the history, choose which test you would do (you can watch it animated on the model), decide the diagnosis and review the physiotherapy plan.`,`${RC_CASES.length} casos para praticar como numa prova prática: leia a história, escolha qual teste faria (pode vê-lo animado no modelo), decida o diagnóstico e revise o plano de fisioterapia.`)}</p>
-    <p class="small muted">${TL('Resueltos','Solved','Resolvidos')}: ${n} / ${RC_CASES.length}</p><div class="rclist">${RC_CASES.map((c,i)=>`<button class="btn" data-rc="${i}">${done[c.id]!=null?(done[c.id]?'✓ ':'✗ '):''}${esc(L(c.t))}</button>`).join('')}</div>`;
+    <p class="small muted">${TL('Resueltos','Solved','Resolvidos')}: ${n} / ${RC_CASES.length}</p>${(()=>{const RR={deporte:['Fisioterapia deportiva','Sports physiotherapy','Fisioterapia esportiva'],rodilla:['Rodilla','Knee','Joelho'],tobillo:['Tobillo y pie','Ankle and foot','Tornozelo e pé'],cadera:['Cadera','Hip','Quadril'],hombro:['Hombro','Shoulder','Ombro'],codo:['Codo','Elbow','Cotovelo'],mano:['Mano y muñeca','Hand and wrist','Mão e punho'],columna:['Columna','Spine','Coluna'],neuro:['Neurología','Neurology','Neurologia'],pediatria:['Pediatría','Paediatrics','Pediatria'],geriatria:['Geriatría','Geriatrics','Geriatria']};
+      const G={};RC_CASES.forEach((c,i)=>{(G[c.r]=G[c.r]||[]).push([c,i]);});const ord=Object.keys(RR).filter(k=>G[k]).concat(Object.keys(G).filter(k=>!RR[k]));
+      return ord.map((k,n)=>`<details class="lgrp"${n===0?' open':''}><summary><b>${esc(RR[k]?L(RR[k]):k)}</b> <span class="muted small">${G[k].length}</span></summary><div class="rclist">${G[k].map(([c,i])=>`<button class="btn" data-rc="${i}">${done[c.id]!=null?(done[c.id]?'✓ ':'✗ '):''}${esc(L(c.t))}</button>`).join('')}</div></details>`).join('');})()}`;
     el.querySelectorAll('[data-rc]').forEach(b=>b.onclick=()=>{RC.i=+b.dataset.rc;RC.stage=0;RC.picked=[];RC.dx=null;renderRC();el.scrollIntoView({block:'start'});});return;}
   const c=RC_CASES[RC.i];let body=`<div class="row" style="justify-content:space-between;align-items:center"><b>${esc(L(c.t))}</b><button class="btn" data-rcx>${TL('← Casos','← Cases','← Casos')}</button></div><p class="small" style="margin:8px 0">${esc(L(c.h))}</p>`;
   body+=`<p class="small muted" style="margin:6px 0">${TL('1. ¿Qué prueba harías primero?','1. Which test would you do first?','1. Qual teste você faria primeiro?')}</p><div class="rcopts">`+c.tests.map((t,j)=>{const ct=typeof CTESTS!=='undefined'?CTESTS.find(x=>x.id===t.ct):null,nm=ct?L(ct.n):t.ct,on=RC.picked.includes(j);
     return `<div class="rcopt${on?' on':''}"><button class="btn" data-rt="${j}" style="text-align:left;white-space:normal">${esc(nm)}${on?(t.good?' <span style="color:var(--ok)">✓ '+TL('muy útil','very useful','muito útil')+'</span>':' <span class="muted">· '+TL('menos útil aquí','less useful here','menos útil aqui')+'</span>'):''}</button>${on?`<p class="small" style="margin:4px 0 2px">${esc(L(t.why))}</p><p class="small"><b>${TL('Resultado','Result','Resultado')}:</b> ${esc(L(t.res))}</p>${ct?`<button class="btn" data-rv="${t.ct}" style="font-size:12px;padding:3px 10px">${TL('Ver la prueba en el modelo','Watch the test on the model','Ver o teste no modelo')}</button>`:''}`:''}</div>`;}).join('')+`</div>`;
   if(RC.picked.length&&RC.stage===0)body+=`<button class="btn pri" data-rs="1" style="margin-top:8px">${TL('Pasar al diagnóstico →','Go to diagnosis →','Ir para o diagnóstico →')}</button>`;
-  if(RC.stage>=1){body+=`<p class="small muted" style="margin:10px 0 6px">${TL('2. ¿Cuál es el diagnóstico más probable?','2. What is the most likely diagnosis?','2. Qual é o diagnóstico mais provável?')}</p><div class="bioopts">`+c.dx.o.map((o,j)=>`<button class="btn" data-rd="${j}" ${RC.dx!=null?'disabled':''} style="${RC.dx!=null?(j===c.dx.a?'background:#14532d;border-color:#22c55e':j===RC.dx?'background:#7f1d1d;border-color:#ef4444':''):''}">${esc(L(o))}</button>`).join('')+`</div>`;
+  if(RC.stage>=1){body+=`<p class="small muted" style="margin:10px 0 6px">${TL('2. ¿Cuál es el diagnóstico más probable?','2. What is the most likely diagnosis?','2. Qual é o diagnóstico mais provável?')}</p><div class="bioopts">`+c.dx.o.map((o,j)=>`<button class="btn${RC.dx!=null?(j===c.dx.a?' ok':j===RC.dx?' bad':''):''}" data-rd="${j}" ${RC.dx!=null?'disabled':''}>${esc(L(o))}</button>`).join('')+`</div>`;
     if(RC.dx!=null)body+=`<p class="small"><b>${RC.dx===c.dx.a?TL('¡Correcto!','Correct!','Correto!'):TL('No exactamente.','Not quite.','Não exatamente.')}</b> ${esc(L(c.x))}</p><p class="small muted" style="margin:8px 0 4px">${TL('3. Plan de fisioterapia','3. Physiotherapy plan','3. Plano de fisioterapia')}</p><p class="small">${esc(L(c.plan))}</p>
       <div class="row">${c.tour&&c.tour[0]&&TOURS[c.tour[0]]?`<button class="btn" data-rtour>${TL('Ver la anatomía funcional','See the functional anatomy','Ver a anatomia funcional')}</button>`:''}${RC.i<RC_CASES.length-1?`<button class="btn pri" data-rn>${TL('Siguiente caso →','Next case →','Próximo caso →')}</button>`:''}</div>`;}
   el.innerHTML=head+body;
@@ -8671,7 +8685,7 @@ renderQbar=function(){_renderQbar0();const el=$('#qbar');if(!el)return;
   el.querySelector('[data-x="all"]').onclick=()=>{if(SOLO||SOLO_SAVE)soloExit();else setView('reset');};};
 
 /* ───── Descarga en segundo plano: tras la carga visible baja todas las capas (hombre y mujer), la alta resolución y los textos a la caché local, de uno en uno y cediendo el paso a lo que pida el usuario ───── */
-const BG_FILES=[["data/info.json",1007604],["data/bio.json",1139828],["data/rc.json",284191],["data/nuevos.json",1158165],["data/glossary.json",1446774],["m2/oseo.txt",2136288],["m2/muscular.txt",4011184],["m2/piel.txt",437568],["m2/arterial.txt",1426728],["m2/venoso.txt",677148],["m2/nervioso_periferico.txt",758908],["m2/nervioso_central.txt",1060188],["m2/digestivo.txt",191900],["m2/respiratorio.txt",148440],["m2/articular.txt",1137072],["m2/insercion.txt",1029372],["m2/fascia.txt",273580],["m2/urinario.txt",36636],["m2/endocrino.txt",33480],["m2/linfatico.txt",357448],["m2/reproductor.txt",34784],["m2/bolsas.txt",176336],["m2/mama.txt",988728],["m2/oseo__f.txt",383432],["m2/muscular__f.txt",2058812],["m2/arterial__f.txt",300268],["m2/venoso__f.txt",282600],["m2/nervioso_periferico__f.txt",223356],["m2/nervioso_central__f.txt",27728],["m2/digestivo__f.txt",115072],["m2/articular__f.txt",273036],["m2/insercion__f.txt",196480],["m2/fascia__f.txt",189068],["m2/urinario__f.txt",36584],["m2/linfatico__f.txt",126104],["m2/bolsas__f.txt",48432],["m2/f_articular.txt",59004],["m2/f_mama.txt",664588],["m2/f_muscular.txt",83228],["m2/f_nervioso.txt",1229276],["m2/f_ojos.txt",274360],["m2/f_oseo.txt",811416],["m2/f_piel.txt",242064],["m2/f_reproductor.txt",329712],["m2/f_vasos.txt",591280],["m2/f_visceras.txt",1251768],["m2/piel_f.txt",1038832],["m2/reproductor_f.txt",375248],["hr/tronco_loc.txt",4678972],["hr/tronco_nv.txt",2894376],["hr/superior_loc.txt",4379048],["hr/superior_nv.txt",1232632],["hr/inferior_loc.txt",4063968],["hr/inferior_nv.txt",1148316],["hr/cabeza_loc.txt",3669272],["hr/cabeza_nv.txt",4806344]];
+const BG_FILES=[["data/info.json",1007604],["data/bio.json",1139828],["data/rc.json",419272],["data/nuevos.json",1158165],["data/glossary.json",1446774],["m2/oseo.txt",2136288],["m2/muscular.txt",4011184],["m2/piel.txt",437568],["m2/arterial.txt",1426728],["m2/venoso.txt",677148],["m2/nervioso_periferico.txt",758908],["m2/nervioso_central.txt",1060188],["m2/digestivo.txt",191900],["m2/respiratorio.txt",148440],["m2/articular.txt",1137072],["m2/insercion.txt",1029372],["m2/fascia.txt",273580],["m2/urinario.txt",36636],["m2/endocrino.txt",33480],["m2/linfatico.txt",357448],["m2/reproductor.txt",34784],["m2/bolsas.txt",176336],["m2/mama.txt",988728],["m2/oseo__f.txt",383432],["m2/muscular__f.txt",2058812],["m2/arterial__f.txt",300268],["m2/venoso__f.txt",282600],["m2/nervioso_periferico__f.txt",223356],["m2/nervioso_central__f.txt",27728],["m2/digestivo__f.txt",115072],["m2/articular__f.txt",273036],["m2/insercion__f.txt",196480],["m2/fascia__f.txt",189068],["m2/urinario__f.txt",36584],["m2/linfatico__f.txt",126104],["m2/bolsas__f.txt",48432],["m2/f_articular.txt",59004],["m2/f_mama.txt",664588],["m2/f_muscular.txt",83228],["m2/f_nervioso.txt",1229276],["m2/f_ojos.txt",274360],["m2/f_oseo.txt",811416],["m2/f_piel.txt",242064],["m2/f_reproductor.txt",329712],["m2/f_vasos.txt",591280],["m2/f_visceras.txt",1251768],["m2/piel_f.txt",1038832],["m2/reproductor_f.txt",375248],["hr/tronco_loc.txt",4678972],["hr/tronco_nv.txt",2894376],["hr/superior_loc.txt",4379048],["hr/superior_nv.txt",1232632],["hr/inferior_loc.txt",4063968],["hr/inferior_nv.txt",1148316],["hr/cabeza_loc.txt",3669272],["hr/cabeza_nv.txt",4806344]];
 const BG={on:store.get('bgdl',!(navigator.connection&&(navigator.connection.saveData||/(^|-)(2g|3g)$/.test(navigator.connection.effectiveType||'')))),i:0,done:0,bytes:0,total:BG_FILES.reduce((a,f)=>a+f[1],0),run:false,fin:false,err:0};
 function bgUI(){const el=$('#bgdlRow');if(!el)return;const mb=x=>(x/1e6).toFixed(0);
   el.querySelector('.sw').setAttribute('aria-checked',BG.on);
@@ -10010,7 +10024,7 @@ const GONI={on:false,x:0,y:0,a0:-90,a1:-30,L0:130,L1:130,sc:'sup',quiz:null};
     box.innerHTML=`<div class="row" style="justify-content:space-between;align-items:center;gap:6px"><b>${TL('Goniómetro','Goniometer','Goniômetro')} <span id="goniRead" class="mono">${reading()}°</span></b><button class="btn" id="goniX" aria-label="${TL('Cerrar','Close','Fechar')}">✕</button></div>
       <p class="small muted" id="goniHelp" style="margin:2px 0 4px"${GONI.moved?' hidden':''}>${TL('Arrastra el círculo central hasta la articulación (fulcro) y cada extremo a lo largo de su segmento: brazo fijo (blanco) y brazo móvil (verde).','Drag the centre circle onto the joint (fulcrum) and each end along its segment: stationary arm (white) and moving arm (green).','Arraste o círculo central até a articulação (fulcro) e cada extremo ao longo do seu segmento: braço fixo (branco) e braço móvel (verde).')}</p>
       <div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn" id="goniSc" title="${TL('Cambiar la escala de lectura','Switch reading scale','Trocar a escala de leitura')}">${GONI.sc==='sup'?TL('0° = brazos juntos','0° = arms together','0° = braços juntos'):TL('0° = brazos en línea','0° = arms in line','0° = braços em linha')}</button>
-      ${1?`<button class="btn" id="goniView">${TL('Mirar el plano de frente','Face the plane','Olhar o plano de frente')}</button><button class="btn pri" id="goniChk">${TL('Comprobar','Check','Conferir')}</button>`:''}</div>
+      ${(typeof ECOE==='undefined'||!ECOE.on)?`<button class="btn" id="goniView">${TL('Mirar el plano de frente','Face the plane','Olhar o plano de frente')}</button><button class="btn pri" id="goniChk">${TL('Comprobar','Check','Conferir')}</button>`:''}</div>
       <p class="small" id="goniMsg" style="margin:4px 0 0"></p>`;
     box.querySelector('#goniX').onclick=()=>setGoni(false);
     box.querySelector('#goniSc').onclick=()=>{GONI.sc=GONI.sc==='sup'?'lin':'sup';panel();draw();};
@@ -10125,21 +10139,21 @@ function asiaCompute(){const A=asiaAxes();if(!A)return null;const skin=meshes.fi
     for(const P of ASIA_PTS){const [lv,,bn]=P;if(bn&&bn.mix){const a=R[bn.mix[0]],b=R[bn.mix[1]];if(a&&b){const p=a.clone().lerp(b,bn.mix[2]);R[lv]=front(p.y,p);if(lv==='L1'){R[lv]=onSkin(a.clone().lerp(b,.5),new V3(0,0,A.ant));}}}}}
   return out;}
 function asiaClear(){ASIA.g.clear();removeLabels('lm');for(const m of (ASIA.marks||[])){m.userData.sq=false;m.userData.hint=false;refreshState(m);}ASIA.marks=[];for(const P of (ASIA.pins||[]))removePin(P);ASIA.pins=[];}
-async function asiaShowPts(only){asiaClear();resetActivity();
+async function asiaShowPts(only,quiz){asiaClear();resetActivity();
   const ks=k=>Object.keys(SYS).find(x=>BS(x)===k&&sexOk(x));const kp=ks('piel');if(kp){SYS[kp].on=true;if(SYS[kp].state!=='loaded')await loadSys(kp);SYS[kp].op=0.55;}const ko=ks('oseo');if(ko){SYS[ko].on=true;if(SYS[ko].state!=='loaded')await loadSys(ko);}
   const km=ks('muscular');if(km)SYS[km].on=false;applySystems();renderSysList();try{syncAllMats();}catch(_){}
   if(!ASIA.pts)ASIA.pts=asiaCompute();if(!ASIA.pts)return;const box=new THREE.Box3();
   for(const side of ['derecho','izquierdo'])for(const [lv,txt] of ASIA_PTS){const p=ASIA.pts[side][lv];if(!p||(only&&only!==lv))continue;
     const s=new THREE.Mesh(new THREE.SphereGeometry(only?0.008:0.0055,14,10),new THREE.MeshBasicMaterial({color:asiaCol(lv),depthTest:false,transparent:true}));s.position.copy(p);s.renderOrder=33;ASIA.g.add(s);box.expandByPoint(p);
-    if(only||side==='derecho'||lv==='S4-5'){const L=addLabel(lv,()=>p,'','lm');L.on=true;L.pos=p;}}
+    if(!quiz&&(only||side==='derecho'||lv==='S4-5')){const L=addLabel(lv,()=>p,'','lm');L.on=true;L.pos=p;}}
   if(only&&!box.isEmpty())focusOn(box.getCenter(new V3()),0.55);else{setView('ant');}
   if(isPhone())setSheet('peek');}
-async function asiaShowMus(list,how){asiaClear();resetActivity();const ks=k=>Object.keys(SYS).find(x=>BS(x)===k&&sexOk(x));
+async function asiaShowMus(list,how,quiz){asiaClear();resetActivity();const ks=k=>Object.keys(SYS).find(x=>BS(x)===k&&sexOk(x));
   for(const k of ['muscular','oseo']){const kk=ks(k);if(kk){SYS[kk].on=true;if(SYS[kk].state!=='loaded')await loadSys(kk);}}const kp=ks('piel');if(kp)SYS[kp].on=false;
   const ka=ks('articular');if(ka&&list.some(en=>/ligament/.test(en))){SYS[ka].on=true;if(SYS[ka].state!=='loaded')await loadSys(ka);}
   applySystems();renderSysList();const b=new THREE.Box3();ASIA.marks=[];ASIA.pins=[];
   for(const m of meshes){const c=m.userData.c;if(!c||!list.includes(c.en)||!sexOk(m.userData.sys)||(c.side&&c.side!=='derecho'))continue;m.userData.sq=true;refreshState(m);ASIA.marks.push(m);m.geometry.computeBoundingBox();b.union(m.geometry.boundingBox);
-    if(ASIA.pins.length<3&&!ASIA.pins.some(P=>P.m.userData.c.en===c.en)){m.userData.pinTxt=nameL(Object.values(CAT).find(r=>r[1]===c.en)||[0,c.en,c.es||c.en])||c.es;const n0=PINS.length;addPin(m,m.geometry.boundingBox.getCenter(new V3()));if(PINS.length>n0)ASIA.pins.push(PINS[PINS.length-1]);}}
+    if(!quiz&&ASIA.pins.length<3&&!ASIA.pins.some(P=>P.m.userData.c.en===c.en)){m.userData.pinTxt=nameL(Object.values(CAT).find(r=>r[1]===c.en)||[0,c.en,c.es||c.en])||c.es;const n0=PINS.length;addPin(m,m.geometry.boundingBox.getCenter(new V3()));if(PINS.length>n0)ASIA.pins.push(PINS[PINS.length-1]);}}
   if(!b.isEmpty()){const sz=b.getSize(new V3()).length();focusOn(b.getCenter(new V3()),Math.max(0.3,Math.min(1.4,sz*1.4)));setView(how||'ant');}if(isPhone())setSheet('peek');}
 function renderAsia(){const el=$('#asiaBox');if(!el)return;const i=VI();const M=ASIA.mode;
   const seg=`<div class="seg" style="margin:6px 0">${[['derm',TL('Dermatomas','Dermatomes','Dermátomos')],['mio',TL('Músculos clave','Key muscles','Músculos-chave')],['ref',TL('Reflejos','Reflexes','Reflexos')]].map(([k,n])=>`<button data-am="${k}" aria-pressed="${M===k}">${n}</button>`).join('')}</div>`;
@@ -10172,6 +10186,99 @@ renderAsia();
     try{const del=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^corpus/.test(k))del.push(k);}del.forEach(k=>localStorage.removeItem(k));
       for(const k in o.data)if(/^corpus/.test(k)&&typeof o.data[k]==='string')localStorage.setItem(k,o.data[k]);}catch(e){}
     location.reload();};r.readAsText(f);};})();
+/* ───── Práctica ECOE (examen clínico objetivo estructurado): circuito de estaciones cronometradas, sin conexión ─────
+   Estaciones: identificar una estructura, medir con el goniómetro, dermatoma, músculo clave, caso clínico y kinesiología. */
+const ECOE={on:false,st:[],i:0,t:0,dur:90,n:6,timer:0,ans:null};
+(()=>{const st=$('#stage');const box=document.createElement('div');box.id='ecoeBox';box.className='ecoebox';box.hidden=true;st.appendChild(box);ECOE.box=box;})();
+const ecoeL=a=>TL(a[0],a[1],a[2]),shuf=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
+function ecoeMk(kind){
+  if(kind==='ident'){const ms=meshes.filter(m=>m.visible&&BS(m.userData.sys)==='muscular'&&sexOk(m.userData.sys)&&(!m.userData.c.side||m.userData.c.side==='derecho')&&Object.values(CAT).some(r=>r[1]===m.userData.c.en));
+    const big=ms.filter(m=>{m.geometry.computeBoundingSphere();return m.geometry.boundingSphere.radius>0.06&&!/intercostal|subcostal|levator costarum|transversus thoracis/i.test(m.userData.c.en);});if(big.length<8)return null;
+    const m=big[Math.floor(Math.random()*big.length)],c0=m.geometry.boundingSphere.center;const near=big.filter(x=>x!==m&&x.userData.c.en!==m.userData.c.en).sort((a,b)=>a.geometry.boundingSphere.center.distanceTo(c0)-b.geometry.boundingSphere.center.distanceTo(c0)).slice(0,8);
+    const nm=x=>{const r=Object.values(CAT).find(r=>r[1]===x.userData.c.en);return r?nameL(r):x.userData.c.en;};const ds=[...new Set(shuf(near).map(nm))].filter(n=>n!==nm(m)).slice(0,3);if(ds.length<3)return null;
+    const o=shuf([nm(m),...ds]);return {kind,q:TL('¿Qué músculo está resaltado?','Which muscle is highlighted?','Qual músculo está destacado?'),o,a:o.indexOf(nm(m)),m};}
+  if(kind==='gonio'){const J=ROM.filter(j=>['hombro','codo','muneca','cadera','rodilla','tobillo'].includes(j.id)&&j.moves.some(m=>m.gon&&m.gon[1]&&(m.u||'°')==='°'));const j=J[Math.floor(Math.random()*J.length)],mv=shuf(j.moves.filter(m=>m.gon&&m.gon[1]))[0];
+    return {kind,j,mv,a:Math.round(mv.max*(0.3+Math.random()*0.6)),q:TL(`Mide con el goniómetro: ${j.n}, ${mv.n.toLowerCase()}. Colócalo tú y entrega tu lectura.`,`Measure with the goniometer: ${j.n}, ${mv.n.toLowerCase()}. Place it yourself and submit your reading.`,`Meça com o goniômetro: ${j.n}, ${mv.n.toLowerCase()}. Posicione-o você mesmo e entregue sua leitura.`)};}
+  if(kind==='derm'){const P=shuf(ASIA_PTS.filter(p=>p[0]!=='S4-5'))[0],lv=P[0],all=ASIA_PTS.map(p=>p[0]);const k=all.indexOf(lv);const ds=shuf(all.filter((x,i)=>x!==lv&&Math.abs(i-k)<=4)).slice(0,3);const o=shuf([lv,...ds]);
+    return {kind,lv,o,a:o.indexOf(lv),q:TL('¿Qué dermatoma explora el punto sensitivo clave marcado?','Which dermatome does the marked key sensory point test?','Qual dermátomo o ponto sensitivo-chave marcado avalia?')};}
+  if(kind==='mio'){const M=shuf(ASIA_MUS)[0];const o=shuf([M[0],...shuf(ASIA_MUS.filter(x=>x!==M).map(x=>x[0])).slice(0,3)]);
+    return {kind,M,o,a:o.indexOf(M[0]),q:TL('¿Qué nivel medular explora el grupo muscular resaltado (músculo clave de ASIA)?','Which spinal level does the highlighted muscle group (ASIA key muscle) test?','Qual nível medular o grupo muscular destacado (músculo-chave da ASIA) avalia?')};}
+  if(kind==='caso'){if(typeof RC_CASES==='undefined'||!RC_CASES||!RC_CASES.length)return null;const c=RC_CASES[Math.floor(Math.random()*RC_CASES.length)];const idx=shuf([0,1,2,3]);
+    return {kind,c,o:idx.map(i=>ecoeL(c.dx.o[i])),a:idx.indexOf(c.dx.a),q:ecoeL(c.h)+' '+TL('¿Cuál es el diagnóstico más probable?','What is the most likely diagnosis?','Qual é o diagnóstico mais provável?')};}
+  if(kind==='kin'){if(typeof BIO_Q==='undefined'||!BIO_Q)return null;const L=BIO_Q.filter(q=>q.d);const q=L[Math.floor(Math.random()*L.length)];const i=LANG==='pt'?2:LANG==='es'?0:1;
+    const o=shuf([ecoeL(q.a),...q.d[i]]);return {kind,bq:q,o,a:o.indexOf(ecoeL(q.a)),q:ecoeL(q.q)};}
+  return null;}
+async function ecoeShow(){const S=ECOE.st[ECOE.i];if(!S)return ecoeEnd();try{asiaClear();}catch(_){}if(ECOE.hl){ECOE.hl.userData.hint=false;refreshState(ECOE.hl);ECOE.hl=null;}if(GONI.on)setGoni(false);
+  const sysOn=async(k,on)=>{const kk=Object.keys(SYS).find(x=>BS(x)===k&&sexOk(x));if(!kk)return;SYS[kk].on=on;if(on&&SYS[kk].state!=='loaded')await loadSys(kk);if(on)SYS[kk].op=1;};
+  if(S.kind==='ident'||S.kind==='gonio'){await sysOn('piel',false);await sysOn('muscular',true);applySystems();renderSysList();}
+  if(S.kind==='ident'){resetActivity();showTab('sistemas');S.m.userData.hint=true;refreshState(S.m);ECOE.hl=S.m;focusMesh(S.m);}
+  else if(S.kind==='gonio'){resetActivity();curJ=S.j;curM=S.mv;angle=S.a;GONI.quiz={a:S.a};if(currentTab!=='mov')showTab('mov');renderROM();try{applyPose();updateReadout();}catch(_){}
+    try{setView(S.mv.pl==='sag'?(romSide==='L'?'lati':'latd'):S.mv.pl==='fro'?'ant':'sup');}catch(_){}setTimeout(()=>{try{$('#focusJ').click();}catch(_){}setGoni(true);},80);}
+  else if(S.kind==='derm'){await asiaShowPts(S.lv,true);}
+  else if(S.kind==='mio'){await asiaShowMus(S.M[2],/S1|C7/.test(S.M[0])?'post':'ant',true);}
+  if(isPhone())setSheet('peek');ECOE.ans=null;ECOE.t=ECOE.dur;ecoeRender();clearInterval(ECOE.timer);
+  ECOE.timer=setInterval(()=>{ECOE.t--;const b=ECOE.box.querySelector('.ecoebar i');if(b)b.style.width=Math.max(0,ECOE.t/ECOE.dur*100)+'%';const tt=ECOE.box.querySelector('#ecoeT');if(tt)tt.textContent=Math.max(0,ECOE.t)+' s';
+    if(ECOE.t<=0){clearInterval(ECOE.timer);if(ECOE.ans==null)ecoeAnswer(-1);}},1000);}
+function ecoeAnswer(v){const S=ECOE.st[ECOE.i];if(ECOE.ans!=null)return;clearInterval(ECOE.timer);
+  if(S.kind==='gonio'){const r=v<0?null:v,d=r==null?99:Math.abs(r-S.a);S.score=d<=5?1:d<=10?0.5:0;S.got=r;}else{S.score=v===S.a?1:0;S.got=v;}ECOE.ans=v;ecoeRender();}
+function ecoeRender(){const b=ECOE.box,S=ECOE.st[ECOE.i];if(!ECOE.on){b.hidden=true;return;}b.hidden=false;
+  const head=`<div class="row" style="justify-content:space-between;align-items:center"><b>ECOE · ${TL('estación','station','estação')} ${ECOE.i+1}/${ECOE.st.length}</b><span class="mono" id="ecoeT">${Math.max(0,ECOE.t)} s</span><button class="btn" id="ecoeX" aria-label="${TL('Salir','Exit','Sair')}">✕</button></div><div class="ecoebar"><i style="width:${Math.max(0,ECOE.t/ECOE.dur*100)}%"></i></div>`;
+  let body=`<p class="small ecoeq">${esc(S.q)}</p>`;
+  if(S.kind==='gonio'){body+=ECOE.ans==null?`<button class="btn pri" id="ecoeG">${TL('Entregar mi lectura','Submit my reading','Entregar minha leitura')} (<span id="ecoeGv">${GONI.on?'':'—'}</span>)</button>`
+      :`<p class="small"><b>${S.got==null?TL('Sin respuesta','No answer','Sem resposta'):TL('Tu lectura','Your reading','Sua leitura')+': '+S.got+'°'}</b> · ${TL('ángulo real','true angle','ângulo real')}: <b>${S.a}°</b> · ${S.score===1?'✓':S.score?'±':'✗'}</p>`;}
+  else body+=`<div class="bioopts">${S.o.map((o,j)=>`<button class="btn${ECOE.ans!=null?(j===S.a?' ok':j===ECOE.ans?' bad':''):''}" data-eo="${j}" ${ECOE.ans!=null?'disabled':''}>${esc(o)}</button>`).join('')}</div>`;
+  if(ECOE.ans!=null)body+=`<button class="btn pri" id="ecoeN">${ECOE.i<ECOE.st.length-1?TL('Siguiente estación →','Next station →','Próxima estação →'):TL('Ver resultado','See result','Ver resultado')}</button>`;
+  b.innerHTML=head+body;
+  b.querySelector('#ecoeX').onclick=()=>ecoeStop();
+  b.querySelectorAll('[data-eo]').forEach(x=>x.onclick=()=>ecoeAnswer(+x.dataset.eo));
+  const g=b.querySelector('#ecoeG');if(g){const upd=()=>{const v=b.querySelector('#ecoeGv');if(v&&GONI.on)v.textContent=(document.getElementById('goniRead')||{}).textContent||'';};upd();clearInterval(ECOE.gt);ECOE.gt=setInterval(upd,400);
+    g.onclick=()=>{clearInterval(ECOE.gt);const t=(document.getElementById('goniRead')||{}).textContent||'';const v=parseInt(t,10);ecoeAnswer(isNaN(v)?-1:v);};}
+  const n=b.querySelector('#ecoeN');if(n)n.onclick=()=>{ECOE.i++;ecoeShow();};}
+function ecoeEnd(){ecoeRestore();clearInterval(ECOE.timer);clearInterval(ECOE.gt);ECOE.on=false;ECOE.box.hidden=true;if(GONI.on)setGoni(false);GONI.quiz=null;try{asiaClear();}catch(_){}if(ECOE.hl){ECOE.hl.userData.hint=false;refreshState(ECOE.hl);ECOE.hl=null;}
+  const tot=ECOE.st.reduce((a,s)=>a+(s.score||0),0);try{progMark('exam','ecoe',Math.round(tot),ECOE.st.length);}catch(_){}ECOE.last={tot,st:ECOE.st};showTab('lec');renderEcoe();const c=$('#ecoeCard');if(c)c.scrollIntoView({block:'start'});}
+function ecoeStop(){ecoeRestore();clearInterval(ECOE.timer);clearInterval(ECOE.gt);ECOE.on=false;ECOE.box.hidden=true;if(GONI.on)setGoni(false);GONI.quiz=null;try{asiaClear();}catch(_){}if(ECOE.hl){ECOE.hl.userData.hint=false;refreshState(ECOE.hl);ECOE.hl=null;}}
+async function ecoeStart(){try{if(typeof loadBanks==='function')await loadBanks();}catch(_){}const kinds=['ident','gonio','derm','mio','caso','kin'];const st=[];
+  for(const k of shuf(kinds).concat(shuf(kinds)).slice(0,ECOE.n)){let s=null;for(let t=0;t<5&&!s;t++)s=ecoeMk(k);if(s)st.push(s);}
+  ECOE.saved=Object.fromEntries(Object.keys(SYS).map(k=>[k,{on:SYS[k].on,op:SYS[k].op}]));ECOE.st=st;ECOE.i=0;ECOE.on=true;ECOE.last=null;ecoeShow();}
+function ecoeRestore(){if(!ECOE.saved)return;for(const k in ECOE.saved)if(SYS[k]){SYS[k].on=ECOE.saved[k].on;SYS[k].op=ECOE.saved[k].op;}ECOE.saved=null;try{syncAllMats();}catch(_){}applySystems();renderSysList();}
+const ECOE_K={ident:['Identificación','Identification','Identificação'],gonio:['Goniometría','Goniometry','Goniometria'],derm:['Dermatoma','Dermatome','Dermátomo'],mio:['Miotoma','Myotome','Miótomo'],caso:['Caso clínico','Clinical case','Caso clínico'],kin:['Kinesiología','Kinesiology','Cinesiologia']};
+function renderEcoe(){const el=$('#ecoeCard');if(!el)return;
+  el.innerHTML=`<p class="muted small">${TL('Un circuito de estaciones cronometradas como en el examen práctico: identificar una estructura, medir con el goniómetro, localizar un dermatoma, reconocer un músculo clave, resolver un caso y una pregunta de kinesiología.','A circuit of timed stations as in the practical exam: identify a structure, measure with the goniometer, place a dermatome, recognise a key muscle, solve a case and a kinesiology question.','Um circuito de estações cronometradas como na prova prática: identificar uma estrutura, medir com o goniômetro, localizar um dermátomo, reconhecer um músculo-chave, resolver um caso e uma pergunta de cinesiologia.')}</p>
+   <div class="row" style="gap:6px;flex-wrap:wrap"><span class="small">${TL('Estaciones','Stations','Estações')}</span><div class="seg">${[6,10].map(n=>`<button data-en="${n}" aria-pressed="${ECOE.n===n}">${n}</button>`).join('')}</div>
+   <span class="small">${TL('Tiempo','Time','Tempo')}</span><div class="seg">${[60,90,120].map(n=>`<button data-ed="${n}" aria-pressed="${ECOE.dur===n}">${n} s</button>`).join('')}</div></div>
+   <button class="btn pri" id="ecoeGo" style="margin-top:8px">${TL('Empezar el circuito','Start the circuit','Começar o circuito')}</button>
+   ${ECOE.last?`<div class="card" style="margin-top:8px"><b>${TL('Resultado','Result','Resultado')}: ${ECOE.last.tot} / ${ECOE.last.st.length}</b>${ECOE.last.st.map((s,i)=>`<p class="small" style="margin:4px 0">${s.score===1?'✓':s.score?'±':'✗'} ${i+1}. ${esc(ecoeL(ECOE_K[s.kind]))}: ${s.kind==='gonio'?`${TL('real','true','real')} ${s.a}°${s.got!=null?`, ${TL('tú','you','você')} ${s.got}°`:''}`:esc(s.o[s.a])}</p>`).join('')}</div>`:''}`;
+  el.querySelectorAll('[data-en]').forEach(b=>b.onclick=()=>{ECOE.n=+b.dataset.en;renderEcoe();});
+  el.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{ECOE.dur=+b.dataset.ed;renderEcoe();});
+  el.querySelector('#ecoeGo').onclick=()=>ecoeStart();}
+renderEcoe();
+/* ───── Imprimir una lección (o guardarla como PDF desde el diálogo de impresión) ───── */
+function printLesson(L){if(!L)return;let pa=document.getElementById('printArea');if(!pa){pa=document.createElement('div');pa.id='printArea';document.body.appendChild(pa);}
+  const nm=en=>{const r=Object.values(CAT).find(x=>x[1]===en&&x[4]!=='insercion')||Object.values(CAT).find(x=>x[1]===en);return r?nameL(r):en;};
+  const QS=Array.isArray(L.q)?L.q:(L.q?[L.q]:[]);
+  pa.innerHTML=`<h1>${esc(L.t)}</h1><p class="pmeta">${esc(L.a||'')} · ${esc(L.r||'')} · Corpus Atlas</p>
+   ${L.obj?`<h2>${TL('Objetivos','Objectives','Objetivos')}</h2><ul>${L.obj.map(o=>`<li>${esc(o)}</li>`).join('')}</ul>`:''}
+   ${L.steps.map((s,i)=>`<h2>${i+1}. ${esc(s.t)}</h2><p>${esc(s.x)}</p><p class="pmeta">${TL('En el modelo','On the model','No modelo')}: ${[...new Set(s.show)].map(en=>esc(nm(en))).join(', ')}</p>`).join('')}
+   ${QS.length?`<h2>${TL('Examen','Quiz','Prova')}</h2><ol>${QS.map(q=>`<li><p>${esc(q.p)}</p><ol type="a">${q.o.map(o=>`<li>${esc(o)}</li>`).join('')}</ol></li>`).join('')}</ol>
+   <p class="pkey">${TL('Respuestas','Answers','Respostas')}: ${QS.map((q,i)=>`${i+1}${'abcd'[q.a]}`).join(' · ')}</p>`:''}
+   <p class="pmeta">Corpus Atlas · ${TL('atlas anatómico libre','free anatomy atlas','atlas anatômico livre')} · CC BY-SA 4.0 · ftjrodriguez-arch.github.io/corpus-atlas</p>`;
+  document.body.classList.add('printing');const done=()=>{document.body.classList.remove('printing');removeEventListener('afterprint',done);};addEventListener('afterprint',done);setTimeout(()=>{window.print();setTimeout(done,60000);},50);}
+/* ───── Ejercicio terapéutico por patología (data/protocols.json): fases, objetivos, ejercicios animados, criterios y precauciones ───── */
+let PROT=null,PROT_I=-1;
+function loadProt(){if(PROT)return Promise.resolve(PROT);return fetch('data/protocols.json').then(r=>r.ok?r.json():[]).then(v=>PROT=Array.isArray(v)?v:[]).catch(()=>PROT=[]);}
+function renderProt(){const el=$('#protCard');if(!el)return;loadProt().then(P=>{if(!P.length){el.hidden=true;return;}el.hidden=false;const L=a=>TL(a[0],a[1],a[2]);
+  let h=`<h3>${TL('Ejercicio terapéutico por patología','Therapeutic exercise by condition','Exercício terapêutico por patologia')}</h3><p class="muted small">${TL('Fases con objetivos, ejercicios (los animados se ven en el modelo), criterios para avanzar y precauciones. Material docente: no sustituye la valoración ni la prescripción individual.','Phases with goals, exercises (animated ones play on the model), criteria to progress and precautions. Teaching material: it does not replace individual assessment and prescription.','Fases com objetivos, exercícios (os animados aparecem no modelo), critérios para avançar e precauções. Material didático: não substitui a avaliação nem a prescrição individual.')}</p>
+   <div class="chips">${P.map((x,i)=>`<button data-pi="${i}" aria-pressed="${i===PROT_I}">${esc(L(x.t))}</button>`).join('')}</div>`;
+  const x=P[PROT_I];
+  if(x){h+=`<p class="small" style="margin-top:8px">${esc(L(x.intro))}</p>`+x.phases.map((ph,k)=>`<div class="protph"><h4>${k+1}. ${esc(L(ph.n))}</h4><p class="small"><b>${TL('Objetivos','Goals','Objetivos')}:</b> ${esc(L(ph.obj))}</p>
+      ${ph.ej.map((e,j)=>`<div class="protej"><span><b>${esc(L(e.n))}</b><br><span class="muted">${esc(L(e.dos))}</span></span>${e.ct&&CTESTS.some(c=>c.id===e.ct)?`<button class="btn" data-pe="${k}:${j}" style="flex:none">${TL('Ver','Watch','Ver')}</button>`:''}</div>`).join('')}
+      <p class="small"><b>${TL('Para pasar de fase','To progress','Para avançar de fase')}:</b> ${esc(L(ph.crit))}</p><p class="small"><b>${TL('Precauciones','Precautions','Precauções')}:</b> ${esc(L(ph.prec))}</p></div>`).join('')+
+     `<p class="small"><b>${TL('Cuándo derivar','When to refer','Quando encaminhar')}:</b> ${esc(L(x.red))}</p><p class="small muted">${TL('Basado en','Based on','Baseado em')}: ${esc(L(x.ref))}</p>`;}
+  el.innerHTML=h;
+  el.querySelectorAll('[data-pi]').forEach(b=>b.onclick=()=>{PROT_I=+b.dataset.pi===PROT_I?-1:+b.dataset.pi;renderProt();});
+  el.querySelectorAll('[data-pe]').forEach(b=>b.onclick=()=>{const [k,j]=b.dataset.pe.split(':').map(Number);const t=CTESTS.find(c=>c.id===P[PROT_I].phases[k].ej[j].ct);if(!t)return;
+    if(currentTab!=='mov')showTab('mov');if(isPhone())setSheet('peek');Promise.resolve(ctStart(t)).then(()=>{});});});}
+renderProt();
 /* ───── Precalentado en tiempo libre: el mapa costillas-escápula y el estilo de las pestañas se calculan cuando nadie toca la pantalla,
    así abrir Movimiento o Estudiar la primera vez no se nota ───── */
 (()=>{const warm=()=>{try{if(typeof stcInit==='function')stcInit();}catch(e){}
@@ -10229,7 +10336,7 @@ renderAsia();
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
  const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
- const APP_V='corpus-v152';/* igual que V en sw.js: se cambian juntos en cada publicación */
+ const APP_V='corpus-v153';/* igual que V en sw.js: se cambian juntos en cada publicación */
  const hadCtl=!!navigator.serviceWorker.controller;let upShown=false;
  /* aviso de versión nueva: si alguien tiene abierta (o instalada) una versión antigua, se le ofrece actualizar */
  const upBar=v=>{if(upShown)return;upShown=true;const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');
