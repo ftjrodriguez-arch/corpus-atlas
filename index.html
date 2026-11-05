@@ -39,8 +39,9 @@ window.fetch=function(u,o){if(typeof u!=='string'||!OK.test(u)||(o&&o.method&&o.
 (function(){try{const of=window.fetch.bind(window),M=new Map();window.fetch=function(u,o){if(typeof u==='string'&&/^data\/[^?]+\.json$/.test(u)&&!(o&&o.method&&o.method!=='GET')){let p=M.get(u);if(!p){p=of(u,o).then(r=>{if(!r.ok)M.delete(u);return r;},e=>{M.delete(u);throw e;});M.set(u,p);}return p.then(r=>r.clone());}return of(u,o);};}catch(e){}})();</script>
 <script>/* Carga rápida: pide ya los modelos que se usaron la última vez (o los de inicio), en paralelo con el resto de la página */
 (function(){try{if(!/^https?:$/.test(location.protocol))return;let l=null;try{l=JSON.parse(localStorage.getItem("corpus.pre")||"null");}catch(e){}if(!Array.isArray(l)||!l.length)l=["m2/oseo.txt","m2/muscular.txt"];const P=window.__PRE={};l=l.filter(u=>/^m2\/(?!importado)[\w.-]+\.txt$/.test(u)).slice(0,4);l.forEach((u,i)=>{P[u]=fetch(u,{priority:i?"low":"high"}).catch(()=>null);});for(const d of ["draco/draco_wasm_wrapper.js","draco/draco_decoder.wasm"])document.head.insertAdjacentHTML("beforeend",'<link rel="preload" as="fetch" crossorigin="anonymous" href="'+d+'">');}catch(e){}})();</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,500;0,600;1,400;1,500&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<meta name="claude:viewport-fit-sides" content="cover">
+<!-- tipografías incluidas en la app (SIL OFL 1.1, ver fonts/LICENSE-*.txt): funcionan sin conexión y sin pedir nada a terceros -->
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
 /* Layout: visor anatómico — escenario 3D a la izquierda, panel de instrumentos a la derecha; en teléfono se apilan */
 :root{
@@ -904,6 +905,27 @@ html[data-theme="light"] .seg .btn.pri{background:var(--accent)!important;color:
 </style>
 <nav id="mnav" aria-label="Secciones"></nav>
 <div id="mmore" hidden><div class="mm" role="dialog" aria-label="Más"></div></div>
+<style id="asiaCss">
+.asiaList{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.asiaRow{display:flex;gap:10px;align-items:baseline;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:7px 2px;font-size:13px;color:inherit;cursor:pointer}
+.asiaRow b{min-width:38px;font-family:var(--f-mono,monospace)}
+</style>
+<style id="goniCss">
+#goniSvg{position:absolute;inset:0;width:100%;height:100%;z-index:11;pointer-events:none;overflow:visible}
+#goniSvg .g-h{pointer-events:all;cursor:grab;touch-action:none}
+#goniSvg .g-disk{fill:rgba(255,255,255,.10);stroke:rgba(255,255,255,.75);stroke-width:1.5}
+#goniSvg .g-tick{stroke:rgba(255,255,255,.8);stroke-width:1.2}
+#goniSvg .g-arc{fill:rgba(45,212,191,.28);stroke:none}
+#goniSvg .g-arm{stroke-width:11;stroke-linecap:round;opacity:.92;paint-order:stroke}
+#goniSvg .g-fix{stroke:#e5e7eb}#goniSvg .g-mov{stroke:#2dd4bf}
+#goniSvg .g-hfix{fill:#e5e7eb;stroke:#0f172a;stroke-width:3}#goniSvg .g-hmov{fill:#2dd4bf;stroke:#0f172a;stroke-width:3}
+#goniSvg .g-hful{fill:#0f172a;stroke:#fbbf24;stroke-width:4}
+#goniSvg .g-val{fill:#fff;font:700 15px var(--f-mono,monospace);text-anchor:middle;dominant-baseline:middle;paint-order:stroke;stroke:#0f172a;stroke-width:4px}
+.gonibox{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:12;width:min(360px,calc(100% - 16px));background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.gonibox .btn{padding:6px 10px;font-size:12.5px}
+.gonimv{border-top:1px solid var(--line);padding:4px 0}.gonimv summary{cursor:pointer;padding:6px 0;font-size:13.5px}
+@media (max-width:879px){.gonibox{bottom:calc(var(--sheet,112px) + 8px)}}
+</style>
 <style id="sheetFast">
 @media (max-width:879px){
   *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
@@ -938,9 +960,20 @@ html[data-theme="light"] .seg .btn.pri{background:var(--accent)!important;color:
   </div></div>
     <label class="chk"><input type="checkbox" id="liteChk"> Modo ligero para móviles modestos (menos resolución y efectos)</label>
     <details class="keys"><summary>Atajos de teclado</summary><p class="small muted">Flechas: girar · + / −: acercar · 1–6: vistas · X: rayos X · E: estudio · Esc: deseleccionar · /: buscar</p></details>
+    <details class="keys" id="progDl"><summary>Tu progreso y Corpus sin internet</summary>
+        <p class="small muted">Tu progreso (lecciones, exámenes, repaso, ajustes) se guarda solo en este dispositivo. Para pasarlo a otro, guárdalo en un archivo y ábrelo allí.</p>
+        <div class="row"><button class="btn" id="progExp">Guardar mi progreso</button><button class="btn" id="progImpB">Cargar progreso</button><input type="file" id="progImp" accept=".json,application/json" hidden></div>
+        <p class="small muted" style="margin-top:8px">Corpus completo para un ordenador sin internet o una memoria USB (unos 75 MB): descárgalo, descomprímelo y abre «ABRIR CORPUS» (Windows, Mac o Linux). Las instrucciones vienen dentro.</p>
+        <a class="btn" href="https://github.com/ftjrodriguez-arch/corpus-atlas/archive/refs/heads/main.zip" rel="noopener">Descargar Corpus completo (.zip)</a>
+    </details>
     <details class="keys"><summary>Créditos y licencias</summary>
         <p class="credit">Modelos 3D: <a href="https://github.com/Z-Anatomy/Models-of-human-anatomy" target="_blank" rel="noopener">Z-Anatomy</a> (CC BY-SA 4.0), derivados de BodyParts3D, Copyright© The Database Center for Life Science licensed by CC Attribution-Share Alike 2.1 Japan. Mallas optimizadas para la web y fichas en español redactadas para Corpus; distribuidas bajo CC BY-SA 4.0.</p>
         <p class="credit">Modelo femenino: <a href="https://github.com/hubmapconsortium/ccf-3d-reference-object-library" target="_blank" rel="noopener">HuBMAP Human Reference Atlas, 3D Reference Object Library (Visible Human Female, v1.3)</a>, CC BY 4.0. Mallas reducidas y realineadas para Corpus; nombres y fichas en español añadidos.</p>
+        <p class="credit">Basado en el conjunto de datos <i>Visible Human Project®</i> de la U.S. National Library of Medicine. Nombres latinos y españoles: Terminologia Anatomica (FIPAT).</p>
+        <p class="credit">Músculos modelados para Corpus (v140–v143), lecciones, exámenes, kinesiología y biomecánica, variantes anatómicas, casos, glosario y fichas: redactados para Corpus, CC BY-SA 4.0. Rangos articulares por edad y sexo: CDC Normal Joint Range of Motion Study (Soucie et al., 2011), dominio público.</p>
+        <p class="credit">Programa: código de Corpus con licencia MIT; <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> (MIT); decodificador <a href="https://github.com/google/draco" target="_blank" rel="noopener">Draco</a> (Apache 2.0, Google); tipografías Spectral, Public Sans y JetBrains Mono (SIL Open Font License 1.1), incluidas en la app.</p>
+        <p class="credit">Privacidad: Corpus no tiene cuentas ni servidor propio. Tu progreso se guarda solo en este dispositivo. Para saber cuántas personas lo usan se cuentan las visitas de forma anónima con GoatCounter, sin cookies ni datos personales.</p>
+        <p class="credit">Puedes usar, copiar, adaptar y compartir Corpus libremente, también en clases y cursos, citando la fuente y compartiendo las mejoras con la misma licencia (CC BY-SA 4.0). Detalle en los archivos LICENSE, LICENSE-DATA.md y ATTRIBUTION.md del repositorio.</p>
     </details>
   </div>
 </header>
@@ -1168,9 +1201,11 @@ html[data-theme="light"] .seg .btn.pri{background:var(--accent)!important;color:
             <button class="btn pri" id="play">Animar rango</button>
             <button class="btn" id="zero">Volver a 0°</button>
             <button class="btn" id="focusJ">Enfocar articulación</button>
+            <button class="btn" id="gonBtn" aria-pressed="false">Goniómetro</button>
           </div>
         </div>
         <dl class="kv" id="moveInfo"></dl>
+        <div class="card" id="goniCard"></div>
         <label class="chk"><input type="checkbox" id="agChk"> Resaltar los músculos: agonistas en naranja, los que se estiran en azul</label>
         <div class="row" style="align-items:center;gap:8px"><span class="small muted">Ver</span><div class="seg" id="mvView" role="group" aria-label="Capas del movimiento"><button data-v="mus">Músculos</button><button data-v="lig">Ligamentos</button><button data-v="both">Ambos</button></div></div>
         <p class="small muted" style="margin:4px 0 0">Los ligamentos pasan de blanco a rojo cuando se tensan al final del rango. La línea amarilla discontinua es el eje del movimiento.</p>
@@ -1194,7 +1229,7 @@ html[data-theme="light"] .seg .btn.pri{background:var(--accent)!important;color:
         <p class="muted" style="font-size:12px">Valores de referencia de rango articular activo en adultos (AAOS). Las mallas reales se deforman alrededor del centro articular calculado a partir de los huesos; los músculos que cruzan la articulación se curvan de forma aproximada.</p>
       </div>
 
-      <div class="view" id="tab-lec" hidden><div id="progBox"></div><p class="femonly card">Las lecciones guiadas usan la musculatura completa. <button class="btn" onclick="setBody('f')">Ver el modelo femenino completo</button></p><div class="phyhost" style="margin-bottom:6px"></div><div id="caseBox" class="maleonly"></div><h3 class="sect maleonly">Lecciones guiadas</h3><div id="lecBox"></div><h3 class="sect maleonly">Variantes anatómicas</h3><div id="varBox" class="maleonly"></div>
+      <div class="view" id="tab-lec" hidden><div id="progBox"></div><p class="femonly card">Las lecciones guiadas usan la musculatura completa. <button class="btn" onclick="setBody('f')">Ver el modelo femenino completo</button></p><div class="phyhost" style="margin-bottom:6px"></div><div id="caseBox" class="maleonly"></div><h3 class="sect maleonly">Lecciones guiadas</h3><div id="lecBox"></div><h3 class="sect maleonly">Exploración neurológica (ASIA)</h3><div id="asiaBox" class="maleonly"></div><h3 class="sect maleonly">Variantes anatómicas</h3><div id="varBox" class="maleonly"></div>
 <div class="card" id="routeCard"></div>
 <div class="card" id="bioCard"></div>
 <div class="card" id="rcCard"></div>
@@ -3704,7 +3739,7 @@ async function setLang(l){if(!['es','en','pt','fr','de'].includes(l))l='es';
 $('#phyBtn').onclick=e=>{e.stopPropagation();togglePop($('#phyBtn'),$('#phyPop'));};document.addEventListener('pointerdown',e=>{if(!e.target.closest('#phyPop,#phyBtn')&&!$('#phyPop').hidden)togglePop($('#phyBtn'),$('#phyPop'),false);});
   $$('#langSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===l));
   if(typeof SEARCH!=='undefined'&&SEARCH.length)buildSearch();
-  /* paneles generados con textos traducidos: se vuelven a dibujar en el idioma nuevo */for(const f of ['renderPlanes','renderGloCats','renderGlo','renderLessons','renderROM','renderViews','renderSrsDecks','renderGaitBar','renderSqCard','renderVars']){try{if(typeof window[f]==='function'||eval('typeof '+f)==='function')eval(f+'()');}catch(e){}}
+  /* paneles generados con textos traducidos: se vuelven a dibujar en el idioma nuevo */for(const f of ['renderPlanes','renderGloCats','renderGlo','renderLessons','renderROM','renderViews','renderSrsDecks','renderGaitBar','renderSqCard','renderVars','renderGoniCard','goniRefresh','renderAsia']){try{if(typeof window[f]==='function'||eval('typeof '+f)==='function')eval(f+'()');}catch(e){}}
   if(selected)renderInfo();if(typeof renderSysList==='function')renderSysList();try{renderDis();}catch(e){}try{window.retitleFolds&&retitleFolds();}catch(e){}
   trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}if(l!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});
   if(typeof tagLabel!=='undefined'&&selected)tagLabel.el.textContent=label(selected.m.userData.c);}
@@ -3760,7 +3795,8 @@ $$('[data-w]').forEach(b=>b.onclick=()=>{const w=b.dataset.w;closeWelcome();
 const TL=(es,en,pt)=>LANG==='en'?en:LANG==='pt'?pt:LANG==='es'?es:((I18N&&I18N.ui[LANG]||{})[es]??en);
 let CASES=[],caseOn=null,CASES_ES=null,LESSONS_ES=null;const CONTENT_TR={};
 async function loadContentTr(l){try{let d={les:LESSONS_ES,cas:CASES_ES};
-  if(l!=='es'){d=CONTENT_TR[l];if(!d){const [a,b]=await Promise.all(['lessons','cases'].map(n=>fetch('data/'+n+'_'+LBL(l)+'.json').then(r=>r.ok?r.json():null).catch(()=>null)));d=CONTENT_TR[l]={les:a,cas:b};}}
+  if(l!=='es'){d=CONTENT_TR[l];if(!d){const get=u=>fetch(u).then(r=>r.ok?r.json():null).catch(()=>null);/* lecciones en francés y alemán propias; si faltan, en inglés */
+    const [a,b]=await Promise.all([(l==='fr'||l==='de')?get('data/lessons_'+l+'.json').then(x=>x||get('data/lessons_en.json')):get('data/lessons_'+LBL(l)+'.json'),get('data/cases_'+LBL(l)+'.json')]);d=CONTENT_TR[l]={les:a,cas:b};}}
   if(LANG!==l)return;
   if(d.les&&d.les.length&&!lesson){LESSONS=d.les;if(typeof renderLessons==='function')renderLessons();}
   if(d.cas&&d.cas.length&&!caseOn){CASES=d.cas;renderCases();}}catch(e){}}
@@ -4002,7 +4038,7 @@ function renderProg(){const box=$('#progBox');if(!box)return;
   const ex=PROG.exam[0],avg=PROG.exam.length?PROG.exam.slice(0,10).reduce((a,e)=>a+e.ok/e.n,0)/Math.min(10,PROG.exam.length):0;
   const st=streak();
   box.innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><h3>${TL('Mi progreso','My progress','Meu progresso')}</h3><span class="small muted">${st?`🔥 ${st} ${TL(st===1?'día seguido':'días seguidos',st===1?'day in a row':'days in a row',st===1?'dia seguido':'dias seguidos')}`:TL('Estudia hoy para empezar una racha','Study today to start a streak','Estude hoje para começar uma sequência')}</span></div>
-   <div class="prings">${ring(dL/nL,'#38bdf8',TL('Lecciones','Lessons','Lições'),`${dL}/${nL}`)}${ring(dS/tot,'#f472b6',TL('Fisiología','Physiology','Fisiologia'),`${dS}/${tot} ${TL('pasos','steps','passos')}`)}${ring(dG/nG,'#a3e635',TL('Glosario','Glossary','Glossário'),`${dG} ${dG===1?TL('término','term','termo'):TL('términos','terms','termos')}`)}${typeof BIO_Q!=='undefined'?(()=>{let k={};try{k=JSON.parse(localStorage.getItem('corpus.bio')||'{}').k||{};}catch(e){}const n=BIO_Q.filter(q=>k[q.id]).length;return ring(n/BIO_Q.length,'#f97316',TL('Biomecánica','Biomechanics','Biomecânica'),`${n}/${BIO_Q.length}`);})():''}${ring(avg,'#fbbf24',TL('Exámenes','Exams','Provas'),PROG.exam.length?`${TL('media','average','média')} ${(avg*10).toFixed(1).replace('.',',')}`:'—')}</div>
+   <div class="prings">${ring(dL/nL,'#38bdf8',TL('Lecciones','Lessons','Lições'),`${dL}/${nL}`)}${ring(dS/tot,'#f472b6',TL('Fisiología','Physiology','Fisiologia'),`${dS}/${tot} ${TL('pasos','steps','passos')}`)}${ring(dG/nG,'#a3e635',TL('Glosario','Glossary','Glossário'),`${dG} ${dG===1?TL('término','term','termo'):TL('términos','terms','termos')}`)}${typeof BIO_Q!=='undefined'?(()=>{let k={};try{k=JSON.parse(localStorage.getItem('corpus.bio')||'{}').k||{};}catch(e){}const n=BIO_Q.filter(q=>k[q.id]).length;return ring(n/BIO_Q.length,'#f97316',TL('Kinesiología','Kinesiology','Cinesiologia'),`${n}/${BIO_Q.length}`);})():''}${ring(avg,'#fbbf24',TL('Exámenes','Exams','Provas'),PROG.exam.length?`${TL('media','average','média')} ${(avg*10).toFixed(1).replace('.',',')}`:'—')}</div>
    ${weekHtml()}
    ${Object.keys(PROG.tour).length?`<p class="small muted" style="margin-top:6px">${TL('Repasos de fisiología','Physiology reviews','Revisões de fisiologia')}: ${Object.entries(PROG.tour).filter(([k])=>TOURS[k]).map(([k,o])=>`${esc(tN(TOURS[k]))} ${o.best}/${o.n}`).join(' · ')}</p>`:''}
    <div class="row"><button class="btn" id="progReset" style="font-size:12px;padding:4px 10px">${TL('Reiniciar progreso','Reset progress','Reiniciar progresso')}</button><span class="muted small">${TL('Se guarda solo en este dispositivo.','Saved only on this device.','Salvo só neste dispositivo.')}</span></div></div>`;
@@ -4025,7 +4061,7 @@ function renderVars(){const box=$('#varBox');if(!box)return;loadVars().then(V=>{
 function varInfoBox(c){const L=VAR_BY[c.en];if(!L||!L.length)return '';const i=VI();return `<div class="card varcard"><h3>${TL('Variante anatómica','Anatomical variant','Variante anatômica')}</h3>${L.map(x=>`<p><b>${esc(x.t[i])}</b> · <span class="muted small">${esc(x.prev[i])}</span><br><span class="small">${esc(x.x[i])} ${esc(x.clin[i])}</span></p>`).join('')}</div>`;}
 function renderLessons(){
   const box=$('#lecBox');
-  if(!lesson){const AORD=[['Osteología','Osteology','Osteologia'],['Artrología','Arthrology','Artrologia'],['Miología','Myology','Miologia'],['Neuroanatomía','Neuroanatomy','Neuroanatomia'],['Esplacnología','Splanchnology','Esplancnologia'],['Angiología','Angiology','Angiologia']];
+  if(!lesson){const AORD=[['Osteología','Osteology','Osteologia','Ostéologie','Osteologie'],['Artrología','Arthrology','Artrologia','Arthrologie'],['Miología','Myology','Miologia','Myologie'],['Neuroanatomía','Neuroanatomy','Neuroanatomia','Neuroanatomie'],['Esplacnología','Splanchnology','Esplancnologia','Splanchnologie'],['Angiología','Angiology','Angiologia','Angiologie'],['Valoración clínica','Clinical assessment','Avaliação clínica','Évaluation clinique','Klinische Untersuchung']];
     const gi=a=>{const k=AORD.findIndex(x=>x.includes(a));return k<0?99:k;};const groups={};LESSONS.forEach((l,i)=>{const g=l.a||TL('Otras','Other','Outras');(groups[g]=groups[g]||[]).push([l,i]);});
     const LROW=(l,i)=>`<div class="lesson"><div><b>${esc(l.t)}</b><span class="muted small">${esc(l.r)} · ${l.steps.length} ${TL('pasos','steps','passos')}${l.obj?' · '+(Array.isArray(l.q)?l.q.length:1)+' '+TL('preguntas','questions','perguntas'):''}${PROG.les[l.id||l.t]?` · <span class="ok">✓ ${PROG.les[l.id||l.t].best}/${PROG.les[l.id||l.t].n}</span>`:''}</span></div><div class="row" style="gap:6px;flex-wrap:nowrap">${LES_TOUR[l.id]&&TOURS[LES_TOUR[l.id][0]]?`<button class="btn" data-ltour="${LES_TOUR[l.id].join('|')}" title="${esc(TL('Ver la fisiología en acción','See physiology in action','Ver a fisiologia em ação'))}" style="padding:6px 9px">${TOURS[LES_TOUR[l.id][0]].ic}</button>`:''}<button class="btn pri" data-les="${i}">Empezar</button></div></div>`;
     box.innerHTML=`<div class="view"><p class="muted small">${TL('Lecciones por asignatura: cada una empieza con sus objetivos, muestra en el modelo solo lo que explica y termina con un examen de 5 preguntas. Lo que falles pasa al repaso espaciado.','Lessons by subject: each one starts with its objectives, shows on the model only what it explains and ends with a 5-question quiz. What you miss goes to spaced review.','Lições por disciplina: cada uma começa com seus objetivos, mostra no modelo só o que explica e termina com uma prova de 5 perguntas. O que errar vai para a revisão espaçada.')}</p>${Object.keys(groups).sort((a,b)=>gi(a)-gi(b)).map((g,k)=>`<details class="lgrp"${k===0?' open':''}><summary><b>${esc(g)}</b> <span class="muted small">${groups[g].length}</span></summary>${groups[g].map(([l,i])=>LROW(l,i)).join('')}</details>`).join('')}</div>`;
@@ -4062,7 +4098,7 @@ async function showStep(){
   setView(st.view||'ant');
 }
 function exitLesson(){clearLessonHl();isoOnly=false;if(lesson&&lesson.cutUsed){for(const k in PLANES)PLANES[k].cut=false;lesson.cutUsed=false;updatePlanes();renderPlanes();}lesson=null;isoSet=null;applySystems();renderLessons();}
-$('#xrayBtn').onclick=()=>setXray(!xray);$('#liteChk').onchange=e=>setLite(e.target.checked);setLite(lite);
+$('#xrayBtn').onclick=()=>setXray(!xray);$('#liteChk').onchange=e=>{store.set('liteUser',true);setLite(e.target.checked);};setLite(lite);
 /* Teclado: flechas giran, +/− acercan, 1–6 vistas, X rayos X, E estudio, Esc deselecciona, / busca */
 document.addEventListener('keydown',e=>{const t=e.target;if(t&&(/INPUT|TEXTAREA|SELECT/.test(t.tagName)||t.isContentEditable))return;if(e.ctrlKey||e.metaKey||e.altKey)return;
   const k=e.key;let hit=true;
@@ -5567,10 +5603,10 @@ function phyExam(h,back,reg){const L=o=>TL(o.es,o.en,o.pt);const RG=EXREG[reg||'
   const bar=()=>`<div class="bar" style="height:6px;margin-bottom:10px"><i style="width:${100*i/Q.length}%;background:var(--accent)"></i></div>`;
   const draw=()=>{if(i>=Q.length){progMark('exam','fisio',ok,Q.length);const pct=Math.round(100*ok/Q.length);
       h.innerHTML=head()+`<div style="text-align:center;margin:10px 0 14px"><div style="font-size:34px;font-weight:800;color:${pct>=80?'var(--ok)':pct>=50?'#f59e0b':'var(--bad)'}">${ok} / ${Q.length}</div><div class="small muted" style="margin:2px 0 4px">⏱ ${(s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0'))(Math.round((Date.now()-XT0)/1000))}</div><div class="small">${pct>=80?TL('¡Muy bien!','Well done!','Muito bem!'):pct>=50?TL('Vas por buen camino.','You are on the right track.','Você está no caminho certo.'):TL('Repasa los recorridos y vuelve a intentarlo.','Review the tours and try again.','Revise os percursos e tente de novo.')}</div></div>`+
-      (miss.size?`<div class="small" style="margin-bottom:6px">${TL('Para repasar','To review','Para revisar')}:</div><div class="phytours">${[...miss].map(k=>{if(k.startsWith('bio:')){const b=(BIO_Q||[]).find(x=>'bio:'+x.id===k);return b?`<button class="phytour" data-bior="${b.r}" style="--c:#a3e635"><span class="ic">🦴</span><span><b>${esc(TL(...b.q))}</b><small>${TL('Biomecánica','Biomechanics','Biomecânica')}</small></span></button>`:'';}if(k.startsWith('ct:')){const t=CTESTS.find(x=>'ct:'+x.id===k);return `<button class="phytour" data-cttest="${t.id}" style="--c:#38bdf8"><span class="ic">🩺</span><span><b>${esc(TL(...t.n))}</b><small>${TL('Prueba clínica','Clinical test','Teste clínico')}</small></span></button>`;}return `<button class="phytour" data-tour="${k}" style="--c:${TOURS[k].col}"><span class="ic">${TOURS[k].ic}</span><span><b>${esc(tN(TOURS[k]))}</b></span></button>`;}).join('')}</div>`:'')+
+      (miss.size?`<div class="small" style="margin-bottom:6px">${TL('Para repasar','To review','Para revisar')}:</div><div class="phytours">${[...miss].map(k=>{if(k.startsWith('bio:')){const b=(BIO_Q||[]).find(x=>'bio:'+x.id===k);return b?`<button class="phytour" data-bior="${b.r}" style="--c:#a3e635"><span class="ic">🦴</span><span><b>${esc(TL(...b.q))}</b><small>${TL('Kinesiología','Kinesiology','Cinesiologia')}</small></span></button>`:'';}if(k.startsWith('ct:')){const t=CTESTS.find(x=>'ct:'+x.id===k);return `<button class="phytour" data-cttest="${t.id}" style="--c:#38bdf8"><span class="ic">🩺</span><span><b>${esc(TL(...t.n))}</b><small>${TL('Prueba clínica','Clinical test','Teste clínico')}</small></span></button>`;}return `<button class="phytour" data-tour="${k}" style="--c:${TOURS[k].col}"><span class="ic">${TOURS[k].ic}</span><span><b>${esc(tN(TOURS[k]))}</b></span></button>`;}).join('')}</div>`:'')+
       `<div class="row" style="gap:8px;margin-top:12px"><button class="btn" data-xagain>${TL('Otro examen','Another exam','Outro exame')}</button><button class="btn" data-xback>${TL('Volver a los recorridos','Back to tours','Voltar aos percursos')}</button></div>`;
       h.querySelector('[data-xagain]').onclick=()=>phyExam(h,back,reg);h.querySelectorAll('[data-bior]').forEach(b=>b.onclick=()=>{back();showTab('lec');BIO.r=b.dataset.bior;BIO.mode='list';BIO.order=[];renderBio();setTimeout(()=>{const c=$('#bioCard');if(c)c.scrollIntoView({behavior:'smooth'});},100);});h.querySelectorAll('[data-cttest]').forEach(b=>b.onclick=()=>{back();showTab('mov');ctStart(CTESTS.find(x=>x.id===b.dataset.cttest));});h.querySelectorAll('[data-tour]').forEach(b=>b.onclick=()=>{back();if(isPhone())setSheet('peek');const pp=$('#phyPop');if(pp&&!pp.hidden)togglePop($('#phyBtn'),pp,false);phyStart(b.dataset.tour,0);});h.querySelectorAll('[data-xback]').forEach(b=>b.onclick=back);return;}
-    const q=Q[i],T=q.k.startsWith('ct:')?{col:'#38bdf8',ic:'🩺',n:{es:'Pruebas clínicas',en:'Clinical tests',pt:'Testes clínicos'}}:q.k.startsWith('bio:')?{col:'#a3e635',ic:'🦴',n:{es:'Biomecánica',en:'Biomechanics',pt:'Biomecânica'}}:TOURS[q.k];h.innerHTML=head()+bar()+`<div class="small" style="margin-bottom:4px;color:${T.col}">${T.ic} ${esc(tN(T))} · ${i+1}/${Q.length}</div><p style="font-weight:700;margin:4px 0 10px">${esc(L(q.q))}</p>`+q.o.map((o,k)=>`<button class="opt" data-k="${k}">${esc(L(o))}</button>`).join('')+`<div class="row" style="justify-content:flex-end;margin-top:6px"><button class="btn" data-xnext disabled>${i===Q.length-1?TL('Ver resultado','See result','Ver resultado'):TL('Siguiente','Next','Próximo')}</button></div>`;
+    const q=Q[i],T=q.k.startsWith('ct:')?{col:'#38bdf8',ic:'🩺',n:{es:'Pruebas clínicas',en:'Clinical tests',pt:'Testes clínicos'}}:q.k.startsWith('bio:')?{col:'#a3e635',ic:'🦴',n:{es:'Kinesiología',en:'Kinesiology',pt:'Cinesiologia'}}:TOURS[q.k];h.innerHTML=head()+bar()+`<div class="small" style="margin-bottom:4px;color:${T.col}">${T.ic} ${esc(tN(T))} · ${i+1}/${Q.length}</div><p style="font-weight:700;margin:4px 0 10px">${esc(L(q.q))}</p>`+q.o.map((o,k)=>`<button class="opt" data-k="${k}">${esc(L(o))}</button>`).join('')+`<div class="row" style="justify-content:flex-end;margin-top:6px"><button class="btn" data-xnext disabled>${i===Q.length-1?TL('Ver resultado','See result','Ver resultado'):TL('Siguiente','Next','Próximo')}</button></div>`;
     h.querySelectorAll('[data-xback]').forEach(b=>b.onclick=back);let done=false;
     h.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{if(done)return;done=true;const k=+b.dataset.k;if(k===q.a){ok++;b.classList.add('ok');}else{b.classList.add('bad');h.querySelector(`[data-k="${q.a}"]`).classList.add('ok');miss.add(q.k);}h.querySelector('[data-xnext]').disabled=false;});
     h.querySelector('[data-xnext]').onclick=()=>{i++;draw();};};
@@ -8426,7 +8462,7 @@ const mq=window.matchMedia('(prefers-color-scheme: dark)');mq.addEventListener&&
 let last=performance.now();
 /* Resolución adaptable: si el teléfono no llega a ~28 cuadros por segundo durante unos segundos, se baja la resolución de dibujo */
 var DPR_EMA=1/60,DPR_T=0,DPR_CUR=0;function dprTick(raw){if(document.hidden||raw>0.5)return;DPR_EMA+=(raw-DPR_EMA)*0.05;DPR_T+=raw;if(DPR_T<5)return;DPR_T=0;
-  if(!DPR_CUR)DPR_CUR=renderer.getPixelRatio();if(DPR_EMA>1/28&&DPR_CUR>1.01){DPR_CUR=Math.max(1,DPR_CUR-0.5);renderer.setPixelRatio(DPR_CUR);if(typeof resize==='function')resize();}else if(DPR_EMA>1/26&&typeof AO!=='undefined'&&AO.on){AO.on=false;}else if(DPR_EMA>1/26&&typeof SHD!=='undefined'&&SHD.on){SHD.on=false;renderer.shadowMap.enabled=false;key.castShadow=false;for(const k in MAT)MAT[k].needsUpdate=true;}}
+  if(!DPR_CUR)DPR_CUR=renderer.getPixelRatio();if(DPR_EMA>1/28&&DPR_CUR>1.01){DPR_CUR=Math.max(1,DPR_CUR-0.5);renderer.setPixelRatio(DPR_CUR);if(typeof resize==='function')resize();}else if(DPR_EMA>1/26&&typeof AO!=='undefined'&&AO.on){AO.on=false;}else if(DPR_EMA>1/22&&!lite&&!store.get('liteUser',false)&&typeof setLite==='function'){setLite(true);try{toast(TL('Activé el modo ligero porque el equipo iba lento. Puedes quitarlo en Ajustes.','Lite mode is on because this device was struggling. You can turn it off in Settings.','Ativei o modo leve porque o aparelho estava lento. Você pode desativá-lo em Ajustes.'));}catch(e){}}else if(DPR_EMA>1/26&&typeof SHD!=='undefined'&&SHD.on){SHD.on=false;renderer.shadowMap.enabled=false;key.castShadow=false;for(const k in MAT)MAT[k].needsUpdate=true;}}
 /* el siguiente fotograma se programa antes de dibujar: si un fotograma falla (por ejemplo, un material a medio cargar),
    la vista no se congela en negro y el error se registra una sola vez */
 /* Dibujo bajo demanda: con la escena quieta no se redibuja 60 veces por segundo (ahorra batería y calor en el teléfono).
@@ -9935,6 +9971,213 @@ window.MNAV_H=62;
     if(on&&typeof SHEET==='object')SHEET.peek=112;if(typeof setSheet==='function'&&on)setSheet(sheetState||'peek');render();};
   apply();addEventListener('resize',()=>{clearTimeout(apply.t);apply.t=setTimeout(apply,150);});
 })();
+/* ───── Goniómetro manipulable: lo coloca y mueve quien estudia (fulcro y dos brazos), como uno real sobre una foto.
+   No se coloca solo: aparece en el centro y hay que llevar el fulcro a la articulación y alinear cada brazo con sus referencias.
+   Con un rango articular en pantalla, «Comprobar» compara la lectura con el ángulo real del modelo. ───── */
+const GONI={on:false,x:0,y:0,a0:-90,a1:-30,L0:130,L1:130,sc:'sup',quiz:null};
+(()=>{const st=$('#stage');if(!st)return;const NS='http://www.w3.org/2000/svg';
+  const sv=document.createElementNS(NS,'svg');sv.id='goniSvg';sv.setAttribute('aria-hidden','true');st.appendChild(sv);
+  const box=document.createElement('div');box.id='goniBox';box.className='gonibox';box.hidden=true;box.setAttribute('role','region');st.appendChild(box);
+  const D=Math.PI/180,norm=a=>((a%360)+360)%360;
+  const inner=()=>{const d=norm(GONI.a1-GONI.a0);return d>180?360-d:d;};
+  const reading=()=>{const t=inner();return Math.round(GONI.sc==='sup'?t:180-t);};
+  const pt=(a,L)=>[GONI.x+Math.cos(a*D)*L,GONI.y-Math.sin(a*D)*L];
+  function draw(){if(!GONI.on){sv.innerHTML='';sv.style.display='none';return;}sv.style.display='';
+    const R=48,[x0,y0]=pt(GONI.a0,GONI.L0),[x1,y1]=pt(GONI.a1,GONI.L1);let tk='';
+    for(let a=0;a<360;a+=10){const r0=a%30?R-6:R-12,aa=(GONI.a0+a)*D;tk+=`M${GONI.x+Math.cos(aa)*r0} ${GONI.y-Math.sin(aa)*r0}L${GONI.x+Math.cos(aa)*R} ${GONI.y-Math.sin(aa)*R}`;}
+    /* arco entre los brazos (por el lado menor) */
+    let d=norm(GONI.a1-GONI.a0),s=GONI.a0,e=GONI.a1;if(d>180){s=GONI.a1;e=GONI.a0;d=360-d;}
+    const rA=R*0.62,[ax,ay]=[GONI.x+Math.cos(s*D)*rA,GONI.y-Math.sin(s*D)*rA],[bx,by]=[GONI.x+Math.cos(e*D)*rA,GONI.y-Math.sin(e*D)*rA];
+    const mid=(s+d/2)*D,lx=GONI.x+Math.cos(mid)*(R+22),ly=GONI.y-Math.sin(mid)*(R+22);
+    sv.innerHTML=`<circle cx="${GONI.x}" cy="${GONI.y}" r="${R}" class="g-disk"/><path d="${tk}" class="g-tick"/>
+      <path d="M${GONI.x} ${GONI.y}L${ax} ${ay}A${rA} ${rA} 0 0 0 ${bx} ${by}Z" class="g-arc"/>
+      <line x1="${GONI.x}" y1="${GONI.y}" x2="${x0}" y2="${y0}" class="g-arm g-fix"/><line x1="${GONI.x}" y1="${GONI.y}" x2="${x1}" y2="${y1}" class="g-arm g-mov"/>
+      <text x="${lx}" y="${ly}" class="g-val">${reading()}°</text>
+      <circle cx="${x0}" cy="${y0}" r="17" class="g-h g-hfix" data-h="0"/><circle cx="${x1}" cy="${y1}" r="17" class="g-h g-hmov" data-h="1"/>
+      <circle cx="${GONI.x}" cy="${GONI.y}" r="15" class="g-h g-hful" data-h="f"/>`;
+    const r=box.querySelector('#goniRead');if(r)r.textContent=reading()+'°';}
+  /* arrastre: fulcro mueve todo; los extremos giran y alargan cada brazo */
+  let drag=null;
+  sv.addEventListener('pointerdown',e=>{const h=e.target.closest('[data-h]');if(!h)return;e.preventDefault();e.stopPropagation();const r=st.getBoundingClientRect();
+    drag={h:h.dataset.h,dx:e.clientX-r.left-GONI.x,dy:e.clientY-r.top-GONI.y,id:e.pointerId};try{sv.setPointerCapture(e.pointerId);}catch(_){}});
+  sv.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;e.preventDefault();const r=st.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+    if(drag.h==='f'){GONI.x=Math.max(10,Math.min(r.width-10,x-drag.dx));GONI.y=Math.max(10,Math.min(r.height-10,y-drag.dy));}
+    else{const a=Math.atan2(-(y-GONI.y),x-GONI.x)/D,L=Math.max(60,Math.min(Math.max(r.width,r.height),Math.hypot(x-GONI.x,y-GONI.y)));if(drag.h==='0'){GONI.a0=a;GONI.L0=L;}else{GONI.a1=a;GONI.L1=L;}}
+    draw();if(!GONI.moved){GONI.moved=true;const hp=box.querySelector('#goniHelp');if(hp)hp.hidden=true;}const m=box.querySelector('#goniMsg');if(m&&m.dataset.k==='chk')m.textContent='';});
+  const up=e=>{if(drag&&e.pointerId===drag.id)drag=null;};sv.addEventListener('pointerup',up);sv.addEventListener('pointercancel',up);
+  const romOk=()=>currentTab==='mov'&&!(typeof CT!=='undefined'&&CT.on)&&!(typeof SQ!=='undefined'&&SQ.on)&&!(typeof gait!=='undefined'&&gait.on)&&curM&&(curM.u||'°')==='°';
+  function panel(){if(!GONI.on){box.hidden=true;return;}box.hidden=false;
+    box.innerHTML=`<div class="row" style="justify-content:space-between;align-items:center;gap:6px"><b>${TL('Goniómetro','Goniometer','Goniômetro')} <span id="goniRead" class="mono">${reading()}°</span></b><button class="btn" id="goniX" aria-label="${TL('Cerrar','Close','Fechar')}">✕</button></div>
+      <p class="small muted" id="goniHelp" style="margin:2px 0 4px"${GONI.moved?' hidden':''}>${TL('Arrastra el círculo central hasta la articulación (fulcro) y cada extremo a lo largo de su segmento: brazo fijo (blanco) y brazo móvil (verde).','Drag the centre circle onto the joint (fulcrum) and each end along its segment: stationary arm (white) and moving arm (green).','Arraste o círculo central até a articulação (fulcro) e cada extremo ao longo do seu segmento: braço fixo (branco) e braço móvel (verde).')}</p>
+      <div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn" id="goniSc" title="${TL('Cambiar la escala de lectura','Switch reading scale','Trocar a escala de leitura')}">${GONI.sc==='sup'?TL('0° = brazos juntos','0° = arms together','0° = braços juntos'):TL('0° = brazos en línea','0° = arms in line','0° = braços em linha')}</button>
+      ${1?`<button class="btn" id="goniView">${TL('Mirar el plano de frente','Face the plane','Olhar o plano de frente')}</button><button class="btn pri" id="goniChk">${TL('Comprobar','Check','Conferir')}</button>`:''}</div>
+      <p class="small" id="goniMsg" style="margin:4px 0 0"></p>`;
+    box.querySelector('#goniX').onclick=()=>setGoni(false);
+    box.querySelector('#goniSc').onclick=()=>{GONI.sc=GONI.sc==='sup'?'lin':'sup';panel();draw();};
+    const need=()=>{const m=box.querySelector('#goniMsg');m.dataset.k='';m.textContent=TL('Para comprobar, elige una articulación y un movimiento en Movimiento → Articulación y pon un ángulo con el deslizador (o usa «Mide este ángulo»).','To check, pick a joint and movement in Movement → Joint and set an angle with the slider (or use “Measure this angle”).','Para conferir, escolha uma articulação e um movimento em Movimento → Articulação e ajuste um ângulo com o controle (ou use «Meça este ângulo»).');};
+    const v=box.querySelector('#goniView');if(v)v.onclick=()=>{if(!romOk()){need();return;}setView(curM.pl==='sag'?(romSide==='L'?'lati':'latd'):curM.pl==='fro'?'ant':'sup');};
+    const c=box.querySelector('#goniChk');if(c)c.onclick=()=>{if(!romOk()){need();return;}const real=Math.round(angle),r=reading(),d=Math.abs(r-real),m=box.querySelector('#goniMsg');m.dataset.k='chk';
+      m.innerHTML=`${TL('Tu lectura','Your reading','Sua leitura')}: <b>${r}°</b> · ${TL('ángulo real del modelo','true model angle','ângulo real do modelo')}: <b>${real}°</b> · ${TL('diferencia','difference','diferença')}: <b>${d}°</b><br>`+
+        (d<=5?TL('Muy bien: en la práctica se considera habitual una diferencia de hasta unos 5° entre mediciones.','Well done: differences of up to about 5° between measurements are considered usual in practice.','Muito bem: na prática considera-se habitual uma diferença de até uns 5° entre medições.')
+             :TL('Revisa el fulcro y la alineación de los brazos con sus referencias, mira el plano de frente y comprueba la escala de lectura.','Check the fulcrum and the alignment of the arms with their landmarks, face the plane and check the reading scale.','Revise o fulcro e o alinhamento dos braços com as referências, olhe o plano de frente e confira a escala de leitura.'));
+      if(GONI.quiz){GONI.quiz=null;try{updateReadout();}catch(_){}}};}
+  window.setGoni=function(on,opt){GONI.on=on;const b=$('#gonBtn');if(b)b.setAttribute('aria-pressed',on);
+    if(on&&!(opt&&opt.keep)){const r=st.getBoundingClientRect(),sh=isPhone()?(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sheet'))||0):0;
+      panel();const bb=box.getBoundingClientRect(),top=70,bot=bb.top-r.top-20;GONI.x=r.width*0.28;GONI.y=Math.max(top+40,(top+bot)/2);GONI.a0=-90;GONI.a1=-35;GONI.L0=GONI.L1=Math.min(150,r.width*0.32);}
+    if(!on&&GONI.quiz){GONI.quiz=null;try{updateReadout();}catch(_){}}draw();panel();};
+  window.goniRefresh=()=>{if(GONI.on){panel();draw();}};
+  addEventListener('resize',()=>{if(GONI.on){const r=st.getBoundingClientRect();GONI.x=Math.min(GONI.x,r.width-10);GONI.y=Math.min(GONI.y,r.height-10);draw();}});
+  /* durante «Mide este ángulo» el número real queda oculto hasta comprobar */
+  const _ur=updateReadout;updateReadout=function(){_ur.apply(this,arguments);if(GONI.quiz){const d=$('#deg');if(d)d.innerHTML=`?°<small> / ${curM.max}°</small>`;}};
+  const b=$('#gonBtn');if(b)b.onclick=()=>setGoni(!GONI.on);
+  const _st=showTab;showTab=function(t){const r=_st.apply(this,arguments);try{goniRefresh();}catch(_){}return r;};
+})();
+/* ───── Goniometría: cómo medir cada movimiento (datos de ROM) y práctica «mide este ángulo» ───── */
+function renderGoniCard(){const el=$('#goniCard');if(!el)return;const J=ROM.filter(j=>j.moves.some(m=>m.gon&&m.gon[1]));
+  const cur=renderGoniCard.j&&J.includes(renderGoniCard.j)?renderGoniCard.j:J[0];renderGoniCard.j=cur;
+  el.innerHTML=`<h3>${TL('Goniometría: cómo medir cada movimiento','Goniometry: how to measure each movement','Goniometria: como medir cada movimento')}</h3>
+   <p class="muted small">${TL('Posición del paciente, dónde va el fulcro, con qué se alinea cada brazo y el rango de referencia. «Mide este ángulo» coloca la articulación en un ángulo oculto: abre el goniómetro, colócalo tú y comprueba tu lectura.','Patient position, where the fulcrum goes, what each arm lines up with and the reference range. “Measure this angle” sets the joint at a hidden angle: open the goniometer, place it yourself and check your reading.','Posição do paciente, onde vai o fulcro, com o que se alinha cada braço e a amplitude de referência. «Meça este ângulo» coloca a articulação num ângulo oculto: abra o goniômetro, posicione-o você mesmo e confira sua leitura.')}</p>
+   <div class="chips">${J.map((j,k)=>`<button data-gj="${k}" aria-pressed="${j===cur}">${esc(j.n)}</button>`).join('')}</div>
+   ${cur.moves.filter(m=>m.gon&&m.gon[1]).map((m,k)=>`<details class="gonimv"><summary><b>${esc(m.n)}</b> <span class="muted small mono">0–${m.max}°</span></summary><dl class="kv"><dt>${TL('Posición','Position','Posição')}</dt><dd>${esc(m.pos||'')}</dd><dt>${TL('Fulcro','Fulcrum','Fulcro')}</dt><dd>${esc(m.gon[0])}</dd><dt>${TL('Brazo fijo','Stationary arm','Braço fixo')}</dt><dd>${esc(m.gon[1])}</dd><dt>${TL('Brazo móvil','Moving arm','Braço móvel')}</dt><dd>${esc(m.gon[2])}</dd><dt>${TL('Sensación final','End feel','Sensação final')}</dt><dd>${esc(m.ef||'')}</dd></dl>
+     <div class="row"><button class="btn pri" data-gq="${k}">${TL('Mide este ángulo','Measure this angle','Meça este ângulo')}</button><button class="btn" data-gs="${k}">${TL('Ver el movimiento','See the movement','Ver o movimento')}</button></div></details>`).join('')}`;
+  el.querySelectorAll('[data-gj]').forEach(b=>b.onclick=()=>{renderGoniCard.j=J[+b.dataset.gj];renderGoniCard();});
+  const mvs=cur.moves.filter(m=>m.gon&&m.gon[1]);
+  const go=(m,ang)=>{if(typeof CT!=='undefined'&&CT.on)ctStop();if(typeof gait!=='undefined'&&gait.on)setGait(false);if(typeof SQ!=='undefined'&&SQ.on)setSq(false);if(PHY.on)phyStop();
+    curJ=cur;curM=m;angle=ang;try{stopPlay();}catch(_){}if(currentTab!=='mov')showTab('mov');renderROM();try{applyPose();}catch(_){}
+    try{setView(m.pl==='sag'?(romSide==='L'?'lati':'latd'):m.pl==='fro'?'ant':'sup');}catch(_){}setTimeout(()=>{try{$('#focusJ').click();}catch(_){}},60);};
+  el.querySelectorAll('[data-gq]').forEach(b=>b.onclick=()=>{const m=mvs[+b.dataset.gq];const a=Math.round(m.max*(0.3+Math.random()*0.6));GONI.quiz={a};go(m,a);updateReadout();
+    if(isPhone())setSheet('peek');setGoni(true);const g=$('#goniMsg');if(g)g.textContent=TL('Coloca el goniómetro y pulsa «Comprobar».','Place the goniometer and press “Check”.','Posicione o goniômetro e toque em «Conferir».');});
+  el.querySelectorAll('[data-gs]').forEach(b=>b.onclick=()=>{GONI.quiz=null;go(mvs[+b.dataset.gs],0);setTimeout(()=>{try{$('#play').click();}catch(_){}},100);});}
+renderGoniCard();
+/* ───── Exploración neurológica (ISNCSCI/ASIA): puntos sensitivos clave sobre la piel, músculos clave y reflejos ─────
+   Los puntos se calculan sobre los huesos del propio modelo (posición anatómica) y se proyectan a la piel con un rayo:
+   son una guía docente aproximada; los dermatomas se solapan y varían entre personas. */
+const ASIA={on:false,mode:'derm',sel:null,g:new THREE.Group(),pts:null};scene.add(ASIA.g);
+const ASIA_PTS=[
+ ['C2',['Al menos 1 cm lateral a la protuberancia occipital externa','At least 1 cm lateral to the external occipital protuberance','Pelo menos 1 cm lateral à protuberância occipital externa'],'Occipital bone',[.62,.35,0],['post']],
+ ['C3',['Fosa supraclavicular, en la línea medioclavicular','Supraclavicular fossa, at the midclavicular line','Fossa supraclavicular, na linha hemiclavicular'],'Clavicle',[.5,1,.35],['sup','ant']],
+ ['C4',['Sobre la articulación acromioclavicular','Over the acromioclavicular joint','Sobre a articulação acromioclavicular'],'Clavicle',[.97,1,.45],['sup']],
+ ['C5',['Cara lateral de la fosa antecubital, justo por encima del pliegue del codo','Lateral antecubital fossa, just proximal to the elbow crease','Face lateral da fossa cubital, logo acima da prega do cotovelo'],'Humerus',[.95,.1,.65],['lat','ant']],
+ ['C6',['Cara dorsal de la falange proximal del pulgar','Dorsal surface of the proximal phalanx of the thumb','Face dorsal da falange proximal do polegar'],'Proximal phalanx of first finger of hand',[.5,.5,.5],['lat','post']],
+ ['C7',['Cara dorsal de la falange proximal del dedo medio','Dorsal surface of the proximal phalanx of the middle finger','Face dorsal da falange proximal do dedo médio'],'Proximal phalanx of third finger of hand',[.5,.5,.5],['post']],
+ ['C8',['Cara dorsal de la falange proximal del meñique','Dorsal surface of the proximal phalanx of the little finger','Face dorsal da falange proximal do dedo mínimo'],'Proximal phalanx of fifth finger of hand',[.5,.5,.5],['post','med']],
+ ['T1',['Cara medial de la fosa antecubital, justo por encima del epicóndilo medial','Medial antecubital fossa, just proximal to the medial epicondyle','Face medial da fossa cubital, logo acima do epicôndilo medial'],'Humerus',[.05,.12,.6],['med','ant']],
+ ['T2',['Vértice de la axila','Apex of the axilla','Ápice da axila'],'Humerus',[-.15,.8,.5],['inf']],
+ ['T3',['Tercer espacio intercostal, línea medioclavicular','Third intercostal space, midclavicular line','Terceiro espaço intercostal, linha hemiclavicular'],{ic:3}],
+ ['T4',['Cuarto espacio intercostal (línea del pezón), línea medioclavicular','Fourth intercostal space (nipple line), midclavicular line','Quarto espaço intercostal (linha do mamilo), linha hemiclavicular'],{ic:4}],
+ ['T5',['Quinto espacio intercostal, línea medioclavicular','Fifth intercostal space, midclavicular line','Quinto espaço intercostal, linha hemiclavicular'],{ic:5}],
+ ['T6',['Nivel del apéndice xifoides, línea medioclavicular','Level of the xiphisternum, midclavicular line','Nível do apêndice xifoide, linha hemiclavicular'],{lv:'xif'}],
+ ['T7',['Línea medioclavicular, a un cuarto de la distancia entre T6 y T10','Midclavicular line, one quarter of the way from T6 to T10','Linha hemiclavicular, a um quarto da distância entre T6 e T10'],{mix:['T6','T10',.25]}],
+ ['T8',['Línea medioclavicular, a mitad de camino entre T6 y T10','Midclavicular line, halfway between T6 and T10','Linha hemiclavicular, a meio caminho entre T6 e T10'],{mix:['T6','T10',.5]}],
+ ['T9',['Línea medioclavicular, a tres cuartos de la distancia entre T6 y T10','Midclavicular line, three quarters of the way from T6 to T10','Linha hemiclavicular, a três quartos da distância entre T6 e T10'],{mix:['T6','T10',.75]}],
+ ['T10',['Línea medioclavicular, a la altura del ombligo','Midclavicular line, at the level of the umbilicus','Linha hemiclavicular, na altura do umbigo'],{lv:'umb'}],
+ ['T11',['Línea medioclavicular, a mitad de camino entre T10 y T12','Midclavicular line, halfway between T10 and T12','Linha hemiclavicular, a meio caminho entre T10 e T12'],{mix:['T10','T12',.5]}],
+ ['T12',['Punto medio del ligamento inguinal','Midpoint of the inguinal ligament','Ponto médio do ligamento inguinal'],'Inguinal ligament',[.5,.5,1],['ant']],
+ ['L1',['A mitad de camino entre T12 y L2','Halfway between T12 and L2','A meio caminho entre T12 e L2'],{mix:['T12','L2',.5]}],
+ ['L2',['Cara anteromedial del muslo, a mitad de camino entre T12 y el cóndilo femoral medial','Anteromedial thigh, halfway between T12 and the medial femoral condyle','Face anteromedial da coxa, a meio caminho entre T12 e o côndilo femoral medial'],'Femur',[.35,.58,1],['ant','med']],
+ ['L3',['Cóndilo femoral medial, por encima de la rodilla','Medial femoral condyle, above the knee','Côndilo femoral medial, acima do joelho'],'Femur',[0,.07,.55],['med']],
+ ['L4',['Maléolo medial','Medial malleolus','Maléolo medial'],'Tibia',[0,.02,.5],['med']],
+ ['L5',['Dorso del pie, en la tercera articulación metatarsofalángica','Dorsum of the foot at the third metatarsophalangeal joint','Dorso do pé, na terceira articulação metatarsofalângica'],'Third metatarsal bone',[.5,.8,.95],['sup']],
+ ['S1',['Cara lateral del talón','Lateral heel','Face lateral do calcanhar'],'Calcaneus',[1,.45,.25],['lat']],
+ ['S2',['Línea media de la fosa poplítea','Midline of the popliteal fossa','Linha média da fossa poplítea'],'Femur',[.5,.04,0],['post']],
+ ['S3',['Tuberosidad isquiática o pliegue infraglúteo','Ischial tuberosity or infragluteal fold','Tuberosidade isquiática ou prega infraglútea'],'Hip bone',[.4,.04,.25],['post','inf']],
+ ['S4-5',['Zona perianal, a menos de 1 cm de la unión mucocutánea (punto único)','Perianal area, less than 1 cm lateral to the mucocutaneous junction (single point)','Região perianal, a menos de 1 cm da junção mucocutânea (ponto único)'],'Coccyx',[.5,0,.6],['inf'],1]];
+const ASIA_MUS=[
+ ['C5',['Flexores del codo','Elbow flexors','Flexores do cotovelo'],['Biceps brachii muscle','Long head of biceps brachii','Short head of biceps brachii','Brachialis muscle']],
+ ['C6',['Extensores de la muñeca','Wrist extensors','Extensores do punho'],['Extensor carpi radialis longus','Extensor carpi radialis brevis']],
+ ['C7',['Extensores del codo','Elbow extensors','Extensores do cotovelo'],['Triceps brachii muscle','Long head of triceps brachii','Lateral head of triceps brachii','Medial head of triceps brachii']],
+ ['C8',['Flexor profundo del dedo medio','Finger flexor (FDP, middle finger)','Flexor profundo do dedo médio'],['Flexor digitorum profundus']],
+ ['T1',['Abductor del meñique','Small finger abductor','Abdutor do dedo mínimo'],['Abductor digiti minimi of hand']],
+ ['L2',['Flexores de la cadera','Hip flexors','Flexores do quadril'],['Psoas major','Iliacus muscle']],
+ ['L3',['Extensores de la rodilla','Knee extensors','Extensores do joelho'],['Rectus femoris muscle','Vastus lateralis muscle','Vastus medialis muscle','Vastus intermedius muscle']],
+ ['L4',['Flexores dorsales del tobillo','Ankle dorsiflexors','Dorsiflexores do tornozelo'],['Tibialis anterior muscle']],
+ ['L5',['Extensor largo del dedo gordo','Long toe extensor','Extensor longo do hálux'],['Extensor hallucis longus']],
+ ['S1',['Flexores plantares del tobillo','Ankle plantar flexors','Flexores plantares do tornozelo'],['Soleus muscle','Lateral head of gastrocnemius','Medial head of gastrocnemius']]];
+const ASIA_REF=[
+ ['C5–C6',['Bicipital','Biceps','Bicipital'],['Biceps brachii muscle','Long head of biceps brachii','Short head of biceps brachii'],['Golpe sobre el tendón del bíceps en el pliegue del codo, con el pulgar del examinador encima','Tap the biceps tendon at the elbow crease, under the examiner’s thumb','Percussão do tendão do bíceps na prega do cotovelo, sob o polegar do examinador']],
+ ['C6',['Braquiorradial','Brachioradialis','Braquiorradial'],['Brachioradialis muscle'],['Golpe sobre el radio distal, unos 5 cm por encima de la muñeca','Tap the distal radius about 5 cm above the wrist','Percussão do rádio distal, uns 5 cm acima do punho']],
+ ['C7',['Tricipital','Triceps','Tricipital'],['Triceps brachii muscle','Long head of triceps brachii','Lateral head of triceps brachii','Medial head of triceps brachii'],['Golpe sobre el tendón del tríceps por encima del olécranon, con el codo flexionado','Tap the triceps tendon above the olecranon, elbow flexed','Percussão do tendão do tríceps acima do olécrano, cotovelo fletido']],
+ ['L3–L4',['Rotuliano','Patellar','Patelar'],['Patellar ligament','Rectus femoris muscle'],['Golpe sobre el tendón rotuliano con la rodilla flexionada y relajada','Tap the patellar tendon with the knee flexed and relaxed','Percussão do tendão patelar com o joelho fletido e relaxado']],
+ ['S1',['Aquíleo','Achilles','Aquileu'],['Calcaneal tendon','Soleus muscle'],['Golpe sobre el tendón calcáneo con el tobillo en ligera flexión dorsal','Tap the calcaneal tendon with the ankle slightly dorsiflexed','Percussão do tendão calcâneo com o tornozelo em leve dorsiflexão']]];
+const asiaCol=l=>/^C/.test(l)?0x2dd4bf:/^T/.test(l)?0xfbbf24:/^L/.test(l)?0xfb923c:0xe23fbf;
+function asiaMesh(en,side){return meshes.find(m=>m.userData.c&&m.userData.c.en===en&&(!side||!m.userData.c.side||m.userData.c.side===side)&&sexOk(m.userData.sys));}
+function asiaBox(en,side){const m=asiaMesh(en,side);if(!m)return null;m.updateMatrixWorld(true);const g=m.geometry;if(!g.boundingBox)g.computeBoundingBox();const b=g.boundingBox.clone().applyMatrix4(m.matrixWorld);return b;}
+/* ejes del modelo: arriba = +y; anterior y derecho se miden con el propio esqueleto */
+function asiaAxes(){const x=asiaBox('Xiphoid process'),c=asiaBox('Coccyx'),h=asiaBox('Humerus','derecho');if(!x||!c||!h)return null;
+  return {ant:Math.sign(x.getCenter(new V3()).z-c.getCenter(new V3()).z)||1,right:Math.sign(h.getCenter(new V3()).x)||-1};}
+function asiaCompute(){const A=asiaAxes();if(!A)return null;const skin=meshes.filter(m=>/^piel/.test(BS(m.userData.sys))&&sexOk(m.userData.sys)&&m.visible);
+  const ray=new THREE.Raycaster(),out={};
+  const dirV=(names,lat)=>{const v=new V3();for(const n of names){if(n==='ant')v.z+=A.ant;else if(n==='post')v.z-=A.ant;else if(n==='sup')v.y+=1;else if(n==='inf')v.y-=1;else if(n==='lat')v.x+=lat;else if(n==='med')v.x-=lat;}return v.normalize();};
+  /* el rayo empieza solo unos centímetros fuera del hueso: así no choca con el otro brazo, la otra pierna o el tronco */
+  const onSkin=(p,d,o)=>{if(!skin.length)return p.clone();o=o||0.07;ray.set(p.clone().addScaledVector(d,o),d.clone().negate());ray.far=o+0.05;const h=ray.intersectObjects(skin,false);return h.length?h[0].point.clone().addScaledVector(d,0.002):p.clone().addScaledVector(d,0.012);};
+  const mcl=side=>{const b=asiaBox('Clavicle',side);return b?b.getCenter(new V3()).x:0;};
+  const ribY=(n,side)=>{const nm=['First','Second','Third','Fourth','Fifth','Sixth','Seventh'][n-1]+' rib';const m=asiaMesh(nm,side);if(!m)return null;const x0=mcl(side),a=m.geometry.attributes.position,v=new V3();let best=null;
+    m.updateMatrixWorld(true);for(let i=0;i<a.count;i+=3){v.fromBufferAttribute(a,i).applyMatrix4(m.matrixWorld);if(Math.abs(v.x-x0)<0.015&&(!best||v.z*A.ant>best.z*A.ant))best=v.clone();}return best?best.y:null;};
+  for(const side of ['derecho','izquierdo']){const lat=side==='derecho'?A.right:-A.right;const R=out[side]={};
+    const front=(y,fb)=>{const x0=mcl(side);const d=new V3(0,0,A.ant);const p=fb||new V3(x0,y,0.1*A.ant);ray.set(new V3(x0,y,A.ant*0.5),new V3(0,0,-A.ant));ray.far=1;const h=(skin.length?ray.intersectObjects(skin,false):[]).filter(x=>x.point.z*A.ant>0.02);return h.length?h[0].point.clone().addScaledVector(d,0.002):p;};
+    for(const P of ASIA_PTS){const [lv,,bn,f,dirs,single]=P;if(single&&side==='izquierdo')continue;
+      if(typeof bn==='string'){const sd=asiaMesh(bn,side)?side:null;const b=asiaBox(bn,sd);if(!b)continue;const mn=b.min,mx=b.max;
+        const fx=lat>0?f[0]:1-f[0],fz=A.ant>0?f[2]:1-f[2];const p=new V3(mn.x+(mx.x-mn.x)*fx,mn.y+(mx.y-mn.y)*f[1],mn.z+(mx.z-mn.z)*fz);
+        if(f[0]<0)p.x=(lat>0?mn.x:mx.x)-lat*0.025;R[lv]=onSkin(p,dirV(dirs,lat),dirs.includes('med')?0.03:0.07);}
+      else if(bn.ic){const a=ribY(bn.ic,side),b=ribY(bn.ic+1,side);if(a!=null&&b!=null)R[lv]=front((a+b)/2);}
+      else if(bn.lv==='xif'){const b=asiaBox('Xiphoid process');if(b){let y=b.getCenter(new V3()).y;if(R.T5)y=Math.min(y,R.T5.y-0.03);R[lv]=front(y);}}
+      else if(bn.lv==='umb'){const b=asiaBox('Hip bone',side);if(b)R[lv]=front(b.max.y+0.025);}}
+    for(const P of ASIA_PTS){const [lv,,bn]=P;if(bn&&bn.mix){const a=R[bn.mix[0]],b=R[bn.mix[1]];if(a&&b){const p=a.clone().lerp(b,bn.mix[2]);R[lv]=front(p.y,p);if(lv==='L1'){R[lv]=onSkin(a.clone().lerp(b,.5),new V3(0,0,A.ant));}}}}}
+  return out;}
+function asiaClear(){ASIA.g.clear();removeLabels('lm');for(const m of (ASIA.marks||[])){m.userData.sq=false;m.userData.hint=false;refreshState(m);}ASIA.marks=[];for(const P of (ASIA.pins||[]))removePin(P);ASIA.pins=[];}
+async function asiaShowPts(only){asiaClear();resetActivity();
+  const ks=k=>Object.keys(SYS).find(x=>BS(x)===k&&sexOk(x));const kp=ks('piel');if(kp){SYS[kp].on=true;if(SYS[kp].state!=='loaded')await loadSys(kp);SYS[kp].op=0.55;}const ko=ks('oseo');if(ko){SYS[ko].on=true;if(SYS[ko].state!=='loaded')await loadSys(ko);}
+  const km=ks('muscular');if(km)SYS[km].on=false;applySystems();renderSysList();try{syncAllMats();}catch(_){}
+  if(!ASIA.pts)ASIA.pts=asiaCompute();if(!ASIA.pts)return;const box=new THREE.Box3();
+  for(const side of ['derecho','izquierdo'])for(const [lv,txt] of ASIA_PTS){const p=ASIA.pts[side][lv];if(!p||(only&&only!==lv))continue;
+    const s=new THREE.Mesh(new THREE.SphereGeometry(only?0.008:0.0055,14,10),new THREE.MeshBasicMaterial({color:asiaCol(lv),depthTest:false,transparent:true}));s.position.copy(p);s.renderOrder=33;ASIA.g.add(s);box.expandByPoint(p);
+    if(only||side==='derecho'||lv==='S4-5'){const L=addLabel(lv,()=>p,'','lm');L.on=true;L.pos=p;}}
+  if(only&&!box.isEmpty())focusOn(box.getCenter(new V3()),0.55);else{setView('ant');}
+  if(isPhone())setSheet('peek');}
+async function asiaShowMus(list,how){asiaClear();resetActivity();const ks=k=>Object.keys(SYS).find(x=>BS(x)===k&&sexOk(x));
+  for(const k of ['muscular','oseo']){const kk=ks(k);if(kk){SYS[kk].on=true;if(SYS[kk].state!=='loaded')await loadSys(kk);}}const kp=ks('piel');if(kp)SYS[kp].on=false;
+  const ka=ks('articular');if(ka&&list.some(en=>/ligament/.test(en))){SYS[ka].on=true;if(SYS[ka].state!=='loaded')await loadSys(ka);}
+  applySystems();renderSysList();const b=new THREE.Box3();ASIA.marks=[];ASIA.pins=[];
+  for(const m of meshes){const c=m.userData.c;if(!c||!list.includes(c.en)||!sexOk(m.userData.sys)||(c.side&&c.side!=='derecho'))continue;m.userData.sq=true;refreshState(m);ASIA.marks.push(m);m.geometry.computeBoundingBox();b.union(m.geometry.boundingBox);
+    if(ASIA.pins.length<3&&!ASIA.pins.some(P=>P.m.userData.c.en===c.en)){m.userData.pinTxt=nameL(Object.values(CAT).find(r=>r[1]===c.en)||[0,c.en,c.es||c.en])||c.es;const n0=PINS.length;addPin(m,m.geometry.boundingBox.getCenter(new V3()));if(PINS.length>n0)ASIA.pins.push(PINS[PINS.length-1]);}}
+  if(!b.isEmpty()){const sz=b.getSize(new V3()).length();focusOn(b.getCenter(new V3()),Math.max(0.3,Math.min(1.4,sz*1.4)));setView(how||'ant');}if(isPhone())setSheet('peek');}
+function renderAsia(){const el=$('#asiaBox');if(!el)return;const i=VI();const M=ASIA.mode;
+  const seg=`<div class="seg" style="margin:6px 0">${[['derm',TL('Dermatomas','Dermatomes','Dermátomos')],['mio',TL('Músculos clave','Key muscles','Músculos-chave')],['ref',TL('Reflejos','Reflexes','Reflexos')]].map(([k,n])=>`<button data-am="${k}" aria-pressed="${M===k}">${n}</button>`).join('')}</div>`;
+  let body='';
+  if(M==='derm')body=`<p class="muted small">${TL('Los 28 puntos sensitivos clave de la exploración ISNCSCI (ASIA) sobre la piel del modelo. Son una guía aproximada: los dermatomas se solapan y varían entre personas.','The 28 key sensory points of the ISNCSCI (ASIA) examination on the model’s skin. They are an approximate guide: dermatomes overlap and vary between people.','Os 28 pontos sensitivos-chave do exame ISNCSCI (ASIA) sobre a pele do modelo. São um guia aproximado: os dermátomos se sobrepõem e variam entre as pessoas.')}</p>
+    <div class="row"><button class="btn pri" data-a="all">${TL('Ver todos los puntos','Show all points','Ver todos os pontos')}</button><button class="btn" data-a="clr">${TL('Quitar','Clear','Limpar')}</button></div>
+    <div class="asiaList">${ASIA_PTS.map(([lv,t])=>`<button class="asiaRow" data-ap="${lv}"><b style="color:#${asiaCol(lv).toString(16).padStart(6,'0')}">${lv}</b><span>${esc(t[i])}</span></button>`).join('')}</div>`;
+  else if(M==='mio')body=`<p class="muted small">${TL('Los 10 músculos clave de ASIA (fuerza 0–5). Toca un nivel para verlos en el modelo.','The 10 ASIA key muscles (strength 0–5). Tap a level to see them on the model.','Os 10 músculos-chave da ASIA (força 0–5). Toque um nível para vê-los no modelo.')}</p>
+    <div class="asiaList">${ASIA_MUS.map(([lv,t],k)=>`<button class="asiaRow" data-amu="${k}"><b style="color:#${asiaCol(lv).toString(16).padStart(6,'0')}">${lv}</b><span>${esc(t[i])}</span></button>`).join('')}</div>`;
+  else body=`<p class="muted small">${TL('Reflejos osteotendinosos: 0 ausente, 1+ disminuido, 2+ normal, 3+ vivo, 4+ con clonus. Compara siempre los dos lados.','Tendon reflexes: 0 absent, 1+ reduced, 2+ normal, 3+ brisk, 4+ with clonus. Always compare both sides.','Reflexos osteotendíneos: 0 ausente, 1+ diminuído, 2+ normal, 3+ vivo, 4+ com clônus. Compare sempre os dois lados.')}</p>
+    <div class="asiaList">${ASIA_REF.map(([lv,t,,h],k)=>`<button class="asiaRow" data-ar="${k}"><b style="color:#${asiaCol(lv[0]).toString(16).padStart(6,'0')}">${lv}</b><span><b>${esc(t[i])}</b> · ${esc(h[i])}</span></button>`).join('')}</div>`;
+  el.innerHTML=seg+body;
+  el.querySelectorAll('[data-am]').forEach(b=>b.onclick=()=>{ASIA.mode=b.dataset.am;renderAsia();});
+  el.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{if(b.dataset.a==='all')asiaShowPts();else{asiaClear();}});
+  el.querySelectorAll('[data-ap]').forEach(b=>b.onclick=()=>asiaShowPts(b.dataset.ap));
+  el.querySelectorAll('[data-amu]').forEach(b=>b.onclick=()=>{const x=ASIA_MUS[+b.dataset.amu];asiaShowMus(x[2],/C8|T1/.test(x[0])?'ant':/S1|C7/.test(x[0])?'post':'ant');});
+  el.querySelectorAll('[data-ar]').forEach(b=>b.onclick=()=>{const x=ASIA_REF[+b.dataset.ar];asiaShowMus(x[2],x[0]==='S1'||x[0]==='C7'?'post':'ant');});}
+renderAsia();
+{const _sb=setBody;setBody=function(b){ASIA.pts=null;try{asiaClear();}catch(e){}return _sb.apply(this,arguments);};}
+/* ───── Guardar y cargar el progreso en un archivo (sin cuentas ni servidor) ───── */
+(()=>{const ex=$('#progExp'),ib=$('#progImpB'),inp=$('#progImp');if(!ex||!inp)return;
+  ex.onclick=()=>{const data={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^corpus/.test(k))data[k]=localStorage.getItem(k);}}catch(e){}
+    const blob=new Blob([JSON.stringify({app:'corpus-atlas',v:1,fecha:new Date().toISOString(),data},null,1)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='corpus-progreso-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);
+    try{toast(TL('Progreso guardado en tu carpeta de descargas.','Progress saved to your downloads folder.','Progresso salvo na sua pasta de downloads.'));}catch(e){}};
+  ib.onclick=()=>inp.click();
+  inp.onchange=()=>{const f=inp.files&&inp.files[0];inp.value='';if(!f)return;const r=new FileReader();r.onload=()=>{let o=null;try{o=JSON.parse(r.result);}catch(e){}
+    if(!o||o.app!=='corpus-atlas'||!o.data||typeof o.data!=='object'){try{toast(TL('Ese archivo no es un progreso de Corpus.','That file is not a Corpus progress file.','Esse arquivo não é um progresso do Corpus.'));}catch(e){}return;}
+    if(!confirm(TL('¿Reemplazar el progreso de este dispositivo por el del archivo?','Replace this device’s progress with the one in the file?','Substituir o progresso deste dispositivo pelo do arquivo?')))return;
+    try{const del=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^corpus/.test(k))del.push(k);}del.forEach(k=>localStorage.removeItem(k));
+      for(const k in o.data)if(/^corpus/.test(k)&&typeof o.data[k]==='string')localStorage.setItem(k,o.data[k]);}catch(e){}
+    location.reload();};r.readAsText(f);};})();
+/* ───── Precalentado en tiempo libre: el mapa costillas-escápula y el estilo de las pestañas se calculan cuando nadie toca la pantalla,
+   así abrir Movimiento o Estudiar la primera vez no se nota ───── */
+(()=>{const warm=()=>{try{if(typeof stcInit==='function')stcInit();}catch(e){}
+    try{for(const t of ['mov','lec','estr','planos']){const w=document.getElementById('tab-'+t);if(w&&w.hidden&&currentTab!==t){w.style.visibility='hidden';w.hidden=false;w.offsetHeight;w.hidden=true;w.style.visibility='';}}}catch(e){}};
+  const ric=window.requestIdleCallback?f=>requestIdleCallback(f,{timeout:5000}):f=>setTimeout(f,1500);let n=0;
+  const go=()=>{if(SYS.oseo&&SYS.oseo.state==='loaded')ric(warm);else if(n++<90)setTimeout(go,1000);};setTimeout(go,2500);})();
 /* ───── Hoja inferior fluida (teléfono) ─────
    Antes cada movimiento del dedo cambiaba la altura del panel (miles de nodos), la variable --sheet de toda la página
    y la cámara 3D: el navegador recalculaba todo y redibujaba el modelo en cada fotograma. Ahora, mientras se arrastra
@@ -9986,7 +10229,7 @@ window.MNAV_H=62;
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
  const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
- const APP_V='corpus-v151';/* igual que V en sw.js: se cambian juntos en cada publicación */
+ const APP_V='corpus-v152';/* igual que V en sw.js: se cambian juntos en cada publicación */
  const hadCtl=!!navigator.serviceWorker.controller;let upShown=false;
  /* aviso de versión nueva: si alguien tiene abierta (o instalada) una versión antigua, se le ofrece actualizar */
  const upBar=v=>{if(upShown)return;upShown=true;const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');

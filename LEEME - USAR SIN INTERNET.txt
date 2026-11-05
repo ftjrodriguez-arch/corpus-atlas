@@ -1,0 +1,25 @@
+CORPUS ATLAS - USAR SIN INTERNET (memoria USB u ordenador sin conexion)
+=======================================================================
+
+ESPANOL
+1. Descomprime este archivo .zip (clic derecho > Extraer todo).
+2. Abre la carpeta y haz doble clic en:
+   - Windows:  ABRIR CORPUS - Windows.bat
+     (si Windows avisa de que protegio el equipo: "Mas informacion" > "Ejecutar de todas formas")
+   - Mac:      ABRIR CORPUS - Mac.command   (si no abre: clic derecho > Abrir)
+   - Linux:    sh abrir-corpus-linux.sh
+3. Se abre el navegador con Corpus. Deja abierta la ventana negra mientras lo usas.
+4. La primera vez, en Ajustes activa "Descargar todo en segundo plano" o pulsa "Instalar":
+   despues Corpus funciona aunque no abras este archivo.
+Tu progreso se guarda en el navegador de cada ordenador. Puedes pasarlo a otro con
+Ajustes > "Tu progreso y Corpus sin internet" > "Guardar mi progreso".
+
+ENGLISH
+1. Unzip this file. 2. Double-click "ABRIR CORPUS - Windows.bat" (Windows), "ABRIR CORPUS - Mac.command"
+(Mac: right-click > Open) or run "sh abrir-corpus-linux.sh" (Linux). 3. Keep the black window open while you use it.
+
+PORTUGUES
+1. Descompacte este arquivo. 2. De dois cliques em "ABRIR CORPUS - Windows.bat" (Windows), "ABRIR CORPUS - Mac.command"
+(Mac: clique direito > Abrir) ou rode "sh abrir-corpus-linux.sh" (Linux). 3. Deixe a janela preta aberta enquanto usa.
+
+Licencias: codigo MIT; modelos y datos CC BY-SA 4.0 (ver LICENSE, LICENSE-DATA.md, ATTRIBUTION.md).
