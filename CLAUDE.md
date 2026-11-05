@@ -46,7 +46,7 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 - Textos de técnica de ejercicios en `EJ_TXT` (errores, progresiones, precauciones) y escenas de ergonomía en `CTESTS` con `r:'ergonomia'`.
 
 ## Pendiente
-- Modo docente con resultados de la clase (necesita cuentas y servidor).
+- Decisión del usuario: NUNCA servidor propio, cuentas ni base de datos. Todo debe funcionar en local y sin conexión (GitHub Pages solo sirve los archivos estáticos).
 - Interfaz móvil nueva programada en v147–v148 (barra inferior, capas en fila, hoja de estructura tocada): recoger opiniones y pulir.
 - Al fusionar el artefacto con la web, los bloques nuevos al principio o al final del archivo se pierden: ponerlos en mitad (p. ej. antes de `<header>`).
 - Revisión por un fisioterapeuta de los parámetros de la sentadilla.
