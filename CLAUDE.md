@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v156**.
+(GitHub Pages desde `main`). Versión actual: **v157**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -63,6 +63,7 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 - `loadSys` y `loadHR` preparan las piezas por tandas de ~12 ms; `fetchB64` usa `Uint8Array.fromBase64` o `fetch(data:)` antes del bucle con `atob`.
 - Los observadores de emojis y de traducción solo recorren los nodos que cambiaron.
 - v155: sombras en caché `SHC` (`shcBegin`/`shcEnd` alrededor del dibujo principal; firma en `shcSig`). Si añades algo que cambie las sombras sin pasar por geometría, material, matriz, visibilidad, luces o `clipArr`, inclúyelo en `shcSig`. Etiquetas a ~8 Hz en reposo (`frame0.lt`).
+- Portugués: siempre de Brasil (patela, quadril, controle, esporte, celular, tela, muletas). Al corregir textos, cambia solo cadenas en portugués: «rótula», «fémur», «crónica» son correctas en español. Ojo con el género al cambiar sustantivos (anca f. → quadril m.). Script de apoyo del flujo de Claude: detecta portugués antes de reemplazar.
 - Con dibujo por software (swiftshader) la prueba «Inglés: sistema traducido» puede fallar por tiempo: la traducción va en el siguiente fotograma y cada uno tarda segundos.
 
 ## Pendiente
