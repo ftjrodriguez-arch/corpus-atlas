@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v153**.
+(GitHub Pages desde `main`). Versión actual: **v154**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -56,6 +56,12 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 - ECOE (`ECOE`, `ecoeMk`, `ecoeShow`, `renderEcoe`): estaciones generadas a partir de los datos existentes; guarda y restaura las capas.
 - `printLesson(L)`: vista imprimible (`#printArea`, `body.printing`).
 - Protocolos en `data/protocols.json` (`renderProt`), casos en `data/rc.json` agrupados por `r` (deporte, neuro, pediatria, geriatria…).
+
+## v154 (rendimiento)
+- Dibujo agrupado `BATCH` (junto a `needDraw`/`frame0`): `batchBegin` antes de `renderer.render` y `batchEnd` después de `aoRender` (siempre en `finally`). No agrupa transparentes ni piezas con transformación distinta de la identidad, renderOrder, grupos o morph. `?nobatch` lo desactiva; con `?qa`, `window.__batch` (on, stats).
+- Al comparar capturas, hazlo en la misma sesión (`__batch.on=false`): la aparición de capas y otras transiciones avanzan por fotograma y dos sesiones casi nunca coinciden.
+- `loadSys` y `loadHR` preparan las piezas por tandas de ~12 ms; `fetchB64` usa `Uint8Array.fromBase64` o `fetch(data:)` antes del bucle con `atob`.
+- Los observadores de emojis y de traducción solo recorren los nodos que cambiaron.
 
 ## Pendiente
 - Decisión del usuario: NUNCA servidor propio, cuentas ni base de datos. Todo debe funcionar en local y sin conexión (GitHub Pages solo sirve los archivos estáticos).

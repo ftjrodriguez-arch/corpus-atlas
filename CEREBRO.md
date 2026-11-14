@@ -93,9 +93,11 @@ Pendiente de revisión clínica: el 27 %, el 38° de dorsiflexión en carga y la
 - 2026-11-03 · Postura resuelta por equilibrio del centro de masas y topes personales, no por fotogramas fijos · Motivo: que cada persona vea su propia sentadilla (tobillo rígido → más inclinación; cadera limitada → flexión lumbar) · Descartado: curvas promedio de un estudio.
 - 2026-11-03 · Rangos por edad y sexo del CDC (Soucie 2011) · Motivo: datos abiertos de >600 personas sanas, por grupo de edad y sexo · Descartado: solo AAOS (no distingue edad ni sexo).
 - 2026-11-03 · Gancho `window.__qa` solo con `?qa` en la URL · Motivo: medir y capturar sin exponer nada al usuario normal.
+- 2026-11-14 · Dibujo agrupado (`BATCH`, v154): las piezas opacas con el mismo material, los mismos atributos y transformación identidad se dibujan juntas en geometrías combinadas que solo existen durante el dibujo; una pieza que cambia vuelve a dibujarse sola hasta que su grupo se queda quieto 300 ms · Motivo: la app hacía 3–4 llamadas de dibujo por pieza (imagen, sombras, oclusión) y con todas las capas pasaba de 5.800 por fotograma; el freno automático acababa bajando la calidad · Descartado: apagar sombras u oclusión con muchas piezas (pierde calidad), unir también las transparentes (cambia el orden de mezcla) y mover coordenadas al espacio del mundo (cambiaría las texturas procedurales, que usan la posición propia de cada pieza). `?nobatch` lo desactiva; con `?qa`, `window.__batch` permite compararlo.
 
 ## Registro de verificación
 (fecha · elemento · iteraciones · defectos corregidos · pendientes)
+- 2026-11-14 · v154 rendimiento · 3 · Comparación inicial entre sesiones engañosa (la aparición de capas avanza por fotograma y en software no estaba terminada): se repitió en la misma sesión con y sin agrupado → 0 píxeles distintos de 145.600 con todas las capas · Llamadas de dibujo: 5.804 → 608 (todas las capas), 1.289 → 41 (inicio) · Bloqueo al encender todas las capas: ~700 → ~240 ms, alta resolución de la cabeza: máx. ~370 → ~100 ms · tools/pruebas: todas pasan · Pendiente: medir fps en el equipo del usuario con GPU real.
 
 ## Estado actual
 - Hecho (v139): atlas completo, disección, fichas, glosario, lecciones, casos, pruebas clínicas, rangos articulares con goniómetro, marcha normal y patológica, fisiología animada, 3 idiomas, PWA.
@@ -104,6 +106,7 @@ Pendiente de revisión clínica: el 27 %, el 38° de dorsiflexión en carga y la
 - Siguiente: usar las mediciones guardadas del paciente para rellenar su perfil de movilidad; más ejercicios en cadena cerrada (zancada, peso muerto, puente); intensidad de activación muscular continua (no solo activo/inactivo).
 
 ## Deuda y riesgos
+- El dibujo agrupado duplica en la GPU la geometría de las piezas agrupadas (la copia en memoria de JavaScript se libera al subirla). Por eso la alta resolución no se agrupa, hay un tope de vértices agrupados (8 M en ordenador; 1,2 M en teléfono, 3 M con ≥ 6 GB) y en teléfonos con < 3 GB se desactiva. Revisión independiente del 2026-11-14: corregidas la carrera capa ↔ alta resolución (prueba de carrera: 0 piezas mal) y los reintentos.
 - `index.html` de 2,8 MB en un solo archivo: difícil de mantener; dividir en módulos cuando se pueda sin romper la app sin conexión.
 - El modelo femenino no tiene rig: la sentadilla y la marcha solo funcionan en el masculino.
 - Fichas en inglés y portugués con traducción automática pendiente de revisión.

@@ -1514,7 +1514,11 @@ async function fetchB64(url,onProg){
     for(;;){const {done,value}=await rd.read();if(done)break;parts.push(dec.decode(value,{stream:true}));n+=value.length;onProg(n);}
     parts.push(dec.decode());txt=parts.join('');}
   else txt=await r.text();
-  const bin=atob(txt.trim());const out=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i);
+  txt=txt.trim();
+  /* v154: decodificación nativa (no bloquea la página); el bucle con atob queda de respaldo */
+  try{if(typeof Uint8Array.fromBase64==='function')return Uint8Array.fromBase64(txt).buffer;}catch(e){}
+  try{const rb=await fetch('data:application/octet-stream;base64,'+txt);if(rb.ok)return await rb.arrayBuffer();}catch(e){}
+  const bin=atob(txt);const out=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i);
   return out.buffer;
 }
 function showLoad(){const ks=Object.keys(loadQueue.parts);if(!ks.length){$('#loader').hidden=true;return;}
@@ -1525,10 +1529,11 @@ function loadSys(k){
   const s=SYS[k];if(s.promise) return s.promise;
   s.state='loading';loadQueue.parts[k]={l:0,t:0};showLoad();renderSysList();
   s.promise=new Promise((res)=>{
-    const onLoad=g=>{
+    const onLoad=async g=>{try{
       const grp=new THREE.Group();grp.name=k;
       g.scene.updateMatrixWorld(true);
-      g.scene.traverse(o=>{if(!o.isMesh)return;
+      const MADE=[],OL=[];g.scene.traverse(o=>{if(o.isMesh)OL.push(o);});let T0=performance.now();
+      for(const o of OL){/* v154: por tandas de ~12 ms; las piezas entran en «meshes» juntas y en el mismo orden */
         const pa=o.geometry.attributes.position,n=pa.count,pos=new Float32Array(n*3),e=o.matrixWorld.elements;
         for(let i=0;i<n;i++){const x=pa.getX(i),y=pa.getY(i),z=pa.getZ(i);
           pos[i*3]=e[0]*x+e[4]*y+e[8]*z+e[12];pos[i*3+1]=e[1]*x+e[5]*y+e[9]*z+e[13];pos[i*3+2]=e[2]*x+e[6]*y+e[10]*z+e[14];}
@@ -1541,9 +1546,10 @@ function loadSys(k){
         const m=new THREE.Mesh(geo,matFor(k,c.ins,MEMB.test(c.en)?'memb':SEMI.test(c.en)?'semi':''));m.userData={c,sys:k,state:''};
         applyTint(m);if(HRGEO[c.id]) swapGeo(m,HRGEO[c.id]);
         if(BS(k)==='muscular'||fiberOK(m)) addFiberDir(m);else if(TUBE_SYS.includes(BS(k))) addAxisDir(m);
-        grp.add(m);meshes.push(m);(byId[c.id]=m);
+        grp.add(m);MADE.push([m,c.id]);
         o.geometry.dispose();
-      });
+        if(performance.now()-T0>12){await new Promise(z=>setTimeout(z,0));T0=performance.now();}}
+      for(const [m,id] of MADE){meshes.push(m);(byId[id]=m);/* la alta resolución pudo cargarse o descargarse mientras tanto */const hg=HRGEO[id];if(hg){if(m.geometry!==hg)swapGeo(m,hg);}else if(m.userData.lrGeo)unswapGeo(m);}
       if(NUEVOS&&NUEVOS[k])NUEVOS[k].forEach(q=>{if(byId[q.id])return;const geo=nuevosGeo(q);
         const c=entry(q.id)||{id:q.id,en:q.id,es:q.id,la:'',sys:k,side:'',ins:''};
         const m=new THREE.Mesh(geo,matFor(k,c.ins,''));m.userData={c,sys:k,state:'',nuevo:true};
@@ -1558,7 +1564,7 @@ function loadSys(k){
       applySystems();renderSysList();
       if(currentTab==='mov'){prepWeights();applyPose();applyAgonists();}
       res(grp);
-    };
+    }catch(e){console.error('loadSys',k,e);fail(e);}};
     const fail=()=>{s.state='error';s.promise=null;delete loadQueue.parts[k];showLoad();renderSysList();res(null);};
     fetchB64('m2/'+k+'.txt',(l)=>{if(loadQueue.parts[k]){loadQueue.parts[k].l=l/1.333;loadQueue.parts[k].t=s.mb*1e6;showLoad();}})
       .then(buf=>Promise.all([SEAM_P,NUEVOS_P]).then(()=>buf)).then(buf=>loader.parse(buf,'',onLoad,fail)).catch(fail);
@@ -1643,8 +1649,10 @@ function loadHR(r){const h=HR[r];if(h.state==='loaded'||h.state==='loading')retu
   h.promise=Promise.all(parts.map(lv=>{const key='hr_'+r+'_'+lv;loadQueue.parts[key]={l:0,t:0,name:h.n,hr:1};showLoad();
     return fetchB64('hr/'+r+'_'+lv+'.txt',l=>{if(loadQueue.parts[key]){loadQueue.parts[key].l=l/1.333;loadQueue.parts[key].t=h.mb*1e6/2;showLoad();}})
       .then(buf=>SEAM_P.then(()=>buf)).then(buf=>new Promise((res,rej)=>loader.parse(buf,'',res,rej)))
-      .then(g=>{g.scene.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry;if(!geo.index)return;seamFix('hr/'+r+'_'+lv,o.name,geo.attributes.position.array);setVattr(geo,geo.attributes.color);geo.computeVertexNormals();geo.computeBoundingSphere();
-          HRGEO[o.name]=geo;h.ids.push(o.name);const m=byId[o.name];if(m)swapGeo(m,geo);});})
+      .then(async g=>{const L=[];g.scene.traverse(o=>{if(o.isMesh&&o.geometry.index)L.push(o);});let t0=performance.now();
+          for(const o of L){const geo=o.geometry;seamFix('hr/'+r+'_'+lv,o.name,geo.attributes.position.array);setVattr(geo,geo.attributes.color);geo.computeVertexNormals();geo.computeBoundingSphere();
+          geo.userData.hr=true;HRGEO[o.name]=geo;h.ids.push(o.name);const m=byId[o.name];if(m)swapGeo(m,geo);
+          if(performance.now()-t0>12){if(currentTab==='mov'&&performance.now()-(loadHR.pt||0)>250){loadHR.pt=performance.now();try{applyPose();}catch(e){}}await new Promise(z=>setTimeout(z,0));t0=performance.now();}}})/* v154: por tandas de ~12 ms */
       .finally(()=>{delete loadQueue.parts[key];showLoad();});}))
     .then(()=>{h.state='loaded';renderHR();applyPose();},()=>{h.state='error';h.promise=null;renderHR();});
   return h.promise;}
@@ -3742,7 +3750,7 @@ function trNode(root){if(!root)return;const walk=document.createTreeWalker(root,
   for(const el of els){if(!el.getAttribute)continue;let o=_origA.get(el);if(!o){o={};_origA.set(el,o);}
     for(const a of ['placeholder','aria-label','title']){const v=el.getAttribute(a);if(v==null)continue;if(o[a]==null||(v!==o[a]&&v!==o['_'+a]))o[a]=v;
       const tr=LANG==='es'?null:trText(o[a]);const want=tr??o[a];if(v!==want){o['_'+a]=want;el.setAttribute(a,want);}}}}
-let trPending=false;const trObs=new MutationObserver(()=>{if(trPending||LANG==='es')return;trPending=true;requestAnimationFrame(()=>{trPending=false;trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}finally{if(LANG!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});}});});
+let trPending=false;const TR_TG=new Set();const TR_OPT={childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['placeholder','aria-label','title']};const trObs=new MutationObserver(recs=>{if(LANG==='es')return;for(const r of recs){const t=r.target;TR_TG.add(t&&t.nodeType===1?t:t&&t.parentElement);}if(trPending)return;trPending=true;requestAnimationFrame(()=>{trPending=false;trObs.disconnect();try{for(const t of TR_TG)if(t&&t.isConnected)trNode(t);}catch(e){console.warn('tr',e);}finally{TR_TG.clear();if(LANG!=='es')trObs.observe(document.body,TR_OPT);}});});/* v154: traduce solo lo que cambió */
 async function setLang(l){if(!['es','en','pt','fr','de'].includes(l))l='es';
   if(l!=='es'&&!I18N){try{I18N=await (await fetch('data/i18n.json')).json();}catch(e){l='es';}}
   if((l==='fr'||l==='de')&&I18N&&!I18N['names_'+l]){try{const x=await (await fetch('data/i18n_'+l+'.json')).json();I18N.ui[l]=x.ui;I18N['names_'+l]=x.names;}catch(e){l='en';}}
@@ -3752,7 +3760,7 @@ $('#phyBtn').onclick=e=>{e.stopPropagation();togglePop($('#phyBtn'),$('#phyPop')
   if(typeof SEARCH!=='undefined'&&SEARCH.length)buildSearch();
   /* paneles generados con textos traducidos: se vuelven a dibujar en el idioma nuevo */for(const f of ['renderPlanes','renderGloCats','renderGlo','renderLessons','renderROM','renderViews','renderSrsDecks','renderGaitBar','renderSqCard','renderVars','renderGoniCard','goniRefresh','renderAsia','renderEcoe','renderProt']){try{if(typeof window[f]==='function'||eval('typeof '+f)==='function')eval(f+'()');}catch(e){}}
   if(selected)renderInfo();if(typeof renderSysList==='function')renderSysList();try{renderDis();}catch(e){}try{window.retitleFolds&&retitleFolds();}catch(e){}
-  trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}if(l!=='es')trObs.observe(document.body,{childList:true,subtree:true,characterData:true});
+  trObs.disconnect();try{trNode(document.body);}catch(e){console.warn('tr',e);}if(l!=='es')trObs.observe(document.body,TR_OPT);
   if(typeof tagLabel!=='undefined'&&selected)tagLabel.el.textContent=label(selected.m.userData.c);}
 $$('#langSeg button').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
 function buildSearch(){SEARCH=Object.values(CAT).map(r=>({k:norm([r[2],r[3],r[1],I18N&&I18N.names[r[2]]||'',I18N&&I18N.names_fr&&I18N.names_fr[r[2]]||'',I18N&&I18N.names_de&&I18N.names_de[r[2]]||''].join(' | ')),c:r}));}
@@ -8490,6 +8498,77 @@ function needDraw(now){let go=DRAW.force||now-DRAW.inp<1500||now-DRAW.t>500;
   if(!go){try{go=!!(spin||playing||contraction||(gait.on&&gait.play)||(typeof CT!=='undefined'&&CT.on)||PHY.on||fading.length||Object.keys(loadQueue.parts).length||document.body.classList.contains('teach')||meshes.some(m=>m.userData.offT));}catch(_){go=true;}}
   if(go){DRAW.t=now;DRAW.p.copy(camera.position);DRAW.g.copy(orb.tgt);DRAW.force=false;}
   return go;}
+/* ───── Dibujo agrupado (v154). Las piezas opacas que comparten material, atributos y transformación (identidad en todo
+   el atlas) se dibujan juntas: los mismos vértices, en las mismas coordenadas y con el mismo material, así que la imagen
+   es la misma con muchas menos llamadas de dibujo (de miles a decenas). Una pieza que cambia (postura, selección, alta
+   resolución, visibilidad, material) vuelve a dibujarse sola hasta que su grupo se queda quieto y se rehace.
+   Los grupos solo existen mientras se dibuja: el resto del código (selección, rayos, recorridos de la escena) no los ve.
+   ?nobatch lo desactiva para comparar. ───── */
+var BATCH={on:true,chunks:new Map(),grp:new THREE.Group(),hidden:[],frame:0,settle:300,budget:8,size:64,vtx:0,cap:8e6,stats:{chunks:0,members:0,builds:0}};
+(function(){let ok=true;try{ok=renderer.capabilities.isWebGL2||!!renderer.extensions.get('OES_element_index_uint');}catch(e){ok=false;}
+  try{if(new URLSearchParams(location.search).has('nobatch'))ok=false;}catch(e){}
+  try{if(isPhone()){const dm=navigator.deviceMemory;if(dm&&dm<3)ok=false;BATCH.cap=dm&&dm>=6?3e6:1.2e6;}}catch(e){}/* teléfonos: tope de vértices agrupados (memoria de la GPU) */
+  BATCH.on=ok;BATCH.grp.name='__batch';try{if(new URLSearchParams(location.search).has('qa'))window.__batch=BATCH;}catch(e){}BATCH.grp.matrixAutoUpdate=false;
+  try{cv.addEventListener('webglcontextlost',()=>{batchReset();});}catch(e){}})();
+const BATCH_AID=new WeakMap();let BATCH_AN=1;function batchAid(a){let v=BATCH_AID.get(a);if(!v){v=BATCH_AN++;BATCH_AID.set(a,v);}return v;}
+const BATCH_GS=new WeakMap(),BATCH_GSN=new Map();
+function batchGeoSig(g){/* firma de los atributos (nombres, tamaño, tipo); null si la geometría no se puede agrupar */
+  let h=0;for(const n in g.attributes)h=(Math.imul(h,31)+batchAid(g.attributes[n]))|0;
+  const c=BATCH_GS.get(g);if(c&&c.h===h)return c.s;
+  let s=[];for(const n of Object.keys(g.attributes).sort()){const a=g.attributes[n];
+    if(a.isInterleavedBufferAttribute||!a.array||a.array.length<a.count*a.itemSize){s=null;break;}
+    s.push(n+':'+a.itemSize+(a.normalized?'n':'')+a.array.constructor.name);}
+  if(s){s=s.join('|');let n=BATCH_GSN.get(s);if(!n){n=BATCH_GSN.size+1;BATCH_GSN.set(s,n);}s=n;}BATCH_GS.set(g,{h,s});return s;}
+function batchIdent(e){return e[0]===1&&e[5]===1&&e[10]===1&&e[15]===1&&e[1]===0&&e[2]===0&&e[3]===0&&e[4]===0&&e[6]===0&&e[7]===0&&e[8]===0&&e[9]===0&&e[11]===0&&e[12]===0&&e[13]===0&&e[14]===0;}
+function batchOK(m){if(!m.isMesh||!m.visible||m.isSkinnedMesh||m.isInstancedMesh||m.renderOrder||m.layers.mask!==1)return false;
+  if(Object.prototype.hasOwnProperty.call(m,'onBeforeRender')||Object.prototype.hasOwnProperty.call(m,'onAfterRender'))return false;
+  const mt=m.material;if(!mt||Array.isArray(mt)||mt.transparent||mt.visible===false)return false;
+  const g=m.geometry;if(!g||!g.index||g.groups.length||g.drawRange.start!==0||g.drawRange.count!==Infinity||g.userData.hr)return false;
+  if(g.morphAttributes&&Object.keys(g.morphAttributes).length)return false;
+  if(!batchIdent(m.matrixWorld.elements))return false;
+  let p=m.parent,top=m;while(p){if(!p.visible)return false;top=p;p=p.parent;}return top===scene;}
+function batchSig(L){let a=L.length|0,b=17;for(const m of L){const g=m.geometry;a=(Math.imul(a,31)+m.id)|0;a=(Math.imul(a,31)+g.id)|0;
+    b=(Math.imul(b,31)+g.index.version)|0;b=(Math.imul(b,31)+batchAid(g.index))|0;
+    for(const n in g.attributes){const t=g.attributes[n];a=(Math.imul(a,31)+batchAid(t))|0;b=(Math.imul(b,31)+t.version)|0;}}
+  return a+':'+b;}
+function batchFree(){this.array=null;}
+function batchBuild(c){const L=c.cur,g0=L[0].geometry,names=Object.keys(g0.attributes);let nv=0,ni=0;
+  for(const m of L){nv+=m.geometry.attributes.position.count;ni+=m.geometry.index.count;}
+  if(BATCH.vtx-(c.nv||0)+nv>BATCH.cap){batchDrop(c);c.failed=c.sig;return;}/* por encima del tope: este grupo se dibuja pieza a pieza */
+  const geo=new THREE.BufferGeometry();
+  for(const n of names){const a0=g0.attributes[n],k=a0.itemSize,arr=new a0.array.constructor(nv*k);let o=0;
+    for(const m of L){const a=m.geometry.attributes[n],len=a.count*k;arr.set(len===a.array.length?a.array:a.array.subarray(0,len),o);o+=len;}
+    const A=new THREE.BufferAttribute(arr,k,a0.normalized);A.onUpload(batchFree);geo.setAttribute(n,A);}
+  const ix=new Uint32Array(ni);let p=0,base=0;
+  for(const m of L){const g=m.geometry,src=g.index.array,cnt=g.index.count;for(let j=0;j<cnt;j++)ix[p++]=src[j]+base;base+=g.attributes.position.count;}
+  const I=new THREE.BufferAttribute(ix,1);I.onUpload(batchFree);geo.setIndex(I);
+  const box=new THREE.Box3(),sb=new THREE.Box3();
+  for(const m of L){const g=m.geometry;if(!g.boundingSphere)g.computeBoundingSphere();const bs=g.boundingSphere;sb.min.copy(bs.center).subScalar(bs.radius);sb.max.copy(bs.center).addScalar(bs.radius);box.union(sb);}
+  geo.boundingSphere=new THREE.Sphere();box.getBoundingSphere(geo.boundingSphere);geo.boundingBox=box.clone();
+  if(c.proxy){c.proxy.geometry.dispose();c.proxy.geometry=geo;c.proxy.material=L[0].material;}
+  else{c.proxy=new THREE.Mesh(geo,L[0].material);c.proxy.matrixAutoUpdate=false;c.proxy.raycast=()=>{};c.proxy.userData.batch=true;}
+  c.proxy.castShadow=L[0].castShadow;c.proxy.receiveShadow=L[0].receiveShadow;c.builtSig=c.sig;BATCH.vtx+=nv-(c.nv||0);c.nv=nv;BATCH.stats.builds++;}
+function batchDrop(c){if(c.proxy){c.proxy.geometry.dispose();c.proxy=null;}BATCH.vtx-=c.nv||0;c.nv=0;c.builtSig=null;}
+function batchReset(){for(const c of BATCH.chunks.values())batchDrop(c);BATCH.chunks.clear();}
+function batchBegin(now){if(!BATCH.on||!meshes.length)return;const F=++BATCH.frame;
+  try{scene.updateMatrixWorld();}catch(e){}
+  const seen=new Map();
+  for(let i=0;i<meshes.length;i++){const m=meshes[i];if(!batchOK(m))continue;const gs=batchGeoSig(m.geometry);if(gs==null)continue;
+    const k=m.material.id+'|'+gs+'|'+(m.castShadow?1:0)+(m.receiveShadow?1:0)+'|'+((i/BATCH.size)|0);
+    let L=seen.get(k);if(!L){L=[];seen.set(k,L);}L.push(m);}
+  for(const [k,L] of seen){if(L.length<2)continue;let c=BATCH.chunks.get(k);
+    if(!c){c={sig:'',t:now,proxy:null,builtSig:null,cur:null,f:0};BATCH.chunks.set(k,c);}
+    const s=batchSig(L);if(s!==c.sig){c.sig=s;c.t=now;}c.cur=L;c.f=F;}
+  for(const [k,c] of BATCH.chunks)if(c.f!==F){batchDrop(c);BATCH.chunks.delete(k);}
+  const t0=performance.now();
+  for(const c of BATCH.chunks.values()){if(c.builtSig===c.sig||c.failed===c.sig||now-c.t<BATCH.settle)continue;if(performance.now()-t0>BATCH.budget)break;try{batchBuild(c);}catch(e){batchDrop(c);c.failed=c.sig;console.warn('batch',e);}}
+  let nc=0,nm=0;
+  for(const c of BATCH.chunks.values()){if(!c.proxy||c.builtSig!==c.sig)continue;nc++;
+    for(const m of c.cur){m.visible=false;BATCH.hidden.push(m);nm++;}BATCH.grp.add(c.proxy);}
+  BATCH.stats.chunks=nc;BATCH.stats.members=nm;
+  if(nc)scene.add(BATCH.grp);}
+function batchEnd(){const H=BATCH.hidden;for(let i=0;i<H.length;i++)H[i].visible=true;H.length=0;
+  if(BATCH.grp.parent)BATCH.grp.parent.remove(BATCH.grp);if(BATCH.grp.children.length)BATCH.grp.clear();}
 let FRAME_ERR=0;function frame(now){requestAnimationFrame(frame);try{frame0(now);}catch(e){if(FRAME_ERR++<3)console.error('frame',e);}}
 function frame0(now){if(!cv.clientWidth||!cv.clientHeight){last=now;return;}/* lienzo oculto o sin tamaño: no se dibuja (evita búferes de tamaño cero) */const raw=(now-last)/1000;const dt=Math.min(0.05,raw);last=now;dprTick(raw);if(typeof shadowsTick==='function')try{shadowsTick(dt);}catch(_){}const k=1-Math.pow(0.0008,dt);
   orb.th+=(orb.T.th-orb.th)*k;orb.ph+=(orb.T.ph-orb.ph)*k;orb.r+=(orb.T.r-orb.r)*k;orb.tgt.lerp(orb.T.tgt,k);
@@ -8500,7 +8579,7 @@ function frame0(now){if(!cv.clientWidth||!cv.clientHeight){last=now;return;}/* l
   tickContraction(dt);autoHRTick(dt);fadeTick(dt);gaitTick(dt);sqTick(dt);if(typeof ctTick==='function')ctTick(dt);
   if(playing&&currentTab==='mov'){playT+=dt;angle=curM.max*(0.5-0.5*Math.cos(playT*1.4));$('#angle').value=Math.round(angle);updateReadout();applyPose();}
   axisGroup.visible=showAxes;
-  if(needDraw(now)){renderer.render(scene,camera);if(typeof aoRender==='function')try{aoRender();}catch(e){AO.on=false;console.warn('AO',e);}}
+  if(needDraw(now)){try{try{batchBegin(now);}catch(e){batchEnd();BATCH.on=false;batchReset();console.warn('batch',e);}renderer.render(scene,camera);if(typeof aoRender==='function')try{aoRender();}catch(e){AO.on=false;console.warn('AO',e);}}finally{batchEnd();}}
   const r=cv.getBoundingClientRect();
   for(const L of labels){let p=null,show=false;
     if(L.group==='vec'){const gp=L.getPos();show=!!gp;p=gp?gp.clone():null;}
@@ -8831,7 +8910,7 @@ async function bgStart(){if(BG.run||BG.fin||!BG.on||!window.caches||!window.__CC
  const SKIPE=el=>!el||el.closest('.ic,.emo,script,style,textarea,input,.lbl,#gloList .gdef,.kv dd');
  function wrap(root){if(!root||!root.querySelectorAll)return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const L=[];let n;while((n=w.nextNode()))if(RX.test(n.nodeValue)){RX.lastIndex=0;L.push(n);}RX.lastIndex=0;
   for(const t of L){const p=t.parentElement;if(SKIPE(p))continue;const v=t.nodeValue;const f=document.createDocumentFragment();let last=0;v.replace(RX,(m,off)=>{if(off>last)f.appendChild(document.createTextNode(v.slice(last,off)));const i=document.createElement('i');i.className='emo';i.setAttribute('aria-hidden','true');i.textContent=m;f.appendChild(i);last=off+m.length;return m;});if(last<v.length)f.appendChild(document.createTextNode(v.slice(last)));t.replaceWith(f);}}
- let pend=false;const ob=new MutationObserver(()=>{if(pend)return;pend=true;requestAnimationFrame(()=>{pend=false;ob.disconnect();try{wrap(document.body);}catch(e){}ob.observe(document.body,{childList:true,subtree:true});});});
+ let pend=false;const TG=new Set();const ob=new MutationObserver(recs=>{for(const r of recs){const t=r.target;TG.add(t&&t.nodeType===1?t:t&&t.parentElement);}if(pend)return;pend=true;requestAnimationFrame(()=>{pend=false;ob.disconnect();try{for(const t of TG)if(t&&t.isConnected)wrap(t);}catch(e){}TG.clear();ob.observe(document.body,{childList:true,subtree:true});});});/* v154: solo recorre los nodos que cambiaron (antes, la página entera en cada cambio de texto) */
  wrap(document.body);ob.observe(document.body,{childList:true,subtree:true});})();
 /* bienvenida: tres opciones principales arriba, el resto en «Más formas de empezar» */
 (function(){if(typeof renderWelcomeExtra!=='function')return;const _rwe=renderWelcomeExtra;
@@ -10336,7 +10415,7 @@ renderProt();
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
  const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
- const APP_V='corpus-v153';/* igual que V en sw.js: se cambian juntos en cada publicación */
+ const APP_V='corpus-v154';/* igual que V en sw.js: se cambian juntos en cada publicación */
  const hadCtl=!!navigator.serviceWorker.controller;let upShown=false;
  /* aviso de versión nueva: si alguien tiene abierta (o instalada) una versión antigua, se le ofrece actualizar */
  const upBar=v=>{if(upShown)return;upShown=true;const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');
