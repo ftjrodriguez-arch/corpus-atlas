@@ -8498,6 +8498,29 @@ function needDraw(now){let go=DRAW.force||now-DRAW.inp<1500||now-DRAW.t>500;
   if(!go){try{go=!!(spin||playing||contraction||(gait.on&&gait.play)||(typeof CT!=='undefined'&&CT.on)||PHY.on||fading.length||Object.keys(loadQueue.parts).length||document.body.classList.contains('teach')||meshes.some(m=>m.userData.offT));}catch(_){go=true;}}
   if(go){DRAW.t=now;DRAW.p.copy(camera.position);DRAW.g.copy(orb.tgt);DRAW.force=false;}
   return go;}
+/* ───── Sombras en caché (v155). La luz de las sombras sigue al punto que se mira, no al ángulo de la cámara: al girar,
+   el mapa de sombras no cambia. Solo se recalcula cuando cambia algo que lo afecta (piezas que proyectan sombra, su
+   geometría, material, posición o visibilidad, las luces, la cámara de la sombra o los planos de corte). Fuera del
+   dibujo principal (fotos, miniaturas) todo sigue como antes. ?noshcache lo desactiva; con ?qa, window.__shc. ───── */
+var SHC={on:true,rs:null,stats:{renders:0,skips:0}};
+try{const q=new URLSearchParams(location.search);if(q.has('noshcache'))SHC.on=false;if(q.has('qa'))window.__shc=SHC;}catch(e){}
+function shcQ(h,x){return (Math.imul(h,31)+Math.round(x*1e6))|0;}
+function shcSig(){let a=7,b=11,n=0;
+  scene.traverseVisible(o=>{
+    if(o.isLight&&o.castShadow&&o.shadow){const e=o.matrixWorld.elements;for(let i=12;i<15;i++)a=shcQ(a,e[i]);const t=o.target;if(t){const f=t.matrixWorld.elements;for(let i=12;i<15;i++)a=shcQ(a,f[i]);}
+      const c=o.shadow.camera;a=shcQ(a,c.left);a=shcQ(a,c.right);a=shcQ(a,c.top);a=shcQ(a,c.bottom);a=shcQ(a,c.near);a=shcQ(a,c.far);a=shcQ(a,o.shadow.mapSize.x);if(!o.shadow.map)a=(a+977)|0;return;}
+    if(!(o.isMesh||o.isLine||o.isPoints)||!o.castShadow)return;n++;
+    const g=o.geometry,mt=o.material;a=(Math.imul(a,31)+o.id)|0;a=(Math.imul(a,31)+(g?g.id:0))|0;
+    if(g){b=(Math.imul(b,31)+(g.index?g.index.version:0))|0;for(const k in g.attributes)b=(Math.imul(b,31)+g.attributes[k].version)|0;b=(Math.imul(b,31)+g.drawRange.start)|0;b=(Math.imul(b,31)+(g.drawRange.count===Infinity?-1:g.drawRange.count))|0;}
+    const ms=Array.isArray(mt)?mt:[mt];for(const m of ms)if(m){b=(Math.imul(b,31)+m.id)|0;b=(Math.imul(b,31)+m.side)|0;b=(Math.imul(b,31)+(m.shadowSide==null?-1:m.shadowSide))|0;b=(Math.imul(b,31)+(m.clipShadows?1:0))|0;b=(Math.imul(b,31)+(m.visible?1:0))|0;}
+    const e=o.matrixWorld.elements;for(let i=0;i<16;i++)b=shcQ(b,e[i]);});
+  for(const p of clipArr){a=shcQ(a,p.normal.x);a=shcQ(a,p.normal.y);a=shcQ(a,p.normal.z);a=shcQ(a,p.constant);}
+  a=(Math.imul(a,31)+clipArr.length)|0;a=(Math.imul(a,31)+(renderer.localClippingEnabled?1:0))|0;
+  return a+':'+b+':'+n;}
+function shcBegin(){if(!SHC.on)return;const sm=renderer.shadowMap;if(!sm.enabled)return;let s;try{s=shcSig();}catch(e){return;}
+  if(isPhone()){/* teléfono: igual que antes (cada dos fotogramas), pero sin rehacerla si no cambió nada */if(sm.needsUpdate){if(s===SHC.rs&&key.shadow.map){sm.needsUpdate=false;SHC.stats.skips++;}else{SHC.rs=s;SHC.stats.renders++;}}return;}
+  sm.autoUpdate=false;if(s!==SHC.rs||!key.shadow.map){sm.needsUpdate=true;SHC.rs=s;SHC.stats.renders++;}else SHC.stats.skips++;}
+function shcEnd(){if(!SHC.on)return;const sm=renderer.shadowMap;if(sm.enabled&&!isPhone())sm.autoUpdate=true;}
 /* ───── Dibujo agrupado (v154). Las piezas opacas que comparten material, atributos y transformación (identidad en todo
    el atlas) se dibujan juntas: los mismos vértices, en las mismas coordenadas y con el mismo material, así que la imagen
    es la misma con muchas menos llamadas de dibujo (de miles a decenas). Una pieza que cambia (postura, selección, alta
@@ -8579,7 +8602,8 @@ function frame0(now){if(!cv.clientWidth||!cv.clientHeight){last=now;return;}/* l
   tickContraction(dt);autoHRTick(dt);fadeTick(dt);gaitTick(dt);sqTick(dt);if(typeof ctTick==='function')ctTick(dt);
   if(playing&&currentTab==='mov'){playT+=dt;angle=curM.max*(0.5-0.5*Math.cos(playT*1.4));$('#angle').value=Math.round(angle);updateReadout();applyPose();}
   axisGroup.visible=showAxes;
-  if(needDraw(now)){try{try{batchBegin(now);}catch(e){batchEnd();BATCH.on=false;batchReset();console.warn('batch',e);}renderer.render(scene,camera);if(typeof aoRender==='function')try{aoRender();}catch(e){AO.on=false;console.warn('AO',e);}}finally{batchEnd();}}
+  const DRW=needDraw(now);if(DRW){try{try{shcBegin();}catch(e){SHC.on=false;}try{batchBegin(now);}catch(e){batchEnd();BATCH.on=false;batchReset();console.warn('batch',e);}renderer.render(scene,camera);if(typeof aoRender==='function')try{aoRender();}catch(e){AO.on=false;console.warn('AO',e);}}finally{batchEnd();try{shcEnd();}catch(e){}}}
+  if(DRW||now-(frame0.lt||0)>120){frame0.lt=now;/* v155: en reposo las etiquetas se recolocan cada 120 ms (antes, en cada fotograma) */
   const r=cv.getBoundingClientRect();
   for(const L of labels){let p=null,show=false;
     if(L.group==='vec'){const gp=L.getPos();show=!!gp;p=gp?gp.clone():null;}
@@ -8590,7 +8614,7 @@ function frame0(now){if(!cv.clientWidth||!cv.clientHeight){last=now;return;}/* l
     if(show){p=p||L.getPos();const v=p.clone().project(camera);if(v.z>1)show=false;else{const X=(v.x+1)/2*r.width,Y=(1-v.y)/2*r.height;if(L.co){L.ax=X;L.ay=Y;if(X<-20||X>r.width+20||Y<-20||Y>r.height+20)show=false;}else{L.el.style.left=X+'px';L.el.style.top=Y+'px';if(L.group==='tag'){/* la etiqueta de la estructura seleccionada nunca se sale de la pantalla: si no cabe a la derecha, se coloca a la izquierda del punto */const room=r.width-X-28;L.el.style.maxWidth=Math.max(130,Math.min(520,room))+'px';}}}}
     if(L.show!==show){L.el.hidden=!show;L.show=show;}}
   cullLabels();
-  layoutPins(r);animTick&&animTick(dt);phyTick(dt);
+  layoutPins(r);}animTick&&animTick(dt);phyTick(dt);
   }
 
 /* ───────── Interfaz limpia: barra rápida de capas, herramientas, conteos, etiquetas ───────── */
@@ -10415,7 +10439,7 @@ renderProt();
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
  const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
- const APP_V='corpus-v154';/* igual que V en sw.js: se cambian juntos en cada publicación */
+ const APP_V='corpus-v155';/* igual que V en sw.js: se cambian juntos en cada publicación */
  const hadCtl=!!navigator.serviceWorker.controller;let upShown=false;
  /* aviso de versión nueva: si alguien tiene abierta (o instalada) una versión antigua, se le ofrece actualizar */
  const upBar=v=>{if(upShown)return;upShown=true;const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');

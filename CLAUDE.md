@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v154**.
+(GitHub Pages desde `main`). Versión actual: **v155**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -62,6 +62,8 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 - Al comparar capturas, hazlo en la misma sesión (`__batch.on=false`): la aparición de capas y otras transiciones avanzan por fotograma y dos sesiones casi nunca coinciden.
 - `loadSys` y `loadHR` preparan las piezas por tandas de ~12 ms; `fetchB64` usa `Uint8Array.fromBase64` o `fetch(data:)` antes del bucle con `atob`.
 - Los observadores de emojis y de traducción solo recorren los nodos que cambiaron.
+- v155: sombras en caché `SHC` (`shcBegin`/`shcEnd` alrededor del dibujo principal; firma en `shcSig`). Si añades algo que cambie las sombras sin pasar por geometría, material, matriz, visibilidad, luces o `clipArr`, inclúyelo en `shcSig`. Etiquetas a ~8 Hz en reposo (`frame0.lt`).
+- Con dibujo por software (swiftshader) la prueba «Inglés: sistema traducido» puede fallar por tiempo: la traducción va en el siguiente fotograma y cada uno tarda segundos.
 
 ## Pendiente
 - Decisión del usuario: NUNCA servidor propio, cuentas ni base de datos. Todo debe funcionar en local y sin conexión (GitHub Pages solo sirve los archivos estáticos).
