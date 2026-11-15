@@ -1,0 +1,422 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Acino pulmonar · Corpus Atlas</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="data:,">
+<style>
+html,body{margin:0;height:100%;background:#0b1120;color:#e2e8f0;font:14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;-webkit-text-size-adjust:100%}
+body.embed{background:transparent}
+#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none;cursor:grab}
+#c:active{cursor:grabbing}
+#c2{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+#top{position:absolute;left:10px;top:10px;right:250px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;pointer-events:none}
+#top>*{pointer-events:auto}
+#ttl{margin:0 6px 0 2px;font:700 16px system-ui,sans-serif;color:#f8fafc;white-space:nowrap;text-shadow:0 1px 3px #000,0 0 8px #0b1120}
+#ui{display:flex;flex-wrap:wrap;gap:6px}
+button{font:inherit;color:#e2e8f0}
+#ui button{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:6px 10px;cursor:pointer}
+#ui button:hover{border-color:#64748b}
+#ui button.on{background:#be185d;border-color:#f472b6}
+#ui button:focus-visible,.tg:focus-visible{outline:2px solid #f472b6;outline-offset:1px}
+.pan{background:rgba(15,23,42,.88);border:1px solid #334155;border-radius:10px}
+#leg{position:absolute;right:10px;top:var(--legTop,10px);width:226px;font-size:12px;line-height:1.55;overflow:auto}
+.tg{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;background:none;border:0;padding:7px 10px;cursor:pointer;font-weight:700;font-size:12px;text-align:left}
+.tg:after{content:'▾';opacity:.7;transition:transform .15s}
+.shut .tg:after{transform:rotate(-90deg)}
+.shut>.bd{display:none!important}
+#legB{padding:0 10px 8px}
+#legB i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+#legB .nt{opacity:.72;margin-top:4px}
+#scale{display:flex;align-items:center;gap:6px;margin-top:6px}
+#scale b{display:block;height:4px;border:1px solid #e2e8f0;border-top:0;min-width:10px}
+#memW{position:absolute;right:10px;bottom:calc(var(--capH,60px) + 20px);width:340px}
+#memW.shut,#leg.shut{width:auto!important}
+#mem{display:block;width:100%;height:172px}
+#cap{position:absolute;left:10px;bottom:10px;right:10px;padding:8px 12px;font-size:13px;line-height:1.45}
+#lbs{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lb{position:absolute;left:0;top:0;font:600 12px system-ui,sans-serif;color:#fff;text-shadow:0 1px 3px #000,0 0 6px #000;white-space:nowrap;visibility:hidden;will-change:transform}
+.lb:before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:#fff;margin-right:5px;vertical-align:1px}
+#msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;color:#cbd5e1;background:#0b1120;text-align:center;padding:20px}
+#msg.off{display:none}
+/* incrustada en la app: botones compactos y sin título */
+body.embed #ttl{display:none}
+body.embed #ui button{padding:4px 8px;font-size:12px;border-radius:7px}
+body.embed #cap{font-size:12px;padding:6px 10px}
+/* teléfono */
+@media (max-width:600px){
+ #top{right:10px;top:max(8px,env(safe-area-inset-top))}
+ #ttl{font-size:14px;width:100%}
+ #ui{gap:5px}
+ #ui button{padding:5px 8px;font-size:12px}
+ #leg{width:auto;max-width:200px;font-size:11.5px}
+ #memW{width:min(300px,calc(100% - 20px))}
+ #mem{height:136px}
+ #cap{font-size:12px;padding:6px 10px;cursor:pointer;bottom:max(8px,env(safe-area-inset-bottom))}
+ #cap.clamp span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+ #cap.clamp:after{content:'▾';position:absolute;right:6px;bottom:3px;font-size:10px;opacity:.6}
+ .lb{font-size:11px}
+}
+@media (min-width:601px) and (max-width:900px){#top{right:248px}}
+</style></head><body>
+<canvas id="c" tabindex="0"></canvas>
+<div id="lbs"></div>
+<div id="top"><h1 id="ttl"></h1><div id="ui" role="toolbar"></div></div>
+<aside id="leg" class="pan"><button class="tg" id="legT" aria-expanded="true" aria-controls="legB"></button><div class="bd" id="legB"><div id="legL"></div><div class="nt" id="legN"></div><div id="scale"><b></b><span></span></div><div class="nt" id="hint"></div></div></aside>
+<div id="memW" class="pan"><button class="tg" id="memT" aria-expanded="true" aria-controls="mem"></button><canvas class="bd" id="mem" aria-hidden="true"></canvas></div>
+<div id="cap" class="pan" aria-live="polite"><span id="capT"></span></div>
+<div id="msg"></div>
+<script src="../lib/three.min.js"></script>
+<script>
+'use strict';
+/* ================= textos (es, en, pt-BR, fr, de) ================= */
+const I18N={
+es:{doc:'Acino pulmonar · Corpus Atlas',ttl:'Acino pulmonar',views:'Vistas',leg:'Leyenda',load:'Cargando acino…',err:'No se pudo cargar el modelo (WebGL o datos).',
+ hint:'Arrastra para girar · rueda o pellizco para acercar · doble clic: reiniciar',
+ m:{all:['Acino completo','Bronquiolo respiratorio → conducto alveolar → sacos alveolares. Cada alvéolo comparte sus paredes (tabiques) con los vecinos; dentro de cada tabique corre una red de capilares muy densa.'],
+  cut:['Abrir el saco','Al cortar se ve que los alvéolos son huecos de aire que se abren al conducto por su boca (anillo de entrada). Los tabiques son finos y llevan los capilares.'],
+  blood:['Solo sangre','La arteriola llega con sangre pobre en O₂ (azul) junto a la vía aérea; los eritrocitos recorren la red en ≈0,75 s y se cargan de O₂ en el primer tercio. La sangre sale por vénulas de la periferia del acino (rojo).'],
+  gas:['Intercambio','El O₂ (celeste) pasa del aire a la sangre y el CO₂ (ámbar), de la sangre al aire, por difusión a través de la membrana alveolocapilar.'],
+  cells:['Células','Neumocitos I (planos, cubren ~95 % de la superficie), neumocitos II (cúbicos, en las esquinas; fabrican surfactante) y macrófagos alveolares que limpian partículas.']},
+ lg:['Tabiques alveolares','Sangre pobre en O₂','Sangre rica en O₂','O₂','CO₂','Neumocito I','Neumocito II','Macrófago'],
+ note:'Capilares dibujados con el doble de su separación real',
+ lb:['Bronquiolo respiratorio','Conducto alveolar','Saco alveolar','Arteriola pulmonar (sangre pobre en O₂)','Vénula pulmonar (sangre con O₂)','Alvéolo (~0,2 mm)','Macrófago alveolar','Neumocito II (surfactante)','Neumocito I','Red capilar'],
+ mem:'Membrana alveolocapilar (≈0,2–0,6 µm)',ly:['Aire alveolar','Surfactante','Neumocito I','Membrana basal fusionada','Endotelio','Plasma','Eritrocito'],
+ o2:'O₂  PA 100 → Pc 40→100 mmHg',co2:'CO₂  Pc 46 → PA 40 mmHg · tránsito ≈0,75 s'},
+en:{doc:'Pulmonary acinus · Corpus Atlas',ttl:'Pulmonary acinus',views:'Views',leg:'Legend',load:'Loading acinus…',err:'The model could not be loaded (WebGL or data).',
+ hint:'Drag to rotate · wheel or pinch to zoom · double-click to reset',
+ m:{all:['Whole acinus','Respiratory bronchiole → alveolar duct → alveolar sacs. Each alveolus shares its walls (septa) with its neighbors; a very dense capillary network runs inside every septum.'],
+  cut:['Open the sac','The cut shows that alveoli are air spaces opening onto the duct through their mouth (entrance ring). The septa are thin and carry the capillaries.'],
+  blood:['Blood only','The arteriole brings O₂-poor blood (blue) alongside the airway; red blood cells cross the network in ≈0.75 s and are loaded with O₂ within the first third. Blood leaves through venules at the edge of the acinus (red).'],
+  gas:['Gas exchange','O₂ (light blue) moves from air to blood and CO₂ (amber) from blood to air, by diffusion across the alveolar-capillary membrane.'],
+  cells:['Cells','Type I pneumocytes (flat, covering ~95% of the surface), type II pneumocytes (cuboidal, in the corners; they make surfactant) and alveolar macrophages that clear particles.']},
+ lg:['Alveolar septa','O₂-poor blood','O₂-rich blood','O₂','CO₂','Type I pneumocyte','Type II pneumocyte','Macrophage'],
+ note:'Capillaries drawn at twice their real spacing',
+ lb:['Respiratory bronchiole','Alveolar duct','Alveolar sac','Pulmonary arteriole (O₂-poor blood)','Pulmonary venule (oxygenated blood)','Alveolus (~0.2 mm)','Alveolar macrophage','Type II pneumocyte (surfactant)','Type I pneumocyte','Capillary network'],
+ mem:'Alveolar-capillary membrane (≈0.2–0.6 µm)',ly:['Alveolar air','Surfactant','Type I pneumocyte','Fused basement membrane','Endothelium','Plasma','Red blood cell'],
+ o2:'O₂  PA 100 → Pc 40→100 mmHg',co2:'CO₂  Pc 46 → PA 40 mmHg · transit ≈0.75 s'},
+pt:{doc:'Ácino pulmonar · Corpus Atlas',ttl:'Ácino pulmonar',views:'Visualizações',leg:'Legenda',load:'Carregando ácino…',err:'Não foi possível carregar o modelo (WebGL ou dados).',
+ hint:'Arraste para girar · roda do mouse ou pinça para aproximar · clique duplo: reiniciar',
+ m:{all:['Ácino completo','Bronquíolo respiratório → ducto alveolar → sacos alveolares. Cada alvéolo compartilha suas paredes (septos) com os vizinhos; dentro de cada septo corre uma rede de capilares muito densa.'],
+  cut:['Abrir o saco','O corte mostra que os alvéolos são espaços de ar que se abrem para o ducto pela sua boca (anel de entrada). Os septos são finos e contêm os capilares.'],
+  blood:['Só o sangue','A arteríola chega com sangue pobre em O₂ (azul) junto à via aérea; as hemácias percorrem a rede em ≈0,75 s e se carregam de O₂ já no primeiro terço. O sangue sai por vênulas da periferia do ácino (vermelho).'],
+  gas:['Troca gasosa','O O₂ (azul-claro) passa do ar para o sangue e o CO₂ (âmbar), do sangue para o ar, por difusão através da membrana alveolocapilar.'],
+  cells:['Células','Pneumócitos tipo I (planos, cobrem ~95 % da superfície), pneumócitos tipo II (cúbicos, nos cantos; produzem surfactante) e macrófagos alveolares que removem partículas.']},
+ lg:['Septos alveolares','Sangue pobre em O₂','Sangue rico em O₂','O₂','CO₂','Pneumócito tipo I','Pneumócito tipo II','Macrófago'],
+ note:'Capilares desenhados com o dobro do espaçamento real',
+ lb:['Bronquíolo respiratório','Ducto alveolar','Saco alveolar','Arteríola pulmonar (sangue pobre em O₂)','Vênula pulmonar (sangue oxigenado)','Alvéolo (~0,2 mm)','Macrófago alveolar','Pneumócito tipo II (surfactante)','Pneumócito tipo I','Rede capilar'],
+ mem:'Membrana alveolocapilar (≈0,2–0,6 µm)',ly:['Ar alveolar','Surfactante','Pneumócito tipo I','Membrana basal fundida','Endotélio','Plasma','Hemácia'],
+ o2:'O₂  PA 100 → Pc 40→100 mmHg',co2:'CO₂  Pc 46 → PA 40 mmHg · trânsito ≈0,75 s'},
+fr:{doc:'Acinus pulmonaire · Corpus Atlas',ttl:'Acinus pulmonaire',views:'Vues',leg:'Légende',load:'Chargement de l’acinus…',err:'Impossible de charger le modèle (WebGL ou données).',
+ hint:'Glisser pour tourner · molette ou pincement pour zoomer · double-clic : réinitialiser',
+ m:{all:['Acinus entier','Bronchiole respiratoire → canal alvéolaire → sacs alvéolaires. Chaque alvéole partage ses parois (septums) avec ses voisines ; dans chaque septum circule un réseau capillaire très dense.'],
+  cut:['Ouvrir le sac','La coupe montre que les alvéoles sont des espaces aériens qui s’ouvrent sur le canal par leur orifice (anneau d’entrée). Les septums sont fins et contiennent les capillaires.'],
+  blood:['Sang seul','L’artériole apporte du sang pauvre en O₂ (bleu) le long des voies aériennes ; les globules rouges traversent le réseau en ≈0,75 s et se chargent en O₂ dès le premier tiers. Le sang repart par des veinules à la périphérie de l’acinus (rouge).'],
+  gas:['Échanges gazeux','L’O₂ (bleu clair) passe de l’air au sang et le CO₂ (ambre), du sang à l’air, par diffusion à travers la membrane alvéolo-capillaire.'],
+  cells:['Cellules','Pneumocytes de type I (aplatis, ~95 % de la surface), pneumocytes de type II (cubiques, dans les angles ; ils produisent le surfactant) et macrophages alvéolaires qui éliminent les particules.']},
+ lg:['Septums alvéolaires','Sang pauvre en O₂','Sang riche en O₂','O₂','CO₂','Pneumocyte de type I','Pneumocyte de type II','Macrophage'],
+ note:'Capillaires dessinés deux fois plus espacés qu’en réalité',
+ lb:['Bronchiole respiratoire','Canal alvéolaire','Sac alvéolaire','Artériole pulmonaire (sang pauvre en O₂)','Veinule pulmonaire (sang oxygéné)','Alvéole (~0,2 mm)','Macrophage alvéolaire','Pneumocyte II (surfactant)','Pneumocyte I','Réseau capillaire'],
+ mem:'Membrane alvéolo-capillaire (≈0,2–0,6 µm)',ly:['Air alvéolaire','Surfactant','Pneumocyte I','Membrane basale fusionnée','Endothélium','Plasma','Globule rouge'],
+ o2:'O₂  PA 100 → Pc 40→100 mmHg',co2:'CO₂  Pc 46 → PA 40 mmHg · transit ≈0,75 s'},
+de:{doc:'Lungenazinus · Corpus Atlas',ttl:'Lungenazinus',views:'Ansichten',leg:'Legende',load:'Azinus wird geladen …',err:'Das Modell konnte nicht geladen werden (WebGL oder Daten).',
+ hint:'Ziehen zum Drehen · Mausrad oder zwei Finger zum Zoomen · Doppelklick: zurücksetzen',
+ m:{all:['Ganzer Azinus','Respiratorischer Bronchiolus → Alveolargang → Alveolarsäckchen. Jede Alveole teilt ihre Wände (Septen) mit den Nachbaralveolen; in jedem Septum verläuft ein sehr dichtes Kapillarnetz.'],
+  cut:['Säckchen öffnen','Der Schnitt zeigt: Alveolen sind lufthaltige Räume, die sich mit ihrer Öffnung (Eingangsring) zum Alveolargang hin öffnen. Die Septen sind dünn und enthalten die Kapillaren.'],
+  blood:['Nur Blut','Die Arteriole bringt O₂-armes Blut (blau) entlang des Atemwegs; die Erythrozyten durchqueren das Netz in ≈0,75 s und sind schon im ersten Drittel mit O₂ beladen. Das Blut verlässt den Azinus über Venolen an seinem Rand (rot).'],
+  gas:['Gasaustausch','O₂ (hellblau) gelangt aus der Luft ins Blut und CO₂ (bernsteinfarben) aus dem Blut in die Luft – durch Diffusion über die Blut-Luft-Schranke.'],
+  cells:['Zellen','Pneumozyten Typ I (flach, bedecken ~95 % der Oberfläche), Pneumozyten Typ II (kubisch, in den Ecken; bilden Surfactant) und Alveolarmakrophagen, die Partikel beseitigen.']},
+ lg:['Alveolarsepten','O₂-armes Blut','O₂-reiches Blut','O₂','CO₂','Pneumozyt Typ I','Pneumozyt Typ II','Makrophage'],
+ note:'Kapillaren mit doppeltem Abstand dargestellt',
+ lb:['Respiratorischer Bronchiolus','Alveolargang','Alveolarsäckchen','Pulmonalarteriole (O₂-armes Blut)','Pulmonalvenole (O₂-reiches Blut)','Alveole (~0,2 mm)','Alveolarmakrophage','Pneumozyt Typ II (Surfactant)','Pneumozyt Typ I','Kapillarnetz'],
+ mem:'Blut-Luft-Schranke (≈0,2–0,6 µm)',ly:['Alveolarluft','Surfactant','Pneumozyt Typ I','Verschmolzene Basalmembran','Endothel','Plasma','Erythrozyt'],
+ o2:'O₂  PA 100 → Pc 40→100 mmHg',co2:'CO₂  Pc 46 → PA 40 mmHg · Kontaktzeit ≈0,75 s'}};
+const LANGS=Object.keys(I18N);
+/* nombres de vista en la URL / API ↔ internos */
+const VIEW={todo:'all',corte:'cut',sangre:'blood',intercambio:'gas',celulas:'cells',células:'cells',all:'all',cut:'cut',blood:'blood',gas:'gas',cells:'cells'};
+const VNAME={all:'todo',cut:'corte',blood:'sangre',gas:'intercambio',cells:'celulas'};
+const MODE_KEYS=['all','cut','blood','gas','cells'];
+const Q=new URLSearchParams(location.search);
+const EMBED=Q.get('embed')==='1';
+const AUTO_LITE=matchMedia('(pointer:coarse)').matches&&Math.min(screen.width,screen.height)<900;
+const LITE=Q.has('lite')?Q.get('lite')!=='0':AUTO_LITE;
+let lang=LANGS.includes(Q.get('lang'))?Q.get('lang'):'es';
+let mode=VIEW[(Q.get('v')||'').toLowerCase()]||'all';
+if(EMBED)document.body.classList.add('embed');
+const $=id=>document.getElementById(id);
+const T=()=>I18N[lang];
+$('msg').textContent=T().load;
+const narrow=()=>innerWidth<=600;
+
+/* ================= arranque ================= */
+const post=m=>{if(parent!==window)try{parent.postMessage(Object.assign({acino:'',from:'acino'},m),'*');}catch(e){}};
+async function boot(){
+  const res=await fetch('acino.bin');if(!res.ok)throw new Error('acino.bin '+res.status);
+  const buf=await res.arrayBuffer();const dv=new DataView(buf);
+  if(String.fromCharCode(dv.getUint8(0),dv.getUint8(1),dv.getUint8(2),dv.getUint8(3))!=='ACN1')throw new Error('acino.bin: formato');
+  const hl=dv.getUint32(4,true),D=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,8,hl))),base=8+hl;
+  const U16=k=>new Uint16Array(buf,base+D.b[k][0],D.b[k][1]);
+  const sc=[0,1,2].map(i=>(D.hi[i]-D.lo[i])/65535);
+  const deq=q=>{const f=new Float32Array(q.length);for(let i=0;i<q.length;i+=3){f[i]=D.lo[0]+q[i]*sc[0];f[i+1]=D.lo[1]+q[i+1]*sc[1];f[i+2]=D.lo[2]+q[i+2]*sc[2];}return f;};
+  D.tp=deq(U16('tp'));D.ti=U16('ti');D.N=deq(U16('np'));D.E=U16('ne');D.MID=deq(U16('nm'));
+  const ph=U16('phi');D.PHI=new Float32Array(ph.length);D.SAT=new Float32Array(ph.length);
+  for(let i=0;i<ph.length;i++){const p=ph[i]/65535;D.PHI[i]=p;D.SAT[i]=1-Math.exp(-(1-p)/0.3);} // saturación: completa en el primer tercio
+  start(D);
+}
+boot().catch(e=>{console.warn(e);$('msg').textContent=T().err;post({acino:'error'});});
+
+function start(D){
+const V3=THREE.Vector3;
+let R;
+try{R=new THREE.WebGLRenderer({canvas:$('c'),antialias:!LITE,powerPreference:'high-performance'});}
+catch(e){$('msg').textContent=T().err;post({acino:'error'});return;}
+R.setPixelRatio(Math.min(LITE?1.5:2,devicePixelRatio||1));R.localClippingEnabled=true;R.outputEncoding=THREE.sRGBEncoding;
+R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.05;
+const cv=R.domElement,cv0=cv;cv.addEventListener('webglcontextlost',e=>e.preventDefault());
+const BG=0x0b1120;
+const S=new THREE.Scene();S.background=new THREE.Color(BG);S.fog=new THREE.Fog(BG,30,60);
+const cam=new THREE.PerspectiveCamera(35,1,0.05,400);
+S.add(new THREE.HemisphereLight(0xfff1f2,0x2a1a22,0.55));const key=new THREE.DirectionalLight(0xffffff,1.15);key.position.set(6,10,9);S.add(key);
+const rim=new THREE.DirectionalLight(0x9ecbff,0.5);rim.position.set(-8,3,-6);S.add(rim);
+const W=new THREE.Group();S.add(W);
+const clip=new THREE.Plane(new V3(0,0,-1),99);const clips=[clip];
+const lin=c=>new THREE.Color(c).convertSRGBToLinear();
+/* ---- tejido: paredes y tabiques ---- */
+const tg=new THREE.BufferGeometry();tg.setAttribute('position',new THREE.BufferAttribute(D.tp,3));tg.setIndex(new THREE.BufferAttribute(D.ti,1));tg.computeVertexNormals();
+const tMat=LITE?new THREE.MeshStandardMaterial({color:lin(0xf2b8bf),roughness:0.66,metalness:0,side:THREE.DoubleSide,clippingPlanes:clips,transparent:true})
+ :new THREE.MeshPhysicalMaterial({color:lin(0xf2b8bf),roughness:0.62,metalness:0,sheen:0.6,sheenColor:new THREE.Color(0xffd6dc),sheenRoughness:0.5,side:THREE.DoubleSide,clippingPlanes:clips,transparent:true});
+const tissue=new THREE.Mesh(tg,tMat);W.add(tissue);
+/* ---- red capilar ---- */
+const N=D.N,E=D.E,PHI=D.PHI,SAT=D.SAT,MID=D.MID;const nN=N.length/3,nE=E.length/2;
+const cBlue=new THREE.Color(0x2b4cff),cRed=new THREE.Color(0xe0182d),tmpC=new THREE.Color();
+const satCol=s=>tmpC.copy(cBlue).lerp(cRed,Math.min(1,Math.max(0,s))).convertSRGBToLinear();
+const capGeo=new THREE.CylinderGeometry(1,1,1,LITE?4:8,1,true);capGeo.translate(0,0.5,0);capGeo.rotateX(Math.PI/2);
+const capMat=new THREE.MeshStandardMaterial({roughness:0.45,metalness:0,clippingPlanes:clips});
+const caps=new THREE.InstancedMesh(capGeo,capMat,nE*2);const m4=new THREE.Matrix4(),a=new V3(),b=new V3(),c=new V3(),UP=new V3(0,1,0.0001),sv=new V3();
+const CAPR=0.058;let ci=0;
+const seg=(p,q,col)=>{const L=p.distanceTo(q);m4.lookAt(q,p,UP);m4.scale(sv.set(CAPR,CAPR,L));m4.setPosition(p);caps.setMatrixAt(ci,m4);caps.setColorAt(ci,col);ci++;};
+for(let e=0;e<nE;e++){const i=E[2*e],j=E[2*e+1];a.fromArray(N,3*i);b.fromArray(N,3*j);c.fromArray(MID,3*e);
+  seg(a,c,satCol(SAT[i]*0.75+SAT[j]*0.25));seg(c,b,satCol(SAT[i]*0.25+SAT[j]*0.75));}
+caps.instanceMatrix.needsUpdate=true;W.add(caps);
+const jGeo=LITE?new THREE.OctahedronGeometry(CAPR*1.08,0):new THREE.SphereGeometry(CAPR,8,6);const joints=new THREE.InstancedMesh(jGeo,capMat,LITE?nN:nN+nE);
+for(let i=0;i<nN;i++){m4.makeTranslation(N[3*i],N[3*i+1],N[3*i+2]);joints.setMatrixAt(i,m4);joints.setColorAt(i,satCol(SAT[i]));}
+if(!LITE)for(let e=0;e<nE;e++){m4.makeTranslation(MID[3*e],MID[3*e+1],MID[3*e+2]);joints.setMatrixAt(nN+e,m4);joints.setColorAt(nN+e,satCol((SAT[E[2*e]]+SAT[E[2*e+1]])/2));}W.add(joints);
+/* grafo con el índice de arista (para los eritrocitos) */
+const adj=Array.from({length:nN},()=>[]),adjE=Array.from({length:nN},()=>[]);
+for(let e=0;e<nE;e++){const i=E[2*e],j=E[2*e+1];adj[i].push(j);adjE[i].push(e);adj[j].push(i);adjE[j].push(e);}
+/* ---- vasos: arteriola (azul) y vénulas (rojo) ---- */
+const vmat=col=>new THREE.MeshStandardMaterial({color:lin(col),roughness:0.4,clippingPlanes:clips});
+const merge=gs=>{let nv=0,ni=0;for(const g of gs){nv+=g.attributes.position.count;ni+=g.index.count;}const P=new Float32Array(nv*3),Nn=new Float32Array(nv*3),I=new Uint32Array(ni);let ov=0,oi=0;
+  for(const g of gs){P.set(g.attributes.position.array,ov*3);Nn.set(g.attributes.normal.array,ov*3);const ix=g.index.array;for(let i=0;i<ix.length;i++)I[oi+i]=ix[i]+ov;ov+=g.attributes.position.count;oi+=ix.length;g.dispose();}
+  const m=new THREE.BufferGeometry();m.setAttribute('position',new THREE.BufferAttribute(P,3));m.setAttribute('normal',new THREE.BufferAttribute(Nn,3));m.setIndex(new THREE.BufferAttribute(I,1));return m;};
+const VG=new Map();const addG=(mat,g)=>{if(!VG.has(mat))VG.set(mat,[]);VG.get(mat).push(g);};
+const tube=(pts,r,mat)=>{const cv=new THREE.CatmullRomCurve3(pts.map(p=>new V3(p[0],p[1],p[2])));addG(mat,new THREE.TubeGeometry(cv,Math.max(16,pts.length*3),r,LITE?8:12,false));return cv;};
+const aMat=vmat(0x2546d8),vMat=vmat(0xc8102e);
+const artC=D.art.map((p,k)=>tube(p,k?0.14:0.19,aMat));const venC=D.ven.map(p=>tube(p,0.22,vMat));
+const twig=(ids,curves,mat,r)=>{const pts=curves.map(cv=>cv.getSpacedPoints(160)).flat();const n=new V3();for(let k=0;k<ids.length;k+=3){n.fromArray(N,3*ids[k]);let best=null,bd=1e9;for(const p of pts){const d=p.distanceToSquared(n);if(d<bd){bd=d;best=p;}}bd=Math.sqrt(bd);
+  if(bd>0.05&&bd<0.9){const cv=new THREE.CatmullRomCurve3([best.clone(),best.clone().lerp(n,0.5),n.clone()]);addG(mat,new THREE.TubeGeometry(cv,6,r,LITE?4:6,false));}}};
+twig(D.src,artC,aMat,0.07);twig(D.snk,venC,vMat,0.08);
+const vessels=[];for(const [mat,gs] of VG){const m=new THREE.Mesh(merge(gs),mat);W.add(m);vessels.push(m);}
+/* ---- células ---- */
+const cells=new THREE.Group();W.add(cells);
+const IIMat=vmat(0xd8a3e8),IMat=vmat(0x8b5cf6),macMat=vmat(0xd4a83a),lbMat=vmat(0xfff7ed);
+const IIgeo=new THREE.SphereGeometry(0.13,LITE?10:14,LITE?7:10),lbGeo=new THREE.SphereGeometry(0.028,6,5);
+const o3=new THREE.Object3D(),lbM=new THREE.Matrix4(),mII=[],mLB=[],mI=[];
+D.pII.forEach((p,k)=>{const d=new V3(...D.dII[k]);o3.position.set(p[0],p[1],p[2]).addScaledVector(d,0.12);o3.scale.set(1,1,0.75);o3.lookAt(o3.position.clone().add(d));o3.updateMatrix();mII.push(o3.matrix.clone());
+  for(let q=0;q<4;q++){lbM.makeTranslation((q%2-0.5)*0.09,(q>1?-0.5:0.5)*0.08,0.1);mLB.push(o3.matrix.clone().multiply(lbM));}});
+const Igeo=new THREE.SphereGeometry(0.11,LITE?8:12,LITE?6:8);
+D.pI.forEach(([p,n])=>{const d=new V3(n[0],n[1],n[2]);o3.position.set(p[0],p[1],p[2]).addScaledVector(d,0.02);o3.scale.set(1,1,1);o3.lookAt(o3.position.clone().add(d));o3.scale.set(1.3,0.8,0.28);o3.updateMatrix();mI.push(o3.matrix.clone());});
+const inst=(g,mat,ms)=>{const im=new THREE.InstancedMesh(g,mat,ms.length);ms.forEach((m,i)=>im.setMatrixAt(i,m));im.instanceMatrix.needsUpdate=true;cells.add(im);return im;};
+inst(IIgeo,IIMat,mII);inst(lbGeo,lbMat,mLB);inst(Igeo,IMat,mI);
+/* macrófago: cuerpo irregular con seudópodos */
+const macs=[];const sp1=new V3(0.8,0.1,0.6).normalize(),sp2=new V3(-0.7,0,-0.7).normalize();
+D.mac.forEach(p=>{const g=new THREE.IcosahedronGeometry(0.17,LITE?3:5);const pa=g.attributes.position;const v=new V3(),n=new V3();for(let i=0;i<pa.count;i++){v.fromBufferAttribute(pa,i);n.copy(v).normalize();const k=1+0.12*Math.sin(n.x*5+1)*Math.sin(n.y*4)+0.55*Math.max(0,n.dot(sp1)-0.75)*4+0.45*Math.max(0,n.dot(sp2)-0.8)*5;v.multiplyScalar(k);pa.setXYZ(i,v.x,v.y*0.6,v.z);}g.computeVertexNormals();
+  const m=new THREE.Mesh(g,macMat);m.position.set(p[0],p[1],p[2]);cells.add(m);macs.push(m);});
+/* ---- eritrocitos ---- */
+const rbcGeo=new THREE.SphereGeometry(0.06,LITE?6:12,LITE?4:8);rbcGeo.scale(1,0.34,1);
+const NR=LITE?320:1000,rbc=new THREE.InstancedMesh(rbcGeo,LITE?new THREE.MeshLambertMaterial({clippingPlanes:clips}):new THREE.MeshStandardMaterial({roughness:0.35,clippingPlanes:clips}),NR);W.add(rbc);
+const srcs=D.src,snkSet=new Set(D.snk);
+function step(r){const nb=adj[r.i];if(!nb.length){r.j=r.i;r.e=-1;return;}let w=0;for(const j of nb)w+=Math.max(0,PHI[r.i]-PHI[j])+0.002;let x=Math.random()*w;
+  for(let k=0;k<nb.length;k++){x-=Math.max(0,PHI[r.i]-PHI[nb[k]])+0.002;if(x<=0||k===nb.length-1){r.j=nb[k];r.e=adjE[r.i][k];return;}}}
+const spawn=r=>{r.i=srcs[(Math.random()*srcs.length)|0];r.u=Math.random();r.age=0;step(r);return r;};
+const RB=[];for(let k=0;k<NR;k++){const r=spawn({});const n=Math.random()*60;for(let s=0;s<n;s++){r.i=r.j;r.age++;step(r);}RB.push(r);}
+/* ---- gases: O2 (celeste) del aire a la sangre, CO2 (ámbar) al revés ---- */
+const NG=LITE?150:420;const gGeo=LITE?new THREE.OctahedronGeometry(0.05,0):new THREE.SphereGeometry(0.045,8,6);
+const o2=new THREE.InstancedMesh(gGeo,new THREE.MeshBasicMaterial({color:0x7dd3fc,clippingPlanes:clips}),NG),co2=new THREE.InstancedMesh(gGeo,new THREE.MeshBasicMaterial({color:0xfbbf24,clippingPlanes:clips}),NG);W.add(o2,co2);
+const seeds=D.seeds.map(s=>new V3(s[0],s[1],s[2]));
+const gas=[];for(let k=0;k<NG*2;k++){const n=new V3().fromArray(N,3*((Math.random()*nN)|0));let best=seeds[0],bd=1e9;for(const s of seeds){const d=s.distanceToSquared(n);if(d<bd){bd=d;best=s;}}
+  gas.push({n,c:best.clone().lerp(n,0.35),u:Math.random(),sp:0.25+Math.random()*0.2});}
+/* ---- etiquetas ---- */
+const LB=[];const lbs=$('lbs');
+const lab=(p,modes)=>{const d=document.createElement('div');d.className='lb';lbs.appendChild(d);LB.push({d,p:new V3(p[0],p[1],p[2]),w:0,h:0,modes});};
+const s0=seeds.reduce((x,y)=>y.z>x.z&&y.y<3?y:x,seeds[0]);
+lab([D.rb[8][0]-2.4,D.rb[8][1],D.rb[8][2]]);
+lab([D.ad[15][0]-3.2,D.ad[15][1],D.ad[15][2]+0.6]);
+lab([D.s1[24][0]-1.3,D.s1[24][1]-2.4,D.s1[24][2]]);
+lab([D.art[0][3][0]+0.4,D.art[0][3][1],D.art[0][3][2]],'blood');
+lab([D.ven[1][14][0]+0.2,D.ven[1][14][1],D.ven[1][14][2]],'blood');
+lab([s0.x,s0.y,s0.z+1.2]);
+lab([D.mac[0][0],D.mac[0][1]+0.4,D.mac[0][2]]);
+lab(D.pII[0]);lab(D.pI[3][0]);
+lab([D.s2[24][0]+1.6,D.s2[24][1]-1.2,D.s2[24][2]+0.6],'blood');
+/* ---- membrana alveolocapilar (inserto 2D) ---- */
+const mc=$('mem'),mg=mc.getContext('2d');
+const LYC=[['rgba(125,211,252,.13)',34],['#fde68a',5],['#a78bfa',12],['#94a3b8',6],['#fca5a5',12],['rgba(248,113,113,.22)',18],['#dc2626',28]];
+function drawMem(t){const w=mc.clientWidth,h=mc.clientHeight;if(!w||!h)return;const dpr=Math.min(2,devicePixelRatio||1);
+  if(mc.width!==Math.round(w*dpr)||mc.height!==Math.round(h*dpr)){mc.width=Math.round(w*dpr);mc.height=Math.round(h*dpr);}
+  mg.setTransform(dpr,0,0,dpr,0,0);mg.clearRect(0,0,w,h);
+  const small=w<320,fs=small?9.5:10.5,lw=Math.round(w*(small?0.47:0.45)),x0=10,bw=w-lw-x0-14,foot=small?28:30;
+  const tot=LYC.reduce((s,l)=>s+l[1]+2,0)-2,k=(h-foot-6)/tot;
+  let y=4;const ys=[];for(const [col,hh] of LYC){const H=hh*k;mg.fillStyle=col;mg.fillRect(x0,y,bw,H);ys.push([y,H]);y+=H+2*k;}
+  const top=4,bot=y-2*k;
+  // nombres de las capas: separados al menos fs+1 px, con guía hasta la capa
+  mg.font=`600 ${fs}px system-ui,sans-serif`;mg.textBaseline='middle';const gap=fs+1.5,lx=x0+bw+12;let ly=[];
+  ys.forEach(([y0,H])=>ly.push(y0+H/2));for(let i=1;i<ly.length;i++)ly[i]=Math.max(ly[i],ly[i-1]+gap);
+  const over=ly[ly.length-1]-(bot-fs/2);if(over>0)for(let i=ly.length-1;i>=0;i--){ly[i]-=over;if(i&&ly[i-1]<=ly[i]-gap)break;if(i)ly[i-1]=Math.min(ly[i-1],ly[i]-gap);}
+  T().ly.forEach((n,i)=>{const yc=ys[i][0]+ys[i][1]/2;mg.strokeStyle='rgba(203,213,225,.45)';mg.lineWidth=1;mg.beginPath();mg.moveTo(x0+bw+1,yc);mg.lineTo(lx-3,ly[i]);mg.stroke();
+    mg.fillStyle='#cbd5e1';mg.fillText(n,lx,ly[i],w-lx-4);});
+  const r=small?2.6:3.2;
+  for(let q=0;q<7;q++){const u=((t*0.35+q/7)%1);const x=x0+10+q*((bw-20)/6);mg.fillStyle='#7dd3fc';mg.beginPath();mg.arc(x,top+6+u*(bot-top-12),r,0,7);mg.fill();}
+  for(let q=0;q<5;q++){const u=((t*0.3+q/5)%1);const x=x0+20+q*((bw-40)/4);mg.fillStyle='#fbbf24';mg.beginPath();mg.arc(x,bot-6-u*(bot-top-12),r,0,7);mg.fill();}
+  mg.textBaseline='alphabetic';mg.fillStyle='#7dd3fc';mg.fillText(T().o2,x0,h-foot+12,w-x0-6);mg.fillStyle='#fbbf24';mg.fillText(T().co2,x0,h-foot+12+fs+3,w-x0-6);}
+/* ---- paneles plegables ---- */
+const panes={leg:$('leg'),mem:$('memW')};const touched={};
+function setOpen(k,open){const p=panes[k];p.classList.toggle('shut',!open);p.querySelector('.tg').setAttribute('aria-expanded',String(open));layout();}
+$('legT').onclick=()=>{touched.leg=1;setOpen('leg',panes.leg.classList.contains('shut'));};
+$('memT').onclick=()=>{touched.mem=1;setOpen('mem',panes.mem.classList.contains('shut'));};
+const capEl=$('cap');capEl.onclick=()=>{if(narrow()){capEl.classList.toggle('clamp');layout();}};
+function autoPanes(){const nw=narrow(),short=innerHeight<520;
+  if(!touched.leg)setOpen('leg',!nw&&innerHeight>=680);
+  const port=innerWidth<900&&innerHeight>innerWidth;if(!touched.mem)setOpen('mem',(nw||port)?mode==='gas':!short);
+  if(nw&&!capEl.dataset.u)capEl.classList.add('clamp');if(!nw)capEl.classList.remove('clamp');}
+/* ---- textos ---- */
+const ui=$('ui');
+for(const k of MODE_KEYS){const b=document.createElement('button');b.type='button';b.dataset.k=k;b.onclick=()=>{if(k===mode)resetCam();else setMode(k);};ui.appendChild(b);}
+const LGC=['#f2b8bf','#2b4cff','#e0182d','#7dd3fc','#fbbf24','#a78bfa','#d8a3e8','#d4a83a'];
+function setLang(l){if(!I18N[l])return;lang=l;const t=T();document.documentElement.lang=l==='pt'?'pt-BR':l;document.title=t.doc;
+  $('ttl').textContent=t.ttl;ui.setAttribute('aria-label',t.views);for(const b of ui.children)b.textContent=t.m[b.dataset.k][0];
+  $('legT').textContent=t.leg;$('memT').textContent=t.mem;$('legL').innerHTML='';
+  t.lg.forEach((s,i)=>{const d=document.createElement('div');const ic=document.createElement('i');ic.style.background=LGC[i];d.append(ic,s);$('legL').appendChild(d);});
+  $('legN').textContent=t.note;$('hint').textContent=t.hint;R.domElement.setAttribute('aria-label',t.ttl+'. '+t.hint);
+  $('capT').textContent=t.m[mode][1];
+  LB.forEach((L,i)=>{L.d.textContent=t.lb[i];});
+  for(const L of LB){L.w=L.d.offsetWidth;L.h=L.d.offsetHeight;}
+  layout();}
+/* ---- cámara orbital ---- */
+const ctr=new V3(0,1.6,0);let th=0.5,ph=1.35,base=24,zoomK=1,fitK=1;
+const CAMS={all:[0,1.8,0,0.5,1.35,25.5],cut:[0,2.0,0,0.2,1.4,17.5],blood:[0,1.8,0,0.5,1.35,24],gas:[D.s1[24][0]*0.6,D.s1[24][1]+0.6,0,0.15,1.45,9],cells:null};
+let cellsCam=null;
+/* zona que debe caber en pantalla (ancho, alto) en unidades de 100 µm */
+const NEED={all:[12.5,15],blood:[12.5,15],cut:[11.5,14]};const base0=()=>CAMS[mode][5];
+function resetCam(){zoomK=1;if(mode==='cells'){const C=cellsCam;ctr.copy(C.c);th=C.th;ph=C.ph;base=C.d;}else{const C=CAMS[mode];ctr.set(C[0],C[1],C[2]);th=C[3];ph=C[4];base=C[5];}}
+function setMode(k,silent){if(!CAMS.hasOwnProperty(k))return;mode=k;for(const btn of ui.children){const on=btn.dataset.k===k;btn.classList.toggle('on',on);btn.setAttribute('aria-pressed',String(on));}
+  $('capT').textContent=T().m[k][1];
+  clip.normal.set(0,0,-1);clip.constant=(k==='cut'||k==='gas')?0.15:99;
+  tMat.opacity=k==='blood'?0.12:k==='all'?0.62:1;tMat.depthWrite=!(k==='blood'||k==='all');tMat.transparent=tMat.opacity<1;tMat.needsUpdate=true;
+  if(k==='cells'){const mp=new V3(...D.mac[0]);let sd=null,bd=1e9;for(const s of seeds){const d=s.distanceTo(mp);if(d<bd){bd=d;sd=s;}}const v=sd.clone().sub(mp).normalize();
+    clip.normal.copy(v).negate();clip.constant=sd.dot(v)+0.1;cellsCam={c:mp.clone().lerp(sd,0.25),th:Math.atan2(v.x,v.z),ph:Math.acos(Math.max(-1,Math.min(1,v.y))),d:4.2};}
+  resetCam();
+  o2.visible=co2.visible=(k==='gas'||k==='cut');rbc.visible=(k==='blood'||k==='gas'||k==='cut');cells.visible=k!=='blood';
+  autoPanes();layout();wake();if(!silent)post({acino:'view',v:VNAME[k]});}
+/* ocupación de la interfaz y encuadre */
+let occ={t:0,b:0},uiRects=[];
+function layout(){const w=innerWidth,h=innerHeight;const tr=$('top').getBoundingClientRect(),cr=capEl.getBoundingClientRect();
+  document.body.style.setProperty('--capH',Math.round(cr.height)+'px');
+  document.body.style.setProperty('--legTop',(narrow()?Math.round(tr.bottom+6):10)+'px');
+  const mr=panes.mem.getBoundingClientRect(),lt=narrow()?Math.round(tr.bottom+6):10;
+  const lim=(!panes.mem.classList.contains('shut')&&mr.right>w-240)?mr.top:cr.top;panes.leg.style.maxHeight=Math.max(60,lim-lt-10)+'px';
+  const lr=panes.leg.getBoundingClientRect();
+  uiRects=[tr,lr,mr,cr].map(r=>({l:r.left-4,r:r.right+4,t:r.top-4,b:r.bottom+4}));
+  occ.t=narrow()?Math.max(tr.bottom,lr.bottom)+6:tr.bottom+6;occ.b=h-cr.top+6;
+  const freeH=Math.max(120,h-occ.t-occ.b),asp=w/freeH,close=mode==='gas'||mode==='cells';
+  const tH=Math.tan(cam.fov*Math.PI/360),NE=NEED[mode];
+  fitK=close?Math.pow(Math.max(1,1.45/asp),0.35):Math.max(1,NE[0]/(2*tH*w/h)/base0(),NE[1]*h/(2*tH*freeH)/base0());
+  R.setSize(w,h,false);cam.aspect=w/h;
+  const dy=(occ.t-occ.b)/2;cam.setViewOffset(w,h,0,-dy,w,h);cam.updateProjectionMatrix();wake();}
+let lastW=0,lastH=0;addEventListener('resize',()=>{if(innerWidth!==lastW||innerHeight!==lastH){lastW=innerWidth;lastH=innerHeight;autoPanes();layout();}});
+if(window.ResizeObserver){const ro=new ResizeObserver(()=>layout());ro.observe(capEl);ro.observe($('top'));}
+/* ratón, táctil y teclado */
+const ptrs=new Map();let pinch0=0;
+const clampPh=()=>{ph=Math.min(3,Math.max(0.15,ph));};const clampZ=()=>{zoomK=Math.min(3.5,Math.max(0.2,zoomK));};
+cv.addEventListener('pointerdown',e=>{try{cv.setPointerCapture(e.pointerId);}catch(_){}ptrs.set(e.pointerId,[e.clientX,e.clientY]);if(ptrs.size===2){const [p,q]=[...ptrs.values()];pinch0=Math.hypot(p[0]-q[0],p[1]-q[1]);}wake();});
+cv.addEventListener('pointermove',e=>{const o=ptrs.get(e.pointerId);if(!o)return;
+  if(ptrs.size===1){th-=(e.clientX-o[0])*0.008;ph-=(e.clientY-o[1])*0.008;clampPh();}
+  ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+  if(ptrs.size===2){const [p,q]=[...ptrs.values()];const d=Math.hypot(p[0]-q[0],p[1]-q[1]);if(pinch0>0&&d>0){zoomK*=pinch0/d;clampZ();}pinch0=d;}wake();});
+const up=e=>{ptrs.delete(e.pointerId);pinch0=0;if(ptrs.size===2){const [p,q]=[...ptrs.values()];pinch0=Math.hypot(p[0]-q[0],p[1]-q[1]);}};
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);cv.addEventListener('lostpointercapture',up);
+cv.addEventListener('wheel',e=>{e.preventDefault();zoomK*=Math.exp((e.deltaMode===1?e.deltaY*16:e.deltaY)*0.001);clampZ();wake();},{passive:false});
+cv.addEventListener('dblclick',()=>{resetCam();wake();});
+cv.addEventListener('keydown',e=>{const k=e.key;if(k==='ArrowLeft')th+=0.08;else if(k==='ArrowRight')th-=0.08;else if(k==='ArrowUp'){ph-=0.08;clampPh();}else if(k==='ArrowDown'){ph+=0.08;clampPh();}
+  else if(k==='+'||k==='=')zoomK/=1.1;else if(k==='-')zoomK*=1.1;else if(k==='0')resetCam();else return;clampZ();e.preventDefault();wake();});
+/* ---- API para la página padre ---- */
+addEventListener('message',e=>{const m=e.data;if(!m||typeof m!=='object'||m.from==='acino')return;
+  if(m.acino==='view'&&VIEW[String(m.v).toLowerCase()])setMode(VIEW[String(m.v).toLowerCase()],true);
+  else if(m.acino==='lang'&&I18N[m.lang])setLang(m.lang);});
+/* ---- bucle: se detiene si la pestaña o el iframe no se ven ---- */
+let raf=0,hidden=document.hidden,inView=true,simT=Number(Q.get('t')||0),lastTs=0;
+const stats={frames:0,ft:0,js:0,full:0};
+let paused=false;function wake(){if(!raf&&!hidden&&inView&&!paused){lastTs=0;raf=requestAnimationFrame(frame);}}
+function sleep(){if(raf){cancelAnimationFrame(raf);raf=0;}}
+document.addEventListener('visibilitychange',()=>{hidden=document.hidden;hidden?sleep():wake();});
+if(window.IntersectionObserver)new IntersectionObserver(es=>{inView=es[es.length-1].isIntersecting;inView?wake():sleep();}).observe(cv);
+const dum=new THREE.Object3D(),pp=new V3();
+/* capas: 0 = estático, 1 = lo que se mueve (eritrocitos y gases) */
+for(const o of [rbc,o2,co2])o.layers.set(1);S.traverse(o=>{if(o.isLight)o.layers.enableAll();});cam.layers.enableAll();
+/* lite: lo estático (tejido, capilares, vasos, células) se dibuja solo cuando cambia el encuadre. Los eritrocitos y los gases
+   van en un segundo lienzo transparente encima, que conserva la profundidad de lo estático (preserveDrawingBuffer):
+   cada fotograma solo borra el color y dibuja lo que se mueve. Sin respiración. Mientras se gira o se acerca,
+   la capa móvil se oculta y se rehace al soltar. */
+let R2=null,sig='',moveT=-1e9,depthOK=false,lastDyn=-1e9,depthDrawn=false;
+const c2=document.createElement('canvas');c2.id='c2';
+const depthMat=new THREE.MeshBasicMaterial({colorWrite:false,side:THREE.DoubleSide,clippingPlanes:clips});
+if(LITE){cv0.after(c2);try{R2=new THREE.WebGLRenderer({canvas:c2,alpha:true,antialias:false,preserveDrawingBuffer:true,premultipliedAlpha:true});
+  R2.setPixelRatio(R.getPixelRatio());R2.localClippingEnabled=true;R2.outputEncoding=R.outputEncoding;R2.toneMapping=R.toneMapping;R2.toneMappingExposure=R.toneMappingExposure;
+  R2.setClearColor(0,0);R2.autoClear=false;}catch(e){R2=null;c2.remove();}}
+function draw(ts){
+  if(!LITE||!R2){cam.layers.enableAll();R.render(S,cam);return;}
+  const g=[th,ph,zoomK,fitK,ctr.x,ctr.y,ctr.z,innerWidth,innerHeight,mode,occ.t,occ.b].join();const dirty=g!==sig;sig=g;
+  if(dirty){cam.layers.set(0);R.render(S,cam);stats.full++;moveT=ts;depthOK=false;}
+  const dyn=rbc.visible||o2.visible;const settled=ts-moveT>140&&!ptrs.size;
+  if(!dyn||!settled){if(c2.style.visibility!=='hidden'){c2.style.visibility='hidden';}return;}
+  const bg=S.background;S.background=null;
+  if(!depthOK){R2.setSize(innerWidth,innerHeight,false);R2.clear(true,true,true);cam.layers.set(0);S.overrideMaterial=depthMat;const tv=tissue.visible;if(mode==='blood')tissue.visible=false;
+    R2.render(S,cam);S.overrideMaterial=null;tissue.visible=tv;depthOK=true;depthDrawn=false;}
+  if(ts-lastDyn>=30||!depthDrawn){lastDyn=ts;depthDrawn=true;R2.clear(true,false,false);cam.layers.set(1);R2.render(S,cam);}S.background=bg;
+  if(c2.style.visibility==='hidden')c2.style.visibility='visible';}
+function frame(ts){raf=0;const t0=performance.now();
+  const dt=lastTs?Math.min(0.05,(ts-lastTs)/1000):0;if(lastTs){const f=ts-lastTs;stats.ft=stats.ft?stats.ft*0.9+f*0.1:f;}lastTs=ts;simT+=dt;const t=simT;
+  const dist=base*zoomK*fitK;
+  cam.position.set(ctr.x+dist*Math.sin(ph)*Math.sin(th),ctr.y+dist*Math.cos(ph),ctr.z+dist*Math.sin(ph)*Math.cos(th));cam.lookAt(ctr);
+  S.fog.near=dist*1.25;S.fog.far=dist*2.5;
+  const br=LITE?1:1+0.035*Math.sin(t*2*Math.PI/4.5);W.scale.setScalar(br); // respiración (~4 %)
+  if(rbc.visible){for(let k=0;k<NR;k++){const r=RB[k];r.u+=dt*2.2;while(r.u>=1){r.u-=1;r.i=r.j;r.age++;if(snkSet.has(r.i)||r.age>400)spawn(r);else step(r);}
+      a.fromArray(N,3*r.i);b.fromArray(N,3*r.j);
+      if(r.e>=0){c.fromArray(MID,3*r.e);if(r.u<0.5){dum.position.lerpVectors(a,c,r.u*2);b.copy(c);}else dum.position.lerpVectors(c,b,r.u*2-1);}else dum.position.lerpVectors(a,b,r.u);
+      dum.lookAt(b);dum.rotateX(Math.PI/2);dum.updateMatrix();rbc.setMatrixAt(k,dum.matrix);rbc.setColorAt(k,satCol(SAT[r.i]+(SAT[r.j]-SAT[r.i])*r.u));}
+    rbc.instanceMatrix.needsUpdate=true;rbc.instanceColor.needsUpdate=true;}
+  if(o2.visible){dum.scale.setScalar(1);dum.rotation.set(0,0,0);for(let k=0;k<NG;k++){const g=gas[k];dum.position.lerpVectors(g.c,g.n,(g.u+t*g.sp)%1);dum.updateMatrix();o2.setMatrixAt(k,dum.matrix);
+      const h2=gas[k+NG];dum.position.lerpVectors(h2.n,h2.c,(h2.u+t*h2.sp)%1);dum.updateMatrix();co2.setMatrixAt(k,dum.matrix);}o2.instanceMatrix.needsUpdate=co2.instanceMatrix.needsUpdate=true;}
+  if(!LITE)for(const m of macs)m.rotation.y=0.3*Math.sin(t*0.4);
+  draw(ts);
+  /* etiquetas: ocultas detrás de la cámara, fuera de pantalla, sobre la interfaz o encima de otra */
+  const w=innerWidth,h=innerHeight,shown=[];
+  for(const L of LB){pp.copy(L.p).multiplyScalar(br).project(cam);const x=(pp.x+1)/2*w,y=(1-pp.y)/2*h;let ok=pp.z<1&&mode!=='blood'&&L.w>0;
+    if(ok){const bx={l:x-L.w/2,r:x+L.w/2,t:y-L.h/2,b:y+L.h/2};ok=bx.l>2&&bx.r<w-2&&bx.t>2&&bx.b<h-2&&!uiRects.some(u=>bx.l<u.r&&bx.r>u.l&&bx.t<u.b&&bx.b>u.t)&&!shown.some(u=>bx.l<u.r+4&&bx.r>u.l-4&&bx.t<u.b+2&&bx.b>u.t-2);
+      if(ok){shown.push(bx);const tr=`translate(${(x-L.w/2).toFixed(1)}px,${(y-L.h/2).toFixed(1)}px)`;if(tr!==L.tr){L.tr=tr;L.d.style.transform=tr;}}}
+    if(ok!==L.vis){L.vis=ok;L.d.style.visibility=ok?'visible':'hidden';}}
+  /* barra de escala (1 unidad = 100 µm) */
+  const pxU=h/(2*cam.position.distanceTo(ctr)*Math.tan(cam.fov*Math.PI/360))*br;
+  const opts=[10,20,50,100,200,500,1000];let um=opts[opts.length-1];for(const o of opts){if(o/100*pxU>=46){um=o;break;}}
+  const bw=Math.round(um/100*pxU);if(bw!==stats.sb){stats.sb=bw;scaleB.style.width=bw+'px';scaleS.textContent=um+' µm';}
+  if(!panes.mem.classList.contains('shut')&&(!LITE||ts-(stats.memT||0)>=30)){stats.memT=ts;drawMem(t);}
+  stats.frames++;stats.js=performance.now()-t0;
+  if(!hidden&&inView&&!paused)raf=requestAnimationFrame(frame);}
+const scaleB=document.querySelector('#scale b'),scaleS=document.querySelector('#scale span');
+/* estado expuesto para pruebas */
+window.__acino={stats,R,get mode(){return VNAME[mode];},get lang(){return lang;},lite:LITE,embed:EMBED,setMode:k=>setMode(VIEW[k]||k),setLang,camState:()=>({th:+th.toFixed(3),ph:+ph.toFixed(3),zoomK:+zoomK.toFixed(3)}),
+  get running(){return !!raf;},pause(){paused=true;sleep();},resume(){paused=false;wake();},labels:()=>LB.filter(L=>L.d.style.visibility==='visible').map(L=>L.d.textContent)};
+setLang(lang);setMode(mode,true);
+$('msg').classList.add('off');
+requestAnimationFrame(()=>{layout();wake();});
+post({acino:'ready',v:VNAME[mode],lang,lite:LITE});
+}
+</script></body></html>

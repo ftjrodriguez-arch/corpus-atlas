@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v163**.
+(GitHub Pages desde `main`). Versión actual: **v164**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -78,6 +78,11 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 
 ## v163 (marcha con datos abiertos)
 - `GAIT_K` (cadera, rodilla, tobillo cada 2 %) y `GN` (pelvis obl/rot, tórax−pelvis, brazo, centro de masas, GRF) salen de /home/claude/gait_src/normativa.json (Fukuchi 2018, Schreiber 2019, Lencioni 2019). `gN(tabla,p)` interpola. `gaitRoot(p)` mueve el grupo `body` (pelvis + centro de masas) y `gaitRootOff()` lo devuelve; no actúa con la sentadilla. El tórax contrarrota con la articulación `trunk` (eje y).
+
+## v164 (pulmones por dentro)
+- `micro/acino.html` + `micro/acino.bin` (generador en el flujo de Claude: /home/claude/lung_build/acino_gen.py y /home/claude/acino_prod/tools/acino_bin.py). Parámetros `v`, `lang`, `embed`, `lite`; postMessage `{acino:'view'|'lang'}`. En la app: `acinoShow(v)` / `acinoHide()` (llamado desde `phyResetPose`), capa `#acinoFrame` sobre `#stage`.
+- Paso `gas` de `resp`: arterias segmentarias teñidas de azul y venas de rojo; `phyPulmRoutes()` añade rutas de partículas por cada vaso segmentario.
+- `PHY.ready`/`PHY.pend`: `phyGo` espera a que termine la carga del recorrido.
 
 ## Pendiente
 - Decisión del usuario: NUNCA servidor propio, cuentas ni base de datos. Todo debe funcionar en local y sin conexión (GitHub Pages solo sirve los archivos estáticos).

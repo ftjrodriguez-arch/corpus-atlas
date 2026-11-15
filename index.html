@@ -974,6 +974,14 @@ header .tools #phyBtn span{display:inline!important;font:600 12.5px var(--f-ui);
   /* v162 · teléfono: menú «⋯» con icono (la fuente no tiene el carácter) */
   #stage #actbar #aMoreBtn svg{width:18px;height:18px;display:block;margin:auto}
 }
+/* v164 · acino 3D sobre el escenario */
+#acinoFrame{position:absolute;inset:8px;z-index:30;pointer-events:none}
+#acinoFrame iframe{position:absolute;left:0;right:0;top:0;bottom:48px;width:100%;height:calc(100% - 48px);border:0;display:block;border-radius:14px;background:#0b1120;border:1px solid rgba(127,127,127,.28);box-shadow:0 10px 40px rgba(0,0,0,.45);pointer-events:auto}
+#acinoFrame .acx{position:absolute;right:0;bottom:4px;pointer-events:auto}
+#acinoFrame.min{inset:auto;right:10px;bottom:10px;width:auto;height:auto}
+#acinoFrame.min iframe{display:none}
+#acinoFrame.min .acx{position:static}
+@media (max-width:879px){html body.mnav #stage #acinoFrame:not(.min){top:58px;bottom:calc(var(--mnav-h,64px) + 40px)}}
 /* v162 · tableta en vertical: mismo diseño que el teléfono, aprovechando el ancho */
 @media (min-width:600px) and (max-width:879px){
   html body.mnav #stage #qbar.qbar{justify-content:center!important;gap:10px!important}
@@ -4462,6 +4470,25 @@ function phyBuildRoutes(){const R=[];const cat=(...a)=>{const o=[];for(const s o
   R.push({c:phyCurve(cat(PR.svc,PR.rh,PR.lpa)),k:'v',w:1,pul:true},{c:phyCurve(cat(PR.ivc,PR.rh,PR.rpa)),k:'v',w:1,pul:true},{c:phyCurve(cat(PR.svc,PR.rh,PR.rpa)),k:'v',w:.6,pul:true},{c:phyCurve(cat(PR.ivc,PR.rh,PR.lpa)),k:'v',w:.6,pul:true});
   for(const pv of PR.pv)R.push({c:phyCurve(cat(pv,PR.lh)),k:'a',w:.8,pul:true});
   for(const r of R)r.len=r.c.getLength();return R;}
+/* v164: rutas de sangre por cada arteria y vena segmentaria (del hilio a la periferia y vuelta a la aurícula izquierda) */
+function phyPulmRoutes(){const R=[];const cat=(...a)=>{const o=[];for(const s of a)for(const p of s){const l=o[o.length-1];if(!l||Math.hypot(l[0]-p[0],l[1]-p[1],l[2]-p[2])>1e-4)o.push(p);}return o;};
+  const ends=(m,H)=>{const a=m.geometry.attributes.position.array;let n=-1,dn=1e9,f=-1,df=-1,cx=0,cy=0,cz=0,c=0;for(let k=0;k<a.length;k+=3){const d=(a[k]-H[0])**2+(a[k+1]-H[1])**2+(a[k+2]-H[2])**2;if(d<dn){dn=d;n=k;}if(d>df){df=d;f=k;}cx+=a[k];cy+=a[k+1];cz+=a[k+2];c++;}
+    const N=[a[n],a[n+1],a[n+2]],F=[a[f],a[f+1],a[f+2]],C=[cx/c,cy/c,cz/c];return [N,[(N[0]+F[0])/2*0.5+C[0]*0.5,(N[1]+F[1])/2*0.5+C[1]*0.5,(N[2]+F[2])/2*0.5+C[2]*0.5],F];};
+  try{const art=meshes.filter(m=>/(segmental|lobar) artery of (right|left) lung|lingular artery of left lung/.test(m.userData.c.en)),ven=meshes.filter(m=>/vein of (right|left) lung|^Lingular vein of left lung$/.test(m.userData.c.en));
+    for(const m of art){const c=centerOf([m]),L=c.x>0,pth=L?PR.lpa:PR.rpa,H=pth[pth.length-1];const [N,M,F]=ends(m,H);R.push({c:phyCurve(cat(PR.svc,PR.rh,pth,[N,M,F])),k:'v',w:.45});}
+    for(const m of ven){const c=centerOf([m]);let best=PR.pv[0],bd=1e9;for(const q of PR.pv){const d=Math.hypot(q[0][0]-c.x,q[0][1]-c.y,q[0][2]-c.z);if(d<bd){bd=d;best=q;}}const [N,M,F]=ends(m,best[0]);R.push({c:phyCurve(cat([F,M,N],best,PR.lh)),k:'a',w:.45});}
+  }catch(e){console.warn('rutas pulmonares',e);}
+  for(const r of R)r.len=r.c.getLength();return R;}
+/* v164: acino pulmonar 3D real (micro/acino.html): alvéolos con tabiques compartidos, red de capilares con flujo de eritrocitos,
+   intercambio de O2/CO2, neumocitos y macrófago. Se muestra encima del escenario en los pasos de los alvéolos. */
+function acinoShow(v){let f=document.getElementById('acinoFrame');const st=document.getElementById('stage');if(!st)return;
+  if(!f){f=document.createElement('div');f.id='acinoFrame';f.innerHTML='<iframe title="Acino pulmonar 3D" allow="fullscreen"></iframe><button class="btn acx" type="button"></button>';st.appendChild(f);
+    f.querySelector('.acx').onclick=()=>{f.classList.toggle('min');acinoLbl();};}
+  const ifr=f.querySelector('iframe'),src='micro/acino.html?embed=1&lang='+LANG+'&v='+v;
+  if(!ifr.dataset.src){ifr.src=src;ifr.dataset.src=src;}else{try{ifr.contentWindow.postMessage({acino:'view',v},'*');ifr.contentWindow.postMessage({acino:'lang',lang:LANG},'*');}catch(e){}}
+  f.hidden=false;f.classList.remove('min');acinoLbl();}
+function acinoLbl(){const f=document.getElementById('acinoFrame');if(!f)return;f.querySelector('.acx').textContent=f.classList.contains('min')?TL('Ver el acino 3D','Show the 3D acinus','Ver o ácino 3D'):TL('Ver el pulmón','Show the lung','Ver o pulmão');}
+function acinoHide(){const f=document.getElementById('acinoFrame');if(f)f.hidden=true;}
 /* Tubos de los recorridos y del sistema de conducción */
 function phyTube(arr,col,r,op,depth){const c=phyCurve(arr);const m=new THREE.Mesh(new THREE.TubeGeometry(c,Math.max(12,arr.length*10),r,8,false),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op,depthTest:depth!==false,depthWrite:false}));m.renderOrder=35;m.userData.curve=c;return m;}
 function phyGlow(col,size){const cv2=document.createElement('canvas');cv2.width=cv2.height=64;const g=cv2.getContext('2d');const gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(0.25,col);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);
@@ -4735,7 +4762,7 @@ window.addEventListener('resize',()=>{if(PHY.on)phyPlace();});
 function phyFocus(c,r){fitSoon(c.clone(),0.26*r,0.26*r,isPhone()?r*1.7:r);}
 const pick2=(rx,need)=>meshes.filter(m=>rx.test(m.userData.c.en)&&(!need||need.includes(BS(m.userData.sys)))&&!m.userData.c.ins);
 async function phyStart(a,b){let tour='heart',step=0;if(typeof a==='string'){tour=a;step=b||0;}else step=a||0;try{if(!step&&window.goatcounter&&window.goatcounter.count&&TOURS[tour])window.goatcounter.count({path:'recorrido-'+tour,title:TOURS[tour].n&&TOURS[tour].n.es||tour,event:true});}catch(e){}
-  if(PHY.on&&PHY_TOUR===tour){phyGo(step);return;}if(PHY.on)phyStop();PHY_TOUR=tour;const T=curTour();
+  if(PHY.on&&PHY_TOUR===tour){phyGo(step);return;}if(PHY.on)phyStop();PHY_TOUR=tour;PHY.ready=false;PHY.pend=null;const T=curTour();
   if(typeof stopAnim==='function')stopAnim();select(null);clearLm();resetActivity('phy');{const wb=T.body==='any'?(BODY==='vh'?'m':null):T.body||(BODY==='vh'?'m':(BODY==='f'&&tour!=='heart')?'m':null);if(wb&&BODY!==wb)setBody(wb);}
   PHY.orb={th:orb.T.th,ph:orb.T.ph,r:orb.T.r,tgt:orb.T.tgt.clone()};
   PHY.saved={sys:Object.fromEntries(Object.keys(SYS).map(k=>[k,{on:SYS[k].on,op:SYS[k].op}])),studio,planes:Object.fromEntries(Object.keys(PLANES).map(k=>[k,{cut:PLANES[k].cut,show:PLANES[k].show,pos:PLANES[k].pos}])),depth:new Set(DEPTH_OFF)};
@@ -4753,13 +4780,13 @@ async function phyStart(a,b){let tour='heart',step=0;if(typeof a==='string'){tou
   PHY.grp.add(phyPts);
   const L=Object.assign({},T.heart?PHY_LBL:{},T.heart?{}:LB2,tour==='resp'?{pt:PHY_LBL.pt,pv:PHY_LBL.pv}:{});
   for(const k in L){const [p,es,en,pt]=L[k];const lb=addLabel(TL(es,en,pt),()=>PV3(p),'phyl','phy');lb.on=false;lb.pos=PV3(p);PHY.lbl[k]=lb;}
-  PHY.t=0;phyGo(step);}
+  PHY.t=0;PHY.ready=true;phyGo(PHY.pend!=null?PHY.pend:step);PHY.pend=null;}
 function phyLabels(keys){for(const k in PHY.lbl)PHY.lbl[k].on=keys.includes(k);}
 function phyIso(list){isoOnly=true;isoSet=new Set(list.map(m=>m.userData.c.id));hiddenIds.clear();applySystems();}
 function phyCut(on,pos){for(const k in PLANES){PLANES[k].cut=on&&k==='fro';PLANES[k].show=false;}if(on)PLANES.fro.pos=pos;updatePlanes();renderPlanes();}
 function phyClearImps(){for(const i of PHY.imps){PHY.grp.remove(i.tb);PHY.grp.remove(i.sp);i.tb.geometry.dispose();}PHY.imps=[];}
 function phyShowOnly(keep,opMap){for(const k in SYS){if(!PHY.saved.sys[k])continue;SYS[k].on=keep.includes(k);if(SYS[k].on)SYS[k].op=(opMap&&opMap[k])||1;}renderSysList();}
-function phyGo(i){const steps=curSteps(),T=curTour();i=Math.max(0,Math.min(steps.length-1,i));PHY.step=i;progMark('step',PHY_TOUR+':'+i);const st=steps[i];const [ti,tx]=pTx(st);
+function phyGo(i){/* v164: si se pulsa «Siguiente» mientras cargan los modelos, se recuerda el paso y se abre al terminar */if(PHY.ready===false){PHY.pend=Math.max(0,i);return;}const steps=curSteps(),T=curTour();i=Math.max(0,Math.min(steps.length-1,i));PHY.step=i;progMark('step',PHY_TOUR+':'+i);const st=steps[i];const [ti,tx]=pTx(st);
   $('#phyTitle').textContent=ti;$('#phyText').textContent=tx;try{phyMicroLink();}catch(_){}$('#phyNum').textContent=`${i+1} / ${steps.length}`;$('#phyKick').textContent=tN(T);$('#phyVoice').textContent=TL('Narración','Narration','Narração');$('#phyAuto').textContent=TL('▶ Ver como vídeo','▶ Play as video','▶ Ver como vídeo');voxFillSel();if(typeof phyTTS!=='undefined'&&phyTTS.on)setTimeout(()=>phySpeak(ti+'. '+tx),50);
   $('#phyPrev').textContent=TL('← Anterior','← Previous','← Anterior');$('#phySlow').textContent=TL('Cámara lenta','Slow motion','Câmera lenta');$('#phySound').textContent=TL('Sonido','Sound','Som');$('#phyPlay').textContent=PHY.paused?TL('Reanudar','Resume','Retomar'):TL('Pausa','Pause','Pausa');$('#phyMore').textContent=$('.phycard').classList.contains('open')?TL('Leer menos','Show less','Ler menos'):TL('Leer más','Read more','Ler mais');
   $('#phyDots').innerHTML=steps.map((s,k)=>`<button data-pd="${k}" aria-label="${esc(pTx(s)[0])}" aria-current="${k===i}"></button>`).join('');$('#phyDots').querySelectorAll('[data-pd]').forEach(b=>b.onclick=()=>phyGo(+b.dataset.pd));
@@ -4797,8 +4824,13 @@ function phyGoResp(st,ins){PHY.breath=true;const airDefs=(out)=>[{p:[...PR2.airU
     phyIso([...lungs,...airway]);SYS.respiratorio.op=0.35;phyFocus(new V3(0,1.42,0.0),0.85);orb.T.ph=1.45;orb.T.th=0.45;PHY.routes=phyRoutes(airDefs());PHY.nParts=240;phyLabels(['nose','phar','lar','tra','bro','lungR','lungL']);}
   else if(st.id==='mech'){phyShowOnly(['respiratorio','muscular','oseo'],{respiratorio:0.7,oseo:0.55});const dia=pick2(/^(Diaphragm|External intercostal muscles|Internal intercostal muscles)$/);const ribs=meshes.filter(m=>BS(m.userData.sys)==='oseo'&&/Rib|Sternum|Vertebra T|Costal cartilage/i.test(m.userData.c.en));
     phyIso([...PHY.lungOnly,...dia,...ribs]);isoOnly=true;phyFocus(new V3(0,1.27,0.0),0.85);orb.T.ph=1.35;orb.T.th=0.6;phyLabels(['dia','ic','lungR','lungL']);ins.hidden=false;PHY.inset='spiro';PHY.dia=dia.filter(m=>/Diaphragm/.test(m.userData.c.en));PHY.ribs=ribs;}
-  else if(st.id==='gas'){phyShowOnly(['respiratorio','arterial','venoso'],{respiratorio:0.45});const heartGV=[...PHY.heart,...PHY.gv];phyIso([...heartGV,...PHY.lungs]);phyFocus(PHY.LC.clone(),0.62);orb.T.ph=1.45;orb.T.th=0;
-    PHY.routes=PHY.routesHeartR||(PHY.routesHeartR=phyBuildRoutes().map(r=>({c:r.c,len:r.len,col:r.k==='v'?C_VEN:C_ART,w:r.w,mode:'heart',sp:1})));phyLabels(['lungR','lungL','pt','pv']);ins.hidden=false;PHY.inset='gas';}
+  else if(st.id==='gas'){phyShowOnly(['respiratorio','arterial','venoso'],{respiratorio:0.14});PHY.nParts=520;const heartGV=[...PHY.heart,...PHY.gv];
+    /* v164: perfusión hasta los segmentos: arterias pulmonares (sangre pobre en O2, azul) y venas pulmonares (sangre oxigenada, roja) */
+    const pa=meshes.filter(m=>/(segmental|lobar) artery of (right|left) lung|lingular artery of left lung|^(Pulmonary trunk|Bifurcation of pulmonary trunk|(Left|Right) pulmonary artery)$/.test(m.userData.c.en));
+    const pv=meshes.filter(m=>/vein of (right|left) lung|^Lingular vein of left lung$|^(Right|Left) (superior|inferior) pulmonary vein$/.test(m.userData.c.en));
+    phyIso([...heartGV,...PHY.lungs,...pa,...pv]);for(const m of pa)phyTint(m,'#2f5bea',0.85);for(const m of pv)phyTint(m,'#e0263a',0.85);
+    phyFocus(PHY.LC.clone(),0.62);orb.T.ph=1.45;orb.T.th=0;
+    PHY.routes=PHY.routesHeartR||(PHY.routesHeartR=[...phyBuildRoutes(),...phyPulmRoutes()].map(r=>({c:r.c,len:r.len,col:r.k==='v'?C_VEN:C_ART,w:r.w,mode:'heart',sp:1})));phyLabels(['lungR','lungL','pt','pv']);ins.hidden=false;PHY.inset='gas';}
   else if(st.id==='ctrl'){phyShowOnly(['respiratorio','muscular','nervioso_central','oseo'],{respiratorio:0.3,oseo:0.2});const dia=pick2(/^Diaphragm$/);const bs=pick2(/^(Medulla oblongata|Pons|Midbrain|Pyramid of medulla oblongata|Olive)$/);const vt=meshes.filter(m=>BS(m.userData.sys)==='oseo'&&/^(Atlas|Axis|Vertebra [CT]\d)/.test(m.userData.c.en));const rb=meshes.filter(m=>BS(m.userData.sys)==='oseo'&&/ rib$|Costal cartilage|^(Manubrium of sternum|Body of sternum|Xiphoid process)$/.test(m.userData.c.en));
     phyIso([...dia,...bs,...PHY.lungOnly,...vt,...rb]);PHY.ribs=rb;phyFocus(new V3(0,1.38,0),0.95);orb.T.ph=1.45;orb.T.th=0.75;PHY.dia=dia;
     phyNerve(PR2.phrR,0xffd400,0,0.25);phyNerve(PR2.phrR.map(MX),0xffd400,0,0.25);phyLabels(['med','phr','dia']);}
@@ -4826,7 +4858,7 @@ function phyGoNeuro(st,ins){phyShowOnly(['nervioso_central','nervioso_periferico
   else if(st.id==='reflex'){phyNerve(PR2.reflexIn,0x7ad8ff,0,0.42);phyNerve(PR2.reflexOut,0xffd400,0.5,0.9);phyFocus(new V3(0.06,0.83,0.02),1.4);orb.T.ph=1.45;orb.T.th=0.9;phyLabels(['pat','fem','ah','quad']);ins.hidden=false;PHY.inset='arc';}
   else if(st.id==='sens'){phyNerve(PR2.sens,0x7ad8ff,0,0.75);phyFocus(new V3(0.03,1.05,0),2.5);orb.T.ph=1.45;orb.T.th=0.55;phyLabels(['pat','fem','dc','thal','s1']);}
 }
-function phyResetPose(){try{thxReset();}catch(e){}PHY.HF=null;if(typeof phyWalkReset==='function')phyWalkReset();if(PHY.xm){for(const m of PHY.xm){m.scale.set(1,1,1);m.position.set(0,0,0);}}PHY.xm=null;PHY.anim=null;PHY.layK=-1;if(PHY.rots){for(const m of PHY.rots){m.quaternion.identity();m.position.set(0,0,0);}PHY.rots.clear();}PHY.jaw=null;PHY.jawM=null;PHY.eyes=null;if(typeof phyUntint==='function')phyUntint();if(PHY.flex||PHY.knee||(contraction&&contraction.phy)){contraction=null;angle=0;applyPose();}PHY.flex=false;PHY.knee=false;PHY.spin=false;PHY.discMove=false;PHY.hern=false;for(const m of [...(PHY.acl||[]),...(PHY.pcl||[]),...(PHY.coll||[]),...(PHY.men||[]),...(PHY.nuc||[]),...(PHY.lymh||[])]){m.userData.hint=false;m.userData.ghost=false;refreshState(m);m.position.set(0,0,0);m.scale.set(1,1,1);}PHY.acl=PHY.pcl=PHY.coll=PHY.men=PHY.nuc=PHY.lymh=null;PHY.accom=false;for(const m of [...(PHY.agon||[]),...(PHY.antag||[])]){m.userData.hint=false;m.userData.ghost=false;refreshState(m);}PHY.agon=null;PHY.antag=null;for(const m of [...(PHY.lens||[]),...(PHY.oss||[]),...(PHY.endo||[]),...(PHY.grow||[])]){m.scale.set(1,1,1);m.position.set(0,0,0);}PHY.grow=null;PHY.wk=0;PHY.lens=null;PHY.oss=null;PHY.endo=null;for(const o of PHY.ms){o.m.scale.set(1,1,1);o.m.position.set(0,0,0);}for(const m of [...(PHY.lungs||[]),...(PHY.dia||[]),...(PHY.churn||[]),...(PHY.blad||[]),...(PHY.quad||[]),...(PHY.ribs||[])]){m.scale.set(1,1,1);m.position.set(0,0,0);}PHY.dia=null;PHY.churn=null;PHY.blad=null;PHY.ribs=null;PHY.breath=false;}
+function phyResetPose(){try{acinoHide();}catch(e){}try{thxReset();}catch(e){}PHY.HF=null;if(typeof phyWalkReset==='function')phyWalkReset();if(PHY.xm){for(const m of PHY.xm){m.scale.set(1,1,1);m.position.set(0,0,0);}}PHY.xm=null;PHY.anim=null;PHY.layK=-1;if(PHY.rots){for(const m of PHY.rots){m.quaternion.identity();m.position.set(0,0,0);}PHY.rots.clear();}PHY.jaw=null;PHY.jawM=null;PHY.eyes=null;if(typeof phyUntint==='function')phyUntint();if(PHY.flex||PHY.knee||(contraction&&contraction.phy)){contraction=null;angle=0;applyPose();}PHY.flex=false;PHY.knee=false;PHY.spin=false;PHY.discMove=false;PHY.hern=false;for(const m of [...(PHY.acl||[]),...(PHY.pcl||[]),...(PHY.coll||[]),...(PHY.men||[]),...(PHY.nuc||[]),...(PHY.lymh||[])]){m.userData.hint=false;m.userData.ghost=false;refreshState(m);m.position.set(0,0,0);m.scale.set(1,1,1);}PHY.acl=PHY.pcl=PHY.coll=PHY.men=PHY.nuc=PHY.lymh=null;PHY.accom=false;for(const m of [...(PHY.agon||[]),...(PHY.antag||[])]){m.userData.hint=false;m.userData.ghost=false;refreshState(m);}PHY.agon=null;PHY.antag=null;for(const m of [...(PHY.lens||[]),...(PHY.oss||[]),...(PHY.endo||[]),...(PHY.grow||[])]){m.scale.set(1,1,1);m.position.set(0,0,0);}PHY.grow=null;PHY.wk=0;PHY.lens=null;PHY.oss=null;PHY.endo=null;for(const o of PHY.ms){o.m.scale.set(1,1,1);o.m.position.set(0,0,0);}for(const m of [...(PHY.lungs||[]),...(PHY.dia||[]),...(PHY.churn||[]),...(PHY.blad||[]),...(PHY.quad||[]),...(PHY.ribs||[])]){m.scale.set(1,1,1);m.position.set(0,0,0);}PHY.dia=null;PHY.churn=null;PHY.blad=null;PHY.ribs=null;PHY.breath=false;}
 function phyStop(){if(!PHY.on)return;voxStop();PHY.auto=false;PHY.serie=null;try{$('#phyAuto').setAttribute('aria-pressed',false);}catch(e){}phyResetPose();for(const m of PHY.quad||[]){m.userData.hint=false;refreshState(m);}PHY.quad=null;PHY.on=false;FLOWON_U.value=0;phyClearImps();
   PHY.grp.clear();removeLabels('phy');PHY.cond=[];$('#phyBox').hidden=true;document.body.classList.remove('phy-on');phyPlace();
   const s=PHY.saved;if(s){for(const k in s.sys)if(SYS[k]){SYS[k].on=s.sys[k].on;SYS[k].op=s.sys[k].op;}for(const k in s.planes){Object.assign(PLANES[k],s.planes[k]);}updatePlanes();renderPlanes();if(studio!==s.studio)setStudio(s.studio);if(s.depth){DEPTH_OFF.clear();s.depth.forEach(d=>DEPTH_OFF.add(d));}}
@@ -8386,7 +8418,7 @@ function phyAlvModel(P,cut){const G=new THREE.Group();G.userData.alv=true;G.posi
     tube([aMid,[(aMid[0]+aEnd[0])/2,(aMid[1]+aEnd[1])/2+0.006,(aMid[2]+aEnd[2])/2+0.004],aEnd],0.0021,mArt);tube([vEnd,[(vMid[0]+vEnd[0])/2,(vMid[1]+vEnd[1])/2+0.006,(vMid[2]+vEnd[2])/2],vMid],0.0021,mVen);
     fl.push({p:[W(aTop),W(aMid),W(aEnd)],col:new THREE.Color(0x6d8cff),w:1,mode:'flow',sp:0.35});fl.push({p:[W(vEnd),W(vMid),W(vTop)],col:new THREE.Color(0xff5a64),w:1,mode:'flow',sp:0.35});});
   return {G,S,sacs:sacs.map(W),B0:W(B0),R0,fl,aTop:W(aTop),vTop:W(vTop)};}
-function phyGoAlv(st,f,lobes){SYS.respiratorio.op=0.28;SYS.oseo.op=0.12;phyIso([...lobes,...f(/(bronch|Trachea)/i)]);
+function phyGoAlv(st,f,lobes){try{acinoShow(st.id==='lu5'?'intercambio':'todo');}catch(e){}SYS.respiratorio.op=0.28;SYS.oseo.op=0.12;phyIso([...lobes,...f(/(bronch|Trachea)/i)]);
   const rl=lobes.filter(m=>/right lung$/.test(m.userData.c.en)),bb=at26Box(rl.length?rl:lobes),Q=new V3(bb.min.x*0.55+bb.max.x*0.45,(bb.min.y+bb.max.y)/2+0.02,bb.max.z-0.01);
   const P=new V3(Q.x+0.13,Q.y+0.0,bb.max.z+0.17),cut=st.id==='lu5',A=phyAlvModel(P,cut);
   const ring=new THREE.Mesh(new THREE.TorusGeometry(0.016,0.0014,8,40),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.9,depthTest:false}));ring.position.copy(Q);ring.renderOrder=40;ring.userData.alv=true;PHY.grp.add(ring);
@@ -10615,7 +10647,7 @@ renderProt();
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
  const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
- const APP_V='corpus-v163';/* igual que V en sw.js: se cambian juntos en cada publicación */
+ const APP_V='corpus-v164';/* igual que V en sw.js: se cambian juntos en cada publicación */
  const hadCtl=!!navigator.serviceWorker.controller;let upShown=false;
  /* aviso de versión nueva: si alguien tiene abierta (o instalada) una versión antigua, se le ofrece actualizar */
  const upBar=v=>{if(upShown)return;upShown=true;const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');
