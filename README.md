@@ -44,6 +44,8 @@ Funciona en el navegador del ordenador, la tableta o el móvil, sin instalar nad
 - **Planos y ejes** (sagital, frontal, transversal) con cortes, vista de rayos X, modo estudio, relieves óseos, lecciones guiadas y práctica de identificación.
 - **Alta resolución** por regiones con las mallas originales del atlas.
 
+En v167 el paso «Ventilación y perfusión: las zonas de West» de la respiración tiene el botón «Ver por segmentos»: cada punto del pulmón se asigna al segmento broncopulmonar cuyo bronquio segmentario apunta hacia él desde el hilio del lóbulo (10 segmentos a la derecha y 8 a la izquierda), y cada segmento toma el V/Q de la altura de su centro, de pie o tumbado. Las fronteras entre segmentos se oscurecen, las costillas se ocultan, los segmentos aparecen como puntos sobre la curva del gráfico y hay etiquetas con el V/Q de los segmentos más representativos. Los botones de postura y de segmentos están traducidos al francés y al alemán.
+
 ## Instalar como app y usar sin conexión
 
 Corpus es una **aplicación web progresiva (PWA)**: se instala desde el navegador y, una vez descargada, todo funciona en el propio dispositivo, sin internet (modelos 3D, glosario, fichas, lecciones, recorridos de fisiología y exámenes). Dirección para instalar: **https://ftjrodriguez-arch.github.io/corpus-atlas/**

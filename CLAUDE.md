@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v166**.
+(GitHub Pages desde `main`). Versión actual: **v167**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -90,6 +90,9 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 
 ## v166
 - `loadInfoTr` carga `info_fr`/`info_de` (si falta, inglés). Botón `#vqPos` (de pie / tumbado) en el paso `vq`; `PHY.vqSup`.
+
+## v167
+- Segmentos broncopulmonares: `VQSEG` (lóbulo, bronquio, código S1–S10), `vqSegBuild` (asignación angular desde el hilio de cada lóbulo; caché en `userData.vqSeg`, se rehace si cambia la geometría) y `vqSegPaint`. Botón `#vqSegB` en el paso `vq` (`PHY.vqSegOn`); oculta las costillas con `hiddenIds`.
 
 ## Pendiente
 - Decisión del usuario: NUNCA servidor propio, cuentas ni base de datos. Todo debe funcionar en local y sin conexión (GitHub Pages solo sirve los archivos estáticos).
