@@ -1576,7 +1576,7 @@ function loadSys(k){
         grp.add(m);MADE.push([m,c.id]);
         o.geometry.dispose();
         if(performance.now()-T0>12){await new Promise(z=>setTimeout(z,0));T0=performance.now();}}
-      for(const [m,id] of MADE){meshes.push(m);(byId[id]=m);/* la alta resolución pudo cargarse o descargarse mientras tanto */const hg=HRGEO[id];if(hg){if(m.geometry!==hg)swapGeo(m,hg);}else if(m.userData.lrGeo)unswapGeo(m);}
+      for(const [m,id] of MADE){meshes.push(m);(byId[id]=m);/* la alta resolución pudo cargarse o descargarse mientras tanto */if(HRA.hide.has(id)&&!HRGEO[id])hraHideGeo(m,id);const hg=HRGEO[id];if(hg){if(m.geometry!==hg)swapGeo(m,hg);}else if(m.userData.lrGeo)unswapGeo(m);}
       if(NUEVOS&&NUEVOS[k])NUEVOS[k].forEach(q=>{if(byId[q.id])return;const geo=nuevosGeo(q);
         const c=entry(q.id)||{id:q.id,en:q.id,es:q.id,la:'',sys:k,side:'',ins:''};
         const m=new THREE.Mesh(geo,matFor(k,c.ins,''));m.userData={c,sys:k,state:'',nuevo:true};
@@ -1674,7 +1674,8 @@ function unswapGeo(m){const u=m.userData;if(!u.lrGeo)return;const hr=m.geometry;
 /* v161: corazón y grandes vasos del Human Reference Atlas (HuBMAP HRA v1.3, CC BY 4.0; Browne y Schlehlein 2024),
    registrados a la posición del corazón del atlas. Sustituyen la geometría de las piezas del mismo nombre
    (se conservan nombre, color, fichas y lógica de los recorridos). */
-const HRA={p:null,ids:new Set()};
+const HRA={p:null,ids:new Set(),hide:new Set()};
+function hraHideGeo(m,id){if(HRGEO[id])return;const g=(m.userData.lrGeo||m.geometry).clone();g.setDrawRange(0,0);g.userData.hr=true;HRGEO[id]=g;swapGeo(m,g);}
 function hraLoad(){if(HRA.p)return HRA.p;
   HRA.p=Promise.all([fetch('data/heart_hra.glb').then(r=>{if(!r.ok)throw 0;return r.arrayBuffer();}),fetch('data/heart_hra_hide.json').then(r=>r.ok?r.json():[]).catch(()=>[])])
    .then(([buf,hide])=>new Promise((res,rej)=>loader.parse(buf,'',g=>res([g,hide]),rej)))
@@ -1682,9 +1683,8 @@ function hraLoad(){if(HRA.p)return HRA.p;
      const prep=geo=>{setVattr(geo,geo.attributes.color);if(!geo.attributes.normal)geo.computeVertexNormals();geo.computeBoundingSphere();geo.userData.hr=true;geo.userData.hra=true;return geo;};
      g.scene.traverse(o=>{if(!o.isMesh||!o.geometry.index)return;const ids=byName[o.name];if(!ids)return;const geo=prep(o.geometry);
        for(const id of ids){HRGEO[id]=geo;HRA.ids.add(id);const m=byId[id];if(m&&m.geometry!==geo)swapGeo(m,geo);}});
-     for(const n of hide||[]){const ids=byName[n];if(!ids)continue;for(const id of ids){if(HRA.ids.has(id))continue;
-       const e=new THREE.BufferGeometry();e.setAttribute('position',new THREE.BufferAttribute(new Float32Array(9),3));e.setAttribute('normal',new THREE.BufferAttribute(new Float32Array([0,1,0,0,1,0,0,1,0]),3));e.setIndex([0,1,2]);prep(e);
-       HRGEO[id]=e;HRA.ids.add(id);const m=byId[id];if(m)swapGeo(m,e);}}
+     /* piezas cuyo contenido ya está en otra malla: se dejan sin dibujar (misma geometría, rango vacío, para que su centro siga en su sitio) */
+     for(const n of hide||[]){const ids=byName[n];if(!ids)continue;for(const id of ids){if(HRA.ids.has(id))continue;HRA.hide.add(id);HRA.ids.add(id);const m=byId[id];if(m)hraHideGeo(m,id);}}
      try{DRAW.t=0;}catch(e){}return true;})
    .catch(e=>{console.warn('HRA',e);return false;});return HRA.p;}
 function loadHR(r){const h=HR[r];if(h.state==='loaded'||h.state==='loading')return h.promise;h.state='loading';renderHR();
