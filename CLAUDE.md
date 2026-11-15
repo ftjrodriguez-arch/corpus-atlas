@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v164**.
+(GitHub Pages desde `main`). Versión actual: **v165**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -83,6 +83,10 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 - `micro/acino.html` + `micro/acino.bin` (generador en el flujo de Claude: /home/claude/lung_build/acino_gen.py y /home/claude/acino_prod/tools/acino_bin.py). Parámetros `v`, `lang`, `embed`, `lite`; postMessage `{acino:'view'|'lang'}`. En la app: `acinoShow(v)` / `acinoHide()` (llamado desde `phyResetPose`), capa `#acinoFrame` sobre `#stage`.
 - Paso `gas` de `resp`: arterias segmentarias teñidas de azul y venas de rojo; `phyPulmRoutes()` añade rutas de partículas por cada vaso segmentario.
 - `PHY.ready`/`PHY.pend`: `phyGo` espera a que termine la carga del recorrido.
+
+## v165
+- Suelo de la marcha: `gaitFloor()` (después de `deform` en `applyPose` y en los recorridos de marcha) sube o baja `body` para que el punto más bajo de los huesos del pie quede en `GF.floor`; `gaitGrid` dibuja la cinta (`GF.v` = velocidad medida del pie de apoyo). En `applyPose` no se llama a `sqApplyRoot` mientras hay marcha (antes deshacía la raíz). Extensión de las MTF en `gaitActive`. `window.__gaitFix` fija la fase en el recorrido para pruebas.
+- Paso `vq` en `resp`: `vqQ`/`vqV`/`vqAt` (West 1962), `vqCol`, `phyTintFn` (tinte por vértice) y el gráfico `phyDrawVQ`.
 
 ## Pendiente
 - Decisión del usuario: NUNCA servidor propio, cuentas ni base de datos. Todo debe funcionar en local y sin conexión (GitHub Pages solo sirve los archivos estáticos).
