@@ -968,6 +968,18 @@ header .tools #phyBtn span{display:inline!important;font:600 12.5px var(--f-ui);
   body.mnav:has(#actbar:not([hidden])) .lbl.tag{display:none!important}
   .info-sys{display:block!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;font-size:12px}
   #welcome .wstats{flex-wrap:wrap!important;white-space:normal!important;row-gap:2px}
+  /* v162 · teléfono: aviso de gestos bajo la fila de capas y resultados de búsqueda con fondo opaco */
+  html body.mnav #stage .hint{top:104px!important}
+  html body.mnav #results{background:var(--panel)!important}
+  /* v162 · teléfono: menú «⋯» con icono (la fuente no tiene el carácter) */
+  #stage #actbar #aMoreBtn svg{width:18px;height:18px;display:block;margin:auto}
+}
+/* v162 · tableta en vertical: mismo diseño que el teléfono, aprovechando el ancho */
+@media (min-width:600px) and (max-width:879px){
+  html body.mnav #stage #qbar.qbar{justify-content:center!important;gap:10px!important}
+  html body.mnav #stage #qbar.qbar button span{display:inline!important}
+  html body.mnav #stage #actbar{max-width:560px;left:50%!important;right:auto!important;transform:translateX(-50%);width:calc(100% - 24px)!important}
+  html body.mnav #stage #actbar #actLat{display:inline!important;font-size:12.5px;opacity:.75}
 }
 </style>
 <header>
@@ -1920,7 +1932,7 @@ function setView(v){if(v==='reset'){orb.T.th=0.42;orb.T.ph=1.45;orb.T.r=isPhone(
   const [th,ph]=VIEWS[v];let d=th-orb.th;d=Math.atan2(Math.sin(d),Math.cos(d));orb.T.th=orb.th+d;orb.T.ph=ph;}
 $$('[data-view]').forEach(b=>b.onclick=()=>setView(b.dataset.view));
 let hintDone=false;
-if(window.innerWidth<600) $('#hintTxt').textContent='Arrastra para girar · mantén pulsado y desliza para ver nombres · toca para identificar';
+if(window.innerWidth<600||matchMedia('(pointer:coarse)').matches) $('#hintTxt').textContent='Arrastra para girar · mantén pulsado y desliza para ver nombres · toca para identificar';
 const ptrs=new Map();let downInfo=null,lastPinch=null;
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('pointerdown',e=>{spin=false;if(!hintDone){hintDone=true;setTimeout(()=>{if(!quiz.on&&!patchFocus)$('#hintTxt').hidden=true;},2500);}cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
@@ -9019,9 +9031,13 @@ async function bgStart(){if(BG.run||BG.fin||!BG.on||!window.caches||!window.__CC
   const aiS=v.querySelector(':scope > details.fsec[data-k="ai"]'),rf=v.querySelector(':scope > details.fsec[data-k="refs"]');if(aiS&&rf)v.insertBefore(aiS,rf);
  }catch(e){console.warn('ficha',e);}};
  try{renderInfo();}catch(e){}})();
+/* v162 · teléfono: al tocar una estructura la hoja baja a lo mínimo (nombre y acciones ya están en la tarjeta) */
+/* v162 · teléfono: al escribir en el buscador la hoja sube para que se vean los resultados */
+(function(){const q=document.getElementById('q');if(!q)return;const up=()=>{try{if(isPhone()&&(sheetState==='mini'||sheetState==='peek')&&q.value.trim())setSheet('half');}catch(e){}};q.addEventListener('input',up);q.addEventListener('focus',up);})();
+(function(){if(typeof select!=='function')return;const _s=select;select=function(m){const r=_s.apply(this,arguments);try{if(m&&isPhone()&&sheetState==='peek'&&!document.body.classList.contains('phy-on'))setSheet('mini');}catch(e){}return r;};})();
 /* barra de acciones: Etiquetar, Extraer, Preguntar a la IA y Al microscopio pasan al menú «⋯» */
 (function(){const bar=$('#actbar'),bt=bar&&bar.querySelector('.actbtns');if(!bt)return;
- const more=document.createElement('button');more.id='aMoreBtn';more.textContent='⋯';more.setAttribute('aria-haspopup','menu');more.setAttribute('aria-expanded','false');more.title=TL('Más acciones','More actions','Mais ações');bt.appendChild(more);
+ const more=document.createElement('button');more.id='aMoreBtn';more.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg>';more.setAttribute('aria-haspopup','menu');more.setAttribute('aria-expanded','false');more.title=TL('Más acciones','More actions','Mais ações');bt.appendChild(more);
  const menu=document.createElement('div');menu.className='amenu';menu.hidden=true;menu.setAttribute('role','menu');bar.appendChild(menu);
  const OV=['aPin','aExt','aAsk','aMicro'];
  const close=()=>{menu.hidden=true;more.setAttribute('aria-expanded','false');};
@@ -10585,7 +10601,7 @@ renderProt();
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
  const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
- const APP_V='corpus-v161';/* igual que V en sw.js: se cambian juntos en cada publicación */
+ const APP_V='corpus-v162';/* igual que V en sw.js: se cambian juntos en cada publicación */
  const hadCtl=!!navigator.serviceWorker.controller;let upShown=false;
  /* aviso de versión nueva: si alguien tiene abierta (o instalada) una versión antigua, se le ofrece actualizar */
  const upBar=v=>{if(upShown)return;upShown=true;const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');
