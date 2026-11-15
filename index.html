@@ -1681,7 +1681,7 @@ function hraLoad(){if(HRA.p)return HRA.p;
    .then(([buf,hide])=>new Promise((res,rej)=>loader.parse(buf,'',g=>res([g,hide]),rej)))
    .then(([g,hide])=>{const byName={};for(const id in CAT){const r=CAT[id];if(r&&r[1])(byName[r[1]]=byName[r[1]]||[]).push(id);}
      const prep=geo=>{setVattr(geo,geo.attributes.color);if(!geo.attributes.normal)geo.computeVertexNormals();geo.computeBoundingSphere();geo.userData.hr=true;geo.userData.hra=true;return geo;};
-     g.scene.traverse(o=>{if(!o.isMesh||!o.geometry.index)return;const ids=byName[o.name];if(!ids)return;const geo=prep(o.geometry);
+     g.scene.traverse(o=>{if(!o.isMesh||!o.geometry.index)return;const ids=byName[o.name]||byName[o.name.replace(/_/g,' ')]||(o.parent&&byName[o.parent.name.replace(/_/g,' ')]);if(!ids)return;const geo=prep(o.geometry);
        for(const id of ids){HRGEO[id]=geo;HRA.ids.add(id);const m=byId[id];if(m&&m.geometry!==geo)swapGeo(m,geo);}});
      /* piezas cuyo contenido ya está en otra malla: se dejan sin dibujar (misma geometría, rango vacío, para que su centro siga en su sitio) */
      for(const n of hide||[]){const ids=byName[n];if(!ids)continue;for(const id of ids){if(HRA.ids.has(id))continue;HRA.hide.add(id);HRA.ids.add(id);const m=byId[id];if(m)hraHideGeo(m,id);}}
