@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v165**.
+(GitHub Pages desde `main`). Versión actual: **v166**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -26,7 +26,7 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
   `MALE_NEW` oculta en la mujer las piezas solo masculinas (x29–x34, x37, x38).
 - Modelado en Blender: scripts en `C:\claude_vision\cw\` (modelar_*.py, importar_za.py, cw_util.py, escenas Corpus_*.blend,
   export_*.json). Coordenadas: atlas (x,y,z) = Z-Anatomy (x,z,−y).
-- Idiomas: es, en, pt completos; fr y de para interfaz y nombres (`data/i18n_fr.json`, `data/i18n_de.json`), fichas largas en inglés.
+- Idiomas: es, en, pt, fr y de completos (fichas largas FR/DE desde v166 en `data/info_fr.json` / `info_de.json`, mismas claves que `info_en.json`; flujo de traducción en /home/claude/trad_info con validar.py). Los textos de los recorridos siguen en inglés en FR/DE (`LEN()`).
 
 ## Movimiento (resumen; detalle en CEREBRO.md)
 - `deform(active)` deforma las mallas reales; `applyPose()` decide marcha, sentadilla (`SQ`, cadena cerrada) o rango articular.
@@ -87,6 +87,9 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 ## v165
 - Suelo de la marcha: `gaitFloor()` (después de `deform` en `applyPose` y en los recorridos de marcha) sube o baja `body` para que el punto más bajo de los huesos del pie quede en `GF.floor`; `gaitGrid` dibuja la cinta (`GF.v` = velocidad medida del pie de apoyo). En `applyPose` no se llama a `sqApplyRoot` mientras hay marcha (antes deshacía la raíz). Extensión de las MTF en `gaitActive`. `window.__gaitFix` fija la fase en el recorrido para pruebas.
 - Paso `vq` en `resp`: `vqQ`/`vqV`/`vqAt` (West 1962), `vqCol`, `phyTintFn` (tinte por vértice) y el gráfico `phyDrawVQ`.
+
+## v166
+- `loadInfoTr` carga `info_fr`/`info_de` (si falta, inglés). Botón `#vqPos` (de pie / tumbado) en el paso `vq`; `PHY.vqSup`.
 
 ## Pendiente
 - Decisión del usuario: NUNCA servidor propio, cuentas ni base de datos. Todo debe funcionar en local y sin conexión (GitHub Pages solo sirve los archivos estáticos).
