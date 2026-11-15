@@ -960,6 +960,14 @@ header .tools #phyBtn span{display:inline!important;font:600 12.5px var(--f-ui);
   .chips.presets{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   .chips.presets::-webkit-scrollbar{display:none}
   .chips.presets > *{flex:0 0 auto}
+  /* v159 · teléfono: menos ruido */
+  html body.mnav #stage #qbar.qbar button{min-width:44px!important;min-height:44px!important;padding:0 10px!important;justify-content:center}
+  html body.mnav #stage #qbar.qbar button span{display:none!important}
+  html body.mnav #stage #qbar.qbar button[aria-pressed="true"] span{display:inline!important}
+  body.mnav.phy-on #qbar{display:none!important}
+  body.mnav:has(#actbar:not([hidden])) .lbl.tag{display:none!important}
+  .info-sys{display:block!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;font-size:12px}
+  #welcome .wstats{flex-wrap:wrap!important;white-space:normal!important;row-gap:2px}
 }
 </style>
 <header>
@@ -1923,7 +1931,7 @@ cv.addEventListener('wheel',e=>{e.preventDefault();FIT_USER=true;
   orb.T.r=r1;},{passive:false});
 function pan(dx,dy){const right=new V3().setFromMatrixColumn(camera.matrix,0),up=new V3().setFromMatrixColumn(camera.matrix,1);const k=orb.r*0.0011;orb.T.tgt.addScaledVector(right,-dx*k).addScaledVector(up,dy*k);}
 function focusOn(v,r){orb.T.tgt.copy(v);orb.T.r=r;}
-function focusMesh(m){m.updateMatrixWorld(true);const bb=new THREE.Box3().setFromObject(m),s=bb.getBoundingSphere(new THREE.Sphere());focusOn(s.center.clone(),Math.max(0.3,s.radius*5.4));}
+function focusMesh(m){m.updateMatrixWorld(true);try{fitMeshes([m]);return;}catch(e){}const bb=new THREE.Box3().setFromObject(m),s=bb.getBoundingSphere(new THREE.Sphere());focusOn(s.center.clone(),Math.max(0.3,s.radius*5.4));}/* v159: mismo encuadre que al seleccionar (descuenta barras y tarjeta) */
 
 /* ───────── Selección ───────── */
 const ray=new THREE.Raycaster();let selected=null;
@@ -8610,7 +8618,8 @@ function batchBegin(now){if(!BATCH.on||!meshes.length)return;const F=++BATCH.fra
 function batchEnd(){const H=BATCH.hidden;for(let i=0;i<H.length;i++)H[i].visible=true;H.length=0;
   if(BATCH.grp.parent)BATCH.grp.parent.remove(BATCH.grp);if(BATCH.grp.children.length)BATCH.grp.clear();}
 function toursSum(){const ts=document.querySelector('#tab-lec details.toursec > summary');if(!ts)return;const n=Object.keys(TOURS).length;ts.textContent=TL('Recorridos guiados','Guided tours','Percursos guiados')+' · '+n;}
-window.addEventListener('load',()=>setTimeout(()=>{try{toursSum();const n=Object.keys(TOURS).length,b=document.querySelector('#welcome .wgrid [data-w="physio"] span');if(b)b.textContent=b.textContent.replace(/^\d+/,n);}catch(e){}},0));/* v158: el número de recorridos se cuenta cuando ya están todos definidos */
+function fixCounts(){try{toursSum();const n=Object.keys(TOURS).length,b=document.querySelector('#welcome [data-w="physio"] span');if(b)b.textContent=b.textContent.replace(/^\d+/,n);}catch(e){}}
+setTimeout(fixCounts,0);setTimeout(fixCounts,1500);window.addEventListener('load',()=>setTimeout(fixCounts,0));/* v159: el número de recorridos se cuenta cuando ya están todos definidos (la app arranca después de «load») */
 let FRAME_ERR=0;function frame(now){requestAnimationFrame(frame);try{frame0(now);}catch(e){if(FRAME_ERR++<3)console.error('frame',e);}}
 function frame0(now){if(!cv.clientWidth||!cv.clientHeight){last=now;return;}/* lienzo oculto o sin tamaño: no se dibuja (evita búferes de tamaño cero) */const raw=(now-last)/1000;const dt=Math.min(0.05,raw);last=now;dprTick(raw);if(typeof shadowsTick==='function')try{shadowsTick(dt);}catch(_){}const k=1-Math.pow(0.0008,dt);
   orb.th+=(orb.T.th-orb.th)*k;orb.ph+=(orb.T.ph-orb.ph)*k;orb.r+=(orb.T.r-orb.r)*k;orb.tgt.lerp(orb.T.tgt,k);
@@ -10461,7 +10470,7 @@ renderProt();
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
  const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
- const APP_V='corpus-v158';/* igual que V en sw.js: se cambian juntos en cada publicación */
+ const APP_V='corpus-v159';/* igual que V en sw.js: se cambian juntos en cada publicación */
  const hadCtl=!!navigator.serviceWorker.controller;let upShown=false;
  /* aviso de versión nueva: si alguien tiene abierta (o instalada) una versión antigua, se le ofrece actualizar */
  const upBar=v=>{if(upShown)return;upShown=true;const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');
