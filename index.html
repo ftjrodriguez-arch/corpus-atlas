@@ -15,7 +15,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Corpus">
 <meta property="og:title" content="Corpus · Atlas de anatomía 3D libre y gratuito">
-<meta property="og:description" content="79 recorridos narrados, 15 vistas al microscopio, 4.719 estructuras y 56 pruebas clínicas animadas. En español, inglés y portugués, en el teléfono y sin instalar nada.">
+<meta property="og:description" content="84 recorridos narrados, 20 vistas al microscopio, 4.719 estructuras y 56 pruebas clínicas animadas. En español, inglés y portugués, en el teléfono y sin instalar nada.">
 <meta property="og:image" content="https://ftjrodriguez-arch.github.io/corpus-atlas/icons/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -23,7 +23,7 @@
 <meta property="og:locale" content="es_ES">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Corpus · Atlas de anatomía 3D libre y gratuito">
-<meta name="twitter:description" content="79 recorridos narrados, 15 vistas al microscopio y 4.719 estructuras del cuerpo humano, gratis en el navegador.">
+<meta name="twitter:description" content="84 recorridos narrados, 20 vistas al microscopio y 4.719 estructuras del cuerpo humano, gratis en el navegador.">
 <meta name="twitter:image" content="https://ftjrodriguez-arch.github.io/corpus-atlas/icons/og.png">
 <title>Corpus Atlas</title>
 <script>/* Caché local de modelos y datos: cada petición de m2/, hr/, data/ y draco/ se sirve desde el almacenamiento del navegador si ya se descargó; lo nuevo se guarda. La caché lleva la versión publicada en el nombre y las versiones viejas se borran. */
@@ -945,6 +945,23 @@ html[data-theme="light"] .seg .btn.pri{background:var(--accent)!important;color:
   .ptop{touch-action:pan-x}
 }
 </style>
+<style id="v158">
+/* v158 · Recorridos visibles en la barra (computadora y tableta) */
+header .tools #phyBtn{width:auto!important;padding:0 11px 0 9px!important;gap:6px!important;display:inline-flex!important;flex-direction:row!important;align-items:center!important;border-radius:999px}
+header .tools #phyBtn svg{width:17px!important;height:17px!important;flex:0 0 auto}
+header .tools #phyBtn span{display:inline!important;font:600 12.5px var(--f-ui);color:inherit}
+#tab-lec details.toursec > summary{font-weight:700}
+/* v158 · Teléfono más limpio */
+@media (max-width:879px){
+  #stage #actbar{padding:6px 8px!important;gap:5px!important;border-color:rgba(127,127,127,.28)!important;border-radius:14px!important}
+  #stage #actbar #actName{font-size:15px!important;line-height:1.25!important;display:block!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%}
+  #stage #actbar #actLat{display:none!important}
+  #stage #actbar .actbtns button{min-height:34px!important;height:auto!important;padding:4px 8px!important;font-size:12.5px!important;line-height:1.15!important}
+  .chips.presets{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .chips.presets::-webkit-scrollbar{display:none}
+  .chips.presets > *{flex:0 0 auto}
+}
+</style>
 <header>
   <div class="brand"><b>Corpus</b><span>Atlas anatómico 3D</span></div>
   <div class="seg" role="group" aria-label="Cuerpo">
@@ -1032,7 +1049,7 @@ html[data-theme="light"] .seg .btn.pri{background:var(--accent)!important;color:
     <div class="tools min" role="toolbar" aria-label="Herramientas de la vista">
       <button class="icon-btn ttog" id="toolsTog" aria-expanded="false" aria-label="Herramientas" title="Herramientas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
       <button class="icon-btn" id="viewMenuBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Vistas" title="Vistas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg><span>Vistas</span></button>
-      <button class="icon-btn" id="phyBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Funciones" title="Fisiología en acción: ver cómo funcionan los órganos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-5 3 10 2-6 1.5 3H21"/></svg><span>Funciones</span></button>
+      <button class="icon-btn" id="phyBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Recorridos guiados" title="Recorridos guiados: el corazón, la respiración, los sistemas…"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-5 3 10 2-6 1.5 3H21"/></svg><span>Recorridos</span></button>
       <button class="icon-btn" id="xrayBtn" aria-pressed="false" aria-label="Rayos X" title="Rayos X"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M7 7h3M7 11h3M7 15h3M14 9h3M14 13h3M14 17h3"/></svg><span>Rayos X</span></button>
       <button class="icon-btn" id="studioBtn" aria-pressed="false" aria-label="Estudio" title="Estilo atlas: fondo negro, piel translúcida y tejidos realzados"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg><span>Atlas</span></button>
       <button class="icon-btn" id="shareBtn" aria-label="Compartir vista" title="Copia un enlace que abre el atlas exactamente en esta vista"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg><span>Compartir</span></button>
@@ -1906,7 +1923,7 @@ cv.addEventListener('wheel',e=>{e.preventDefault();FIT_USER=true;
   orb.T.r=r1;},{passive:false});
 function pan(dx,dy){const right=new V3().setFromMatrixColumn(camera.matrix,0),up=new V3().setFromMatrixColumn(camera.matrix,1);const k=orb.r*0.0011;orb.T.tgt.addScaledVector(right,-dx*k).addScaledVector(up,dy*k);}
 function focusOn(v,r){orb.T.tgt.copy(v);orb.T.r=r;}
-function focusMesh(m){m.updateMatrixWorld(true);const bb=new THREE.Box3().setFromObject(m),s=bb.getBoundingSphere(new THREE.Sphere());focusOn(s.center.clone(),Math.max(0.25,s.radius*4.2));}
+function focusMesh(m){m.updateMatrixWorld(true);const bb=new THREE.Box3().setFromObject(m),s=bb.getBoundingSphere(new THREE.Sphere());focusOn(s.center.clone(),Math.max(0.3,s.radius*5.4));}
 
 /* ───────── Selección ───────── */
 const ray=new THREE.Raycaster();let selected=null;
@@ -8592,6 +8609,8 @@ function batchBegin(now){if(!BATCH.on||!meshes.length)return;const F=++BATCH.fra
   if(nc)scene.add(BATCH.grp);}
 function batchEnd(){const H=BATCH.hidden;for(let i=0;i<H.length;i++)H[i].visible=true;H.length=0;
   if(BATCH.grp.parent)BATCH.grp.parent.remove(BATCH.grp);if(BATCH.grp.children.length)BATCH.grp.clear();}
+function toursSum(){const ts=document.querySelector('#tab-lec details.toursec > summary');if(!ts)return;const n=Object.keys(TOURS).length;ts.textContent=TL('Recorridos guiados','Guided tours','Percursos guiados')+' · '+n;}
+window.addEventListener('load',()=>setTimeout(()=>{try{toursSum();const n=Object.keys(TOURS).length,b=document.querySelector('#welcome .wgrid [data-w="physio"] span');if(b)b.textContent=b.textContent.replace(/^\d+/,n);}catch(e){}},0));/* v158: el número de recorridos se cuenta cuando ya están todos definidos */
 let FRAME_ERR=0;function frame(now){requestAnimationFrame(frame);try{frame0(now);}catch(e){if(FRAME_ERR++<3)console.error('frame',e);}}
 function frame0(now){if(!cv.clientWidth||!cv.clientHeight){last=now;return;}/* lienzo oculto o sin tamaño: no se dibuja (evita búferes de tamaño cero) */const raw=(now-last)/1000;const dt=Math.min(0.05,raw);last=now;dprTick(raw);if(typeof shadowsTick==='function')try{shadowsTick(dt);}catch(_){}const k=1-Math.pow(0.0008,dt);
   orb.th+=(orb.T.th-orb.th)*k;orb.ph+=(orb.T.ph-orb.ph)*k;orb.r+=(orb.T.r-orb.r)*k;orb.tgt.lerp(orb.T.tgt,k);
@@ -8681,7 +8700,9 @@ function cullLabels(){/* la etiqueta del eje no puede quedar debajo de la barra 
 var FIT_ID=0,FIT_USER=false;
 function fitUsable(){const r=stage.getBoundingClientRect(),W=r.width,H=r.height,ph=isPhone();let x0=6,x1=W-6,y0=6,y1=H-6;
   const vis=el=>el&&!el.hidden&&el.offsetParent!==null&&getComputedStyle(el).display!=='none'&&getComputedStyle(el).visibility!=='hidden';
-  const q=$('#qbar');if(vis(q)){const b=q.getBoundingClientRect();if(b.width&&b.height>0.25*H)x0=Math.max(x0,b.right-r.left+4);}
+  const q=$('#qbar');if(vis(q)){const b=q.getBoundingClientRect();if(b.width&&b.height>0.25*H)x0=Math.max(x0,b.right-r.left+4);
+    else if(b.height&&b.top-r.top<H*0.2)y0=Math.max(y0,b.bottom-r.top+8);/* v158: la fila de capas de arriba también tapa */}
+  const ab=$('#actbar');if(vis(ab)){const b=ab.getBoundingClientRect();if(b.height&&b.top-r.top>H*0.4)y1=Math.min(y1,b.top-r.top-8);/* v158: y la tarjeta de la estructura de abajo */}
   const t=document.querySelector('.tools');if(vis(t)){const b=t.getBoundingClientRect();if(b.height>0.4*H)x1=Math.min(x1,b.left-r.left-4);}
   const c=document.querySelector('.phy .phycard');if(PHY.on&&vis(c)){const b=c.getBoundingClientRect();if(b.top-r.top>H*0.3)y1=Math.min(y1,b.top-r.top-6);}
   if(ph){const sh=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sheet'))||SHEET.peek;y1=Math.min(y1,innerHeight-sh-r.top-6);}
@@ -8689,7 +8710,7 @@ function fitUsable(){const r=stage.getBoundingClientRect(),W=r.width,H=r.height,
   return {W,H,x0,x1,y0,y1};}
 function fitNow(c,hx,hy){const U=fitUsable();const sh=isPhone()?parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sheet'))||SHEET.peek:0;const off=sh>0?Math.min(U.H*0.36,sh/2):0;
   const f=(U.H/2)/Math.tan(camera.fov*Math.PI/360),uw=Math.max(90,U.x1-U.x0),uh=Math.max(90,U.y1-U.y0);
-  const kf=isPhone()?0.47:0.42,d=Math.min(12,Math.max(0.12,hx*f/(kf*uw),hy*f/(kf*uh)));
+  const kf=isPhone()?0.32:0.34,d=Math.min(12,Math.max(0.25,hx*f/(kf*uw),hy*f/(kf*uh)));/* v158: la estructura ocupa ~2/3 del espacio libre (antes casi todo) y nunca más cerca de 25 cm */
   const px=(U.x0+U.x1)/2-U.W/2,py=(U.y0+U.y1)/2-(U.H/2-off);const th=orb.T.th,phi=orb.T.ph;
   const fw=new V3(-Math.sin(phi)*Math.sin(th),-Math.cos(phi),-Math.sin(phi)*Math.cos(th)),right=new V3().crossVectors(fw,new V3(0,1,0)).normalize(),up=new V3().crossVectors(right,fw);
   const k=d/f;orb.T.tgt.copy(c).addScaledVector(right,-px*k).addScaledVector(up,py*k);orb.T.r=d;}
@@ -8899,7 +8920,7 @@ async function bgStart(){if(BG.run||BG.fin||!BG.on||!window.caches||!window.__CC
  window.openKin=function(){showTab('lec');const d=$('#tab-lec details.fsec[data-k="bio"]');if(d){d.open=true;setTimeout(()=>d.scrollIntoView({block:'start'}),60);}};
  window.kinLinkTxt=function(){const k=document.querySelector('.kinlink');if(k)k.innerHTML=`🦴 ${esc(TL('Kinesiología y biomecánica','Kinesiology & biomechanics','Cinesiologia e biomecânica'))}<span>${typeof BIO_Q!=='undefined'&&BIO_Q?BIO_Q.length+' '+esc(TL('preguntas','questions','perguntas')):''} →</span>`;};
  window.retitleFolds=function(){try{kinLinkTxt();}catch(e){}document.querySelectorAll('details.tabfold').forEach(d=>{const t=TT[d.dataset.k],sm=d.querySelector(':scope > summary');if(t&&sm&&sm.firstChild)sm.firstChild.textContent=TL(...t);});
-  const pl=document.querySelector('.phylink');if(pl)pl.innerHTML=`⚡ ${esc(TL('Fisiología en acción','Physiology in action','Fisiologia em ação'))}<span>${esc(TL('en Movimiento','in Movement','em Movimento'))} →</span>`;
+  try{toursSum();}catch(e){}
   const rh=document.querySelector('#romBox > .rhd');if(rh)rh.textContent=TL('Rango articular','Range of motion','Amplitude articular');};
  /* si algo del programa desplaza la vista hacia un bloque plegado, se abre primero */
  const _siv=Element.prototype.scrollIntoView;Element.prototype.scrollIntoView=function(){let p=this.closest&&this.closest('details.fsec');while(p){p.open=true;p=p.parentElement&&p.parentElement.closest('details.fsec');}return _siv.apply(this,arguments);};
@@ -8907,8 +8928,9 @@ async function bgStart(){if(BG.run||BG.fin||!BG.on||!window.caches||!window.__CC
   /* Estudiar */
   const L=$('#tab-lec');if(L&&!L.dataset.fold){L.dataset.fold=1;
    const ph=L.querySelector(':scope > .phyhost');if(ph){const b=document.createElement('button');b.className='phylink';b.innerHTML=`⚡ ${esc(TL('Fisiología en acción','Physiology in action','Fisiologia em ação'))}<span>${esc(TL('en Movimiento','in Movement','em Movimento'))} →</span>`;
-     b.onclick=()=>{showTab('mov');const d=$('#tab-mov details.fsec[data-k="phy"]');if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'});}};ph.after(b);
-     const kb=document.createElement('button');kb.className='phylink kinlink';kb.onclick=()=>window.openKin&&openKin();b.after(kb);setTimeout(()=>{try{kinLinkTxt();}catch(e){}},0);}
+     b.onclick=()=>{showTab('mov');const d=$('#tab-mov details.fsec[data-k="phy"]');if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'});}};/* v158: los recorridos se ven aquí mismo, en un apartado abierto (antes había que ir a Movimiento y desplegarlo) */
+      const td=document.createElement('details');td.className='fsec toursec';td.dataset.k='tours';td.open=true;const ts=document.createElement('summary');td.append(ts);L.prepend(td);td.append(ph);toursSum();/* primero en Estudiar */
+      const kb=document.createElement('button');kb.className='phylink kinlink';kb.onclick=()=>window.openKin&&openKin();td.after(kb);setTimeout(()=>{try{kinLinkTxt();}catch(e){}},0);}
    const T=[['#caseBox',TL('Casos clínicos','Clinical cases','Casos clínicos'),'cases'],['#routeCard',TL('Ruta de estudio','Study route','Rota de estudo'),'route'],['#bioCard',TL('Kinesiología y biomecánica','Kinesiology & biomechanics','Cinesiologia e biomecânica'),'bio'],['#rcCard',TL('Razonamiento clínico','Clinical reasoning','Raciocínio clínico'),'rc'],['#revCard',TL('Revisión experta','Expert review','Revisão especializada'),'rev'],['#examCard',TL('Modo examen','Exam mode','Modo exame'),'exam'],['#srsCard',TL('Repaso espaciado','Spaced review','Revisão espaçada'),'srs']];
    const lh=[...L.children].find(x=>x.matches('h3.sect')&&/Lecciones|Lessons|Lições/.test(x.textContent)),lb=$('#lecBox');
    if(lh&&lb){const w=document.createElement('div');lh.parentNode.insertBefore(w,lh);w.append(lh,lb);fold(w,lh.textContent.trim(),'lec');}
@@ -10439,7 +10461,7 @@ renderProt();
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
  const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
- const APP_V='corpus-v157';/* igual que V en sw.js: se cambian juntos en cada publicación */
+ const APP_V='corpus-v158';/* igual que V en sw.js: se cambian juntos en cada publicación */
  const hadCtl=!!navigator.serviceWorker.controller;let upShown=false;
  /* aviso de versión nueva: si alguien tiene abierta (o instalada) una versión antigua, se le ofrece actualizar */
  const upBar=v=>{if(upShown)return;upShown=true;const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');
