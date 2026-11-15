@@ -3372,9 +3372,15 @@ document.querySelectorAll('#mvView [data-v]').forEach(b=>{b.setAttribute('aria-p
 
 /* ───────── Ciclo de la marcha ───────── */
 // ángulos sagitales de referencia (% del ciclo, grados). Cadera y rodilla: + = flexión. Tobillo: + = dorsiflexión.
-const GAIT_K={hip:[[0,30],[10,27],[20,18],[30,8],[40,-2],[50,-10],[60,-4],[70,12],[80,25],[87,32],[95,31],[100,30]],
- knee:[[0,3],[5,10],[12,18],[20,13],[30,6],[40,3],[50,6],[60,38],[66,52],[73,60],[80,46],[87,24],[95,6],[100,3]],
- ankle:[[0,0],[6,-6],[12,-2],[30,8],[45,10],[52,6],[60,-14],[64,-18],[72,-8],[80,0],[90,2],[100,0]]};
+/* v163: curvas de la marcha normal con datos abiertos (cada 2 % del ciclo): ángulos sagitales, pelvis y centro de masas de
+   Fukuchi et al. 2018 (WBDS, PeerJ 6:e4640, CC BY 4.0) y Lencioni et al. 2019 (Sci Data, CC0); brazos y rotación del tórax de
+   Schreiber y Moissenet 2019 (Sci Data 6:111, CC BY 4.0). Tobillo: 0 = posición de pie. */
+const GAIT_K={hip:[[0,30.7],[2,30.6],[4,30.1],[6,29.7],[8,29.4],[10,28.7],[12,27.1],[14,25.1],[16,22.9],[18,20.8],[20,18.7],[22,16.6],[24,14.5],[26,12.2],[28,10.0],[30,7.9],[32,5.9],[34,4.0],[36,2.3],[38,0.6],[40,-1.0],[42,-2.5],[44,-4.1],[46,-5.4],[48,-6.6],[50,-7.5],[52,-8.3],[54,-8.7],[56,-8.4],[58,-7.4],[60,-5.5],[62,-2.7],[64,0.7],[66,4.6],[68,8.7],[70,12.8],[72,16.6],[74,20.0],[76,23.0],[78,25.4],[80,27.5],[82,29.2],[84,30.5],[86,31.4],[88,31.9],[90,31.9],[92,31.6],[94,31.1],[96,30.6],[98,30.4],[100,30.4]],
+ knee:[[0,0.9],[2,3.5],[4,5.7],[6,8.3],[8,11.7],[10,14.4],[12,15.6],[14,15.6],[16,14.9],[18,14.0],[20,13.0],[22,11.9],[24,10.7],[26,9.4],[28,8.1],[30,6.9],[32,5.9],[34,5.0],[36,4.3],[38,3.9],[40,3.6],[42,3.5],[44,3.8],[46,4.5],[48,5.7],[50,7.4],[52,9.7],[54,12.7],[56,16.6],[58,21.9],[60,28.3],[62,35.6],[64,43.1],[66,50.0],[68,55.6],[70,59.5],[72,61.7],[74,62.2],[76,61.1],[78,58.6],[80,54.7],[82,49.7],[84,43.5],[86,36.5],[88,28.7],[90,20.6],[92,12.7],[94,5.9],[96,1.2],[98,-0.6],[100,0.5]],
+ ankle:[[0,1.8],[2,0.6],[4,-2.5],[6,-4.4],[8,-3.6],[10,-1.6],[12,0.5],[14,2.2],[16,3.6],[18,4.7],[20,5.7],[22,6.6],[24,7.2],[26,7.8],[28,8.4],[30,9.1],[32,9.7],[34,10.3],[36,11.0],[38,11.7],[40,12.4],[42,13.0],[44,13.3],[46,13.5],[48,13.3],[50,12.6],[52,11.3],[54,9.1],[56,5.7],[58,0.9],[60,-4.7],[62,-9.4],[64,-11.7],[66,-11.3],[68,-9.0],[70,-6.1],[72,-3.1],[74,-0.3],[76,2.1],[78,4.0],[80,5.5],[82,6.5],[84,7.0],[86,6.8],[88,6.1],[90,4.9],[92,3.5],[94,2.3],[96,1.7],[98,1.6],[100,1.9]]};
+const GN={"obl":[0.6,0.9,1.4,2.2,3.1,3.9,4.5,5.0,5.2,5.0,4.6,4.0,3.3,2.6,1.9,1.3,0.7,0.3,-0.0,-0.2,-0.3,-0.3,-0.3,-0.3,-0.3,-0.5,-0.8,-1.4,-2.1,-2.9,-3.8,-4.5,-5.0,-5.2,-5.1,-4.7,-4.0,-3.4,-2.6,-2.0,-1.3,-0.8,-0.3,-0.0,0.2,0.3,0.3,0.3,0.3,0.3,0.5],"rot":[5.8,6.1,6.1,5.8,5.2,4.5,3.9,3.7,3.7,3.8,3.7,3.5,3.1,2.5,1.8,1.1,0.4,-0.3,-1.0,-1.7,-2.4,-3.1,-3.8,-4.5,-5.1,-5.6,-5.9,-5.9,-5.7,-5.2,-4.6,-4.0,-3.8,-3.7,-3.7,-3.7,-3.5,-3.1,-2.5,-1.8,-1.1,-0.3,0.4,1.1,1.8,2.5,3.2,3.9,4.6,5.2,5.6],"trp":[-7.2,-7.2,-7.1,-6.8,-6.6,-6.3,-6.0,-5.6,-5.1,-4.4,-3.7,-2.8,-1.9,-0.9,0.0,0.9,1.8,2.6,3.4,4.2,5.0,5.7,6.4,6.9,7.3,7.5,7.6,7.5,7.3,7.1,6.8,6.5,6.0,5.5,4.8,4.0,3.1,2.1,1.1,0.1,-0.8,-1.7,-2.5,-3.3,-4.1,-4.8,-5.6,-6.2,-6.7,-7.1,-7.3],"arm":[-10.2,-9.8,-9.2,-8.4,-7.5,-6.6,-5.8,-5.1,-4.3,-3.5,-2.6,-1.6,-0.4,0.8,2.0,3.2,4.3,5.4,6.3,7.2,8.0,8.6,9.2,9.7,10.0,10.1,10.1,9.9,9.4,8.8,8.0,7.1,6.2,5.1,4.1,3.0,1.9,0.7,-0.4,-1.6,-2.8,-4.0,-5.2,-6.3,-7.3,-8.1,-8.9,-9.5,-9.9,-10.1,-10.0],"comv":[-1.5,-1.6,-1.5,-1.3,-1.1,-0.8,-0.5,-0.1,0.2,0.5,0.8,1.1,1.4,1.5,1.6,1.6,1.4,1.2,0.9,0.6,0.2,-0.2,-0.6,-1.0,-1.3,-1.5,-1.6,-1.6,-1.4,-1.2,-0.9,-0.6,-0.3,0.0,0.4,0.7,1.0,1.3,1.4,1.5,1.5,1.3,1.1,0.8,0.5,0.1,-0.3,-0.7,-1.1,-1.4,-1.6],"coml":[-0.7,-0.5,-0.3,-0.1,0.1,0.3,0.5,0.7,0.8,0.9,1.0,1.1,1.1,1.2,1.3,1.3,1.4,1.4,1.3,1.3,1.2,1.2,1.1,1.0,0.9,0.7,0.5,0.3,0.1,-0.1,-0.3,-0.5,-0.7,-0.8,-0.9,-1.0,-1.1,-1.1,-1.2,-1.3,-1.3,-1.3,-1.3,-1.3,-1.3,-1.2,-1.2,-1.1,-1.0,-0.8,-0.7],"grfv":[5.3,28.0,50.2,64.0,75.5,88.1,99.2,105.1,105.6,102.0,96.0,89.2,83.3,79.0,76.8,76.3,77.4,79.8,83.4,87.9,93.4,99.4,105.0,109.1,110.3,107.6,99.5,84.4,62.2,36.6,15.3,3.2,0.3,0.1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,5.2],"grfap":[0.2,-1.6,-6.9,-11.6,-14.6,-16.3,-16.0,-14.3,-12.0,-9.7,-7.7,-6.0,-4.7,-3.7,-2.8,-2.0,-1.2,-0.4,0.6,1.7,3.3,5.3,7.7,10.3,13.2,15.9,18.2,18.9,16.8,11.4,4.8,0.8,0.0,-0.0,-0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.3]};
+const gN=(a,p)=>{p=((p%100)+100)%100;const x=p/2,i=Math.min(49,Math.floor(x)),t=x-i;return a[i]*(1-t)+a[i+1]*t;};
+
 const GAIT_PH=[[0,2,'Contacto inicial','CI','El talón toca el suelo con la cadera flexionada unos 30°, la rodilla casi extendida y el tobillo en posición neutra.'],
  [2,12,'Respuesta a la carga','RC','Se transfiere el peso al miembro: la rodilla se flexiona unos 15–20° para amortiguar y el pie desciende controlado por los dorsiflexores.'],
  [12,31,'Apoyo medio','AM','Apoyo monopodal: la tibia avanza sobre el pie fijo; el sóleo frena ese avance y el glúteo medio sostiene la pelvis.'],
@@ -3385,13 +3391,13 @@ const GAIT_PH=[[0,2,'Contacto inicial','CI','El talón toca el suelo con la cade
  [87,100,'Balanceo final','BF','La rodilla se extiende y los isquiotibiales frenan la pierna (contracción excéntrica) antes del nuevo contacto.']];
 // actividad muscular (lado de referencia): [en, [[ini,fin],...], tipo, función]
 const GAIT_M=[
- [['Tibialis anterior muscle','Extensor digitorum longus','Extensor hallucis longus'],[[0,12],[57,100]],'Tibial anterior y extensores largos',{0:'exc',57:'con'},'Controla el descenso del antepié tras el contacto (excéntrico) y dorsiflexiona el tobillo en el balanceo para que el pie no arrastre.'],
- [['Vastus lateralis muscle','Vastus medialis muscle','Vastus intermedius muscle'],[[0,15],[92,100]],'Vastos (cuádriceps)',{0:'exc',92:'con'},'Absorben la carga controlando la flexión de rodilla en la respuesta a la carga.'],
- [['Rectus femoris muscle'],[[50,65]],'Recto femoral',{50:'exc'},'Limita la flexión excesiva de la rodilla en el prebalanceo y ayuda a iniciar la flexión de cadera.'],
- [['Gluteus maximus muscle'],[[0,15],[95,100]],'Glúteo mayor',{0:'con',95:'iso'},'Extiende la cadera y estabiliza el tronco tras el contacto inicial.'],
- [['Gluteus medius muscle','Gluteus minimus muscle'],[[0,40],[96,100]],'Glúteo medio y menor',{0:'iso'},'Estabiliza la pelvis en el plano frontal durante el apoyo monopodal (su debilidad produce el signo de Trendelenburg).'],
- [['Long head of biceps femoris','Semitendinosus muscle','Semimembranosus muscle'],[[0,8],[80,100]],'Isquiotibiales',{0:'con',80:'exc'},'Frenan la extensión de rodilla y la flexión de cadera al final del balanceo, y ayudan a extender la cadera al contacto.'],
- [['Soleus muscle','Medial head of gastrocnemius','Lateral head of gastrocnemius'],[[10,55]],'Sóleo y gastrocnemio',{10:'exc',43:'con'},'Frenan el avance de la tibia en el apoyo medio (excéntrico) y elevan el talón en el apoyo final (concéntrico).'],
+ [['Tibialis anterior muscle','Extensor digitorum longus','Extensor hallucis longus'],[[0,12],[60,100]],'Tibial anterior y extensores largos',{0:'exc',60:'con'},'Controla el descenso del antepié tras el contacto (excéntrico) y dorsiflexiona el tobillo en el balanceo para que el pie no arrastre.'],
+ [['Vastus lateralis muscle','Vastus medialis muscle','Vastus intermedius muscle'],[[0,14],[90,100]],'Vastos (cuádriceps)',{0:'exc',90:'con'},'Absorben la carga controlando la flexión de rodilla en la respuesta a la carga.'],
+ [['Rectus femoris muscle'],[[0,14],[50,62],[90,100]],'Recto femoral',{0:'exc',50:'exc',90:'con'},'Limita la flexión excesiva de la rodilla en el prebalanceo y ayuda a iniciar la flexión de cadera.'],
+ [['Gluteus maximus muscle'],[[0,14],[96,100]],'Glúteo mayor',{0:'con',96:'iso'},'Extiende la cadera y estabiliza el tronco tras el contacto inicial.'],
+ [['Gluteus medius muscle','Gluteus minimus muscle'],[[0,44],[98,100]],'Glúteo medio y menor',{0:'iso'},'Estabiliza la pelvis en el plano frontal durante el apoyo monopodal (su debilidad produce el signo de Trendelenburg).'],
+ [['Long head of biceps femoris','Semitendinosus muscle','Semimembranosus muscle'],[[0,12],[80,100]],'Isquiotibiales',{0:'con',80:'exc'},'Frenan la extensión de rodilla y la flexión de cadera al final del balanceo, y ayudan a extender la cadera al contacto.'],
+ [['Soleus muscle','Medial head of gastrocnemius','Lateral head of gastrocnemius'],[[4,52]],'Sóleo y gastrocnemio',{4:'exc',40:'con'},'Frenan el avance de la tibia en el apoyo medio (excéntrico) y elevan el talón en el apoyo final (concéntrico).'],
  [['Tibialis posterior muscle','Fibularis longus muscle','Fibularis brevis muscle','Flexor hallucis longus'],[[10,50]],'Tibial posterior, fibulares y flexor largo del dedo gordo',{10:'iso'},'Estabilizan el pie y el retropié durante el apoyo.'],
  [['Psoas major','Iliacus muscle'],[[50,75]],'Iliopsoas',{50:'con'},'Flexiona la cadera para iniciar el balanceo.'],
  [['Adductor longus','Adductor magnus','Gracilis muscle'],[[0,10],[50,65]],'Aductores',{0:'iso',50:'con'},'Estabilizan la cadera en el contacto y contribuyen a la flexión de cadera al inicio del balanceo.'],
@@ -3436,10 +3442,17 @@ function gaitActive(){const R=patAngles('R',gait.p),L=patAngles('L',gait.p+50),o
     add('hip',S,{x:-A.hip,y:(A.hipY||0)*sg,z:-(A.hipZ||0)*sg});add('knee',S,{x:A.knee,y:0,z:0});add('ankle',S,{x:-A.ankle,y:0,z:0});
     const O=A===R?L:R,sh=O.hip,sc=A.armScale??1;
     if(A.armFix&&S==='R'){add('shoulder',S,{x:-5,y:50,z:0});add('elbow',S,{x:-75,y:0,z:0});add('wrist',S,{x:-40,y:0,z:0});}
-    else{add('shoulder',S,{x:-(sh-10)*0.55*sc,y:0,z:0});add('elbow',S,{x:-(A.elbow??(18+Math.max(0,sh-10)*0.35)),y:0,z:0});}}
-  const tz=(R.trunkZ||0)+(L.trunkZ||0),tx=Math.max(R.trunkX||0,L.trunkX||0);
-  if(tz||tx){out.push({k:'trunk',jn:'trunk',q:qOf('trunk',{x:tx,y:0,z:tz})});if(tx)out.push({k:'cervical',jn:'cervical',q:qOf('cervical',{x:-tx*0.4,y:0,z:0})});}
+    else{const ad=gN(GN.arm,A.p??(S==='R'?gait.p:gait.p+50));add('shoulder',S,{x:-ad*1.05*sc,y:0,z:0});add('elbow',S,{x:-(A.elbow??(16+Math.max(0,ad)*0.7)),y:0,z:0});}}
+  const tz=(R.trunkZ||0)+(L.trunkZ||0),tx=Math.max(R.trunkX||0,L.trunkX||0),ty=gN(GN.trp,gait.p)*GAIT_TRY;
+  out.push({k:'trunk',jn:'trunk',q:qOf('trunk',{x:tx,y:ty,z:tz})});if(tx)out.push({k:'cervical',jn:'cervical',q:qOf('cervical',{x:-tx*0.4,y:0,z:0})});
+  try{gaitRoot(gait.p);}catch(e){}
   return out;}
+/* v163: la pelvis rota (±6°) y se inclina (±5°) con el cuerpo entero, el tórax contrarrota y el centro de masas sube y baja ~3 cm */
+let GAIT_TRY=1;const _gq=new THREE.Quaternion(),_ge=new THREE.Euler();
+function gaitRoot(p){if(typeof body==='undefined'||!RIG||(typeof SQ!=='undefined'&&SQ.on))return;const d=Math.PI/180,P=new V3(...RIG.pelvis);
+  _ge.set(0,gN(GN.rot,p)*d,-gN(GN.obl,p)*d,'YXZ');_gq.setFromEuler(_ge);body.quaternion.copy(_gq);
+  body.position.copy(P).sub(P.clone().applyQuaternion(_gq)).add(new V3(-gN(GN.coml,p)/100,gN(GN.comv,p)/100,0));body.updateMatrixWorld(true);}
+function gaitRootOff(){try{if(typeof SQ!=='undefined'&&SQ.on)return;body.quaternion.identity();body.position.set(0,0,0);body.updateMatrixWorld(true);}catch(e){}}
 function renderGait(){if(!gait.on)return;const p=gait.p,ph=gPhase(p),R=patAngles('R',p),L=patAngles('L',p+50);
   $('#gaitR').value=Math.floor(p);$('#gaitPhase').textContent=ph[2]+' (derecho)';$('#gaitPct').textContent=Math.round(p)+' % del ciclo';$('#gaitGoal').textContent=ph[4];
   $('#gaitBar').querySelectorAll('span').forEach(s=>s.setAttribute('aria-current',s.dataset.k===ph[3]));
@@ -3456,7 +3469,7 @@ function gaitAgonists(){const ensR=new Set(),ensL=new Set();if(gait.on){gActive(
 function setGait(on){if(on){try{if(CT.on)ctStop();if(PHY.on)phyStop();if(SQ.on)setSq(false);}catch(e){}stopPlay();angle=0;}gait.on=on;$('#gaitBtn').setAttribute('aria-pressed',on);$('#gaitBtn').textContent=on?'Salir de la marcha':'Ver marcha';$('#gaitBody').hidden=!on;$('#gaitIntro').hidden=on;
   if(on){stopPlay();gait.play=true;$('#gaitPlay').textContent='Pausa';if(!SYS.muscular.on)setOn('muscular',true);
     renderGaitBar();renderGaitPats();setGaitPattern(gait.pat);renderGait();}
-  applyPose();gait.on?gaitAgonists():(gaitAgonists(),applyAgonists());}
+  applyPose();if(!on)gaitRootOff();gait.on?gaitAgonists():(gaitAgonists(),applyAgonists());}
 function renderGaitBar(){$('#gaitBar').innerHTML=GAIT_PH.map(f=>`<span data-k="${f[3]}" style="flex:${f[1]-f[0]};background:${f[0]<50?'color-mix(in srgb,var(--accent) 45%,var(--panel2))':'var(--panel2)'}" title="${f[2]}">${f[1]-f[0]>=10?gAbbr(f[3]):''}</span>`).join('');
     $('#gaitBar').querySelectorAll('span').forEach((s,i)=>s.onclick=()=>{gait.p=GAIT_PH[i][0]+0.5;gait.play=false;$('#gaitPlay').textContent='Reproducir';gaitUpdate();});renderGait();}
 function gaitUpdate(){renderGait();applyPose();gaitAgonists();}
@@ -6113,10 +6126,11 @@ function phyDrawWalk(p,step){const S=phyInsetBase('rgba(6,12,20,0.95)');if(!S)re
     if(B[i+1]-B[i]>6)synTxt(g,names[i],X(B[i])+3,by+13,on?'#fde68a':'rgba(235,240,255,0.85)','700 9.5px system-ui');}
   synTxt(g,PHY_TXT('Apoyo 60 %','Stance 60 %','Apoio 60 %'),X(20),by+bh+12,'#7dd3fc','600 9.5px system-ui');synTxt(g,PHY_TXT('Balanceo 40 %','Swing 40 %','Balanço 40 %'),X(70),by+bh+12,'#86efac','600 9.5px system-ui');
   g.fillStyle='#fff';g.fillRect(X(p)-1.5,by-3,3,bh+6);
-  const cy0=by+bh+22,ch=(h-cy0-8)/3;const rows=[['hip',PHY_TXT('Cadera','Hip','Quadril'),'#f472b6',-15,35],['knee',PHY_TXT('Rodilla','Knee','Joelho'),'#38bdf8',0,65],['ankle',PHY_TXT('Tobillo','Ankle','Tornozelo'),'#facc15',-20,15]];
+  const cy0=by+bh+22,ch=(h-cy0-8)/4;const rows=[['hip',PHY_TXT('Cadera','Hip','Quadril'),'#f472b6',-15,35],['knee',PHY_TXT('Rodilla','Knee','Joelho'),'#38bdf8',0,65],['ankle',PHY_TXT('Tobillo','Ankle','Tornozelo'),'#facc15',-15,15],['grf',PHY_TXT('Suelo','Ground','Solo'),'#a78bfa',0,120]];
   rows.forEach(([k,n,c,lo,hi],i)=>{const y0=cy0+i*ch,y1=y0+ch-6,Y=v=>y1-(v-lo)/(hi-lo)*(y1-y0),cx0=58;const XX=v=>cx0+v/100*(bx1-cx0);
-    g.strokeStyle='rgba(255,255,255,0.1)';g.beginPath();g.moveTo(cx0,Y(0));g.lineTo(bx1,Y(0));g.stroke();g.strokeStyle=c;g.lineWidth=1.8;g.beginPath();for(let v=0;v<=100;v+=1){const y=Y(gInterp(GAIT_K[k],v));v?g.lineTo(XX(v),y):g.moveTo(XX(v),y);}g.stroke();g.lineWidth=1;
-    const cur=gInterp(GAIT_K[k],p);synGlow(g,XX(p),Y(cur),7,c);synTxt(g,n,8,y0+ch*0.45,c,'700 10px system-ui');synTxt(g,(cur>=0?'':'−')+Math.abs(Math.round(cur))+'°',8,y0+ch*0.45+12,'rgba(235,240,255,0.85)','600 9.5px system-ui');});}
+    g.strokeStyle='rgba(255,255,255,0.1)';g.beginPath();g.moveTo(cx0,Y(0));g.lineTo(bx1,Y(0));g.stroke();const fv=v=>k==='grf'?gN(GN.grfv,v):gInterp(GAIT_K[k],v);g.strokeStyle=c;g.lineWidth=1.8;g.beginPath();for(let v=0;v<=100;v+=1){const y=Y(fv(v));v?g.lineTo(XX(v),y):g.moveTo(XX(v),y);}g.stroke();g.lineWidth=1;
+    const cur=fv(p);synGlow(g,XX(p),Y(cur),7,c);synTxt(g,n,8,y0+ch*0.45,c,'700 10px system-ui');synTxt(g,k==='grf'?Math.round(cur)+' %':(cur>=0?'':'−')+Math.abs(Math.round(cur))+'°',8,y0+ch*0.45+12,'rgba(235,240,255,0.85)','600 9.5px system-ui');});
+  synTxt(g,PHY_TXT('Fuerza vertical del suelo, % del peso · datos: Fukuchi 2018 (CC BY)','Vertical ground force, % body weight · data: Fukuchi 2018 (CC BY)','Força vertical do solo, % do peso · dados: Fukuchi 2018 (CC BY)'),58,h-3,'rgba(200,190,255,0.7)','500 8.5px system-ui');}
 function phyGoWalk(st,ins){const idx=TOURS.walk.steps.findIndex(s=>s.id===st.id);phyShowOnly(['muscular','oseo'],{muscular:0.95});isoOnly=false;isoSet=null;applySystems();
   PHY.walk=true;PHY.walkPat=gait.pat;gait.pat='normal';const mus=meshes.filter(m=>m.userData.sys==='muscular'||BS(m.userData.sys)==='muscular');let p=WALK_PH[idx]?WALK_PH[idx][0]:0,last=0,key='';
   const win=WALK_PH[idx]?(()=>{const [a,b]=WALK_PH[idx];const c=(a+b)/2,hw=Math.max(4,(b-a)/2);return [c-hw,c+hw];})():null;
@@ -6127,7 +6141,7 @@ function phyGoWalk(st,ins){const idx=TOURS.walk.steps.findIndex(s=>s.id===st.id)
     PHY.walkP=p;};
   ins.hidden=false;phyBig(true);PHY.insetFn=()=>phyDrawWalk(PHY.walkP||0,idx);
   phyFocus(new V3(0.12,0.86,0),isPhone()?3.4:2.95);orb.T.ph=1.52;orb.T.th=-Math.PI/2+0.25;}
-function phyWalkReset(){try{if(typeof axisLbl!=='undefined'&&axisLbl)axisLbl.on=false;if(typeof axisLine!=='undefined'&&axisLine)axisLine.visible=false;}catch(e){}if(PHY.pgH){for(const m of PHY.pgH){m.userData.hint=false;refreshState(m);}PHY.pgH=null;}if(PHY.walk){gait.pat=PHY.walkPat||'normal';PHY.walk=false;deform([]);for(const m of meshes)if(m.userData.ag){m.userData.ag=false;refreshState(m);}}
+function phyWalkReset(){gaitRootOff();try{if(typeof axisLbl!=='undefined'&&axisLbl)axisLbl.on=false;if(typeof axisLine!=='undefined'&&axisLine)axisLine.visible=false;}catch(e){}if(PHY.pgH){for(const m of PHY.pgH){m.userData.hint=false;refreshState(m);}PHY.pgH=null;}if(PHY.walk){gait.pat=PHY.walkPat||'normal';PHY.walk=false;deform([]);for(const m of meshes)if(m.userData.ag){m.userData.ag=false;refreshState(m);}}
   if(PHY.dfm){PHY.dfm=false;deform([]);for(const m of meshes)if(m.userData.ag){m.userData.ag=false;refreshState(m);}}phyBig(false);}
 
 Object.assign(PHY_GO,{syn:phyGoSyn,walk:phyGoWalk});
@@ -10601,7 +10615,7 @@ renderProt();
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
  const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
- const APP_V='corpus-v162';/* igual que V en sw.js: se cambian juntos en cada publicación */
+ const APP_V='corpus-v163';/* igual que V en sw.js: se cambian juntos en cada publicación */
  const hadCtl=!!navigator.serviceWorker.controller;let upShown=false;
  /* aviso de versión nueva: si alguien tiene abierta (o instalada) una versión antigua, se le ofrece actualizar */
  const upBar=v=>{if(upShown)return;upShown=true;const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');

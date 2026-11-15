@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v162**.
+(GitHub Pages desde `main`). Versión actual: **v163**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -75,6 +75,9 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 - Corazón HRA: `data/heart_hra.glb` (Draco, 32 mallas con el nombre exacto de la pieza del atlas) + `data/heart_hra_hide.json` (piezas que quedan sin dibujar). `hraLoad()` se lanza al cargar arterial/venoso, pone la geometría en `HRGEO[id]` (la alta resolución no la pisa: `HRA.ids`) y oculta con `drawRange 0` (`hraHideGeo`). GLTFLoader cambia espacios por «_» en los nombres. Fuente y registro en el flujo de Claude (/home/claude/heart_build: reg.json, v2.py).
 - Deformación por vértices `VD` (`vdDeform`, `vdResetAll`; `userData.nobatch` saca la pieza del dibujo agrupado). Tórax: `thxPose(A,desc,{dia,lungs})` (costillas rígidas sobre el eje cabeza→tubérculo, esternón ajustado a las costillas 1–2 y 6–7, cartílagos e intercostales mezclados entre huesos). Corazón: `hfBuild`/`hfPose` (campo continuo base→punta). `phyResetPose` y `animReset` llaman a `thxReset`.
 - Prueba en vivo con GPU real: rama `prueba-*` y página en iframe srcdoc desde raw.githubusercontent con el SHA del commit (la rama se cachea 5 min); `iframe.name='qa'` expone `__thx`; `window.__bFix` fija la fase de la respiración.
+
+## v163 (marcha con datos abiertos)
+- `GAIT_K` (cadera, rodilla, tobillo cada 2 %) y `GN` (pelvis obl/rot, tórax−pelvis, brazo, centro de masas, GRF) salen de /home/claude/gait_src/normativa.json (Fukuchi 2018, Schreiber 2019, Lencioni 2019). `gN(tabla,p)` interpola. `gaitRoot(p)` mueve el grupo `body` (pelvis + centro de masas) y `gaitRootOff()` lo devuelve; no actúa con la sentadilla. El tórax contrarrota con la articulación `trunk` (eje y).
 
 ## Pendiente
 - Decisión del usuario: NUNCA servidor propio, cuentas ni base de datos. Todo debe funcionar en local y sin conexión (GitHub Pages solo sirve los archivos estáticos).

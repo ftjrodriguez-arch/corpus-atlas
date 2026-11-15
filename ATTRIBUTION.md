@@ -37,3 +37,4 @@
 ## Privacidad · Privacy
 - Sin cuentas ni servidor propio: el progreso se guarda solo en el dispositivo de cada persona.
 - Recuento anónimo de visitas con GoatCounter (sin cookies ni datos personales), solo en el sitio público.
+- **Marcha normal (v163)**: curvas por % del ciclo calculadas a partir de Fukuchi C.A., Fukuchi R.K., Duarte M. (2018), *A public dataset of overground and treadmill walking kinematics and kinetics in healthy individuals*, PeerJ 6:e4640 (CC BY 4.0); Schreiber C., Moissenet F. (2019), *A multimodal dataset of human gait at different walking speeds established on injury-free adult participants*, Scientific Data 6:111 (CC BY 4.0); Lencioni T. et al. (2019), *Human kinematic, kinetic and EMG data during different walking and stair ascending and descending tasks*, Scientific Data 6:309 (CC0). Se usan las medias de los ángulos, la fuerza de reacción del suelo, el centro de masas, el balanceo de los brazos y los intervalos de EMG.
