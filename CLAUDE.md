@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v160**.
+(GitHub Pages desde `main`). Versión actual: **v161**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -70,6 +70,11 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 ## v160 (francés y alemán)
 - `data/content_fr.json` / `content_de.json`: texto en español → traducción; `setLang` los mezcla en `I18N.ui[l]` (no pisa la interfaz). `TL` busca primero el texto y, si lleva cifras, la plantilla `#…{n}…` (`TLX`). Casos clínicos en `cases_fr.json` / `cases_de.json` (si falta, inglés). Variantes y distractores del ECOE pasan por `TL`.
 - Al añadir textos nuevos a bio/rc/protocols/variants/cases, añade también su traducción FR/DE (si no, se ve en inglés).
+
+## v161 (serie narrada más real)
+- Corazón HRA: `data/heart_hra.glb` (Draco, 32 mallas con el nombre exacto de la pieza del atlas) + `data/heart_hra_hide.json` (piezas que quedan sin dibujar). `hraLoad()` se lanza al cargar arterial/venoso, pone la geometría en `HRGEO[id]` (la alta resolución no la pisa: `HRA.ids`) y oculta con `drawRange 0` (`hraHideGeo`). GLTFLoader cambia espacios por «_» en los nombres. Fuente y registro en el flujo de Claude (/home/claude/heart_build: reg.json, v2.py).
+- Deformación por vértices `VD` (`vdDeform`, `vdResetAll`; `userData.nobatch` saca la pieza del dibujo agrupado). Tórax: `thxPose(A,desc,{dia,lungs})` (costillas rígidas sobre el eje cabeza→tubérculo, esternón ajustado a las costillas 1–2 y 6–7, cartílagos e intercostales mezclados entre huesos). Corazón: `hfBuild`/`hfPose` (campo continuo base→punta). `phyResetPose` y `animReset` llaman a `thxReset`.
+- Prueba en vivo con GPU real: rama `prueba-*` y página en iframe srcdoc desde raw.githubusercontent con el SHA del commit (la rama se cachea 5 min); `iframe.name='qa'` expone `__thx`; `window.__bFix` fija la fase de la respiración.
 
 ## Pendiente
 - Decisión del usuario: NUNCA servidor propio, cuentas ni base de datos. Todo debe funcionar en local y sin conexión (GitHub Pages solo sirve los archivos estáticos).

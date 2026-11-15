@@ -7,6 +7,7 @@
 
 ## Modelo femenino · Female model
 - **HuBMAP Human Reference Atlas — 3D Reference Object Library**, *Visible Human Female, VH_F_United v1.3*, CC BY 4.0.
+- **HuBMAP Human Reference Atlas** — Browne K., Schlehlein H. (2024). *3D Reference Organ for Heart, Male v1.3* (doi:10.48539/HBM564.WKNG.249) y *3D Reference Organ for Blood Vasculature, Male v1.3* (doi:10.48539/HBM473.XTPP.725), CC BY 4.0, datos del Visible Human Project (NLM). Usados para el corazón y los grandes vasos del tórax (`data/heart_hra.glb`): extraídos, recortados, tapados y registrados al atlas.
   https://github.com/hubmapconsortium/ccf-3d-reference-object-library · https://humanatlas.io
   Basado en el conjunto de datos *Visible Human Project®* de la U.S. National Library of Medicine.
   Placenta y modelo de ganglio linfático de Yao excluidos.
