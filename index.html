@@ -3312,7 +3312,7 @@ function applyPose(){
   if(!RIG) return;if(typeof CT!=='undefined'&&CT.on&&currentTab==='mov')return;
   const sqOn=SQ.on&&currentTab==='mov';const active=(gait.on&&currentTab==='mov')?gaitActive():sqOn?sqActive():(currentTab==='mov'||contraction)?Object.entries(comps(angle)).map(([k,cm])=>({k,jn:jname(k),q:qOf(jname(k),cm)})):[];
   active.sort((a,b)=>(DEPTH[b.k.split('_')[0]]||0)-(DEPTH[a.k.split('_')[0]]||0));
-  sqApplyRoot(sqOn);deform(active);updateArc(active);
+  const gOn=gait.on&&currentTab==='mov';if(!gOn)sqApplyRoot(sqOn);deform(active);if(gOn)gaitFloor();updateArc(active);
 }
 /* cadena proximal real: el húmero cuelga de la escápula (acromioclavicular y esternoclavicular), no solo del tronco */
 function arcChain(k){const P=PROX[k]||[];if(k==='shoulder')return ['acr','sc',...P];return P.flatMap(p=>p==='shoulder'?['shoulder','acr','sc']:[p]);}
@@ -3448,6 +3448,7 @@ function gaitActive(){const R=patAngles('R',gait.p),L=patAngles('L',gait.p+50),o
   const add=(k,S,cm)=>{const jn=k+'_'+S;if(JOINTS[jn])out.push({k,jn,q:qOf(jn,cm)});};
   for(const [S,A] of [['R',R],['L',L]]){const sg=S==='R'?1:-1;
     add('hip',S,{x:-A.hip,y:(A.hipY||0)*sg,z:-(A.hipZ||0)*sg});add('knee',S,{x:A.knee,y:0,z:0});add('ankle',S,{x:-A.ankle,y:0,z:0});
+    {const q=(((A.p??(S==='R'?gait.p:gait.p+50))%100)+100)%100,te=q<36?0:q<60?32*Math.sin((q-36)/24*Math.PI/2):q<74?32*Math.cos((q-60)/14*Math.PI/2):0;if(te>0.3)for(const f of TOES)add('mtp'+f,S,{x:-te*(f===1?1:0.85),y:0,z:0});}
     const O=A===R?L:R,sh=O.hip,sc=A.armScale??1;
     if(A.armFix&&S==='R'){add('shoulder',S,{x:-5,y:50,z:0});add('elbow',S,{x:-75,y:0,z:0});add('wrist',S,{x:-40,y:0,z:0});}
     else{const ad=gN(GN.arm,A.p??(S==='R'?gait.p:gait.p+50));add('shoulder',S,{x:-ad*1.05*sc,y:0,z:0});add('elbow',S,{x:-(A.elbow??(16+Math.max(0,ad)*0.7)),y:0,z:0});}}
@@ -3456,11 +3457,30 @@ function gaitActive(){const R=patAngles('R',gait.p),L=patAngles('L',gait.p+50),o
   try{gaitRoot(gait.p);}catch(e){}
   return out;}
 /* v163: la pelvis rota (±6°) y se inclina (±5°) con el cuerpo entero, el tórax contrarrota y el centro de masas sube y baja ~3 cm */
-let GAIT_TRY=1;const _gq=new THREE.Quaternion(),_ge=new THREE.Euler();
+let GAIT_TRY=1;
+/* v165: el pie de apoyo toca el suelo y no resbala. Tras deformar se busca el punto más bajo de los huesos de los pies y el cuerpo
+   entero se sube o baja para que toque el suelo (así la oscilación del centro de masas sale de la propia pierna y los rodillos
+   del talón, del tobillo y del antepié se ven solos). Debajo, una cinta de suelo avanza a la velocidad real del pie de apoyo. */
+const GF={ms:null,floor:null,v:0.011,lz:null,lp:null,grid:null};
+function gaitFootMs(){if(!GF.ms||!GF.ms.length)GF.ms=meshes.filter(m=>/^(Calcaneus|Talus|(First|Second|Third|Fourth|Fifth) metatarsal bone|(Proximal|Distal|Middle) phalanx of (first|second|third|fourth|fifth) finger of foot)$/.test(m.userData.c.en));return GF.ms;}
+function gaitFloor(){try{const ms=gaitFootMs();if(!ms.length||typeof body==='undefined')return;const v=new V3();
+  if(GF.floor==null){let mn=1e9;for(const m of ms){const g=m.geometry,a=(g.userData&&g.userData.rest)||g.attributes.position.array;for(let k=1;k<a.length;k+=9)mn=Math.min(mn,a[k]);}GF.floor=mn;}
+  body.updateMatrixWorld(true);let mn=1e9,mz=0,side=0;
+  for(const m of ms){m.updateMatrixWorld(true);const a=m.geometry.attributes.position.array,M=m.matrixWorld;for(let k=0;k<a.length;k+=18){v.set(a[k],a[k+1],a[k+2]).applyMatrix4(M);if(v.y<mn){mn=v.y;mz=v.z;side=v.x;}}}
+  body.position.y+=GF.floor-mn;body.updateMatrixWorld(true);
+  /* velocidad de la cinta: avance hacia atrás del punto de apoyo del pie derecho en el apoyo medio */
+  const p=((gait.p%100)+100)%100;if(p>14&&p<44&&side<0){if(GF.lz!=null&&GF.lp!=null&&p>GF.lp&&p-GF.lp<6){const vp=(GF.lz-mz)/(p-GF.lp);if(vp>0&&vp<0.05)GF.v=GF.v*0.8+vp*0.2;}GF.lz=mz;GF.lp=p;}else{GF.lz=null;GF.lp=null;}
+  gaitGrid(p);}catch(e){}}
+function gaitGrid(p){if(!GF.grid){const pos=[],N=17,S=0.25;for(let i=0;i<N;i++){const z=-2+i*S;pos.push(-0.7,0,z,0.7,0,z);}for(const x of [-0.7,-0.35,0,0.35,0.7])pos.push(x,0,-2,x,0,2);
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));GF.grid=new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0x7aa2c8,transparent:true,opacity:0.35,depthWrite:false}));GF.grid.userData.gaitGrid=true;GF.grid.renderOrder=-1;scene.add(GF.grid);}
+  let dp=GF.gp==null?0:p-GF.gp;if(dp<-50)dp+=100;if(dp<0||dp>20)dp=0;GF.gp=p;GF.off=((GF.off||0)+dp*GF.v)%0.25;
+  GF.grid.visible=true;GF.grid.position.set(0,GF.floor-0.002,-GF.off);}
+function gaitGridOff(){if(GF.grid)GF.grid.visible=false;}
+const _gq=new THREE.Quaternion(),_ge=new THREE.Euler();
 function gaitRoot(p){if(typeof body==='undefined'||!RIG||(typeof SQ!=='undefined'&&SQ.on))return;const d=Math.PI/180,P=new V3(...RIG.pelvis);
   _ge.set(0,gN(GN.rot,p)*d,-gN(GN.obl,p)*d,'YXZ');_gq.setFromEuler(_ge);body.quaternion.copy(_gq);
   body.position.copy(P).sub(P.clone().applyQuaternion(_gq)).add(new V3(-gN(GN.coml,p)/100,gN(GN.comv,p)/100,0));body.updateMatrixWorld(true);}
-function gaitRootOff(){try{if(typeof SQ!=='undefined'&&SQ.on)return;body.quaternion.identity();body.position.set(0,0,0);body.updateMatrixWorld(true);}catch(e){}}
+function gaitRootOff(){try{gaitGridOff();if(typeof SQ!=='undefined'&&SQ.on)return;body.quaternion.identity();body.position.set(0,0,0);body.updateMatrixWorld(true);}catch(e){}}
 function renderGait(){if(!gait.on)return;const p=gait.p,ph=gPhase(p),R=patAngles('R',p),L=patAngles('L',p+50);
   $('#gaitR').value=Math.floor(p);$('#gaitPhase').textContent=ph[2]+' (derecho)';$('#gaitPct').textContent=Math.round(p)+' % del ciclo';$('#gaitGoal').textContent=ph[4];
   $('#gaitBar').querySelectorAll('span').forEach(s=>s.setAttribute('aria-current',s.dataset.k===ph[3]));
@@ -6167,7 +6187,7 @@ function phyGoWalk(st,ins){const idx=TOURS.walk.steps.findIndex(s=>s.id===st.id)
   PHY.walk=true;PHY.walkPat=gait.pat;gait.pat='normal';const mus=meshes.filter(m=>m.userData.sys==='muscular'||BS(m.userData.sys)==='muscular');let p=WALK_PH[idx]?WALK_PH[idx][0]:0,last=0,key='';
   const win=WALK_PH[idx]?(()=>{const [a,b]=WALK_PH[idx];const c=(a+b)/2,hw=Math.max(4,(b-a)/2);return [c-hw,c+hw];})():null;
   PHY.anim=t=>{const dt=Math.min(0.05,Math.max(0,t-last));last=t;const pp=((p%100)+100)%100;const inW=win&&(pp>=win[0]&&pp<=win[1]||(win[0]<0&&pp>=100+win[0]));
-    p+=dt*(PHY.slow?0.5:1)*(win?(inW?5:45):22);gait.p=p;deform(gaitActive());
+    p+=dt*(PHY.slow?0.5:1)*(win?(inW?5:45):22);gait.p=p;deform(gaitActive());gaitFloor();
     const A=new Set(),Bs=new Set();gActive(p).forEach(({m})=>m[0].forEach(e=>A.add(e)));gActive(p+50).forEach(({m})=>m[0].forEach(e=>Bs.add(e)));const kk=[...A].join()+'|'+[...Bs].join();
     if(kk!==key){key=kk;for(const m of mus){const c=m.userData.c;const want=(c.side!=='izquierdo'&&A.has(c.en))||(c.side==='izquierdo'&&Bs.has(c.en));if(!!m.userData.ag!==want){m.userData.ag=want;refreshState(m);}}}
     PHY.walkP=p;};
@@ -6400,7 +6420,7 @@ function phyGoPGait(st,ins){const key=st.id==='pgint'?'normal':st.id;phyShowOnly
   PHY.walk=true;PHY.walkPat=gait.pat;gait.pat=key;const pat=GAIT_P[key]||{};const mus=meshes.filter(m=>BS(m.userData.sys)==='muscular');
   PHY.pgH=[];const weak=new Set(pat.weak||[]),spa=new Set(pat.spastic||[]),bil=key==='scissor'||key==='parkinson';
   for(const m of mus){const c=m.userData.c,ok=bil||c.side!=='izquierdo';if(ok&&weak.has(c.en)){m.userData.hint=true;refreshState(m);PHY.pgH.push(m);}if(ok&&spa.has(c.en)){m.userData.ag=true;refreshState(m);}}
-  let p=0,last=0;const sp=pat.speed||1;PHY.anim=t=>{const dt=Math.min(0.05,Math.max(0,t-last));last=t;p+=dt*(PHY.slow?0.5:1)*24*sp;gait.p=p;deform(gaitActive());PHY.walkP=p;};
+  let p=0,last=0;const sp=pat.speed||1;PHY.anim=t=>{const dt=Math.min(0.05,Math.max(0,t-last));last=t;p+=dt*(PHY.slow?0.5:1)*24*sp;gait.p=p;deform(gaitActive());gaitFloor();PHY.walkP=p;};
   ins.hidden=false;phyBig(true);PHY.insetFn=()=>phyDrawPGait(PHY.walkP||0,key);
   const front=key==='trend'||key==='scissor'||key==='hemi';phyFocus(new V3(0,0.8,0),2.6);orb.T.ph=1.5;orb.T.th=key==='trend'?Math.PI:key==='hemi'||key==='scissor'?0.25:-Math.PI/2+0.25;}
 
