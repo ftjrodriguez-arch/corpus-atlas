@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v167**.
+(GitHub Pages desde `main`). Versión actual: **v168**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -26,7 +26,7 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
   `MALE_NEW` oculta en la mujer las piezas solo masculinas (x29–x34, x37, x38).
 - Modelado en Blender: scripts en `C:\claude_vision\cw\` (modelar_*.py, importar_za.py, cw_util.py, escenas Corpus_*.blend,
   export_*.json). Coordenadas: atlas (x,y,z) = Z-Anatomy (x,z,−y).
-- Idiomas: es, en, pt, fr y de completos (fichas largas FR/DE desde v166 en `data/info_fr.json` / `info_de.json`, mismas claves que `info_en.json`; flujo de traducción en /home/claude/trad_info con validar.py). Los textos de los recorridos siguen en inglés en FR/DE (`LEN()`).
+- Idiomas: es, en, pt, fr y de completos (fichas largas FR/DE desde v166 en `data/info_fr.json` / `info_de.json`, mismas claves que `info_en.json`; flujo de traducción en /home/claude/trad_info con validar.py). Los recorridos también están en FR/DE desde v168 (`pTx` busca el texto español en `content_fr/de` con `TLX`; si falta, inglés). Flujo de traducción de recorridos en /home/claude/trad_tours (lotes, validar.py, meta_es.json).
 
 ## Movimiento (resumen; detalle en CEREBRO.md)
 - `deform(active)` deforma las mallas reales; `applyPose()` decide marcha, sentadilla (`SQ`, cadena cerrada) o rango articular.
@@ -93,6 +93,13 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 
 ## v167
 - Segmentos broncopulmonares: `VQSEG` (lóbulo, bronquio, código S1–S10), `vqSegBuild` (asignación angular desde el hilio de cada lóbulo; caché en `userData.vqSeg`, se rehace si cambia la geometría) y `vqSegPaint`. Botón `#vqSegB` en el paso `vq` (`PHY.vqSegOn`); oculta las costillas con `hiddenIds`.
+
+## v168
+- Estados de color continuos `lv1`–`lv5` (`u.lv` 0–1, en `refreshState` después de `hint`): amarillo → naranja → magenta (no usar rojo: se confunde con el músculo).
+- Marcha: `GAIT_LV` (curvas por grupo de `GAIT_M`, Perry/Winter aproximado), `lvAt`; sentadilla: `SQ_LVB`/`sqLevel`. Interruptor `ACT_LV` (`store 'actLv'`), leyenda `actLegend` en `#gaitLeg` y `#sqLeg`.
+- Perfil de movilidad: `MOB`, `renderMob` (`#mobCard`), datos en `store 'mob'` ({cur,list:[{id,name,date,v:{'joint|move|S':grados}}]}), `mobPaint` colorea agonistas de los movimientos <80 %. `window.goniReading`.
+- Puente de glúteo: `CTESTS` id `bridge` con `lie:1` (el encuadre usa la caja en coordenadas del mundo).
+- Contador: las URL con `?qa`, `?prueba` o `?v=` no cuentan. Informe semanal de GoatCounter activado (cuenta ft.jrodriguez@gmail.com, panel en español).
 
 ## Pendiente
 - Decisión del usuario: NUNCA servidor propio, cuentas ni base de datos. Todo debe funcionar en local y sin conexión (GitHub Pages solo sirve los archivos estáticos).
