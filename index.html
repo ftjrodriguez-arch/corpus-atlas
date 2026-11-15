@@ -9030,6 +9030,8 @@ async function bgStart(){if(BG.run||BG.fin||!BG.on||!window.caches||!window.__CC
  }catch(e){console.warn('ficha',e);}};
  try{renderInfo();}catch(e){}})();
 /* v162 · teléfono: al tocar una estructura la hoja baja a lo mínimo (nombre y acciones ya están en la tarjeta) */
+/* v162 · teléfono: al escribir en el buscador la hoja sube para que se vean los resultados */
+(function(){const q=document.getElementById('q');if(!q)return;const up=()=>{try{if(isPhone()&&(sheetState==='mini'||sheetState==='peek')&&q.value.trim())setSheet('half');}catch(e){}};q.addEventListener('input',up);q.addEventListener('focus',up);})();
 (function(){if(typeof select!=='function')return;const _s=select;select=function(m){const r=_s.apply(this,arguments);try{if(m&&isPhone()&&sheetState==='peek'&&!document.body.classList.contains('phy-on'))setSheet('mini');}catch(e){}return r;};})();
 /* barra de acciones: Etiquetar, Extraer, Preguntar a la IA y Al microscopio pasan al menú «⋯» */
 (function(){const bar=$('#actbar'),bt=bar&&bar.querySelector('.actbtns');if(!bt)return;
