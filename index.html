@@ -4792,7 +4792,7 @@ function phyTick(dt){if(!PHY.on||!PHY.saved)return;arcLine.visible=arcFan.visibl
   if(T.heart){if(PHY.sound&&!PHY.paused){if(PHY.lastPh<0.165&&ph>=0.165)phyThump(55,0.16,0.55);if(PHY.lastPh<0.465&&ph>=0.465)phyThump(75,0.11,0.35);}
     PHY.lastPh=ph;if(st!=='body')phyHeartPose(ph);if(st==='anat'&&!PHY.paused)orb.T.th+=dt*0.22;}
   else if(PHY_TOUR==='resp'&&(st==='gas'))phyHeartPose(ph);
-  const b=BREATH(PHY.t);const db=BREATH(PHY.t+0.05)-b;
+  const b=window.__bFix!=null?window.__bFix:BREATH(PHY.t);const db=BREATH(PHY.t+0.05)-BREATH(PHY.t);
   if(PHY.ribs){thxPose(0.085*b,0.02*b,{dia:PHY.dia||[],lungs:(PHY.lungOnly||PHY.lungs||[]).filter(m=>!PHY.heart.includes(m))});}
   else{if(PHY.breath&&PHY.lungs){for(const m of (PHY.lungOnly||PHY.lungs)){if(PHY.heart.includes(m))continue;xf(m,PHY.LC,1+0.03*b,1+0.06*b,1+0.035*b);}}
   if(PHY.dia){for(const m of PHY.dia){m.position.set(0,-0.014*b,0);}}}
