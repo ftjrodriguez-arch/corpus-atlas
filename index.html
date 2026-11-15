@@ -1004,6 +1004,7 @@ header .tools #phyBtn span{display:inline!important;font:600 12.5px var(--f-ui);
     <details class="keys"><summary>Créditos y licencias</summary>
         <p class="credit">Modelos 3D: <a href="https://github.com/Z-Anatomy/Models-of-human-anatomy" target="_blank" rel="noopener">Z-Anatomy</a> (CC BY-SA 4.0), derivados de BodyParts3D, Copyright© The Database Center for Life Science licensed by CC Attribution-Share Alike 2.1 Japan. Mallas optimizadas para la web y fichas en español redactadas para Corpus; distribuidas bajo CC BY-SA 4.0.</p>
         <p class="credit">Modelo femenino: <a href="https://github.com/hubmapconsortium/ccf-3d-reference-object-library" target="_blank" rel="noopener">HuBMAP Human Reference Atlas, 3D Reference Object Library (Visible Human Female, v1.3)</a>, CC BY 4.0. Mallas reducidas y realineadas para Corpus; nombres y fichas en español añadidos.</p>
+        <p class="credit">Corazón y grandes vasos del tórax: Browne K., Schlehlein H. (2024), <a href="https://doi.org/10.48539/HBM564.WKNG.249" target="_blank" rel="noopener">3D Reference Organ for Heart, Male v1.3</a> y <a href="https://doi.org/10.48539/HBM473.XTPP.725" target="_blank" rel="noopener">Blood Vasculature, Male v1.3</a>, HuBMAP Human Reference Atlas, CC BY 4.0 (datos del Visible Human Project). Extraídos, recortados y registrados al atlas para Corpus.</p>
         <p class="credit">Basado en el conjunto de datos <i>Visible Human Project®</i> de la U.S. National Library of Medicine. Nombres latinos y españoles: Terminologia Anatomica (FIPAT).</p>
         <p class="credit">Músculos modelados para Corpus (v140–v143), lecciones, exámenes, kinesiología y biomecánica, variantes anatómicas, casos, glosario y fichas: redactados para Corpus, CC BY-SA 4.0. Rangos articulares por edad y sexo: CDC Normal Joint Range of Motion Study (Soucie et al., 2011), dominio público.</p>
         <p class="credit">Programa: código de Corpus con licencia MIT; <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> (MIT); decodificador <a href="https://github.com/google/draco" target="_blank" rel="noopener">Draco</a> (Apache 2.0, Google); tipografías Spectral, Public Sans y JetBrains Mono (SIL Open Font License 1.1), incluidas en la app.</p>
@@ -1551,6 +1552,7 @@ function showLoad(){const ks=Object.keys(loadQueue.parts);if(!ks.length){$('#loa
   $('#loader').hidden=false;$('#loadTxt').textContent=`${TL('Cargando','Loading','Carregando')} ${[...new Set(ks.map(k=>{const q=loadQueue.parts[k];return trW(q.name||SYS[k].n).toLowerCase()+(q.hr?TL(' (alta resolución)',' (high resolution)',' (alta resolução)'):'');}))].join(', ')}${t>0?` · ${(Math.min(l,t)/1e6).toFixed(1)} ${TL('de','of','de')} ${(t/1e6).toFixed(1)} MB`:''}`;
   $('#loadBar').style.width=Math.min(100,t?l/t*100:0)+'%';}
 function loadSys(k){
+  if(k==='arterial'||k==='venoso')setTimeout(()=>{const P=SYS[k].promise;if(P)P.then(()=>hraLoad());},0);
   const s=SYS[k];if(s.promise) return s.promise;
   s.state='loading';loadQueue.parts[k]={l:0,t:0};showLoad();renderSysList();
   s.promise=new Promise((res)=>{
@@ -1669,6 +1671,22 @@ let autoHR=store.get('autoHR',true);
 function swapGeo(m,g){const u=m.userData;if(BODY==='f'&&u.geoF)return;if(u.rest){m.geometry.attributes.position.array.set(u.rest);m.geometry.attributes.normal.array.set(u.restN);m.geometry.attributes.position.needsUpdate=true;m.geometry.attributes.normal.needsUpdate=true;}
   if(!u.lrGeo)u.lrGeo=m.geometry;m.geometry=g;applyTint(m);u.rest=null;u.restN=null;u.W={};deformed.delete(m);if(BS(u.sys)==='muscular'||fiberOK(m))addFiberDir(m);else if(TUBE_SYS.includes(BS(u.sys)))addAxisDir(m);}
 function unswapGeo(m){const u=m.userData;if(!u.lrGeo)return;const hr=m.geometry;if(u.rest){hr.attributes.position.array.set(u.rest);}m.geometry=u.lrGeo;u.lrGeo=null;u.rest=null;u.restN=null;u.W={};deformed.delete(m);}
+/* v161: corazón y grandes vasos del Human Reference Atlas (HuBMAP HRA v1.3, CC BY 4.0; Browne y Schlehlein 2024),
+   registrados a la posición del corazón del atlas. Sustituyen la geometría de las piezas del mismo nombre
+   (se conservan nombre, color, fichas y lógica de los recorridos). */
+const HRA={p:null,ids:new Set()};
+function hraLoad(){if(HRA.p)return HRA.p;
+  HRA.p=Promise.all([fetch('data/heart_hra.glb').then(r=>{if(!r.ok)throw 0;return r.arrayBuffer();}),fetch('data/heart_hra_hide.json').then(r=>r.ok?r.json():[]).catch(()=>[])])
+   .then(([buf,hide])=>new Promise((res,rej)=>loader.parse(buf,'',g=>res([g,hide]),rej)))
+   .then(([g,hide])=>{const byName={};for(const id in CAT){const r=CAT[id];if(r&&r[1])(byName[r[1]]=byName[r[1]]||[]).push(id);}
+     const prep=geo=>{setVattr(geo,geo.attributes.color);if(!geo.attributes.normal)geo.computeVertexNormals();geo.computeBoundingSphere();geo.userData.hr=true;geo.userData.hra=true;return geo;};
+     g.scene.traverse(o=>{if(!o.isMesh||!o.geometry.index)return;const ids=byName[o.name];if(!ids)return;const geo=prep(o.geometry);
+       for(const id of ids){HRGEO[id]=geo;HRA.ids.add(id);const m=byId[id];if(m&&m.geometry!==geo)swapGeo(m,geo);}});
+     for(const n of hide||[]){const ids=byName[n];if(!ids)continue;for(const id of ids){if(HRA.ids.has(id))continue;
+       const e=new THREE.BufferGeometry();e.setAttribute('position',new THREE.BufferAttribute(new Float32Array(9),3));e.setAttribute('normal',new THREE.BufferAttribute(new Float32Array([0,1,0,0,1,0,0,1,0]),3));e.setIndex([0,1,2]);prep(e);
+       HRGEO[id]=e;HRA.ids.add(id);const m=byId[id];if(m)swapGeo(m,e);}}
+     try{DRAW.t=0;}catch(e){}return true;})
+   .catch(e=>{console.warn('HRA',e);return false;});return HRA.p;}
 function loadHR(r){const h=HR[r];if(h.state==='loaded'||h.state==='loading')return h.promise;h.state='loading';renderHR();
   const parts=['loc','nv'];
   h.promise=Promise.all(parts.map(lv=>{const key='hr_'+r+'_'+lv;loadQueue.parts[key]={l:0,t:0,name:h.n,hr:1};showLoad();
@@ -1676,7 +1694,7 @@ function loadHR(r){const h=HR[r];if(h.state==='loaded'||h.state==='loading')retu
       .then(buf=>SEAM_P.then(()=>buf)).then(buf=>new Promise((res,rej)=>loader.parse(buf,'',res,rej)))
       .then(async g=>{const L=[];g.scene.traverse(o=>{if(o.isMesh&&o.geometry.index)L.push(o);});let t0=performance.now();
           for(const o of L){const geo=o.geometry;seamFix('hr/'+r+'_'+lv,o.name,geo.attributes.position.array);setVattr(geo,geo.attributes.color);geo.computeVertexNormals();geo.computeBoundingSphere();
-          geo.userData.hr=true;HRGEO[o.name]=geo;h.ids.push(o.name);const m=byId[o.name];if(m)swapGeo(m,geo);
+          geo.userData.hr=true;if(HRA.ids.has(o.name))continue;HRGEO[o.name]=geo;h.ids.push(o.name);const m=byId[o.name];if(m)swapGeo(m,geo);
           if(performance.now()-t0>12){if(currentTab==='mov'&&performance.now()-(loadHR.pt||0)>250){loadHR.pt=performance.now();try{applyPose();}catch(e){}}await new Promise(z=>setTimeout(z,0));t0=performance.now();}}})/* v154: por tandas de ~12 ms */
       .finally(()=>{delete loadQueue.parts[key];showLoad();});}))
     .then(()=>{h.state='loaded';renderHR();applyPose();},()=>{h.state='error';h.promise=null;renderHR();});
@@ -3504,7 +3522,7 @@ const REFS={
  bone:['Moore KL, Dalley AF, Agur AMR. <i>Anatomía con orientación clínica</i>. 9.ª ed. 2022.','Rouvière H, Delmas A. <i>Anatomía humana</i>. 11.ª ed. 2005.','Netter FH. <i>Atlas de anatomía humana</i>. 8.ª ed. 2023.'],
  gen:['Moore KL, Dalley AF, Agur AMR. <i>Anatomía con orientación clínica</i>. 9.ª ed. 2022.','Standring S (ed.). <i>Gray’s Anatomy</i>. 42.ª ed. Elsevier; 2020.','FIPAT. <i>Terminologia Anatomica</i>. 2.ª ed. 2019.']};
 function refsFor(inf,c){const k=inf?inf.kind:'gen';const list=REFS[k]||REFS.gen;
-  return `<details class="refs"><summary>${TL('Bibliografía de referencia','Reference bibliography','Bibliografia de referência')}</summary><p>${TL('Ficha redactada a partir de la bibliografía anatómica y clínica estándar; verifica siempre los datos en las fuentes:','Record written from standard anatomical and clinical references; always check the data against the sources:','Ficha redigida a partir da bibliografia anatômica e clínica padrão; confira sempre os dados nas fontes:')}</p><ol>${list.map(r=>`<li>${r}</li>`).join('')}</ol><p>${TL('Nomenclatura','Nomenclature','Nomenclatura')}: Terminologia Anatomica (FIPAT). ${TL('Modelo','Model','Modelo')}: ${c.sys.startsWith('f_')?'HuBMAP Human Reference Atlas (Visible Human Female), CC BY 4.0':'Z-Anatomy / BodyParts3D, CC BY-SA 4.0'}.</p></details>`;}
+  return `<details class="refs"><summary>${TL('Bibliografía de referencia','Reference bibliography','Bibliografia de referência')}</summary><p>${TL('Ficha redactada a partir de la bibliografía anatómica y clínica estándar; verifica siempre los datos en las fuentes:','Record written from standard anatomical and clinical references; always check the data against the sources:','Ficha redigida a partir da bibliografia anatômica e clínica padrão; confira sempre os dados nas fontes:')}</p><ol>${list.map(r=>`<li>${r}</li>`).join('')}</ol><p>${TL('Nomenclatura','Nomenclature','Nomenclatura')}: Terminologia Anatomica (FIPAT). ${TL('Modelo','Model','Modelo')}: ${c.sys.startsWith('f_')?'HuBMAP Human Reference Atlas (Visible Human Female), CC BY 4.0':(typeof HRA!=='undefined'&&HRA.ids.has(c.id))?'HuBMAP Human Reference Atlas (Heart / Blood Vasculature, Male v1.3; Browne y Schlehlein 2024), CC BY 4.0':'Z-Anatomy / BodyParts3D, CC BY-SA 4.0'}.</p></details>`;}
 const REPO='https://github.com/ftjrodriguez-arch/corpus-atlas';
 function reviewURL(c,inf){const d=inf?inf.d:{};const lines=Object.entries(d).filter(([,v])=>v&&typeof v==='string').map(([k,v])=>`- **${k}**: ${v}`).join('\n').slice(0,4500);
   const body=`**Estructura:** ${c.es} (${c.la||'—'})\n**Término del atlas:** ${c.en} · id \`${c.id}\` · capa ${c.sys}${c.side?' · lado '+c.side:''}\n\n### ¿Qué hay que corregir?\n(escribe aquí la corrección)\n\n### Fuente que lo respalda\n(libro, artículo o guía, con página si es posible)\n\n### Tu perfil (opcional)\n(p. ej. anatomista, fisioterapeuta, estudiante de 3.º)\n\n---\n<details><summary>Ficha actual</summary>\n\n${lines}\n</details>`;
