@@ -4462,6 +4462,15 @@ function phyBuildRoutes(){const R=[];const cat=(...a)=>{const o=[];for(const s o
   R.push({c:phyCurve(cat(PR.svc,PR.rh,PR.lpa)),k:'v',w:1,pul:true},{c:phyCurve(cat(PR.ivc,PR.rh,PR.rpa)),k:'v',w:1,pul:true},{c:phyCurve(cat(PR.svc,PR.rh,PR.rpa)),k:'v',w:.6,pul:true},{c:phyCurve(cat(PR.ivc,PR.rh,PR.lpa)),k:'v',w:.6,pul:true});
   for(const pv of PR.pv)R.push({c:phyCurve(cat(pv,PR.lh)),k:'a',w:.8,pul:true});
   for(const r of R)r.len=r.c.getLength();return R;}
+/* v164: rutas de sangre por cada arteria y vena segmentaria (del hilio a la periferia y vuelta a la aurícula izquierda) */
+function phyPulmRoutes(){const R=[];const cat=(...a)=>{const o=[];for(const s of a)for(const p of s){const l=o[o.length-1];if(!l||Math.hypot(l[0]-p[0],l[1]-p[1],l[2]-p[2])>1e-4)o.push(p);}return o;};
+  const ends=(m,H)=>{const a=m.geometry.attributes.position.array;let n=-1,dn=1e9,f=-1,df=-1,cx=0,cy=0,cz=0,c=0;for(let k=0;k<a.length;k+=3){const d=(a[k]-H[0])**2+(a[k+1]-H[1])**2+(a[k+2]-H[2])**2;if(d<dn){dn=d;n=k;}if(d>df){df=d;f=k;}cx+=a[k];cy+=a[k+1];cz+=a[k+2];c++;}
+    const N=[a[n],a[n+1],a[n+2]],F=[a[f],a[f+1],a[f+2]],C=[cx/c,cy/c,cz/c];return [N,[(N[0]+F[0])/2*0.5+C[0]*0.5,(N[1]+F[1])/2*0.5+C[1]*0.5,(N[2]+F[2])/2*0.5+C[2]*0.5],F];};
+  try{const art=meshes.filter(m=>/(segmental|lobar) artery of (right|left) lung|lingular artery of left lung/.test(m.userData.c.en)),ven=meshes.filter(m=>/vein of (right|left) lung|^Lingular vein of left lung$/.test(m.userData.c.en));
+    for(const m of art){const c=centerOf([m]),L=c.x>0,pth=L?PR.lpa:PR.rpa,H=pth[pth.length-1];const [N,M,F]=ends(m,H);R.push({c:phyCurve(cat(PR.svc,PR.rh,pth,[N,M,F])),k:'v',w:.45});}
+    for(const m of ven){const c=centerOf([m]);let best=PR.pv[0],bd=1e9;for(const q of PR.pv){const d=Math.hypot(q[0][0]-c.x,q[0][1]-c.y,q[0][2]-c.z);if(d<bd){bd=d;best=q;}}const [N,M,F]=ends(m,best[0]);R.push({c:phyCurve(cat([F,M,N],best,PR.lh)),k:'a',w:.45});}
+  }catch(e){console.warn('rutas pulmonares',e);}
+  for(const r of R)r.len=r.c.getLength();return R;}
 /* Tubos de los recorridos y del sistema de conducción */
 function phyTube(arr,col,r,op,depth){const c=phyCurve(arr);const m=new THREE.Mesh(new THREE.TubeGeometry(c,Math.max(12,arr.length*10),r,8,false),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op,depthTest:depth!==false,depthWrite:false}));m.renderOrder=35;m.userData.curve=c;return m;}
 function phyGlow(col,size){const cv2=document.createElement('canvas');cv2.width=cv2.height=64;const g=cv2.getContext('2d');const gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(0.25,col);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);
@@ -4797,8 +4806,13 @@ function phyGoResp(st,ins){PHY.breath=true;const airDefs=(out)=>[{p:[...PR2.airU
     phyIso([...lungs,...airway]);SYS.respiratorio.op=0.35;phyFocus(new V3(0,1.42,0.0),0.85);orb.T.ph=1.45;orb.T.th=0.45;PHY.routes=phyRoutes(airDefs());PHY.nParts=240;phyLabels(['nose','phar','lar','tra','bro','lungR','lungL']);}
   else if(st.id==='mech'){phyShowOnly(['respiratorio','muscular','oseo'],{respiratorio:0.7,oseo:0.55});const dia=pick2(/^(Diaphragm|External intercostal muscles|Internal intercostal muscles)$/);const ribs=meshes.filter(m=>BS(m.userData.sys)==='oseo'&&/Rib|Sternum|Vertebra T|Costal cartilage/i.test(m.userData.c.en));
     phyIso([...PHY.lungOnly,...dia,...ribs]);isoOnly=true;phyFocus(new V3(0,1.27,0.0),0.85);orb.T.ph=1.35;orb.T.th=0.6;phyLabels(['dia','ic','lungR','lungL']);ins.hidden=false;PHY.inset='spiro';PHY.dia=dia.filter(m=>/Diaphragm/.test(m.userData.c.en));PHY.ribs=ribs;}
-  else if(st.id==='gas'){phyShowOnly(['respiratorio','arterial','venoso'],{respiratorio:0.45});const heartGV=[...PHY.heart,...PHY.gv];phyIso([...heartGV,...PHY.lungs]);phyFocus(PHY.LC.clone(),0.62);orb.T.ph=1.45;orb.T.th=0;
-    PHY.routes=PHY.routesHeartR||(PHY.routesHeartR=phyBuildRoutes().map(r=>({c:r.c,len:r.len,col:r.k==='v'?C_VEN:C_ART,w:r.w,mode:'heart',sp:1})));phyLabels(['lungR','lungL','pt','pv']);ins.hidden=false;PHY.inset='gas';}
+  else if(st.id==='gas'){phyShowOnly(['respiratorio','arterial','venoso'],{respiratorio:0.3});const heartGV=[...PHY.heart,...PHY.gv];
+    /* v164: perfusión hasta los segmentos: arterias pulmonares (sangre pobre en O2, azul) y venas pulmonares (sangre oxigenada, roja) */
+    const pa=meshes.filter(m=>/(segmental|lobar) artery of (right|left) lung|lingular artery of left lung|^(Pulmonary trunk|Bifurcation of pulmonary trunk|(Left|Right) pulmonary artery)$/.test(m.userData.c.en));
+    const pv=meshes.filter(m=>/vein of (right|left) lung|^Lingular vein of left lung$|^(Right|Left) (superior|inferior) pulmonary vein$/.test(m.userData.c.en));
+    phyIso([...heartGV,...PHY.lungs,...pa,...pv]);for(const m of pa)phyTint(m,'#2f5bea',0.85);for(const m of pv)phyTint(m,'#e0263a',0.85);
+    phyFocus(PHY.LC.clone(),0.62);orb.T.ph=1.45;orb.T.th=0;
+    PHY.routes=PHY.routesHeartR||(PHY.routesHeartR=[...phyBuildRoutes(),...phyPulmRoutes()].map(r=>({c:r.c,len:r.len,col:r.k==='v'?C_VEN:C_ART,w:r.w,mode:'heart',sp:1})));phyLabels(['lungR','lungL','pt','pv']);ins.hidden=false;PHY.inset='gas';}
   else if(st.id==='ctrl'){phyShowOnly(['respiratorio','muscular','nervioso_central','oseo'],{respiratorio:0.3,oseo:0.2});const dia=pick2(/^Diaphragm$/);const bs=pick2(/^(Medulla oblongata|Pons|Midbrain|Pyramid of medulla oblongata|Olive)$/);const vt=meshes.filter(m=>BS(m.userData.sys)==='oseo'&&/^(Atlas|Axis|Vertebra [CT]\d)/.test(m.userData.c.en));const rb=meshes.filter(m=>BS(m.userData.sys)==='oseo'&&/ rib$|Costal cartilage|^(Manubrium of sternum|Body of sternum|Xiphoid process)$/.test(m.userData.c.en));
     phyIso([...dia,...bs,...PHY.lungOnly,...vt,...rb]);PHY.ribs=rb;phyFocus(new V3(0,1.38,0),0.95);orb.T.ph=1.45;orb.T.th=0.75;PHY.dia=dia;
     phyNerve(PR2.phrR,0xffd400,0,0.25);phyNerve(PR2.phrR.map(MX),0xffd400,0,0.25);phyLabels(['med','phr','dia']);}
