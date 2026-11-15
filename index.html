@@ -6036,11 +6036,19 @@ function phyDrawSum(t){const S=phyInsetBase('rgba(6,10,22,0.95)');if(!S)return;c
 /* ─ Modelo: vía motora y placa ─ */
 function synMotorPath(target){const en=m=>m.userData.c.en,R=m=>m.userData.c.side!=='izquierdo',Lf=m=>m.userData.c.side==='izquierdo';
   const one=(rx,f)=>{const a=meshes.filter(m=>rx.test(en(m))&&(!f||f(m)));return a.length?cA(a):null;};
-  const cx=one(/^Precentral gyrus$/,Lf)||one(/^Precentral gyrus$/),med=one(/^Medulla oblongata$/),plex=one(/trunk of brachial plexus$/,R);
-  if(!cx||!med||!plex)return null;const cord=[med[0],med[1]-0.1,med[2]-0.005];const P=[cx,[cx[0]*0.4,(cx[1]+med[1])/2,(cx[2]+med[2])/2],med,cord,plex];
-  if(target==='hand'){const mn=meshes.filter(m=>R(m)&&/^Median nerve$/.test(en(m)));if(mn.length){mn[0].geometry.computeBoundingBox();const b=mn[0].geometry.boundingBox;P.push(cA(mn),[ (b.min.x+b.max.x)/2,b.min.y+0.02,(b.min.z+b.max.z)/2]);}}
-  else{const mc=one(/^Musculocutaneous nerve$/,R),bi=one(/^(Biceps brachii muscle|Long head of biceps brachii|Short head of biceps brachii)$/,R);if(mc)P.push(mc);if(bi)P.push(bi);}
-  return P;}
+  /* v161: la vía sigue por dentro del conducto vertebral (C1–C6), sale por las raíces y los troncos del plexo y recorre el nervio */
+  const line=(m,n,lo)=>{const a=m.geometry.attributes.position.array;let y0=1e9,y1=-1e9;for(let k=1;k<a.length;k+=3){y0=Math.min(y0,a[k]);y1=Math.max(y1,a[k]);}if(lo!=null)y0=Math.max(y0,lo);
+    const S=[...Array(n)].map(()=>[0,0,0,0]);for(let k=0;k<a.length;k+=3){const y=a[k+1];if(y<y0)continue;const b=Math.min(n-1,Math.floor((y1-y)/(y1-y0+1e-9)*n));const B=S[b];B[0]+=a[k];B[1]+=y;B[2]+=a[k+2];B[3]++;}
+    return S.filter(B=>B[3]).map(B=>[B[0]/B[3],B[1]/B[3],B[2]/B[3]]);};
+  const cx=one(/^Precentral gyrus$/,Lf)||one(/^Precentral gyrus$/),pons=one(/^Pons$/),med=one(/^Pyramid of medulla oblongata$/)||one(/^Medulla oblongata$/),plex=one(/trunk of brachial plexus$/,R);
+  if(!cx||!med||!plex)return null;const P=[cx,[cx[0]*0.4,(cx[1]+med[1])/2+0.02,(cx[2]+med[2])/2]];if(pons)P.push(pons);P.push(med);
+  for(const v of ['C1','C2','C3','C4','C5']){const c=one(new RegExp('^Vertebra '+v+'$'));if(c)P.push([0,c[1],c[2]-0.012]);}
+  const root=one(/^Roots of brachial plexus$/,R);if(root)P.push(root);const sup=one(/^Superior trunk of brachial plexus$/,R);if(sup)P.push(sup);
+  if(target==='hand'){const mn=meshes.filter(m=>R(m)&&/^Median nerve$/.test(en(m)));if(mn.length){const L=line(mn[0],14);P.push(...L);}else P.push(plex);}
+  else{const ad=one(/^Anterior division of superior trunk of brachial plexus$/,R);if(ad)P.push(ad);const mc=meshes.filter(m=>R(m)&&/^Musculocutaneous nerve$/.test(en(m)));if(mc.length)P.push(...line(mc[0],8).slice(0,5));
+    const bi=one(/^(Biceps brachii muscle|Long head of biceps brachii|Short head of biceps brachii)$/,R);if(bi)P.push(bi);}
+  /* quita puntos casi repetidos para que la curva no haga bucles */
+  const out=[];for(const p of P){const q=out[out.length-1];if(!q||Math.hypot(p[0]-q[0],p[1]-q[1],p[2]-q[2])>0.012)out.push(p);}return out;}
 function phyGoSyn(st,ins){const en=m=>m.userData.c.en;const brain=meshes.filter(m=>BS(m.userData.sys)==='nervioso_central'&&!/eyeball|Cornea|Iris|Lens|Retina|Sclera|Vitreous|Zonular|lacrimal|Cochlea|Vestibule$|Tympanic|Auditory/i.test(en(m)));
   const pns=meshes.filter(m=>BS(m.userData.sys)==='nervioso_periferico'&&m.userData.c.side!=='izquierdo'&&!/(intercostal|lumbar|sacral|femoral|sciatic|tibial|peroneal|fibular|obturator|pudendal|genit|saphen|sural|plantar|gluteal|cutaneous nerve of thigh|iliohypogastric|ilioinguinal)/i.test(en(m))&&centerOf([m]).y>0.85);
   const bones=meshes.filter(m=>BS(m.userData.sys)==='oseo'&&centerOf([m]).y>0.9);
