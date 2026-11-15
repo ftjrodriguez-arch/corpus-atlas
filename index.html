@@ -968,6 +968,9 @@ header .tools #phyBtn span{display:inline!important;font:600 12.5px var(--f-ui);
   body.mnav:has(#actbar:not([hidden])) .lbl.tag{display:none!important}
   .info-sys{display:block!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;font-size:12px}
   #welcome .wstats{flex-wrap:wrap!important;white-space:normal!important;row-gap:2px}
+  /* v162 · teléfono: aviso de gestos bajo la fila de capas y resultados de búsqueda con fondo opaco */
+  html body.mnav #stage .hint{top:104px!important}
+  html body.mnav #results{background:var(--panel)!important;position:relative;z-index:3}
   /* v162 · teléfono: menú «⋯» con icono (la fuente no tiene el carácter) */
   #stage #actbar #aMoreBtn svg{width:18px;height:18px;display:block;margin:auto}
 }
@@ -975,7 +978,6 @@ header .tools #phyBtn span{display:inline!important;font:600 12.5px var(--f-ui);
 @media (min-width:600px) and (max-width:879px){
   html body.mnav #stage #qbar.qbar{justify-content:center!important;gap:10px!important}
   html body.mnav #stage #qbar.qbar button span{display:inline!important}
-  html body.mnav #stage .hint{top:112px!important}
   html body.mnav #stage #actbar{max-width:560px;left:50%!important;right:auto!important;transform:translateX(-50%);width:calc(100% - 24px)!important}
   html body.mnav #stage #actbar #actLat{display:inline!important;font-size:12.5px;opacity:.75}
 }
