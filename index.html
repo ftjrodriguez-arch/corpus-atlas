@@ -6666,6 +6666,7 @@ function thxPose(A,desc,opt){opt=opt||{};if(!THX)thxBuild();const X=THX;
   if(dia.length){if(!X.diaB)X.diaB=vdBox(dia);const b=X.diaB,h=b.max.y-b.min.y;for(const m of dia)vdDeform(m,(p,o)=>{const f=vdSS(b.min.y+0.3*h,b.max.y,p.y);o.set(p.x*(1+A*0.25*(1-f)),p.y-desc*f,p.z);});}
   const lungs=opt.lungs||[];if(lungs.length){if(!X.lungB)X.lungB=vdBox(lungs);const b=X.lungB,h=b.max.y-b.min.y,zc=(b.min.z+b.max.z)/2,ex=A*0.55;
     for(const m of lungs)vdDeform(m,(p,o)=>{const t=Math.min(1,Math.max(0,(p.y-b.min.y)/h)),k=0.35+0.65*(1-t);o.set(p.x*(1+ex*k),p.y-desc*Math.pow(1-t,1.6),p.z+(p.z-zc)*ex*k*(p.z>zc?1:0.35));});}}
+if(/[?&]qa\b/.test(location.search)||window.name==="qa")window.__thx={thxPose,thxReset,hfBuild,hfPose,vdResetAll,get THX(){return THX;}};
 function thxReset(){if(THX){for(const R of THX.ribs){R.rib.quaternion.identity();R.rib.position.set(0,0,0);delete R.rib.userData.nobatch;}for(const m of THX.stern){m.quaternion.identity();m.position.set(0,0,0);delete m.userData.nobatch;}}
   THX=null;vdResetAll();}
 /* ── Corazón ── */
