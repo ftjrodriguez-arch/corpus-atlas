@@ -4755,8 +4755,8 @@ function phyGoResp(st,ins){PHY.breath=true;const airDefs=(out)=>[{p:[...PR2.airU
     phyIso([...PHY.lungOnly,...dia,...ribs]);isoOnly=true;phyFocus(new V3(0,1.27,0.0),0.85);orb.T.ph=1.35;orb.T.th=0.6;phyLabels(['dia','ic','lungR','lungL']);ins.hidden=false;PHY.inset='spiro';PHY.dia=dia.filter(m=>/Diaphragm/.test(m.userData.c.en));PHY.ribs=ribs;}
   else if(st.id==='gas'){phyShowOnly(['respiratorio','arterial','venoso'],{respiratorio:0.45});const heartGV=[...PHY.heart,...PHY.gv];phyIso([...heartGV,...PHY.lungs]);phyFocus(PHY.LC.clone(),0.62);orb.T.ph=1.45;orb.T.th=0;
     PHY.routes=PHY.routesHeartR||(PHY.routesHeartR=phyBuildRoutes().map(r=>({c:r.c,len:r.len,col:r.k==='v'?C_VEN:C_ART,w:r.w,mode:'heart',sp:1})));phyLabels(['lungR','lungL','pt','pv']);ins.hidden=false;PHY.inset='gas';}
-  else if(st.id==='ctrl'){phyShowOnly(['respiratorio','muscular','nervioso_central','oseo'],{respiratorio:0.3,oseo:0.2});const dia=pick2(/^Diaphragm$/);const bs=pick2(/^(Medulla oblongata|Pons|Midbrain|Pyramid of medulla oblongata|Olive)$/);const vt=meshes.filter(m=>BS(m.userData.sys)==='oseo'&&/^(Atlas|Axis|Vertebra [CT]\d)/.test(m.userData.c.en));
-    phyIso([...dia,...bs,...PHY.lungOnly,...vt]);phyFocus(new V3(0,1.38,0),0.95);orb.T.ph=1.45;orb.T.th=0.75;PHY.dia=dia;
+  else if(st.id==='ctrl'){phyShowOnly(['respiratorio','muscular','nervioso_central','oseo'],{respiratorio:0.3,oseo:0.2});const dia=pick2(/^Diaphragm$/);const bs=pick2(/^(Medulla oblongata|Pons|Midbrain|Pyramid of medulla oblongata|Olive)$/);const vt=meshes.filter(m=>BS(m.userData.sys)==='oseo'&&/^(Atlas|Axis|Vertebra [CT]\d)/.test(m.userData.c.en));const rb=meshes.filter(m=>BS(m.userData.sys)==='oseo'&&/ rib$|Costal cartilage|^(Manubrium of sternum|Body of sternum|Xiphoid process)$/.test(m.userData.c.en));
+    phyIso([...dia,...bs,...PHY.lungOnly,...vt,...rb]);PHY.ribs=rb;phyFocus(new V3(0,1.38,0),0.95);orb.T.ph=1.45;orb.T.th=0.75;PHY.dia=dia;
     phyNerve(PR2.phrR,0xffd400,0,0.25);phyNerve(PR2.phrR.map(MX),0xffd400,0,0.25);phyLabels(['med','phr','dia']);}
 }
 function phyGoDig(st,ins){phyShowOnly(['digestivo','urinario'],{});const all=meshes.filter(m=>BS(m.userData.sys)==='digestivo'&&!/omentum|Mesocolon|taenia|Meso-appendix/i.test(m.userData.c.en));
@@ -4793,7 +4793,7 @@ function phyTick(dt){if(!PHY.on||!PHY.saved)return;arcLine.visible=arcFan.visibl
     PHY.lastPh=ph;if(st!=='body')phyHeartPose(ph);if(st==='anat'&&!PHY.paused)orb.T.th+=dt*0.22;}
   else if(PHY_TOUR==='resp'&&(st==='gas'))phyHeartPose(ph);
   const b=window.__bFix!=null?window.__bFix:BREATH(PHY.t);const db=BREATH(PHY.t+0.05)-BREATH(PHY.t);
-  if(PHY.ribs){thxPose(0.085*b,0.02*b,{dia:PHY.dia||[],lungs:(PHY.lungOnly||PHY.lungs||[]).filter(m=>!PHY.heart.includes(m))});}
+  if(PHY.ribs){thxPose(0.11*b,0.022*b,{dia:PHY.dia||[],lungs:(PHY.lungOnly||PHY.lungs||[]).filter(m=>!PHY.heart.includes(m))});}
   else{if(PHY.breath&&PHY.lungs){for(const m of (PHY.lungOnly||PHY.lungs)){if(PHY.heart.includes(m))continue;xf(m,PHY.LC,1+0.03*b,1+0.06*b,1+0.035*b);}}
   if(PHY.dia){for(const m of PHY.dia){m.position.set(0,-0.014*b,0);}}}
   if(PHY.churn){const k=0.5+0.5*Math.sin(PHY.t*2.2);for(const m of PHY.churn){const c=centerOf([m]);xf(m,c,1+0.025*k,1-0.02*k,1+0.02*(1-k));}}
@@ -6095,7 +6095,7 @@ function phyGoWalk(st,ins){const idx=TOURS.walk.steps.findIndex(s=>s.id===st.id)
     if(kk!==key){key=kk;for(const m of mus){const c=m.userData.c;const want=(c.side!=='izquierdo'&&A.has(c.en))||(c.side==='izquierdo'&&Bs.has(c.en));if(!!m.userData.ag!==want){m.userData.ag=want;refreshState(m);}}}
     PHY.walkP=p;};
   ins.hidden=false;phyBig(true);PHY.insetFn=()=>phyDrawWalk(PHY.walkP||0,idx);
-  phyFocus(new V3(0.12,0.62,0),2.6);orb.T.ph=1.52;orb.T.th=-Math.PI/2+0.25;}
+  phyFocus(new V3(0.12,0.86,0),isPhone()?3.4:2.95);orb.T.ph=1.52;orb.T.th=-Math.PI/2+0.25;}
 function phyWalkReset(){try{if(typeof axisLbl!=='undefined'&&axisLbl)axisLbl.on=false;if(typeof axisLine!=='undefined'&&axisLine)axisLine.visible=false;}catch(e){}if(PHY.pgH){for(const m of PHY.pgH){m.userData.hint=false;refreshState(m);}PHY.pgH=null;}if(PHY.walk){gait.pat=PHY.walkPat||'normal';PHY.walk=false;deform([]);for(const m of meshes)if(m.userData.ag){m.userData.ag=false;refreshState(m);}}
   if(PHY.dfm){PHY.dfm=false;deform([]);for(const m of meshes)if(m.userData.ag){m.userData.ag=false;refreshState(m);}}phyBig(false);}
 
