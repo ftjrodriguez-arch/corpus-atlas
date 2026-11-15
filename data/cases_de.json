@@ -1,0 +1,1268 @@
+[
+{
+"id": "radial-canal-torsion",
+"titulo": "Läsion des N. radialis im Sulcus nervi radialis (Fallhand)",
+"region": "upper limb",
+"side": "derecho",
+"presentacion": "34-jähriger Mann mit Humerusschaftfraktur rechts nach einem Motorradsturz. Bei der Untersuchung kann er Handgelenk und Finger nicht strecken und berichtet über Kribbeln am Handrücken im Bereich der ersten Kommissur.",
+"anatomia": "Der N. radialis umschlingt die Rückseite des Humerusschafts im Sulcus nervi radialis in direktem Knochenkontakt und wird daher bei Frakturen des mittleren Drittels geschädigt. Die Äste zum M. triceps gehen meist vor dem Sulcus ab, sodass die Ellenbogenstreckung fast immer erhalten bleibt. Distal davon sind die Extensoren von Handgelenk, Fingern und Daumen, der M. brachioradialis und der M. supinator denerviert. Der sensible R. superficialis erklärt die Hypästhesie am Handrücken im Bereich der ersten Kommissur.",
+"lesion": [
+"Radial nerve",
+"Superficial branch of radial nerve"
+],
+"afectados": [
+"Brachioradialis muscle",
+"Extensor carpi radialis longus",
+"Extensor carpi radialis brevis",
+"Extensor digitorum",
+"Extensor digiti minimi",
+"Humeral head of extensor carpi ulnaris",
+"Ulnar head of extensor carpi ulnaris",
+"Supinator",
+"Abductor pollicis longus",
+"Extensor pollicis brevis",
+"Extensor pollicis longus",
+"Extensor indicis"
+],
+"relacionados": [
+"Humerus",
+"Lateral head of triceps brachii",
+"Medial head of triceps brachii"
+],
+"signos": [
+"Fallhand: Unfähigkeit, das Handgelenk zu strecken",
+"Unfähigkeit, die Metakarpophalangealgelenke und den Daumen zu strecken",
+"Ellenbogenstreckung erhalten",
+"Hypästhesie am Handrücken im Bereich der ersten Kommissur (autonomes Gebiet des R. superficialis n. radialis)",
+"Schwäche des Greifens, da die Fingerflexoren ohne die stabilisierende Handgelenkstreckung in aktiver Insuffizienz arbeiten"
+],
+"pruebas": [
+"Muskelfunktionstest der Handgelenk- und Fingerextensoren (Kendall) bei passiv stabilisiertem Handgelenk",
+"Daumenextensionstest: Der Patient kann den Daumen bei aufliegender Handfläche nicht von der Tischebene abheben",
+"Sensibilitätsprüfung im Versorgungsgebiet des R. superficialis n. radialis",
+"Elektromyographie und Nervenleitungsstudie nach 3–4 Wochen zur Abschätzung der Prognose"
+],
+"fisioterapia": "Dynamische Extensionsschiene für Handgelenk und Finger zum Erhalt der Funktion und zur Vermeidung einer Überdehnung der Extensoren, mit täglicher passiver Mobilisation. Während der Reinnervation, die meist mit dem M. brachioradialis beginnt, kommen Elektrostimulation und progressive Kräftigung hinzu.",
+"camara": "posterior"
+},
+{
+"id": "tunel-carpiano",
+"titulo": "Karpaltunnelsyndrom",
+"region": "upper limb",
+"side": "derecho",
+"presentacion": "52-jährige Büroangestellte mit nächtlichen Parästhesien in Daumen, Zeige- und Mittelfinger der rechten Hand, die sich durch Ausschütteln der Hand bessern. In den letzten Monaten fallen ihr Gegenstände aus der Hand, und sie bemerkt, dass der Daumenballen flacher geworden ist.",
+"anatomia": "Der Karpaltunnel wird von den Handwurzelknochen und dem Retinaculum flexorum gebildet; durch ihn verlaufen der N. medianus und die Sehnen der langen Finger- und Daumenbeuger. Jede Druckerhöhung im Tunnel (Tenosynovitis, Ödem, Schwangerschaft, Hypothyreose) komprimiert den Nerv. Der R. palmaris n. mediani verläuft oberhalb des Retinaculums, sodass die Sensibilität der zentralen Hohlhand erhalten bleibt – ein Befund, der die Lokalisation der Läsion erleichtert. Der motorische R. recurrens innerviert die laterale Thenarmuskulatur (M. abductor pollicis brevis, M. opponens pollicis und Caput superficiale des M. flexor pollicis brevis); die ersten beiden Mm. lumbricales erhalten Nn. digitales palmares des N. medianus.",
+"lesion": [
+"Median nerve"
+],
+"afectados": [
+"Abductor pollicis brevis",
+"Opponens pollicis muscle",
+"Superficial head of flexor pollicis brevis",
+"Lumbrical muscles of hand"
+],
+"relacionados": [
+"Flexor retinaculum of wrist",
+"Palmar branch of median nerve",
+"Flexor pollicis longus",
+"Scaphoid bone"
+],
+"signos": [
+"Nächtliche Parästhesien im Versorgungsgebiet des N. medianus (vom Daumen bis zur radialen Hälfte des Ringfingers)",
+"Sensibilität des Daumenballens erhalten (R. palmaris intakt)",
+"Atrophie des Daumenballens in fortgeschrittenen Stadien",
+"Schwäche der Abduktion und Opposition des Daumens",
+"Ungeschicklichkeit beim Feingriff"
+],
+"pruebas": [
+"Tinel-Zeichen: Beklopfen des Retinaculum flexorum reproduziert die Parästhesien",
+"Phalen-Test: maximale Handgelenkflexion über 60 s löst die Symptome aus",
+"Karpalkompressionstest nach Durkan: direkter Druck auf den Tunnel über 30 s",
+"Kraft der Daumenabduktion (M. abductor pollicis brevis) gegen Widerstand",
+"Nervenleitungsstudie: verlängerte distale motorische Latenz des N. medianus"
+],
+"fisioterapia": "Nächtliche Orthese mit dem Handgelenk in Neutralstellung, Nerven- und Sehnengleitübungen sowie ergonomische Schulung. Bei progredientem motorischem Defizit ist die operative Spaltung indiziert, gefolgt von früher Mobilisation und Narbenbehandlung.",
+"camara": "anterior"
+},
+{
+"id": "cubital-codo",
+"titulo": "Läsion des N. ulnaris am Ellenbogen (Krallenhand)",
+"region": "upper limb",
+"side": "derecho",
+"presentacion": "45-jähriger Mann, der den Ellenbogen gewohnheitsmäßig auf das Autofenster stützt. Er berichtet über Kribbeln im Kleinfinger und in der ulnaren Hälfte des Ringfingers, Ungeschicklichkeit beim Zuknöpfen und Muskelschwund zwischen erstem und zweitem Mittelhandknochen.",
+"anatomia": "Der N. ulnaris verläuft hinter dem Epicondylus medialis humeri im Sulcus nervi ulnaris und tritt durch den Kubitaltunnel zwischen den beiden Köpfen des M. flexor carpi ulnaris in den Unterarm ein. Dort liegt er oberflächlich und ist bei anhaltender Ellenbogenflexion Druck und Dehnung ausgesetzt. Er innerviert den M. flexor carpi ulnaris, die mediale Hälfte des M. flexor digitorum profundus und fast die gesamte intrinsische Handmuskulatur. Die ulnare Krallenstellung (Hyperextension der Metakarpophalangeal- und Flexion der Interphalangealgelenke des 4. und 5. Fingers) entsteht durch die Lähmung des 3. und 4. M. lumbricalis und der Mm. interossei; bei der hohen Läsion ist die Kralle weniger ausgeprägt als bei der distalen, weil auch der M. flexor digitorum profundus geschwächt ist (ulnares Paradoxon).",
+"lesion": [
+"Ulnar nerve"
+],
+"afectados": [
+"Humeral head of flexor carpi ulnaris",
+"Ulnar head of flexor carpi ulnaris",
+"Flexor digitorum profundus",
+"Abductor digiti minimi of hand",
+"Flexor digiti minimi of hand",
+"Opponens digiti minimi muscle of hand",
+"Dorsal interossei muscles of hand",
+"Palmar interossei muscles",
+"Lumbrical muscles of hand",
+"Oblique head of adductor pollicis",
+"Transverse head of adductor pollicis",
+"Deep head of flexor pollicis brevis"
+],
+"relacionados": [
+"Humerus",
+"Ulna",
+"Ulnar collateral ligament",
+"Dorsal branch of ulnar nerve"
+],
+"signos": [
+"Ulnare Krallenhand am 4. und 5. Finger",
+"Atrophie des ersten dorsalen Interosseusraums und des Kleinfingerballens",
+"Hypästhesie des Kleinfingers und der ulnaren Hälfte des Ringfingers einschließlich der Dorsalseite (der R. dorsalis geht oberhalb des Handgelenks ab)",
+"Wartenberg-Zeichen: Der Kleinfinger bleibt abduziert",
+"Schwäche der Abduktion und Adduktion der Finger"
+],
+"pruebas": [
+"Froment-Zeichen: Beim Festhalten eines Blattes Papier zwischen Daumen und Zeigefinger beugt sich das Daumen-Interphalangealgelenk (der M. flexor pollicis longus ersetzt den M. adductor pollicis)",
+"Ellenbogenflexionstest: maximale Flexion bei extendiertem Handgelenk über 1 min reproduziert die Parästhesien",
+"Tinel-Zeichen im Sulcus nervi ulnaris hinter dem Epicondylus medialis",
+"Interosseus-Test: Abduktion des Zeigefingers gegen Widerstand (M. interosseus dorsalis I)",
+"Nervenleitungsstudie mit fokaler Verlangsamung auf Höhe des Ellenbogens"
+],
+"fisioterapia": "Anhaltende Flexion und Aufstützen des Ellenbogens vermeiden (Nachtschiene in relativer Extension), ergänzt durch Nervengleittechniken. Anti-Krallen-Orthese, die die Hyperextension der Metakarpophalangealgelenke blockiert, und Kräftigung der intrinsischen Muskulatur während der Erholung.",
+"camara": "medial"
+},
+{
+"id": "axilar-cuello-quirurgico",
+"titulo": "Läsion des N. axillaris (Fraktur des Collum chirurgicum humeri)",
+"region": "upper limb",
+"side": "derecho",
+"presentacion": "68-jährige Frau mit Fraktur des Collum chirurgicum des rechten Humerus nach einem Sturz auf den Arm. Wochen später kann sie den Arm nicht vom Rumpf abspreizen, die Schulterkontur ist abgeflacht, und an der Außenseite des Oberarms besteht ein anästhetisches Areal.",
+"anatomia": "Der N. axillaris verlässt die Achselhöhle zusammen mit der A. circumflexa humeri posterior durch die laterale Achsellücke und umschlingt das Collum chirurgicum humeri von dorsal, dem Knochen anliegend. Deshalb wird er bei Frakturen in diesem Bereich und bei vorderen Schulterluxationen geschädigt. Er innerviert den M. deltoideus und den M. teres minor sowie über den N. cutaneus brachii lateralis superior die Haut an der Außenseite der Schulter („Epaulettenareal“). Die Abduktion über die ersten Grade hinaus ist stark eingeschränkt, auch wenn der M. supraspinatus sie einleiten kann.",
+"lesion": [
+"Axillary nerve",
+"Superior lateral brachial cutaneous nerve"
+],
+"afectados": [
+"Clavicular part of deltoid muscle",
+"Acromial part of deltoid muscle",
+"Scapular spinal part of deltoid muscle",
+"Teres minor muscle"
+],
+"relacionados": [
+"Humerus",
+"Posterior circumflex humeral artery",
+"Long head of triceps brachii",
+"Teres major muscle"
+],
+"signos": [
+"Atrophie des M. deltoideus mit abgeflachter Schulter und vorspringendem Akromion",
+"Kraftverlust der Schulterabduktion (über etwa 15° hinaus)",
+"Schwäche der Flexion, Extension und Außenrotation der Schulter",
+"Hypästhesie an der Außenseite der Schulter („Epaulettenareal“)"
+],
+"pruebas": [
+"Muskelfunktionstest des M. deltoideus in seinen drei Anteilen (Kendall)",
+"Sensibilitätstest im „Epaulettenareal“ über dem Ansatz des M. deltoideus",
+"Extension-Lag-Zeichen des M. deltoideus",
+"Elektromyographie des M. deltoideus nach 3–4 Wochen"
+],
+"fisioterapia": "Nach Frakturheilung passive und aktiv-assistive Mobilisation zur Vermeidung einer glenohumeralen Steife sowie Elektrostimulation des M. deltoideus. Progressive Kräftigung des M. deltoideus und der Rotatorenmanschette, sobald Reinnervationszeichen auftreten.",
+"camara": "posterior"
+},
+{
+"id": "toracico-largo-escapula-alada",
+"titulo": "Läsion des N. thoracicus longus (Scapula alata)",
+"region": "trunk",
+"side": "derecho",
+"presentacion": "28-jähriger Mann, der nach mehreren Wochen mit einem schweren Rucksack bemerkt, dass der mediale Rand des rechten Schulterblatts beim Drücken gegen eine Wand absteht. Er hat Schwierigkeiten, den Arm über den Kopf zu heben, und gibt kein sensibles Defizit an.",
+"anatomia": "Der N. thoracicus longus entspringt aus den Wurzeln C5–C7, durchbohrt den M. scalenus medius und zieht an der seitlichen Thoraxwand auf dem M. serratus anterior oberflächlich und mit langem Verlauf nach unten. Er ist anfällig für Kompression (Rucksäcke), Dehnung und Operationen (Mastektomie mit Axilladissektion). Der M. serratus anterior hält das Schulterblatt am Thorax und rotiert es zusammen mit dem M. trapezius nach oben. Ohne ihn heben sich der mediale Rand und der Angulus inferior von der Thoraxwand ab. Es ist ein rein motorischer Nerv, daher bestehen keine Sensibilitätsstörungen.",
+"lesion": [
+"Long thoracic nerve"
+],
+"afectados": [
+"Serratus anterior muscle",
+"Scapula"
+],
+"relacionados": [
+"Scalenus medius muscle",
+"Descending part of trapezius muscle",
+"Rhomboid major muscle",
+"Fifth rib"
+],
+"signos": [
+"Mediale Scapula alata: Medialer Rand und Angulus inferior heben sich vom Thorax ab",
+"Mediale Verlagerung des Schulterblatts",
+"Erschwerte Flexion und Abduktion über 90° wegen fehlender Aufwärtsrotation",
+"Normale Sensibilität"
+],
+"pruebas": [
+"Wand-Liegestütz-Test: Das Abstehen verstärkt sich",
+"Schulterflexion gegen Widerstand bei 90° unter Beobachtung des medialen Schulterblattrands",
+"Differenzialdiagnose zur lateralen Scapula alata durch Läsion des N. accessorius (M. trapezius)",
+"Elektromyographie des M. serratus anterior"
+],
+"fisioterapia": "Belastung der Schulter und Dehnung des Nervs vermeiden; eine Skapulaorthese erwägen. Progressive Kräftigung des M. serratus anterior (Push-up plus, Punching) und skapulothorakale motorische Kontrolle während der Reinnervation.",
+"camara": "posterior"
+},
+{
+"id": "peroneo-comun-pie-caido",
+"titulo": "Läsion des N. fibularis (peroneus) communis am Fibulaköpfchen (Fallfuß)",
+"region": "lower limb",
+"side": "derecho",
+"presentacion": "40-jähriger Mann, dem ein schlecht gepolsterter Oberschenkelgips abgenommen wird. Er kann die rechte Fußspitze nicht anheben, schleift beim Gehen die Zehen nach und hat eine Hypästhesie am Fußrücken.",
+"anatomia": "Der N. fibularis communis (N. peroneus communis) umschlingt lateral das Collum fibulae direkt unterhalb des Fibulaköpfchens in sehr oberflächlicher, am Knochen fixierter Lage. Deshalb wird er durch Gipsverbände, Übereinanderschlagen der Beine, Frakturen des Fibulahalses oder Varustraumen des Knies geschädigt. Dort teilt er sich in den N. fibularis profundus (Muskeln der Extensorenloge und M. extensor digitorum brevis) und den N. fibularis superficialis (Mm. fibulares longus und brevis sowie Haut des Fußrückens). Seine Schädigung führt zu einem Defizit der Dorsalextension und Eversion bei erhaltener Inversion (M. tibialis posterior, innerviert vom N. tibialis).",
+"lesion": [
+"Common fibular nerve",
+"Deep fibular nerve",
+"Superficial fibular nerve"
+],
+"afectados": [
+"Tibialis anterior muscle",
+"Extensor hallucis longus",
+"Extensor digitorum longus",
+"Fibularis tertius muscle",
+"Extensor digitorum brevis",
+"Extensor hallucis brevis",
+"Fibularis longus muscle",
+"Fibularis brevis muscle"
+],
+"relacionados": [
+"Fibula",
+"Long head of biceps femoris",
+"Tibialis posterior muscle"
+],
+"signos": [
+"Fallfuß: Defizit der Dorsalextension im Sprunggelenk und der Zehenstreckung",
+"Steppergang (übermäßige Hüft- und Knieflexion, um den Fuß nicht nachzuschleifen)",
+"Schwäche der Fußeversion bei erhaltener Inversion",
+"Hypästhesie des Fußrückens und der Unterschenkelaußenseite; erster Zehenzwischenraum (N. fibularis profundus)"
+],
+"pruebas": [
+"Muskelfunktionstest des M. tibialis anterior und des M. extensor hallucis longus (Kendall)",
+"Fersengangtest: Der Patient kann ihn nicht ausführen",
+"Tinel-Zeichen über dem Fibulahals",
+"Abgrenzung zur Radikulopathie L5: Dabei sind auch die Inversion (M. tibialis posterior) und die Hüftabduktion (M. gluteus medius) geschwächt",
+"Nervenleitungsstudie mit Leitungsblock auf Höhe des Fibulaköpfchens"
+],
+"fisioterapia": "Peroneusorthese (starr oder dynamisch) für das Gehen und Vorbeugung einer Verkürzung des M. triceps surae durch Dehnungen. Elektrostimulation und progressive Kräftigung der Dorsalextensoren und Evertoren, sobald sie reinnerviert werden.",
+"camara": "lateral"
+},
+{
+"id": "nervio-femoral",
+"titulo": "Läsion des N. femoralis",
+"region": "lower limb",
+"side": "derecho",
+"presentacion": "60-jährige antikoagulierte Patientin, die ein retroperitoneales Hämatom im M. iliopsoas entwickelt. Sie hat Leistenschmerzen, ihr rechtes Knie knickt beim Treppensteigen ein, und sie bemerkt eine Hypästhesie an der anteromedialen Seite von Oberschenkel und Unterschenkel.",
+"anatomia": "Der N. femoralis (L2–L4) zieht zwischen M. psoas und M. iliacus nach unten und tritt unter dem Leistenband lateral der A. femoralis in den Oberschenkel ein. Er kann in der Fossa iliaca komprimiert werden (Iliopsoashämatom, Becken- oder Hüftchirurgie). Er innerviert den M. iliacus, den M. sartorius, den M. pectineus und den M. quadriceps; sein sensibler Endast ist der N. saphenus. Der Ausfall des M. quadriceps verhindert das Verriegeln des Knies in Streckung während der Standphase, und der Ausfall des M. iliacus schwächt die Hüftflexion (der M. psoas, der von direkten Plexusästen innerviert wird, bleibt teilweise erhalten).",
+"lesion": [
+"Femoral nerve",
+"Saphenous nerve"
+],
+"afectados": [
+"Iliacus muscle",
+"Sartorius muscle",
+"Pectineus muscle",
+"Rectus femoris muscle",
+"Vastus lateralis muscle",
+"Vastus intermedius muscle",
+"Vastus medialis muscle"
+],
+"relacionados": [
+"Inguinal ligament",
+"Femoral artery",
+"Psoas major",
+"Patella"
+],
+"signos": [
+"Schwäche der Kniestreckung: Das Knie knickt unter Belastung und beim Treppensteigen ein",
+"Patellarsehnenreflex abgeschwächt oder erloschen",
+"Schwäche der Hüftflexion",
+"Hypästhesie an der Vorderseite des Oberschenkels und der Innenseite des Unterschenkels (N. saphenus)",
+"Atrophie des M. quadriceps"
+],
+"pruebas": [
+"Muskelfunktionstest des M. quadriceps und des M. iliopsoas (Kendall)",
+"Patellarsehnenreflex (L4)",
+"Femoralis-Dehnungstest: in Bauchlage Knieflexion mit Hüftextension, die den Schmerz reproduziert",
+"Aufstehen von einem Stuhl oder Step-up auf eine Stufe auf einem Bein",
+"Elektromyographie und Bildgebung (CT) der Fossa iliaca"
+],
+"fisioterapia": "Orthese oder Gehstock zur Sicherung des Knies beim Gehen und Elektrostimulation des M. quadriceps. Progressive Kräftigung in der geschlossenen kinetischen Kette sowie Gang- und Treppentraining, sobald die Reinnervation einsetzt.",
+"camara": "anterior"
+},
+{
+"id": "ciatica",
+"titulo": "Ischialgie / Schädigung des N. ischiadicus",
+"region": "lower limb",
+"side": "derecho",
+"presentacion": "42-jähriger Mann mit Kreuzschmerzen, die über die Rückseite des Oberschenkels und die Außenseite des rechten Unterschenkels bis in den Fuß ausstrahlen und sich im Sitzen und beim Husten verstärken. Er berichtet über Kribbeln am Fußrücken und eine gewisse Schwäche beim Fersengang.",
+"anatomia": "Der N. ischiadicus wird aus den Wurzeln L4–S3 gebildet und verlässt das Becken durch das Foramen ischiadicum majus, meist unterhalb des M. piriformis. Er zieht an der Rückseite des Oberschenkels nach unten, wo er die ischiokrurale Muskulatur und den ischiokruralen Anteil des M. adductor magnus innerviert, und teilt sich in der Fossa poplitea in den N. tibialis und den N. fibularis communis. Die häufigste Ursache der Ischialgie ist ein Bandscheibenvorfall L4–L5 oder L5–S1, der die Wurzel L5 oder S1 komprimiert; seltener wird der Nerv auf Glutealhöhe eingeklemmt (Piriformis-Syndrom) oder bei einer Hüftoperation oder -luxation verletzt. Das Ausfallmuster hängt von der Höhe ab: radikulär (Dermatom und Myotom) oder peripher-trunkulär (alles distal der Läsion).",
+"lesion": [
+"Sciatic nerve",
+"Tibial nerve",
+"Common fibular nerve"
+],
+"afectados": [
+"Long head of biceps femoris",
+"Short head of biceps femoris",
+"Semitendinosus muscle",
+"Semimembranosus muscle",
+"Adductor magnus",
+"Medial head of gastrocnemius",
+"Lateral head of gastrocnemius",
+"Soleus muscle",
+"Tibialis posterior muscle",
+"Tibialis anterior muscle",
+"Extensor hallucis longus",
+"Fibularis longus muscle"
+],
+"relacionados": [
+"Piriformis muscle",
+"Intervertebral disc L4-L5",
+"Intervertebral disc L5-S1",
+"Sacrum"
+],
+"signos": [
+"Ausstrahlender Schmerz über die Oberschenkelrückseite bis unterhalb des Knies",
+"Parästhesien im Dermatom L5 (Fußrücken, Großzehe) oder S1 (Fußaußenrand und Fußsohle)",
+"Schwäche der Großzehenstreckung und der Dorsalextension (L5) oder der Plantarflexion (S1)",
+"Abgeschwächter Achillessehnenreflex bei S1-Beteiligung",
+"Schonhaltung und paravertebraler Hartspann"
+],
+"pruebas": [
+"Straight-Leg-Raise-Test (Lasègue): radikulärer Schmerz zwischen 30° und 70°",
+"Slump-Test: neurale Spannung im Sitzen mit Rumpfflexion und Kniestreckung",
+"Bragard-Zeichen: Die Dorsalextension des Sprunggelenks sensibilisiert den Lasègue-Test",
+"Neurologische Untersuchung nach Myotomen, Dermatomen und Reflexen (Patellarsehnenreflex L4, Achillessehnenreflex S1)",
+"FAIR-Test (Flexion, Adduktion und Innenrotation der Hüfte) bei Verdacht auf Piriformis-Syndrom"
+],
+"fisioterapia": "Aufklärung und Beibehaltung der Aktivität mit therapeutischer Übung, neuralen Mobilisationstechniken und lumbopelviner motorischer Kontrolle. Warnzeichen (Cauda-equina-Syndrom, progredientes motorisches Defizit) erfordern eine notfallmäßige Überweisung.",
+"camara": "posterior"
+},
+{
+"id": "manguito-supraespinoso",
+"titulo": "Ruptur der Rotatorenmanschette (M. supraspinatus) und subakromiales Impingement",
+"region": "upper limb",
+"side": "derecho",
+"presentacion": "58-jähriger Maler mit Schmerzen an der Außenseite der rechten Schulter, die sich beim Anheben des Arms und nachts beim Liegen auf dieser Seite verstärken. Er hat einen schmerzhaften Bogen zwischen 60° und 120° Abduktion und kann den Arm nur mit Mühe oben halten.",
+"anatomia": "Die Sehne des M. supraspinatus verläuft im Subakromialraum zwischen Humeruskopf und korakoakromialem Bogen (Akromion und Lig. coracoacromiale), von diesem durch die Bursa subacromialis-subdeltoidea getrennt. Bei Abduktion und Flexion verengt sich dieser Raum, und die Akromionform, akromioklavikuläre Osteophyten oder eine skapuläre Dyskinesie begünstigen das Impingement. Die Degeneration der Sehne in ihrer kritischen Zone nahe dem Ansatz am Tuberculum majus führt zu Partial- oder Komplettrupturen, die sich mitunter auf den M. infraspinatus ausdehnen. Ohne die humeruskopfdepressorische Wirkung der Manschette zieht der M. deltoideus den Humeruskopf nach oben und verstärkt das Impingement.",
+"lesion": [
+"Supraspinatus muscle",
+"Subacromial bursa"
+],
+"afectados": [
+"Supraspinatus muscle",
+"Infraspinatus muscle",
+"Acromial part of deltoid muscle",
+"Subdeltoid bursa"
+],
+"relacionados": [
+"Coraco-acromial ligament",
+"Scapula",
+"Humerus",
+"Articular capsule of glenohumeral joint"
+],
+"signos": [
+"Schmerzhafter Bogen zwischen 60° und 120° Abduktion",
+"Schmerz an der Außenseite der Schulter mit Ausstrahlung zum Ansatz des M. deltoideus",
+"Nächtlicher Schmerz beim Liegen auf der betroffenen Schulter",
+"Schwäche der Abduktion und Außenrotation bei Rupturen",
+"Passive Beweglichkeit erhalten (im Gegensatz zur adhäsiven Kapsulitis)"
+],
+"pruebas": [
+"Jobe-Test (Empty Can): Abduktion gegen Widerstand bei 90° in der Skapulaebene mit Innenrotation",
+"Neer-Test: maximale passive Flexion mit Innenrotation löst subakromialen Schmerz aus",
+"Hawkins-Kennedy-Test: Flexion auf 90° und forcierte Innenrotation",
+"Drop-Arm-Zeichen: Der Patient kann den Arm aus der Abduktion nicht langsam absenken",
+"Außenrotation gegen Widerstand und Außenrotations-Lag-Zeichen (M. infraspinatus)"
+],
+"fisioterapia": "Progressive therapeutische Übungen für die Rotatorenmanschette und die Skapulastabilisatoren unter Kontrolle von Belastung und Schmerz. Bei operativ versorgten Rupturen wird ein phasenweises Protokoll befolgt: Schutz, passive Beweglichkeit, aktive Beweglichkeit und Kräftigung.",
+"camara": "lateral"
+},
+{
+"id": "epicondilalgia-lateral",
+"titulo": "Laterale Epikondylalgie (Tennisellenbogen)",
+"region": "upper limb",
+"side": "derecho",
+"presentacion": "45-jährige Frau, die mit der Computermaus arbeitet und Padel spielt, mit seit drei Monaten bestehenden Schmerzen an der Außenseite des rechten Ellenbogens. Der Schmerz tritt beim Greifen von Gegenständen, beim Drehen eines Türknaufs und beim Anheben einer Tasse mit gestrecktem Arm auf.",
+"anatomia": "Die Hand- und Fingerextensoren entspringen über die gemeinsame Extensorensehne am Epicondylus lateralis humeri. Der M. extensor carpi radialis brevis im tiefen Anteil dieses Ursprungs ist stark belastet, da er beim Greifen das Handgelenk in Extension stabilisiert. Wiederholte Überlastung führt zu einer degenerativen (angiofibroblastischen) Tendinopathie, nicht zu einer akuten Entzündung. Sie ist abzugrenzen von der Einklemmung des N. interosseus posterior im M. supinator (Radialtunnelsyndrom) und von Erkrankungen des Humeroradialgelenks.",
+"lesion": [
+"Extensor carpi radialis brevis",
+"Common extensor tendon"
+],
+"afectados": [
+"Extensor carpi radialis brevis",
+"Extensor carpi radialis longus",
+"Extensor digitorum",
+"Humeral head of extensor carpi ulnaris",
+"Supinator"
+],
+"relacionados": [
+"Humerus",
+"Radial collateral ligament",
+"Annular ligament of radius",
+"Deep branch of radial nerve"
+],
+"signos": [
+"Druckschmerz über dem Epicondylus lateralis oder knapp distal davon",
+"Schmerz bei Handgelenkextension gegen Widerstand",
+"Verminderte schmerzfreie Griffkraft (das Greifen löst Schmerz aus)",
+"Kein neurologisches Defizit"
+],
+"pruebas": [
+"Cozen-Test: Handgelenkextension gegen Widerstand bei geschlossener Faust und gestrecktem Ellenbogen",
+"Mill-Test: passive Dehnung der Extensoren (Ellenbogen gestreckt, Pronation und Handgelenkflexion)",
+"Maudsley-Test: Extension des Mittelfingers gegen Widerstand",
+"Schmerzfreie Griffkraftdynamometrie im Vergleich zur gesunden Seite",
+"Palpation des Radialtunnels und Supination gegen Widerstand zum Ausschluss einer Kompression des N. interosseus posterior"
+],
+"fisioterapia": "Belastungssteuerung und progressives Training der Handgelenkextensoren (isometrisch, dann exzentrisch-konzentrisch), kombiniert mit manueller Therapie und, falls hilfreich, einer Epikondylitisspange. Sporttechnik und Arbeitsplatzergonomie korrigieren.",
+"camara": "lateral"
+},
+{
+"id": "lca-triada",
+"titulo": "Ruptur des vorderen Kreuzbandes (mit Unhappy Triad als Variante)",
+"region": "lower limb",
+"side": "derecho",
+"presentacion": "22-jährige Fußballspielerin, die bei einer Drehbewegung mit fixiertem Fuß ein Knacken im rechten Knie spürt und nicht weiterspielen kann. Innerhalb weniger Stunden schwillt das Knie stark an (Hämarthros), danach hat sie ein Instabilitätsgefühl, als ob das Knie „wegknickt“.",
+"anatomia": "Das vordere Kreuzband (VKB) zieht von der Innenseite des lateralen Femurkondylus zur Area intercondylaris anterior der Tibia. Es verhindert die Vorwärtstranslation der Tibia gegenüber dem Femur und kontrolliert die Innenrotation. Typischerweise reißt es bei kontaktlosen Abbrems- und Drehmechanismen mit Valgus und Rotation des Knies bei fixiertem Fuß. Bei der „Unhappy Triad“ (O'Donoghue) verletzt ein Valgus-Außenrotations-Trauma zusätzlich das tibiale Kollateralband und den mit ihm verbundenen Innenmeniskus; bei akuten Verletzungen ist jedoch häufiger der Außenmeniskus betroffen. Der Verlust des Bandes geht mit einer Hemmung des M. quadriceps einher, und die ischiokrurale Muskulatur wirkt als dynamischer Stabilisator.",
+"lesion": [
+"Anterior cruciate ligament",
+"Superficial part of tibial collateral ligament",
+"Medial meniscus"
+],
+"afectados": [
+"Deep part of tibial collateral ligament",
+"Vastus medialis muscle",
+"Rectus femoris muscle",
+"Vastus lateralis muscle",
+"Semitendinosus muscle",
+"Long head of biceps femoris"
+],
+"relacionados": [
+"Femur",
+"Tibia",
+"Posterior cruciate ligament",
+"Lateral meniscus"
+],
+"signos": [
+"Hörbares Knacken und sofortiger Erguss (Hämarthros) in den ersten Stunden",
+"Instabilität oder Giving-way des Knies bei Drehbewegungen",
+"Bei der Triade: Schmerz am medialen Gelenkspalt und im Verlauf des tibialen Kollateralbandes mit medialer Aufklappbarkeit im Valgusstress",
+"Atrophie oder Hemmung des M. quadriceps",
+"Mögliche Gelenkblockade bei Korbhenkelriss des Meniskus"
+],
+"pruebas": [
+"Lachman-Test: Vorwärtstranslation der Tibia bei 20–30° Flexion ohne festen Anschlag (der sensitivste)",
+"Vorderer Schubladentest bei 90° Flexion",
+"Pivot-Shift-Test: Schnappen durch anterolaterale Subluxation der Tibia (der spezifischste)",
+"Valgusstresstest bei 0° und 30° für das tibiale Kollateralband",
+"McMurray-Test und Thessaly-Test für die Menisken"
+],
+"fisioterapia": "Frühzeitig die volle Streckung wiederherstellen, den Erguss kontrollieren und den M. quadriceps reaktivieren; danach progressive Kräftigung, Propriozeption und neuromuskuläre Kontrolle, mit oder ohne Rekonstruktion. Die Rückkehr zum Sport nach der Kreuzbandplastik richtet sich nach funktionellen Kriterien (9 bis 12 Monate).",
+"camara": "anterior"
+},
+{
+"id": "esguince-tobillo-lateral",
+"titulo": "Laterale Sprunggelenkdistorsion (Lig. talofibulare anterius)",
+"region": "lower limb",
+"side": "derecho",
+"presentacion": "19-jähriger Basketballspieler, der auf dem Fuß eines Gegenspielers landet und mit dem rechten Sprunggelenk nach innen umknickt. Er hat Schmerzen und eine Schwellung vor und unterhalb des Außenknöchels mit Hämatom und kann den Fuß nur mit Mühe belasten.",
+"anatomia": "Der laterale Bandkomplex des Sprunggelenks besteht aus dem Lig. talofibulare anterius, dem Lig. calcaneofibulare und dem Lig. talofibulare posterius. Der typische Mechanismus ist die Inversion mit Plantarflexion; in dieser Stellung ist das Lig. talofibulare anterius gespannt und senkrecht ausgerichtet und reißt als erstes (und oft als einziges). Wirkt die Kraft weiter, wird das Lig. calcaneofibulare verletzt, selten das Lig. talofibulare posterius. Die Mm. fibulares sind dynamische Stabilisatoren gegen die Inversion; ihre verzögerte Aktivierung zusammen mit dem propriozeptiven Defizit erklärt die chronische Instabilität.",
+"lesion": [
+"Anterior talofibular ligament",
+"Calcaneofibular ligament"
+],
+"afectados": [
+"Posterior talofibular ligament",
+"Fibularis longus muscle",
+"Fibularis brevis muscle",
+"Anterior tibiofibular ligament"
+],
+"relacionados": [
+"Fibula",
+"Talus",
+"Calcaneus",
+"Fifth metatarsal bone"
+],
+"signos": [
+"Anterolateraler Schmerz und Schwellung am Sprunggelenk mit Ekchymose",
+"Druckschmerz über dem Lig. talofibulare anterius vor dem Außenknöchel",
+"Schmerz bei passiver Inversion und Plantarflexion",
+"Instabilitätsgefühl und wiederholte Distorsionen in chronischen Fällen"
+],
+"pruebas": [
+"Ottawa-Regeln: Röntgen bei Knochenschmerz an der Hinterkante oder Spitze der Knöchel, an der Basis des 5. Mittelfußknochens oder am Os naviculare oder bei Unfähigkeit, vier Schritte zu belasten",
+"Vorderer Schubladentest des Sprunggelenks (Lig. talofibulare anterius), am besten nach 4–5 Tagen",
+"Talar-Tilt-Test in Varus (Lig. calcaneofibulare)",
+"Kompressionstest (Squeeze-Test) und Außenrotationstest zum Ausschluss einer Syndesmosenverletzung",
+"Einbeinstand und Star Excursion Balance Test zur Beurteilung der Propriozeption"
+],
+"fisioterapia": "Frühe geschützte Belastung mit funktioneller Stütze (Tape oder Orthese) und Ödemkontrolle. Progressive Mobilitätsübungen, Kräftigung der Mm. fibulares sowie propriozeptives und neuromuskuläres Training zur Rezidivprophylaxe.",
+"camara": "lateral"
+},
+{
+"id": "tendon-calcaneo",
+"titulo": "Achillestendinopathie / Ruptur der Achillessehne",
+"region": "lower limb",
+"side": "derecho",
+"presentacion": "44-jähriger Hobbyläufer mit seit Monaten bestehenden Schmerzen und Morgensteifigkeit der rechten Achillessehne. Während eines Padel-Spiels spürt er einen „Schlag“ in der Wade und kann sich seitdem auf diesem Fuß nicht mehr auf die Zehenspitzen stellen.",
+"anatomia": "Die Achillessehne (Tendo calcaneus) ist der gemeinsame Ansatz der Mm. gastrocnemii und des M. soleus (M. triceps surae) am Tuber calcanei. Ihr mittlerer Abschnitt, 2 bis 6 cm oberhalb des Ansatzes, ist schlecht durchblutet; hier konzentrieren sich die Tendinopathie und die meisten Rupturen. Rupturen entstehen durch eine plötzliche exzentrische Belastung (Sprung, Antritt) einer degenerierten Sehne, häufig bei Männern mittleren Alters mit unregelmäßiger sportlicher Aktivität. Die Insertionstendinopathie geht oft mit einer Bursitis retrocalcanea einher. Die übrigen Plantarflexoren (M. tibialis posterior, lange Zehen- und Großzehenbeuger sowie Mm. fibulares) können eine schwache Plantarflexion aufrechterhalten, was die Diagnose verzögern kann.",
+"lesion": [
+"Calcaneal tendon"
+],
+"afectados": [
+"Medial head of gastrocnemius",
+"Lateral head of gastrocnemius",
+"Soleus muscle",
+"Plantaris muscle"
+],
+"relacionados": [
+"Calcaneus",
+"Subtendinous calcaneal bursa",
+"Subcutaneous calcaneal bursa",
+"Flexor hallucis longus"
+],
+"signos": [
+"Tendinopathie: Schmerz und spindelförmige Verdickung 2 bis 6 cm oberhalb des Ansatzes mit Morgensteifigkeit",
+"Ruptur: Knall und Gefühl eines Tritts gegen die Wade",
+"Tastbare Delle im Sehnenverlauf",
+"Unfähigkeit zum einbeinigen Zehenspitzenstand",
+"Vermehrte passive Dorsalextension in Ruhe im Vergleich zur gesunden Seite"
+],
+"pruebas": [
+"Thompson-Test: Kompression der Wade in Bauchlage löst keine Plantarflexion aus (komplette Ruptur)",
+"Matles-Test: Bei 90° gebeugten Knien in Bauchlage fällt der betroffene Fuß in Neutralstellung oder Dorsalextension",
+"Painful-Arc-Zeichen der Sehne: Die Verdickung wandert bei der Midportion-Tendinopathie mit der Bewegung mit",
+"Einbeinige Fersenhebungen: Anzahl der Wiederholungen und Schmerz; VISA-A-Fragebogen zur funktionellen Schwere",
+"Sonographie zur Beurteilung der Tendinopathie und der Dehiszenz der Sehnenenden"
+],
+"fisioterapia": "Bei Tendinopathie progressives Belastungsprogramm (isometrisch und exzentrisch oder Heavy Slow Resistance) mit Aktivitätsanpassung. Bei Ruptur funktionelle oder operative Behandlung mit Spitzfußstiefel und früher progressiver Belastung sowie schrittweise Rückkehr zum Laufen und Springen.",
+"camara": "posterior"
+},
+{
+"id": "gluteo-medio-trendelenburg",
+"titulo": "Schwäche des M. gluteus medius (Trendelenburg-Zeichen)",
+"region": "lower limb",
+"side": "derecho",
+"presentacion": "63-jährige Frau nach Implantation einer Hüftprothese rechts über einen lateralen Zugang. Beim Gehen sinkt das Becken bei jedem Auftreten auf dem rechten Bein zur linken Seite ab, und sie neigt den Rumpf nach rechts; außerdem berichtet sie über Schmerzen an der Außenseite der Hüfte.",
+"anatomia": "M. gluteus medius und M. gluteus minimus entspringen an der Außenfläche des Os ilium und setzen am Trochanter major an. Sie sind die wichtigsten Hüftabduktoren und verhindern im Einbeinstand, dass das Becken zur Seite des Schwungbeins absinkt. Sie werden vom N. gluteus superior (L4–S1) innerviert, der oberhalb des M. piriformis mit den Vasa glutea superiora austritt und auch den M. tensor fasciae latae versorgt. Die Schwäche kann auf einer Nervenläsion (falsch platzierte intramuskuläre Injektion, lateraler operativer Zugang), einer glutealen Tendinopathie oder Ruptur oder einer Veränderung des Hebelarms (Coxa vara, Luxation) beruhen. Beim Trendelenburg-Zeichen sinkt das Becken zur Gegenseite der schwachen Hüfte ab; das Zeichen gilt auf der Standbeinseite (der schwachen Seite) als positiv.",
+"lesion": [
+"Gluteus medius muscle",
+"Superior gluteal nerve"
+],
+"afectados": [
+"Gluteus medius muscle",
+"Gluteus minimus muscle",
+"Tensor fasciae latae"
+],
+"relacionados": [
+"Hip bone",
+"Femur",
+"Trochanteric bursa of gluteus medius muscle",
+"Iliotibial tract"
+],
+"signos": [
+"Trendelenburg-Zeichen: Das Becken sinkt im Einbeinstand auf dem betroffenen Bein zur Gegenseite ab",
+"Kompensiertes Trendelenburg- bzw. Duchenne-Hinken: Neigung des Rumpfes zur betroffenen Seite",
+"Schwäche der Hüftabduktion",
+"Druckschmerz am Trochanter major bei glutealer Tendinopathie"
+],
+"pruebas": [
+"Trendelenburg-Test: Einbeinstand über 30 s unter Beobachtung der Beckenhöhe",
+"Muskelfunktionstest des M. gluteus medius in Seitenlage mit leichter Hüftextension und Außenrotation (Kendall)",
+"Einbeinstand über 30 s, der den trochantären Schmerz reproduziert (gluteale Tendinopathie)",
+"FADER-R-Test (Flexion, Adduktion, Außenrotation mit Innenrotation gegen Widerstand) für die gluteale Tendinopathie"
+],
+"fisioterapia": "Progressive Kräftigung der Hüftabduktoren, beginnend mit isometrischen Übungen ohne Sehnenkompression und fortschreitend zu Belastungen im Einbeinstand und in der geschlossenen kinetischen Kette. Gangschulung, bei Bedarf mit Gehstock auf der Gegenseite, und Vermeidung von Adduktionshaltungen (Beine überkreuzen).",
+"camara": "posterior"
+},
+{
+"id": "mama-axila",
+"titulo": "Brustkrebs und axilläre Lymphdrainage",
+"region": "breast · female",
+"side": "izquierdo",
+"body": "f",
+"presentacion": "52-jährige Frau mit einem harten, schmerzlosen Knoten im oberen äußeren Quadranten der linken Brust und einem tastbaren Lymphknoten in der gleichseitigen Achselhöhle.",
+"anatomia": "Etwa 75 % der Lymphe der Brust fließen zu den axillären Lymphknoten ab, vor allem aus den äußeren Quadranten: zuerst zu den pektoralen (vorderen), dann zu den zentralen und apikalen und von dort zu den supraklavikulären Lymphknoten. Die inneren Quadranten drainieren zusätzlich zu den parasternalen Lymphknoten entlang der A. thoracica interna. Die Ligg. suspensoria (Cooper-Bänder) verbinden die Drüse mit der Haut: Werden sie vom Tumor infiltriert, zieht sich die Haut ein. Bei der Axilladissektion können der N. thoracicus longus (Scapula alata) und der N. thoracodorsalis (M. latissimus dorsi) verletzt werden.",
+"lesion": [
+"Lobes of mammary gland",
+"Lactiferous ducts",
+"Suspensory ligaments of breast"
+],
+"afectados": [
+"Anterior axillary nodes",
+"Central axillary nodes",
+"Lateral axillary nodes",
+"Posterior axillary nodes",
+"Apical axillary nodes",
+"Interpectoral nodes",
+"Parasternal nodes",
+"Supraclavicular nodes"
+],
+"relacionados": [
+"Pectoralis minor muscle",
+"Sternocostal head of pectoralis major muscle",
+"Long thoracic nerve",
+"Thoracodorsal nerve",
+"Lateral thoracic artery",
+"Axillary artery"
+],
+"signos": [
+"Harter, unregelmäßiger, wenig verschieblicher Knoten",
+"Einziehung der Haut oder der Mamille (Infiltration der Cooper-Bänder)",
+"Orangenhaut durch Lymphstau",
+"Harter axillärer Lymphknoten"
+],
+"pruebas": [
+"Systematische Untersuchung von Brust und Achselhöhle nach Quadranten",
+"Mammographie und Sonographie; Stanzbiopsie",
+"Sentinel-Lymphknotenbiopsie zum axillären Staging",
+"Nach der Operation: Armumfangsmessungen zur Erkennung eines Lymphödems und Test auf Scapula alata (Wand-Liegestütz)"
+],
+"fisioterapia": "Frühe Mobilisation der Schulter nach der Operation, manuelle Lymphdrainage, Kompressionsbandagierung und Übungen bei Lymphödem sowie Kräftigung des M. serratus anterior bei Läsion des N. thoracicus longus.",
+"camara": "anterior"
+},
+{
+"id": "prolapso",
+"titulo": "Beckenorganprolaps nach mehreren Geburten",
+"region": "pelvis · female",
+"side": "derecho",
+"body": "f",
+"presentacion": "58-jährige Frau mit drei vaginalen Geburten, die am Ende des Tages eine Vorwölbung in der Scheide, ein Schweregefühl und Urinverlust beim Husten bemerkt.",
+"anatomia": "Blase, Uterus und Rektum werden durch drei Haltestrukturebenen gestützt (DeLancey): die Aufhängung durch die Ligg. cardinalia und sacrouterina (Level I), die Verbindung der Vagina mit den Arcus tendinei (Level II) und die Stütze durch das Diaphragma pelvis und das Centrum tendineum perinei (Level III). Die Geburt kann den M. levator ani einreißen oder denervieren und die Bänder überdehnen; mit der Menopause und wiederholtem abdominalem Druck erweitert sich der Hiatus urogenitalis, und die Organe senken sich: die Blase über die Vorderwand (Zystozele), der Uterus entlang der Vaginalachse (Hysterozele) und das Rektum über die Hinterwand (Rektozele).",
+"lesion": [
+"Pubococcygeus muscle",
+"Pubo-analis muscle",
+"Iliococcygeus muscle",
+"Cardinal ligament",
+"Uterosacral ligament",
+"Perineal body"
+],
+"afectados": [
+"Urinary bladder",
+"Cervix of uterus",
+"Body of uterus",
+"Vagina",
+"Rectum"
+],
+"relacionados": [
+"Hip bone",
+"Sacrum",
+"Coccyx",
+"Tendinous arch of levator ani",
+"Coccygeus muscle"
+],
+"signos": [
+"Vaginale Vorwölbung, die im Stehen und bei Anstrengung zunimmt",
+"Schweregefühl im Becken",
+"Belastungsharninkontinenz",
+"Erschwerte Rektumentleerung (Rektozele)"
+],
+"pruebas": [
+"Untersuchung in Ruhe und beim Valsalva-Manöver; POP-Q-Klassifikation",
+"Vaginale Palpation der Kontraktion des M. levator ani (Oxford-Skala)",
+"Beckenbodensonographie zur Beurteilung einer Levatoravulsion",
+"Hustentest bei Belastungsinkontinenz"
+],
+"fisioterapia": "Supervidiertes Beckenbodentraining (Maximal- und Ausdauerkontraktionen, 'the knack' vor dem Husten), Biofeedback, Kontrolle des intraabdominalen Drucks und bei Bedarf Pessar.",
+"camara": "medial",
+"solo": true,
+"cut": {
+"p": "sag",
+"pos": 0.002
+}
+},
+{
+"id": "endometriosis",
+"titulo": "Tief infiltrierende Endometriose mit Beckenschmerz",
+"region": "pelvis · female",
+"side": "derecho",
+"body": "f",
+"presentacion": "29-jährige Frau mit seit Jahren bestehender starker Dysmenorrhoe, Schmerzen beim tiefen Geschlechtsverkehr und Schmerzen bei der Defäkation während der Menstruation.",
+"anatomia": "Endometriumgewebe außerhalb des Uterus siedelt sich vor allem am Peritoneum der Excavatio rectouterina (Douglas-Raum), an den Ligg. sacrouterina, an den Ovarien (Endometriome) und an der Vorderwand des Rektums an. Deshalb tritt der Schmerz bei tiefer Penetration, die auf den Douglas-Raum drückt, und bei der Defäkation auf. Sakrouterine Knoten können den Harnleiter einmauern, der wenige Zentimeter von der Zervix entfernt unter der A. uterina verläuft.",
+"lesion": [
+"Uterosacral ligament",
+"Ovary"
+],
+"afectados": [
+"Rectum",
+"Ureter",
+"Uterosacral ligament"
+],
+"relacionados": [
+"Ovary",
+"Body of uterus",
+"Cervix of uterus",
+"Broad ligament of uterus",
+"Ampulla of uterine tube",
+"Uterine artery",
+"Sacrum"
+],
+"signos": [
+"Progrediente Dysmenorrhoe",
+"Tiefe Dyspareunie",
+"Katameniale Dyschezie (Schmerzen bei der Defäkation während der Menstruation)",
+"Schmerzhafter Knoten im Douglas-Raum bei der vaginalen Tastuntersuchung",
+"Infertilität"
+],
+"pruebas": [
+"Vaginale und rektovaginale Tastuntersuchung: Knotenbildung an den Ligg. sacrouterina",
+"Transvaginale Sonographie (Endometriome, tiefe Knoten)",
+"Becken-MRT zur Kartierung der Läsionen",
+"Laparoskopie mit Biopsie (Bestätigung)"
+],
+"fisioterapia": "Schmerzedukation, therapeutische Übungen, Entspannung und manuelle Therapie des Beckenbodens bei schmerzbedingter Hypertonie, abgestimmt auf die hormonelle oder operative Behandlung.",
+"camara": "medial",
+"solo": true,
+"cut": {
+"p": "sag",
+"pos": 0.002
+}
+},
+{
+"id": "cintura-pelvica",
+"titulo": "Beckengürtelschmerz und Rektusdiastase in der Schwangerschaft",
+"region": "pelvis and abdomen · female",
+"side": "derecho",
+"body": "f",
+"presentacion": "33-jährige Frau in der 30. Schwangerschaftswoche mit Schmerzen über der Schambeinfuge und im Gesäß beim Gehen, Treppensteigen oder Umdrehen im Bett. Nach der Geburt bemerkt sie beim Aufrichten eine Vorwölbung in der Mittellinie des Bauches.",
+"anatomia": "Relaxin und Östrogene erhöhen die Laxität der Bänder der Symphysis pubica und der Iliosakralgelenke, um den Geburtskanal zu erweitern: Die Symphyse kann um einige Millimeter auseinanderweichen. Gewichtszunahme und die Verlagerung des Körperschwerpunkts nach vorn belasten diese Gelenke. Der wachsende Uterus dehnt die Bauchwand: Die Linea alba wird dünner und die Mm. recti abdominis weichen auseinander (Rektusdiastase), während die schrägen Bauchmuskeln und der M. transversus abdominis an Wirksamkeit verlieren.",
+"lesion": [
+"Pubic symphysis",
+"Anterior sacro-iliac ligament",
+"Posterior sacro-iliac ligament",
+"Linea alba"
+],
+"afectados": [
+"Rectus abdominis muscle",
+"Transversus abdominis muscle"
+],
+"relacionados": [
+"Hip bone",
+"Sacrum",
+"Interosseous sacro-iliac ligament",
+"Iliolumbar ligament"
+],
+"signos": [
+"Schmerzen an der Symphyse und den Iliosakralgelenken bei Belastung eines Beins",
+"Schonhinken und Schmerzen beim Umdrehen im Bett",
+"Vorwölbung in der Mittellinie beim Aufrichten (Rektusdiastase)"
+],
+"pruebas": [
+"Active Straight Leg Raise Test (ASLR)",
+"Provokationstest für posterioren Beckenschmerz (P4) und Palpation der Symphyse",
+"Messung des Abstands zwischen den Mm. recti abdominis mit den Fingern oder per Ultraschall"
+],
+"fisioterapia": "Aufklärung und Anpassung der Aktivitäten, Beckengurt, motorische Kontrollübungen für den M. transversus abdominis und den Beckenboden sowie schrittweiser Wiederaufbau der Bauchwand nach der Geburt.",
+"camara": "anterior",
+"solo": true
+},
+{
+"id": "desgarro-perineal",
+"titulo": "Dammriss dritten Grades und anale Inkontinenz",
+"region": "perineum · female",
+"side": "derecho",
+"body": "f",
+"presentacion": "Eine 31-jährige Frau berichtet sechs Wochen nach einer Zangengeburt über Windabgang und imperativen Stuhldrang. Bei der Geburt wurde ein Dammriss dritten Grades versorgt.",
+"anatomia": "Das Centrum tendineum perinei ist der Ansatzpunkt des M. bulbospongiosus, der Mm. transversi perinei und des M. sphincter ani externus. Dammrisse werden nach ihrer Tiefe eingeteilt: Grad 1 Haut, Grad 2 Dammmuskulatur (Centrum tendineum), Grad 3 Analsphinkter (3a weniger als 50 % des äußeren Sphinkters, 3b mehr als 50 %, 3c zusätzlich der innere Sphinkter) und Grad 4 Schleimhaut des Analkanals. Die Verletzung des Sphinkters und manchmal des N. pudendus durch Dehnung erklärt die Inkontinenz.",
+"lesion": [
+"Perineal body",
+"External anal sphincter"
+],
+"afectados": [
+"Bulbospongiosus muscle",
+"Superficial transverse perineal muscle",
+"Anal canal"
+],
+"relacionados": [
+"Vagina",
+"Pudendal nerve",
+"Rectum",
+"Ischiocavernosus muscle"
+],
+"signos": [
+"Wind- oder Stuhlinkontinenz und imperativer Stuhldrang",
+"Verkürzter anogenitaler Abstand oder Dammnarbe",
+"Schwacher analer Ruhetonus oder schwache willkürliche Kontraktion"
+],
+"pruebas": [
+"Inspektion und digital-rektale Untersuchung mit willkürlicher Kontraktion (modifizierte Oxford-Skala)",
+"Endoanaler Ultraschall: Sphinkterdefekt",
+"Anorektale Manometrie",
+"Wexner-Inkontinenz-Score"
+],
+"fisioterapia": "Beckenbodentraining mit Biofeedback, Kraft- und Ausdauertraining des Sphinkters, Training des Dranggefühls und Massage der Dammnarbe nach abgeschlossener Wundheilung.",
+"camara": "inferior",
+"solo": true
+},
+{
+"id": "pudendo",
+"titulo": "Pudendusneuralgie (Radfahrer)",
+"region": "perineum · female",
+"side": "derecho",
+"body": "f",
+"presentacion": "Eine 45-jährige Radfahrerin mit brennenden Schmerzen an Vulva und Damm, die sich im Sitzen verstärken, im Stehen bessern und sie nachts nicht wecken.",
+"anatomia": "Der N. pudendus (S2–S4) verlässt das Becken durch das Foramen ischiadicum majus, umläuft die Spina ischiadica zwischen Lig. sacrospinale und Lig. sacrotuberale und tritt durch das Foramen ischiadicum minus wieder in den Canalis pudendalis (Alcock-Kanal) an der Seitenwand der Fossa ischioanalis ein. Dort kann er im Sitzen komprimiert werden. Er innerviert die Haut von Damm und Vulva, den M. sphincter ani externus und die Dammmuskulatur.",
+"lesion": [
+"Pudendal nerve"
+],
+"afectados": [
+"External anal sphincter",
+"Bulbospongiosus muscle",
+"Ischiocavernosus muscle",
+"Superficial transverse perineal muscle"
+],
+"relacionados": [
+"Sacrospinous ligament",
+"Sacrotuberous ligament",
+"Hip bone",
+"Sacrum",
+"Internal pudendal artery",
+"Obturator internus"
+],
+"signos": [
+"Brennender Damm- oder Vulvaschmerz, der sich im Sitzen verstärkt (Nantes-Kriterien)",
+"Besserung im Stehen oder beim Sitzen auf der Toilette",
+"Bei den meisten kein objektives sensibles Defizit"
+],
+"pruebas": [
+"Druckschmerzhafte Spina ischiadica bei vaginaler Palpation",
+"Bildgesteuerte Leitungsanästhesie des N. pudendus (diagnostisch)",
+"Elektromyographie des Sphinkters und motorische Latenz des N. pudendus"
+],
+"fisioterapia": "Langes Sitzen vermeiden und den Fahrradsattel anpassen, Schmerzedukation, manuelle Therapie der Beckenbodenmuskulatur und des M. obturatorius internus sowie Entspannungsübungen.",
+"camara": "inferior",
+"solo": true
+},
+{
+"id": "bell",
+"titulo": "Periphere Fazialisparese (Bell-Parese)",
+"region": "head",
+"side": "derecho",
+"presentacion": "Eine 38-jährige Frau kann beim Aufwachen das rechte Auge nicht schließen, der Mundwinkel hängt herab und sie bemerkt, dass sich Speisereste in der Wange ansammeln. Weitere Ausfälle bestehen nicht.",
+"anatomia": "Der N. facialis (VII) tritt im Kleinhirnbrückenwinkel aus dem Hirnstamm aus, verläuft durch den Canalis facialis des Os temporale, wo er sich bei der Bell-Parese entzündet und komprimiert wird, und verlässt den Schädel durch das Foramen stylomastoideum, um sich in der Glandula parotidea in seine Äste für die mimische Muskulatur aufzuteilen. Die periphere Läsion lähmt die gesamte Gesichtshälfte einschließlich der Stirn; bei der zentralen Läsion (Schlaganfall) bleibt die Stirn ausgespart, weil der Teil des Nucleus nervi facialis, der sie innerviert, kortikonukleäre Fasern aus beiden Hemisphären erhält.",
+"lesion": [
+"Facial nerve (VII)"
+],
+"afectados": [
+"Orbicularis oris muscle",
+"Zygomaticus major muscle",
+"Platysma"
+],
+"relacionados": [
+"Parotid gland",
+"Pons",
+"Temporal bone"
+],
+"signos": [
+"Unfähigkeit, das Auge zu schließen (Bell-Phänomen: der Augapfel dreht sich nach oben)",
+"Verstreichen der Stirnfalten und der Nasolabialfalte",
+"Verziehen des Mundes zur gesunden Seite",
+"Manchmal Hyperakusis und Geschmacksverlust in den vorderen zwei Dritteln der Zunge"
+],
+"pruebas": [
+"House-Brackmann-Skala",
+"Untersuchung der Stirn: unterscheidet periphere von zentraler Läsion",
+"Otoskopie (Ausschluss eines Zoster oticus)",
+"Elektroneurographie zwischen Tag 3 und 14 bei kompletter Parese; Elektromyographie, wenn nach 3 Wochen keine Erholung eintritt"
+],
+"fisioterapia": "Augenschutz, neuromuskuläres Training vor dem Spiegel mit selektiven Übungen und Biofeedback; intensive Elektrostimulation und Massenbewegungen, die Synkinesien begünstigen, sind zu vermeiden.",
+"camara": "lateral"
+},
+{
+"id": "tercer-par",
+"titulo": "Okulomotoriusparese (III) durch Aneurysma der A. communicans posterior",
+"region": "head",
+"side": "derecho",
+"presentacion": "Ein 55-jähriger Mann mit Hypertonie hat plötzlich einsetzende heftige Kopfschmerzen, ein herabhängendes rechtes Oberlid und Doppelbilder. Die rechte Pupille ist weit und reagiert nicht auf Licht.",
+"anatomia": "Der N. oculomotorius (III) tritt zwischen A. cerebri posterior und A. superior cerebelli aus dem Mesencephalon aus und verläuft entlang der A. communicans posterior. Seine parasympathischen Fasern für die Pupille liegen an der Oberfläche des Nervs; deshalb erweitert eine Kompression von außen (Aneurysma, Unkusherniation) die Pupille, während die diabetische Ischämie sie meist ausspart. Er innerviert die Mm. recti superior, inferior und medialis, den M. obliquus inferior und den M. levator palpebrae superioris.",
+"lesion": [
+"Oculomotor nerve (III)"
+],
+"afectados": [
+"Midbrain"
+],
+"relacionados": [
+"Posterior cerebral artery",
+"Basilar artery",
+"Internal carotid artery",
+"Trochlear nerve (IV)"
+],
+"signos": [
+"Ptosis des Oberlids",
+"Auge nach unten außen abgewichen (ungehemmte Wirkung von M. rectus lateralis und M. obliquus superior)",
+"Lichtstarre Mydriasis",
+"Diplopie"
+],
+"pruebas": [
+"Prüfung der Augenmotilität in den neun Blickrichtungen",
+"Direkte und konsensuelle Lichtreaktion",
+"Notfall-CT- oder MR-Angiographie: Eine Okulomotoriusparese (III) mit Pupillenbeteiligung ist bis zum Beweis des Gegenteils ein Aneurysma"
+],
+"fisioterapia": "Nach der neurovaskulären Behandlung: alternierende Okklusion gegen die Doppelbilder, okulomotorische Übungen und Anpassung der Aktivitäten des täglichen Lebens.",
+"camara": "inferior"
+},
+{
+"id": "hernia-inguinal",
+"titulo": "Indirekte Leistenhernie",
+"region": "abdomen",
+"side": "derecho",
+"presentacion": "Ein 28-jähriger Mann bemerkt beim Tragen schwerer Lasten eine Schwellung in der rechten Leiste, die in Richtung Skrotum absteigt und im Liegen verschwindet.",
+"anatomia": "Der Leistenkanal durchzieht die Bauchwand schräg oberhalb des Lig. inguinale, vom inneren Leistenring (lateral der Vasa epigastrica inferiora) bis zum äußeren Leistenring. Die indirekte Hernie tritt lateral der epigastrischen Gefäße durch den inneren Leistenring entlang des Samenstrangs ein; die direkte Hernie wölbt den Boden des Kanals (Hesselbach-Dreieck) medial dieser Gefäße vor. M. obliquus internus abdominis und M. transversus abdominis bilden das Dach, und die Falx inguinalis (Tendo conjunctivus) verstärkt die Hinterwand.",
+"lesion": [
+"Inguinal ligament",
+"Inferior epigastric artery"
+],
+"afectados": [
+"Transversus abdominis muscle",
+"Rectus abdominis muscle"
+],
+"relacionados": [
+"Inferior epigastric vein",
+"Hip bone",
+"Ilio-inguinal nerve"
+],
+"signos": [
+"Leistenschwellung, die beim Husten und Pressen zunimmt",
+"Im Liegen reponibel",
+"Kann bis ins Skrotum absteigen (indirekt)",
+"Plötzlich auftretende nicht reponible, pralle und schmerzhafte Schwellung: Inkarzeration, chirurgischer Notfall"
+],
+"pruebas": [
+"Untersuchung im Stehen mit Husten: Anprall am Finger, der durch den äußeren Leistenring eingeführt ist",
+"Ultraschall der Bauchwand in unklaren Fällen"
+],
+"fisioterapia": "Nach der Versorgung (Hernioplastik): Frühmobilisation, schrittweise Kontrolle des intraabdominalen Drucks, Kräftigung des M. transversus abdominis und allmähliche Rückkehr zur Belastung.",
+"camara": "anterior"
+},
+{
+"id": "ictus-acm",
+"titulo": "Schlaganfall im Versorgungsgebiet der linken A. cerebri media",
+"region": "brain",
+"side": "izquierdo",
+"presentacion": "Ein 67-jähriger Mann mit Vorhofflimmern kann plötzlich den rechten Arm und die rechte Gesichtshälfte nicht mehr bewegen und nicht flüssig sprechen, versteht aber, was man ihm sagt.",
+"anatomia": "Die A. cerebri media versorgt die laterale Hemisphärenfläche: den motorischen und sensiblen Kortex für Gesicht und obere Extremität (Gyrus praecentralis und postcentralis), das Broca-Areal in der dominanten Hemisphäre und über ihre tiefen lentikulostriatären Äste die Capsula interna. Ihr Verschluss in der linken Hemisphäre verursacht eine brachiofazial betonte Hemiparese und Hemihypästhesie rechts sowie eine Aphasie; das Bein ist weniger betroffen, weil sein Kortexareal von der A. cerebri anterior versorgt wird.",
+"lesion": [
+"Middle cerebral artery (M1-segment)",
+"Middle cerebral artery (M3 segment)"
+],
+"afectados": [
+"Precentral gyrus",
+"Postcentral gyrus",
+"Putamen",
+"Caudate nucleus"
+],
+"relacionados": [
+"Internal carotid artery",
+"Anterior cerebral artery",
+"Posterior cerebral artery",
+"Basilar artery"
+],
+"signos": [
+"Brachiofazial betonte Hemiparese rechts",
+"Zentrale Fazialisparese (Stirn ausgespart)",
+"Motorische Aphasie (Broca)",
+"Blickdeviation zur Seite der Läsion"
+],
+"pruebas": [
+"NIHSS-Skala",
+"Notfall-CT des Schädels zum Ausschluss einer Blutung und CT-Angiographie zur Lokalisation des Verschlusses (Thrombolyse oder Thrombektomie)",
+"Schluckdiagnostik vor der ersten Nahrungsgabe"
+],
+"fisioterapia": "Frühe Mobilisation und frühes Sitzen, Lagerung der plegischen Schulter, aufgabenorientiertes Training, in späteren Phasen Constraint-Induced Movement Therapy (Immobilisation der gesunden Seite) und Logopädie bei Aphasie.",
+"camara": "lateral",
+"solo": true
+},
+{
+"id": "fascitis-plantar",
+"titulo": "Plantarfasziitis",
+"region": "foot",
+"side": "derecho",
+"presentacion": "Eine 45-jährige Frau, die bei der Arbeit viele Stunden geht, hat stechende Schmerzen in der rechten Ferse bei den ersten Schritten am Morgen, die sich beim Gehen bessern und gegen Ende des Tages zunehmen.",
+"anatomia": "Die Aponeurosis plantaris entspringt am Processus medialis tuberis calcanei und zieht bis zu den Grundphalangen. Beim Abstoßen spannt die Extension der Zehen sie an und hebt das Gewölbe an (Windlass-Mechanismus). Wiederholte Belastungen, eine Verkürzung des M. triceps surae sowie Platt- oder Hohlfuß führen zu einer Degeneration (Fasziose) an ihrem Ursprung.",
+"lesion": [
+"Plantar aponeurosis"
+],
+"afectados": [
+"Abductor hallucis",
+"Flexor digitorum brevis",
+"Quadratus plantae muscle"
+],
+"relacionados": [
+"Calcaneus",
+"Medial head of gastrocnemius",
+"Soleus muscle",
+"Long plantar ligament"
+],
+"signos": [
+"Schmerz am Processus medialis tuberis calcanei",
+"Maximaler Schmerz bei den ersten Schritten nach Ruhe (Anlaufschmerz)",
+"Verkürzung des M. triceps surae"
+],
+"pruebas": [
+"Palpation des medialen Ursprungs der Aponeurose",
+"Windlass-Test (passive Extension der Großzehe reproduziert den Schmerz)",
+"Ultraschall: Dicke über 4 mm am Ursprung"
+],
+"fisioterapia": "Gezielte Dehnung der Plantaraponeurose und des M. triceps surae, Kräftigung der intrinsischen Fußmuskulatur und progressive Belastung (Fersenheben mit extendierter Großzehe), Einlagen und Aufklärung über die Belastungssteuerung.",
+"camara": "inferior"
+},
+{
+"id": "radiculopatia-l5",
+"titulo": "Bandscheibenvorfall L4–L5 mit Radikulopathie L5",
+"region": "lumbar spine",
+"side": "izquierdo",
+"presentacion": "Ein 38-jähriger Mann hat nach dem Anheben einer schweren Kiste Kreuzschmerzen, die an der Außenseite des linken Beins bis zum Fußrücken ausstrahlen, mit Kribbeln in der Großzehe.",
+"anatomia": "Der Nucleus pulposus der Bandscheibe L4–L5 prolabiert nach posterolateral, wo das Lig. longitudinale posterius am schwächsten ist, und komprimiert die Wurzel L5 im Recessus lateralis. L5 versorgt den M. extensor hallucis longus, den M. tibialis anterior (zusammen mit L4), den M. gluteus medius und die Sensibilität des Fußrückens.",
+"lesion": [
+"Nucleus pulposus L4-L5",
+"Intervertebral disc L4-L5"
+],
+"afectados": [
+"Extensor hallucis longus",
+"Tibialis anterior muscle",
+"Gluteus medius muscle"
+],
+"relacionados": [
+"Vertebra L4",
+"Vertebra L5",
+"Sciatic nerve",
+"Common fibular nerve",
+"Posterior longitudinal ligament"
+],
+"signos": [
+"Radikulärer Schmerz im Dermatom L5 (Außenseite des Unterschenkels und Fußrücken)",
+"Schwäche der Großzehenextension",
+"Fersengang erschwert",
+"Patellarsehnen- und Achillessehnenreflex erhalten"
+],
+"pruebas": [
+"Straight Leg Raise (Lasègue) positiv zwischen 30° und 70°",
+"Muskelfunktionsprüfung des M. extensor hallucis longus",
+"Sensibilität des Fußrückens",
+"MRT bei progredientem Defizit oder Warnzeichen (Cauda-equina-Syndrom)"
+],
+"fisioterapia": "Aufklärung und Aufrechterhaltung der Aktivität, motorische Kontrollübungen und progressive Belastung, neurodynamische Techniken und Mobilisation; dringliche Überweisung bei zunehmender Schwäche oder Blasen-/Mastdarmstörungen.",
+"camara": "lateral",
+"foco": [
+"Intervertebral disc L4-L5",
+"Vertebra L4",
+"Vertebra L5"
+]
+},
+{
+"id": "radiculopatia-c6",
+"titulo": "Bandscheibenvorfall C5–C6 mit Radikulopathie C6",
+"region": "cervical spine",
+"side": "derecho",
+"presentacion": "Eine 47-jährige Frau hat Nackenschmerzen, die in den rechten Arm bis zu Daumen und Zeigefinger ausstrahlen, mit Kribbeln, verstärkt durch Rotation und Seitneigung des Kopfes zu dieser Seite.",
+"anatomia": "In der Halswirbelsäule tritt jede Wurzel oberhalb des gleichnamigen Wirbels aus: Der Vorfall C5–C6 komprimiert die Wurzel C6. Diese versorgt den M. biceps brachii und den M. brachioradialis (zusammen mit C5) sowie die Mm. extensores carpi radiales und die Sensibilität des radialen Unterarmrands, des Daumens und des Zeigefingers.",
+"lesion": [
+"Nucleus pulposus C5-C6",
+"Intervertebral disc C5-C6"
+],
+"afectados": [
+"Brachioradialis muscle",
+"Extensor carpi radialis longus",
+"Extensor carpi radialis brevis"
+],
+"relacionados": [
+"Vertebra C5",
+"Vertebra C6",
+"Roots of brachial plexus",
+"Musculocutaneous nerve",
+"Radial nerve"
+],
+"signos": [
+"Schmerzen und Parästhesien im Dermatom C6 (Daumen und Zeigefinger)",
+"Abgeschwächter Bizepssehnen- oder Brachioradialisreflex",
+"Schwäche der Ellenbogenflexion und der Handgelenksextension"
+],
+"pruebas": [
+"Spurling-Test (Extension, Rotation und Seitneigung mit axialer Kompression)",
+"Zervikaler Distraktionstest (lindert den Schmerz)",
+"Neurodynamischer Test der oberen Extremität (ULNT1)",
+"Reflexe und Muskelfunktionsprüfung nach Myotomen"
+],
+"fisioterapia": "Aufklärung, Mobilisation und Übungen für Hals- und Brustwirbelsäule, neurodynamische Techniken, Training der tiefen Halsflexoren und Anpassung der Haltungen; die meisten Patienten bessern sich innerhalb weniger Wochen.",
+"camara": "lateral",
+"foco": [
+"Intervertebral disc C5-C6",
+"Vertebra C5",
+"Vertebra C6"
+]
+},
+{
+"id": "de-quervain",
+"titulo": "Tendovaginitis de Quervain",
+"region": "wrist",
+"side": "derecho",
+"presentacion": "Eine 32-jährige Frau mit einem drei Monate alten Baby hat Schmerzen am radialen Rand des rechten Handgelenks beim Hochheben des Kindes und beim Drehen der Hand.",
+"anatomia": "Der M. abductor pollicis longus und der M. extensor pollicis brevis verlaufen gemeinsam durch das erste Strecksehnenfach unter dem Retinaculum musculorum extensorum über dem Processus styloideus radii. Die Verdickung der Sehnenscheide und des Retinakulums durch wiederholten Gebrauch mit abduziertem Daumen und abgewinkeltem Handgelenk verursacht Schmerzen beim Gleiten der Sehnen.",
+"lesion": [
+"Abductor pollicis longus",
+"Extensor pollicis brevis"
+],
+"afectados": [
+"Extensor retinaculum of wrist"
+],
+"relacionados": [
+"Radius",
+"Superficial branch of radial nerve",
+"Brachioradialis muscle"
+],
+"signos": [
+"Schmerz und Schwellung über dem Processus styloideus radii",
+"Schmerz bei Abduktion und Extension des Daumens gegen Widerstand",
+"Gelegentliche Krepitation"
+],
+"pruebas": [
+"Finkelstein-/Eichhoff-Test (Ulnarduktion mit flektiertem Daumen)",
+"Palpation des ersten Strecksehnenfachs",
+"Ultraschall: Verdickung der Sehnenscheide"
+],
+"fisioterapia": "Daumen-Handgelenk-Orthese, Änderung der Art, das Baby zu tragen, progressive Belastung der Sehnen und bei Persistenz eine Infiltration durch den Arzt.",
+"camara": "anterior"
+},
+{
+"id": "piramidal",
+"titulo": "Piriformis-Syndrom (M. piriformis)",
+"region": "gluteal",
+"side": "derecho",
+"presentacion": "Ein 41-jähriger Läufer hat tiefe Gesäßschmerzen rechts, die bei längerem Sitzen an der Rückseite des Oberschenkels ausstrahlen, ohne Kreuzschmerzen.",
+"anatomia": "Der N. ischiadicus verlässt das Becken durch das Foramen ischiadicum majus, gewöhnlich unterhalb des M. piriformis; bei manchen Menschen durchbohrt er ihn oder einer seiner Anteile verläuft oberhalb. Hypertrophie oder Spasmus des M. piriformis und der tiefen Außenrotatoren können ihn im subglutealen Raum reizen (Deep-Gluteal-Syndrom).",
+"lesion": [
+"Piriformis muscle"
+],
+"afectados": [
+"Sciatic nerve"
+],
+"relacionados": [
+"Gluteus maximus muscle",
+"Obturator internus",
+"Quadratus femoris muscle",
+"Sacrum",
+"Hip bone"
+],
+"signos": [
+"Tiefer Gesäßschmerz, der sich im Sitzen verstärkt",
+"Druckschmerz des M. piriformis",
+"Keine lumbalen radikulären Zeichen"
+],
+"pruebas": [
+"FAIR-Test (Flexion, Adduktion und Innenrotation der Hüfte)",
+"Freiberg- und Pace-Test",
+"Lumbale Ursache ausschließen (Lasègue, Reflexe)"
+],
+"fisioterapia": "Dehnung und Kräftigung der Rotatoren und Abduktoren der Hüfte, Techniken zur Neuromobilisation des N. ischiadicus, Anpassung des Sitzens und des Trainings.",
+"camara": "posterior"
+},
+{
+"id": "menisco-medial",
+"titulo": "Innenmeniskusriss",
+"region": "knee",
+"side": "derecho",
+"presentacion": "Ein 29-jähriger Mann verspürte beim Fußballspielen während einer Drehbewegung mit fixiertem Fuß Schmerzen an der Innenseite des rechten Knies; seitdem hat er Blockaden, und das Knie schwillt am Tag nach dem Sport an.",
+"anatomia": "Der C-förmige Innenmeniskus ist mit der Gelenkkapsel und dem Lig. collaterale tibiale verwachsen; daher ist er weniger beweglich als der Außenmeniskus und wird bei Drehbewegungen des gebeugten, belasteten Knies häufiger verletzt. Sein äußeres Drittel ist vaskularisiert (rote Zone) und kann heilen, das innere nicht.",
+"lesion": [
+"Medial meniscus"
+],
+"afectados": [
+"Vastus medialis muscle"
+],
+"relacionados": [
+"Femur",
+"Tibia",
+"Anterior meniscotibial ligament (Medial meniscus)",
+"Posterior meniscotibial ligament (Medial meniscus)",
+"Anterior cruciate ligament"
+],
+"signos": [
+"Schmerz am medialen Gelenkspalt",
+"Verzögert auftretender Gelenkerguss (nach Stunden)",
+"Blockaden oder Hängenbleiben",
+"Schmerz beim Hocken"
+],
+"pruebas": [
+"McMurray-Test",
+"Thessaly-Test",
+"Druckschmerz am medialen Gelenkspalt",
+"Magnetresonanztomographie"
+],
+"fisioterapia": "Kontrolle des Ergusses, Wiederherstellung der Beweglichkeit und der Quadrizepsfunktion, progressives Belastungstraining und neuromuskuläre Kontrolle; Operation (Naht oder Teilmeniskektomie) bei echter Blockade.",
+"camara": "anterior"
+},
+{
+"id": "femoropatelar",
+"titulo": "Patellofemorales Schmerzsyndrom",
+"region": "knee",
+"side": "derecho",
+"presentacion": "Eine 19-jährige Läuferin hat diffuse Schmerzen um die rechte Patella beim Treppabgehen, beim Hocken und bei längerem Sitzen mit gebeugten Knien.",
+"anatomia": "Die Patella gleitet in der Trochlea femoris, geführt vom M. quadriceps femoris (mit dem M. vastus medialis obliquus), den Retinacula patellae und dem Tractus iliotibialis. Übermäßige Belastungen, eine Schwäche der Abduktoren und Außenrotatoren der Hüfte sowie ein dynamischer Valgus erhöhen den Druck im Femoropatellargelenk.",
+"lesion": [
+"Patella",
+"Lateral patellar retinaculum",
+"Medial patellar retinaculum"
+],
+"afectados": [
+"Vastus medialis muscle",
+"Gluteus medius muscle",
+"Rectus femoris muscle"
+],
+"relacionados": [
+"Femur",
+"Iliotibial tract",
+"Tensor fasciae latae",
+"Vastus lateralis muscle"
+],
+"signos": [
+"Vorderer Knieschmerz beim Hocken, Treppensteigen und längeren Sitzen",
+"Dynamischer Valgus bei der einbeinigen Kniebeuge",
+"Kein Erguss und keine Blockaden"
+],
+"pruebas": [
+"Einbeinige Kniebeuge (Valguskontrolle)",
+"Schmerz bei Kompression der Patella",
+"Kraft der Abduktoren und Außenrotatoren der Hüfte"
+],
+"fisioterapia": "Aufklärung und Anpassung der Belastung, Kräftigung von Hüfte und M. quadriceps femoris, Lauftechniktraining und kurzfristig Tape oder Patellabandage.",
+"camara": "anterior"
+},
+{
+"id": "capsulitis",
+"titulo": "Adhäsive Kapsulitis (Frozen Shoulder)",
+"region": "shoulder",
+"side": "izquierdo",
+"presentacion": "Eine 54-jährige Diabetikerin hat seit vier Monaten zunehmende Schmerzen in der linken Schulter und große Schwierigkeiten, sich zu kämmen und den BH zu schließen; die Außenrotation ist stark eingeschränkt.",
+"anatomia": "Die Kapsel des Glenohumeralgelenks mit dem Lig. coracohumerale und dem Rotatorenintervall entzündet sich, fibrosiert und verliert an Volumen. Der Bewegungsverlust folgt dem Kapselmuster: Außenrotation stärker als Abduktion stärker als Innenrotation, sowohl aktiv als auch passiv.",
+"lesion": [
+"Articular capsule of glenohumeral joint",
+"Coracohumeral ligament"
+],
+"afectados": [
+"Subscapularis muscle",
+"Supraspinatus muscle",
+"Infraspinatus muscle"
+],
+"relacionados": [
+"Scapula",
+"Humerus",
+"Superior glenohumeral ligament",
+"Middle glenohumeral ligament",
+"Inferior glenohumeral ligament"
+],
+"signos": [
+"Nachtschmerz",
+"Aktive und passive Einschränkung der Außenrotation",
+"Phasen: schmerzhafte Phase, Steifigkeitsphase und Erholungsphase (1–3 Jahre)"
+],
+"pruebas": [
+"Passive Außenrotation unter 50 % der gesunden Seite",
+"Unauffälliges Röntgenbild (schließt Arthrose und Verkalkungen aus)",
+"Ultraschall: Verdickung des Lig. coracohumerale"
+],
+"fisioterapia": "Aufklärung über den natürlichen Verlauf, Beweglichkeitsübungen im Rahmen der Toleranz in der schmerzhaften Phase und progressive Kapseldehnungen in der Steifigkeitsphase; intraartikuläre Infiltration oder Hydrodilatation nach ärztlicher Indikation.",
+"camara": "anterior"
+}
+]

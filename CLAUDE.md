@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v159**.
+(GitHub Pages desde `main`). Versión actual: **v160**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -66,6 +66,10 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 - Portugués: siempre de Brasil (patela, quadril, controle, esporte, celular, tela, muletas). Al corregir textos, cambia solo cadenas en portugués: «rótula», «fémur», «crónica» son correctas en español. Ojo con el género al cambiar sustantivos (anca f. → quadril m.). Script de apoyo del flujo de Claude: detecta portugués antes de reemplazar.
 - v158: encuadre en `fitNow` (kf 0,32 teléfono / 0,34 escritorio, distancia mínima 0,25) y `fitUsable` descuenta `#qbar` arriba y `#actbar` abajo. Recorridos en Estudiar: `details.toursec` (primero, abierto; título con `toursSum`). Estilos nuevos en `<style id="v158">` antes de `<header>` (v159 añade ahí lo del teléfono, con selectores fuertes `html body.mnav #stage #qbar.qbar …` porque hay reglas posteriores con !important). `focusMesh` usa `fitMeshes`. Contadores de la bienvenida en `fixCounts` (la app arranca después de «load»).
 - Con dibujo por software (swiftshader) la prueba «Inglés: sistema traducido» puede fallar por tiempo: la traducción va en el siguiente fotograma y cada uno tarda segundos.
+
+## v160 (francés y alemán)
+- `data/content_fr.json` / `content_de.json`: texto en español → traducción; `setLang` los mezcla en `I18N.ui[l]` (no pisa la interfaz). `TL` busca primero el texto y, si lleva cifras, la plantilla `#…{n}…` (`TLX`). Casos clínicos en `cases_fr.json` / `cases_de.json` (si falta, inglés). Variantes y distractores del ECOE pasan por `TL`.
+- Al añadir textos nuevos a bio/rc/protocols/variants/cases, añade también su traducción FR/DE (si no, se ve en inglés).
 
 ## Pendiente
 - Decisión del usuario: NUNCA servidor propio, cuentas ni base de datos. Todo debe funcionar en local y sin conexión (GitHub Pages solo sirve los archivos estáticos).
