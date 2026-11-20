@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v168**.
+(GitHub Pages desde `main`). Versión actual: **v169**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -100,6 +100,12 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 - Perfil de movilidad: `MOB`, `renderMob` (`#mobCard`), datos en `store 'mob'` ({cur,list:[{id,name,date,v:{'joint|move|S':grados}}]}), `mobPaint` colorea agonistas de los movimientos <80 %. `window.goniReading`.
 - Puente de glúteo: `CTESTS` id `bridge` con `lie:1` (el encuadre usa la caja en coordenadas del mundo).
 - Contador: las URL con `?qa`, `?prueba` o `?v=` no cuentan. Informe semanal de GoatCounter activado (cuenta ft.jrodriguez@gmail.com, panel en español).
+
+## v169 (HuBMAP HRA v1.4)
+- `data/hra14.glb` (Draco, mallas con el id del catálogo): ojo completo, cartílagos traqueales y tonsilas palatinas. `hra14Load()` se lanza al cargar `nervioso_central`, `respiratorio` o `linfatico`; `hra14Apply()` cambia la geometría de las piezas que existen (`HRGEO`, `HRA.ids`) y crea las nuevas (ids `h1`–`h27`).
+- Se regenera con `tools/hra14/construir.py` (necesita numpy, trimesh, fast-simplification y las mallas de `tools/unreal/exportar.js` como anclas) y `npx @gltf-transform/cli draco`; piezas en `piezas.json`, nombres y fichas en `fichas.py`, registro del ajuste en `registro.json`.
+- Descartado por ahora: carina, cartílagos bronquiales y segmentos pulmonares de HRA (el árbol bronquial de Corpus tiene otra forma y sus arterias segmentarias lo siguen), laringe (la de Corpus tiene más detalle).
+- Pendiente de decisión del usuario: Z-Anatomy declara dos modelos de origen con licencia no comercial (oído interno de Dundee, CC BY-NC-SA; riñón de L. Cowley, CC BY-NC) que `ATTRIBUTION.md` aún no menciona.
 
 ## Edición Unreal Engine (en curso, aparte de la web)
 - Decisión del usuario (2026-11-20): la web se mantiene; Unreal es una edición de escritorio aparte, de más calidad gráfica.

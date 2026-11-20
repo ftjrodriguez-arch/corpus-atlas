@@ -195,6 +195,10 @@ require(path.join(RAIZ,'draco','draco_decoder.js'))({onModuleLoaded(dm){try{
       const ids=porNombre[o.name]||porNombre[o.name.replace(/_/g,' ')]||porNombre[(o.parent||'').replace(/_/g,' ')];if(!ids)continue;
       for(const id of ids)HRGEO[id]={g:o,o:'hra'};}
     for(const n of HRA_HIDE)for(const id of porNombre[n]||[])if(!(HRGEO[id]&&HRGEO[id].o==='hra'))oculto.add(id);}
+  /* HRA v1.4 (ojo, cartílagos traqueales, tonsilas): mallas con el id del catálogo; sustituyen o añaden piezas */
+  const HRA14={};
+  if(fs.existsSync(path.join(RAIZ,'data/hra14.glb')))for(const o of leerGLB(fs.readFileSync(path.join(RAIZ,'data/hra14.glb')),dm)){
+    const id=CAT[o.name]?o.name:(CAT[o.parent]?o.parent:null);if(id){HRA14[id]=o;HRGEO[id]={g:o,o:'hra14'};}}
   const copia=g=>({pos:new Float32Array(g.pos),idx:g.idx,col:g.col?new Uint8Array(g.col):null});
 
   console.log('Cuerpo de hombre');
@@ -203,6 +207,7 @@ require(path.join(RAIZ,'draco','draco_decoder.js'))({onModuleLoaded(dm){try{
     for(const o of leerB64('m2/'+k+'.txt',dm)){if(oculto.has(o.name)||visto.has(o.name))continue;visto.add(o.name);seamFix('m2/'+k,o.name,o.pos);
       const h=cuerpo==='hombre'&&HRGEO[o.name];P.push(terminar(o.name,k,h?copia(h.g):o,h?h.o:'m2'));}
     for(const q of NUEVOS[k]||[]){if(visto.has(q.id))continue;visto.add(q.id);P.push(terminar(q.id,k,nuevosGeo(q),'blender'));}
+    if(cuerpo==='hombre')for(const id in HRA14){if(visto.has(id)||CAT[id][4]!==k)continue;visto.add(id);P.push(terminar(id,k,copia(HRA14[id]),'hra14'));}
     guardar(cuerpo,k,P);}
 
   console.log('Cuerpo de mujer (piezas que cambian respecto al hombre)');

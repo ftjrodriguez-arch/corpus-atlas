@@ -9,7 +9,7 @@ ejecutado y comprobado. El código C++ y el script de Python hay que compilarlos
 ## Pasos en el PC (Windows, Unreal Engine 5.x, Node.js)
 
 1. En la raíz del repositorio: `node tools/unreal/exportar.js`
-   Crea `unreal/CorpusAtlas/Importar/` (43 GLB, 5.123 piezas, 12,1 M de triángulos, ~380 MB; no se sube al repositorio).
+   Crea `unreal/CorpusAtlas/Importar/` (43 GLB, 5.150 piezas, 12,3 M de triángulos, ~380 MB; no se sube al repositorio).
 2. Clic derecho en `unreal/CorpusAtlas/CorpusAtlas.uproject` → *Generate Visual Studio project files*, y abrirlo (compila el módulo).
    Si tu versión no es la 5.8, cambia `EngineAssociation` en el `.uproject`.
 3. En el editor, consola de Python:
