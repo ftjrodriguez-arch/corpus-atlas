@@ -104,6 +104,8 @@ void ACorpusCuerpo::CargarCapa(const FString& Clave)
 		C->SetCollisionResponseToAllChannels(ECR_Ignore);
 		C->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 		C->SetCastShadow(!bTrans);
+		C->bDisallowNanite = bTrans;        // Nanite no dibuja materiales translúcidos: la capa usa la malla clásica
+		C->SetForceDisableNanite(bTrans);
 		C->SetupAttachment(Raiz);
 		C->RegisterComponent();
 		C->SetCustomPrimitiveDataVector4(0, FVector4(0, 0, 0, 0));          // estado: color + fuerza
@@ -159,7 +161,14 @@ void ACorpusCuerpo::OpacidadCapa(const FString& Clave, float Opacidad)
 		{
 			if (const TObjectPtr<UStaticMeshComponent>* C = Piezas.Find(Id))
 			{
-				if (Mat) { (*C)->SetMaterial(0, Mat); (*C)->SetCastShadow(!bAhora); }
+				if (Mat)
+				{
+					// Nanite solo admite materiales opacos o enmascarados: la capa translúcida usa la malla clásica
+					(*C)->bDisallowNanite = bAhora;
+					(*C)->SetForceDisableNanite(bAhora);
+					(*C)->SetMaterial(0, Mat); (*C)->SetCastShadow(!bAhora);
+					(*C)->MarkRenderStateDirty();
+				}
 				(*C)->SetCustomPrimitiveDataFloat(4, Opacidad);
 			}
 		}

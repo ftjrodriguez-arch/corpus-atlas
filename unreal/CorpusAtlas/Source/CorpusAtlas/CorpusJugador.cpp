@@ -1,12 +1,21 @@
 #include "CorpusJugador.h"
 #include "CorpusCuerpo.h"
 #include "CorpusInterfaz.h"
+#include "CorpusDatos.h"
+#include "Engine/GameInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Engine/World.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/Engine.h"
 #include "EngineUtils.h"
 #include "Widgets/SWeakWidget.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+#include "Misc/Paths.h"
+#include "UnrealClient.h"
+#if WITH_EDITOR
+#include "ShaderCompiler.h"
+#endif
 
 // ───────── Cámara orbital ─────────
 // El atlas mira hacia +Y de Unreal (glTF +Z) con la cabeza en +Z; la vista anterior coloca la cámara delante (Yaw −90).
@@ -56,7 +65,16 @@ void ACorpusCamara::Encuadrar(const FBox& Caja, bool bInmediato)
 	if (!Caja.IsValid) { return; }
 	Objetivo = Caja.GetCenter();
 	const float Radio = FMath::Max(Caja.GetExtent().Size(), 1.f);
-	Distancia = FMath::Clamp(Radio / FMath::Tan(FMath::DegreesToRadians(Camara->FieldOfView * 0.5f)) * 1.15f, 6.f, 1500.f);
+	// FieldOfView es horizontal: en pantallas apaisadas manda el ángulo vertical, más estrecho
+	float Aspecto = 16.f / 9.f;
+	if (GEngine && GEngine->GameViewport)
+	{
+		FVector2D Tam; GEngine->GameViewport->GetViewportSize(Tam);
+		if (Tam.X > 1.f && Tam.Y > 1.f) { Aspecto = Tam.X / Tam.Y; }
+	}
+	const float TanH = FMath::Tan(FMath::DegreesToRadians(Camara->FieldOfView * 0.5f));
+	const float TanMin = FMath::Min(TanH, TanH / Aspecto);
+	Distancia = FMath::Clamp(Radio / TanMin * 1.05f, 6.f, 1500.f);
 	if (bInmediato) { ObjetivoSuave = Objetivo; DistanciaSuave = Distancia; }
 }
 
@@ -92,6 +110,78 @@ void ACorpusJugador::BeginPlay()
 		const FBox B = CuerpoRef->Caja(FString());
 		if (B.IsValid) { C->Encuadrar(B, true); }
 	}
+
+	FString Qa;
+	if (FParse::Value(FCommandLine::Get(), TEXT("QaPasos="), Qa, /*bShouldStopOnSeparator*/ false))
+	{
+		Qa.ParseIntoArray(QaPasos, TEXT(";"), true);
+		QaHasta = FPlatformTime::Seconds() + 4.0;   // deja arrancar la interfaz y el streaming
+		UE_LOG(LogTemp, Display, TEXT("CorpusQa: %d pasos"), QaPasos.Num());
+	}
+}
+
+void ACorpusJugador::TickQa()
+{
+	if (QaPasos.Num() == 0 || FPlatformTime::Seconds() < QaHasta) { return; }
+#if WITH_EDITOR
+	// Sin cocinar, los shaders se compilan al vuelo y mientras tanto se pinta con el material por defecto
+	if (GShaderCompilingManager && GShaderCompilingManager->GetNumRemainingJobs() > 0) { QaHasta = FPlatformTime::Seconds() + 0.5; return; }
+#endif
+	if (++QaIndice >= QaPasos.Num()) { QaPasos.Reset(); ConsoleCommand(TEXT("quit")); return; }
+
+	const FString Paso = QaPasos[QaIndice].TrimStartAndEnd();
+	FString Verbo = Paso, Resto;
+	Paso.Split(TEXT(" "), &Verbo, &Resto);
+	Resto.TrimStartAndEndInline();
+	double Pausa = 1.5;
+	ACorpusCuerpo* Cu = CuerpoRef.Get();
+	ACorpusCamara* Ca = CamaraOrbital();
+	UE_LOG(LogTemp, Display, TEXT("CorpusQa %d: %s"), QaIndice, *Paso);
+
+	if (Verbo == TEXT("foto"))
+	{
+		const FString Archivo = FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("Capturas") / (Resto.IsEmpty() ? TEXT("qa") : Resto) + TEXT(".png"));
+		FScreenshotRequest::RequestScreenshot(Archivo, /*bShowUI*/ true, /*bAddFilenameSuffix*/ false);
+		Pausa = 2.0;
+	}
+	else if (Verbo == TEXT("esperar")) { Pausa = FCString::Atod(*Resto); }
+	else if (Verbo == TEXT("sel") && Cu) { Cu->Seleccionar(Resto); }
+	else if (Verbo == TEXT("encuadrar")) { EncuadrarSeleccion(); Pausa = 2.0; }
+	else if (Verbo == TEXT("aislar") && Cu) { Cu->Aislar(Resto.IsEmpty() ? Cu->Seleccionada() : Resto); }
+	else if (Verbo == TEXT("ocultar") && Cu) { Cu->Ocultar(Resto.IsEmpty() ? Cu->Seleccionada() : Resto); }
+	else if (Verbo == TEXT("todo") && Cu) { Cu->MostrarTodo(); }
+	else if (Verbo == TEXT("vista") && Ca) { Ca->Vista(FCString::Atoi(*Resto)); Pausa = 2.0; }
+	else if (Verbo == TEXT("capa") && Cu)
+	{
+		FString Clave, Valor; Resto.Split(TEXT(" "), &Clave, &Valor);
+		Cu->MostrarCapa(Clave.IsEmpty() ? Resto : Clave, Valor != TEXT("0"));
+		Pausa = 3.0;   // la capa nueva carga mallas y quizá shaders
+	}
+	else if (Verbo == TEXT("idioma"))
+	{
+		if (UCorpusDatos* D = GetGameInstance() ? GetGameInstance()->GetSubsystem<UCorpusDatos>() : nullptr) { D->PonerIdioma(Resto); }
+		Pausa = 2.0;
+	}
+	else if (Verbo == TEXT("opacidad") && Cu)
+	{
+		FString Clave, Valor; Resto.Split(TEXT(" "), &Clave, &Valor);
+		Cu->OpacidadCapa(Clave, FCString::Atof(*Valor));
+		Pausa = 3.0;
+	}
+	else if (Verbo == TEXT("cuerpo") && Cu)
+	{
+		Cu->PonerCuerpo(Resto == TEXT("mujer") ? ECorpusCuerpo::Mujer : Resto == TEXT("vh") ? ECorpusCuerpo::VisibleHuman : ECorpusCuerpo::Hombre);
+		Pausa = 4.0;
+	}
+	else if (Verbo == TEXT("buscar"))
+	{
+		if (ACorpusHUD* H = Cast<ACorpusHUD>(GetHUD()))
+		{
+			if (TSharedPtr<SWidget> W = H->InterfazWidget()) { StaticCastSharedPtr<SCorpusInterfaz>(W)->QaBuscar(Resto); }
+		}
+	}
+	else { ConsoleCommand(Paso); }
+	QaHasta = FPlatformTime::Seconds() + Pausa;
 }
 
 void ACorpusJugador::EncuadrarSeleccion()
@@ -104,6 +194,7 @@ void ACorpusJugador::EncuadrarSeleccion()
 void ACorpusJugador::PlayerTick(float Dt)
 {
 	Super::PlayerTick(Dt);
+	TickQa();
 	ACorpusCamara* C = CamaraOrbital();
 	FVector2D Raton;
 	if (!C || !GetMousePosition(Raton.X, Raton.Y)) { bRatonValido = false; return; }

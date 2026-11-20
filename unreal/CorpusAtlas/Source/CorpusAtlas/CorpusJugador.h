@@ -49,6 +49,12 @@ public:
 	void EncuadrarSeleccion();
 
 private:
+	// Pruebas automáticas (como ?qa en la web): -QaPasos="sel n1394; foto ficha; buscar biceps; foto buscador"
+	void TickQa();
+	TArray<FString> QaPasos;
+	int32 QaIndice = -1;
+	double QaHasta = 0;
+
 	TWeakObjectPtr<ACorpusCuerpo> CuerpoRef;
 	FVector2D RatonAntes = FVector2D::ZeroVector, RatonAlPulsar = FVector2D::ZeroVector;
 	bool bRatonValido = false;
@@ -62,6 +68,7 @@ class CORPUSATLAS_API ACorpusHUD : public AHUD
 public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type Motivo) override;
+	TSharedPtr<class SWidget> InterfazWidget() const { return Interfaz; }
 private:
 	TSharedPtr<class SWidget> Interfaz;
 };

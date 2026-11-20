@@ -66,6 +66,9 @@ TEJIDOS = {
     "endocrino":           dict(color="9a6bc2", rug=0.35, esp=0.50, fibra=0.00, anis=0.0, sss=0.45, sss_color="6a3c94", poro=0.10, esc=0.0),
     "piel":                dict(color="d29f82", rug=0.50, esp=0.40, fibra=0.00, anis=0.0, sss=0.60, sss_color="c2543a", poro=0.20, esc=0.0),
 }
+# Multiplicador del color base tras el tinte del órgano: el hueso (tinte 242,236,220) quemaba la imagen con la exposición
+# del estudio. Comprobado en capturas (unreal/capturas).
+ALBEDO = {"oseo": 0.30, "articular": 0.55, "bolsas": 0.80, "fascia": 0.80}
 FIBRA = ("muscular", "articular", "fascia", "arterial", "venoso", "nervioso_periferico", "linfatico")
 
 
@@ -95,7 +98,9 @@ class _G:
         return e
 
     def une(self, a, b, entrada, salida=""):
-        mel.connect_material_expressions(a, salida, b, entrada)
+        if not mel.connect_material_expressions(a, salida, b, entrada):
+            unreal.log_warning("Corpus: no se pudo unir %s.%s → %s.%s en %s" % (a.get_class().get_name(), salida,
+                               b.get_class().get_name(), entrada, self.m.get_name()))
 
     def op(self, clase, a, b, x=-400, **props):
         e = self.n(clase, x, **props)
@@ -128,12 +133,16 @@ class _G:
 def _maestro(nombre, translucido):
     ruta = "%s/%s" % (R_MAT, nombre)
     if eal.does_asset_exist(ruta):
-        eal.delete_asset(ruta)
-    mat = herr.create_asset(nombre, R_MAT, unreal.Material, unreal.MaterialFactoryNew())
+        # Se rehace en el mismo recurso: las instancias y mallas que lo usan siguen apuntando a él
+        mat = eal.load_asset(ruta)
+        mel.delete_all_material_expressions(mat)
+    else:
+        mat = herr.create_asset(nombre, R_MAT, unreal.Material, unreal.MaterialFactoryNew())
     mat.set_editor_property("two_sided", True)
     if translucido:
         mat.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
-        mat.set_editor_property("translucency_lighting_mode", unreal.TranslucencyLightingMode.TLM_SURFACE_PER_PIXEL_LIGHTING)
+        # volumétrica: recibe luz de todas las fuentes (con «superficie por píxel» la piel salía negra)
+        mat.set_editor_property("translucency_lighting_mode", unreal.TranslucencyLightingMode.TLM_VOLUMETRIC_PER_VERTEX_DIRECTIONAL)
     else:
         mat.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_SUBSURFACE)
     g = _G(mat)
@@ -157,13 +166,13 @@ def _maestro(nombre, translucido):
     u = g.op(unreal.MaterialExpressionDotProduct, pos, bit)
     fase = g.mul(u, escala)                                      # ciclos por centímetro
     s1 = g.n(unreal.MaterialExpressionSine, -400, period=1.0); g.une(fase, s1, "")
-    f2 = g.mul(fase, g.cte(3.7))
+    f2 = g.mul(fase, g.cte(2.3))                                 # 3.7 producía muaré al acercarse
     s2 = g.n(unreal.MaterialExpressionSine, -400, period=1.0); g.une(f2, s2, "")
     onda = g.add(s1, g.mul(s2, g.cte(0.35)))                     # fascículos gruesos + fibras finas
 
     # Grano fino (poro del hueso, irregularidad del tejido): ruido 3D barato
     ruido = g.n(unreal.MaterialExpressionNoise, -400, scale=6.0, levels=2, output_min=-1.0, output_max=1.0)
-    g.une(pos, ruido, "Position")
+    g.une(pos, ruido, "")     # primera entrada del ruido = posición («Position» no existe con ese nombre en 5.8)
     grano = g.mul(ruido, poro)
 
     # Máscaras por vértice; el cartílago articular no lleva estrías
@@ -177,30 +186,36 @@ def _maestro(nombre, translucido):
     # Color propio del órgano (tablas TINT de la web, en el manifiesto): se mezcla con el de la capa según su peso
     tinte = g.vec("Tinte", unreal.LinearColor(0, 0, 0, 0), cpd=5)
     tRGB = g.n(unreal.MaterialExpressionComponentMask, -500, r=True, g=True, b=True, a=False); g.une(tinte, tRGB, "")
-    tA = g.n(unreal.MaterialExpressionComponentMask, -500, r=False, g=False, b=False, a=True); g.une(tinte, tA, "")
+    # La salida por defecto de un VectorParameter es RGB (3 componentes): el alfa se toma de su salida «A»
+    tA = g.n(unreal.MaterialExpressionComponentMask, -500, r=True, g=False, b=False, a=False); g.une(tinte, tA, "", "A")
     base = g.lerp(base, tRGB, tA)
     col = g.lerp(base, tendon, mG)
     col = g.lerp(col, cartil, mB)
+    col = g.mul(col, g.esc("Albedo", 1.0))                       # los tejidos casi blancos (hueso, cartílago) saturaban la imagen
     surco = g.add(g.cte(1.0), g.mul(g.mul(onda, fuerza), g.cte(0.10)))
     col = g.mul(col, surco)
     col = g.mul(col, g.add(g.cte(1.0), g.mul(grano, g.cte(0.25))))
     ao = g.lerp(g.cte(0.45), g.cte(1.0), mR)
     col = g.mul(col, ao)
     eRGB = g.n(unreal.MaterialExpressionComponentMask, -500, r=True, g=True, b=True, a=False); g.une(estado, eRGB, "")
-    eA = g.n(unreal.MaterialExpressionComponentMask, -500, r=False, g=False, b=False, a=True); g.une(estado, eA, "")
+    eA = g.n(unreal.MaterialExpressionComponentMask, -500, r=True, g=False, b=False, a=False); g.une(estado, eA, "", "A")
     col = g.lerp(col, eRGB, eA)
     g.sal(col, MP.MP_BASE_COLOR)
-    g.sal(g.mul(eRGB, g.mul(eA, g.cte(0.35))), MP.MP_EMISSIVE_COLOR)   # el estado brilla un poco: se lee en sombra
+    brillo = g.mul(eRGB, g.mul(eA, g.cte(0.35)))                 # el estado brilla un poco: se lee en sombra
+    if translucido:          # la capa translúcida recibe poca luz: un velo de su propio color la hace legible
+        brillo = g.add(brillo, g.mul(col, g.cte(0.35)))
+    g.sal(brillo, MP.MP_EMISSIVE_COLOR)
 
     # Relieve en espacio tangente: X = fibra, Y = a través. La pendiente de la onda inclina la normal en Y.
     c1 = g.n(unreal.MaterialExpressionCosine, -400, period=1.0); g.une(fase, c1, "")
-    pend = g.mul(g.mul(c1, fuerza), g.cte(0.45))
+    pend = g.mul(g.mul(c1, fuerza), g.cte(0.22))                 # relieve suave: con 0.45 las estrías brillaban como rayas
     pend = g.add(pend, g.mul(grano, g.cte(0.6)))
     normal = g.n(unreal.MaterialExpressionAppendVector, -300)
     xy = g.n(unreal.MaterialExpressionAppendVector, -350); g.une(g.mul(grano, g.cte(0.4)), xy, "A"); g.une(pend, xy, "B")
     g.une(xy, normal, "A"); g.une(g.cte(1.0), normal, "B")
     nn = g.n(unreal.MaterialExpressionNormalize, -250); g.une(normal, nn, "VectorInput")
-    g.sal(nn, MP.MP_NORMAL)
+    if not translucido:      # en translúcido la normal en espacio tangente y la anisotropía dejaban la superficie negra
+        g.sal(nn, MP.MP_NORMAL)
 
     # Superficie húmeda: el tendón y el cartílago son más lisos; los surcos, algo más mates
     r = g.lerp(rug, g.cte(0.22), mG)
@@ -208,7 +223,8 @@ def _maestro(nombre, translucido):
     r = g.add(r, g.mul(g.mul(onda, fuerza), g.cte(-0.05)))
     g.sal(r, MP.MP_ROUGHNESS)
     g.sal(esp, MP.MP_SPECULAR)
-    g.sal(g.mul(anis, noCart), MP.MP_ANISOTROPY)
+    if not translucido:
+        g.sal(g.mul(anis, noCart), MP.MP_ANISOTROPY)
     g.sal(g.mul(mR, g.cte(1.0)), MP.MP_AMBIENT_OCCLUSION)
 
     opac = g.esc("Opacidad", 1.0, cpd=4)
@@ -233,14 +249,16 @@ def crear_materiales():
             nombre = "MI_%s%s" % (clave, suf)
             ruta = "%s/%s" % (R_MAT, nombre)
             if eal.does_asset_exist(ruta):
-                eal.delete_asset(ruta)
-            mi = herr.create_asset(nombre, R_MAT, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+                mi = eal.load_asset(ruta)
+            else:
+                mi = herr.create_asset(nombre, R_MAT, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
             mel.set_material_instance_parent(mi, padre)
             mel.set_material_instance_vector_parameter_value(mi, "ColorBase", _hex(t["color"]))
             mel.set_material_instance_vector_parameter_value(mi, "ColorDispersion", _hex(t["sss_color"]))
             for p, k in (("Rugosidad", "rug"), ("Especular", "esp"), ("Fibra", "fibra"), ("Anisotropia", "anis"),
                          ("Dispersion", "sss"), ("Poro", "poro"), ("EscalaFibra", "esc")):
                 mel.set_material_instance_scalar_parameter_value(mi, p, float(t[k]))
+            mel.set_material_instance_scalar_parameter_value(mi, "Albedo", float(ALBEDO.get(clave, 1.0)))
             eal.save_asset(ruta)
     unreal.log("Corpus: materiales creados en " + R_MAT)
 
@@ -276,6 +294,75 @@ def _ajustar(malla, con_fibra):
         pass
 
 
+def _aplanar(destino):
+    """Interchange (UE 5.x) deja cada malla en <destino>/<archivo>/StaticMeshes/<id>; el C++ la busca en <destino>/<id>."""
+    movidas = 0
+    for ruta in eal.list_assets(destino, recursive=True, include_folder=False):
+        obj = eal.find_asset_data(ruta)
+        carpeta = str(obj.package_path)
+        if carpeta == destino:
+            continue
+        nombre = str(obj.asset_name)
+        if obj.asset_class_path.asset_name == "StaticMesh" and not eal.does_asset_exist("%s/%s" % (destino, nombre)):
+            if eal.rename_asset(ruta.split(".")[0], "%s/%s" % (destino, nombre)):
+                movidas += 1
+    for sub in eal.list_assets(destino, recursive=False, include_folder=True):
+        if sub.endswith("/") and sub.rstrip("/") != destino:
+            eal.delete_directory(sub.rstrip("/"))   # quedan redirectores y texturas de relleno sin usar
+    return movidas
+
+
+def aplanar_mallas():
+    """Mueve todas las mallas ya importadas a /Game/Corpus/Mallas/<cuerpo>/<sistema>/<id>."""
+    man = json.load(open(os.path.join(IMPORTAR, "manifiesto.json"), encoding="utf-8"))
+    for a in man["archivos"]:
+        destino = "%s/%s/%s" % (R_MALLAS, a["cuerpo"], a["sistema"])
+        n = _aplanar(destino)
+        unreal.log("Corpus: %s → %d mallas movidas a %s" % (a["archivo"], n, destino))
+
+
+def ajustar_mallas():
+    """Vuelve a aplicar Nanite, tangentes y colisión a las mallas ya importadas (necesita el editor completo:
+    en modo comando no existe StaticMeshEditorSubsystem)."""
+    if unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem) is None:
+        unreal.log_error("Corpus: ajustar_mallas necesita el editor completo (no el modo comando)")
+        return
+    man = json.load(open(os.path.join(IMPORTAR, "manifiesto.json"), encoding="utf-8"))
+    with unreal.ScopedSlowTask(len(man["archivos"]), "Corpus: Nanite") as barra:
+        barra.make_dialog(True)
+        for a in man["archivos"]:
+            barra.enter_progress_frame(1, a["archivo"])
+            destino = "%s/%s/%s" % (R_MALLAS, a["cuerpo"], a["sistema"])
+            n = 0
+            for ruta in eal.list_assets(destino, recursive=True, include_folder=False):
+                obj = eal.load_asset(ruta)
+                if isinstance(obj, unreal.StaticMesh):
+                    _ajustar(obj, a["base"] in FIBRA); n += 1
+            eal.save_directory(destino, only_if_is_dirty=True, recursive=True)
+            unreal.log("Corpus: Nanite %s → %d mallas" % (a["archivo"], n))
+
+
+def _opciones_interchange():
+    """Interchange: el color por vértice (oclusión, tendón, cartílago) debe importarse tal cual, sin texturas ni materiales."""
+    p = unreal.InterchangeGenericAssetsPipeline()
+    try:
+        mp = p.get_editor_property("mesh_pipeline")
+        mp.set_editor_property("vertex_color_import_option", unreal.InterchangeVertexColorImportOption.IVCIO_REPLACE)
+        mp.set_editor_property("keep_sections_separate", False)
+        mp.set_editor_property("build_nanite", True)
+        mp.set_editor_property("recompute_normals", False)
+        mp.set_editor_property("recompute_tangents", False)
+        mp.set_editor_property("combine_static_meshes", False)
+    except Exception as e:  # noqa
+        unreal.log_warning("Corpus: opciones de malla de Interchange: %s" % e)
+    try:
+        mat = p.get_editor_property("material_pipeline")
+        mat.set_editor_property("import_materials", False)
+    except Exception as e:  # noqa
+        unreal.log_warning("Corpus: opciones de material de Interchange: %s" % e)
+    return p
+
+
 def importar_mallas(solo=None):
     """Importa Importar/<cuerpo>/<sistema>.glb. `solo` = lista de «cuerpo/sistema» para importar solo algunos."""
     man = json.load(open(os.path.join(IMPORTAR, "manifiesto.json"), encoding="utf-8"))
@@ -293,7 +380,9 @@ def importar_mallas(solo=None):
             t.set_editor_property("automated", True)
             t.set_editor_property("replace_existing", True)
             t.set_editor_property("save", False)
+            t.set_editor_property("options", _opciones_interchange())
             herr.import_asset_tasks([t])
+            _aplanar(destino)
             con_fibra = a["base"] in FIBRA
             mi = eal.load_asset("%s/MI_%s" % (R_MAT, a["base"] if a["base"] in TEJIDOS else "digestivo"))
             n = 0
@@ -311,6 +400,25 @@ def importar_mallas(solo=None):
 
 
 # ───────────────────────── mapa ─────────────────────────
+# Compensación de exposición manual (pasos sobre la cámara física por defecto, EV100 ≈ 10).
+# 10.5 dejaba la imagen blanca: las luces del estudio dan ~1.000 lux, que piden EV ≈ 9.
+EXPOSICION = 2.0   # comprobado en capturas: 1 queda oscuro, 4 quema los tendones, 2.5 aún satura el hueso
+
+
+def ajustar_exposicion(valor=None):
+    """Cambia la compensación de exposición del volumen de post-proceso del mapa abierto y lo guarda."""
+    actores = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+    for a in actores.get_all_level_actors():
+        if isinstance(a, unreal.PostProcessVolume):
+            aj = a.get_editor_property("settings")
+            aj.set_editor_property("override_auto_exposure_bias", True)
+            aj.set_editor_property("auto_exposure_bias", EXPOSICION if valor is None else valor)
+            aj.set_editor_property("override_bloom_intensity", True)
+            aj.set_editor_property("bloom_intensity", 0.08)
+            a.set_editor_property("settings", aj)
+    unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).save_current_level()
+
+
 def crear_mapa():
     """Estudio oscuro con luz de tres puntos, cielo suave, niebla y post-proceso (exposición fija, oclusión, viñeta)."""
     niveles = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
@@ -328,7 +436,7 @@ def crear_mapa():
     clave = pon(unreal.DirectionalLight, rot=(0, -38, -125), nombre="Luz principal")
     c = clave.get_component_by_class(unreal.DirectionalLightComponent)
     c.set_editor_property("intensity", 6.0); c.set_editor_property("light_color", unreal.Color(255, 244, 230))
-    c.set_editor_property("source_angle", 3.0)          # sombras suaves de estudio
+    c.set_editor_property("light_source_angle", 3.0)    # sombras suaves de estudio
 
     relleno = pon(unreal.RectLight, pos=(-260, 240, 150), rot=(0, -8, -45), nombre="Luz de relleno")
     r = relleno.get_component_by_class(unreal.RectLightComponent)
@@ -350,9 +458,9 @@ def crear_mapa():
     pp.set_editor_property("unbound", True)
     aj = pp.get_editor_property("settings")
     for prop, val in (("override_auto_exposure_method", True), ("auto_exposure_method", unreal.AutoExposureMethod.AEM_MANUAL),
-                      ("override_auto_exposure_bias", True), ("auto_exposure_bias", 10.5),
+                      ("override_auto_exposure_bias", True), ("auto_exposure_bias", EXPOSICION),
                       ("override_vignette_intensity", True), ("vignette_intensity", 0.35),
-                      ("override_bloom_intensity", True), ("bloom_intensity", 0.25),
+                      ("override_bloom_intensity", True), ("bloom_intensity", 0.08),   # 0.25 dejaba halo en el hueso
                       ("override_ambient_occlusion_intensity", True), ("ambient_occlusion_intensity", 0.7),
                       ("override_film_toe", True), ("film_toe", 0.6)):
         try:
@@ -369,5 +477,6 @@ def todo():
     copiar_datos()
     crear_materiales()
     importar_mallas()
+    ajustar_mallas()      # Nanite y tangentes: necesita el editor completo
     crear_mapa()
     unreal.log("Corpus: listo. Pulsa Jugar (Alt+P).")

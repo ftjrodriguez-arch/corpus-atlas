@@ -21,6 +21,9 @@
 
 namespace
 {
+	// FString::ToUpper solo trata ASCII («CIRCULACIóN»); FText usa ICU y respeta tildes y eñes.
+	FString Mayus(const FString& S) { return FText::FromString(S).ToUpper().ToString(); }
+
 	// Mismos tonos que el tema oscuro de la web (--bg, --panel, --ink, --muted, --accent).
 	const FLinearColor C_PANEL(0.012f, 0.016f, 0.022f, 0.90f);
 	const FLinearColor C_PANEL2(0.035f, 0.045f, 0.060f, 1.f);
@@ -144,6 +147,7 @@ void SCorpusInterfaz::Reconstruir()
 
 	if (Buscador.IsValid()) { Buscador->SetHintText(FText::FromString(D->T(TEXT("Buscar estructura…")))); }
 
+	CuerpoPintado = (uint8)C->Cuerpo();
 	CajaBarra->ClearChildren();
 	CajaBarra->AddSlot().AutoHeight()[ Txt(D->T(TEXT("Atlas anatómico 3D libre")), 10, C_GRIS) ];
 
@@ -185,6 +189,7 @@ void SCorpusInterfaz::RehacerCapas()
 	UCorpusDatos* D = Datos();
 	ACorpusCuerpo* C = Cuerpo();
 	if (!D || !C || !CajaCapas.IsValid()) { return; }
+	if ((uint8)C->Cuerpo() != CuerpoPintado) { Reconstruir(); return; }   // cambió el cuerpo: también la barra
 	CajaCapas->ClearChildren();
 	TWeakObjectPtr<ACorpusCuerpo> WC(C);
 	FString Grupo;
@@ -194,7 +199,7 @@ void SCorpusInterfaz::RehacerCapas()
 		if (Capa.Grupo != Grupo)
 		{
 			Grupo = Capa.Grupo;
-			CajaCapas->AddSlot().AutoHeight().Padding(0, 12, 0, 4)[ Txt(D->T(Grupo).ToUpper(), 9, C_GRIS, true) ];
+			CajaCapas->AddSlot().AutoHeight().Padding(0, 12, 0, 4)[ Txt(Mayus(D->T(Grupo)), 9, C_GRIS, true) ];
 		}
 		const FString Clave = Capa.Clave;
 		CajaCapas->AddSlot().AutoHeight().Padding(0, 2)
@@ -255,9 +260,15 @@ void SCorpusInterfaz::RehacerFicha()
 
 	for (const TPair<FString, FString>& Campo : D->Ficha(Id))
 	{
-		CajaFicha->AddSlot().AutoHeight().Padding(0, 12, 0, 2)[ Txt(Campo.Key.ToUpper(), 9, C_GRIS, true) ];
+		CajaFicha->AddSlot().AutoHeight().Padding(0, 12, 0, 2)[ Txt(Mayus(Campo.Key), 9, C_GRIS, true) ];
 		CajaFicha->AddSlot().AutoHeight()[ Txt(Campo.Value, 11, C_TINTA) ];
 	}
+}
+
+void SCorpusInterfaz::QaBuscar(const FString& Texto)
+{
+	if (Buscador.IsValid()) { Buscador->SetText(FText::FromString(Texto)); }
+	RehacerResultados(FText::FromString(Texto));
 }
 
 void SCorpusInterfaz::RehacerResultados(const FText& Texto)

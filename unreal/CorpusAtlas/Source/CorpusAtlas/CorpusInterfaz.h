@@ -21,6 +21,9 @@ public:
 	void Construct(const FArguments& Args);
 	virtual ~SCorpusInterfaz();
 
+	/** Pruebas automáticas: escribe en el buscador como si lo hiciera el usuario. */
+	void QaBuscar(const FString& Texto);
+
 private:
 	ACorpusCuerpo* Cuerpo() const;
 	UCorpusDatos* Datos() const;
@@ -34,4 +37,5 @@ private:
 	TSharedPtr<SVerticalBox> CajaCapas, CajaFicha, CajaResultados, CajaBarra;
 	TSharedPtr<SEditableTextBox> Buscador;
 	FDelegateHandle HSel, HCapas, HIdioma;
+	uint8 CuerpoPintado = 255;   // la barra (hombre / mujer / Visible Human) se rehace cuando cambia el cuerpo
 };

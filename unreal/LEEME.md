@@ -3,8 +3,8 @@
 Versión de escritorio de alta calidad gráfica. La web (`index.html`) sigue siendo la versión gratuita, ligera y sin conexión;
 esta carpeta no se usa en la web.
 
-**Estado: primera fase escrita en la nube, sin compilar ni abrir en Unreal todavía.** El exportador de modelos sí está
-ejecutado y comprobado. El código C++ y el script de Python hay que compilarlos y ajustarlos en el PC con Unreal.
+**Estado (2026-11-20): Fase 1 compilada, importada y probada en el PC con Unreal Engine 5.8**, con capturas en
+`unreal/capturas/`. Detalle y pendientes más abajo.
 
 ## Pasos en el PC (Windows, Unreal Engine 5.x, Node.js)
 
@@ -39,11 +39,40 @@ El material `M_CorpusTejido` usa lo que cada vértice ya lleva (oclusión, tend�
 - **Ligamento y fascia:** fibra fina y brillante con anisotropía alta.
 Los valores de cada tejido están en la tabla `TEJIDOS` del script; se afinan mirando el resultado en el PC.
 
-## Dudas que solo se resuelven al abrirlo
-- Compilación del C++ (API de la versión instalada) y del grafo del material.
-- Orientación: se supone que el importador glTF deja el cuerpo mirando a +Y con la cabeza en +Z.
-- Que la importación conserve el color por vértice sin corrección de gamma y la tangente con Nanite.
-- Exposición e intensidad de las luces.
+## Fase 1 comprobada en el PC (2026-11-20, Unreal Engine 5.8, RTX 3080 Ti)
+Exportación (43 GLB, 5.150 piezas), compilación de `CorpusAtlasEditor`, importación completa y juego en marcha,
+con capturas en `unreal/capturas/` (anterior, posterior, lateral, esqueleto, piel translúcida, selección y ficha,
+buscador, inglés, alemán, mujer y Visible Human). Comprobado: orientación (de pie, mirando a la cámara), color propio
+de cada órgano, luces del estudio, capas, selección, ficha, buscador sin tildes, cuerpos e idiomas.
+
+Lo que hubo que corregir del código escrito a ciegas:
+- **Interchange (UE 5.x)** deja cada malla en `<sistema>/<archivo>/StaticMeshes/<id>`: `_aplanar()` las mueve a `<sistema>/<id>`, donde las busca el C++.
+- `StaticMeshEditorSubsystem` no existe en modo comando: Nanite se aplica con `ajustar_mallas()` desde el editor completo (`todo()` ya lo llama).
+- Luz direccional: la propiedad es `light_source_angle`. En el material, el alfa de un `VectorParameter` se toma de su salida «A» (la máscara sobre la salida RGB no compila), y la entrada del ruido y de `OneMinus` no tiene nombre (`""`).
+- Exposición: con la cámara física (EV ≈ 10), +10,5 dejaba la imagen blanca; ahora `EXPOSICION = 2.0`. Bloom 0,08. Parámetro `Albedo` por tejido (`ALBEDO`: hueso 0,30) porque el tinte casi blanco del hueso saturaba.
+- Encuadre: `FieldOfView` es horizontal; en pantallas apaisadas manda el vertical (cortaba la cabeza).
+- Nanite no dibuja materiales translúcidos: las capas con opacidad < 1 usan la malla clásica (`bDisallowNanite`). El translúcido usa luz volumétrica y un velo emisivo de su color (con luz «por píxel» salía negro).
+- Mayúsculas de la interfaz con `FText::ToUpper` (`FString::ToUpper` dejaba «CIRCULACIóN»). La barra hombre / mujer / Visible Human se rehace al cambiar de cuerpo.
+
+## Pruebas automáticas y capturas (equivalente a `?qa` de la web)
+`ACorpusJugador` acepta `-QaPasos="…"`: espera a que terminen los shaders (sin cocinar se compilan al vuelo y, mientras,
+todo sale gris), ejecuta los pasos y cierra. Desde PowerShell:
+```
+.\unreal\captura.ps1 -Pasos "esperar 8; foto inicio; sel n1394; encuadrar; foto ficha; buscar biceps; foto buscador"
+.\unreal\captura.ps1 -Exposicion 2.0 -Pasos "foto expo"
+```
+Pasos: `foto <nombre>` · `sel <id>` (vacío = ninguna) · `encuadrar` · `aislar` · `ocultar` · `todo` · `vista <0-5>` ·
+`capa <clave> <0|1>` · `opacidad <clave> <valor>` · `cuerpo <hombre|mujer|vh>` · `idioma <es|en|pt|fr|de>` ·
+`buscar <texto>` · `esperar <s>` · cualquier otro texto se ejecuta como comando de consola (p. ej. `viewmode unlit`).
+Las fotos quedan en `unreal/capturas/` con la interfaz incluida.
+
+## Pendiente de la Fase 1
+- **Piel del Visible Human** (`f_piel`, una sola malla): no se ve ni opaca ni translúcida; la piel del hombre sí. Revisar esa malla (escala, normales o Nanite).
+- **Traducciones de la interfaz Unreal:** vistas («Anterior»…), subtítulo y texto del buscador siguen en español; en alemán las capas de vísceras
+  salen sin traducir y «Urinario» aparece como «digestivo» (búsqueda aproximada de `T()`).
+- Hueso todavía muy claro de frente con la luz principal; afinar con `ALBEDO`/luces mirando capturas.
+- Muaré leve de las estrías al acercarse mucho a un músculo (`EscalaFibra`, factor 2,3).
+- Probar con el ratón real (clic, doble clic, arrastrar) y los atajos H, I, F, 1–6: las capturas usan las mismas funciones, pero no el ratón.
 
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
