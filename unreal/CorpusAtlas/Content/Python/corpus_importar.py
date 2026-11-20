@@ -17,7 +17,7 @@ Material de tejido (M_CorpusTejido), a partir de lo que ya lleva cada vértice:
   tangente = dirección de la fibra muscular (o del eje del vaso/nervio)
   → estrías de fibra en relieve a dos escalas, brillo anisótropo húmedo a lo largo de la fibra,
     tendón nacarado, cartílago liso azulado, dispersión bajo la superficie y poro fino en el hueso.
-Datos primitivos por pieza: 0–2 color de estado, 3 fuerza del estado, 4 opacidad.
+Datos primitivos por pieza: 0–2 color de estado, 3 fuerza del estado, 4 opacidad, 5–7 color propio del órgano, 8 su peso.
 """
 import json
 import os
@@ -174,6 +174,11 @@ def _maestro(nombre, translucido):
     fuerza = g.mul(fibra, noCart)
 
     # Color: base → tendón (G) → cartílago (B); las estrías oscurecen los surcos; la oclusión sombrea los pliegues
+    # Color propio del órgano (tablas TINT de la web, en el manifiesto): se mezcla con el de la capa según su peso
+    tinte = g.vec("Tinte", unreal.LinearColor(0, 0, 0, 0), cpd=5)
+    tRGB = g.n(unreal.MaterialExpressionComponentMask, -500, r=True, g=True, b=True, a=False); g.une(tinte, tRGB, "")
+    tA = g.n(unreal.MaterialExpressionComponentMask, -500, r=False, g=False, b=False, a=True); g.une(tinte, tA, "")
+    base = g.lerp(base, tRGB, tA)
     col = g.lerp(base, tendon, mG)
     col = g.lerp(col, cartil, mB)
     surco = g.add(g.cte(1.0), g.mul(g.mul(onda, fuerza), g.cte(0.10)))

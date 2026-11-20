@@ -26,7 +26,7 @@ ejecutado y comprobado. El código C++ y el script de Python hay que compilarlos
 |---|---|---|
 | Exportador | `tools/unreal/exportar.js` | Mismos modelos que la web con la mejor geometría de cada pieza (corazón HRA > alta resolución > capa ligera), costuras corregidas, piezas de Blender, cuerpo de mujer y Visible Human. Añade normales suaves y la dirección de fibra como tangente. |
 | Datos | `CorpusDatos` | Catálogo, 30 capas (tabla `SYS`), fichas, buscador sin tildes y los 5 idiomas, leyendo los mismos JSON que la web. |
-| Cuerpo | `CorpusCuerpo` | Una malla Nanite por estructura; capas, opacidad, hombre / mujer / Visible Human, seleccionar, ocultar, aislar, color de estado por pieza. |
+| Cuerpo | `CorpusCuerpo` | Una malla Nanite por estructura con el color propio de cada órgano (mismas tablas que la web); capas, opacidad, hombre / mujer / Visible Human, seleccionar, ocultar, aislar, color de estado por pieza. |
 | Cámara y control | `CorpusJugador` | Órbita, desplazamiento, rueda, clic para seleccionar, doble clic o F para encuadrar, H ocultar, I aislar, 1–6 vistas. |
 | Interfaz | `CorpusInterfaz` | Panel de capas, cuerpo e idioma; buscador; ficha de la estructura. |
 | Gráficos | `Content/Python/corpus_importar.py` | Materiales por tejido y estudio de luz (Lumen, sombras virtuales, trazado de rayos). |
@@ -46,7 +46,7 @@ Los valores de cada tejido están en la tabla `TEJIDOS` del script; se afinan mi
 - Exposición e intensidad de las luces.
 
 ## Pendiente de pasar desde la web (por fases)
-1. **Atlas:** color propio de cada órgano (`TINT`), membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
+1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.
 2. **Movimiento:** rig (`data/rig.json`, `buildRig`), `deform`, rangos articulares y goniómetro, marcha con datos de
    laboratorio y suelo, sentadilla en cadena cerrada, ejercicios funcionales, actividad muscular por intensidad.

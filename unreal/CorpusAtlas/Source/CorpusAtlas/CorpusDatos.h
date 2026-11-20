@@ -14,6 +14,8 @@ struct FCorpusMalla
 	GENERATED_BODY()
 	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Sistema;
 	UPROPERTY(BlueprintReadOnly, Category = "Corpus") int32 Triangulos = 0;
+	/** Color propio del órgano (lineal) y peso de mezcla con el color de la capa en A; A = 0 si usa el de la capa. */
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FLinearColor Tinte = FLinearColor(0, 0, 0, 0);
 };
 
 /** Una estructura anatómica del catálogo (data/catalog.json y fem.json). */

@@ -37,6 +37,21 @@ const CAT={};for(const r of lee('data/catalog.json'))CAT[r[0]]=r;
 const FEM=lee('data/fem.json');for(const r of FEM.cat)if(!CAT[r[0]])CAT[r[0]]=r;
 const SEAM=lee('data/seam.json'),NUEVOS=lee('data/nuevos.json'),HRA_HIDE=lee('data/heart_hra_hide.json');
 
+/* Color propio de cada órgano: las mismas tablas TINT y ART_TINT de index.html (se leen de ahí para no duplicarlas) */
+const HTML=fs.readFileSync(path.join(RAIZ,'index.html'),'utf8');
+const tabla=n=>{const i=HTML.indexOf('const '+n+'=['),j=HTML.indexOf('];',i);return (0,eval)(HTML.slice(i+('const '+n+'=').length,j+1));};
+const TINT=tabla('TINT'),ART_TINT=tabla('ART_TINT');
+const hexRGB=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+const COLOR_MUSCULO=hexRGB('#a3392f');
+const esFem=k=>k.startsWith('f_')||SYS[k].sex==='f';
+/* → [r,g,b,peso] en sRGB 0–255, o null si la pieza usa el color de su capa (tintFor de la web) */
+function tinte(en,k){if(k==='insercion')return null;
+  if(BS(k)==='articular'){for(const [re,col,w] of ART_TINT)if(re.test(en))return [...hexRGB(col),Math.round(w*255)];}
+  if(BS(k)==='muscular'&&!/tendon/i.test(en)){let h=0;for(const ch of en)h=(h*31+ch.charCodeAt(0))|0;const f=0.88+((h>>>3)%100)/100*0.2,b=COLOR_MUSCULO;
+    return [b[0]*f,b[1]*f*(0.97+((h>>>9)%7)/100),b[2]*f,255].map(v=>Math.round(Math.min(255,v)));}
+  for(const [re,col,w,fo] of TINT)if((!fo||esFem(k))&&re.test(en))return [...hexRGB(col),Math.round(w*255)];
+  return null;}
+
 /* ───────── lectura de GLB (con o sin Draco) ───────── */
 function mat4(n){if(n.matrix)return n.matrix.slice();const t=n.translation||[0,0,0],q=n.rotation||[0,0,0,1],s=n.scale||[1,1,1];
   const [x,y,z,w]=q,xx=x*x,yy=y*y,zz=z*z,xy=x*y,xz=x*z,yz=y*z,wx=w*x,wy=w*y,wz=w*z;
@@ -176,7 +191,8 @@ function guardar(cuerpo,k,piezas){if(!piezas.length)return;const rel=cuerpo+'/'+
   for(const p of piezas){tris+=p.idx.length/3;const n=p.pos.length/3,mn=[1e9,1e9,1e9],mx=[-1e9,-1e9,-1e9];
     for(let i=0;i<p.pos.length;i++){const c=i%3,v=p.pos[i];if(v<mn[c])mn[c]=v;if(v>mx[c])mx[c]=v;}
     const r=v=>Math.round(v*1e5)/1e5;
-    (MAN.piezas[p.id]=MAN.piezas[p.id]||{})[cuerpo]={a:rel,s:k,t:p.idx.length/3,v:n,o:p.origen,c:mn.map((v,i)=>r((v+mx[i])/2)),b:[mn.map(r),mx.map(r)]};}
+    const tn=tinte(p.extras.en,k);
+    (MAN.piezas[p.id]=MAN.piezas[p.id]||{})[cuerpo]={a:rel,s:k,t:p.idx.length/3,v:n,o:p.origen,...(tn?{k:tn}:{}),c:mn.map((v,i)=>r((v+mx[i])/2)),b:[mn.map(r),mx.map(r)]};}
   escribirGLB(path.join(SAL,rel),piezas);MAN.archivos.push({archivo:rel,cuerpo,sistema:k,base:BS(k),piezas:piezas.length,triangulos:tris});
   console.log(('  '+rel).padEnd(38),String(piezas.length).padStart(5),'piezas',String(tris).padStart(9),'triángulos');}
 

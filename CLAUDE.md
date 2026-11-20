@@ -105,7 +105,7 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 - `data/hra14.glb` (Draco, mallas con el id del catálogo): ojo completo, cartílagos traqueales y tonsilas palatinas. `hra14Load()` se lanza al cargar `nervioso_central`, `respiratorio` o `linfatico`; `hra14Apply()` cambia la geometría de las piezas que existen (`HRGEO`, `HRA.ids`) y crea las nuevas (ids `h1`–`h27`).
 - Se regenera con `tools/hra14/construir.py` (necesita numpy, trimesh, fast-simplification y las mallas de `tools/unreal/exportar.js` como anclas) y `npx @gltf-transform/cli draco`; piezas en `piezas.json`, nombres y fichas en `fichas.py`, registro del ajuste en `registro.json`.
 - Descartado por ahora: carina, cartílagos bronquiales y segmentos pulmonares de HRA (el árbol bronquial de Corpus tiene otra forma y sus arterias segmentarias lo siguen), laringe (la de Corpus tiene más detalle).
-- Pendiente de decisión del usuario: Z-Anatomy declara dos modelos de origen con licencia no comercial (oído interno de Dundee, CC BY-NC-SA; riñón de L. Cowley, CC BY-NC) que `ATTRIBUTION.md` aún no menciona.
+- Z-Anatomy declara dos modelos de origen con licencia no comercial (oído interno de Dundee, CC BY-NC-SA; riñón de L. Cowley, CC BY-NC); `ATTRIBUTION.md` lo recoge desde v169. Pendiente de decisión del usuario: sustituir esas piezas (HRA tiene riñón CC BY) o dejarlas declaradas.
 
 ## Edición Unreal Engine (en curso, aparte de la web)
 - Decisión del usuario (2026-11-20): la web se mantiene; Unreal es una edición de escritorio aparte, de más calidad gráfica.

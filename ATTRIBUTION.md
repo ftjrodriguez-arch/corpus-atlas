@@ -3,6 +3,7 @@
 ## Modelo masculino · Male model
 - **Z-Anatomy** — *Models of human anatomy*, CC BY-SA 4.0. https://github.com/Z-Anatomy/Models-of-human-anatomy
 - Derivado de **BodyParts3D**, © The Database Center for Life Science (DBCLS), licenciado por CC Atribución-CompartirIgual 2.1 Japón (versiones posteriores de BodyParts3D: CC BY 4.0). https://dbarchive.biosciencedbc.jp/en/bodyparts3d/
+- Z-Anatomy declara además estos modelos «usados como referencia / incluidos y adaptados» (texto de su Readme, consultado el 2026-11-20): «Brainder» y «White matter» (University of Washington); «Cranial Nerves and Foramina», University of Dundee, CAHID, CC BY 4.0; «Anatomy of the Inner Ear», University of Dundee School of Medicine, **CC BY-NC-SA 4.0**; «Kidney», Lissie Cowley, **CC BY-NC 4.0**. Z-Anatomy no indica qué mallas concretas proceden de cada uno. Corpus es gratuito y sin publicidad; quien reutilice las piezas del oído interno o del riñón con fines comerciales debe comprobar antes su origen.
 - Nombres en español y latín: Terminologia Anatomica (FIPAT), vía la tabla TA2 incluida en Z-Anatomy.
 
 ## Modelo femenino · Female model

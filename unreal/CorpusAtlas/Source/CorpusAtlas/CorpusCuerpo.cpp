@@ -108,6 +108,7 @@ void ACorpusCuerpo::CargarCapa(const FString& Clave)
 		C->RegisterComponent();
 		C->SetCustomPrimitiveDataVector4(0, FVector4(0, 0, 0, 0));          // estado: color + fuerza
 		C->SetCustomPrimitiveDataFloat(4, OpacidadDeCapa(Clave));          // opacidad de la capa
+		C->SetCustomPrimitiveDataVector4(5, FVector4(M->Tinte.R, M->Tinte.G, M->Tinte.B, M->Tinte.A)); // color propio del órgano + peso
 		Piezas.Add(P.Id, C);
 		Ids.Add(P.Id);
 	}

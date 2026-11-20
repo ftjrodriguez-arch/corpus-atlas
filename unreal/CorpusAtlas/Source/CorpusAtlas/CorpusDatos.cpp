@@ -137,6 +137,13 @@ void UCorpusDatos::Initialize(FSubsystemCollectionBase& Collection)
 					FCorpusMalla Malla;
 					(*M)->TryGetStringField(TEXT("s"), Malla.Sistema);
 					double Tri = 0; (*M)->TryGetNumberField(TEXT("t"), Tri); Malla.Triangulos = (int32)Tri;
+					const TArray<TSharedPtr<FJsonValue>>* K = nullptr;
+					if ((*M)->TryGetArrayField(TEXT("k"), K) && K->Num() == 4)
+					{
+						// sRGB 0–255 → lineal; el peso (0–255) va en A
+						Malla.Tinte = FLinearColor(FColor((uint8)(*K)[0]->AsNumber(), (uint8)(*K)[1]->AsNumber(), (uint8)(*K)[2]->AsNumber()));
+						Malla.Tinte.A = (float)(*K)[3]->AsNumber() / 255.f;
+					}
 					P.Mallas.Add(FString(C.Key), Malla);
 					if (P.Sistema.IsEmpty()) { P.Sistema = Malla.Sistema; }
 				}
