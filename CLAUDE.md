@@ -112,6 +112,14 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 - `tools/unreal/exportar.js` exporta todos los modelos a GLB sin comprimir en `unreal/CorpusAtlas/Importar/` (no se sube); proyecto en `unreal/CorpusAtlas/` (C++ + `Content/Python/corpus_importar.py`). Estado, pasos y fases pendientes en `unreal/LEEME.md`.
 - En la nube no hay Unreal: compilar, ver y afinar materiales se hace en el PC del usuario.
 
+## Fuentes abiertas comprobadas (2026-11-20, leídas en su página)
+- HuBMAP HRA 3D Reference Object Library: CC BY 4.0 (archivo LICENSE del repositorio). Usado en v161 y v169.
+- Embriones Carnegie de NIH 3D, estadios 12, 14, 16, 18, 20 y 23 (entradas 3DPX-016950 a 016955): CC-BY, con GLB y STL. Solo forma externa. Sin integrar.
+- Brainder «Brain for Blender» (corteza por regiones y subcorticales en OBJ): CC BY-SA 3.0. Sin integrar.
+- Z-Anatomy: CC BY-SA 4.0, con dos modelos de origen no comerciales (ver v169).
+- Fab (licencia estándar): prohíbe redistribuir los modelos sueltos; no sirve para un repositorio público.
+- Sin poder abrir desde la nube: anatomytool.org (Open3DModel), zenodo.org y la licencia de Unreal Engine en unrealengine.com.
+
 ## Pendiente
 - Decisión del usuario: NUNCA servidor propio, cuentas ni base de datos. Todo debe funcionar en local y sin conexión (GitHub Pages solo sirve los archivos estáticos).
 - Interfaz móvil nueva programada en v147–v148 (barra inferior, capas en fila, hoja de estructura tocada): recoger opiniones y pulir.
