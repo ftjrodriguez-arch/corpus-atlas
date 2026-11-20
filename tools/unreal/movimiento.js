@@ -101,6 +101,7 @@ const PREPARA = `(async()=>{
   const b64e=u8=>{if(u8.toBase64)return u8.toBase64();let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));return btoa(s);};
   const b64d=s=>{if(Uint8Array.fromBase64)return Uint8Array.fromBase64(s);const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;};
   const AX=L.length+1,NA=L.length;
+  const HARMC=/^(Gluteus (maximus|medius|minimus)|Piriformis|Tensor fasciae latae|Iliacus|Psoas major|Obturator (internus|externus)|(Superior|Inferior) gemellus|Quadratus femoris|Pectineus)( muscle)?$/;
   const HARM=/^((Ascending|Descending|Transverse) part of trapezius|Rhomboid (major|minor)|Levator scapulae|Serratus anterior|Pectoralis minor|Subclavius|(Clavicular|Acromial|Scapular spinal) part of deltoid|Supraspinatus|Infraspinatus|Teres minor|Subscapularis)( muscle)?$/;
   window.__movW=(en,side,sys,b64,b64i)=>{const u8=b64d(b64),pos=new Float32Array(u8.buffer,u8.byteOffset,u8.length>>2),n=pos.length/3;const i8=b64i?b64d(b64i):null,idx=i8?new Uint32Array(i8.buffer,i8.byteOffset,i8.length>>2):null;
     let x0=1e9,y0=1e9,z0=1e9,x1=-1e9,y1=-1e9,z1=-1e9;for(let i=0;i<n;i++){const x=pos[i*3],y=pos[i*3+1],z=pos[i*3+2];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;if(z<z0)z0=z;if(z>z1)z1=z;}
@@ -163,18 +164,25 @@ const PREPARA = `(async()=>{
        donde toca la escápula va con ella, donde toca vértebras o costillas se queda, donde toca el húmero va con él.
        Entre los anclajes el peso es armónico (ecuación de Laplace sobre la malla): el estiramiento se reparte de forma
        continua por toda la fibra, sin escalones ni zonas rígidas. */
-    if(idx&&HARM.test(en)&&(side==='derecho'||side==='izquierdo')){const Sd=side==='derecho'?'R':'L';
+    /* Lo mismo en la cadera (HARMC): en la web los glúteos y los pelvitrocantéreos están fijados a la pelvis y en la
+       flexión de cadera el glúteo mayor quedaba como una bola. Aquí van de la pelvis (0) al fémur (1) y giran en arco
+       alrededor de la cadera (envuelven la articulación), no en línea recta. */
+    const CAD=HARMC.test(en);
+    if(idx&&(HARM.test(en)||CAD)&&(side==='derecho'||side==='izquierdo')){const Sd=side==='derecho'?'R':'L';
       const ESC=/trapezius|Rhomboid|Levator scapulae|Serratus anterior|Pectoralis minor|Subclavius/.test(en);/* ESC: unen tórax y escápula, no llegan al húmero */
       const G=malla(),{uid,nu,rep,ancla}=G;
-      for(const nodo of ['shoulder','acr','sc']){const kq=L.indexOf(nodo+'_'+Sd);if(kq<0)continue;if(ESC&&nodo==='shoulder'){Ws[kq]=[null,false];continue;}const W0=Ws[kq][0];
+      for(const nodo of (CAD?['hip']:['shoulder','acr','sc'])){const kq=L.indexOf(nodo+'_'+Sd);if(kq<0)continue;if(ESC&&nodo==='shoulder'){Ws[kq]=[null,false];continue;}const W0=Ws[kq][0];
         const fijo=new Float32Array(nu).fill(-1);let n0=0,n1=0;for(let q=0;q<nu;q++){if(ancla[q]===null)continue;const f=skF(ancla[q],nodo,Sd)>0?1:0;fijo[q]=f;if(f)n1++;else n0++;}
         if(n0<4||n1<4)continue;/* sin dos anclajes distintos se dejan los pesos de la web */
         const x=new Float32Array(nu);for(let q=0;q<nu;q++)x[q]=fijo[q]>=0?fijo[q]:(W0?Math.min(1,W0[rep[q]]):0.5);
         laplace(G,fijo,x);
-        const Wn=new Float32Array(n);for(let v=0;v<n;v++)Wn[v]=x[uid[v]];Ws[kq]=[Wn,true];}
+        const Wn=new Float32Array(n);for(let v=0;v<n;v++)Wn[v]=x[uid[v]];Ws[kq]=[Wn,!CAD];}
+      /* El glúteo mayor se probó como fibra tensa (recto del sacro al fémur): atraviesa la pelvis y se hunde. Se queda
+         girando en arco, que envuelve la cadera por detrás; en flexión de más de 90° aún se ve enrollado (pendiente:
+         envolverlo sobre la pelvis como se hace con el tórax). */
       /* los que se insertan en la escapula la siguen igual en sus dos articulaciones (acromioclavicular y esternoclavicular) */
       if(ESC&&!/Subclavius|Descending/.test(en)){const qa=L.indexOf('acr_'+Sd),qs=L.indexOf('sc_'+Sd);if(Ws[qs][0]&&!Ws[qa][0])Ws[qa]=[Ws[qs][0],Ws[qs][1]];}
-      L.forEach((k,q)=>{const [nd,sd]=k.split('_');if(/^(elbow|fore|wrist|hip|knee)$/.test(nd)||(sd&&sd!==Sd&&/^(shoulder|acr|sc)$/.test(nd)))Ws[q]=[null,false];});}
+      L.forEach((k,q)=>{const [nd,sd]=k.split('_');if(CAD?(/^(shoulder|acr|sc|elbow|fore|wrist)$/.test(nd)||(sd&&sd!==Sd&&nd==='hip')):(/^(elbow|fore|wrist|hip|knee)$/.test(nd)||(sd&&sd!==Sd&&/^(shoulder|acr|sc)$/.test(nd))))Ws[q]=[null,false];});}
     /* articulaciones que mueven la pieza (algún vértice con peso ≥ 0,002), en el orden en que las aplica deform() */
     let S=[];for(let k=0;k<NA;k++){const W=Ws[k][0];if(!W)continue;let mx=0;for(let v=0;v<n;v++)if(W[v]>mx)mx=W[v];if(mx>=0.002)S.push({i:k+1,W,lin:Ws[k][1],mx});}
     /* articulaciones seguidas (en este orden) que pesan lo mismo en toda la pieza van juntas en un hueco, hasta 3:
@@ -186,6 +194,24 @@ const PREPARA = `(async()=>{
     /* por vértice solo pesos (0–1): Nanite y la malla de reserva promedian los UV al simplificar, y un peso promediado sigue siendo un peso */
     const out=new Float32Array(n*8);for(let s=0;s<S.length;s++){const W=S[s].W;for(let v=0;v<n;v++)out[v*8+s]=W[v]>1?1:W[v]<0.002?0:W[v];}
     return {w:S.length?b64e(new Uint8Array(out.buffer)):'',huecos:S.map(s=>(s.lin?-1:1)*s.i),over,moved:S.length>0,ins};};
+  /* lista de giros de la web → [índice, eje, ángulo, traslación] por articulación del rig (rodilla con deslizamiento, tobillo partido) */
+  const aOps=cap=>{const act=(cap||[]).map(a=>{if(a.tr||!/^knee_/.test(a.jn))return a;const tt=kneeTr(a.q,a.jn);return tt?Object.assign({},a,{tr:tt}):a;});
+    const ops=act.map(a=>{const q=a.q;let ang=2*Math.acos(Math.min(1,Math.abs(q.w)));const s=Math.sqrt(Math.max(0,1-q.w*q.w));
+      let ax=s>1e-6?new V3(q.x/s,q.y/s,q.z/s):new V3(1,0,0);if(q.w<0)ax.negate();return {jn:a.jn,ang,ax,p:JOINTS[a.jn].pivot,tr:a.tr?a.tr.clone().applyQuaternion(a.q):null};}).filter(o=>o.ang>1e-4||o.tr);
+    const R=[],fuera=[];const pon=(k,o)=>{const i=L.indexOf(k);if(i<0){fuera.push(k);return;}const f=v=>Math.round(v*1e5)/1e5;
+      R.push([i,f(o.ax.x),f(o.ax.y),f(o.ax.z),f(o.ang),o.tr?f(o.tr.x):0,o.tr?f(o.tr.y):0,o.tr?f(o.tr.z):0]);};
+    for(const o of ops){if(/^ankle_/.test(o.jn)){const sp=ankleSplit(o),S2=o.jn.slice(6);pon('ankle_st_'+S2,sp.sw);pon('ankle_tc_'+S2,sp.tw);}else pon(o.jn,o);}
+    R.sort((a,b)=>a[0]-b[0]);return {R,fuera};};
+  /* marcha: applyPose() de la web con la marcha puesta (ángulos de laboratorio, pelvis, centro de masas, braceo y, tras deformar,
+     gaitFloor() que apoya el pie en el suelo). Se guardan los giros y la raíz del cuerpo (cuaternión + posición). */
+  window.__movGait=(pat,p)=>{gait.on=true;gait.pat=pat;gait.p=p;const tab=currentTab;currentTab='mov';let cap=null;const D0=deform;deform=a=>{cap=a;D0(a);};
+    try{applyPose();}finally{deform=D0;currentTab=tab;}
+    const r=aOps(cap),q=body.quaternion,ps=body.position,f=v=>Math.round(v*1e5)/1e5;r.raiz=[q.x,q.y,q.z,q.w,ps.x,ps.y,ps.z].map(f);return r;};
+  window.__movGaitFin=()=>{gait.on=false;gait.pat='normal';try{gaitRootOff();}catch(e){}const tab=currentTab;currentTab='mov';try{applyPose();}finally{currentTab=tab;}};
+  const sinHTML=s=>String(s||'').replace(/<[^>]+>/g,'');
+  window.__movGaitMeta=()=>({fases:GAIT_PH.map(f=>[f[0],f[1],f[2],f[3],f[4]]),
+    grupos:GAIT_M.map((m,i)=>({en:m[0],tramos:m[1],n:m[2],tipo:m[3],txt:m[4],lv:GAIT_LV[i]||[]})),
+    patrones:Object.entries(GAIT_P).map(([k,v])=>({id:k,n:v.n,t:sinHTML(v.t),debiles:v.weak||[],espasticos:v.spastic||[],vel:v.speed||1}))});
   window.__movPose=(jid,mi,S,t)=>{const j=ROM.find(x=>x.id===jid);curJ=j;curM=j.moves[mi];romSide=S;angle=t;
     const tab=currentTab;currentTab='mov';let cap=null;const D0=deform;deform=a=>{cap=a;};
     try{applyPose();}finally{deform=D0;currentTab=tab;}
@@ -232,6 +258,12 @@ const PREPARA = `(async()=>{
     rom.push({ id: j.id, n: j.n, lados: j.sided, movs });
     console.log('  ROM %s: %d movimientos', j.id, movs.length);
   }
+  /* ── marcha: cada 2 % del ciclo, los 8 patrones de la web ── */
+  const marcha = await E('()=>__movGaitMeta()'); marcha.paso = 2;
+  for (const pt of marcha.patrones) { pt.frames = []; pt.raiz = []; const fu = new Set();
+    for (let p = 0; p < 100; p += marcha.paso) { const r = await E('(k,p)=>__movGait(k,p)', pt.id, p); pt.frames.push(r.R.flat()); pt.raiz.push(r.raiz); r.fuera.forEach(x => fu.add(x.replace(/_[RL]$/, ''))); }
+    console.log('  marcha %s: %d instantes%s', pt.id, pt.frames.length, fu.size ? ' (fuera del rig: ' + [...fu].join(',') + ')' : ''); }
+  await E('()=>__movGaitFin()');
   /* ── mejora sobre la web: la columna toracolumbar no gira en una sola bisagra ──
      En la web todo el giro de «tronco» ocurre en L3 y la zona lumbar hace joroba. Aquí se reparte entre la charnela
      lumbosacra (lumb, S1), L3 (trunk) y la toracolumbar (thor, T12), con el reparto fisiológico de cada movimiento:
@@ -318,7 +350,7 @@ const PREPARA = `(async()=>{
   const jf = path.join(IMP, 'datos', 'movimiento.json');
   const antes = (SIN_PESOS || SOLO) && fs.existsSync(jf) ? JSON.parse(fs.readFileSync(jf, 'utf8')) : null;
   const salida = { version: 2, unidades: 'm, glTF (Y arriba)', paso: PASO, ax: R.AX, ax_de: R.L.slice(-3),
-    articulaciones: R.L.map((k, i) => ({ id: k, pivote: R.piv[i] })), rom, torax, abrazo, piezas: antes ? antes.piezas : {}, insercion: antes && antes.insercion ? antes.insercion : {} };
+    articulaciones: R.L.map((k, i) => ({ id: k, pivote: R.piv[i] })), rom, marcha, torax, abrazo, piezas: antes ? antes.piezas : {}, insercion: antes && antes.insercion ? antes.insercion : {} };
   fs.mkdirSync(path.join(IMP, 'datos'), { recursive: true });
   fs.writeFileSync(jf, JSON.stringify(salida));
   console.log('Posturas: datos/movimiento.json');

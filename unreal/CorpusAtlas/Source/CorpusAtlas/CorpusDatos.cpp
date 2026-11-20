@@ -240,6 +240,57 @@ void UCorpusDatos::CargarMovimiento()
 			if (Cu.Value.IsValid() && Cu.Value->TryGetArray(Ids)) { for (const auto& X : *Ids) { Abrazo.Add(FString(Cu.Key) + TEXT("/") + X->AsString()); } }
 		}
 	}
+	// marcha: fases, grupos musculares y patrones con sus instantes cada PasoCiclo % del ciclo
+	const TSharedPtr<FJsonObject>* MJ = nullptr;
+	if (J->TryGetObjectField(TEXT("marcha"), MJ))
+	{
+		const TSharedPtr<FJsonObject>& Ma = *MJ;
+		double Ps = 2; Ma->TryGetNumberField(TEXT("paso"), Ps); PasoCiclo = (float)Ps;
+		const auto Cadenas = [](const TSharedPtr<FJsonObject>& O, const TCHAR* Campo, TArray<FString>& Fuera)
+		{
+			const TArray<TSharedPtr<FJsonValue>>* L = nullptr;
+			if (O->TryGetArrayField(Campo, L)) { for (const auto& X : *L) { Fuera.Add(X->AsString()); } }
+		};
+		const auto Numeros = [](const TSharedPtr<FJsonObject>& O, const TCHAR* Campo, TArray<TArray<float>>& Fuera)
+		{
+			const TArray<TSharedPtr<FJsonValue>>* L = nullptr;
+			if (!O->TryGetArrayField(Campo, L)) { return; }
+			for (const auto& Fr : *L) { TArray<float>& D = Fuera.AddDefaulted_GetRef(); for (const auto& X : Fr->AsArray()) { D.Add((float)X->AsNumber()); } }
+		};
+		const TArray<TSharedPtr<FJsonValue>>* L = nullptr;
+		if (Ma->TryGetArrayField(TEXT("fases"), L))
+		{
+			for (const auto& V : *L)
+			{
+				const TArray<TSharedPtr<FJsonValue>>& F = V->AsArray();
+				FCorpusFaseMarcha& Fa = Fases.AddDefaulted_GetRef();
+				Fa.Ini = (float)F[0]->AsNumber(); Fa.Fin = (float)F[1]->AsNumber(); Fa.Nombre = F[2]->AsString(); Fa.Abrev = F[3]->AsString(); Fa.Texto = F[4]->AsString();
+			}
+		}
+		if (Ma->TryGetArrayField(TEXT("grupos"), L))
+		{
+			for (const auto& V : *L)
+			{
+				const TSharedPtr<FJsonObject> O = V->AsObject();
+				FCorpusGrupoMarcha& G = Grupos.AddDefaulted_GetRef();
+				Cadenas(O, TEXT("en"), G.En); G.Nombre = O->GetStringField(TEXT("n")); G.Texto = O->GetStringField(TEXT("txt"));
+				const TArray<TSharedPtr<FJsonValue>>* Lv = nullptr;
+				if (O->TryGetArrayField(TEXT("lv"), Lv)) { for (const auto& Pt : *Lv) { const auto& Par2 = Pt->AsArray(); G.Nivel.Add(FVector2f((float)Par2[0]->AsNumber(), (float)Par2[1]->AsNumber())); } }
+			}
+		}
+		if (Ma->TryGetArrayField(TEXT("patrones"), L))
+		{
+			for (const auto& V : *L)
+			{
+				const TSharedPtr<FJsonObject> O = V->AsObject();
+				FCorpusPatronMarcha& P = Patrones.AddDefaulted_GetRef();
+				P.Id = O->GetStringField(TEXT("id")); P.Nombre = O->GetStringField(TEXT("n")); P.Texto = O->GetStringField(TEXT("t"));
+				double Ve = 1; O->TryGetNumberField(TEXT("vel"), Ve); P.Velocidad = (float)Ve;
+				Cadenas(O, TEXT("debiles"), P.Debiles); Cadenas(O, TEXT("espasticos"), P.Espasticos);
+				Numeros(O, TEXT("frames"), P.Frames); Numeros(O, TEXT("raiz"), P.Raiz);
+			}
+		}
+	}
 	const TArray<TSharedPtr<FJsonValue>>* R = nullptr;
 	if (J->TryGetArrayField(TEXT("rom"), R))
 	{

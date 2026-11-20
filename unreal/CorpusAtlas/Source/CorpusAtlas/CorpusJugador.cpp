@@ -186,6 +186,19 @@ void ACorpusJugador::TickQa()
 		Cu->PonerRango(Ri, A.Num() > 1 ? FCString::Atoi(*A[1]) : 0, A.Num() > 2 && A[2] == TEXT("L"), A.Num() > 3 ? FCString::Atof(*A[3]) : 0.f);
 		Pausa = 2.0;
 	}
+	else if (Verbo == TEXT("marcha") && Cu)
+	{
+		// marcha <id del patrón> <% del ciclo>   ·   marcha (solo) = salir
+		TArray<FString> A; Resto.ParseIntoArrayWS(A);
+		int32 Pi = -1;
+		if (const UCorpusDatos* D = GetGameInstance() ? GetGameInstance()->GetSubsystem<UCorpusDatos>() : nullptr)
+		{
+			for (int32 i = 0; A.Num() > 0 && i < D->PatronesMarcha().Num(); ++i) { if (D->PatronesMarcha()[i].Id == A[0]) { Pi = i; } }
+		}
+		Cu->ReproducirMarcha(false);
+		Cu->PonerMarcha(Pi, A.Num() > 1 ? FCString::Atof(*A[1]) : 0.f);
+		Pausa = 2.0;
+	}
 	else if (Verbo == TEXT("buscar"))
 	{
 		if (ACorpusHUD* H = Cast<ACorpusHUD>(GetHUD()))

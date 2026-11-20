@@ -67,6 +67,17 @@ struct FCorpusRango
 	TArray<FCorpusMovimiento> Movs;
 };
 
+/** Marcha (movimiento.json → marcha): fases del ciclo, grupos musculares con su intensidad y patrones (normal y patológicos). */
+struct FCorpusFaseMarcha { float Ini = 0, Fin = 0; FString Nombre, Abrev, Texto; };
+struct FCorpusGrupoMarcha { TArray<FString> En; FString Nombre, Texto; TArray<FVector2f> Nivel; };   // Nivel: (porcentaje del ciclo, intensidad 0–1)
+struct FCorpusPatronMarcha
+{
+	FString Id, Nombre, Texto;
+	TArray<FString> Debiles, Espasticos;
+	float Velocidad = 1.f;
+	TArray<TArray<float>> Frames, Raiz;   // por instante: giros (como los rangos) y raíz del cuerpo [cuaternión xyzw, posición xyz] en glTF
+};
+
 /** Claves que distinguen mayúsculas (como los objetos de JavaScript): en i18n_de, «urinario» y «Urinario» son textos distintos. */
 struct FClaveExacta : TDefaultMapKeyFuncs<FString, FString, false>
 {
@@ -124,8 +135,17 @@ public:
 	/** ¿La pieza se mantiene pegada a la pared torácica al mover el brazo? (dorsal ancho, redondo mayor) */
 	bool SePegaAlTorax(const FString& Carpeta, const FString& Id) const { return Abrazo.Contains(Carpeta + TEXT("/") + Id); }
 
+	const TArray<FCorpusFaseMarcha>& FasesMarcha() const { return Fases; }
+	const TArray<FCorpusGrupoMarcha>& GruposMarcha() const { return Grupos; }
+	const TArray<FCorpusPatronMarcha>& PatronesMarcha() const { return Patrones; }
+	float PasoMarcha() const { return PasoCiclo; }
+
 private:
 	void CargarMovimiento();
+	TArray<FCorpusFaseMarcha> Fases;
+	TArray<FCorpusGrupoMarcha> Grupos;
+	TArray<FCorpusPatronMarcha> Patrones;
+	float PasoCiclo = 2.f;
 	TArray<TArray<float>> Torax;
 	TMap<FString, FVector3f> Insercion;
 	TSet<FString> Abrazo;

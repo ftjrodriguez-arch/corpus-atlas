@@ -114,10 +114,11 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 			]
 		]
 		// ── Abajo: movimiento (rango articular) ──
-		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Bottom).Padding(18.f)
+		// (a la derecha: en el centro tapaba las piernas y los pies, que es lo que hay que ver en la marcha)
+		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom).Padding(18.f)
 		[
-			SNew(SBox).WidthOverride(760.f)
-			.Visibility_Lambda([this]() { const ACorpusCuerpo* C = Cuerpo(); return C && C->MovimientoDisponible() && (bVerMov || C->Rango() >= 0) ? EVisibility::Visible : EVisibility::Collapsed; })
+			SNew(SBox).WidthOverride(520.f)
+			.Visibility_Lambda([this]() { const ACorpusCuerpo* C = Cuerpo(); return C && C->MovimientoDisponible() && (bVerMov || C->HayPostura()) ? EVisibility::Visible : EVisibility::Collapsed; })
 			[
 				SNew(SBorder).BorderImage(Panel()).Padding(14.f)[ SAssignNew(CajaMov, SVerticalBox) ]
 			]
@@ -210,7 +211,7 @@ void SCorpusInterfaz::AlCambiarPostura()
 	// en reproducción la postura cambia en cada fotograma: el panel solo se rehace si cambian rango, movimiento o lado
 	const ACorpusCuerpo* C = Cuerpo();
 	if (!C) { return; }
-	if (FIntVector(C->Rango(), C->Movimiento(), (C->LadoIzquierdo() ? 1 : 0) + (C->Reproduciendo() ? 2 : 0)) != MovPintado) { RehacerMovimiento(); }
+	if (FIntVector(C->PatronMarcha() >= 0 ? 1000 + C->PatronMarcha() : C->Rango(), C->Movimiento(), (C->LadoIzquierdo() ? 1 : 0) + (C->Reproduciendo() ? 2 : 0) + (C->MarchaEnCurso() ? 4 : 0) + (C->EsMarchaLenta() ? 8 : 0)) != MovPintado) { RehacerMovimiento(); }
 }
 
 void SCorpusInterfaz::RehacerMovimiento()
@@ -218,7 +219,7 @@ void SCorpusInterfaz::RehacerMovimiento()
 	UCorpusDatos* D = Datos();
 	ACorpusCuerpo* C = Cuerpo();
 	if (!D || !C || !CajaMov.IsValid()) { return; }
-	MovPintado = FIntVector(C->Rango(), C->Movimiento(), (C->LadoIzquierdo() ? 1 : 0) + (C->Reproduciendo() ? 2 : 0));
+	MovPintado = FIntVector(C->PatronMarcha() >= 0 ? 1000 + C->PatronMarcha() : C->Rango(), C->Movimiento(), (C->LadoIzquierdo() ? 1 : 0) + (C->Reproduciendo() ? 2 : 0) + (C->MarchaEnCurso() ? 4 : 0) + (C->EsMarchaLenta() ? 8 : 0));
 	CajaMov->ClearChildren();
 	if (!C->MovimientoDisponible()) { return; }
 	TWeakObjectPtr<ACorpusCuerpo> WC(C);
@@ -226,7 +227,55 @@ void SCorpusInterfaz::RehacerMovimiento()
 	const int32 Ri = C->Rango(), Mi = C->Movimiento();
 	const bool bIzq = C->LadoIzquierdo();
 
-	CajaMov->AddSlot().AutoHeight()[ Txt(Mayus(D->T(TEXT("Rango articular"))), 9, C_GRIS, true) ];
+	// modo: rango articular o marcha
+	const bool bMarcha = C->PatronMarcha() >= 0;
+	{
+		TSharedRef<SHorizontalBox> Modos = SNew(SHorizontalBox);
+		Modos->AddSlot().AutoWidth().Padding(0, 0, 5, 0)[ Boton(D->T(TEXT("Rango articular")), [WC]() { if (WC.IsValid()) { WC->PonerMarcha(-1, 0.f); } }, !bMarcha) ];
+		if (D->PatronesMarcha().Num() > 0)
+		{
+			Modos->AddSlot().AutoWidth()[ Boton(D->T(TEXT("Marcha")), [WC]() { if (WC.IsValid()) { WC->QuitarPostura(); WC->PonerMarcha(0, 0.f); WC->ReproducirMarcha(true); } }, bMarcha) ];
+		}
+		CajaMov->AddSlot().AutoHeight().Padding(0, 0, 0, 8)[ Modos ];
+	}
+	if (bMarcha)
+	{
+		const TArray<FCorpusPatronMarcha>& Ps = D->PatronesMarcha();
+		const int32 Pi = C->PatronMarcha();
+		TSharedRef<SWrapBox> FilaP = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
+		for (int32 i = 0; i < Ps.Num(); ++i)
+		{
+			FilaP->AddSlot()[ Boton(D->T(Ps[i].Nombre), [WC, i]() { if (WC.IsValid()) { WC->PonerMarcha(i, WC->CicloDeMarcha()); } }, i == Pi) ];
+		}
+		CajaMov->AddSlot().AutoHeight()[ FilaP ];
+		TWeakObjectPtr<UCorpusDatos> WD(D);
+		// fase del ciclo (del miembro derecho) y qué ocurre en ella
+		CajaMov->AddSlot().AutoHeight().Padding(0, 10, 0, 0)
+		[
+			SNew(STextBlock).Font(Letra(13, true)).ColorAndOpacity(FSlateColor(C_ACENTO))
+			.Text_Lambda([WC, WD]() { if (!WC.IsValid() || !WD.IsValid()) { return FText(); } const int32 F = WC->FaseDeMarcha(); if (!WD->FasesMarcha().IsValidIndex(F)) { return FText(); }
+				return FText::FromString(FString::Printf(TEXT("%s · %d %%"), *WD->T(WD->FasesMarcha()[F].Nombre), FMath::RoundToInt(WC->CicloDeMarcha()))); })
+		];
+		CajaMov->AddSlot().AutoHeight().Padding(0, 2, 0, 0)
+		[
+			SNew(STextBlock).Font(Letra(10)).ColorAndOpacity(FSlateColor(C_TINTA)).AutoWrapText(true)
+			.Text_Lambda([WC, WD]() { if (!WC.IsValid() || !WD.IsValid()) { return FText(); } const int32 F = WC->FaseDeMarcha(); return WD->FasesMarcha().IsValidIndex(F) ? FText::FromString(WD->T(WD->FasesMarcha()[F].Texto)) : FText(); })
+		];
+		if (Ps.IsValidIndex(Pi) && !Ps[Pi].Texto.IsEmpty()) { CajaMov->AddSlot().AutoHeight().Padding(0, 6, 0, 0)[ Txt(D->T(Ps[Pi].Texto), 9, C_GRIS) ]; }
+		TSharedRef<SHorizontalBox> FilaC = SNew(SHorizontalBox);
+		FilaC->AddSlot().FillWidth(1.f).VAlign(VAlign_Center)
+		[
+			SNew(SSlider).MinValue(0.f).MaxValue(99.9f)
+			.Value_Lambda([WC]() { return WC.IsValid() ? WC->CicloDeMarcha() : 0.f; })
+			.OnValueChanged_Lambda([WC](float V) { if (WC.IsValid()) { WC->ReproducirMarcha(false); WC->PonerMarcha(WC->PatronMarcha(), V); } })
+		];
+		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(10, 0, 0, 0)[ Boton(D->T(C->MarchaEnCurso() ? TEXT("Pausa") : TEXT("Reproducir")), [WC]() { if (WC.IsValid()) { WC->ReproducirMarcha(!WC->MarchaEnCurso()); } }, true) ];
+		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(5, 0, 0, 0)[ Boton(D->T(TEXT("Cámara lenta")), [WC]() { if (WC.IsValid()) { WC->MarchaLenta(!WC->EsMarchaLenta()); } }, C->EsMarchaLenta()) ];
+		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(5, 0, 0, 0)[ Boton(D->T(TEXT("Reposo")), [WC]() { if (WC.IsValid()) { WC->PonerMarcha(-1, 0.f); } }) ];
+		CajaMov->AddSlot().AutoHeight().Padding(0, 10, 0, 0)[ FilaC ];
+		CajaMov->AddSlot().AutoHeight().Padding(0, 6, 0, 0)[ Txt(D->T(TEXT("Actividad muscular: amarillo (poca) → magenta (mucha). Datos de laboratorio: Fukuchi 2018, Schreiber 2019, Lencioni 2019.")), 8, C_GRIS) ];
+		return;
+	}
 	TSharedRef<SWrapBox> FilaR = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
 	for (int32 i = 0; i < Rs.Num(); ++i)
 	{

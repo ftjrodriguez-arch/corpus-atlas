@@ -14,17 +14,19 @@ const fs = require('fs'), path = require('path');
 const PO = require('../postura.js');
 const [id, rom, mi, lado, grados, pasoArg, salArg] = process.argv.slice(2);
 const paso = +pasoArg || 10, LD = lado === 'R' ? 'derecho' : 'izquierdo';
-const dir = salArg || path.join(PO.IMP, '..', 'Saved', 'sim', `${id.includes(',') ? 'grupo' : id}_${rom}${mi}${lado}`);
+const dir = salArg || path.join(PO.IMP, '..', 'Saved', 'sim', `${(id.includes(',') || id.startsWith('re:')) ? 'grupo' : id}_${rom}${mi}${lado}`);
 fs.mkdirSync(dir, { recursive: true });
 /* varios músculos separados por comas se funden en una malla (para verlos juntos; la simulación es de uno) */
-const ids = id.split(','), partes = ids.map(i => PO.pieza('hombre/muscular', i)); if (partes.some(p => !p)) { console.error('no está ' + id); process.exit(1); }
+/* «re:expresión» = todos los músculos del lado cuyo nombre en inglés la cumple; con eso el colisionador son solo huesos */
+const RE = id.startsWith('re:') ? new RegExp(id.slice(3), 'i') : null;
+const ids = RE ? PO.capa('hombre/muscular').g.nodes.filter(n => n.mesh !== undefined && RE.test((n.extras || {}).en || '') && (!(n.extras || {}).lado || n.extras.lado === LD)).map(n => n.name) : id.split(','), partes = ids.map(i => PO.pieza('hombre/muscular', i)); if (partes.some(p => !p)) { console.error('no está ' + id); process.exit(1); }
 const mus = partes[0];
 
 /* colisionador: huesos del tórax y de la cintura escapular del lado, y los músculos profundos sobre los que resbala */
-const HUESO = /\brib\b|^Costal cartilage|sternum|Xiphoid|^Vertebra [TL]\d+|^Scapula$|^Humerus$|^Clavicle$|^Hip bone$|^Sacrum$/i;
+const HUESO = RE ? /^(Hip bone|Sacrum|Coccyx|Femur|Tibia|Fibula|Patella|Talus|Calcaneus|Vertebra [TL]\d+|.* rib|Humerus|Scapula|Clavicle|Ulna|Radius)$/i : /\brib\b|^Costal cartilage|sternum|Xiphoid|^Vertebra [TL]\d+|^Scapula$|^Humerus$|^Clavicle$|^Hip bone$|^Sacrum$/i;
 const PROFUNDO = /^(Serratus anterior muscle|External intercostal muscles|Internal intercostal muscles|Teres major muscle|Teres minor muscle|Infraspinatus muscle|Subscapularis muscle|Iliocostalis thoracis muscle|Longissimus thoracis muscle|Serratus posterior inferior muscle|External abdominal oblique muscle)$/;
 const piezas = [];
-for (const [capa, re] of [['hombre/oseo', HUESO], ['hombre/muscular', PROFUNDO]]) {
+for (const [capa, re] of (RE ? [['hombre/oseo', HUESO]] : [['hombre/oseo', HUESO], ['hombre/muscular', PROFUNDO]])) {
   const C = PO.capa(capa);
   for (const nd of C.g.nodes) { if (nd.mesh === undefined || ids.includes(nd.name)) continue; const ex = nd.extras || {};
     if (!re.test(ex.en || '')) continue; if (ex.lado && ex.lado !== LD) continue; piezas.push(PO.pieza(capa, nd.name)); }

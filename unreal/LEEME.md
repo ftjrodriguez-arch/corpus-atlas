@@ -180,6 +180,30 @@ Queda fuera de este paso (la web lo hace después de deformar, en la CPU): `musP
 cabeza humeral ni el tórax), `latHug`, `kneePush`, la deformación por fibras del pectoral y el dorsal, y los dedos de la mano
 y del pie (no caben en 8 pares sin otro grupo como `ax`). El clic del ratón usa la colisión de reposo.
 
+## Fase 2 · Marcha de laboratorio (2026-11-20)
+- `movimiento.js` hornea la marcha de la web cada 2 % del ciclo para sus 8 patrones (normal, Trendelenburg, steppage,
+  antiálgica, hemiparética, en tijera, parkinsoniana y rodilla rígida): llama a `applyPose()` con la marcha puesta, así salen
+  los ángulos de laboratorio (Fukuchi 2018, Schreiber 2019, Lencioni 2019), la pelvis, el centro de masas, el braceo y la raíz
+  del cuerpo después de `gaitFloor()` (pie apoyado en el suelo). También guarda las 8 fases con su texto, los 11 grupos
+  musculares con su curva de intensidad y la explicación de cada patrón (`movimiento.json → marcha`).
+- `ACorpusCuerpo::PonerMarcha(patrón, % del ciclo)` interpola los instantes, mueve el actor con la raíz (glTF → Unreal:
+  posición (x, z, y)·100 y cuaternión (−x, −z, −y, w)) y pinta la actividad muscular de amarillo a magenta; músculos débiles del
+  patrón en turquesa y espásticos en naranja. Un ciclo dura 1,1 s (4,4 s a cámara lenta).
+- Interfaz: el panel de movimiento tiene dos modos, «Rango articular» y «Marcha» (patrones, fase y su explicación,
+  deslizador del ciclo, reproducir, cámara lenta). El panel va abajo a la derecha para no tapar las piernas.
+  Pruebas: `marcha <id del patrón> <% del ciclo>` (`marcha` solo = salir). Capturas `unreal/capturas/marcha_*` y
+  `mosaico_marcha.png`.
+- Falta respecto a la web: la extensión de los dedos del pie en el despegue (los dedos aún no están en el rig), la cinta del
+  suelo, la leyenda por músculo con el tipo de contracción (excéntrica, concéntrica, isométrica) y las gráficas.
+
+### Cadera (misma pasada)
+- Glúteos y pelvitrocantéreos (`HARMC` en `movimiento.js`) anclados a pelvis (0) y fémur (1), girando en arco: en la web
+  estaban fijos a la pelvis y en la flexión de cadera el glúteo mayor quedaba como una bola. Se probó el glúteo mayor como
+  fibra tensa y se descartó (atraviesa la pelvis).
+- `blender/posar.js` admite `re:<expresión>` para ver un grupo de músculos por nombre; `unreal/hoja.ps1` junta muchas
+  imágenes en una hoja de contactos (12 posturas de hombro, 12 de pierna revisadas así).
+- Fuentes y lista inicial del futuro módulo de patologías: `unreal/PATOLOGIAS_FUENTES.md`.
+
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.

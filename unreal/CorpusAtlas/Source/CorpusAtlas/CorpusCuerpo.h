@@ -63,10 +63,31 @@ public:
 	float Grados() const { return GradosActual; }
 	float GradosMax() const;
 
+	// ── Marcha: instantes del ciclo de la web, con la pelvis, el centro de masas y el pie en el suelo ──
+	/** Coloca el instante Ciclo (0–100 %) del patrón de marcha. Patron < 0 = salir de la marcha. */
+	void PonerMarcha(int32 Patron, float Ciclo);
+	void ReproducirMarcha(bool bSi) { bMarchaEnCurso = bSi && PatronActual >= 0; AlCambiarPostura.Broadcast(); }
+	bool MarchaEnCurso() const { return bMarchaEnCurso; }
+	void MarchaLenta(bool bSi) { bMarchaLenta = bSi; AlCambiarPostura.Broadcast(); }
+	bool EsMarchaLenta() const { return bMarchaLenta; }
+	int32 PatronMarcha() const { return PatronActual; }
+	float CicloDeMarcha() const { return CicloMarcha; }
+	int32 FaseDeMarcha() const;
+	bool HayPostura() const { return RangoActual >= 0 || PatronActual >= 0; }
+
 	virtual void Tick(float Dt) override;
 
 private:
 	void CrearTexturaPostura();
+	void PosturaEnReposo();
+	void MezclarFotogramas(const TArray<float>& F0, const TArray<float>& F1, float A);
+	int32 PatronActual = -1;
+	float CicloMarcha = 0.f;
+	bool bMarchaEnCurso = false, bMarchaLenta = false;
+	FTransform TransformBase = FTransform::Identity;
+	TSet<FString> IdsMarcha;
+	TMap<FString, FIntPoint> GruposMarcha;      // pieza → (grupo muscular, 0 derecho / 1 izquierdo)
+	TMap<FString, FLinearColor> FijosMarcha;    // músculos débiles o espásticos del patrón
 	void SubirPostura();
 	void AjustarLimites(UStaticMeshComponent* C) const;
 	void PintarAgonistas(const TArray<FString>& En, const FString& Lado);

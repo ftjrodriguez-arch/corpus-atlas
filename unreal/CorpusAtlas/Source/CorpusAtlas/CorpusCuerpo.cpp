@@ -40,6 +40,7 @@ FString ACorpusCuerpo::CarpetaCuerpo() const
 void ACorpusCuerpo::BeginPlay()
 {
 	Super::BeginPlay();
+	TransformBase = Raiz ? Raiz->GetRelativeTransform() : FTransform::Identity;
 	if (const UCorpusDatos* D = Datos())
 	{
 		for (const FCorpusCapa& C : D->Capas())
@@ -144,7 +145,7 @@ void ACorpusCuerpo::AjustarLimites(UStaticMeshComponent* C) const
 {
 	// la postura saca la malla de su caja de reposo: sin agrandar los límites, Nanite y las sombras la recortarían
 	const float Radio = FMath::Max(C->Bounds.SphereRadius / FMath::Max(C->BoundsScale, 1e-3f), 0.5f);
-	C->SetBoundsScale(RangoActual >= 0 ? FMath::Clamp((Radio + ALCANCE_POSTURA) / Radio, 1.f, 400.f) : 1.f);
+	C->SetBoundsScale(HayPostura() ? FMath::Clamp((Radio + ALCANCE_POSTURA) / Radio, 1.f, 400.f) : 1.f);
 }
 
 void ACorpusCuerpo::PintarAgonistas(const TArray<FString>& En, const FString& Lado)
@@ -164,20 +165,155 @@ void ACorpusCuerpo::PintarAgonistas(const TArray<FString>& En, const FString& La
 	}
 }
 
+void ACorpusCuerpo::PosturaEnReposo()
+{
+	// ángulos y traslaciones a cero (los pivotes y el contorno del tórax no cambian)
+	for (int32 i = 0; i < AnchoPostura; ++i) { Postura[i] = FVector4f(0, 0, 0, 0); Postura[AnchoPostura * 2 + i] = FVector4f(0, 0, 0, 0); }
+}
+
+void ACorpusCuerpo::MezclarFotogramas(const TArray<float>& F0, const TArray<float>& F1, float A)
+{
+	// cada fotograma: 8 números por articulación [índice, eje xyz, ángulo, traslación xyz]; se interpola el giro (slerp)
+	struct FGiro { FQuat Q = FQuat::Identity; FVector T = FVector::ZeroVector; };
+	TMap<int32, TPair<FGiro, FGiro>> Giros;
+	for (int32 k = 0; k < 2; ++k)
+	{
+		const TArray<float>& Fr = k == 0 ? F0 : F1;
+		for (int32 j = 0; j + 7 < Fr.Num(); j += 8)
+		{
+			FGiro& G = k == 0 ? Giros.FindOrAdd((int32)Fr[j]).Key : Giros.FindOrAdd((int32)Fr[j]).Value;
+			const FVector Eje(Fr[j + 1], Fr[j + 2], Fr[j + 3]);
+			G.Q = Eje.IsNearlyZero() ? FQuat::Identity : FQuat(Eje.GetSafeNormal(), Fr[j + 4]);
+			G.T = FVector(Fr[j + 5], Fr[j + 6], Fr[j + 7]);
+		}
+	}
+	for (const auto& Par : Giros)
+	{
+		if (Par.Key < 0 || Par.Key >= AnchoPostura) { continue; }
+		const FQuat Q = FQuat::Slerp(Par.Value.Key.Q, Par.Value.Value.Q, A);
+		FVector Eje; double Ang; Q.ToAxisAndAngle(Eje, Ang);
+		if (Ang > PI) { Ang = 2.0 * PI - Ang; Eje = -Eje; }
+		const FVector T = FMath::Lerp(Par.Value.Key.T, Par.Value.Value.T, A);
+		Postura[Par.Key] = FVector4f((float)Eje.X, (float)Eje.Y, (float)Eje.Z, (float)Ang);
+		Postura[AnchoPostura * 2 + Par.Key] = FVector4f((float)T.X, (float)T.Y, (float)T.Z, 0.f);
+	}
+}
+
+// ───────── Marcha ─────────
+// Los instantes vienen de la web (ángulos de laboratorio de Fukuchi 2018, Schreiber 2019 y Lencioni 2019; pelvis, centro de
+// masas y pie apoyado en el suelo). Aquí se interpolan, se mueve el cuerpo entero con la raíz y se pinta la actividad muscular.
+
+namespace
+{
+	float NivelEn(const TArray<FVector2f>& P, float Ciclo)
+	{
+		if (P.Num() == 0) { return 0.f; }
+		Ciclo = FMath::Fmod(FMath::Fmod(Ciclo, 100.f) + 100.f, 100.f);
+		for (int32 i = 1; i < P.Num(); ++i)
+		{
+			if (Ciclo <= P[i].X) { const float T = (Ciclo - P[i - 1].X) / FMath::Max(1e-6f, P[i].X - P[i - 1].X); return FMath::Lerp(P[i - 1].Y, P[i].Y, T); }
+		}
+		return P.Last().Y;
+	}
+	// amarillo → naranja → magenta (no rojo: se confunde con el músculo), como los estados lv1–lv5 de la web
+	FLinearColor ColorNivel(float L)
+	{
+		const FLinearColor A(FColor::FromHex(TEXT("ffd23f"))), B(FColor::FromHex(TEXT("ff8a1f"))), C(FColor::FromHex(TEXT("e23fbf")));
+		return L < 0.5f ? FMath::Lerp(A, B, L * 2.f) : FMath::Lerp(B, C, (L - 0.5f) * 2.f);
+	}
+}
+
+void ACorpusCuerpo::PonerMarcha(int32 Patron, float Ciclo)
+{
+	const UCorpusDatos* D = Datos();
+	if (!D) { return; }
+	CrearTexturaPostura();
+	const bool bAntes = HayPostura();
+	const FCorpusPatronMarcha* P = (MovimientoDisponible() && D->PatronesMarcha().IsValidIndex(Patron) && D->PatronesMarcha()[Patron].Frames.Num() > 1) ? &D->PatronesMarcha()[Patron] : nullptr;
+	const bool bCambiaPatron = (P ? Patron : -1) != PatronActual;
+	if (P && RangoActual >= 0) { RangoActual = -1; bReproduciendo = false; GradosActual = 0.f; PintarAgonistas(TArray<FString>(), FString()); }
+	PatronActual = P ? Patron : -1;
+	PosturaEnReposo();
+	FTransform Raiz0 = FTransform::Identity;
+	if (P)
+	{
+		CicloMarcha = FMath::Fmod(FMath::Fmod(Ciclo, 100.f) + 100.f, 100.f);
+		const int32 N = P->Frames.Num();
+		const float X = CicloMarcha / D->PasoMarcha();
+		const int32 I0 = FMath::FloorToInt(X) % N, I1 = (I0 + 1) % N;
+		const float A = X - FMath::FloorToFloat(X);
+		MezclarFotogramas(P->Frames[I0], P->Frames[I1], A);
+		if (P->Raiz.IsValidIndex(I0) && P->Raiz.IsValidIndex(I1) && P->Raiz[I0].Num() >= 7 && P->Raiz[I1].Num() >= 7)
+		{
+			// raíz del cuerpo en glTF → Unreal: Y y Z intercambiados (espejo): posición (x, z, y) · 100 y cuaternión (−x, −z, −y, w)
+			const TArray<float>& R0 = P->Raiz[I0]; const TArray<float>& R1 = P->Raiz[I1];
+			const FQuat Q = FQuat::Slerp(FQuat(-R0[0], -R0[2], -R0[1], R0[3]), FQuat(-R1[0], -R1[2], -R1[1], R1[3]), A);
+			const FVector T = FMath::Lerp(FVector(R0[4], R0[6], R0[5]), FVector(R1[4], R1[6], R1[5]), A) * 100.0;
+			Raiz0 = FTransform(Q, T);
+		}
+	}
+	else { bMarchaEnCurso = false; }
+	if (Raiz) { Raiz->SetRelativeTransform(Raiz0 * TransformBase); }
+	SubirPostura();
+	if (HayPostura() != bAntes) { for (auto& Par : Piezas) { if (Par.Value) { AjustarLimites(Par.Value); } } }
+
+	// actividad muscular: cada grupo con su intensidad en este instante (lado derecho en el ciclo, izquierdo medio ciclo después)
+	if (bCambiaPatron)
+	{
+		for (const FString& Id : IdsMarcha) { if (Id != IdSeleccionada) { PonerEstado(Id, FLinearColor::Black, 0.f); } }
+		IdsMarcha.Reset(); GruposMarcha.Reset(); FijosMarcha.Reset();
+		if (P)
+		{
+			TMap<FString, int32> GrupoDe;
+			for (int32 g = 0; g < D->GruposMarcha().Num(); ++g) { for (const FString& En : D->GruposMarcha()[g].En) { GrupoDe.Add(En, g); } }
+			const TSet<FString> Deb(P->Debiles), Esp(P->Espasticos);
+			for (const auto& Par : Piezas)
+			{
+				const FCorpusPieza* Pz = D->Pieza(Par.Key);
+				if (!Pz || Pz->Lado.IsEmpty()) { continue; }
+				const bool bDer = Pz->Lado.StartsWith(TEXT("der"));
+				// lado afectado de los patrones patológicos: el derecho. Débiles en turquesa, espásticos en naranja (como la web)
+				if (bDer && Deb.Contains(Pz->En)) { FijosMarcha.Add(Par.Key, FLinearColor(FColor::FromHex(TEXT("2bc4c4")))); IdsMarcha.Add(Par.Key); continue; }
+				if (bDer && Esp.Contains(Pz->En)) { FijosMarcha.Add(Par.Key, FLinearColor(FColor::FromHex(TEXT("f0a040")))); IdsMarcha.Add(Par.Key); continue; }
+				if (const int32* G = GrupoDe.Find(Pz->En)) { GruposMarcha.Add(Par.Key, FIntPoint(*G, bDer ? 0 : 1)); IdsMarcha.Add(Par.Key); }
+			}
+		}
+	}
+	if (P)
+	{
+		for (const auto& Par : FijosMarcha) { if (Par.Key != IdSeleccionada) { PonerEstado(Par.Key, Par.Value, 0.7f); } }
+		for (const auto& Par : GruposMarcha)
+		{
+			if (Par.Key == IdSeleccionada) { continue; }
+			const float L = NivelEn(D->GruposMarcha()[Par.Value.X].Nivel, CicloMarcha + (Par.Value.Y ? 50.f : 0.f));
+			PonerEstado(Par.Key, ColorNivel(FMath::Clamp(L / 0.6f, 0.f, 1.f)), L > 0.05f ? FMath::Clamp(0.25f + L, 0.f, 0.85f) : 0.f);
+		}
+	}
+	AlCambiarPostura.Broadcast();
+}
+
+int32 ACorpusCuerpo::FaseDeMarcha() const
+{
+	const UCorpusDatos* D = Datos();
+	if (!D) { return -1; }
+	for (int32 i = 0; i < D->FasesMarcha().Num(); ++i) { if (CicloMarcha >= D->FasesMarcha()[i].Ini && CicloMarcha < D->FasesMarcha()[i].Fin) { return i; } }
+	return D->FasesMarcha().Num() - 1;
+}
+
 void ACorpusCuerpo::PonerRango(int32 Rango, int32 Mov, bool bIzq, float Grados)
 {
 	const UCorpusDatos* D = Datos();
 	if (!D) { return; }
 	CrearTexturaPostura();
-	const bool bAntes = RangoActual >= 0;
+	if (PatronActual >= 0 && Rango >= 0) { PonerMarcha(-1, 0.f); }   // un rango articular saca de la marcha
+	const bool bAntes = HayPostura();
 	const FCorpusRango* R = (MovimientoDisponible() && D->Rangos().IsValidIndex(Rango)) ? &D->Rangos()[Rango] : nullptr;
 	const FCorpusMovimiento* M = (R && R->Movs.IsValidIndex(Mov)) ? &R->Movs[Mov] : nullptr;
 	const bool bCambia = Rango != RangoActual || Mov != MovActual || bIzq != bLadoIzq;
 	RangoActual = M ? Rango : -1; MovActual = M ? Mov : 0; bLadoIzq = M && bIzq;
 	if (!M) { bReproduciendo = false; }
 
-	// reposo: ángulos y traslaciones a cero (los pivotes no cambian)
-	for (int32 i = 0; i < AnchoPostura; ++i) { Postura[i] = FVector4f(0, 0, 0, 0); Postura[AnchoPostura * 2 + i] = FVector4f(0, 0, 0, 0); }
+	PosturaEnReposo();
 	if (M)
 	{
 		const TArray<TArray<float>>& F = (bLadoIzq && M->Izquierdo.Num()) ? M->Izquierdo : M->Derecho;
@@ -189,35 +325,13 @@ void ACorpusCuerpo::PonerRango(int32 Rango, int32 Mov, bool bIzq, float Grados)
 			const int32 I0 = FMath::Clamp(FMath::FloorToInt(GradosActual / M->Paso), 0, FMath::Max(Ult - 1, 0)), I1 = FMath::Min(I0 + 1, Ult);
 			const float G0 = FMath::Min(I0 * M->Paso, M->Max), G1 = FMath::Min(I1 * M->Paso, M->Max);
 			const float A = G1 > G0 ? FMath::Clamp((GradosActual - G0) / (G1 - G0), 0.f, 1.f) : 0.f;
-			struct FGiro { FQuat Q = FQuat::Identity; FVector T = FVector::ZeroVector; };
-			TMap<int32, TPair<FGiro, FGiro>> Giros;
-			for (int32 k = 0; k < 2; ++k)
-			{
-				const TArray<float>& Fr = F[k == 0 ? I0 : I1];
-				for (int32 j = 0; j + 7 < Fr.Num(); j += 8)
-				{
-					FGiro& G = k == 0 ? Giros.FindOrAdd((int32)Fr[j]).Key : Giros.FindOrAdd((int32)Fr[j]).Value;
-					const FVector Eje(Fr[j + 1], Fr[j + 2], Fr[j + 3]);
-					G.Q = Eje.IsNearlyZero() ? FQuat::Identity : FQuat(Eje.GetSafeNormal(), Fr[j + 4]);
-					G.T = FVector(Fr[j + 5], Fr[j + 6], Fr[j + 7]);
-				}
-			}
-			for (const auto& Par : Giros)
-			{
-				if (Par.Key < 0 || Par.Key >= AnchoPostura) { continue; }
-				const FQuat Q = FQuat::Slerp(Par.Value.Key.Q, Par.Value.Value.Q, A);
-				FVector Eje; double Ang; Q.ToAxisAndAngle(Eje, Ang);
-				if (Ang > PI) { Ang = 2.0 * PI - Ang; Eje = -Eje; }
-				const FVector T = FMath::Lerp(Par.Value.Key.T, Par.Value.Value.T, A);
-				Postura[Par.Key] = FVector4f((float)Eje.X, (float)Eje.Y, (float)Eje.Z, (float)Ang);
-				Postura[AnchoPostura * 2 + Par.Key] = FVector4f((float)T.X, (float)T.Y, (float)T.Z, 0.f);
-			}
+			MezclarFotogramas(F[I0], F[I1], A);
 		}
 	}
 	else { GradosActual = 0.f; }
 	SubirPostura();
 
-	if ((RangoActual >= 0) != bAntes) { for (auto& Par : Piezas) { if (Par.Value) { AjustarLimites(Par.Value); } } }
+	if (HayPostura() != bAntes) { for (auto& Par : Piezas) { if (Par.Value) { AjustarLimites(Par.Value); } } }
 	if (bCambia)
 	{
 		// agonistas: los del lado que se mueve (en el tronco y el cuello, ambos lados)
@@ -229,6 +343,14 @@ void ACorpusCuerpo::PonerRango(int32 Rango, int32 Mov, bool bIzq, float Grados)
 void ACorpusCuerpo::Tick(float Dt)
 {
 	Super::Tick(Dt);
+	if (PatronActual >= 0 && bMarchaEnCurso)
+	{
+		// un ciclo cada 1,1 s (4,4 s a cámara lenta), como la web; los patrones patológicos llevan su propia velocidad
+		const UCorpusDatos* D = Datos();
+		const float Vel = (D && D->PatronesMarcha().IsValidIndex(PatronActual)) ? D->PatronesMarcha()[PatronActual].Velocidad : 1.f;
+		PonerMarcha(PatronActual, CicloMarcha + Dt * 100.f * Vel / (bMarchaLenta ? 4.4f : 1.1f));
+		return;
+	}
 	if (!bReproduciendo || RangoActual < 0) { return; }
 	// ida y vuelta entre 0 y el máximo, a unos 45° por segundo (como el botón ▶ de la web)
 	const float Max = GradosMax();
@@ -293,7 +415,7 @@ void ACorpusCuerpo::CargarCapa(const FString& Clave)
 		{
 			C->SetCustomPrimitiveDataFloat(21, Ins->X); C->SetCustomPrimitiveDataFloat(22, Ins->Y); C->SetCustomPrimitiveDataFloat(23, Ins->Z);
 		}
-		if (RangoActual >= 0) { AjustarLimites(C); }
+		if (HayPostura()) { AjustarLimites(C); }
 		Piezas.Add(P.Id, C);
 		Ids.Add(P.Id);
 	}
@@ -448,7 +570,9 @@ void ACorpusCuerpo::DescargarTodo()
 void ACorpusCuerpo::PonerCuerpo(ECorpusCuerpo Nuevo)
 {
 	if (Nuevo == CuerpoActual) { return; }
-	if (Nuevo == ECorpusCuerpo::VisibleHuman) { QuitarPostura(); }   // el Visible Human no tiene rig
+	if (Nuevo == ECorpusCuerpo::VisibleHuman) { QuitarPostura(); }
+	if (PatronActual >= 0) { PonerMarcha(-1, 0.f); }
+	IdsMarcha.Reset(); GruposMarcha.Reset(); FijosMarcha.Reset();   // el Visible Human no tiene rig
 	IdsAgonistas.Reset();
 	const bool bDeVH = CuerpoActual == ECorpusCuerpo::VisibleHuman, bAVH = Nuevo == ECorpusCuerpo::VisibleHuman;
 	TSet<FString> Antes = CapasVisibles;
