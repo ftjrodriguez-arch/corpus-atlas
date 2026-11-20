@@ -202,6 +202,25 @@ void UCorpusDatos::CargarMovimiento()
 			}
 		}
 	}
+	// contorno del tórax por alturas (fila 3 de la textura de postura) y piezas que se pegan a él (dorsal ancho, redondo mayor)
+	const TSharedPtr<FJsonObject>* TJ = nullptr;
+	if (J->TryGetObjectField(TEXT("torax"), TJ))
+	{
+		for (const auto& F : (*TJ)->GetArrayField(TEXT("filas")))
+		{
+			const TArray<TSharedPtr<FJsonValue>>& V = F->AsArray();
+			Torax.Add(FVector3f((float)V[0]->AsNumber(), (float)V[1]->AsNumber(), (float)V[2]->AsNumber()));
+		}
+	}
+	const TSharedPtr<FJsonObject>* AJ = nullptr;
+	if (J->TryGetObjectField(TEXT("abrazo"), AJ))
+	{
+		for (const auto& Cu : (*AJ)->Values)
+		{
+			const TArray<TSharedPtr<FJsonValue>>* Ids = nullptr;
+			if (Cu.Value.IsValid() && Cu.Value->TryGetArray(Ids)) { for (const auto& X : *Ids) { Abrazo.Add(FString(Cu.Key) + TEXT("/") + X->AsString()); } }
+		}
+	}
 	const TArray<TSharedPtr<FJsonValue>>* R = nullptr;
 	if (J->TryGetArrayField(TEXT("rom"), R))
 	{

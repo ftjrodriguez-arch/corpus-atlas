@@ -29,8 +29,9 @@ try { ({ chromium } = require('playwright')); }
 catch (e) { console.error('Falta Playwright: npm i playwright (o NODE_PATH a una instalación existente)'); process.exit(1); }
 
 const RAIZ = path.resolve(__dirname, '..', '..');
-const URL = process.argv[2] || 'http://localhost:8765/index.html';
-const IMP = path.resolve(process.argv[3] || path.join(RAIZ, 'unreal', 'CorpusAtlas', 'Importar'));
+const ARGS = process.argv.slice(2).filter(a => !a.startsWith('--'));   // --sin-pesos: solo posturas (no toca los GLB)
+const URL = ARGS[0] || 'http://localhost:8765/index.html';
+const IMP = path.resolve(ARGS[1] || path.join(RAIZ, 'unreal', 'CorpusAtlas', 'Importar'));
 const CUERPOS = ['hombre', 'mujer'];            // el Visible Human no se mueve en la web
 const ROM_FUERA = ['dedos', 'pulgar', 'dedospie'];
 const PASO = 5;
@@ -99,6 +100,17 @@ const PREPARA = `(async()=>{
     const c=new V3((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);let r=0;for(let i=0;i<n;i++)r=Math.max(r,Math.hypot(pos[i*3]-c.x,pos[i*3+1]-c.y,pos[i*3+2]-c.z));
     const m={userData:{c:{en,side},sys},geometry:{attributes:{position:{array:pos}},boundingSphere:{center:c,radius:r},index:null}};
     const Ws=L.map(k=>{let W=null;try{W=weightsFor(m,jn(k));}catch(e){W=null;}if(/^ankle_st_/.test(k)&&en==='Talus')W=null;return [W,!!(m.userData.lin&&m.userData.lin[jn(k)])];});
+    /* Dorsal ancho, pectoral mayor y redondo mayor (mejora sobre la web): sus pesos de hombro van a escalones (sectores angulares de shRig) y dejan que
+       medio vientre muscular gire con el brazo; la web lo arregla después relajando la malla en la CPU. Aquí: solo los
+       últimos centímetros junto al tendón siguen al húmero (la inserción está a ~6 cm de la articulación), el vientre
+       queda sobre el tórax y el músculo se estira entre ambos. Peso suave por distancia al punto de inserción. */
+    const TD=[[/^Latissimus dorsi muscle$/,/^(shoulder|acr|sc)$/,0.02,0.09],[/^(Sternocostal head|Abdominal part) of pectoralis major muscle$/,/^(shoulder|acr|sc)$/,0.03,0.11],
+      [/^Clavicular head of pectoralis major muscle$/,/^(shoulder|acr)$/,0.03,0.09],[/^Teres major muscle$/,/^shoulder$/,0.02,0.07]].find(x=>x[0].test(en));
+    if(TD&&(side==='derecho'||side==='izquierdo')){const Sd=side==='derecho'?'R':'L',seg=SEGS['arm_'+Sd],A=seg[0],B=seg[1],ax=B.x-A.x,ay=B.y-A.y,az=B.z-A.z,L2=ax*ax+ay*ay+az*az;
+      let bi=0,bd=1e9;for(let i=0;i<n;i++){const px=pos[i*3]-A.x,py=pos[i*3+1]-A.y,pz=pos[i*3+2]-A.z;let t=(px*ax+py*ay+pz*az)/L2;t=t<0?0:t>1?1:t;const dx=px-ax*t,dy=py-ay*t,dz=pz-az*t,d=dx*dx+dy*dy+dz*dz+(t<0.06?0.0004:0);if(d<bd){bd=d;bi=i;}}
+      const Ix=pos[bi*3],Iy=pos[bi*3+1],Iz=pos[bi*3+2],Wd=new Float32Array(n);
+      for(let i=0;i<n;i++){let t=(Math.hypot(pos[i*3]-Ix,pos[i*3+1]-Iy,pos[i*3+2]-Iz)-TD[2])/TD[3];t=t<0?0:t>1?1:t;Wd[i]=1-t*t*(3-2*t);}
+      L.forEach((k,q)=>{const [nd,sd]=k.split('_');if(sd===Sd&&TD[1].test(nd))Ws[q]=[Wd,true];else if(/^(elbow|fore|wrist|hip|knee)$/.test(nd)||(sd&&sd!==Sd&&/^(shoulder|acr|sc)$/.test(nd)))Ws[q]=[null,false];});}
     /* articulaciones que mueven la pieza (algún vértice con peso ≥ 0,002), en el orden en que las aplica deform() */
     let S=[];for(let k=0;k<NA;k++){const W=Ws[k][0];if(!W)continue;let mx=0;for(let v=0;v<n;v++)if(W[v]>mx)mx=W[v];if(mx>=0.002)S.push({i:k+1,W,lin:Ws[k][1],mx});}
     /* articulaciones seguidas (en este orden) que pesan lo mismo en toda la pieza van juntas en un hueco, hasta 3:
@@ -156,19 +168,56 @@ const PREPARA = `(async()=>{
     rom.push({ id: j.id, n: j.n, lados: j.sided, movs });
     console.log('  ROM %s: %d movimientos', j.id, movs.length);
   }
-  const salida = { version: 1, unidades: 'm, glTF (Y arriba)', paso: PASO, ax: R.AX, ax_de: R.L.slice(-3),
-    articulaciones: R.L.map((k, i) => ({ id: k, pivote: R.piv[i] })), rom };
+  /* ── mejora sobre la web: la columna toracolumbar no gira en una sola bisagra ──
+     En la web todo el giro de «tronco» ocurre en L3 y la zona lumbar hace joroba. Aquí se reparte entre la charnela
+     lumbosacra (lumb, S1), L3 (trunk) y la toracolumbar (thor, T12), con el reparto fisiológico de cada movimiento:
+     la flexión es sobre todo lumbar; la rotación, casi toda torácica (las carillas lumbares la bloquean). */
+  const REPARTO = [[0.42, 0.26, 0.32], [0.45, 0.25, 0.30], [0.30, 0.28, 0.42], [0.08, 0.17, 0.75]];   // flexión, extensión, inclinación, rotación → [lumb, trunk, thor]
+  const iL = R.L.indexOf('lumb'), iT = R.L.indexOf('trunk'), iH = R.L.indexOf('thor');
+  const tronco = rom.find(r => r.id === 'tronco');
+  if (tronco) tronco.movs.forEach((M, mi) => { const rp = REPARTO[mi] || REPARTO[0];
+    for (const S of ['R', 'L']) if (M[S]) M[S] = M[S].map(fr => { const out = [];
+      for (let k = 0; k < fr.length; k += 8) { const o = fr.slice(k, k + 8);
+        if (o[0] !== iT) { out.push(o); continue; }
+        [[iL, rp[0]], [iT, rp[1]], [iH, rp[2]]].forEach(([i, f]) => out.push([i, o[1], o[2], o[3], Math.round(o[4] * f * 1e5) / 1e5, 0, 0, 0])); }
+      return out.sort((a, b) => a[0] - b[0]).flat(); }); });
+
+  /* ── contorno de la parrilla costal por alturas (para pegar el dorsal ancho al tórax, como latHug de la web) ──
+     Cada centímetro de altura: elipse que envuelve costillas, cartílagos, esternón y vértebras torácicas
+     [centro z, radio x, radio z]. El material mide con ella cuánto se separa un punto de la pared torácica. */
+  const torax = (() => { const g = leeGLB(path.join(IMP, 'hombre', 'oseo.glb')), y0 = 1.06, dy = 0.0125, n = 32;
+    const caja = Array.from({ length: n }, () => [1e9, -1e9, 1e9, -1e9]);
+    for (const nodo of g.j.nodes) { if (nodo.mesh === undefined || !/\brib\b|^Costal cartilage|sternum|Xiphoid|^Vertebra T\d+/i.test((nodo.extras || {}).en || '')) continue;
+      const P = vista(g, g.j.meshes[nodo.mesh].primitives[0].attributes.POSITION);
+      for (let i = 0; i < P.length; i += 3) { const k = Math.round((P[i + 1] - y0) / dy); if (k < 0 || k >= n) continue; const c = caja[k];
+        if (P[i] < c[0]) c[0] = P[i]; if (P[i] > c[1]) c[1] = P[i]; if (P[i + 2] < c[2]) c[2] = P[i + 2]; if (P[i + 2] > c[3]) c[3] = P[i + 2]; } }
+    const f = v => Math.round(v * 1e4) / 1e4;
+    /* la caja se suaviza con sus vecinas: las costillas dejan huecos entre una y otra */
+    const filas = caja.map((c, k) => { let a = [0, 0, 0, 0], m = 0; for (let d = -2; d <= 2; d++) { const q = caja[k + d]; if (!q || q[0] > q[1]) continue; for (let t = 0; t < 4; t++) a[t] += q[t]; m++; }
+      if (!m) return [0, 0, 0]; a = a.map(v => v / m); return [f((a[2] + a[3]) / 2), f((a[1] - a[0]) / 2), f((a[3] - a[2]) / 2)]; });
+    return { y0, dy, filas }; })();
+  const abrazo = {};
+  for (const c of CUERPOS) { const g = leeGLB(path.join(IMP, c, 'muscular.glb'));
+    abrazo[c] = g.j.nodes.filter(nd => /^(Latissimus dorsi muscle|Teres major muscle|.* of pectoralis major muscle)$/.test((nd.extras || {}).en || '')).map(nd => nd.name); }
+
+  const SIN_PESOS = process.argv.includes('--sin-pesos');
+  const SOLO = (process.argv.find(a => a.startsWith('--solo=')) || '').slice(7);   // --solo=muscular: rehace los pesos de esa capa nada más
+  const jf = path.join(IMP, 'datos', 'movimiento.json');
+  const antes = (SIN_PESOS || SOLO) && fs.existsSync(jf) ? JSON.parse(fs.readFileSync(jf, 'utf8')) : null;
+  const salida = { version: 2, unidades: 'm, glTF (Y arriba)', paso: PASO, ax: R.AX, ax_de: R.L.slice(-3),
+    articulaciones: R.L.map((k, i) => ({ id: k, pivote: R.piv[i] })), rom, torax, abrazo, piezas: antes ? antes.piezas : {} };
   fs.mkdirSync(path.join(IMP, 'datos'), { recursive: true });
-  fs.writeFileSync(path.join(IMP, 'datos', 'movimiento.json'), JSON.stringify(salida));
+  fs.writeFileSync(jf, JSON.stringify(salida));
   console.log('Posturas: datos/movimiento.json');
+  if (SIN_PESOS) { console.log('Pesos: sin tocar (--sin-pesos)'); await b.close(); return; }
 
   /* ── pesos ── */
   let tv = 0, tm = 0, to = 0;
-  salida.piezas = {};
+  if (!SOLO) salida.piezas = {};
   for (const c of CUERPOS) {
-    const P = salida.piezas[c] = {};
+    const P = salida.piezas[c] = salida.piezas[c] || {};
     const dir = path.join(IMP, c);
-    for (const f of fs.readdirSync(dir).filter(x => x.endsWith('.glb'))) {
+    for (const f of fs.readdirSync(dir).filter(x => x.endsWith('.glb') && (!SOLO || x === SOLO + '.glb'))) {
       const g = leeGLB(path.join(dir, f)), nuevos = [];
       let mv = 0, ov = 0, nv = 0;
       for (let ni = 0; ni < g.j.nodes.length; ni++) {

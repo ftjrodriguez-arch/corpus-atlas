@@ -118,6 +118,21 @@ Capturas: `unreal/capturas/mov_00…10` (hombro, codo, cadera, rodilla, tronco, 
 Color del músculo: parámetro `Desaturar` (tabla `DESATURAR`, músculo 0,30) y menos dispersión roja; antes salía rojo puro.
 Reimportar las mallas (`importar_mallas`) tarda 1 h 45 min; `_aplanar` sustituye la malla anterior por la recién importada.
 
+### Mejoras sobre la web (2026-11-20, a petición del usuario: «anatómicamente el cuerpo no es así»)
+- **Columna toracolumbar repartida:** en la web todo el giro de «tronco» ocurre en L3 y la zona lumbar hace joroba.
+  `movimiento.js` lo reparte entre S1 (`lumb`), L3 (`trunk`) y T12 (`thor`) con la tabla `REPARTO` (flexión 42/26/32 %,
+  extensión 45/25/30, inclinación 30/28/42, rotación 8/17/75).
+- **Dorsal ancho, pectoral mayor y redondo mayor:** los pesos de la web dejan que medio vientre muscular gire con el brazo
+  (y van a escalones; la web lo arregla relajando la malla en la CPU). Aquí solo la zona del tendón sigue al húmero: peso
+  suave por distancia al punto de inserción (tabla `TD` de `movimiento.js`); el vientre queda sobre el tórax y se estira.
+- **Pegados a la parrilla costal** (`abrazo` en `movimiento.json`, dato primitivo 20): fila 3 de la textura de postura =
+  contorno del tórax cada 1,25 cm (centro z, radio x, radio z). Antes de girar el tronco, el material devuelve cada punto a
+  su distancia de reposo al contorno, con holgura creciente hacia el húmero (misma regla que `latHug`, sin corte brusco).
+- `node tools/unreal/movimiento.js --sin-pesos` rehace solo las posturas; `--solo=muscular` rehace los pesos de una capa
+  (luego `ci.importar_mallas(["hombre/muscular", "mujer/muscular"])`, unos 12 minutos).
+- Pendiente de este repaso: pliegues finos en la axila (deltoides, bíceps, tríceps largo y manguito se cruzan), el brazo
+  levantado de la mujer sale pálido, y revisar de cerca los demás rangos (rotaciones del hombro, escápula, cadera).
+
 Queda fuera de este paso (la web lo hace después de deformar, en la CPU): `musPost` (músculos del hombro que no atraviesan la
 cabeza humeral ni el tórax), `latHug`, `kneePush`, la deformación por fibras del pectoral y el dorsal, y los dedos de la mano
 y del pie (no caben en 8 pares sin otro grupo como `ax`). El clic del ratón usa la colisión de reposo.

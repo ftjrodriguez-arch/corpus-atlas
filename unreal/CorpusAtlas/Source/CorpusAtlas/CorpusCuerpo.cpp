@@ -106,6 +106,12 @@ void ACorpusCuerpo::CrearTexturaPostura()
 		const FVector3f& P = D->PivotesArticulaciones()[i];
 		Postura[AnchoPostura + i] = FVector4f(P.X, P.Y, P.Z, 0.f);
 	}
+	// Fila 3: contorno de la parrilla costal por alturas (el material pega a él el dorsal ancho y el redondo mayor)
+	for (int32 i = 0; D && i < FMath::Min(AnchoPostura, D->ContornoTorax().Num()); ++i)
+	{
+		const FVector3f& T = D->ContornoTorax()[i];
+		Postura[AnchoPostura * 3 + i] = FVector4f(T.X, T.Y, T.Z, 0.f);
+	}
 	SubirPostura();
 }
 
@@ -280,6 +286,7 @@ void ACorpusCuerpo::CargarCapa(const FString& Clave)
 			C->SetCustomPrimitiveDataVector4(12, FVector4(V[0], V[1], V[2], V[3]));
 			C->SetCustomPrimitiveDataVector4(16, FVector4(V[4], V[5], V[6], V[7]));
 		}
+		C->SetCustomPrimitiveDataFloat(20, D->SePegaAlTorax(Carpeta, P.Id) ? 1.f : 0.f);
 		if (RangoActual >= 0) { AjustarLimites(C); }
 		Piezas.Add(P.Id, C);
 		Ids.Add(P.Id);

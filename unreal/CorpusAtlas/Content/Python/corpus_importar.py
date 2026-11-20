@@ -147,16 +147,50 @@ HLSL_POSTURA = r"""
 float3 g = float3(P.x, P.z, P.y) * 0.01;
 float3 g0 = g;
 float4 qt = float4(0, 0, 0, 1);
-float js[8] = { J0, J1, J2, J3, J4, J5, J6, J7 };
-float ws[8] = { U0.x, U0.y, U1.x, U1.y, U2.x, U2.y, U3.x, U3.y };
-[loop] for (int k = 0; k < 8; k++)
+float js[9] = { J0, J1, J2, J3, J4, J5, J6, J7, 0 };
+float ws[9] = { U0.x, U0.y, U1.x, U1.y, U2.x, U2.y, U3.x, U3.y, 0 };
+bool abrazado = false;
+float wl = 0;
+[loop] for (int k = 0; k < 9; k++)
 {
     float jv = js[k];
+    int code = (int)round(abs(jv));
+    // Antes de girar el tronco (o al acabar): el dorsal ancho y el redondo mayor no se despegan de la parrilla costal.
+    // Fila 3 de la textura = contorno del tórax por alturas (centro z, radio x, radio z). k = distancia relativa al
+    // contorno (1 = sobre las costillas). Cada punto conserva su k de reposo; solo cerca del húmero (peso alto) se le
+    // deja holgura para el pliegue axilar posterior. Misma regla que latHug() de la web: d0 + 6 mm + libre² · 7 cm.
+    bool tronco = (jv == 0) || ((code & 31) >= NA_TRONCO);
+    if (!abrazado && tronco)
+    {
+        abrazado = true;
+        if (HUG > 0 && wl > 0.0005)
+        {
+            float h0 = clamp((g0.y - Y0) / DY, 0, 31), h1 = clamp((g.y - Y0) / DY, 0, 31);
+            int a0 = (int)floor(h0), a1 = (int)floor(h1);
+            float3 c0 = lerp(Tex.Load(int3(a0, 3, 0)).xyz, Tex.Load(int3(min(a0 + 1, 31), 3, 0)).xyz, h0 - a0);
+            float3 c1 = lerp(Tex.Load(int3(a1, 3, 0)).xyz, Tex.Load(int3(min(a1 + 1, 31), 3, 0)).xyz, h1 - a1);
+            if (c0.y > 0.01 && c1.y > 0.01)
+            {
+                float k0 = length(float2(g0.x / c0.y, (g0.z - c0.x) / c0.z));
+                float k1 = length(float2(g.x / c1.y, (g.z - c1.x) / c1.z));
+                float libre = saturate((wl - 0.25) / 0.6);
+                // la holgura crece sin corte hacia el húmero (libre → 1): un corte brusco plegaba el músculo en la axila
+                float l3 = libre * libre * libre;
+                float kmax = k0 + (0.006 + libre * libre * 0.07 + l3 * l3 * 1.5) / (0.5 * (c1.y + c1.z));
+                float kt = clamp(k1, min(k0, 1.03), kmax);
+                float hy = (g.y - Y0) / DY;
+                float val = saturate(hy) * saturate(31 - hy) * saturate(HUG);
+                float s = lerp(1, kt / max(k1, 1e-4), val);
+                g.x *= s;
+                g.z = c1.x + (g.z - c1.x) * s;
+            }
+        }
+    }
     if (jv == 0) break;
     float w = saturate(ws[k]);
+    if (k == 0 && !tronco) wl = w;
     if (w < 0.0005) continue;
     bool lin = jv < 0;
-    int code = (int)round(abs(jv));
     [loop] for (int t = 0; t < 3; t++)
     {
         int j = (code & 31) - 1;
@@ -192,6 +226,14 @@ return float3(g.x, g.z, g.y);
 """
 
 
+def _datos_mov():
+    for f in (os.path.join(IMPORTAR, "datos", "movimiento.json"), os.path.join(DATOS, "movimiento.json")):
+        if os.path.exists(f):
+            with open(f, encoding="utf-8") as h:
+                return json.load(h)
+    raise RuntimeError("Falta movimiento.json: node tools/unreal/movimiento.js")
+
+
 def _custom(g, codigo, entradas, tipo, extra=None, desc=""):
     cu = g.n(unreal.MaterialExpressionCustom, -500)
     cu.set_editor_property("description", desc)
@@ -225,7 +267,10 @@ def _postura(g):
     if negro:
         tex.set_editor_property("texture", negro)
     tex.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
-    cu = _custom(g, HLSL_POSTURA, ["Tex", "P", "U0", "U1", "U2", "U3"] + ["J%d" % i for i in range(8)], CMOT.CMOT_FLOAT3,
+    mov = _datos_mov()
+    codigo = (HLSL_POSTURA.replace("NA_TRONCO", str(len(mov["articulaciones"]) - 2))
+              .replace("Y0", repr(float(mov["torax"]["y0"]))).replace("DY", repr(float(mov["torax"]["dy"]))))
+    cu = _custom(g, codigo, ["Tex", "P", "U0", "U1", "U2", "U3"] + ["J%d" % i for i in range(8)] + ["HUG"], CMOT.CMOT_FLOAT3,
                  extra=[("Q", CMOT.CMOT_FLOAT4)], desc="Postura (rig de la web)")
     g.une(tex, cu, "Tex")
     g.une(g.n(unreal.MaterialExpressionPreSkinnedPosition), cu, "P")
@@ -233,6 +278,7 @@ def _postura(g):
         g.une(g.n(unreal.MaterialExpressionTextureCoordinate, coordinate_index=c), cu, "U%d" % c)
     for i in range(8):      # articulación de cada hueco: datos primitivos 12–19 (ACorpusCuerpo::CargarCapa)
         g.une(g.esc("Hueco%d" % i, 0.0, cpd=12 + i), cu, "J%d" % i)
+    g.une(g.esc("Abrazo", 0.0, cpd=20), cu, "HUG")      # 1 = dorsal ancho y redondo mayor: pegados a la parrilla costal
     S, D = unreal.MaterialVectorCoordTransformSource, unreal.MaterialVectorCoordTransform
     wpo = _transformar(g, cu, S.TRANSFORMSOURCE_LOCAL, D.TRANSFORM_WORLD)
     g.sal(wpo, unreal.MaterialProperty.MP_WORLD_POSITION_OFFSET)
