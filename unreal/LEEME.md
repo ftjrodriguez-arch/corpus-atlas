@@ -180,6 +180,38 @@ Queda fuera de este paso (la web lo hace después de deformar, en la CPU): `musP
 cabeza humeral ni el tórax), `latHug`, `kneePush`, la deformación por fibras del pectoral y el dorsal, y los dedos de la mano
 y del pie (no caben en 8 pares sin otro grupo como `ax`). El clic del ratón usa la colisión de reposo.
 
+## Fase 2 · Correctivos elásticos del hombro (2026-11-20)
+El reparto de pesos no daba para todos los movimientos (dorsal rasgado al encoger el hombro, pectoral retorcido en la
+rotación externa). Ahora 25 músculos por lado (trapecio, romboides, elevador, serrato, dorsal, pectorales, subclavio,
+deltoides, manguito, redondos, bíceps, coracobraquial y cabeza larga del tríceps) se resuelven fuera como cuerpos elásticos
+y Unreal solo reproduce el resultado. Solo en los rangos `hombro` y `escapula`; en la marcha y el tronco siguen los pesos.
+- `tools/unreal/correctivos.js`:
+  - **Rejilla** de nodos de 15 mm alrededor de cada músculo; el vértice se mueve con los 8 nodos de su celda (trilineal
+    sobre la posición de reposo). Es continuo por construcción (los fascículos sueltos no se separan) y Nanite no lo estropea.
+  - **Anclajes reales:** los vértices que tocan las áreas de origen e inserción de la capa `insercion` siguen rígidamente
+    al hueso sobre el que está dibujada el área. Extremos sin área en el atlas: tabla `EXTRA` (redondo mayor,
+    coracobraquial, bíceps corto), tendón del dorsal y del pectoral (`insercion` de movimiento.json), línea media y cresta
+    ilíaca. El dorsal no va cosido al ángulo inferior de la escápula: resbala sobre él.
+  - **Elasticidad:** ARAP por celdas con la fibra libre (tangente de la malla): a lo largo de la fibra el músculo se alarga
+    o se acorta casi sin oponerse y engorda o adelgaza para conservar el volumen (`BETA`).
+  - **Sin atravesar huesos:** contorno de la parrilla costal y distancia con signo a húmero, escápula y clavícula.
+  - **Brazo:** bíceps, tríceps largo y coracobraquial van sujetos al húmero de lado pero deslizan a lo largo de él.
+  - Órdenes: `anclas` (qué hueso sujeta cada músculo), `prueba`, `medir` (pliegues, vértices dentro de hueso y
+    estiramiento, material frente a correctivo, en 14 posturas) y `hornear`.
+  - Medido en el lado derecho: pliegues 22.214 → 5.231; vértices dentro de hueso 32.206 → 19.968 (los que quedan son
+    de zonas ancladas a un hueso que a su vez entra en el contorno del tórax).
+- `node tools/unreal/correctivos.js hornear` (90 s) escribe `Importar/datos/correctivos.json` + `correctivos.bin` (88 MB,
+  no se sube): por movimiento, lado y cuadro (cada 5°), desplazamiento y giro de cada nodo en enteros de 16 bits.
+  La mujer solo trae sus piezas propias (dorsal y cabezas largas); el resto son las del hombre.
+- Unreal: `UCorpusDatos::CargarCorrectivos`, `ACorpusCuerpo::PonerCorrectivo` (interpola los dos cuadros vecinos y sube la
+  textura `Correctivo`: mitad superior desplazamientos, inferior giros; texel 0 = activo) y, en `HLSL_POSTURA`, el bloque
+  «Correctivo elástico» (datos primitivos 24–31: base, nodos por eje, esquina y celda). Con la rejilla activa no se
+  ejecuta el bucle de pesos. Tras cambiar el HLSL: `.\unreal\py.ps1 "ci.copiar_datos(); ci.crear_materiales()"`.
+- Visor: `.\unreal\hojas_hombro.ps1 -Corr` (14 posturas en Blender, 75 s) y sin `-Corr` para comparar con el material.
+  Capturas de Unreal: `unreal/capturas/cz_*`.
+- Pendiente: capas entre músculos (el pectoral mayor no «sabe» que debajo está el menor), hueco bajo la clavícula al
+  elevar 40°, pliegue del dorsal junto al ángulo inferior de la escápula en abducción de 150°, y llevar lo mismo a la cadera.
+
 ## Fase 2 · Marcha de laboratorio (2026-11-20)
 - `movimiento.js` hornea la marcha de la web cada 2 % del ciclo para sus 8 patrones (normal, Trendelenburg, steppage,
   antiálgica, hemiparética, en tijera, parkinsoniana y rodilla rígida): llama a `applyPose()` con la marcha puesta, así salen

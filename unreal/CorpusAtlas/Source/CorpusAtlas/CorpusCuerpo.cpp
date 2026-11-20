@@ -78,8 +78,10 @@ UMaterialInterface* ACorpusCuerpo::MaterialDe(const FString& Base, bool bTranslu
 	if (Mat)
 	{
 		CrearTexturaPostura();
+		CrearTexturaCorrectivo();
 		UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(Mat, this);
 		MID->SetTextureParameterValue(TEXT("Postura"), TexPostura);
+		MID->SetTextureParameterValue(TEXT("Correctivo"), TexCorrectivo);
 		Mat = MID;
 	}
 	Materiales.Add(Nombre, Mat);
@@ -126,6 +128,83 @@ void ACorpusCuerpo::SubirPostura()
 	FUpdateTextureRegion2D* Region = new FUpdateTextureRegion2D(0, 0, 0, 0, AnchoPostura, AltoPostura);
 	TexPostura->UpdateTextureRegions(0, 1, Region, Paso, sizeof(FVector4f), Copia,
 		[](uint8* Datos, const FUpdateTextureRegion2D* R) { FMemory::Free(Datos); delete R; });
+}
+
+// ───────── Correctivos elásticos del hombro (tools/unreal/correctivos.js) ─────────
+
+void ACorpusCuerpo::CrearTexturaCorrectivo()
+{
+	if (TexCorrectivo) { return; }
+	const UCorpusDatos* D = Datos();
+	const int32 Texeles = D ? D->TexelesCorrectivo() : 0;
+	AnchoCorr = Texeles > 0 ? D->AnchoCorrectivo() : 4;
+	FilasCorr = FMath::Max(1, FMath::DivideAndRoundUp(FMath::Max(Texeles, 1), AnchoCorr));
+	TexCorrectivo = UTexture2D::CreateTransient(AnchoCorr, FilasCorr * 2, PF_A32B32G32R32F, TEXT("T_Correctivo"));
+	TexCorrectivo->Filter = TF_Nearest;
+	TexCorrectivo->SRGB = false;
+	TexCorrectivo->AddressX = TA_Clamp; TexCorrectivo->AddressY = TA_Clamp;
+	TexCorrectivo->NeverStream = true;
+	TexCorrectivo->UpdateResource();
+	Correctivo.Init(FVector4f(0, 0, 0, 0), AnchoCorr * FilasCorr * 2);
+	for (int32 i = AnchoCorr * FilasCorr; i < Correctivo.Num(); ++i) { Correctivo[i] = FVector4f(0, 0, 0, 1); }
+	Correctivo[0] = FVector4f(0.f, (float)FilasCorr, 0.f, 0.f);
+	SubirCorrectivo();
+}
+
+void ACorpusCuerpo::SubirCorrectivo()
+{
+	if (!TexCorrectivo) { return; }
+	const int32 Paso = AnchoCorr * sizeof(FVector4f), Alto = FilasCorr * 2;
+	uint8* Copia = (uint8*)FMemory::Malloc(Paso * Alto);
+	FMemory::Memcpy(Copia, Correctivo.GetData(), Paso * Alto);
+	FUpdateTextureRegion2D* Region = new FUpdateTextureRegion2D(0, 0, 0, 0, AnchoCorr, Alto);
+	TexCorrectivo->UpdateTextureRegions(0, 1, Region, Paso, sizeof(FVector4f), Copia,
+		[](uint8* Datos, const FUpdateTextureRegion2D* R) { FMemory::Free(Datos); delete R; });
+}
+
+void ACorpusCuerpo::PonerCorrectivo(const FCorpusRango* R, int32 Mov, bool bIzq, int32 I0, int32 I1, float A)
+{
+	const UCorpusDatos* D = Datos();
+	CrearTexturaCorrectivo();
+	const FCorpusCorrMov* CM = (D && R) ? D->Correctivo(R->Id, Mov, bIzq) : nullptr;
+	if (!CM || CM->Cuadros < 1)
+	{
+		// este movimiento no lleva correctivos: los músculos vuelven a moverse solo con sus pesos
+		if (bCorrActivo) { bCorrActivo = false; ClaveCorr.Reset(); Correctivo[0].X = 0.f; SubirCorrectivo(); }
+		return;
+	}
+	const FString Clave = FString::Printf(TEXT("%s/%d/%d"), *R->Id, Mov, bIzq ? 1 : 0);
+	const int32 Mitad = AnchoCorr * FilasCorr;
+	if (Clave != ClaveCorr)
+	{
+		// otro movimiento u otro lado: todo a reposo (el lado que no se mueve se queda así)
+		for (int32 i = 1; i < Mitad; ++i) { Correctivo[i] = FVector4f(0, 0, 0, 0); }
+		for (int32 i = Mitad; i < Correctivo.Num(); ++i) { Correctivo[i] = FVector4f(0, 0, 0, 1); }
+		ClaveCorr = Clave;
+	}
+	I0 = FMath::Clamp(I0, 0, CM->Cuadros - 1); I1 = FMath::Clamp(I1, 0, CM->Cuadros - 1);
+	const uint8* Bin = D->BinCorrectivos().GetData();
+	const float Esc = 1.f / D->EscalaCorrectivo(), EscQ = 1.f / 32767.f;
+	for (const auto& Par : CM->Piezas)
+	{
+		const FCorpusRejilla* Rj = D->RejillaDe(Par.Key);
+		if (!Rj) { continue; }
+		const uint32* Lista = (const uint32*)(Bin + Rj->Lista);
+		const int16* F0 = (const int16*)(Bin + Par.Value) + (int64)I0 * Rj->Act * 7;
+		const int16* F1 = (const int16*)(Bin + Par.Value) + (int64)I1 * Rj->Act * 7;
+		for (int32 i = 0; i < Rj->Act; ++i)
+		{
+			const int32 T = Rj->Base + (int32)Lista[i];
+			if (T < 1 || T >= Mitad) { continue; }
+			const int16* a = F0 + i * 7; const int16* b = F1 + i * 7;
+			Correctivo[T] = FVector4f(FMath::Lerp((float)a[0], (float)b[0], A) * Esc, FMath::Lerp((float)a[1], (float)b[1], A) * Esc, FMath::Lerp((float)a[2], (float)b[2], A) * Esc, 0.f);
+			// los giros vienen con el mismo signo de un cuadro al siguiente: se pueden mezclar tal cual (el material normaliza)
+			Correctivo[Mitad + T] = FVector4f(FMath::Lerp((float)a[3], (float)b[3], A) * EscQ, FMath::Lerp((float)a[4], (float)b[4], A) * EscQ, FMath::Lerp((float)a[5], (float)b[5], A) * EscQ, FMath::Lerp((float)a[6], (float)b[6], A) * EscQ);
+		}
+	}
+	Correctivo[0] = FVector4f(1.f, (float)FilasCorr, 0.f, 0.f);
+	bCorrActivo = true;
+	SubirCorrectivo();
 }
 
 bool ACorpusCuerpo::MovimientoDisponible() const
@@ -232,6 +311,7 @@ void ACorpusCuerpo::PonerMarcha(int32 Patron, float Ciclo)
 	const FCorpusPatronMarcha* P = (MovimientoDisponible() && D->PatronesMarcha().IsValidIndex(Patron) && D->PatronesMarcha()[Patron].Frames.Num() > 1) ? &D->PatronesMarcha()[Patron] : nullptr;
 	const bool bCambiaPatron = (P ? Patron : -1) != PatronActual;
 	if (P && RangoActual >= 0) { RangoActual = -1; bReproduciendo = false; GradosActual = 0.f; PintarAgonistas(TArray<FString>(), FString()); }
+	if (P) { PonerCorrectivo(nullptr, 0, false, 0, 0, 0.f); }   // en la marcha los músculos van solo con sus pesos
 	PatronActual = P ? Patron : -1;
 	PosturaEnReposo();
 	FTransform Raiz0 = FTransform::Identity;
@@ -314,6 +394,7 @@ void ACorpusCuerpo::PonerRango(int32 Rango, int32 Mov, bool bIzq, float Grados)
 	if (!M) { bReproduciendo = false; }
 
 	PosturaEnReposo();
+	bool bCorr = false;
 	if (M)
 	{
 		const TArray<TArray<float>>& F = (bLadoIzq && M->Izquierdo.Num()) ? M->Izquierdo : M->Derecho;
@@ -326,9 +407,13 @@ void ACorpusCuerpo::PonerRango(int32 Rango, int32 Mov, bool bIzq, float Grados)
 			const float G0 = FMath::Min(I0 * M->Paso, M->Max), G1 = FMath::Min(I1 * M->Paso, M->Max);
 			const float A = G1 > G0 ? FMath::Clamp((GradosActual - G0) / (G1 - G0), 0.f, 1.f) : 0.f;
 			MezclarFotogramas(F[I0], F[I1], A);
+			// músculos del hombro: su rejilla elástica en esos mismos dos cuadros
+			PonerCorrectivo(R, MovActual, bLadoIzq && M->Izquierdo.Num() > 0, I0, I1, A);
+			bCorr = true;
 		}
 	}
 	else { GradosActual = 0.f; }
+	if (!bCorr) { PonerCorrectivo(nullptr, 0, false, 0, 0, 0.f); }
 	SubirPostura();
 
 	if (HayPostura() != bAntes) { for (auto& Par : Piezas) { if (Par.Value) { AjustarLimites(Par.Value); } } }
@@ -414,6 +499,12 @@ void ACorpusCuerpo::CargarCapa(const FString& Clave)
 		if (const FVector3f* Ins = D->InsercionFibra(Carpeta, P.Id))   // fibra tensa: el material estira el músculo hacia donde va este punto
 		{
 			C->SetCustomPrimitiveDataFloat(21, Ins->X); C->SetCustomPrimitiveDataFloat(22, Ins->Y); C->SetCustomPrimitiveDataFloat(23, Ins->Z);
+		}
+		// correctivo elástico: dónde está la rejilla de esta pieza en la textura y cómo se mide (datos primitivos 24–31)
+		if (const FCorpusRejilla* Rj = D->Rejilla(Carpeta, P.Id))
+		{
+			C->SetCustomPrimitiveDataVector4(24, FVector4((float)Rj->Base, (float)Rj->N.X, (float)Rj->N.Y, (float)Rj->N.Z));
+			C->SetCustomPrimitiveDataVector4(28, FVector4(Rj->O.X, Rj->O.Y, Rj->O.Z, Rj->H));
 		}
 		if (HayPostura()) { AjustarLimites(C); }
 		Piezas.Add(P.Id, C);

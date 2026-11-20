@@ -156,6 +156,7 @@ void UCorpusDatos::Initialize(FSubsystemCollectionBase& Collection)
 
 	InfoEs = LeerObjeto(TEXT("info.json"));
 	CargarMovimiento();
+	CargarCorrectivos();
 	UE_LOG(LogCorpus, Log, TEXT("Corpus Atlas: %d estructuras, %d capas, %d articulaciones, %d rangos"), Piezas.Num(), ListaCapas.Num(), Pivotes.Num(), ListaRangos.Num());
 }
 
@@ -314,6 +315,65 @@ void UCorpusDatos::CargarMovimiento()
 			}
 		}
 	}
+}
+
+// correctivos.json + correctivos.bin (tools/unreal/correctivos.js): rejilla elástica de cada músculo del hombro y, por
+// movimiento y lado, el desplazamiento y el giro de cada nodo cada 5°.
+void UCorpusDatos::CargarCorrectivos()
+{
+	const FString RutaJ = FPaths::Combine(CarpetaDatos(), TEXT("correctivos.json")), RutaB = FPaths::Combine(CarpetaDatos(), TEXT("correctivos.bin"));
+	if (!FPaths::FileExists(RutaJ) || !FPaths::FileExists(RutaB)) { return; }   // opcional: sin él, los músculos usan solo los pesos
+	const TSharedPtr<FJsonObject> J = LeerObjeto(TEXT("correctivos.json"));
+	if (!J || !FFileHelper::LoadFileToArray(CorrBin, *RutaB)) { CorrBin.Reset(); return; }
+	double X = 0;
+	if (J->TryGetNumberField(TEXT("texeles"), X)) { CorrTexeles = (int32)X; }
+	if (J->TryGetNumberField(TEXT("ancho"), X)) { CorrAncho = FMath::Max(1, (int32)X); }
+	if (J->TryGetNumberField(TEXT("escala"), X)) { CorrEscala = FMath::Max(1.f, (float)X); }
+	const int64 Tam = CorrBin.Num();
+	const TSharedPtr<FJsonObject>* PJ = nullptr;
+	if (J->TryGetObjectField(TEXT("piezas"), PJ))
+	{
+		for (const auto& Par : (*PJ)->Values)
+		{
+			const TSharedPtr<FJsonObject>* O = nullptr;
+			if (!Par.Value.IsValid() || !Par.Value->TryGetObject(O)) { continue; }
+			FCorpusRejilla R;
+			R.Base = (int32)(*O)->GetNumberField(TEXT("base"));
+			R.H = (float)(*O)->GetNumberField(TEXT("h"));
+			R.Act = (int32)(*O)->GetNumberField(TEXT("act"));
+			R.Lista = (int64)(*O)->GetNumberField(TEXT("ai"));
+			const TArray<TSharedPtr<FJsonValue>>& N = (*O)->GetArrayField(TEXT("n"));
+			const TArray<TSharedPtr<FJsonValue>>& Or = (*O)->GetArrayField(TEXT("o"));
+			if (N.Num() != 3 || Or.Num() != 3 || R.H <= 0.f || R.Lista < 0 || R.Lista + (int64)R.Act * 4 > Tam) { continue; }
+			R.N = FIntVector((int32)N[0]->AsNumber(), (int32)N[1]->AsNumber(), (int32)N[2]->AsNumber());
+			R.O = FVector3f((float)Or[0]->AsNumber(), (float)Or[1]->AsNumber(), (float)Or[2]->AsNumber());
+			if (R.Base < 1 || R.Base + R.N.X * R.N.Y * R.N.Z > CorrTexeles) { continue; }
+			Rejillas.Add(FString(Par.Key), R);
+		}
+	}
+	const TArray<TSharedPtr<FJsonValue>>* MJ = nullptr;
+	if (J->TryGetArrayField(TEXT("movs"), MJ))
+	{
+		for (const auto& V : *MJ)
+		{
+			const TSharedPtr<FJsonObject> O = V->AsObject();
+			if (!O) { continue; }
+			FCorpusCorrMov M;
+			M.Cuadros = (int32)O->GetNumberField(TEXT("cuadros"));
+			const TSharedPtr<FJsonObject>* Pz = nullptr;
+			if (O->TryGetObjectField(TEXT("piezas"), Pz))
+			{
+				for (const auto& Par : (*Pz)->Values)
+				{
+					const FCorpusRejilla* R = Rejillas.Find(FString(Par.Key));
+					const int64 Pos = (int64)Par.Value->AsNumber();
+					if (R && Pos >= 0 && Pos + (int64)M.Cuadros * R->Act * 14 <= Tam) { M.Piezas.Add(FString(Par.Key), Pos); }
+				}
+			}
+			CorrMovs.Add(FString::Printf(TEXT("%s/%d/%s"), *O->GetStringField(TEXT("rom")), (int32)O->GetNumberField(TEXT("mov")), *O->GetStringField(TEXT("lado"))), MoveTemp(M));
+		}
+	}
+	UE_LOG(LogCorpus, Log, TEXT("Corpus Atlas: correctivos elásticos de %d músculos en %d movimientos"), Rejillas.Num(), CorrMovs.Num());
 }
 
 const FCorpusCapa* UCorpusDatos::Capa(const FString& Clave) const

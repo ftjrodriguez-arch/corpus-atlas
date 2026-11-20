@@ -94,6 +94,16 @@ private:
 	TArray<FVector4f> Postura;                        // ancho × 4: eje+ángulo, pivote, traslación (glTF, m)
 	int32 AnchoPostura = 32, AltoPostura = 4;
 	UPROPERTY() TObjectPtr<class UTexture2D> TexPostura;
+	// Correctivos elásticos del hombro: la rejilla de cada músculo en una textura (mitad superior: desplazamiento de cada
+	// nodo; mitad inferior: su giro). El texel 0 dice si están activos y en qué fila empiezan los giros.
+	void CrearTexturaCorrectivo();
+	void PonerCorrectivo(const struct FCorpusRango* R, int32 Mov, bool bIzq, int32 I0, int32 I1, float A);
+	void SubirCorrectivo();
+	TArray<FVector4f> Correctivo;
+	int32 AnchoCorr = 4, FilasCorr = 1;
+	bool bCorrActivo = false;
+	FString ClaveCorr;
+	UPROPERTY() TObjectPtr<class UTexture2D> TexCorrectivo;
 	TSet<FString> IdsAgonistas;
 	int32 RangoActual = -1, MovActual = 0;
 	bool bLadoIzq = false, bReproduciendo = false;

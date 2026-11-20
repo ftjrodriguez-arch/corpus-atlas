@@ -12,6 +12,7 @@
 'use strict';
 const fs = require('fs'), path = require('path');
 const PO = require('../postura.js');
+const CO = process.env.CORR ? require('../correctivos.js') : null;
 const [id, rom, mi, lado, grados, pasoArg, salArg] = process.argv.slice(2);
 const paso = +pasoArg || 10, LD = lado === 'R' ? 'derecho' : 'izquierdo';
 const dir = salArg || path.join(PO.IMP, '..', 'Saved', 'sim', `${(id.includes(',') || id.startsWith('re:')) ? 'grupo' : id}_${rom}${mi}${lado}`);
@@ -42,7 +43,8 @@ fs.writeFileSync(path.join(dir, 'musculo_w.f32'), Buffer.from(w.buffer));
 const pasos = []; for (let g = 0; g < +grados; g += paso) pasos.push(g); pasos.push(+grados);
 pasos.forEach((g, k) => {
   const J = PO.articulaciones(rom, mi, lado, g);
-  { const a = new Float32Array(nvm * 3); let o = 0; for (const p of partes) { a.set(PO.deformar(p, J), o); o += p.nv * 3; } fs.writeFileSync(path.join(dir, `musculo_${k}.f32`), Buffer.from(a.buffer)); }
+  /* CORR=1: los músculos con correctivo (correctivos.js) se colocan con su rejilla elástica en vez de con el material */
+  { const a = new Float32Array(nvm * 3); let o = 0; for (const p of partes) { const c = CO && g > 0 ? CO.deformar('hombre', p.id, rom, +mi, lado, g) : null; a.set(c || PO.deformar(p, J), o); o += p.nv * 3; } fs.writeFileSync(path.join(dir, `musculo_${k}.f32`), Buffer.from(a.buffer)); }
   const col = new Float32Array(nvc * 3); let o = 0; for (const p of piezas) { col.set(PO.deformar(p, J), o); o += p.nv * 3; }
   fs.writeFileSync(path.join(dir, `colision_${k}.f32`), Buffer.from(col.buffer));
 });

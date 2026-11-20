@@ -65,4 +65,4 @@ function deformar(pz, J, op) {
   for (let i = 0; i < pz.nv; i++) { const ws = [pz.U[0][i * 2], pz.U[0][i * 2 + 1], pz.U[1][i * 2], pz.U[1][i * 2 + 1], pz.U[2][i * 2], pz.U[2][i * 2 + 1], pz.U[3][i * 2], pz.U[3][i * 2 + 1], 0]; D.set(vertice(pz, J, [pz.P[i * 3], pz.P[i * 3 + 1], pz.P[i * 3 + 2]], ws, op), i * 3); }
   return D;
 }
-module.exports = { IMP, M, rig, TC, TX, arts, pieza, capa, articulaciones, deformar, gira };
+module.exports = { IMP, M, rig, TC, TX, arts, pieza, capa, articulaciones, deformar, vertice, gira };

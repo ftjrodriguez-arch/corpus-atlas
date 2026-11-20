@@ -151,7 +151,7 @@ try:
     centro = Vector(np.asarray(res[NP - 1]).reshape(-1, 3).mean(axis=0).tolist())
     lado = -1 if centro.x < 0 else 1
     vistas = {"post": Vector((0.25 * lado, 0.1, -1.7)), "lat": Vector((1.7 * lado, 0.1, -0.2)), "ant": Vector((0.3 * lado, 0.1, 1.7))}
-    for nombre, pos_mus in (("sim", res[NP - 1]), ("material", mus[NP - 1])):
+    for nombre, pos_mus in ((("material", mus[NP - 1]),) if SIN else (("sim", res[NP - 1]), ("material", mus[NP - 1]))):
         om.modifiers["tela"].show_viewport = om.modifiers["tela"].show_render = False
         if om.data.shape_keys:
             om.shape_key_clear()

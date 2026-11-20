@@ -67,6 +67,20 @@ struct FCorpusRango
 	TArray<FCorpusMovimiento> Movs;
 };
 
+/** Correctivo elástico de un músculo (correctivos.json, tools/unreal/correctivos.js): rejilla de nodos alrededor de la pieza.
+    El material mueve cada vértice con los 8 nodos de su celda (interpolación trilineal de la posición de reposo). */
+struct FCorpusRejilla
+{
+	int32 Base = 0;                       // primer texel de la rejilla en la textura de correctivos
+	FIntVector N = FIntVector::ZeroValue; // nodos por eje
+	FVector3f O = FVector3f::ZeroVector;  // esquina de la rejilla (glTF, m)
+	float H = 0.f;                        // tamaño de celda (m)
+	int32 Act = 0;                        // nodos guardados (los que tocan al músculo y sus vecinos)
+	int64 Lista = 0;                      // posición en el .bin de la lista de nodos (uint32: índice en la rejilla completa)
+};
+/** Un movimiento con correctivos: por pieza, dónde empiezan sus cuadros en el .bin (7 enteros de 16 bits por nodo y cuadro). */
+struct FCorpusCorrMov { int32 Cuadros = 0; TMap<FString, int64> Piezas; };
+
 /** Marcha (movimiento.json → marcha): fases del ciclo, grupos musculares con su intensidad y patrones (normal y patológicos). */
 struct FCorpusFaseMarcha { float Ini = 0, Fin = 0; FString Nombre, Abrev, Texto; };
 struct FCorpusGrupoMarcha { TArray<FString> En; FString Nombre, Texto; TArray<FVector2f> Nivel; };   // Nivel: (porcentaje del ciclo, intensidad 0–1)
@@ -140,8 +154,23 @@ public:
 	const TArray<FCorpusPatronMarcha>& PatronesMarcha() const { return Patrones; }
 	float PasoMarcha() const { return PasoCiclo; }
 
+	/** Correctivos elásticos de los músculos del hombro (correctivos.json + correctivos.bin). */
+	const FCorpusRejilla* Rejilla(const FString& Carpeta, const FString& Id) const { return Rejillas.Find(Carpeta + TEXT("/") + Id); }
+	const FCorpusRejilla* RejillaDe(const FString& Clave) const { return Rejillas.Find(Clave); }
+	const FCorpusCorrMov* Correctivo(const FString& Rom, int32 Mov, bool bIzq) const { return CorrMovs.Find(FString::Printf(TEXT("%s/%d/%s"), *Rom, Mov, bIzq ? TEXT("L") : TEXT("R"))); }
+	const TArray<uint8>& BinCorrectivos() const { return CorrBin; }
+	int32 TexelesCorrectivo() const { return CorrTexeles; }
+	int32 AnchoCorrectivo() const { return CorrAncho; }
+	float EscalaCorrectivo() const { return CorrEscala; }
+
 private:
 	void CargarMovimiento();
+	void CargarCorrectivos();
+	TMap<FString, FCorpusRejilla> Rejillas;
+	TMap<FString, FCorpusCorrMov> CorrMovs;
+	TArray<uint8> CorrBin;
+	int32 CorrTexeles = 0, CorrAncho = 512;
+	float CorrEscala = 20000.f;
 	TArray<FCorpusFaseMarcha> Fases;
 	TArray<FCorpusGrupoMarcha> Grupos;
 	TArray<FCorpusPatronMarcha> Patrones;

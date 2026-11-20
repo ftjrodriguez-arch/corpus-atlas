@@ -178,7 +178,38 @@ float3 ip = float3(IX, IY, IZ);
 bool fibra = dot(ip, ip) > 0;
 bool abrazado = false;
 float wl = 0;
-[loop] for (int k = 0; k < 9; k++)
+// Correctivo elástico (tools/unreal/correctivos.js): los músculos del hombro llevan una rejilla de nodos resuelta fuera
+// (anclada a sus huesos, sin atravesarlos). El vértice se mueve con los 8 nodos de su celda: desplazamiento en la mitad
+// superior de la textura, giro (para la normal) en la inferior. Texel 0: x = activo, y = fila donde empiezan los giros.
+bool rejilla = false;
+if (CB > 0.5)
+{
+    float4 cab = TexC.Load(int3(0, 0, 0));
+    if (cab.x > 0.5)
+    {
+        rejilla = true;
+        float3 cn = float3(CNX, CNY, CNZ);
+        float3 f = clamp((g0 - float3(COX, COY, COZ)) / CH, 0, cn - 1.001);
+        float3 fi = floor(f);
+        float3 t = f - fi;
+        int nx = (int)CNX, ny = (int)CNY, hq = (int)cab.y;
+        int b = (int)CB + (int)fi.x + nx * ((int)fi.y + ny * (int)fi.z);
+        float3 d = 0;
+        float4 q = 0;
+        [unroll] for (int c = 0; c < 8; c++)
+        {
+            int cx = c & 1, cy = (c >> 1) & 1, cz = (c >> 2) & 1;
+            int i = b + cx + nx * (cy + ny * cz);
+            float w = (cx ? t.x : 1 - t.x) * (cy ? t.y : 1 - t.y) * (cz ? t.z : 1 - t.z);
+            int3 uv = int3(i % @CW@, i / @CW@, 0);
+            d += w * TexC.Load(uv).xyz;
+            q += w * TexC.Load(uv + int3(0, hq, 0));
+        }
+        g = g0 + d;
+        qt = q;
+    }
+}
+[loop] for (int k = 0; k < 9 && !rejilla; k++)
 {
     float jv = js[k];
     int code = (int)round(abs(jv));
@@ -321,14 +352,29 @@ def _postura(g):
     with open(os.path.join(IMPORTAR, "datos", "rig.json"), encoding="utf-8") as h:
         sb = json.load(h)["scapBot_R"]          # ángulo inferior de la escápula derecha (la izquierda, en espejo)
     tor = mov["torax"]
+    ancho_corr = 512        # ancho de la textura de correctivos (correctivos.json → ancho)
+    for f in (os.path.join(IMPORTAR, "datos", "correctivos.json"), os.path.join(DATOS, "correctivos.json")):
+        if os.path.exists(f):
+            with open(f, encoding="utf-8") as h:
+                ancho_corr = int(json.load(h).get("ancho", 512))
+            break
+    texc = g.n(unreal.MaterialExpressionTextureObjectParameter, parameter_name="Correctivo")
+    if negro:
+        texc.set_editor_property("texture", negro)
+    texc.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
     codigo = HLSL_POSTURA
-    for k, v in (("NA_TRONCO", len(arts) - 2), ("Y0", float(tor["y0"])), ("DY", float(tor["dy"])), ("ZC", float(tor["zc"])),
+    for k, v in (("CW", ancho_corr), ("NA_TRONCO", len(arts) - 2), ("Y0", float(tor["y0"])), ("DY", float(tor["dy"])), ("ZC", float(tor["zc"])),
                  ("NH", int(tor["nh"])), ("NS", int(tor["ns"])), ("ACR_R", arts.index("acr_R")), ("ACR_L", arts.index("acr_L")),
                  ("SC_R", arts.index("sc_R")), ("SC_L", arts.index("sc_L")), ("SBX", sb[0]), ("SBY", sb[1]), ("SBZ", sb[2])):
         codigo = codigo.replace("@%s@" % k, repr(v))
-    cu = _custom(g, codigo, ["Tex", "P", "U0", "U1", "U2", "U3"] + ["J%d" % i for i in range(8)] + ["HUG", "IX", "IY", "IZ"], CMOT.CMOT_FLOAT3,
+    cu = _custom(g, codigo, ["Tex", "P", "U0", "U1", "U2", "U3"] + ["J%d" % i for i in range(8)] + ["HUG", "IX", "IY", "IZ"]
+                 + ["TexC", "CB", "CNX", "CNY", "CNZ", "COX", "COY", "COZ", "CH"], CMOT.CMOT_FLOAT3,
                  extra=[("Q", CMOT.CMOT_FLOAT4)], desc="Postura (rig de la web)")
     g.une(tex, cu, "Tex")
+    g.une(texc, cu, "TexC")
+    # rejilla del correctivo elástico de la pieza: datos primitivos 24–31 (base, nodos por eje, esquina, celda)
+    for i, nm in enumerate(("CB", "CNX", "CNY", "CNZ", "COX", "COY", "COZ", "CH")):
+        g.une(g.esc("Rejilla" + nm, 0.0, cpd=24 + i), cu, nm)
     g.une(g.n(unreal.MaterialExpressionPreSkinnedPosition), cu, "P")
     for c in range(4):
         g.une(g.n(unreal.MaterialExpressionTextureCoordinate, coordinate_index=c), cu, "U%d" % c)
