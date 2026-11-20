@@ -142,6 +142,14 @@ const PREPARA = `(async()=>{
           if(d<TD[2]){fijo[q]=1;continue;}
           const origen=LAT?(px<0.022||py<1.0||d>0.5):CLA?(an==='clav_'+Sd):TER?(an==='scap_'+Sd&&d>0.05):(px<0.035||py<1.12);
           if(origen){fijo[q]=0;n0++;}}
+        /* La malla del músculo son varios fascículos sueltos (islas). Un fascículo sin anclaje de origen giraba entero con
+           el húmero (el «tendón suelto» del dorsal); uno sin anclaje de inserción se quedaba atrás. A cada isla que le falta
+           un extremo se le fija, en su punta más lejana o más cercana a la inserción, el peso por distancia de sus vecinas. */
+        {const isla=new Int32Array(G.nu).fill(-1);let ni=0;for(let s=0;s<G.nu;s++){if(isla[s]>=0)continue;const pila=[s];isla[s]=ni;while(pila.length){const q=pila.pop(),l=G.NB[q];for(let t=0;t<l.length;t++)if(isla[l[t]]<0){isla[l[t]]=ni;pila.push(l[t]);}}ni++;}
+          const dmn=new Float32Array(ni).fill(1e9),dmx=new Float32Array(ni),h0=new Uint8Array(ni),h1=new Uint8Array(ni),dq=new Float32Array(G.nu);
+          for(let q=0;q<G.nu;q++){const d=dq[q]=dI(G.rep[q]),c=isla[q];if(d<dmn[c])dmn[c]=d;if(d>dmx[c])dmx[c]=d;if(fijo[q]===0)h0[c]=1;else if(fijo[q]===1)h1[c]=1;}
+          for(let q=0;q<G.nu;q++){const c=isla[q];if(fijo[q]>=0)continue;if(!h1[c]&&dq[q]<=dmn[c]+0.015){fijo[q]=x[q];}else if(!h0[c]&&dq[q]>=dmx[c]-0.02){fijo[q]=x[q];n0++;}}
+          window.__islas=(window.__islas||'')+' '+en.slice(0,14)+':'+ni;}
         if(n0>3){laplace(G,fijo,x);for(let v=0;v<n;v++)Wd[v]=x[G.uid[v]];}}
       L.forEach((k,q)=>{const [nd,sd]=k.split('_');if(sd===Sd&&TD[1].test(nd))Ws[q]=[Wd,true];else if(/^(elbow|fore|wrist|hip|knee)$/.test(nd)||(sd&&sd!==Sd&&/^(shoulder|acr|sc)$/.test(nd)))Ws[q]=[null,false];});}
     /* Músculos tendidos entre dos huesos de la cintura escapular (mejora sobre la web, donde el trapecio, los romboides o
@@ -274,7 +282,18 @@ const PREPARA = `(async()=>{
         oA[1] = f5(a2[0]); oA[2] = f5(a2[1]); oA[3] = f5(a2[2]); oA[4] = f5(a2[3]);
         if (oH) { const qH = qAA(oH.slice(1, 4), oH[4]), h2 = aAA(qMul(qInv(qA2), qMul(qA, qH))); oH[1] = f5(h2[0]); oH[2] = f5(h2[1]); oH[3] = f5(h2[2]); oH[4] = f5(h2[3]); }
         return ops.flat(); }); }
-    console.log('Escápula sobre las costillas: %d posturas corregidas, giro añadido máximo %s°', nfix, (amax * 57.2958).toFixed(1));
+    /* Movimientos propios de la cintura escapular (encoger, deprimir, protraer, retraer): en la web el brazo entero gira
+       con la clavícula (al elevar 40° se abría 40°). En realidad el húmero sigue colgando: la glenohumeral compensa. */
+    const esc = rom.find(r => r.id === 'escapula'); let ncomp = 0;
+    if (esc) for (const M of esc.movs) for (const S of ['R', 'L']) { if (!M[S]) continue;
+      const iA = R.L.indexOf('acr_' + S), iC = R.L.indexOf('sc_' + S), iH = R.L.indexOf('shoulder_' + S);
+      M[S] = M[S].map(fr => { const ops = []; for (let k = 0; k < fr.length; k += 8) ops.push(fr.slice(k, k + 8));
+        const oA = ops.find(o => o[0] === iA), oC = ops.find(o => o[0] === iC); if (!oA && !oC) return fr;
+        const qA = oA ? qAA(oA.slice(1, 4), oA[4]) : [0, 0, 0, 1], qC = oC ? qAA(oC.slice(1, 4), oC[4]) : [0, 0, 0, 1];
+        const h = aAA(qInv(qMul(qC, qA))), f5 = x => Math.round(x * 1e5) / 1e5, sin = ops.filter(o => o[0] !== iH);
+        sin.push([iH, f5(h[0]), f5(h[1]), f5(h[2]), f5(h[3]), 0, 0, 0]); ncomp++;
+        return sin.sort((a, b) => a[0] - b[0]).flat(); }); }
+    console.log('Escápula sobre las costillas: %d posturas corregidas, giro añadido máximo %s° · cintura escapular con el brazo colgando: %d posturas', nfix, (amax * 57.2958).toFixed(1), ncomp);
   }
   const abrazo = {};
   for (const c of CUERPOS) { const g = leeGLB(path.join(IMP, c, 'muscular.glb'));

@@ -153,6 +153,21 @@ Reimportar las mallas (`importar_mallas`) tarda 1 h 45 min; `_aplanar` sustituye
   - Paso de pruebas `solo id1,id2…` (`ACorpusCuerpo::VerSolo`) para ver un grupo de piezas.
   - El editor a veces se queda colgado al cerrarse tras `-ExecutePythonScript`: esperar a `CORPUS_RUN_OK` en el registro
     y cerrar el proceso.
+- **Blender como visor y banco de pruebas (cuarta pasada):** `tools/unreal/postura.js` es la cuenta del material como
+  módulo; `tools/unreal/blender/posar.js <ids> <rom> <mov> <lado> <grados>` deja huesos y músculos ya colocados y
+  `blender -b --python tools/unreal/blender/simular_musculo.py -- <carpeta> sinsim` los dibuja en 1 s (frente a 6 min de
+  una captura de Unreal). Blender 5.2 está en `X:\software\Blender 5.2`.
+  - Sin `sinsim` simula el músculo como tela con colisión: **no sirve tal cual** (14 min por postura y el dorsal se hace
+    jirones, porque en reposo ya roza los músculos profundos). Haría falta una escena preparada (solo huesos, malla
+    limpia); queda como vía abierta junto con Chaos Flesh + ML Deformer (instalados, pero sin Nanite) y el modelo
+    OpenSim de Seth 2019 (CC BY 4.0, simtk.org/projects/thoracoscapular) como guía de trayectorias.
+  - Lo que sí destapó: **la malla de cada músculo son varios fascículos sueltos (islas)**. Una isla sin anclaje de origen
+    giraba entera con el húmero (el «tendón suelto» del dorsal a 150°). `movimiento.js` fija ahora, isla por isla, el
+    extremo que le falte.
+  - **Cintura escapular con el brazo colgando:** en la web, al elevar la escápula 40° el brazo se abría 40°; ahora la
+    glenohumeral compensa (32 posturas).
+  - Pendiente visto en el visor: deltoides algo retorcido al encoger el hombro, bíceps cruzado en la rotación externa
+    a 90°, solapa en el borde del dorsal en la extensión a 60°.
 - Referencias del ritmo escapulohumeral: Braman et al. 2009 (0,43° de rotación superior por grado de elevación, relación
   2,3:1) y Ludewig et al. 2009 (báscula posterior ≈ 19°, rotación posterior de la clavícula ≈ 31°); la tabla `ST_UR` de la
   web ya los sigue en los huesos.
