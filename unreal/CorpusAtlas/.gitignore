@@ -1,0 +1,12 @@
+# Generado por Unreal o por tools/unreal/exportar.js (no se sube al repositorio)
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+*.sln
+*.VC.db
+Importar/
+Content/Datos/
+# Los .uasset se crean en el PC con Content/Python/corpus_importar.py; decide allí si se versionan (Git LFS)
+Content/Corpus/

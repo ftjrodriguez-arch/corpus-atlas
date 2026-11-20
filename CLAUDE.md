@@ -101,6 +101,11 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 - Puente de glúteo: `CTESTS` id `bridge` con `lie:1` (el encuadre usa la caja en coordenadas del mundo).
 - Contador: las URL con `?qa`, `?prueba` o `?v=` no cuentan. Informe semanal de GoatCounter activado (cuenta ft.jrodriguez@gmail.com, panel en español).
 
+## Edición Unreal Engine (en curso, aparte de la web)
+- Decisión del usuario (2026-11-20): la web se mantiene; Unreal es una edición de escritorio aparte, de más calidad gráfica.
+- `tools/unreal/exportar.js` exporta todos los modelos a GLB sin comprimir en `unreal/CorpusAtlas/Importar/` (no se sube); proyecto en `unreal/CorpusAtlas/` (C++ + `Content/Python/corpus_importar.py`). Estado, pasos y fases pendientes en `unreal/LEEME.md`.
+- En la nube no hay Unreal: compilar, ver y afinar materiales se hace en el PC del usuario.
+
 ## Pendiente
 - Decisión del usuario: NUNCA servidor propio, cuentas ni base de datos. Todo debe funcionar en local y sin conexión (GitHub Pages solo sirve los archivos estáticos).
 - Interfaz móvil nueva programada en v147–v148 (barra inferior, capas en fila, hoja de estructura tocada): recoger opiniones y pulir.
