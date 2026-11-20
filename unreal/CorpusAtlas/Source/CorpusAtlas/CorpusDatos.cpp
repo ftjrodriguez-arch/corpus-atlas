@@ -163,10 +163,61 @@ const FCorpusCapa* UCorpusDatos::Capa(const FString& Clave) const
 	return ListaCapas.FindByPredicate([&](const FCorpusCapa& C) { return C.Clave == Clave; });
 }
 
+namespace
+{
+	// El lector JSON de Unreal guarda las claves sin distinguir mayúsculas; aquí se leen tal cual vienen en el archivo.
+	void Volcar(const TSharedPtr<FJsonObject>& O, FTablaTr& T, bool bPisar)
+	{
+		if (!O.IsValid()) { return; }
+		for (const auto& Par : O->Values)
+		{
+			FString S;
+			if (!Par.Value.IsValid() || !Par.Value->TryGetString(S) || S.IsEmpty()) { continue; }
+			const FString K(Par.Key);
+			if (bPisar || !T.Contains(K)) { T.Add(K, S); }
+		}
+	}
+
+	// Textos propios de esta edición que no están en los JSON de la web: es → en, pt, fr, de.
+	struct FTrPropia { const TCHAR* Es; const TCHAR* L[4]; };
+	const FTrPropia TR_PROPIA[] = {
+		{TEXT("Respiratorio"), {TEXT("Respiratory"), TEXT("Respiratório"), TEXT("Respiratoire"), TEXT("Atmungssystem")}},
+		{TEXT("Digestivo"), {TEXT("Digestive"), TEXT("Digestório"), TEXT("Digestif"), TEXT("Verdauungssystem")}},
+		{TEXT("Urinario"), {TEXT("Urinary"), TEXT("Urinário"), TEXT("Urinaire"), TEXT("Harnsystem")}},
+		{TEXT("Reproductor"), {TEXT("Reproductive"), TEXT("Reprodutor"), TEXT("Reproducteur"), TEXT("Geschlechtsorgane")}},
+		{TEXT("Endocrino"), {TEXT("Endocrine"), TEXT("Endócrino"), TEXT("Endocrinien"), TEXT("Endokrines System")}},
+		{TEXT("Ojos"), {TEXT("Eyes"), TEXT("Olhos"), TEXT("Yeux"), TEXT("Augen")}},
+		{TEXT("Derecha"), {TEXT("Right"), TEXT("Direita"), TEXT("Droite"), TEXT("Rechts")}},
+		{TEXT("Izquierda"), {TEXT("Left"), TEXT("Esquerda"), TEXT("Gauche"), TEXT("Links")}},
+		{TEXT("izquierdo"), {TEXT("left"), TEXT("esquerdo"), TEXT("gauche"), TEXT("links")}},
+		{TEXT("Mostrar todo"), {TEXT("Show all"), TEXT("Mostrar tudo"), TEXT("Tout afficher"), TEXT("Alles zeigen")}},
+		{TEXT("Encuadrar"), {TEXT("Frame"), TEXT("Enquadrar"), TEXT("Cadrer"), TEXT("Einpassen")}},
+		{TEXT("Buscar estructura…"), {TEXT("Search structure…"), TEXT("Buscar estrutura…"), TEXT("Rechercher une structure…"), TEXT("Struktur suchen…")}},
+		{TEXT("Atlas anatómico 3D libre"), {TEXT("Free 3D anatomy atlas"), TEXT("Atlas anatômico 3D livre"), TEXT("Atlas d'anatomie 3D libre"), TEXT("Freier 3D-Anatomieatlas")}},
+		{TEXT("Sin resultados"), {TEXT("No results"), TEXT("Sem resultados"), TEXT("Aucun résultat"), TEXT("Keine Ergebnisse")}},
+		{TEXT("Descripción"), {TEXT("Description"), TEXT("Descrição"), TEXT("Description"), TEXT("Beschreibung")}},
+		{TEXT("Une"), {TEXT("Connects"), TEXT("Une"), TEXT("Relie"), TEXT("Verbindet")}},
+		{TEXT("Destino"), {TEXT("Destination"), TEXT("Destino"), TEXT("Destination"), TEXT("Ziel")}},
+		{TEXT("Ramas"), {TEXT("Branches"), TEXT("Ramos"), TEXT("Branches"), TEXT("Äste")}},
+		{TEXT("Territorio"), {TEXT("Territory"), TEXT("Território"), TEXT("Territoire"), TEXT("Versorgungsgebiet")}},
+		{TEXT("Clínica"), {TEXT("Clinical notes"), TEXT("Clínica"), TEXT("Clinique"), TEXT("Klinik")}},
+		{TEXT("Relaciones"), {TEXT("Relations"), TEXT("Relações"), TEXT("Rapports"), TEXT("Lagebeziehungen")}},
+	};
+
+	bool BuscarPropia(const FString& Idioma, const FString& Es, FString& Fuera)
+	{
+		static const TArray<FString> Orden = { TEXT("en"), TEXT("pt"), TEXT("fr"), TEXT("de") };
+		const int32 i = Orden.IndexOfByKey(Idioma);
+		if (i == INDEX_NONE) { return false; }
+		for (const FTrPropia& P : TR_PROPIA) { if (Es.Equals(P.Es, ESearchCase::CaseSensitive)) { Fuera = P.L[i]; return true; } }
+		return false;
+	}
+}
+
 void UCorpusDatos::CargarIdioma(const FString& Codigo)
 {
 	if (Codigo == TEXT("es") || UiTr.Contains(Codigo)) { return; }
-	TSharedPtr<FJsonObject> Ui = MakeShared<FJsonObject>(), Nombres = MakeShared<FJsonObject>();
+	FTablaTr Ui, Nombres;
 	const TSharedPtr<FJsonObject>* O = nullptr;
 	if (Codigo == TEXT("en") || Codigo == TEXT("pt"))
 	{
@@ -174,23 +225,22 @@ void UCorpusDatos::CargarIdioma(const FString& Codigo)
 		if (const TSharedPtr<FJsonObject> J = LeerObjeto(TEXT("i18n.json")))
 		{
 			const TSharedPtr<FJsonObject>* UiJ = nullptr;
-			if (J->TryGetObjectField(TEXT("ui"), UiJ) && (*UiJ)->TryGetObjectField(Codigo, O)) { Ui = *O; }
-			if (Codigo == TEXT("pt") && J->TryGetObjectField(TEXT("names"), O)) { Nombres = *O; }
+			if (J->TryGetObjectField(TEXT("ui"), UiJ) && (*UiJ)->TryGetObjectField(Codigo, O)) { Volcar(*O, Ui, true); UiAprox.Add(Codigo, *O); }
+			if (Codigo == TEXT("pt") && J->TryGetObjectField(TEXT("names"), O)) { Volcar(*O, Nombres, true); }
 		}
 	}
 	else if (const TSharedPtr<FJsonObject> J = LeerObjeto(FString::Printf(TEXT("i18n_%s.json"), *Codigo)))
 	{
-		if (J->TryGetObjectField(TEXT("ui"), O)) { Ui = *O; }
-		if (J->TryGetObjectField(TEXT("names"), O)) { Nombres = *O; }
+		if (J->TryGetObjectField(TEXT("ui"), O)) { Volcar(*O, Ui, true); UiAprox.Add(Codigo, *O); }
+		if (J->TryGetObjectField(TEXT("names"), O)) { Volcar(*O, Nombres, true); }
 		// content_fr/de: textos largos (español → traducción); no pisan la interfaz
-		if (const TSharedPtr<FJsonObject> Cont = LeerObjeto(FString::Printf(TEXT("content_%s.json"), *Codigo)))
-		{
-			for (const auto& Par : Cont->Values) { if (!Ui->HasField(Par.Key)) { Ui->SetField(Par.Key, Par.Value); } }
-		}
+		Volcar(LeerObjeto(FString::Printf(TEXT("content_%s.json"), *Codigo)), Ui, false);
 	}
-	UiTr.Add(Codigo, Ui);
-	NombresTr.Add(Codigo, Nombres);
+	UiTr.Add(Codigo, MoveTemp(Ui));
+	NombresTr.Add(Codigo, MoveTemp(Nombres));
 	if (const TSharedPtr<FJsonObject> Info = LeerObjeto(FString::Printf(TEXT("info_%s.json"), *Codigo))) { InfoTr.Add(Codigo, Info); }
+	// francés y alemán caen en inglés si falta el texto
+	if (Codigo == TEXT("fr") || Codigo == TEXT("de")) { CargarIdioma(TEXT("en")); }
 }
 
 void UCorpusDatos::PonerIdioma(const FString& Codigo)
@@ -204,16 +254,17 @@ void UCorpusDatos::PonerIdioma(const FString& Codigo)
 
 FString UCorpusDatos::T(const FString& Es) const
 {
-	if (IdiomaActual != TEXT("es"))
-	{
-		FString Tr;
-		if (const TSharedPtr<FJsonObject>* Ui = UiTr.Find(IdiomaActual)) { if ((*Ui)->TryGetStringField(Es, Tr) && !Tr.IsEmpty()) { return Tr; } }
-		// francés y alemán caen en inglés si falta el texto (igual que la web)
-		if (IdiomaActual == TEXT("fr") || IdiomaActual == TEXT("de"))
-		{
-			if (const TSharedPtr<FJsonObject>* En = UiTr.Find(TEXT("en"))) { if ((*En)->TryGetStringField(Es, Tr) && !Tr.IsEmpty()) { return Tr; } }
-		}
-	}
+	if (IdiomaActual == TEXT("es")) { return Es; }
+	// Mismo orden que trW() en la web: interfaz → (fr/de) nombres → textos propios → (fr/de) inglés.
+	// Antes del inglés, la interfaz sin distinguir mayúsculas: el lector JSON de Unreal funde «Hombre» y «hombre»
+	// en una sola clave (la última), así que la búsqueda exacta puede no encontrar «Hombre».
+	const bool bFrDe = IdiomaActual == TEXT("fr") || IdiomaActual == TEXT("de");
+	if (const FTablaTr* Ui = UiTr.Find(IdiomaActual)) { if (const FString* S = Ui->Find(Es)) { return *S; } }
+	if (bFrDe) { if (const FTablaTr* N = NombresTr.Find(IdiomaActual)) { if (const FString* S = N->Find(Es)) { return *S; } } }
+	FString Tr;
+	if (BuscarPropia(IdiomaActual, Es, Tr)) { return Tr; }
+	if (const TSharedPtr<FJsonObject>* A = UiAprox.Find(IdiomaActual)) { if ((*A)->TryGetStringField(Es, Tr) && !Tr.IsEmpty()) { return Tr; } }
+	if (bFrDe) { if (const FTablaTr* En = UiTr.Find(TEXT("en"))) { if (const FString* S = En->Find(Es)) { return *S; } } }
 	return Es;
 }
 
@@ -223,8 +274,7 @@ FString UCorpusDatos::NombrePieza(const FString& Id) const
 	if (!P) { return Id; }
 	if (IdiomaActual == TEXT("es")) { return P->Es; }
 	if (IdiomaActual == TEXT("en")) { return P->En; }
-	FString Tr;
-	if (const TSharedPtr<FJsonObject>* N = NombresTr.Find(IdiomaActual)) { if ((*N)->TryGetStringField(P->Es, Tr) && !Tr.IsEmpty()) { return Tr; } }
+	if (const FTablaTr* N = NombresTr.Find(IdiomaActual)) { if (const FString* S = N->Find(P->Es)) { return *S; } }
 	return IdiomaActual == TEXT("pt") ? P->Es : P->En;
 }
 
@@ -290,7 +340,9 @@ FString UCorpusDatos::Plano(const FString& S)
 
 TArray<FString> UCorpusDatos::Buscar(const FString& Texto, int32 Maximo) const
 {
-	TArray<FString> Empiezan, Contienen;
+	// Orden: empieza por el texto → lo contiene → orígenes e inserciones (llevan el mismo nombre que el músculo
+	// y antes tapaban al propio músculo en la lista)
+	TArray<FString> Empiezan, Contienen, Inserciones;
 	const FString Q = Plano(Texto.TrimStartAndEnd());
 	if (Q.Len() < 2) { return Empiezan; }
 	for (const auto& Par : Piezas)
@@ -298,11 +350,12 @@ TArray<FString> UCorpusDatos::Buscar(const FString& Texto, int32 Maximo) const
 		const FCorpusPieza& P = Par.Value;
 		if (P.Mallas.Num() == 0) { continue; }
 		const FString N = Plano(NombrePieza(P.Id));
-		if (N.StartsWith(Q)) { Empiezan.Add(P.Id); }
-		else if (N.Contains(Q) || Plano(P.Es).Contains(Q) || Plano(P.En).Contains(Q) || Plano(P.La).Contains(Q)) { Contienen.Add(P.Id); }
-		if (Empiezan.Num() >= Maximo) { break; }
+		const bool bEmpieza = N.StartsWith(Q);
+		if (!bEmpieza && !(N.Contains(Q) || Plano(P.Es).Contains(Q) || Plano(P.En).Contains(Q) || Plano(P.La).Contains(Q))) { continue; }
+		(P.Sistema == TEXT("insercion") ? Inserciones : bEmpieza ? Empiezan : Contienen).Add(P.Id);
 	}
 	Empiezan.Append(Contienen);
+	Empiezan.Append(Inserciones);
 	if (Empiezan.Num() > Maximo) { Empiezan.SetNum(Maximo); }
 	return Empiezan;
 }

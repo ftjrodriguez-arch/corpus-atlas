@@ -5,26 +5,29 @@
 # terminen los shaders, ejecuta cada paso y se cierra) y copia las fotos de Saved/Capturas a unreal/capturas/.
 # Pasos: foto <nombre> · sel <id> · encuadrar · aislar [id] · ocultar [id] · todo · vista <0-5> · capa <clave> <0|1>
 #        cuerpo <hombre|mujer|vh> · buscar <texto> · esperar <s> · cualquier otro texto = comando de consola
-param([double]$Exposicion = [double]::NaN, [string]$Pasos = "foto captura", [int]$Limite = 300)
+#   .\captura.ps1 -Py "ci.ajustar_luces(sol=40, relleno=3000)" -Pasos "foto luces"   (Python sobre el mapa antes de jugar)
+param([double]$Exposicion = [double]::NaN, [string]$Py = "", [string]$Pasos = "foto captura", [int]$Limite = 300)
 $raiz = Join-Path $PSScriptRoot "CorpusAtlas"
 $proy = Join-Path $raiz "CorpusAtlas.uproject"
 $ue = "C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe"
-if (-not [double]::IsNaN($Exposicion)) {
-    $py = Join-Path $raiz "Saved\corpus_expo.py"
+if (-not [double]::IsNaN($Exposicion)) { $Py = "ci.ajustar_exposicion($Exposicion)`n    $Py" }
+if ($Py) {
+    $guion = Join-Path $raiz "Saved\corpus_expo.py"
     @"
 import traceback, unreal
 try:
     import importlib, corpus_importar as ci
     importlib.reload(ci)
     unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level(ci.R_MAPA)
-    ci.ajustar_exposicion($Exposicion)
+    $Py
     unreal.log("CORPUS_RUN_OK")
 except Exception:
     unreal.log_error("CORPUS_RUN_FALLO\n" + traceback.format_exc())
 unreal.SystemLibrary.quit_editor()
-"@ | Set-Content -Path $py -Encoding utf8
-    $pr = Start-Process -FilePath $ue -ArgumentList "`"$proy`"", "-ExecutePythonScript=`"$($py -replace '\\','/')`"", "-nosplash", "-unattended", "-log=CorpusExpo.log" -PassThru
+"@ | Set-Content -Path $guion -Encoding utf8
+    $pr = Start-Process -FilePath $ue -ArgumentList "`"$proy`"", "-ExecutePythonScript=`"$($guion -replace '\\','/')`"", "-nosplash", "-unattended", "-log=CorpusExpo.log" -PassThru
     $pr.WaitForExit()
+    Get-Content (Join-Path $raiz "Saved\Logs\CorpusExpo.log") | Select-String "CORPUS_RUN" | ForEach-Object { $_.Line }
 }
 $dir = Join-Path $raiz "Saved\Capturas"
 Remove-Item "$dir\*.png" -ErrorAction SilentlyContinue

@@ -50,6 +50,14 @@ struct FCorpusCapa
 	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Base;
 };
 
+/** Claves que distinguen mayúsculas (como los objetos de JavaScript): en i18n_de, «urinario» y «Urinario» son textos distintos. */
+struct FClaveExacta : TDefaultMapKeyFuncs<FString, FString, false>
+{
+	static FORCEINLINE bool Matches(const FString& A, const FString& B) { return A.Equals(B, ESearchCase::CaseSensitive); }
+	static FORCEINLINE uint32 GetKeyHash(const FString& K) { return GetTypeHash(K); }
+};
+using FTablaTr = TMap<FString, FString, FDefaultSetAllocator, FClaveExacta>;
+
 UCLASS()
 class CORPUSATLAS_API UCorpusDatos : public UGameInstanceSubsystem
 {
@@ -99,5 +107,6 @@ private:
 
 	TSharedPtr<FJsonObject> InfoEs;                       // info.json: tipo → nombre inglés → ficha
 	TMap<FString, TSharedPtr<FJsonObject>> InfoTr;       // info_en/pt/fr/de: «tipo|nombre» → ficha
-	TMap<FString, TSharedPtr<FJsonObject>> UiTr, NombresTr; // por idioma: texto español → traducción
+	TMap<FString, FTablaTr> UiTr, NombresTr;              // por idioma: texto español → traducción
+	TMap<FString, TSharedPtr<FJsonObject>> UiAprox;       // el «ui» tal cual lo lee Unreal (sin distinguir mayúsculas): último recurso
 };

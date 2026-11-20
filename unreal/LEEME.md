@@ -60,19 +60,31 @@ todo sale gris), ejecuta los pasos y cierra. Desde PowerShell:
 ```
 .\unreal\captura.ps1 -Pasos "esperar 8; foto inicio; sel n1394; encuadrar; foto ficha; buscar biceps; foto buscador"
 .\unreal\captura.ps1 -Exposicion 2.0 -Pasos "foto expo"
+.\unreal\captura.ps1 -Py "ci.ajustar_luces(sol=200, relleno=2000)" -Pasos "foto luces"
 ```
 Pasos: `foto <nombre>` · `sel <id>` (vacío = ninguna) · `encuadrar` · `aislar` · `ocultar` · `todo` · `vista <0-5>` ·
 `capa <clave> <0|1>` · `opacidad <clave> <valor>` · `cuerpo <hombre|mujer|vh>` · `idioma <es|en|pt|fr|de>` ·
 `buscar <texto>` · `esperar <s>` · cualquier otro texto se ejecuta como comando de consola (p. ej. `viewmode unlit`).
 Las fotos quedan en `unreal/capturas/` con la interfaz incluida.
 
+### Pendientes de la Fase 1 resueltos (2026-11-20)
+- **Piel del Visible Human:** el GLB `vh/f_piel` tiene una sola malla e Interchange la llamaba como el archivo (`f_piel`) en vez de
+  con su id (`f0`), así que el C++ no la encontraba. `_aplanar(destino, ids)` renombra la malla que no coincide con ningún id de la capa.
+- **Traducciones:** el lector JSON de Unreal no distingue mayúsculas en las claves; en `i18n_de.json` hay `"urinario": "digestivo"`,
+  por eso «Urinario» salía como «digestivo», y «Hombre»/«hombre» se fundían. `T()` busca ahora como `trW()` de la web, con claves exactas
+  (`FTablaTr`): interfaz → nombres (fr/de) → tabla propia `TR_PROPIA` (capas de vísceras, vistas, subtítulo, buscador, campos de la ficha)
+  → interfaz sin distinguir mayúsculas → inglés.
+- **Hueso quemado:** con el sol a 6 lux solo iluminaban las dos rectangulares (9000 / 14000), planas y fortísimas. Tabla `LUCES`
+  (sol 200 lux como luz principal, relleno 2000, contraluz 6000, cielo 1,0) y `ajustar_luces()` para cambiarlas sin rehacer el mapa.
+- **Muaré:** a cuerpo entero había más de un ciclo de estría por píxel. Cada escala se apaga con `|ddx|+|ddy|` de la fase
+  entre 0,25 y 0,5 ciclos por píxel.
+- **Buscador:** los orígenes e inserciones (mismo nombre que el músculo) van al final de la lista.
+- `captura.ps1 -Py "ci.ajustar_luces(sol=…)"` ejecuta Python sobre el mapa antes de jugar.
+
 ## Pendiente de la Fase 1
-- **Piel del Visible Human** (`f_piel`, una sola malla): no se ve ni opaca ni translúcida; la piel del hombre sí. Revisar esa malla (escala, normales o Nanite).
-- **Traducciones de la interfaz Unreal:** vistas («Anterior»…), subtítulo y texto del buscador siguen en español; en alemán las capas de vísceras
-  salen sin traducir y «Urinario» aparece como «digestivo» (búsqueda aproximada de `T()`).
-- Hueso todavía muy claro de frente con la luz principal; afinar con `ALBEDO`/luces mirando capturas.
-- Muaré leve de las estrías al acercarse mucho a un músculo (`EscalaFibra`, factor 2,3).
 - Probar con el ratón real (clic, doble clic, arrastrar) y los atajos H, I, F, 1–6: las capturas usan las mismas funciones, pero no el ratón.
+- Al encuadrar una pieza pequeña (p. ej. un músculo del ojo) la cámara queda muy cerca; y cambiar de cuerpo no reencuadra.
+- La piel del Visible Human opaca sale algo anaranjada; afinar su tinte si hace falta.
 
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,

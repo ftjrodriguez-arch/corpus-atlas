@@ -107,6 +107,10 @@ class _G:
         self.une(a, e, "A"); self.une(b, e, "B")
         return e
 
+    def un(self, clase, a, x=-400):
+        """Nodo de una sola entrada (Abs, Saturate, DDX…): su entrada no tiene nombre en 5.8."""
+        e = self.n(clase, x); self.une(a, e, ""); return e
+
     def mul(self, a, b): return self.op(unreal.MaterialExpressionMultiply, a, b)
     def add(self, a, b): return self.op(unreal.MaterialExpressionAdd, a, b)
 
@@ -168,7 +172,13 @@ def _maestro(nombre, translucido):
     s1 = g.n(unreal.MaterialExpressionSine, -400, period=1.0); g.une(fase, s1, "")
     f2 = g.mul(fase, g.cte(2.3))                                 # 3.7 producía muaré al acercarse
     s2 = g.n(unreal.MaterialExpressionSine, -400, period=1.0); g.une(f2, s2, "")
-    onda = g.add(s1, g.mul(s2, g.cte(0.35)))                     # fascículos gruesos + fibras finas
+    # Antimuaré: ciclos de estría por píxel (|ddx| + |ddy| de la fase). Cada escala se apaga entre 0,25 y 0,5 ciclos
+    # por píxel, antes de que el muestreo la convierta en franjas (a cuerpo entero hay >1 ciclo por píxel).
+    cpp = g.add(g.un(unreal.MaterialExpressionAbs, g.un(unreal.MaterialExpressionDDX, fase)),
+                g.un(unreal.MaterialExpressionAbs, g.un(unreal.MaterialExpressionDDY, fase)))
+    v1 = g.un(unreal.MaterialExpressionSaturate, g.add(g.cte(2.0), g.mul(cpp, g.cte(-4.0))))
+    v2 = g.un(unreal.MaterialExpressionSaturate, g.add(g.cte(2.0), g.mul(cpp, g.cte(-9.2))))
+    onda = g.add(g.mul(s1, v1), g.mul(g.mul(s2, v2), g.cte(0.35)))   # fascículos gruesos + fibras finas
 
     # Grano fino (poro del hueso, irregularidad del tejido): ruido 3D barato
     ruido = g.n(unreal.MaterialExpressionNoise, -400, scale=6.0, levels=2, output_min=-1.0, output_max=1.0)
@@ -208,7 +218,7 @@ def _maestro(nombre, translucido):
 
     # Relieve en espacio tangente: X = fibra, Y = a través. La pendiente de la onda inclina la normal en Y.
     c1 = g.n(unreal.MaterialExpressionCosine, -400, period=1.0); g.une(fase, c1, "")
-    pend = g.mul(g.mul(c1, fuerza), g.cte(0.22))                 # relieve suave: con 0.45 las estrías brillaban como rayas
+    pend = g.mul(g.mul(g.mul(c1, v1), fuerza), g.cte(0.22))                # relieve suave: con 0.45 las estrías brillaban como rayas
     pend = g.add(pend, g.mul(grano, g.cte(0.6)))
     normal = g.n(unreal.MaterialExpressionAppendVector, -300)
     xy = g.n(unreal.MaterialExpressionAppendVector, -350); g.une(g.mul(grano, g.cte(0.4)), xy, "A"); g.une(pend, xy, "B")
@@ -294,16 +304,31 @@ def _ajustar(malla, con_fibra):
         pass
 
 
-def _aplanar(destino):
-    """Interchange (UE 5.x) deja cada malla en <destino>/<archivo>/StaticMeshes/<id>; el C++ la busca en <destino>/<id>."""
+def _ids_capa(man, archivo):
+    """Ids de las piezas que el manifiesto pone en ese cuerpo y esa capa."""
+    c, s = archivo["cuerpo"], archivo["sistema"]
+    return [i for i, b in man["piezas"].items() if c in b and b[c].get("s") == s]
+
+
+def _aplanar(destino, ids=None):
+    """Interchange (UE 5.x) deja cada malla en <destino>/<archivo>/StaticMeshes/<id>; el C++ la busca en <destino>/<id>.
+    Con un archivo de una sola malla, Interchange la llama como el archivo (vh/f_piel → «f_piel» en vez de «f0»):
+    si se pasan los ids de la capa, la malla que no coincide con ninguno toma el único id que falta."""
     movidas = 0
+    ids = set(ids or [])
     for ruta in eal.list_assets(destino, recursive=True, include_folder=False):
         obj = eal.find_asset_data(ruta)
-        carpeta = str(obj.package_path)
-        if carpeta == destino:
+        if obj.asset_class_path.asset_name != "StaticMesh":
             continue
+        carpeta = str(obj.package_path)
         nombre = str(obj.asset_name)
-        if obj.asset_class_path.asset_name == "StaticMesh" and not eal.does_asset_exist("%s/%s" % (destino, nombre)):
+        if ids and nombre not in ids:
+            faltan = [i for i in ids if not eal.does_asset_exist("%s/%s" % (destino, i))]
+            if len(faltan) == 1:
+                nombre = faltan[0]
+        if carpeta == destino and nombre == str(obj.asset_name):
+            continue
+        if not eal.does_asset_exist("%s/%s" % (destino, nombre)):
             if eal.rename_asset(ruta.split(".")[0], "%s/%s" % (destino, nombre)):
                 movidas += 1
     for sub in eal.list_assets(destino, recursive=False, include_folder=True):
@@ -317,7 +342,7 @@ def aplanar_mallas():
     man = json.load(open(os.path.join(IMPORTAR, "manifiesto.json"), encoding="utf-8"))
     for a in man["archivos"]:
         destino = "%s/%s/%s" % (R_MALLAS, a["cuerpo"], a["sistema"])
-        n = _aplanar(destino)
+        n = _aplanar(destino, _ids_capa(man, a))
         unreal.log("Corpus: %s → %d mallas movidas a %s" % (a["archivo"], n, destino))
 
 
@@ -382,7 +407,7 @@ def importar_mallas(solo=None):
             t.set_editor_property("save", False)
             t.set_editor_property("options", _opciones_interchange())
             herr.import_asset_tasks([t])
-            _aplanar(destino)
+            _aplanar(destino, _ids_capa(man, a))
             con_fibra = a["base"] in FIBRA
             mi = eal.load_asset("%s/MI_%s" % (R_MAT, a["base"] if a["base"] in TEJIDOS else "digestivo"))
             n = 0
@@ -402,6 +427,10 @@ def importar_mallas(solo=None):
 # ───────────────────────── mapa ─────────────────────────
 # Compensación de exposición manual (pasos sobre la cámara física por defecto, EV100 ≈ 10).
 # 10.5 dejaba la imagen blanca: las luces del estudio dan ~1.000 lux, que piden EV ≈ 9.
+# Intensidades del estudio: sol en lux, rectangulares en candelas, cielo multiplicador. Con sol=6 el sol no aportaba
+# nada y las dos rectangulares (9000 / 14000) quemaban solas el hueso, sin sombreado (capturas de prueba 2026-11-20).
+# Ahora el sol es la luz principal y da el relieve; relleno y contraluz quedan suaves.
+LUCES = dict(sol=200.0, relleno=2000.0, contra=6000.0, cielo=1.0)
 EXPOSICION = 2.0   # comprobado en capturas: 1 queda oscuro, 4 quema los tendones, 2.5 aún satura el hueso
 
 
@@ -416,6 +445,19 @@ def ajustar_exposicion(valor=None):
             aj.set_editor_property("override_bloom_intensity", True)
             aj.set_editor_property("bloom_intensity", 0.08)
             a.set_editor_property("settings", aj)
+    unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).save_current_level()
+
+
+def ajustar_luces(**cambios):
+    """Cambia la intensidad de las luces del mapa abierto (claves de LUCES) y lo guarda. Ej.: ajustar_luces(sol=40, relleno=2000)."""
+    LUCES.update(cambios)
+    etiquetas = {"Luz principal": ("sol", unreal.DirectionalLightComponent), "Luz de relleno": ("relleno", unreal.RectLightComponent),
+                 "Contraluz": ("contra", unreal.RectLightComponent), "Luz de cielo": ("cielo", unreal.SkyLightComponent)}
+    actores = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+    for a in actores.get_all_level_actors():
+        e = etiquetas.get(a.get_actor_label())
+        if e:
+            a.get_component_by_class(e[1]).set_editor_property("intensity", float(LUCES[e[0]]))
     unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).save_current_level()
 
 
@@ -435,22 +477,22 @@ def crear_mapa():
     # El cuerpo mira hacia +Y y mide ~175 cm de alto. Rotator(roll, pitch, yaw).
     clave = pon(unreal.DirectionalLight, rot=(0, -38, -125), nombre="Luz principal")
     c = clave.get_component_by_class(unreal.DirectionalLightComponent)
-    c.set_editor_property("intensity", 6.0); c.set_editor_property("light_color", unreal.Color(255, 244, 230))
+    c.set_editor_property("intensity", float(LUCES["sol"])); c.set_editor_property("light_color", unreal.Color(255, 244, 230))
     c.set_editor_property("light_source_angle", 3.0)    # sombras suaves de estudio
 
     relleno = pon(unreal.RectLight, pos=(-260, 240, 150), rot=(0, -8, -45), nombre="Luz de relleno")
     r = relleno.get_component_by_class(unreal.RectLightComponent)
-    r.set_editor_property("intensity", 9000.0); r.set_editor_property("source_width", 260.0); r.set_editor_property("source_height", 320.0)
+    r.set_editor_property("intensity", float(LUCES["relleno"])); r.set_editor_property("source_width", 260.0); r.set_editor_property("source_height", 320.0)
     r.set_editor_property("light_color", unreal.Color(214, 228, 255)); r.set_editor_property("attenuation_radius", 1200.0)
 
     contra = pon(unreal.RectLight, pos=(120, -280, 230), rot=(0, -25, 110), nombre="Contraluz")
     k = contra.get_component_by_class(unreal.RectLightComponent)
-    k.set_editor_property("intensity", 14000.0); k.set_editor_property("source_width", 200.0); k.set_editor_property("source_height", 200.0)
+    k.set_editor_property("intensity", float(LUCES["contra"])); k.set_editor_property("source_width", 200.0); k.set_editor_property("source_height", 200.0)
     k.set_editor_property("attenuation_radius", 1200.0)   # perfila el contorno de músculos y huesos
 
     cielo = pon(unreal.SkyLight, nombre="Luz de cielo")
     s = cielo.get_component_by_class(unreal.SkyLightComponent)
-    s.set_editor_property("real_time_capture", True); s.set_editor_property("intensity", 0.6)
+    s.set_editor_property("real_time_capture", True); s.set_editor_property("intensity", float(LUCES["cielo"]))
     pon(unreal.SkyAtmosphere, nombre="Atmósfera")
     pon(unreal.ExponentialHeightFog, pos=(0, 0, -50), nombre="Niebla")
 
