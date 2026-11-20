@@ -1,7 +1,7 @@
 # Corpus Atlas — guía para Claude Code
 
 Atlas anatómico 3D libre (three.js r147, una sola página `index.html`). Web pública: https://ftjrodriguez-arch.github.io/corpus-atlas/
-(GitHub Pages desde `main`). Versión actual: **v169**.
+(GitHub Pages desde `main`). Versión actual: **v170**.
 
 Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decisiones) y `README.md` (historial por versión).
 
@@ -107,6 +107,11 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 - Descartado por ahora: carina, cartílagos bronquiales y segmentos pulmonares de HRA (el árbol bronquial de Corpus tiene otra forma y sus arterias segmentarias lo siguen), laringe (la de Corpus tiene más detalle).
 - Z-Anatomy declara dos modelos de origen con licencia no comercial (oído interno de Dundee, CC BY-NC-SA; riñón de L. Cowley, CC BY-NC); `ATTRIBUTION.md` lo recoge desde v169. Pendiente de decisión del usuario: sustituir esas piezas (HRA tiene riñón CC BY) o dejarlas declaradas.
 
+## v170 (embriología)
+- `micro/embrion.html` + `micro/embrion.glb` (Draco, mallas `cs12`…`cs23` normalizadas a longitud 1): seis embriones Carnegie de NIH 3D (CC BY). Parámetros `lang`, `s`, `embed`; postMessage `{embrion:'lang'|'stage'}`. Días, medidas y rasgos de cada estadio en la tabla `ST` y en `T` (5 idiomas) de la propia página.
+- En la app: `embrionShow()` (capa `#embFrame` sobre `#stage`, mismo estilo que `#acinoFrame`) y botón `.emblink` en Estudiar (`embLinkTxt`, se retitula en `retitleFolds`). Textos FR/DE en `content_fr/de.json`.
+- Los originales se bajan con `https://3d.nih.gov/api/files/<fileId>` (el enlace directo a S3 da 403). Solo forma externa; para órganos internos haría falta permiso del atlas de Ámsterdam (NC-ND) o modelado propio.
+
 ## Edición Unreal Engine (en curso, aparte de la web)
 - Decisión del usuario (2026-11-20): la web se mantiene; Unreal es una edición de escritorio aparte, de más calidad gráfica.
 - `tools/unreal/exportar.js` exporta todos los modelos a GLB sin comprimir en `unreal/CorpusAtlas/Importar/` (no se sube); proyecto en `unreal/CorpusAtlas/` (C++ + `Content/Python/corpus_importar.py`). Estado, pasos y fases pendientes en `unreal/LEEME.md`.
@@ -114,7 +119,7 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 
 ## Fuentes abiertas comprobadas (2026-11-20, leídas en su página)
 - HuBMAP HRA 3D Reference Object Library: CC BY 4.0 (archivo LICENSE del repositorio). Usado en v161 y v169.
-- Embriones Carnegie de NIH 3D, estadios 12, 14, 16, 18, 20 y 23 (entradas 3DPX-016950 a 016955): CC-BY, con GLB y STL. Solo forma externa. Sin integrar.
+- Embriones Carnegie de NIH 3D, estadios 12, 14, 16, 18, 20 y 23 (entradas 3DPX-016950 a 016955): CC-BY, con GLB y STL. Solo forma externa. Integrados en v170.
 - Brainder «Brain for Blender» (corteza por regiones y subcorticales en OBJ): CC BY-SA 3.0. Sin integrar.
 - Z-Anatomy: CC BY-SA 4.0, con dos modelos de origen no comerciales (ver v169).
 - Fab (licencia estándar): prohíbe redistribuir los modelos sueltos; no sirve para un repositorio público.

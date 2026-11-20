@@ -14,6 +14,10 @@
   Placenta y modelo de ganglio linfático de Yao excluidos.
 - **HuBMAP Human Reference Atlas — 3D Reference Object Library**, *Visible Human Male v1.4*: 3D Reference Organs for Eye (left, right), Trachea and Palatine Tonsil (left, right), CC BY 4.0. Usados desde v169 para el ojo, los cartílagos traqueales y las tonsilas palatinas (`data/hra14.glb`).
 
+## Embriones · Embryos
+- **NIH 3D**, *Carnegie Human Embryo Stage 12, 14, 16, 18, 20 y 23* (entradas 3DPX-016955, 016954, 016953, 016952, 016951 y 016950), Kristen Browne, a partir de la segmentación de los embriones del *Virtual Human Embryo Project*; licencia CC BY. https://3d.nih.gov
+  Cambios: reducción de triángulos, orientación común de perfil, tamaño normalizado (la app los escala a la longitud vértex-cóccix media de cada estadio) y compresión Draco (`micro/embrion.glb`).
+
 ## Adaptaciones realizadas por Corpus · Adaptations
 - Extracción de las mallas del archivo `Startup.blend` de Z-Anatomy con un lector propio (sin Blender), aplicación de modificadores espejo y gancho.
 - Subdivisión de Loop en las estructuras que el atlas define con superficie de subdivisión y en los huesos.

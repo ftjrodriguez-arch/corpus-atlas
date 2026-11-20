@@ -109,6 +109,7 @@ Pendiente de revisión clínica: el 27 %, el 38° de dorsiflexión en carga y la
 - Hecho (v140–v145): 26 músculos nuevos modelados en Blender, tema claro, francés y alemán, sentadilla en cadena cerrada con músculos activos en magenta, seis ejercicios nuevos, gemelos y dorsal ancho sin atravesar ni despegarse, aviso de versión nueva.
 - Hecho (v146–v168, detalle en CLAUDE.md y README): interfaz móvil nueva, contenido educativo y clínico (kinesiología, ECOE, ASIA, protocolos, variantes), rendimiento (dibujo agrupado, sombras en caché), francés y alemán completos, corazón HRA, respiración con costillas, marcha con datos de laboratorio y suelo, acino pulmonar, zonas de West y segmentos, actividad muscular por intensidad, perfil de movilidad y puente de glúteo.
 - Hecho (v169): ojo completo, cartílagos traqueales y tonsilas del HuBMAP HRA v1.4 (`tools/hra14`).
+- Hecho (v170): módulo de embriología con seis embriones Carnegie de NIH 3D (`micro/embrion.html`).
 - En curso: edición Unreal Engine de escritorio (`unreal/`, fase 1 escrita sin compilar; se valida en el PC del usuario).
 - Siguiente: compilar y ver la edición Unreal en el PC; decidir qué hacer con las piezas de origen no comercial de Z-Anatomy; más fuentes abiertas (Open3DModel de Leiden, trayectos musculares de MyoSim, atlas cerebrales, embriones de NIH 3D) tras confirmar licencias.
 

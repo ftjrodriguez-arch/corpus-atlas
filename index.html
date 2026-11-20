@@ -983,6 +983,10 @@ header .tools #phyBtn span{display:inline!important;font:600 12.5px var(--f-ui);
 #acinoFrame.min iframe{display:none}
 #acinoFrame.min .acx{position:static}
 @media (max-width:879px){html body.mnav #stage #acinoFrame:not(.min){top:58px;bottom:calc(var(--mnav-h,64px) + 40px)}}
+#embFrame{position:absolute;inset:8px;z-index:30;pointer-events:none}
+#embFrame iframe{position:absolute;left:0;right:0;top:0;bottom:48px;width:100%;height:calc(100% - 48px);border:0;display:block;border-radius:14px;background:#0b1120;border:1px solid rgba(127,127,127,.28);box-shadow:0 10px 40px rgba(0,0,0,.45);pointer-events:auto}
+#embFrame .acx{position:absolute;right:0;bottom:4px;pointer-events:auto}
+@media (max-width:879px){html body.mnav #stage #embFrame{top:58px;bottom:calc(var(--mnav-h,64px) + 40px)}}
 /* v162 · tableta en vertical: mismo diseño que el teléfono, aprovechando el ancho */
 @media (min-width:600px) and (max-width:879px){
   html body.mnav #stage #qbar.qbar{justify-content:center!important;gap:10px!important}
@@ -4610,6 +4614,14 @@ function acinoShow(v){let f=document.getElementById('acinoFrame');const st=docum
   const ifr=f.querySelector('iframe'),src='micro/acino.html?embed=1&lang='+LANG+'&v='+v;
   if(!ifr.dataset.src){ifr.src=src;ifr.dataset.src=src;}else{try{ifr.contentWindow.postMessage({acino:'view',v},'*');ifr.contentWindow.postMessage({acino:'lang',lang:LANG},'*');}catch(e){}}
   f.hidden=false;f.classList.remove('min');acinoLbl();}
+/* v170: embriología (micro/embrion.html): seis embriones de los estadios Carnegie 12 a 23 sobre el escenario */
+function embrionShow(){let f=document.getElementById('embFrame');const st=document.getElementById('stage');if(!st)return;
+  if(!f){f=document.createElement('div');f.id='embFrame';f.innerHTML='<iframe title="Embrión humano 3D" allow="fullscreen"></iframe><button class="btn acx" type="button"></button>';st.appendChild(f);
+    f.querySelector('.acx').onclick=()=>{f.hidden=true;};}
+  const ifr=f.querySelector('iframe');
+  if(!ifr.dataset.src){ifr.src='micro/embrion.html?embed=1&lang='+LANG;ifr.dataset.src='1';}else{try{ifr.contentWindow.postMessage({embrion:'lang',lang:LANG},'*');}catch(e){}}
+  f.querySelector('.acx').textContent=TL('Cerrar embriología','Close embryology','Fechar embriologia');f.hidden=false;}
+function embLinkTxt(){const b=document.querySelector('.emblink');if(b)b.innerHTML=`🧬 ${esc(TL('Embriología 3D','3D embryology','Embriologia 3D'))}<span>${esc(TL('semanas 4 a 8','weeks 4 to 8','semanas 4 a 8'))} →</span>`;}
 function acinoLbl(){const f=document.getElementById('acinoFrame');if(!f)return;f.querySelector('.acx').textContent=f.classList.contains('min')?TL('Ver el acino 3D','Show the 3D acinus','Ver o ácino 3D'):TL('Ver el pulmón','Show the lung','Ver o pulmão');}
 function acinoHide(){const f=document.getElementById('acinoFrame');if(f)f.hidden=true;}
 /* Tubos de los recorridos y del sistema de conducción */
@@ -9255,7 +9267,7 @@ async function bgStart(){if(BG.run||BG.fin||!BG.on||!window.caches||!window.__CC
  const TT={cases:['Casos clínicos','Clinical cases','Casos clínicos'],lec:['Lecciones guiadas','Guided lessons','Lições guiadas'],route:['Ruta de estudio','Study route','Rota de estudo'],bio:['Kinesiología y biomecánica','Kinesiology & biomechanics','Cinesiologia e biomecânica'],rc:['Razonamiento clínico','Clinical reasoning','Raciocínio clínico'],rev:['Revisión experta','Expert review','Revisão especializada'],exam:['Modo examen','Exam mode','Modo exame'],srs:['Repaso espaciado','Spaced review','Revisão espaçada'],practice:['Práctica de identificación','Identification practice','Prática de identificação'],phy:['Fisiología en acción','Physiology in action','Fisiologia em ação'],gait:['Ciclo de la marcha','Gait cycle','Ciclo da marcha'],ct:['Pruebas clínicas y movimientos funcionales','Clinical tests & functional movements','Testes clínicos e movimentos funcionais'],ptbl:['Tabla de planos, ejes y movimientos','Planes, axes and movements table','Tabela de planos, eixos e movimentos']};
  window.openKin=function(){showTab('lec');const d=$('#tab-lec details.fsec[data-k="bio"]');if(d){d.open=true;setTimeout(()=>d.scrollIntoView({block:'start'}),60);}};
  window.kinLinkTxt=function(){const k=document.querySelector('.kinlink');if(k)k.innerHTML=`🦴 ${esc(TL('Kinesiología y biomecánica','Kinesiology & biomechanics','Cinesiologia e biomecânica'))}<span>${typeof BIO_Q!=='undefined'&&BIO_Q?BIO_Q.length+' '+esc(TL('preguntas','questions','perguntas')):''} →</span>`;};
- window.retitleFolds=function(){try{kinLinkTxt();}catch(e){}document.querySelectorAll('details.tabfold').forEach(d=>{const t=TT[d.dataset.k],sm=d.querySelector(':scope > summary');if(t&&sm&&sm.firstChild)sm.firstChild.textContent=TL(...t);});
+ window.retitleFolds=function(){try{kinLinkTxt();}catch(e){}try{embLinkTxt();}catch(e){}document.querySelectorAll('details.tabfold').forEach(d=>{const t=TT[d.dataset.k],sm=d.querySelector(':scope > summary');if(t&&sm&&sm.firstChild)sm.firstChild.textContent=TL(...t);});
   try{toursSum();}catch(e){}
   const rh=document.querySelector('#romBox > .rhd');if(rh)rh.textContent=TL('Rango articular','Range of motion','Amplitude articular');};
  /* si algo del programa desplaza la vista hacia un bloque plegado, se abre primero */
@@ -9266,7 +9278,8 @@ async function bgStart(){if(BG.run||BG.fin||!BG.on||!window.caches||!window.__CC
    const ph=L.querySelector(':scope > .phyhost');if(ph){const b=document.createElement('button');b.className='phylink';b.innerHTML=`⚡ ${esc(TL('Fisiología en acción','Physiology in action','Fisiologia em ação'))}<span>${esc(TL('en Movimiento','in Movement','em Movimento'))} →</span>`;
      b.onclick=()=>{showTab('mov');const d=$('#tab-mov details.fsec[data-k="phy"]');if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'});}};/* v158: los recorridos se ven aquí mismo, en un apartado abierto (antes había que ir a Movimiento y desplegarlo) */
       const td=document.createElement('details');td.className='fsec toursec';td.dataset.k='tours';td.open=true;const ts=document.createElement('summary');td.append(ts);L.prepend(td);td.append(ph);toursSum();/* primero en Estudiar */
-      const kb=document.createElement('button');kb.className='phylink kinlink';kb.onclick=()=>window.openKin&&openKin();td.after(kb);setTimeout(()=>{try{kinLinkTxt();}catch(e){}},0);}
+      const kb=document.createElement('button');kb.className='phylink kinlink';kb.onclick=()=>window.openKin&&openKin();td.after(kb);setTimeout(()=>{try{kinLinkTxt();}catch(e){}},0);
+      const eb=document.createElement('button');eb.className='phylink emblink';eb.onclick=()=>embrionShow();kb.after(eb);setTimeout(()=>{try{embLinkTxt();}catch(e){}},0);}
    const T=[['#caseBox',TL('Casos clínicos','Clinical cases','Casos clínicos'),'cases'],['#routeCard',TL('Ruta de estudio','Study route','Rota de estudo'),'route'],['#bioCard',TL('Kinesiología y biomecánica','Kinesiology & biomechanics','Cinesiologia e biomecânica'),'bio'],['#rcCard',TL('Razonamiento clínico','Clinical reasoning','Raciocínio clínico'),'rc'],['#revCard',TL('Revisión experta','Expert review','Revisão especializada'),'rev'],['#examCard',TL('Modo examen','Exam mode','Modo exame'),'exam'],['#srsCard',TL('Repaso espaciado','Spaced review','Revisão espaçada'),'srs']];
    const lh=[...L.children].find(x=>x.matches('h3.sect')&&/Lecciones|Lessons|Lições/.test(x.textContent)),lb=$('#lecBox');
    if(lh&&lb){const w=document.createElement('div');lh.parentNode.insertBefore(w,lh);w.append(lh,lb);fold(w,lh.textContent.trim(),'lec');}
@@ -10852,7 +10865,7 @@ renderProt();
 (()=>{if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
  const FILES=["draco/draco_decoder.js", "draco/draco_decoder.wasm", "draco/draco_wasm_wrapper.js", "hr/cabeza_loc.txt", "hr/cabeza_nv.txt", "hr/inferior_loc.txt", "hr/inferior_nv.txt", "hr/superior_loc.txt", "hr/superior_nv.txt", "hr/tronco_loc.txt", "hr/tronco_nv.txt", "m2/arterial.txt", "m2/arterial__f.txt", "m2/articular.txt", "m2/articular__f.txt", "m2/bolsas.txt", "m2/bolsas__f.txt", "m2/digestivo.txt", "m2/digestivo__f.txt", "m2/endocrino.txt", "m2/f_articular.txt", "m2/f_mama.txt", "m2/f_muscular.txt", "m2/f_nervioso.txt", "m2/f_ojos.txt", "m2/f_oseo.txt", "m2/f_piel.txt", "m2/f_reproductor.txt", "m2/f_vasos.txt", "m2/f_visceras.txt", "m2/fascia.txt", "m2/fascia__f.txt", "m2/insercion.txt", "m2/insercion__f.txt", "m2/linfatico.txt", "m2/linfatico__f.txt", "m2/mama.txt", "m2/muscular.txt", "m2/muscular__f.txt", "m2/nervioso_central.txt", "m2/nervioso_central__f.txt", "m2/nervioso_periferico.txt", "m2/nervioso_periferico__f.txt", "m2/oseo.txt", "m2/oseo__f.txt", "m2/piel.txt", "m2/piel_f.txt", "m2/reproductor.txt", "m2/reproductor_f.txt", "m2/respiratorio.txt", "m2/urinario.txt", "m2/urinario__f.txt", "m2/venoso.txt", "m2/venoso__f.txt"],MODELS='corpus-models-3',MB=54;
  const L=(es,en,pt)=>{const l=document.documentElement.lang;return l==='en'?en:l==='pt'?pt:es;};
- const APP_V='corpus-v169';/* igual que V en sw.js: se cambian juntos en cada publicación */
+ const APP_V='corpus-v170';/* igual que V en sw.js: se cambian juntos en cada publicación */
  const hadCtl=!!navigator.serviceWorker.controller;let upShown=false;
  /* aviso de versión nueva: si alguien tiene abierta (o instalada) una versión antigua, se le ofrece actualizar */
  const upBar=v=>{if(upShown)return;upShown=true;const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');
