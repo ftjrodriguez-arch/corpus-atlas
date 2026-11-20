@@ -183,6 +183,33 @@ float wl = 0;
                 float s = lerp(1, kt / max(k1, 1e-4), val);
                 g.x *= s;
                 g.z = c1.x + (g.z - c1.x) * s;
+                // El borde superior del dorsal cubre el ángulo inferior de la escápula: al rotar la escápula hacia arriba
+                // (ritmo escapulohumeral) el ángulo se desliza hacia fuera por debajo del músculo, que se abomba sobre él.
+                if (HUG > 1.5)
+                {
+                    bool der = g0.x < 0;
+                    int ja = der ? ACR_R : ACR_L, jc = der ? SC_R : SC_L;
+                    float3 b = float3(der ? SBX : -(SBX), SBY, SBZ);
+                    float4 qa = Tex.Load(int3(ja, 0, 0)); float3 pa = Tex.Load(int3(ja, 1, 0)).xyz;
+                    float sa, ca; sincos(qa.w, sa, ca);
+                    float3 db = b - pa;
+                    b = db * ca + cross(qa.xyz, db) * sa + qa.xyz * dot(qa.xyz, db) * (1 - ca) + pa;
+                    float4 qc = Tex.Load(int3(jc, 0, 0)); float3 pc = Tex.Load(int3(jc, 1, 0)).xyz;
+                    sincos(qc.w, sa, ca);
+                    db = b - pc;
+                    b = db * ca + cross(qc.xyz, db) * sa + qc.xyz * dot(qc.xyz, db) * (1 - ca) + pc;
+                    // el dorsal queda siempre un poco por fuera de donde está el ángulo inferior en esta postura
+                    float hb = clamp((b.y - Y0) / DY, 0, 31);
+                    int ab = (int)floor(hb);
+                    float3 cb = lerp(Tex.Load(int3(ab, 3, 0)).xyz, Tex.Load(int3(min(ab + 1, 31), 3, 0)).xyz, hb - ab);
+                    float kb = length(float2(b.x / cb.y, (b.z - cb.x) / cb.z)) + 0.016 / (0.5 * (cb.y + cb.z));
+                    float kg = length(float2(g.x / c1.y, (g.z - c1.x) / c1.z));
+                    float cerca = 1 - smoothstep(0.045, 0.14, length(g - b));
+                    float kn = max(kg, lerp(kg, kb, cerca));
+                    float sb2 = kn / max(kg, 1e-4);
+                    g.x *= sb2;
+                    g.z = c1.x + (g.z - c1.x) * sb2;
+                }
             }
         }
     }
@@ -270,6 +297,12 @@ def _postura(g):
     mov = _datos_mov()
     codigo = (HLSL_POSTURA.replace("NA_TRONCO", str(len(mov["articulaciones"]) - 2))
               .replace("Y0", repr(float(mov["torax"]["y0"]))).replace("DY", repr(float(mov["torax"]["dy"]))))
+    arts = [a["id"] for a in mov["articulaciones"]]
+    with open(os.path.join(IMPORTAR, "datos", "rig.json"), encoding="utf-8") as h:
+        sb = json.load(h)["scapBot_R"]          # ángulo inferior de la escápula derecha (la izquierda, en espejo)
+    for k, v in (("ACR_R", arts.index("acr_R")), ("ACR_L", arts.index("acr_L")), ("SC_R", arts.index("sc_R")), ("SC_L", arts.index("sc_L")),
+                 ("SBX", sb[0]), ("SBY", sb[1]), ("SBZ", sb[2])):
+        codigo = codigo.replace(k, repr(v))
     cu = _custom(g, codigo, ["Tex", "P", "U0", "U1", "U2", "U3"] + ["J%d" % i for i in range(8)] + ["HUG"], CMOT.CMOT_FLOAT3,
                  extra=[("Q", CMOT.CMOT_FLOAT4)], desc="Postura (rig de la web)")
     g.une(tex, cu, "Tex")

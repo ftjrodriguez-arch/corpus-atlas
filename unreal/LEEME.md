@@ -128,6 +128,17 @@ Reimportar las mallas (`importar_mallas`) tarda 1 h 45 min; `_aplanar` sustituye
 - **Pegados a la parrilla costal** (`abrazo` en `movimiento.json`, dato primitivo 20): fila 3 de la textura de postura =
   contorno del tórax cada 1,25 cm (centro z, radio x, radio z). Antes de girar el tronco, el material devuelve cada punto a
   su distancia de reposo al contorno, con holgura creciente hacia el húmero (misma regla que `latHug`, sin corte brusco).
+- **Músculos elásticos anclados a sus huesos** (tabla `HARM`: trapecio, romboides, elevador, serrato, pectoral menor,
+  subclavio, deltoides y manguito). En la web el trapecio y los romboides no acompañaban a la escápula y lo de debajo los
+  atravesaba. Cada vértice a menos de 12 mm de un hueso queda anclado a él y entre los anclajes el peso es armónico
+  (Laplace sobre la malla): el estiramiento se reparte de forma continua por toda la fibra.
+- **La escápula resbala pegada a las costillas:** con las posturas de la web el ángulo inferior se despegaba (hacían
+  falta hasta 20° para devolverlo). `movimiento.js` añade a la acromioclavicular la báscula mínima que lo deja a su
+  distancia de reposo del contorno del tórax y recalcula la glenohumeral (188 posturas). El dorsal ancho (dato primitivo
+  20 = 2) pasa además por fuera del ángulo inferior en cada postura.
+- Referencias del ritmo escapulohumeral: Braman et al. 2009 (0,43° de rotación superior por grado de elevación, relación
+  2,3:1) y Ludewig et al. 2009 (báscula posterior ≈ 19°, rotación posterior de la clavícula ≈ 31°); la tabla `ST_UR` de la
+  web ya los sigue en los huesos.
 - `node tools/unreal/movimiento.js --sin-pesos` rehace solo las posturas; `--solo=muscular` rehace los pesos de una capa
   (luego `ci.importar_mallas(["hombre/muscular", "mujer/muscular"])`, unos 12 minutos).
 - Pendiente de este repaso: pliegues finos en la axila (deltoides, bíceps, tríceps largo y manguito se cruzan), el brazo
