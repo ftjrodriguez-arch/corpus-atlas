@@ -31,11 +31,16 @@ private:
 	void RehacerCapas();
 	void RehacerFicha();
 	void RehacerResultados(const FText& Texto);
+	/** Panel de movimiento (rango articular): articulación, movimiento, lado, grados y reproducir. */
+	void RehacerMovimiento();
+	void AlCambiarPostura();
 	TSharedRef<SWidget> Boton(const FString& Texto, TFunction<void()> Accion, bool bAcento = false) const;
 
 	TWeakObjectPtr<ACorpusJugador> Jugador;
-	TSharedPtr<SVerticalBox> CajaCapas, CajaFicha, CajaResultados, CajaBarra;
+	TSharedPtr<SVerticalBox> CajaCapas, CajaFicha, CajaResultados, CajaBarra, CajaMov;
 	TSharedPtr<SEditableTextBox> Buscador;
-	FDelegateHandle HSel, HCapas, HIdioma;
+	FDelegateHandle HSel, HCapas, HIdioma, HPostura;
+	bool bVerMov = false;
+	FIntVector MovPintado = FIntVector(-2, -2, -2);   // rango, movimiento y lado con los que se pintó el panel
 	uint8 CuerpoPintado = 255;   // la barra (hombre / mujer / Visible Human) se rehace cuando cambia el cuerpo
 };

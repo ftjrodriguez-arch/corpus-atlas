@@ -10,6 +10,8 @@ esta carpeta no se usa en la web.
 
 1. En la raíz del repositorio: `node tools/unreal/exportar.js`
    Crea `unreal/CorpusAtlas/Importar/` (43 GLB, 5.150 piezas, 12,3 M de triángulos, ~380 MB; no se sube al repositorio).
+   Después, con `python -m http.server 8765` en otra consola: `node tools/unreal/movimiento.js` (pesos y posturas del
+   movimiento, calculados por la web; necesita Playwright).
 2. Clic derecho en `unreal/CorpusAtlas/CorpusAtlas.uproject` → *Generate Visual Studio project files*, y abrirlo (compila el módulo).
    Si tu versión no es la 5.8, cambia `EngineAssociation` en el `.uproject`.
 3. En el editor, consola de Python:
@@ -85,6 +87,40 @@ Las fotos quedan en `unreal/capturas/` con la interfaz incluida.
 - Probar con el ratón real (clic, doble clic, arrastrar) y los atajos H, I, F, 1–6: las capturas usan las mismas funciones, pero no el ratón.
 - Al encuadrar una pieza pequeña (p. ej. un músculo del ojo) la cámara queda muy cerca; y cambiar de cuerpo no reencuadra.
 - La piel del Visible Human opaca sale algo anaranjada; afinar su tinte si hace falta.
+
+## Fase 2 · Movimiento: rangos articulares (2026-11-20)
+El movimiento no se ha vuelto a programar: lo calcula la propia web y Unreal solo lo dibuja.
+1. `node tools/unreal/movimiento.js` (con `python -m http.server 8765` en marcha y Playwright) abre la web sin ventana con `?qa`:
+   - **Pesos:** `weightsFor()` de la web para cada vértice de las 5.066 mallas del hombre y la mujer (5,6 M de vértices) y
+     27 articulaciones (sin los dedos). Cada pieza usa hasta 8 «huecos» en el orden de `deform()`; la articulación de cada
+     hueco va en `movimiento.json → piezas` (± a + 32·b + 1024·c: hasta 3 articulaciones seguidas con el mismo peso;
+     negativo = interpolación lineal, `u.lin` de la web) y Unreal la pone en los datos primitivos 12–19. Por vértice solo
+     van los 8 pesos, en `TEXCOORD_0…3`. **No mezclar índice y peso en un UV:** Nanite y la malla de reserva promedian los
+     UV al simplificar, y «16,98» promediado con «0» da otra articulación (salían astillas en los músculos del hombro).
+     Solo el nervio cubital (hombre y mujer) necesita 10 y pierde las 2 de menos peso.
+   - **Posturas:** `applyPose()` de la web con `deform()` interceptado, cada 5°, lado derecho e izquierdo, para los
+     14 rangos de la tabla ROM (hombro, escápula, codo, antebrazo, muñeca, cadera, rodilla, tobillo, cervical, ATM,
+     cervical alta, tronco, torácica, lumbar). Así salen ya el ritmo escapulohumeral (ISB), la escápula sobre las costillas,
+     el deslizamiento de la rodilla (`kneeTr`) y el tobillo separado en talocrural y subastragalina (`ankleSplit`).
+     Salida: `Importar/datos/movimiento.json` (eje, ángulo, pivote y traslación en glTF).
+2. `M_CorpusTejido` y `M_CorpusTranslucido`: nodo *Custom* «Postura» en el World Position Offset que repite el bucle de
+   `deform()` (comprobado en Node contra la web: mismos desplazamientos máximos en dorsal, pectoral, iliocostal e
+   intercostales) leyendo la postura de una textura de 32×4 (fila 0 eje + ángulo, 1 pivote, 2 traslación). El giro total del
+   vértice pasa al píxel (*VertexInterpolator*) y gira la normal (local → glTF → local), así la luz cae bien sobre el brazo
+   levantado. Las estrías usan la posición de reposo (`LocalPosition` sin desplazamientos). UV a precisión completa.
+3. `ACorpusCuerpo::PonerRango()` interpola entre los fotogramas (slerp), sube la textura, agranda los límites de las piezas
+   (`BoundsScale`, para que Nanite y las sombras no recorten la pieza movida; `Caja()` lo descuenta) y pinta los agonistas de
+   naranja (`#f0a040`, como el estado «ag» de la web). Reproducir: ida y vuelta a 45°/s.
+4. Interfaz: botón «Movimiento» → panel inferior con articulación, movimiento, lado, deslizador de grados, reproducir y reposo.
+   Pruebas: paso `rom <id> <nº de movimiento> <R|L> <grados>` (`rom` solo = reposo).
+
+Capturas: `unreal/capturas/mov_00…10` (hombro, codo, cadera, rodilla, tronco, cuello, solo esqueleto y mujer).
+Color del músculo: parámetro `Desaturar` (tabla `DESATURAR`, músculo 0,30) y menos dispersión roja; antes salía rojo puro.
+Reimportar las mallas (`importar_mallas`) tarda 1 h 45 min; `_aplanar` sustituye la malla anterior por la recién importada.
+
+Queda fuera de este paso (la web lo hace después de deformar, en la CPU): `musPost` (músculos del hombro que no atraviesan la
+cabeza humeral ni el tórax), `latHug`, `kneePush`, la deformación por fibras del pectoral y el dorsal, y los dedos de la mano
+y del pie (no caben en 8 pares sin otro grupo como `ax`). El clic del ratón usa la colisión de reposo.
 
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,

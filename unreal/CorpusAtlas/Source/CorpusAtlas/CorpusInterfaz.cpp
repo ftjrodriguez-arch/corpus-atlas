@@ -44,7 +44,7 @@ namespace
 
 SCorpusInterfaz::~SCorpusInterfaz()
 {
-	if (ACorpusCuerpo* C = Cuerpo()) { C->AlCambiarSeleccion.Remove(HSel); C->AlCambiarCapas.Remove(HCapas); }
+	if (ACorpusCuerpo* C = Cuerpo()) { C->AlCambiarSeleccion.Remove(HSel); C->AlCambiarCapas.Remove(HCapas); C->AlCambiarPostura.Remove(HPostura); }
 	if (UCorpusDatos* D = Datos()) { D->AlCambiarIdioma.Remove(HIdioma); }
 }
 
@@ -113,6 +113,15 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 				]
 			]
 		]
+		// ── Abajo: movimiento (rango articular) ──
+		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Bottom).Padding(18.f)
+		[
+			SNew(SBox).WidthOverride(760.f)
+			.Visibility_Lambda([this]() { const ACorpusCuerpo* C = Cuerpo(); return C && C->MovimientoDisponible() && (bVerMov || C->Rango() >= 0) ? EVisibility::Visible : EVisibility::Collapsed; })
+			[
+				SNew(SBorder).BorderImage(Panel()).Padding(14.f)[ SAssignNew(CajaMov, SVerticalBox) ]
+			]
+		]
 		// ── Derecha: ficha de la estructura seleccionada ──
 		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Top).Padding(18.f)
 		[
@@ -131,6 +140,7 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 	{
 		HSel = C->AlCambiarSeleccion.AddSP(this, &SCorpusInterfaz::RehacerFicha);
 		HCapas = C->AlCambiarCapas.AddSP(this, &SCorpusInterfaz::RehacerCapas);
+		HPostura = C->AlCambiarPostura.AddSP(this, &SCorpusInterfaz::AlCambiarPostura);
 	}
 	if (UCorpusDatos* D = Datos()) { HIdioma = D->AlCambiarIdioma.AddSP(this, &SCorpusInterfaz::Reconstruir); }
 	Reconstruir();
@@ -178,10 +188,87 @@ void SCorpusInterfaz::Reconstruir()
 		FilaVistas->AddSlot()[ Boton(D->T(Vistas[i]), [WJ, i]() { if (WJ.IsValid() && WJ->CamaraOrbital()) { WJ->CamaraOrbital()->Vista(i); } }) ];
 	}
 	FilaVistas->AddSlot()[ Boton(D->T(TEXT("Mostrar todo")), [WC]() { if (WC.IsValid()) { WC->MostrarTodo(); } }) ];
+	if (C->MovimientoDisponible())
+	{
+		FilaVistas->AddSlot()[ Boton(D->T(TEXT("Movimiento")), [this, WC]()
+		{
+			bVerMov = !bVerMov;
+			if (WC.IsValid() && !bVerMov) { WC->QuitarPostura(); }
+			MovPintado = FIntVector(-2, -2, -2); RehacerMovimiento();
+		}, bVerMov) ];
+	}
 	CajaBarra->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[ FilaVistas ];
 
 	RehacerCapas();
 	RehacerFicha();
+	MovPintado = FIntVector(-2, -2, -2);
+	RehacerMovimiento();
+}
+
+void SCorpusInterfaz::AlCambiarPostura()
+{
+	// en reproducción la postura cambia en cada fotograma: el panel solo se rehace si cambian rango, movimiento o lado
+	const ACorpusCuerpo* C = Cuerpo();
+	if (!C) { return; }
+	if (FIntVector(C->Rango(), C->Movimiento(), (C->LadoIzquierdo() ? 1 : 0) + (C->Reproduciendo() ? 2 : 0)) != MovPintado) { RehacerMovimiento(); }
+}
+
+void SCorpusInterfaz::RehacerMovimiento()
+{
+	UCorpusDatos* D = Datos();
+	ACorpusCuerpo* C = Cuerpo();
+	if (!D || !C || !CajaMov.IsValid()) { return; }
+	MovPintado = FIntVector(C->Rango(), C->Movimiento(), (C->LadoIzquierdo() ? 1 : 0) + (C->Reproduciendo() ? 2 : 0));
+	CajaMov->ClearChildren();
+	if (!C->MovimientoDisponible()) { return; }
+	TWeakObjectPtr<ACorpusCuerpo> WC(C);
+	const TArray<FCorpusRango>& Rs = D->Rangos();
+	const int32 Ri = C->Rango(), Mi = C->Movimiento();
+	const bool bIzq = C->LadoIzquierdo();
+
+	CajaMov->AddSlot().AutoHeight()[ Txt(Mayus(D->T(TEXT("Rango articular"))), 9, C_GRIS, true) ];
+	TSharedRef<SWrapBox> FilaR = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
+	for (int32 i = 0; i < Rs.Num(); ++i)
+	{
+		FilaR->AddSlot()[ Boton(D->T(Rs[i].Nombre), [WC, i, bIzq]() { if (WC.IsValid()) { WC->Reproducir(false); WC->PonerRango(i, 0, bIzq, 0.f); } }, i == Ri) ];
+	}
+	CajaMov->AddSlot().AutoHeight().Padding(0, 6, 0, 0)[ FilaR ];
+	if (!Rs.IsValidIndex(Ri)) { return; }
+
+	const FCorpusRango& R = Rs[Ri];
+	TSharedRef<SWrapBox> FilaM = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
+	for (int32 m = 0; m < R.Movs.Num(); ++m)
+	{
+		FilaM->AddSlot()[ Boton(D->T(R.Movs[m].Nombre), [WC, Ri, m, bIzq]() { if (WC.IsValid()) { WC->Reproducir(false); WC->PonerRango(Ri, m, bIzq, 0.f); } }, m == Mi) ];
+	}
+	CajaMov->AddSlot().AutoHeight().Padding(0, 10, 0, 0)[ FilaM ];
+
+	// lado: en las articulaciones pares, derecho o izquierdo; en el tronco y el cuello, el sentido de la inclinación o el giro
+	TSharedRef<SHorizontalBox> Fila = SNew(SHorizontalBox);
+	if (R.Movs.IsValidIndex(Mi) && R.Movs[Mi].Izquierdo.Num() > 0)
+	{
+		const TCHAR* LD = R.bLados ? TEXT("Derecho") : TEXT("Hacia la derecha");
+		const TCHAR* LI = R.bLados ? TEXT("Izquierdo") : TEXT("Hacia la izquierda");
+		Fila->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 5, 0)[ Boton(D->T(LD), [WC, Ri, Mi]() { if (WC.IsValid()) { WC->PonerRango(Ri, Mi, false, WC->Grados()); } }, !bIzq) ];
+		Fila->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 10, 0)[ Boton(D->T(LI), [WC, Ri, Mi]() { if (WC.IsValid()) { WC->PonerRango(Ri, Mi, true, WC->Grados()); } }, bIzq) ];
+	}
+	Fila->AddSlot().FillWidth(1.f).VAlign(VAlign_Center)
+	[
+		SNew(SSlider).MinValue(0.f).MaxValue(1.f)
+		.Value_Lambda([WC]() { return WC.IsValid() && WC->GradosMax() > 0.f ? WC->Grados() / WC->GradosMax() : 0.f; })
+		.OnValueChanged_Lambda([WC](float V) { if (WC.IsValid()) { WC->Reproducir(false); WC->PonerRango(WC->Rango(), WC->Movimiento(), WC->LadoIzquierdo(), V * WC->GradosMax()); } })
+	];
+	Fila->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(10, 0)
+	[
+		SNew(SBox).WidthOverride(84.f)
+		[
+			SNew(STextBlock).Font(Letra(12, true)).ColorAndOpacity(FSlateColor(C_TINTA))
+			.Text_Lambda([WC]() { return WC.IsValid() ? FText::FromString(FString::Printf(TEXT("%d° / %d°"), FMath::RoundToInt(WC->Grados()), FMath::RoundToInt(WC->GradosMax()))) : FText(); })
+		]
+	];
+	Fila->AddSlot().AutoWidth().VAlign(VAlign_Center)[ Boton(D->T(C->Reproduciendo() ? TEXT("Pausa") : TEXT("Reproducir")), [WC]() { if (WC.IsValid()) { WC->Reproducir(!WC->Reproduciendo()); } }, true) ];
+	Fila->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(5, 0, 0, 0)[ Boton(D->T(TEXT("Reposo")), [WC]() { if (WC.IsValid()) { WC->QuitarPostura(); } }) ];
+	CajaMov->AddSlot().AutoHeight().Padding(0, 12, 0, 0)[ Fila ];
 }
 
 void SCorpusInterfaz::RehacerCapas()

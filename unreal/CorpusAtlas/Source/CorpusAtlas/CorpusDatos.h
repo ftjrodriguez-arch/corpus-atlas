@@ -50,6 +50,23 @@ struct FCorpusCapa
 	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Base;
 };
 
+/** Un movimiento de la tabla ROM de la web (flexión del hombro…): la postura ya calculada cada Paso grados. */
+struct FCorpusMovimiento
+{
+	FString Nombre;
+	float Max = 0.f, Paso = 5.f;
+	TArray<FString> Agonistas;                 // nombres en inglés del catálogo (se pintan de naranja, como en la web)
+	TArray<TArray<float>> Derecho, Izquierdo;  // por fotograma: [índice, eje xyz, ángulo (rad), traslación xyz] × articulaciones
+};
+
+/** Una articulación o región de la tabla ROM (hombro, codo, tronco…). */
+struct FCorpusRango
+{
+	FString Id, Nombre;
+	bool bLados = false;
+	TArray<FCorpusMovimiento> Movs;
+};
+
 /** Claves que distinguen mayúsculas (como los objetos de JavaScript): en i18n_de, «urinario» y «Urinario» son textos distintos. */
 struct FClaveExacta : TDefaultMapKeyFuncs<FString, FString, false>
 {
@@ -93,7 +110,21 @@ public:
 	DECLARE_MULTICAST_DELEGATE(FAlCambiarIdioma);
 	FAlCambiarIdioma AlCambiarIdioma;
 
+	/** Movimiento (movimiento.json): pivotes en glTF (m), índice del grupo «tronco entero» y rangos articulares. */
+	const TArray<FVector3f>& PivotesArticulaciones() const { return Pivotes; }
+	const TArray<FCorpusRango>& Rangos() const { return ListaRangos; }
+	int32 IndiceGrupoTronco() const { return IndiceTronco; }
+	/** Articulaciones que mueven la pieza en ese cuerpo (carpeta «hombre» o «mujer»): códigos para los datos primitivos 12–19. */
+	const TArray<float>* HuecosMovimiento(const FString& Carpeta, const FString& Id) const { return Huecos.Find(Carpeta + TEXT("/") + Id); }
+
 private:
+	void CargarMovimiento();
+	TMap<FString, TArray<float>> Huecos;
+	TArray<FVector3f> Pivotes;
+	TArray<FString> NombresArt;
+	TArray<FCorpusRango> ListaRangos;
+	int32 IndiceTronco = 0;
+
 	static TSharedPtr<FJsonObject> LeerObjeto(const FString& Archivo);
 	static bool LeerLista(const FString& Archivo, TArray<TSharedPtr<FJsonValue>>& Fuera);
 	void CargarCatalogo(const FString& Archivo, const FString& Campo);

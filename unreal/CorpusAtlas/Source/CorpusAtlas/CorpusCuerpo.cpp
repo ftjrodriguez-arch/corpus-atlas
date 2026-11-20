@@ -4,17 +4,24 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/GameInstance.h"
 #include "Materials/MaterialInterface.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Engine/Texture2D.h"
+#include "TextureResource.h"
 
 namespace
 {
 	const TCHAR* RUTA_MALLAS = TEXT("/Game/Corpus/Mallas");
 	const TCHAR* RUTA_MATERIALES = TEXT("/Game/Corpus/Materiales");
 	const FLinearColor COLOR_SELECCION(0.10f, 0.55f, 1.0f); // azul de selección de la web
+	const FLinearColor COLOR_AGONISTA = FLinearColor(FColor::FromHex(TEXT("f0a040")));   // agonistas del rango articular (web: estado «ag»)
+	// Con la postura puesta, cada pieza puede alejarse hasta ~1,5 m de su sitio (el brazo entero): sus límites se agrandan
+	// para que no se recorte al salir de la caja de reposo.
+	const float ALCANCE_POSTURA = 160.f;
 }
 
 ACorpusCuerpo::ACorpusCuerpo()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	Raiz = CreateDefaultSubobject<USceneComponent>(TEXT("Raiz"));
 	SetRootComponent(Raiz);
 }
@@ -66,8 +73,162 @@ UMaterialInterface* ACorpusCuerpo::MaterialDe(const FString& Base, bool bTranslu
 		const TCHAR* Maestro = bTranslucido ? TEXT("M_CorpusTranslucido") : TEXT("M_CorpusTejido");
 		Mat = LoadObject<UMaterialInterface>(nullptr, *FString::Printf(TEXT("%s/%s.%s"), RUTA_MATERIALES, Maestro, Maestro));
 	}
+	// Instancia dinámica: el material lee la postura (giros de cada articulación) de una textura que se actualiza al moverse
+	if (Mat)
+	{
+		CrearTexturaPostura();
+		UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(Mat, this);
+		MID->SetTextureParameterValue(TEXT("Postura"), TexPostura);
+		Mat = MID;
+	}
 	Materiales.Add(Nombre, Mat);
 	return Mat;
+}
+
+// ───────── Movimiento ─────────
+
+void ACorpusCuerpo::CrearTexturaPostura()
+{
+	if (TexPostura) { return; }
+	const UCorpusDatos* D = Datos();
+	const int32 N = D ? D->PivotesArticulaciones().Num() : 0;
+	AnchoPostura = FMath::Max(32, N);
+	TexPostura = UTexture2D::CreateTransient(AnchoPostura, 4, PF_A32B32G32R32F, TEXT("T_Postura"));
+	TexPostura->Filter = TF_Nearest;
+	TexPostura->SRGB = false;
+	TexPostura->AddressX = TA_Clamp; TexPostura->AddressY = TA_Clamp;
+	TexPostura->NeverStream = true;
+	TexPostura->UpdateResource();
+	// Fila 0: eje y ángulo · fila 1: pivote · fila 2: traslación (todo en glTF, metros, como la web)
+	Postura.Init(FVector4f(0, 0, 0, 0), AnchoPostura * 4);
+	for (int32 i = 0; i < N; ++i)
+	{
+		const FVector3f& P = D->PivotesArticulaciones()[i];
+		Postura[AnchoPostura + i] = FVector4f(P.X, P.Y, P.Z, 0.f);
+	}
+	SubirPostura();
+}
+
+void ACorpusCuerpo::SubirPostura()
+{
+	if (!TexPostura) { return; }
+	const int32 Paso = AnchoPostura * sizeof(FVector4f);
+	uint8* Copia = (uint8*)FMemory::Malloc(Paso * 4);
+	FMemory::Memcpy(Copia, Postura.GetData(), Paso * 4);
+	FUpdateTextureRegion2D* Region = new FUpdateTextureRegion2D(0, 0, 0, 0, AnchoPostura, 4);
+	TexPostura->UpdateTextureRegions(0, 1, Region, Paso, sizeof(FVector4f), Copia,
+		[](uint8* Datos, const FUpdateTextureRegion2D* R) { FMemory::Free(Datos); delete R; });
+}
+
+bool ACorpusCuerpo::MovimientoDisponible() const
+{
+	const UCorpusDatos* D = Datos();
+	return D && D->Rangos().Num() > 0 && CuerpoActual != ECorpusCuerpo::VisibleHuman;
+}
+
+float ACorpusCuerpo::GradosMax() const
+{
+	const UCorpusDatos* D = Datos();
+	if (!D || !D->Rangos().IsValidIndex(RangoActual) || !D->Rangos()[RangoActual].Movs.IsValidIndex(MovActual)) { return 0.f; }
+	return D->Rangos()[RangoActual].Movs[MovActual].Max;
+}
+
+void ACorpusCuerpo::AjustarLimites(UStaticMeshComponent* C) const
+{
+	// la postura saca la malla de su caja de reposo: sin agrandar los límites, Nanite y las sombras la recortarían
+	const float Radio = FMath::Max(C->Bounds.SphereRadius / FMath::Max(C->BoundsScale, 1e-3f), 0.5f);
+	C->SetBoundsScale(RangoActual >= 0 ? FMath::Clamp((Radio + ALCANCE_POSTURA) / Radio, 1.f, 400.f) : 1.f);
+}
+
+void ACorpusCuerpo::PintarAgonistas(const TArray<FString>& En, const FString& Lado)
+{
+	const UCorpusDatos* D = Datos();
+	for (const FString& Id : IdsAgonistas) { if (Id != IdSeleccionada) { PonerEstado(Id, FLinearColor::Black, 0.f); } }
+	IdsAgonistas.Reset();
+	if (!D || En.Num() == 0) { return; }
+	const TSet<FString> Nombres(En);
+	for (const auto& Par : Piezas)
+	{
+		const FCorpusPieza* P = D->Pieza(Par.Key);
+		if (!P || !Nombres.Contains(P->En)) { continue; }
+		if (!Lado.IsEmpty() && !P->Lado.IsEmpty() && !P->Lado.StartsWith(Lado)) { continue; }
+		IdsAgonistas.Add(Par.Key);
+		if (Par.Key != IdSeleccionada) { PonerEstado(Par.Key, COLOR_AGONISTA, 0.75f); }
+	}
+}
+
+void ACorpusCuerpo::PonerRango(int32 Rango, int32 Mov, bool bIzq, float Grados)
+{
+	const UCorpusDatos* D = Datos();
+	if (!D) { return; }
+	CrearTexturaPostura();
+	const bool bAntes = RangoActual >= 0;
+	const FCorpusRango* R = (MovimientoDisponible() && D->Rangos().IsValidIndex(Rango)) ? &D->Rangos()[Rango] : nullptr;
+	const FCorpusMovimiento* M = (R && R->Movs.IsValidIndex(Mov)) ? &R->Movs[Mov] : nullptr;
+	const bool bCambia = Rango != RangoActual || Mov != MovActual || bIzq != bLadoIzq;
+	RangoActual = M ? Rango : -1; MovActual = M ? Mov : 0; bLadoIzq = M && bIzq;
+	if (!M) { bReproduciendo = false; }
+
+	// reposo: ángulos y traslaciones a cero (los pivotes no cambian)
+	for (int32 i = 0; i < AnchoPostura; ++i) { Postura[i] = FVector4f(0, 0, 0, 0); Postura[AnchoPostura * 2 + i] = FVector4f(0, 0, 0, 0); }
+	if (M)
+	{
+		const TArray<TArray<float>>& F = (bLadoIzq && M->Izquierdo.Num()) ? M->Izquierdo : M->Derecho;
+		GradosActual = FMath::Clamp(Grados, 0.f, M->Max);
+		if (F.Num() > 0)
+		{
+			// fotogramas cada Paso grados (el último, en el máximo exacto): se interpola entre los dos vecinos
+			const int32 Ult = F.Num() - 1;
+			const int32 I0 = FMath::Clamp(FMath::FloorToInt(GradosActual / M->Paso), 0, FMath::Max(Ult - 1, 0)), I1 = FMath::Min(I0 + 1, Ult);
+			const float G0 = FMath::Min(I0 * M->Paso, M->Max), G1 = FMath::Min(I1 * M->Paso, M->Max);
+			const float A = G1 > G0 ? FMath::Clamp((GradosActual - G0) / (G1 - G0), 0.f, 1.f) : 0.f;
+			struct FGiro { FQuat Q = FQuat::Identity; FVector T = FVector::ZeroVector; };
+			TMap<int32, TPair<FGiro, FGiro>> Giros;
+			for (int32 k = 0; k < 2; ++k)
+			{
+				const TArray<float>& Fr = F[k == 0 ? I0 : I1];
+				for (int32 j = 0; j + 7 < Fr.Num(); j += 8)
+				{
+					FGiro& G = k == 0 ? Giros.FindOrAdd((int32)Fr[j]).Key : Giros.FindOrAdd((int32)Fr[j]).Value;
+					const FVector Eje(Fr[j + 1], Fr[j + 2], Fr[j + 3]);
+					G.Q = Eje.IsNearlyZero() ? FQuat::Identity : FQuat(Eje.GetSafeNormal(), Fr[j + 4]);
+					G.T = FVector(Fr[j + 5], Fr[j + 6], Fr[j + 7]);
+				}
+			}
+			for (const auto& Par : Giros)
+			{
+				if (Par.Key < 0 || Par.Key >= AnchoPostura) { continue; }
+				const FQuat Q = FQuat::Slerp(Par.Value.Key.Q, Par.Value.Value.Q, A);
+				FVector Eje; double Ang; Q.ToAxisAndAngle(Eje, Ang);
+				if (Ang > PI) { Ang = 2.0 * PI - Ang; Eje = -Eje; }
+				const FVector T = FMath::Lerp(Par.Value.Key.T, Par.Value.Value.T, A);
+				Postura[Par.Key] = FVector4f((float)Eje.X, (float)Eje.Y, (float)Eje.Z, (float)Ang);
+				Postura[AnchoPostura * 2 + Par.Key] = FVector4f((float)T.X, (float)T.Y, (float)T.Z, 0.f);
+			}
+		}
+	}
+	else { GradosActual = 0.f; }
+	SubirPostura();
+
+	if ((RangoActual >= 0) != bAntes) { for (auto& Par : Piezas) { if (Par.Value) { AjustarLimites(Par.Value); } } }
+	if (bCambia)
+	{
+		// agonistas: los del lado que se mueve (en el tronco y el cuello, ambos lados)
+		PintarAgonistas(M ? M->Agonistas : TArray<FString>(), (R && R->bLados) ? FString(bLadoIzq ? TEXT("izq") : TEXT("der")) : FString());
+	}
+	AlCambiarPostura.Broadcast();
+}
+
+void ACorpusCuerpo::Tick(float Dt)
+{
+	Super::Tick(Dt);
+	if (!bReproduciendo || RangoActual < 0) { return; }
+	// ida y vuelta entre 0 y el máximo, a unos 45° por segundo (como el botón ▶ de la web)
+	const float Max = GradosMax();
+	float G = GradosActual + SentidoRepro * 45.f * Dt;
+	if (G >= Max) { G = Max; SentidoRepro = -1.f; }
+	if (G <= 0.f) { G = 0.f; SentidoRepro = 1.f; }
+	PonerRango(RangoActual, MovActual, bLadoIzq, G);
 }
 
 void ACorpusCuerpo::CargarCapa(const FString& Clave)
@@ -111,6 +272,15 @@ void ACorpusCuerpo::CargarCapa(const FString& Clave)
 		C->SetCustomPrimitiveDataVector4(0, FVector4(0, 0, 0, 0));          // estado: color + fuerza
 		C->SetCustomPrimitiveDataFloat(4, OpacidadDeCapa(Clave));          // opacidad de la capa
 		C->SetCustomPrimitiveDataVector4(5, FVector4(M->Tinte.R, M->Tinte.G, M->Tinte.B, M->Tinte.A)); // color propio del órgano + peso
+		// articulaciones que mueven esta malla (el material lee sus pesos de los UV y su orden de aquí)
+		if (const TArray<float>* H = D->HuecosMovimiento(Carpeta, P.Id))
+		{
+			float V[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+			for (int32 i = 0; i < FMath::Min(8, H->Num()); ++i) { V[i] = (*H)[i]; }
+			C->SetCustomPrimitiveDataVector4(12, FVector4(V[0], V[1], V[2], V[3]));
+			C->SetCustomPrimitiveDataVector4(16, FVector4(V[4], V[5], V[6], V[7]));
+		}
+		if (RangoActual >= 0) { AjustarLimites(C); }
 		Piezas.Add(P.Id, C);
 		Ids.Add(P.Id);
 	}
@@ -234,13 +404,18 @@ FString ACorpusCuerpo::IdDe(const UPrimitiveComponent* Comp) const
 
 FBox ACorpusCuerpo::Caja(const FString& Id) const
 {
+	// caja de reposo: con la postura puesta los límites están agrandados (BoundsScale) y se deshace ese aumento
+	const auto CajaDe = [](const UStaticMeshComponent* C)
+	{
+		return FBox::BuildAABB(C->Bounds.Origin, C->Bounds.BoxExtent / FMath::Max(C->BoundsScale, 1e-3f));
+	};
 	FBox B(ForceInit);
 	if (!Id.IsEmpty())
 	{
-		if (const TObjectPtr<UStaticMeshComponent>* C = Piezas.Find(Id)) { B = (*C)->Bounds.GetBox(); }
+		if (const TObjectPtr<UStaticMeshComponent>* C = Piezas.Find(Id)) { B = CajaDe(*C); }
 		return B;
 	}
-	for (const auto& Par : Piezas) { if (Par.Value && Par.Value->IsVisible()) { B += Par.Value->Bounds.GetBox(); } }
+	for (const auto& Par : Piezas) { if (Par.Value && Par.Value->IsVisible()) { B += CajaDe(Par.Value); } }
 	return B;
 }
 
@@ -253,6 +428,8 @@ void ACorpusCuerpo::DescargarTodo()
 void ACorpusCuerpo::PonerCuerpo(ECorpusCuerpo Nuevo)
 {
 	if (Nuevo == CuerpoActual) { return; }
+	if (Nuevo == ECorpusCuerpo::VisibleHuman) { QuitarPostura(); }   // el Visible Human no tiene rig
+	IdsAgonistas.Reset();
 	const bool bDeVH = CuerpoActual == ECorpusCuerpo::VisibleHuman, bAVH = Nuevo == ECorpusCuerpo::VisibleHuman;
 	TSet<FString> Antes = CapasVisibles;
 	DescargarTodo();

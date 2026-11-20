@@ -45,7 +45,36 @@ public:
 	void PonerEstado(const FString& Id, const FLinearColor& Color, float Fuerza);
 
 	DECLARE_MULTICAST_DELEGATE(FAlCambiar);
-	FAlCambiar AlCambiarSeleccion, AlCambiarCapas;
+	FAlCambiar AlCambiarSeleccion, AlCambiarCapas, AlCambiarPostura;
+
+	// ── Movimiento: rangos articulares de la web (la GPU deforma las mallas con la textura de postura) ──
+	/** Hay pesos y posturas (movimiento.json) y el cuerpo actual se mueve (el Visible Human no). */
+	bool MovimientoDisponible() const;
+	/** Coloca la postura del movimiento Mov del rango Rango a Grados (lado izquierdo si bIzq). Rango < 0 = reposo. */
+	void PonerRango(int32 Rango, int32 Mov, bool bIzq, float Grados);
+	void QuitarPostura() { PonerRango(-1, 0, false, 0.f); }
+	void Reproducir(bool bSi) { bReproduciendo = bSi && RangoActual >= 0; AlCambiarPostura.Broadcast(); }
+	bool Reproduciendo() const { return bReproduciendo; }
+	int32 Rango() const { return RangoActual; }
+	int32 Movimiento() const { return MovActual; }
+	bool LadoIzquierdo() const { return bLadoIzq; }
+	float Grados() const { return GradosActual; }
+	float GradosMax() const;
+
+	virtual void Tick(float Dt) override;
+
+private:
+	void CrearTexturaPostura();
+	void SubirPostura();
+	void AjustarLimites(UStaticMeshComponent* C) const;
+	void PintarAgonistas(const TArray<FString>& En, const FString& Lado);
+	TArray<FVector4f> Postura;                        // ancho × 4: eje+ángulo, pivote, traslación (glTF, m)
+	int32 AnchoPostura = 32;
+	UPROPERTY() TObjectPtr<class UTexture2D> TexPostura;
+	TSet<FString> IdsAgonistas;
+	int32 RangoActual = -1, MovActual = 0;
+	bool bLadoIzq = false, bReproduciendo = false;
+	float GradosActual = 0.f, SentidoRepro = 1.f;
 
 private:
 	UCorpusDatos* Datos() const;
@@ -57,7 +86,7 @@ private:
 
 	UPROPERTY() TObjectPtr<USceneComponent> Raiz;
 	UPROPERTY() TMap<FString, TObjectPtr<UStaticMeshComponent>> Piezas;
-	UPROPERTY() TMap<FString, TObjectPtr<UMaterialInterface>> Materiales;
+	UPROPERTY() TMap<FString, TObjectPtr<UMaterialInterface>> Materiales;   // instancias dinámicas con la textura de postura
 	TMap<FString, TArray<FString>> IdsPorCapa;
 	TMap<FString, float> Opacidades;
 	TSet<FString> CapasCargadas, CapasVisibles, Ocultas;

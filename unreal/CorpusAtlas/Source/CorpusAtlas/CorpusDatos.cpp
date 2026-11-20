@@ -155,7 +155,76 @@ void UCorpusDatos::Initialize(FSubsystemCollectionBase& Collection)
 	}
 
 	InfoEs = LeerObjeto(TEXT("info.json"));
-	UE_LOG(LogCorpus, Log, TEXT("Corpus Atlas: %d estructuras, %d capas"), Piezas.Num(), ListaCapas.Num());
+	CargarMovimiento();
+	UE_LOG(LogCorpus, Log, TEXT("Corpus Atlas: %d estructuras, %d capas, %d articulaciones, %d rangos"), Piezas.Num(), ListaCapas.Num(), Pivotes.Num(), ListaRangos.Num());
+}
+
+// movimiento.json (tools/unreal/movimiento.js): articulaciones con su pivote y, por cada movimiento de la tabla ROM de la web,
+// la postura cada 5° y por lado: lista plana de 8 números por articulación [índice, eje xyz, ángulo, traslación xyz] (glTF, m).
+void UCorpusDatos::CargarMovimiento()
+{
+	const TSharedPtr<FJsonObject> J = LeerObjeto(TEXT("movimiento.json"));
+	if (!J) { return; }
+	IndiceTronco = (int32)J->GetNumberField(TEXT("ax"));
+	const TArray<TSharedPtr<FJsonValue>>* A = nullptr;
+	if (J->TryGetArrayField(TEXT("articulaciones"), A))
+	{
+		for (const auto& V : *A)
+		{
+			const TSharedPtr<FJsonObject> O = V->AsObject();
+			const TArray<TSharedPtr<FJsonValue>>& P = O->GetArrayField(TEXT("pivote"));
+			NombresArt.Add(O->GetStringField(TEXT("id")));
+			Pivotes.Add(FVector3f((float)P[0]->AsNumber(), (float)P[1]->AsNumber(), (float)P[2]->AsNumber()));
+		}
+	}
+	const auto LeerFrames = [](const TSharedPtr<FJsonObject>& M, const TCHAR* Lado, TArray<TArray<float>>& Fuera)
+	{
+		const TArray<TSharedPtr<FJsonValue>>* F = nullptr;
+		if (!M->TryGetArrayField(Lado, F)) { return; }
+		for (const auto& Fr : *F)
+		{
+			TArray<float>& Dst = Fuera.AddDefaulted_GetRef();
+			for (const auto& X : Fr->AsArray()) { Dst.Add((float)X->AsNumber()); }
+		}
+	};
+	// huecos de cada pieza: «cuerpo/id» → hasta 8 códigos de articulación (± a + 32·b + 1024·c), datos primitivos 12–19
+	const TSharedPtr<FJsonObject>* PJ = nullptr;
+	if (J->TryGetObjectField(TEXT("piezas"), PJ))
+	{
+		for (const auto& Cu : (*PJ)->Values)
+		{
+			const TSharedPtr<FJsonObject>* PorId = nullptr;
+			if (!Cu.Value.IsValid() || !Cu.Value->TryGetObject(PorId)) { continue; }
+			for (const auto& Pz : (*PorId)->Values)
+			{
+				TArray<float>& H = Huecos.Add(FString(Cu.Key) + TEXT("/") + FString(Pz.Key));
+				for (const auto& X : Pz.Value->AsArray()) { H.Add((float)X->AsNumber()); }
+			}
+		}
+	}
+	const TArray<TSharedPtr<FJsonValue>>* R = nullptr;
+	if (J->TryGetArrayField(TEXT("rom"), R))
+	{
+		for (const auto& V : *R)
+		{
+			const TSharedPtr<FJsonObject> O = V->AsObject();
+			FCorpusRango& Rg = ListaRangos.AddDefaulted_GetRef();
+			Rg.Id = O->GetStringField(TEXT("id"));
+			Rg.Nombre = O->GetStringField(TEXT("n"));
+			O->TryGetBoolField(TEXT("lados"), Rg.bLados);
+			for (const auto& MV : O->GetArrayField(TEXT("movs")))
+			{
+				const TSharedPtr<FJsonObject> M = MV->AsObject();
+				FCorpusMovimiento& Mv = Rg.Movs.AddDefaulted_GetRef();
+				Mv.Nombre = M->GetStringField(TEXT("n"));
+				Mv.Max = (float)M->GetNumberField(TEXT("max"));
+				Mv.Paso = (float)M->GetNumberField(TEXT("paso"));
+				for (const auto& Ag : M->GetArrayField(TEXT("ag"))) { Mv.Agonistas.Add(Ag->AsString()); }
+				LeerFrames(M, TEXT("R"), Mv.Derecho);
+				LeerFrames(M, TEXT("L"), Mv.Izquierdo);
+			}
+		}
+	}
 }
 
 const FCorpusCapa* UCorpusDatos::Capa(const FString& Clave) const

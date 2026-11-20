@@ -17,7 +17,8 @@ Material de tejido (M_CorpusTejido), a partir de lo que ya lleva cada vértice:
   tangente = dirección de la fibra muscular (o del eje del vaso/nervio)
   → estrías de fibra en relieve a dos escalas, brillo anisótropo húmedo a lo largo de la fibra,
     tendón nacarado, cartílago liso azulado, dispersión bajo la superficie y poro fino en el hueso.
-Datos primitivos por pieza: 0–2 color de estado, 3 fuerza del estado, 4 opacidad, 5–7 color propio del órgano, 8 su peso.
+Datos primitivos por pieza: 0–2 color de estado, 3 fuerza del estado, 4 opacidad, 5–7 color propio del órgano, 8 su peso,
+12–19 articulaciones que la mueven (movimiento.json; los pesos de cada vértice van en TEXCOORD_0…3).
 """
 import json
 import os
@@ -49,7 +50,7 @@ def _hex(h):
 #   fibra: relieve de las estrías · anis: brillo alargado · sss: dispersión bajo la superficie · poro: grano fino
 TEJIDOS = {
     "oseo":                dict(color="ece2cb", rug=0.62, esp=0.35, fibra=0.00, anis=0.0, sss=0.10, sss_color="e8c9a0", poro=0.55, esc=0.0),
-    "muscular":            dict(color="a3392f", rug=0.38, esp=0.55, fibra=0.85, anis=0.55, sss=0.45, sss_color="7a1410", poro=0.10, esc=9.0),
+    "muscular":            dict(color="a3392f", rug=0.42, esp=0.50, fibra=0.85, anis=0.55, sss=0.22, sss_color="8a4a3e", poro=0.10, esc=9.0),
     "articular":           dict(color="d3dde6", rug=0.30, esp=0.60, fibra=0.55, anis=0.70, sss=0.30, sss_color="c8d6e8", poro=0.05, esc=14.0),
     "insercion":           dict(color="2f9e5b", rug=0.55, esp=0.30, fibra=0.00, anis=0.0, sss=0.05, sss_color="2f9e5b", poro=0.00, esc=0.0),
     "fascia":              dict(color="cdb594", rug=0.35, esp=0.55, fibra=0.35, anis=0.50, sss=0.35, sss_color="d8c4a8", poro=0.05, esc=16.0),
@@ -69,6 +70,7 @@ TEJIDOS = {
 # Multiplicador del color base tras el tinte del órgano: el hueso (tinte 242,236,220) quemaba la imagen con la exposición
 # del estudio. Comprobado en capturas (unreal/capturas).
 ALBEDO = {"oseo": 0.30, "articular": 0.55, "bolsas": 0.80, "fascia": 0.80}
+DESATURAR = {"muscular": 0.30}     # la web se ve salmón, no rojo puro (capturas 2026-11-20)
 FIBRA = ("muscular", "articular", "fascia", "arterial", "venoso", "nervioso_periferico", "linfatico")
 
 
@@ -134,6 +136,119 @@ class _G:
     def sal(self, e, prop, salida=""): mel.connect_material_property(e, salida, prop)
 
 
+# ───────────────────────── movimiento ─────────────────────────
+# De tools/unreal/movimiento.js: cada pieza usa hasta 8 «huecos» de articulación, en el orden en que los aplica deform()
+# de la web (de distal a proximal). La articulación de cada hueco va en los datos primitivos 12–19 (± a + 32·b + 1024·c:
+# hasta 3 articulaciones seguidas con el mismo peso; negativo = interpolación lineal) y el peso de cada vértice en
+# TEXCOORD_0…3 (solo pesos: Nanite promedia los UV al simplificar). La postura (textura de 32×4 que rellena
+# ACorpusCuerpo): fila 0 eje + ángulo, fila 1 pivote, fila 2 traslación, todo en glTF (metros, Y arriba).
+# Local de Unreal = glTF con Y y Z intercambiados, en centímetros (comprobado con la caja de n1).
+HLSL_POSTURA = r"""
+float3 g = float3(P.x, P.z, P.y) * 0.01;
+float3 g0 = g;
+float4 qt = float4(0, 0, 0, 1);
+float js[8] = { J0, J1, J2, J3, J4, J5, J6, J7 };
+float ws[8] = { U0.x, U0.y, U1.x, U1.y, U2.x, U2.y, U3.x, U3.y };
+[loop] for (int k = 0; k < 8; k++)
+{
+    float jv = js[k];
+    if (jv == 0) break;
+    float w = saturate(ws[k]);
+    if (w < 0.0005) continue;
+    bool lin = jv < 0;
+    int code = (int)round(abs(jv));
+    [loop] for (int t = 0; t < 3; t++)
+    {
+        int j = (code & 31) - 1;
+        code = code >> 5;
+        if (j < 0) break;
+        float4 ea = Tex.Load(int3(j, 0, 0));
+        float3 tr = Tex.Load(int3(j, 2, 0)).xyz;
+        if (ea.w == 0 && !any(tr)) continue;
+        float3 pv = Tex.Load(int3(j, 1, 0)).xyz;
+        float th = lin ? ea.w : ea.w * w;
+        float sn, cs; sincos(th, sn, cs);
+        float3 e = ea.xyz, d = g - pv;
+        float3 r = d * cs + cross(e, d) * sn + e * dot(e, d) * (1 - cs) + pv;
+        g = lin ? g + (r - g) * w : r;
+        g += tr * w;
+        float sh, ch; sincos(ea.w * w * 0.5, sh, ch);
+        float3 qv = e * sh;
+        qt = float4(ch * qt.xyz + qt.w * qv + cross(qv, qt.xyz), ch * qt.w - dot(qv, qt.xyz));
+    }
+}
+Q = qt;
+float3 o = (g - g0) * 100;
+return float3(o.x, o.z, o.y);
+"""
+# La normal gira con la pieza: se pasa a local, se aplica el giro total del vértice (en glTF) y se devuelve a tangente
+HLSL_GIRO = r"""
+float l = length(Q);
+float4 q = l > 1e-6 ? Q / l : float4(0, 0, 0, 1);
+float3 g = float3(N.x, N.z, N.y);
+float3 t = 2 * cross(q.xyz, g);
+g = g + q.w * t + cross(q.xyz, t);
+return float3(g.x, g.z, g.y);
+"""
+
+
+def _custom(g, codigo, entradas, tipo, extra=None, desc=""):
+    cu = g.n(unreal.MaterialExpressionCustom, -500)
+    cu.set_editor_property("description", desc)
+    cu.set_editor_property("code", codigo)
+    cu.set_editor_property("output_type", tipo)
+    ins = []
+    for nm in entradas:
+        ci = unreal.CustomInput(); ci.set_editor_property("input_name", nm); ins.append(ci)
+    cu.set_editor_property("inputs", ins)
+    if extra:
+        outs = []
+        for nm, t in extra:
+            co = unreal.CustomOutput(); co.set_editor_property("output_name", nm); co.set_editor_property("output_type", t); outs.append(co)
+        cu.set_editor_property("additional_outputs", outs)
+    return cu
+
+
+def _transformar(g, e, origen, destino):
+    t = g.n(unreal.MaterialExpressionTransform, -350)
+    t.set_editor_property("transform_source_type", origen)
+    t.set_editor_property("transform_type", destino)
+    g.une(e, t, "")
+    return t
+
+
+def _postura(g):
+    """World Position Offset del rig de la web; devuelve el giro total del vértice (cuaternión glTF) ya en el píxel."""
+    CMOT = unreal.CustomMaterialOutputType
+    tex = g.n(unreal.MaterialExpressionTextureObjectParameter, parameter_name="Postura")
+    negro = unreal.load_asset("/Engine/EngineResources/Black")
+    if negro:
+        tex.set_editor_property("texture", negro)
+    tex.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
+    cu = _custom(g, HLSL_POSTURA, ["Tex", "P", "U0", "U1", "U2", "U3"] + ["J%d" % i for i in range(8)], CMOT.CMOT_FLOAT3,
+                 extra=[("Q", CMOT.CMOT_FLOAT4)], desc="Postura (rig de la web)")
+    g.une(tex, cu, "Tex")
+    g.une(g.n(unreal.MaterialExpressionPreSkinnedPosition), cu, "P")
+    for c in range(4):
+        g.une(g.n(unreal.MaterialExpressionTextureCoordinate, coordinate_index=c), cu, "U%d" % c)
+    for i in range(8):      # articulación de cada hueco: datos primitivos 12–19 (ACorpusCuerpo::CargarCapa)
+        g.une(g.esc("Hueco%d" % i, 0.0, cpd=12 + i), cu, "J%d" % i)
+    S, D = unreal.MaterialVectorCoordTransformSource, unreal.MaterialVectorCoordTransform
+    wpo = _transformar(g, cu, S.TRANSFORMSOURCE_LOCAL, D.TRANSFORM_WORLD)
+    g.sal(wpo, unreal.MaterialProperty.MP_WORLD_POSITION_OFFSET)
+    vi = g.n(unreal.MaterialExpressionVertexInterpolator, -300)
+    g.une(cu, vi, "VS", "Q")
+    return vi
+
+
+def _girar_normal(g, normal_tangente, giro):
+    S, D = unreal.MaterialVectorCoordTransformSource, unreal.MaterialVectorCoordTransform
+    loc = _transformar(g, normal_tangente, S.TRANSFORMSOURCE_TANGENT, D.TRANSFORM_LOCAL)
+    gi = _custom(g, HLSL_GIRO, ["N", "Q"], unreal.CustomMaterialOutputType.CMOT_FLOAT3, desc="Normal girada con la postura")
+    g.une(loc, gi, "N"); g.une(giro, gi, "Q")
+    return _transformar(g, gi, S.TRANSFORMSOURCE_LOCAL, D.TRANSFORM_TANGENT)
+
+
 def _maestro(nombre, translucido):
     ruta = "%s/%s" % (R_MAT, nombre)
     if eal.does_asset_exist(ruta):
@@ -163,7 +278,12 @@ def _maestro(nombre, translucido):
     sss = g.esc("Dispersion", 0.4); sss_c = g.vec("ColorDispersion", _hex("7a1410"))
 
     # Coordenada a través de la fibra = posición local · (normal × tangente). Las estrías corren a lo largo de la tangente.
+    giro = _postura(g)
     pos = g.n(unreal.MaterialExpressionLocalPosition) if hasattr(unreal, "MaterialExpressionLocalPosition") else g.n(unreal.MaterialExpressionWorldPosition)
+    try:   # posición de reposo: las estrías y el poro siguen pegados al tejido cuando la postura lo mueve
+        pos.set_editor_property("included_offsets", unreal.PositionIncludedOffsets.EXCLUDE_OFFSETS)
+    except Exception as e:  # noqa
+        unreal.log_warning("Corpus: LocalPosition sin desplazamientos: %s" % e)
     nrm = g.n(unreal.MaterialExpressionVertexNormalWS)
     tan = g.n(unreal.MaterialExpressionVertexTangentWS)
     bit = g.op(unreal.MaterialExpressionCrossProduct, nrm, tan)
@@ -201,7 +321,10 @@ def _maestro(nombre, translucido):
     base = g.lerp(base, tRGB, tA)
     col = g.lerp(base, tendon, mG)
     col = g.lerp(col, cartil, mB)
-    col = g.mul(col, g.esc("Albedo", 1.0))                       # los tejidos casi blancos (hueso, cartílago) saturaban la imagen
+    # el músculo salía rojo puro: se le quita parte de la saturación (parámetro por tejido, DESATURAR)
+    des = g.n(unreal.MaterialExpressionDesaturation, -350)
+    g.une(col, des, ""); g.une(g.esc("Desaturar", 0.0), des, "Fraction")
+    col = g.mul(des, g.esc("Albedo", 1.0))                       # los tejidos casi blancos (hueso, cartílago) saturaban la imagen
     surco = g.add(g.cte(1.0), g.mul(g.mul(onda, fuerza), g.cte(0.10)))
     col = g.mul(col, surco)
     col = g.mul(col, g.add(g.cte(1.0), g.mul(grano, g.cte(0.25))))
@@ -225,7 +348,7 @@ def _maestro(nombre, translucido):
     g.une(xy, normal, "A"); g.une(g.cte(1.0), normal, "B")
     nn = g.n(unreal.MaterialExpressionNormalize, -250); g.une(normal, nn, "VectorInput")
     if not translucido:      # en translúcido la normal en espacio tangente y la anisotropía dejaban la superficie negra
-        g.sal(nn, MP.MP_NORMAL)
+        g.sal(_girar_normal(g, nn, giro), MP.MP_NORMAL)
 
     # Superficie húmeda: el tendón y el cartílago son más lisos; los surcos, algo más mates
     r = g.lerp(rug, g.cte(0.22), mG)
@@ -269,6 +392,7 @@ def crear_materiales():
                          ("Dispersion", "sss"), ("Poro", "poro"), ("EscalaFibra", "esc")):
                 mel.set_material_instance_scalar_parameter_value(mi, p, float(t[k]))
             mel.set_material_instance_scalar_parameter_value(mi, "Albedo", float(ALBEDO.get(clave, 1.0)))
+            mel.set_material_instance_scalar_parameter_value(mi, "Desaturar", float(DESATURAR.get(clave, 0.0)))
             eal.save_asset(ruta)
     unreal.log("Corpus: materiales creados en " + R_MAT)
 
@@ -283,6 +407,7 @@ def _ajustar(malla, con_fibra):
         b.set_editor_property("recompute_tangents", False)
         b.set_editor_property("generate_lightmap_u_vs", False)
         b.set_editor_property("remove_degenerates", False)
+        b.set_editor_property("use_full_precision_u_vs", True)   # pesos del movimiento en TEXCOORD_0…3 (índice + peso)
         sub.set_lod_build_settings(malla, 0, b)
     except Exception as e:  # noqa
         unreal.log_warning("Corpus: ajustes de construcción de %s: %s" % (malla.get_name(), e))
@@ -328,9 +453,11 @@ def _aplanar(destino, ids=None):
                 nombre = faltan[0]
         if carpeta == destino and nombre == str(obj.asset_name):
             continue
-        if not eal.does_asset_exist("%s/%s" % (destino, nombre)):
-            if eal.rename_asset(ruta.split(".")[0], "%s/%s" % (destino, nombre)):
-                movidas += 1
+        final = "%s/%s" % (destino, nombre)
+        if eal.does_asset_exist(final):
+            eal.delete_asset(final)          # reimportación: la malla recién importada sustituye a la anterior
+        if eal.rename_asset(ruta.split(".")[0], final):
+            movidas += 1
     for sub in eal.list_assets(destino, recursive=False, include_folder=True):
         if sub.endswith("/") and sub.rstrip("/") != destino:
             eal.delete_directory(sub.rstrip("/"))   # quedan redirectores y texturas de relleno sin usar

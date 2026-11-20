@@ -173,6 +173,18 @@ void ACorpusJugador::TickQa()
 		Cu->PonerCuerpo(Resto == TEXT("mujer") ? ECorpusCuerpo::Mujer : Resto == TEXT("vh") ? ECorpusCuerpo::VisibleHuman : ECorpusCuerpo::Hombre);
 		Pausa = 4.0;
 	}
+	else if (Verbo == TEXT("rom") && Cu)
+	{
+		// rom <id> <nº de movimiento> <R|L> <grados>   ·   rom (solo) = reposo
+		TArray<FString> A; Resto.ParseIntoArrayWS(A);
+		int32 Ri = -1;
+		if (const UCorpusDatos* D = GetGameInstance() ? GetGameInstance()->GetSubsystem<UCorpusDatos>() : nullptr)
+		{
+			for (int32 i = 0; A.Num() > 0 && i < D->Rangos().Num(); ++i) { if (D->Rangos()[i].Id == A[0]) { Ri = i; } }
+		}
+		Cu->PonerRango(Ri, A.Num() > 1 ? FCString::Atoi(*A[1]) : 0, A.Num() > 2 && A[2] == TEXT("L"), A.Num() > 3 ? FCString::Atof(*A[3]) : 0.f);
+		Pausa = 2.0;
+	}
 	else if (Verbo == TEXT("buscar"))
 	{
 		if (ACorpusHUD* H = Cast<ACorpusHUD>(GetHUD()))
