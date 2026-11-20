@@ -18,6 +18,7 @@
 #include "Widgets/Input/SSlider.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Images/SImage.h"
+#include "Widgets/Notifications/SProgressBar.h"
 
 namespace
 {
@@ -273,6 +274,46 @@ void SCorpusInterfaz::RehacerMovimiento()
 		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(5, 0, 0, 0)[ Boton(D->T(TEXT("Cámara lenta")), [WC]() { if (WC.IsValid()) { WC->MarchaLenta(!WC->EsMarchaLenta()); } }, C->EsMarchaLenta()) ];
 		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(5, 0, 0, 0)[ Boton(D->T(TEXT("Reposo")), [WC]() { if (WC.IsValid()) { WC->PonerMarcha(-1, 0.f); } }) ];
 		CajaMov->AddSlot().AutoHeight().Padding(0, 10, 0, 0)[ FilaC ];
+		// leyenda: cada grupo muscular con su intensidad en este instante (barra) y el tipo de contracción (miembro derecho)
+		{
+			TSharedRef<SVerticalBox> Ley = SNew(SVerticalBox);
+			for (int32 g = 0; g < D->GruposMarcha().Num(); ++g)
+			{
+				const FCorpusGrupoMarcha& G = D->GruposMarcha()[g];
+				Ley->AddSlot().AutoHeight().Padding(0, 1)
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)
+					[
+						SNew(STextBlock).Font(Letra(9)).Text(FText::FromString(D->T(G.Nombre))).ToolTipText(FText::FromString(D->T(G.Texto)))
+						.ColorAndOpacity_Lambda([WC, g]() { return FSlateColor(WC.IsValid() && WC->NivelDeGrupo(g) > 0.05f ? C_TINTA : C_GRIS); })
+					]
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(6, 0)
+					[
+						SNew(SBox).WidthOverride(70.f).HeightOverride(7.f)
+						[
+							SNew(SProgressBar).FillImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderPadding(FVector2D::ZeroVector)   // relleno blanco: el color es el de la actividad
+							.Percent_Lambda([WC, g]() { return TOptional<float>(WC.IsValid() ? FMath::Clamp(WC->NivelDeGrupo(g) / 0.6f, 0.f, 1.f) : 0.f); })
+							.FillColorAndOpacity_Lambda([WC, g]() { return FSlateColor(WC.IsValid() ? ACorpusCuerpo::ColorDeNivel(WC->NivelDeGrupo(g)) : FLinearColor::Gray); })
+						]
+					]
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+					[
+						SNew(SBox).WidthOverride(78.f)
+						[
+							SNew(STextBlock).Font(Letra(9)).ColorAndOpacity(FSlateColor(C_ACENTO))
+							.Text_Lambda([WC, WD, g]()
+							{
+								if (!WC.IsValid() || !WD.IsValid()) { return FText(); }
+								const FString T = WC->TipoDeGrupo(g);
+								return FText::FromString(T == TEXT("exc") ? WD->T(TEXT("Excéntrica")) : T == TEXT("con") ? WD->T(TEXT("Concéntrica")) : T == TEXT("iso") ? WD->T(TEXT("Isométrica")) : FString());
+							})
+						]
+					]
+				];
+			}
+			CajaMov->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[ Ley ];
+		}
 		CajaMov->AddSlot().AutoHeight().Padding(0, 6, 0, 0)[ Txt(D->T(TEXT("Actividad muscular: amarillo (poca) → magenta (mucha). Datos de laboratorio: Fukuchi 2018, Schreiber 2019, Lencioni 2019.")), 8, C_GRIS) ];
 		return;
 	}

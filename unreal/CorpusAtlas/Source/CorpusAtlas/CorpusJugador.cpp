@@ -64,7 +64,8 @@ void ACorpusCamara::Encuadrar(const FBox& Caja, bool bInmediato)
 {
 	if (!Caja.IsValid) { return; }
 	Objetivo = Caja.GetCenter();
-	const float Radio = FMath::Max(Caja.GetExtent().Size(), 1.f);
+	// las piezas muy pequeñas (un músculo del ojo, un huesecillo) se encuadran con algo de contexto alrededor: 5 cm de radio mínimo
+	const float Radio = FMath::Max(Caja.GetExtent().Size(), 5.f);
 	// FieldOfView es horizontal: en pantallas apaisadas manda el ángulo vertical, más estrecho
 	float Aspecto = 16.f / 9.f;
 	if (GEngine && GEngine->GameViewport)
@@ -147,6 +148,15 @@ void ACorpusJugador::TickQa()
 	else if (Verbo == TEXT("esperar")) { Pausa = FCString::Atod(*Resto); }
 	else if (Verbo == TEXT("sel") && Cu) { Cu->Seleccionar(Resto); }
 	else if (Verbo == TEXT("encuadrar")) { EncuadrarSeleccion(); Pausa = 2.0; }
+	else if (Verbo == TEXT("enfocar") && Cu && Ca)
+	{
+		// enfocar n1620,n1673: encuadra esas piezas sin seleccionarlas (para fotos de una región)
+		TArray<FString> Ids; Resto.ParseIntoArray(Ids, TEXT(","), true);
+		FBox B(ForceInit);
+		for (const FString& Id : Ids) { const FBox Bi = Cu->Caja(Id.TrimStartAndEnd()); if (Bi.IsValid) { B += Bi; } }
+		Ca->Encuadrar(B); Pausa = 2.0;
+	}
+	else if (Verbo == TEXT("acercar") && Ca) { Ca->Acercar(FCString::Atof(*Resto)); Pausa = 1.5; }
 	else if (Verbo == TEXT("aislar") && Cu) { Cu->Aislar(Resto.IsEmpty() ? Cu->Seleccionada() : Resto); }
 	else if (Verbo == TEXT("ocultar") && Cu) { Cu->Ocultar(Resto.IsEmpty() ? Cu->Seleccionada() : Resto); }
 	else if (Verbo == TEXT("todo") && Cu) { Cu->MostrarTodo(); }
@@ -222,6 +232,13 @@ void ACorpusJugador::PlayerTick(float Dt)
 	Super::PlayerTick(Dt);
 	TickQa();
 	ACorpusCamara* C = CamaraOrbital();
+	// al cambiar de cuerpo (hombre, mujer, Visible Human) se vuelve a encuadrar: no miden lo mismo
+	if (C && CuerpoRef.IsValid() && (uint8)CuerpoRef->Cuerpo() != CuerpoAntes)
+	{
+		CuerpoAntes = (uint8)CuerpoRef->Cuerpo();
+		const FBox B = CuerpoRef->Caja(FString());
+		if (B.IsValid) { C->Encuadrar(B); }
+	}
 	FVector2D Raton;
 	if (!C || !GetMousePosition(Raton.X, Raton.Y)) { bRatonValido = false; return; }
 	const FVector2D D = bRatonValido ? Raton - RatonAntes : FVector2D::ZeroVector;

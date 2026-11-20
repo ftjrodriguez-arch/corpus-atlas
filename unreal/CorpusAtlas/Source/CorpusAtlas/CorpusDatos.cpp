@@ -277,6 +277,13 @@ void UCorpusDatos::CargarMovimiento()
 				Cadenas(O, TEXT("en"), G.En); G.Nombre = O->GetStringField(TEXT("n")); G.Texto = O->GetStringField(TEXT("txt"));
 				const TArray<TSharedPtr<FJsonValue>>* Lv = nullptr;
 				if (O->TryGetArrayField(TEXT("lv"), Lv)) { for (const auto& Pt : *Lv) { const auto& Par2 = Pt->AsArray(); G.Nivel.Add(FVector2f((float)Par2[0]->AsNumber(), (float)Par2[1]->AsNumber())); } }
+				if (O->TryGetArrayField(TEXT("tramos"), Lv)) { for (const auto& Pt : *Lv) { const auto& Par2 = Pt->AsArray(); if (Par2.Num() == 2) { G.Tramos.Add(FVector2f((float)Par2[0]->AsNumber(), (float)Par2[1]->AsNumber())); } } }
+				const TSharedPtr<FJsonObject>* Tp = nullptr;
+				if (O->TryGetObjectField(TEXT("tipo"), Tp))
+				{
+					for (const auto& Par2 : (*Tp)->Values) { G.Tipo.Emplace(FCString::Atof(*FString(Par2.Key)), Par2.Value->AsString()); }
+					G.Tipo.Sort([](const TPair<float, FString>& A, const TPair<float, FString>& B) { return A.Key < B.Key; });
+				}
 			}
 		}
 		if (Ma->TryGetArrayField(TEXT("patrones"), L))
@@ -419,6 +426,9 @@ namespace
 		{TEXT("Ramas"), {TEXT("Branches"), TEXT("Ramos"), TEXT("Branches"), TEXT("Äste")}},
 		{TEXT("Territorio"), {TEXT("Territory"), TEXT("Território"), TEXT("Territoire"), TEXT("Versorgungsgebiet")}},
 		{TEXT("Clínica"), {TEXT("Clinical notes"), TEXT("Clínica"), TEXT("Clinique"), TEXT("Klinik")}},
+		{TEXT("Excéntrica"), {TEXT("Eccentric"), TEXT("Excêntrica"), TEXT("Excentrique"), TEXT("Exzentrisch")}},
+		{TEXT("Concéntrica"), {TEXT("Concentric"), TEXT("Concêntrica"), TEXT("Concentrique"), TEXT("Konzentrisch")}},
+		{TEXT("Isométrica"), {TEXT("Isometric"), TEXT("Isométrica"), TEXT("Isométrique"), TEXT("Isometrisch")}},
 		{TEXT("Relaciones"), {TEXT("Relations"), TEXT("Relações"), TEXT("Rapports"), TEXT("Lagebeziehungen")}},
 	};
 

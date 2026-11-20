@@ -372,6 +372,27 @@ void ACorpusCuerpo::PonerMarcha(int32 Patron, float Ciclo)
 	AlCambiarPostura.Broadcast();
 }
 
+float ACorpusCuerpo::NivelDeGrupo(int32 Gi, bool bIzq) const
+{
+	const UCorpusDatos* D = Datos();
+	return (D && PatronActual >= 0 && D->GruposMarcha().IsValidIndex(Gi)) ? NivelEn(D->GruposMarcha()[Gi].Nivel, CicloMarcha + (bIzq ? 50.f : 0.f)) : 0.f;
+}
+
+FString ACorpusCuerpo::TipoDeGrupo(int32 Gi) const
+{
+	const UCorpusDatos* D = Datos();
+	if (!D || PatronActual < 0 || !D->GruposMarcha().IsValidIndex(Gi)) { return FString(); }
+	const FCorpusGrupoMarcha& G = D->GruposMarcha()[Gi];
+	bool bDentro = false;
+	for (const FVector2f& T : G.Tramos) { if (CicloMarcha >= T.X && CicloMarcha <= T.Y) { bDentro = true; break; } }
+	if (!bDentro) { return FString(); }
+	FString Tipo;
+	for (const auto& Par : G.Tipo) { if (Par.Key <= CicloMarcha) { Tipo = Par.Value; } }
+	return Tipo;
+}
+
+FLinearColor ACorpusCuerpo::ColorDeNivel(float Nivel) { return ColorNivel(FMath::Clamp(Nivel / 0.6f, 0.f, 1.f)); }
+
 int32 ACorpusCuerpo::FaseDeMarcha() const
 {
 	const UCorpusDatos* D = Datos();

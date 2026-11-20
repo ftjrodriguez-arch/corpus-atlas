@@ -58,6 +58,7 @@ private:
 	TWeakObjectPtr<ACorpusCuerpo> CuerpoRef;
 	FVector2D RatonAntes = FVector2D::ZeroVector, RatonAlPulsar = FVector2D::ZeroVector;
 	bool bRatonValido = false;
+	uint8 CuerpoAntes = 0;      // para reencuadrar al cambiar de cuerpo
 	double TiempoUltimoClic = 0;
 };
 

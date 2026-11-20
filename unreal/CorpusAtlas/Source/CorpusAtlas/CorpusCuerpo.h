@@ -73,6 +73,11 @@ public:
 	int32 PatronMarcha() const { return PatronActual; }
 	float CicloDeMarcha() const { return CicloMarcha; }
 	int32 FaseDeMarcha() const;
+	/** Intensidad (0–1) de un grupo muscular de la marcha en este instante (miembro derecho, o izquierdo medio ciclo después). */
+	float NivelDeGrupo(int32 Gi, bool bIzq = false) const;
+	/** Tipo de contracción del grupo en este instante en el miembro derecho: «exc», «con», «iso» o vacío si descansa. */
+	FString TipoDeGrupo(int32 Gi) const;
+	static FLinearColor ColorDeNivel(float Nivel);
 	bool HayPostura() const { return RangoActual >= 0 || PatronActual >= 0; }
 
 	virtual void Tick(float Dt) override;

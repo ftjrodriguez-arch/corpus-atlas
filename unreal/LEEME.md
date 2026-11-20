@@ -85,7 +85,7 @@ Las fotos quedan en `unreal/capturas/` con la interfaz incluida.
 
 ## Pendiente de la Fase 1
 - Probar con el ratón real (clic, doble clic, arrastrar) y los atajos H, I, F, 1–6: las capturas usan las mismas funciones, pero no el ratón.
-- Al encuadrar una pieza pequeña (p. ej. un músculo del ojo) la cámara queda muy cerca; y cambiar de cuerpo no reencuadra.
+- Resuelto (2026-11-20): las piezas pequeñas se encuadran con 5 cm de radio mínimo (`f2_ojo`) y al cambiar de cuerpo la cámara reencuadra (`f2_mujer`, `f2_vh`). Pasos de prueba nuevos: `enfocar id1,id2` y `acercar <factor>`.
 - La piel del Visible Human opaca sale algo anaranjada; afinar su tinte si hace falta.
 
 ## Fase 2 · Movimiento: rangos articulares (2026-11-20)
@@ -225,8 +225,10 @@ y Unreal solo reproduce el resultado. Solo en los rangos `hombro` y `escapula`; 
   deslizador del ciclo, reproducir, cámara lenta). El panel va abajo a la derecha para no tapar las piernas.
   Pruebas: `marcha <id del patrón> <% del ciclo>` (`marcha` solo = salir). Capturas `unreal/capturas/marcha_*` y
   `mosaico_marcha.png`.
+- Leyenda de la marcha: los 11 grupos con su barra de intensidad en ese instante y el tipo de contracción (excéntrica,
+  concéntrica, isométrica) del miembro derecho (`f2_marcha10`, `f2_marcha60`).
 - Falta respecto a la web: la extensión de los dedos del pie en el despegue (los dedos aún no están en el rig), la cinta del
-  suelo, la leyenda por músculo con el tipo de contracción (excéntrica, concéntrica, isométrica) y las gráficas.
+  suelo y las gráficas de ángulos y fuerzas.
 
 ### Cadera (misma pasada)
 - Glúteos y pelvitrocantéreos (`HARMC` en `movimiento.js`) anclados a pelvis (0) y fémur (1), girando en arco: en la web

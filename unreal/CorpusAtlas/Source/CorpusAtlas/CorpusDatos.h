@@ -83,7 +83,13 @@ struct FCorpusCorrMov { int32 Cuadros = 0; TMap<FString, int64> Piezas; };
 
 /** Marcha (movimiento.json → marcha): fases del ciclo, grupos musculares con su intensidad y patrones (normal y patológicos). */
 struct FCorpusFaseMarcha { float Ini = 0, Fin = 0; FString Nombre, Abrev, Texto; };
-struct FCorpusGrupoMarcha { TArray<FString> En; FString Nombre, Texto; TArray<FVector2f> Nivel; };   // Nivel: (porcentaje del ciclo, intensidad 0–1)
+struct FCorpusGrupoMarcha
+{
+	TArray<FString> En; FString Nombre, Texto;
+	TArray<FVector2f> Nivel;                 // (porcentaje del ciclo, intensidad 0–1)
+	TArray<FVector2f> Tramos;                // tramos del ciclo en los que trabaja (inicio, fin)
+	TArray<TPair<float, FString>> Tipo;      // desde qué porcentaje: «exc» excéntrica, «con» concéntrica, «iso» isométrica
+};
 struct FCorpusPatronMarcha
 {
 	FString Id, Nombre, Texto;
