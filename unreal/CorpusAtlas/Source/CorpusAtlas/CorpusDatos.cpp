@@ -202,14 +202,33 @@ void UCorpusDatos::CargarMovimiento()
 			}
 		}
 	}
-	// contorno del tórax por alturas (fila 3 de la textura de postura) y piezas que se pegan a él (dorsal ancho, redondo mayor)
+	// contorno real de la parrilla costal (tools/unreal/torax.js): radio por altura y sector angular → filas 4… de la textura de postura
 	const TSharedPtr<FJsonObject>* TJ = nullptr;
 	if (J->TryGetObjectField(TEXT("torax"), TJ))
 	{
-		for (const auto& F : (*TJ)->GetArrayField(TEXT("filas")))
+		const TArray<TSharedPtr<FJsonValue>>* Filas = nullptr;
+		if ((*TJ)->TryGetArrayField(TEXT("r"), Filas))
 		{
-			const TArray<TSharedPtr<FJsonValue>>& V = F->AsArray();
-			Torax.Add(FVector3f((float)V[0]->AsNumber(), (float)V[1]->AsNumber(), (float)V[2]->AsNumber()));
+			for (const auto& F : *Filas)
+			{
+				TArray<float>& Dst = Torax.AddDefaulted_GetRef();
+				for (const auto& X : F->AsArray()) { Dst.Add((float)X->AsNumber()); }
+			}
+		}
+	}
+	// punto de inserción de las piezas de fibra tensa (dorsal ancho, pectoral mayor): «cuerpo/id» → xyz en glTF
+	const TSharedPtr<FJsonObject>* IJ = nullptr;
+	if (J->TryGetObjectField(TEXT("insercion"), IJ))
+	{
+		for (const auto& Cu : (*IJ)->Values)
+		{
+			const TSharedPtr<FJsonObject>* PorId = nullptr;
+			if (!Cu.Value.IsValid() || !Cu.Value->TryGetObject(PorId)) { continue; }
+			for (const auto& Pz : (*PorId)->Values)
+			{
+				const TArray<TSharedPtr<FJsonValue>>& V = Pz.Value->AsArray();
+				if (V.Num() == 3) { Insercion.Add(FString(Cu.Key) + TEXT("/") + FString(Pz.Key), FVector3f((float)V[0]->AsNumber(), (float)V[1]->AsNumber(), (float)V[2]->AsNumber())); }
+			}
 		}
 	}
 	const TSharedPtr<FJsonObject>* AJ = nullptr;

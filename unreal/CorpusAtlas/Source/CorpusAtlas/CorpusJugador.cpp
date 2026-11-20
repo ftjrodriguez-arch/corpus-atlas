@@ -150,6 +150,7 @@ void ACorpusJugador::TickQa()
 	else if (Verbo == TEXT("aislar") && Cu) { Cu->Aislar(Resto.IsEmpty() ? Cu->Seleccionada() : Resto); }
 	else if (Verbo == TEXT("ocultar") && Cu) { Cu->Ocultar(Resto.IsEmpty() ? Cu->Seleccionada() : Resto); }
 	else if (Verbo == TEXT("todo") && Cu) { Cu->MostrarTodo(); }
+	else if (Verbo == TEXT("solo") && Cu) { TArray<FString> Ids; Resto.ParseIntoArray(Ids, TEXT(","), true); Cu->VerSolo(Ids); }   // solo n92,n1687 · solo (vacío) = todas
 	else if (Verbo == TEXT("vista") && Ca) { Ca->Vista(FCString::Atoi(*Resto)); Pausa = 2.0; }
 	else if (Verbo == TEXT("capa") && Cu)
 	{

@@ -35,6 +35,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Corpus") void Ocultar(const FString& Id);
 	UFUNCTION(BlueprintCallable, Category = "Corpus") void Aislar(const FString& Id);
 	UFUNCTION(BlueprintCallable, Category = "Corpus") void MostrarTodo();
+	/** Deja a la vista solo esas piezas (de las capas encendidas). Lista vacía = todas. Lo usan las pruebas y lo usarán las lecciones. */
+	void VerSolo(const TArray<FString>& Ids);
 
 	/** Id de la pieza a la que pertenece un componente (clic del ratón). */
 	FString IdDe(const UPrimitiveComponent* Comp) const;
@@ -69,7 +71,7 @@ private:
 	void AjustarLimites(UStaticMeshComponent* C) const;
 	void PintarAgonistas(const TArray<FString>& En, const FString& Lado);
 	TArray<FVector4f> Postura;                        // ancho × 4: eje+ángulo, pivote, traslación (glTF, m)
-	int32 AnchoPostura = 32;
+	int32 AnchoPostura = 32, AltoPostura = 4;
 	UPROPERTY() TObjectPtr<class UTexture2D> TexPostura;
 	TSet<FString> IdsAgonistas;
 	int32 RangoActual = -1, MovActual = 0;
@@ -91,5 +93,6 @@ private:
 	TMap<FString, float> Opacidades;
 	TSet<FString> CapasCargadas, CapasVisibles, Ocultas;
 	FString IdSeleccionada, IdAislada;
+	TSet<FString> Grupo;
 	ECorpusCuerpo CuerpoActual = ECorpusCuerpo::Hombre;
 };

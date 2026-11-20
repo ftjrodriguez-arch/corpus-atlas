@@ -117,14 +117,17 @@ public:
 	/** Articulaciones que mueven la pieza en ese cuerpo (carpeta «hombre» o «mujer»): códigos para los datos primitivos 12–19. */
 	const TArray<float>* HuecosMovimiento(const FString& Carpeta, const FString& Id) const { return Huecos.Find(Carpeta + TEXT("/") + Id); }
 
-	/** Contorno de la parrilla costal por alturas: centro z, radio x, radio z (glTF, m). */
-	const TArray<FVector3f>& ContornoTorax() const { return Torax; }
+	/** Contorno de la parrilla costal: por cada altura, el radio de las costillas en cada sector angular (glTF, m). */
+	const TArray<TArray<float>>& ContornoTorax() const { return Torax; }
+	/** Punto de inserción (glTF) de una pieza de fibra tensa, o nullptr. */
+	const FVector3f* InsercionFibra(const FString& Carpeta, const FString& Id) const { return Insercion.Find(Carpeta + TEXT("/") + Id); }
 	/** ¿La pieza se mantiene pegada a la pared torácica al mover el brazo? (dorsal ancho, redondo mayor) */
 	bool SePegaAlTorax(const FString& Carpeta, const FString& Id) const { return Abrazo.Contains(Carpeta + TEXT("/") + Id); }
 
 private:
 	void CargarMovimiento();
-	TArray<FVector3f> Torax;
+	TArray<TArray<float>> Torax;
+	TMap<FString, FVector3f> Insercion;
 	TSet<FString> Abrazo;
 	TMap<FString, TArray<float>> Huecos;
 	TArray<FVector3f> Pivotes;

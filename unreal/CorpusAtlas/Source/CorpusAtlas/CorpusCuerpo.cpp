@@ -92,25 +92,26 @@ void ACorpusCuerpo::CrearTexturaPostura()
 	if (TexPostura) { return; }
 	const UCorpusDatos* D = Datos();
 	const int32 N = D ? D->PivotesArticulaciones().Num() : 0;
-	AnchoPostura = FMath::Max(32, N);
-	TexPostura = UTexture2D::CreateTransient(AnchoPostura, 4, PF_A32B32G32R32F, TEXT("T_Postura"));
+	AltoPostura = 4 + (D ? D->ContornoTorax().Num() : 0);
+	AnchoPostura = FMath::Max3(32, N, (D && D->ContornoTorax().Num()) ? D->ContornoTorax()[0].Num() : 0);
+	TexPostura = UTexture2D::CreateTransient(AnchoPostura, AltoPostura, PF_A32B32G32R32F, TEXT("T_Postura"));
 	TexPostura->Filter = TF_Nearest;
 	TexPostura->SRGB = false;
 	TexPostura->AddressX = TA_Clamp; TexPostura->AddressY = TA_Clamp;
 	TexPostura->NeverStream = true;
 	TexPostura->UpdateResource();
 	// Fila 0: eje y ángulo · fila 1: pivote · fila 2: traslación (todo en glTF, metros, como la web)
-	Postura.Init(FVector4f(0, 0, 0, 0), AnchoPostura * 4);
+	Postura.Init(FVector4f(0, 0, 0, 0), AnchoPostura * AltoPostura);
 	for (int32 i = 0; i < N; ++i)
 	{
 		const FVector3f& P = D->PivotesArticulaciones()[i];
 		Postura[AnchoPostura + i] = FVector4f(P.X, P.Y, P.Z, 0.f);
 	}
-	// Fila 3: contorno de la parrilla costal por alturas (el material pega a él el dorsal ancho y el redondo mayor)
-	for (int32 i = 0; D && i < FMath::Min(AnchoPostura, D->ContornoTorax().Num()); ++i)
+	// Filas 4…: contorno real de la parrilla costal (altura × sector angular); el material mide con él la distancia a las costillas
+	for (int32 h = 0; D && h < D->ContornoTorax().Num(); ++h)
 	{
-		const FVector3f& T = D->ContornoTorax()[i];
-		Postura[AnchoPostura * 3 + i] = FVector4f(T.X, T.Y, T.Z, 0.f);
+		const TArray<float>& F = D->ContornoTorax()[h];
+		for (int32 s = 0; s < FMath::Min(AnchoPostura, F.Num()); ++s) { Postura[AnchoPostura * (4 + h) + s] = FVector4f(F[s], 0.f, 0.f, 0.f); }
 	}
 	SubirPostura();
 }
@@ -119,9 +120,9 @@ void ACorpusCuerpo::SubirPostura()
 {
 	if (!TexPostura) { return; }
 	const int32 Paso = AnchoPostura * sizeof(FVector4f);
-	uint8* Copia = (uint8*)FMemory::Malloc(Paso * 4);
-	FMemory::Memcpy(Copia, Postura.GetData(), Paso * 4);
-	FUpdateTextureRegion2D* Region = new FUpdateTextureRegion2D(0, 0, 0, 0, AnchoPostura, 4);
+	uint8* Copia = (uint8*)FMemory::Malloc(Paso * AltoPostura);
+	FMemory::Memcpy(Copia, Postura.GetData(), Paso * AltoPostura);
+	FUpdateTextureRegion2D* Region = new FUpdateTextureRegion2D(0, 0, 0, 0, AnchoPostura, AltoPostura);
 	TexPostura->UpdateTextureRegions(0, 1, Region, Paso, sizeof(FVector4f), Copia,
 		[](uint8* Datos, const FUpdateTextureRegion2D* R) { FMemory::Free(Datos); delete R; });
 }
@@ -288,6 +289,10 @@ void ACorpusCuerpo::CargarCapa(const FString& Clave)
 		}
 		// 1 = pegada a la parrilla costal; 2 = además cubre el ángulo inferior de la escápula (dorsal ancho)
 		C->SetCustomPrimitiveDataFloat(20, D->SePegaAlTorax(Carpeta, P.Id) ? (P.En.StartsWith(TEXT("Latissimus")) ? 2.f : 1.f) : 0.f);
+		if (const FVector3f* Ins = D->InsercionFibra(Carpeta, P.Id))   // fibra tensa: el material estira el músculo hacia donde va este punto
+		{
+			C->SetCustomPrimitiveDataFloat(21, Ins->X); C->SetCustomPrimitiveDataFloat(22, Ins->Y); C->SetCustomPrimitiveDataFloat(23, Ins->Z);
+		}
 		if (RangoActual >= 0) { AjustarLimites(C); }
 		Piezas.Add(P.Id, C);
 		Ids.Add(P.Id);
@@ -303,7 +308,7 @@ void ACorpusCuerpo::AplicarVisibilidad(const FString& Clave)
 	{
 		if (const TObjectPtr<UStaticMeshComponent>* C = Piezas.Find(Id))
 		{
-			const bool bVer = bCapa && !Ocultas.Contains(Id) && (IdAislada.IsEmpty() || IdAislada == Id);
+			const bool bVer = bCapa && !Ocultas.Contains(Id) && (IdAislada.IsEmpty() || IdAislada == Id) && (Grupo.Num() == 0 || Grupo.Contains(Id));
 			(*C)->SetVisibility(bVer);
 			(*C)->SetCollisionEnabled(bVer ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
 		}
@@ -396,8 +401,15 @@ void ACorpusCuerpo::Aislar(const FString& Id)
 	for (const auto& Par : IdsPorCapa) { AplicarVisibilidad(Par.Key); }
 }
 
+void ACorpusCuerpo::VerSolo(const TArray<FString>& Ids)
+{
+	Grupo = TSet<FString>(Ids);
+	for (const auto& Par : IdsPorCapa) { AplicarVisibilidad(Par.Key); }
+}
+
 void ACorpusCuerpo::MostrarTodo()
 {
+	Grupo.Reset();
 	Ocultas.Reset();
 	IdAislada.Reset();
 	for (const auto& Par : IdsPorCapa) { AplicarVisibilidad(Par.Key); }

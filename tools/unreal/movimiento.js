@@ -107,16 +107,42 @@ const PREPARA = `(async()=>{
     const c=new V3((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);let r=0;for(let i=0;i<n;i++)r=Math.max(r,Math.hypot(pos[i*3]-c.x,pos[i*3+1]-c.y,pos[i*3+2]-c.z));
     const m={userData:{c:{en,side},sys},geometry:{attributes:{position:{array:pos}},boundingSphere:{center:c,radius:r},index:null}};
     const Ws=L.map(k=>{let W=null;try{W=weightsFor(m,jn(k));}catch(e){W=null;}if(/^ankle_st_/.test(k)&&en==='Talus')W=null;return [W,!!(m.userData.lin&&m.userData.lin[jn(k)])];});
+    /* malla soldada por posición, vecinos y hueso más cercano a cada vértice (a menos de 12 mm): para los pesos armónicos */
+    let _G=null;const malla=()=>{if(_G)return _G;
+      if(!window.__huesos){const cs=0.012,H=new Map();for(const b of meshes){const u=b.userData;if(!u.c||u.sys!=='oseo')continue;const part=skPartOf(b),a=u.rest||b.geometry.attributes.position.array;
+          for(let i=0;i<a.length;i+=3){const k=Math.floor(a[i]/cs)+','+Math.floor(a[i+1]/cs)+','+Math.floor(a[i+2]/cs);let l=H.get(k);if(!l)H.set(k,l=[]);l.push(a[i],a[i+1],a[i+2],part);}}window.__huesos={cs,H};}
+      const {cs,H}=window.__huesos,RA=0.012,uid=new Int32Array(n),M=new Map();let nu=0;for(let v=0;v<n;v++){const k=Math.round(pos[v*3]*2e4)+','+Math.round(pos[v*3+1]*2e4)+','+Math.round(pos[v*3+2]*2e4);let q=M.get(k);if(q===undefined){q=nu++;M.set(k,q);}uid[v]=q;}
+      const rep=new Int32Array(nu).fill(-1);for(let v=0;v<n;v++)if(rep[uid[v]]<0)rep[uid[v]]=v;
+      const nb=Array.from({length:nu},()=>new Set());for(let t=0;t<idx.length;t+=3){const a=uid[idx[t]],b=uid[idx[t+1]],c=uid[idx[t+2]];if(a!==b){nb[a].add(b);nb[b].add(a);}if(b!==c){nb[b].add(c);nb[c].add(b);}if(a!==c){nb[a].add(c);nb[c].add(a);}}
+      const NB=nb.map(s=>Int32Array.from(s)),ancla=new Array(nu).fill(null);
+      for(let q=0;q<nu;q++){const v=rep[q],x=pos[v*3],y=pos[v*3+1],z=pos[v*3+2],fx=Math.floor(x/cs),fy=Math.floor(y/cs),fz=Math.floor(z/cs);let bd=RA*RA,bp=null;
+        for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)for(let c=-1;c<=1;c++){const l=H.get((fx+a)+','+(fy+b)+','+(fz+c));if(!l)continue;for(let t=0;t<l.length;t+=4){const d=(l[t]-x)**2+(l[t+1]-y)**2+(l[t+2]-z)**2;if(d<bd){bd=d;bp=l[t+3];}}}ancla[q]=bp;}
+      return _G={uid,nu,rep,NB,ancla};};
+    /* ecuación de Laplace sobre la malla con valores fijos en los anclajes (fijo ≥ 0): reparto continuo entre ellos */
+    const laplace=(G,fijo,x)=>{for(let it=0;it<2500;it++){let dmax=0;for(let q=0;q<G.nu;q++){if(fijo[q]>=0)continue;const l=G.NB[q];if(!l.length)continue;let s=0;for(let t=0;t<l.length;t++)s+=x[l[t]];const nv=s/l.length,d=Math.abs(nv-x[q]);if(d>dmax)dmax=d;x[q]=nv;}if(dmax<2e-5)break;}return x;};
     /* Dorsal ancho, pectoral mayor y redondo mayor (mejora sobre la web): sus pesos de hombro van a escalones (sectores angulares de shRig) y dejan que
        medio vientre muscular gire con el brazo; la web lo arregla después relajando la malla en la CPU. Aquí: solo los
        últimos centímetros junto al tendón siguen al húmero (la inserción está a ~6 cm de la articulación), el vientre
        queda sobre el tórax y el músculo se estira entre ambos. Peso suave por distancia al punto de inserción. */
-    const TD=[[/^Latissimus dorsi muscle$/,/^(shoulder|acr|sc)$/,0.02,0.09],[/^(Sternocostal head|Abdominal part) of pectoralis major muscle$/,/^(shoulder|acr|sc)$/,0.03,0.11],
-      [/^Clavicular head of pectoralis major muscle$/,/^(shoulder|acr)$/,0.03,0.09],[/^Teres major muscle$/,/^shoulder$/,0.02,0.07]].find(x=>x[0].test(en));
+    /* [músculo, articulaciones, radio del tendón, longitud en la que se reparte el estiramiento, fibra tensa] */
+    const TD=[[/^Latissimus dorsi muscle$/,/^(shoulder|acr|sc)$/,0.02,0.25,1],[/^(Sternocostal head|Abdominal part) of pectoralis major muscle$/,/^(shoulder|acr|sc)$/,0.03,0.16,1],
+      [/^Clavicular head of pectoralis major muscle$/,/^(shoulder|acr)$/,0.03,0.10,1],[/^Teres major muscle$/,/^shoulder$/,0.02,0.07,0]].find(x=>x[0].test(en));
+    let ins=null;
     if(TD&&(side==='derecho'||side==='izquierdo')){const Sd=side==='derecho'?'R':'L',seg=SEGS['arm_'+Sd],A=seg[0],B=seg[1],ax=B.x-A.x,ay=B.y-A.y,az=B.z-A.z,L2=ax*ax+ay*ay+az*az;
       let bi=0,bd=1e9;for(let i=0;i<n;i++){const px=pos[i*3]-A.x,py=pos[i*3+1]-A.y,pz=pos[i*3+2]-A.z;let t=(px*ax+py*ay+pz*az)/L2;t=t<0?0:t>1?1:t;const dx=px-ax*t,dy=py-ay*t,dz=pz-az*t,d=dx*dx+dy*dy+dz*dz+(t<0.06?0.0004:0);if(d<bd){bd=d;bi=i;}}
-      const Ix=pos[bi*3],Iy=pos[bi*3+1],Iz=pos[bi*3+2],Wd=new Float32Array(n);
-      for(let i=0;i<n;i++){let t=(Math.hypot(pos[i*3]-Ix,pos[i*3+1]-Iy,pos[i*3+2]-Iz)-TD[2])/TD[3];t=t<0?0:t>1?1:t;Wd[i]=1-t*t*(3-2*t);}
+      const Ix=pos[bi*3],Iy=pos[bi*3+1],Iz=pos[bi*3+2],Wd=new Float32Array(n);if(TD[4])ins=[Ix,Iy,Iz].map(v=>Math.round(v*1e5)/1e5);
+      const dI=i=>Math.hypot(pos[i*3]-Ix,pos[i*3+1]-Iy,pos[i*3+2]-Iz);
+      for(let i=0;i<n;i++){let t=(dI(i)-TD[2])/TD[3];t=t<0?0:t>1?1:t;Wd[i]=1-t*t*(3-2*t);}
+      /* fracción de fibra: 1 en el tendón de inserción, 0 en el origen (línea media y cresta ilíaca para el dorsal; borde
+         esternal para el pectoral; clavícula o escápula donde el músculo nace de ellas) y armónico entre ambos. Con el
+         peso «por distancia a la inserción» el origen del dorsal junto a la columna se iba detrás del brazo. */
+      if(idx){const G=malla(),fijo=new Float32Array(G.nu).fill(-1),x=new Float32Array(G.nu);let n0=0;
+        const LAT=/^Latissimus/.test(en),CLA=/^Clavicular/.test(en),TER=/^Teres/.test(en);
+        for(let q=0;q<G.nu;q++){const v=G.rep[q],d=dI(v),px=Math.abs(pos[v*3]),py=pos[v*3+1],an=G.ancla[q];x[q]=Wd[v];
+          if(d<TD[2]){fijo[q]=1;continue;}
+          const origen=LAT?(px<0.022||py<1.0||d>0.5):CLA?(an==='clav_'+Sd):TER?(an==='scap_'+Sd&&d>0.05):(px<0.035||py<1.12);
+          if(origen){fijo[q]=0;n0++;}}
+        if(n0>3){laplace(G,fijo,x);for(let v=0;v<n;v++)Wd[v]=x[G.uid[v]];}}
       L.forEach((k,q)=>{const [nd,sd]=k.split('_');if(sd===Sd&&TD[1].test(nd))Ws[q]=[Wd,true];else if(/^(elbow|fore|wrist|hip|knee)$/.test(nd)||(sd&&sd!==Sd&&/^(shoulder|acr|sc)$/.test(nd)))Ws[q]=[null,false];});}
     /* Músculos tendidos entre dos huesos de la cintura escapular (mejora sobre la web, donde el trapecio, los romboides o
        el serrato no acompañan a la escápula y lo que hay debajo los atraviesa). Cada músculo queda anclado a sus huesos:
@@ -124,22 +150,13 @@ const PREPARA = `(async()=>{
        Entre los anclajes el peso es armónico (ecuación de Laplace sobre la malla): el estiramiento se reparte de forma
        continua por toda la fibra, sin escalones ni zonas rígidas. */
     if(idx&&HARM.test(en)&&(side==='derecho'||side==='izquierdo')){const Sd=side==='derecho'?'R':'L';
-      if(!window.__huesos){const cs=0.012,H=new Map();for(const b of meshes){const u=b.userData;if(!u.c||BS(u.sys)!=='oseo'||u.sys!=='oseo')continue;const part=skPartOf(b),a=u.rest||b.geometry.attributes.position.array;
-          for(let i=0;i<a.length;i+=3){const k=Math.floor(a[i]/cs)+','+Math.floor(a[i+1]/cs)+','+Math.floor(a[i+2]/cs);let l=H.get(k);if(!l)H.set(k,l=[]);l.push(a[i],a[i+1],a[i+2],part);}}window.__huesos={cs,H};}
-      const {cs,H}=window.__huesos,RA=0.012,ESC=/trapezius|Rhomboid|Levator scapulae|Serratus anterior|Pectoralis minor|Subclavius/.test(en);/* ESC: unen tórax y escápula, no llegan al húmero */
-      /* vértices soldados por posición y vecinos */
-      const uid=new Int32Array(n),M=new Map();let nu=0;for(let v=0;v<n;v++){const k=Math.round(pos[v*3]*2e4)+','+Math.round(pos[v*3+1]*2e4)+','+Math.round(pos[v*3+2]*2e4);let q=M.get(k);if(q===undefined){q=nu++;M.set(k,q);}uid[v]=q;}
-      const rep=new Int32Array(nu).fill(-1);for(let v=0;v<n;v++)if(rep[uid[v]]<0)rep[uid[v]]=v;
-      const nb=Array.from({length:nu},()=>new Set());for(let t=0;t<idx.length;t+=3){const a=uid[idx[t]],b=uid[idx[t+1]],c=uid[idx[t+2]];if(a!==b){nb[a].add(b);nb[b].add(a);}if(b!==c){nb[b].add(c);nb[c].add(b);}if(a!==c){nb[a].add(c);nb[c].add(a);}}
-      const NB=nb.map(s=>Int32Array.from(s));
-      /* hueso más cercano a cada vértice (a menos de 12 mm) */
-      const ancla=new Array(nu).fill(null);for(let q=0;q<nu;q++){const v=rep[q],x=pos[v*3],y=pos[v*3+1],z=pos[v*3+2],fx=Math.floor(x/cs),fy=Math.floor(y/cs),fz=Math.floor(z/cs);let bd=RA*RA,bp=null;
-        for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)for(let c=-1;c<=1;c++){const l=H.get((fx+a)+','+(fy+b)+','+(fz+c));if(!l)continue;for(let t=0;t<l.length;t+=4){const d=(l[t]-x)**2+(l[t+1]-y)**2+(l[t+2]-z)**2;if(d<bd){bd=d;bp=l[t+3];}}}ancla[q]=bp;}
+      const ESC=/trapezius|Rhomboid|Levator scapulae|Serratus anterior|Pectoralis minor|Subclavius/.test(en);/* ESC: unen tórax y escápula, no llegan al húmero */
+      const G=malla(),{uid,nu,rep,ancla}=G;
       for(const nodo of ['shoulder','acr','sc']){const kq=L.indexOf(nodo+'_'+Sd);if(kq<0)continue;if(ESC&&nodo==='shoulder'){Ws[kq]=[null,false];continue;}const W0=Ws[kq][0];
         const fijo=new Float32Array(nu).fill(-1);let n0=0,n1=0;for(let q=0;q<nu;q++){if(ancla[q]===null)continue;const f=skF(ancla[q],nodo,Sd)>0?1:0;fijo[q]=f;if(f)n1++;else n0++;}
         if(n0<4||n1<4)continue;/* sin dos anclajes distintos se dejan los pesos de la web */
         const x=new Float32Array(nu);for(let q=0;q<nu;q++)x[q]=fijo[q]>=0?fijo[q]:(W0?Math.min(1,W0[rep[q]]):0.5);
-        for(let it=0;it<1500;it++){let dmax=0;for(let q=0;q<nu;q++){if(fijo[q]>=0)continue;const l=NB[q];if(!l.length)continue;let s=0;for(let t=0;t<l.length;t++)s+=x[l[t]];const nv=s/l.length,d=Math.abs(nv-x[q]);if(d>dmax)dmax=d;x[q]=nv;}if(dmax<2e-5)break;}
+        laplace(G,fijo,x);
         const Wn=new Float32Array(n);for(let v=0;v<n;v++)Wn[v]=x[uid[v]];Ws[kq]=[Wn,true];}
       /* los que se insertan en la escapula la siguen igual en sus dos articulaciones (acromioclavicular y esternoclavicular) */
       if(ESC&&!/Subclavius|Descending/.test(en)){const qa=L.indexOf('acr_'+Sd),qs=L.indexOf('sc_'+Sd);if(Ws[qs][0]&&!Ws[qa][0])Ws[qa]=[Ws[qs][0],Ws[qs][1]];}
@@ -154,7 +171,7 @@ const PREPARA = `(async()=>{
     let over=0;if(S.length>8){over=S.length-8;S.sort((a,b)=>b.mx-a.mx);S.length=8;S.sort((a,b)=>a.o-b.o);}
     /* por vértice solo pesos (0–1): Nanite y la malla de reserva promedian los UV al simplificar, y un peso promediado sigue siendo un peso */
     const out=new Float32Array(n*8);for(let s=0;s<S.length;s++){const W=S[s].W;for(let v=0;v<n;v++)out[v*8+s]=W[v]>1?1:W[v]<0.002?0:W[v];}
-    return {w:S.length?b64e(new Uint8Array(out.buffer)):'',huecos:S.map(s=>(s.lin?-1:1)*s.i),over,moved:S.length>0};};
+    return {w:S.length?b64e(new Uint8Array(out.buffer)):'',huecos:S.map(s=>(s.lin?-1:1)*s.i),over,moved:S.length>0,ins};};
   window.__movPose=(jid,mi,S,t)=>{const j=ROM.find(x=>x.id===jid);curJ=j;curM=j.moves[mi];romSide=S;angle=t;
     const tab=currentTab;currentTab='mov';let cap=null;const D0=deform;deform=a=>{cap=a;};
     try{applyPose();}finally{deform=D0;currentTab=tab;}
@@ -218,17 +235,8 @@ const PREPARA = `(async()=>{
   /* ── contorno de la parrilla costal por alturas (para pegar el dorsal ancho al tórax, como latHug de la web) ──
      Cada centímetro de altura: elipse que envuelve costillas, cartílagos, esternón y vértebras torácicas
      [centro z, radio x, radio z]. El material mide con ella cuánto se separa un punto de la pared torácica. */
-  const torax = (() => { const g = leeGLB(path.join(IMP, 'hombre', 'oseo.glb')), y0 = 1.06, dy = 0.0125, n = 32;
-    const caja = Array.from({ length: n }, () => [1e9, -1e9, 1e9, -1e9]);
-    for (const nodo of g.j.nodes) { if (nodo.mesh === undefined || !/\brib\b|^Costal cartilage|sternum|Xiphoid|^Vertebra T\d+/i.test((nodo.extras || {}).en || '')) continue;
-      const P = vista(g, g.j.meshes[nodo.mesh].primitives[0].attributes.POSITION);
-      for (let i = 0; i < P.length; i += 3) { const k = Math.round((P[i + 1] - y0) / dy); if (k < 0 || k >= n) continue; const c = caja[k];
-        if (P[i] < c[0]) c[0] = P[i]; if (P[i] > c[1]) c[1] = P[i]; if (P[i + 2] < c[2]) c[2] = P[i + 2]; if (P[i + 2] > c[3]) c[3] = P[i + 2]; } }
-    const f = v => Math.round(v * 1e4) / 1e4;
-    /* la caja se suaviza con sus vecinas: las costillas dejan huecos entre una y otra */
-    const filas = caja.map((c, k) => { let a = [0, 0, 0, 0], m = 0; for (let d = -2; d <= 2; d++) { const q = caja[k + d]; if (!q || q[0] > q[1]) continue; for (let t = 0; t < 4; t++) a[t] += q[t]; m++; }
-      if (!m) return [0, 0, 0]; a = a.map(v => v / m); return [f((a[2] + a[3]) / 2), f((a[1] - a[0]) / 2), f((a[3] - a[2]) / 2)]; });
-    return { y0, dy, filas }; })();
+  const TX = require('./torax.js');
+  const torax = TX.contorno(leeGLB, vista, path.join(IMP, 'hombre', 'oseo.glb'));   // radio de las costillas por altura y ángulo
   /* ── mejora sobre la web: la escápula resbala pegada a las costillas ──
      Con las posturas de la web, al rotar hacia arriba el ángulo inferior de la escápula se despega varios centímetros de
      la parrilla costal (asoma por la espalda). Aquí se añade a la acromioclavicular el giro mínimo, alrededor del eje
@@ -242,8 +250,7 @@ const PREPARA = `(async()=>{
     const qRot = (q, v) => { const u = [q[0], q[1], q[2]], c1 = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]].map(x => 2 * x);
       const c2 = [u[1] * c1[2] - u[2] * c1[1], u[2] * c1[0] - u[0] * c1[2], u[0] * c1[1] - u[1] * c1[0]]; return v.map((x, i) => x + q[3] * c1[i] + c2[i]); };
     const aAA = q => { if (q[3] < 0) q = q.map(x => -x); const an = 2 * Math.acos(Math.min(1, q[3])), s = Math.sqrt(Math.max(0, 1 - q[3] * q[3])); return s > 1e-6 ? [q[0] / s, q[1] / s, q[2] / s, an] : [1, 0, 0, 0]; };
-    const cont = y => { const h = Math.max(0, Math.min(torax.filas.length - 1.001, (y - torax.y0) / torax.dy)), a = Math.floor(h), f = h - a, A = torax.filas[a], B = torax.filas[a + 1]; return A.map((v, i) => v + (B[i] - v) * f); };
-    const kDe = p => { const c = cont(p[1]); return [Math.hypot(p[0] / c[1], (p[2] - c[0]) / c[2]), c]; };
+    const kDe = p => [TX.k(torax, p), TX.radio(torax, p)];
     const sobre = (p, piv, q) => qRot(q, p.map((x, i) => x - piv[i])).map((x, i) => x + piv[i]);
     let nfix = 0, amax = 0;
     for (const r of rom) for (const M of r.movs) for (const S of ['R', 'L']) { if (!M[S]) continue;
@@ -253,10 +260,10 @@ const PREPARA = `(async()=>{
         const oC = ops.find(o => o[0] === iC), oH = ops.find(o => o[0] === iH);
         const qA = qAA(oA.slice(1, 4), oA[4]), qC = oC ? qAA(oC.slice(1, 4), oC[4]) : [0, 0, 0, 1];
         const tipA = sobre(tip0, pA, qA), fin = q => sobre(sobre(tip0, pA, q), pC, qC);
-        const [k1, c] = kDe(fin(qA)), tol = 0.004 / (0.5 * (c[1] + c[2]));
+        const [k1, rr] = kDe(fin(qA)), tol = 0.003 / rr;
         if (k1 <= k0 + tol) return fr;
         /* eje: perpendicular a la palanca y a la normal de la pared torácica, llevado al marco anterior a la esternoclavicular */
-        const t = fin(qA), nrm = [t[0] / (c[1] * c[1]), 0, (t[2] - c[0]) / (c[2] * c[2])], v = t.map((x, i) => x - sobre(pA, pC, qC)[i]);
+        const t = fin(qA), nrm = [t[0], 0, t[2] - torax.zc], v = t.map((x, i) => x - sobre(pA, pC, qC)[i]);
         let eje = [v[1] * nrm[2] - v[2] * nrm[1], v[2] * nrm[0] - v[0] * nrm[2], v[0] * nrm[1] - v[1] * nrm[0]]; const le = Math.hypot(...eje); if (le < 1e-9) return fr; eje = qRot(qInv(qC), eje.map(x => x / le));
         const kCon = an => kDe(fin(qMul(qAA(eje, an), qA)))[0];
         /* el signo que acerca, y bisección hasta la distancia de reposo */
@@ -278,7 +285,7 @@ const PREPARA = `(async()=>{
   const jf = path.join(IMP, 'datos', 'movimiento.json');
   const antes = (SIN_PESOS || SOLO) && fs.existsSync(jf) ? JSON.parse(fs.readFileSync(jf, 'utf8')) : null;
   const salida = { version: 2, unidades: 'm, glTF (Y arriba)', paso: PASO, ax: R.AX, ax_de: R.L.slice(-3),
-    articulaciones: R.L.map((k, i) => ({ id: k, pivote: R.piv[i] })), rom, torax, abrazo, piezas: antes ? antes.piezas : {} };
+    articulaciones: R.L.map((k, i) => ({ id: k, pivote: R.piv[i] })), rom, torax, abrazo, piezas: antes ? antes.piezas : {}, insercion: antes && antes.insercion ? antes.insercion : {} };
   fs.mkdirSync(path.join(IMP, 'datos'), { recursive: true });
   fs.writeFileSync(jf, JSON.stringify(salida));
   console.log('Posturas: datos/movimiento.json');
@@ -289,6 +296,7 @@ const PREPARA = `(async()=>{
   if (!SOLO) salida.piezas = {};
   for (const c of CUERPOS) {
     const P = salida.piezas[c] = salida.piezas[c] || {};
+    salida.insercion = salida.insercion || {}; const INS = salida.insercion[c] = salida.insercion[c] || {};
     const dir = path.join(IMP, c);
     for (const f of fs.readdirSync(dir).filter(x => x.endsWith('.glb') && (!SOLO || x === SOLO + '.glb'))) {
       const g = leeGLB(path.join(dir, f)), nuevos = [];
@@ -303,7 +311,7 @@ const PREPARA = `(async()=>{
           const ind = f === 'muscular.glb' ? Buffer.from(Uint32Array.from(indices(g, prim.indices)).buffer).toString('base64') : '';
           const r = await E('(en,side,sys,b,bi)=>__movW(en,side,sys,b,bi)', ex.en || '', ex.lado || '', sys, Buffer.from(pos.buffer).toString('base64'), ind);
           const w = r.w ? new Float32Array(new Uint8Array(Buffer.from(r.w, 'base64')).buffer) : new Float32Array(n * 8);
-          nuevos.push([prim, w]); nv += n; if (r.moved) { mv++; P[nodo.name] = r.huecos; } if (r.over) { ov++; console.log('    aviso: %s (%s) usa %d articulaciones de más', nodo.name, ex.en, r.over); }
+          nuevos.push([prim, w]); nv += n; if (r.moved) { mv++; P[nodo.name] = r.huecos; } if (r.ins) INS[nodo.name] = r.ins; if (r.over) { ov++; console.log('    aviso: %s (%s) usa %d articulaciones de más', nodo.name, ex.en, r.over); }
         }
       }
       escribeGLB(path.join(dir, f), g, nuevos);

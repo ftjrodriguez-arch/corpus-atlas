@@ -144,79 +144,88 @@ class _G:
 # ACorpusCuerpo): fila 0 eje + ángulo, fila 1 pivote, fila 2 traslación, todo en glTF (metros, Y arriba).
 # Local de Unreal = glTF con Y y Z intercambiados, en centímetros (comprobado con la caja de n1).
 HLSL_POSTURA = r"""
+// Radio de las costillas en la dirección de p (filas 4… de la textura: altura × sector angular; tools/unreal/torax.js)
+struct FTorax
+{
+    float R(Texture2D T, float3 p)
+    {
+        float h = clamp((p.y - (@Y0@)) / @DY@, 0, @NH@ - 1);
+        int h0 = (int)floor(h), h1 = min(h0 + 1, @NH@ - 1);
+        float a = (atan2(p.z - (@ZC@), p.x) + 3.14159265) / 6.2831853 * @NS@ - 0.5;
+        float af = floor(a);
+        int s0 = (((int)af % @NS@) + @NS@) % @NS@, s1 = (s0 + 1) % @NS@;
+        float r0 = lerp(T.Load(int3(s0, 4 + h0, 0)).x, T.Load(int3(s1, 4 + h0, 0)).x, a - af);
+        float r1 = lerp(T.Load(int3(s0, 4 + h1, 0)).x, T.Load(int3(s1, 4 + h1, 0)).x, a - af);
+        return max(lerp(r0, r1, h - h0), 0.01);
+    }
+    float K(Texture2D T, float3 p) { return length(float2(p.x, p.z - (@ZC@))) / R(T, p); }
+    float3 Gira(float3 p, float3 pv, float4 ea)
+    {
+        float sn, cs; sincos(ea.w, sn, cs);
+        float3 d = p - pv;
+        return d * cs + cross(ea.xyz, d) * sn + ea.xyz * dot(ea.xyz, d) * (1 - cs) + pv;
+    }
+};
+FTorax tx;
 float3 g = float3(P.x, P.z, P.y) * 0.01;
 float3 g0 = g;
 float4 qt = float4(0, 0, 0, 1);
 float js[9] = { J0, J1, J2, J3, J4, J5, J6, J7, 0 };
 float ws[9] = { U0.x, U0.y, U1.x, U1.y, U2.x, U2.y, U3.x, U3.y, 0 };
+// Fibra tensa (dorsal ancho, pectoral mayor): el vientre no gira con el hueso; se desplaza y se estira hacia donde va
+// su inserción (ip), y solo junto al tendón gira con el húmero. Es el modelo de la web para el pectoral (FIB en deform()).
+float3 ip = float3(IX, IY, IZ);
+bool fibra = dot(ip, ip) > 0;
 bool abrazado = false;
 float wl = 0;
 [loop] for (int k = 0; k < 9; k++)
 {
     float jv = js[k];
     int code = (int)round(abs(jv));
-    // Antes de girar el tronco (o al acabar): el dorsal ancho y el redondo mayor no se despegan de la parrilla costal.
-    // Fila 3 de la textura = contorno del tórax por alturas (centro z, radio x, radio z). k = distancia relativa al
-    // contorno (1 = sobre las costillas). Cada punto conserva su k de reposo; solo cerca del húmero (peso alto) se le
-    // deja holgura para el pliegue axilar posterior. Misma regla que latHug() de la web: d0 + 6 mm + libre² · 7 cm.
-    bool tronco = (jv == 0) || ((code & 31) >= NA_TRONCO);
+    // Antes de girar el tronco (o al acabar): las piezas pegadas al tórax conservan su distancia relativa a las costillas
+    // (k = r / radio de las costillas; 1 = sobre ellas). Solo hacia el húmero (peso alto) hay holgura: pliegue axilar.
+    bool tronco = (jv == 0) || ((code & 31) >= @NA_TRONCO@);
     if (!abrazado && tronco)
     {
         abrazado = true;
         if (HUG > 0 && wl > 0.0005)
         {
-            float h0 = clamp((g0.y - Y0) / DY, 0, 31), h1 = clamp((g.y - Y0) / DY, 0, 31);
-            int a0 = (int)floor(h0), a1 = (int)floor(h1);
-            float3 c0 = lerp(Tex.Load(int3(a0, 3, 0)).xyz, Tex.Load(int3(min(a0 + 1, 31), 3, 0)).xyz, h0 - a0);
-            float3 c1 = lerp(Tex.Load(int3(a1, 3, 0)).xyz, Tex.Load(int3(min(a1 + 1, 31), 3, 0)).xyz, h1 - a1);
-            if (c0.y > 0.01 && c1.y > 0.01)
+            float k0 = tx.K(Tex, g0);
+            float R1 = tx.R(Tex, g);
+            float k1 = length(float2(g.x, g.z - (@ZC@))) / R1;
+            float libre = saturate((wl - 0.25) / 0.6);
+            float l4 = libre * libre * libre * libre;
+            float kmax = k0 + (0.006 + libre * libre * 0.07 + libre * 0.03 + l4 * l4 * 1.5) / R1;
+            // el límite inferior crece con k0: las dos caras del músculo no se aplastan a la misma altura
+            float kmin = k0 < 1 ? k0 : 1 + (k0 - 1) * 0.6;
+            // límite suave (tanh): un tope brusco arruga la malla donde unos puntos lo alcanzan y sus vecinos no
+            float kt = max(kmin, k1 > k0 ? k0 + (kmax - k0) * tanh((k1 - k0) / (kmax - k0)) : k1);
+            float hy = (g.y - (@Y0@)) / @DY@;
+            float val = saturate(hy) * saturate(@NH@ - 1 - hy) * saturate(HUG);
+            float s = lerp(1, kt / max(k1, 1e-4), val);
+            g.x *= s;
+            g.z = (@ZC@) + (g.z - (@ZC@)) * s;
+            // El borde superior del dorsal cubre el ángulo inferior de la escápula, que resbala por debajo al rotar:
+            // las dos caras suben lo mismo, lo justo para quedar por fuera de la punta en esta postura.
+            if (HUG > 1.5)
             {
-                float k0 = length(float2(g0.x / c0.y, (g0.z - c0.x) / c0.z));
-                float k1 = length(float2(g.x / c1.y, (g.z - c1.x) / c1.z));
-                float libre = saturate((wl - 0.25) / 0.6);
-                // la holgura crece sin corte hacia el húmero (libre → 1): un corte brusco plegaba el músculo en la axila
-                float l3 = libre * libre * libre;
-                float kmax = k0 + (0.006 + libre * libre * 0.07 + l3 * l3 * 1.5) / (0.5 * (c1.y + c1.z));
-                float kt = clamp(k1, min(k0, 1.03), kmax);
-                float hy = (g.y - Y0) / DY;
-                float val = saturate(hy) * saturate(31 - hy) * saturate(HUG);
-                float s = lerp(1, kt / max(k1, 1e-4), val);
-                g.x *= s;
-                g.z = c1.x + (g.z - c1.x) * s;
-                // El borde superior del dorsal cubre el ángulo inferior de la escápula: al rotar la escápula hacia arriba
-                // (ritmo escapulohumeral) el ángulo se desliza hacia fuera por debajo del músculo, que se abomba sobre él.
-                if (HUG > 1.5)
-                {
-                    bool der = g0.x < 0;
-                    int ja = der ? ACR_R : ACR_L, jc = der ? SC_R : SC_L;
-                    float3 b = float3(der ? SBX : -(SBX), SBY, SBZ);
-                    float4 qa = Tex.Load(int3(ja, 0, 0)); float3 pa = Tex.Load(int3(ja, 1, 0)).xyz;
-                    float sa, ca; sincos(qa.w, sa, ca);
-                    float3 db = b - pa;
-                    b = db * ca + cross(qa.xyz, db) * sa + qa.xyz * dot(qa.xyz, db) * (1 - ca) + pa;
-                    float4 qc = Tex.Load(int3(jc, 0, 0)); float3 pc = Tex.Load(int3(jc, 1, 0)).xyz;
-                    sincos(qc.w, sa, ca);
-                    db = b - pc;
-                    b = db * ca + cross(qc.xyz, db) * sa + qc.xyz * dot(qc.xyz, db) * (1 - ca) + pc;
-                    // el dorsal queda siempre un poco por fuera de donde está el ángulo inferior en esta postura
-                    float hb = clamp((b.y - Y0) / DY, 0, 31);
-                    int ab = (int)floor(hb);
-                    float3 cb = lerp(Tex.Load(int3(ab, 3, 0)).xyz, Tex.Load(int3(min(ab + 1, 31), 3, 0)).xyz, hb - ab);
-                    float kb = length(float2(b.x / cb.y, (b.z - cb.x) / cb.z)) + 0.016 / (0.5 * (cb.y + cb.z));
-                    float kg = length(float2(g.x / c1.y, (g.z - c1.x) / c1.z));
-                    float cerca = 1 - smoothstep(0.045, 0.14, length(g - b));
-                    float kn = max(kg, lerp(kg, kb, cerca));
-                    float sb2 = kn / max(kg, 1e-4);
-                    g.x *= sb2;
-                    g.z = c1.x + (g.z - c1.x) * sb2;
-                }
+                bool der = g0.x < 0;
+                int ja = der ? @ACR_R@ : @ACR_L@, jc = der ? @SC_R@ : @SC_L@;
+                float3 b = float3(der ? (@SBX@) : -(@SBX@), @SBY@, @SBZ@);
+                b = tx.Gira(b, Tex.Load(int3(ja, 1, 0)).xyz, Tex.Load(int3(ja, 0, 0)));
+                b = tx.Gira(b, Tex.Load(int3(jc, 1, 0)).xyz, Tex.Load(int3(jc, 0, 0)));
+                float kb = tx.K(Tex, b) + 0.004 / tx.R(Tex, b);
+                float kg = tx.K(Tex, g);
+                float cerca = 1 - smoothstep(0.04, 0.20, length(g - b));
+                float s2 = (kg + cerca * max(0, kb - 1.0)) / max(kg, 1e-4);
+                g.x *= s2;
+                g.z = (@ZC@) + (g.z - (@ZC@)) * s2;
             }
         }
     }
     if (jv == 0) break;
     float w = saturate(ws[k]);
     if (k == 0 && !tronco) wl = w;
-    if (w < 0.0005) continue;
     bool lin = jv < 0;
     [loop] for (int t = 0; t < 3; t++)
     {
@@ -227,14 +236,27 @@ float wl = 0;
         float3 tr = Tex.Load(int3(j, 2, 0)).xyz;
         if (ea.w == 0 && !any(tr)) continue;
         float3 pv = Tex.Load(int3(j, 1, 0)).xyz;
-        float th = lin ? ea.w : ea.w * w;
-        float sn, cs; sincos(th, sn, cs);
-        float3 e = ea.xyz, d = g - pv;
-        float3 r = d * cs + cross(e, d) * sn + e * dot(e, d) * (1 - cs) + pv;
-        g = lin ? g + (r - g) * w : r;
+        float wq = w;
+        if (fibra && lin)
+        {
+            float3 ri = tx.Gira(ip, pv, ea);
+            if (w >= 0.0005)
+            {
+                wq = w * w;
+                float3 tensa = g + w * (ri - ip);
+                g = lerp(tensa, tx.Gira(g, pv, ea), wq);
+            }
+            ip = ri;
+        }
+        else if (w >= 0.0005)
+        {
+            float3 r = tx.Gira(g, pv, float4(ea.xyz, lin ? ea.w : ea.w * w));
+            g = lin ? g + (r - g) * w : r;
+        }
+        if (w < 0.0005) continue;
         g += tr * w;
-        float sh, ch; sincos(ea.w * w * 0.5, sh, ch);
-        float3 qv = e * sh;
+        float sh, ch; sincos(ea.w * wq * 0.5, sh, ch);
+        float3 qv = ea.xyz * sh;
         qt = float4(ch * qt.xyz + qt.w * qv + cross(qv, qt.xyz), ch * qt.w - dot(qv, qt.xyz));
     }
 }
@@ -295,15 +317,16 @@ def _postura(g):
         tex.set_editor_property("texture", negro)
     tex.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
     mov = _datos_mov()
-    codigo = (HLSL_POSTURA.replace("NA_TRONCO", str(len(mov["articulaciones"]) - 2))
-              .replace("Y0", repr(float(mov["torax"]["y0"]))).replace("DY", repr(float(mov["torax"]["dy"]))))
     arts = [a["id"] for a in mov["articulaciones"]]
     with open(os.path.join(IMPORTAR, "datos", "rig.json"), encoding="utf-8") as h:
         sb = json.load(h)["scapBot_R"]          # ángulo inferior de la escápula derecha (la izquierda, en espejo)
-    for k, v in (("ACR_R", arts.index("acr_R")), ("ACR_L", arts.index("acr_L")), ("SC_R", arts.index("sc_R")), ("SC_L", arts.index("sc_L")),
-                 ("SBX", sb[0]), ("SBY", sb[1]), ("SBZ", sb[2])):
-        codigo = codigo.replace(k, repr(v))
-    cu = _custom(g, codigo, ["Tex", "P", "U0", "U1", "U2", "U3"] + ["J%d" % i for i in range(8)] + ["HUG"], CMOT.CMOT_FLOAT3,
+    tor = mov["torax"]
+    codigo = HLSL_POSTURA
+    for k, v in (("NA_TRONCO", len(arts) - 2), ("Y0", float(tor["y0"])), ("DY", float(tor["dy"])), ("ZC", float(tor["zc"])),
+                 ("NH", int(tor["nh"])), ("NS", int(tor["ns"])), ("ACR_R", arts.index("acr_R")), ("ACR_L", arts.index("acr_L")),
+                 ("SC_R", arts.index("sc_R")), ("SC_L", arts.index("sc_L")), ("SBX", sb[0]), ("SBY", sb[1]), ("SBZ", sb[2])):
+        codigo = codigo.replace("@%s@" % k, repr(v))
+    cu = _custom(g, codigo, ["Tex", "P", "U0", "U1", "U2", "U3"] + ["J%d" % i for i in range(8)] + ["HUG", "IX", "IY", "IZ"], CMOT.CMOT_FLOAT3,
                  extra=[("Q", CMOT.CMOT_FLOAT4)], desc="Postura (rig de la web)")
     g.une(tex, cu, "Tex")
     g.une(g.n(unreal.MaterialExpressionPreSkinnedPosition), cu, "P")
@@ -311,6 +334,8 @@ def _postura(g):
         g.une(g.n(unreal.MaterialExpressionTextureCoordinate, coordinate_index=c), cu, "U%d" % c)
     for i in range(8):      # articulación de cada hueco: datos primitivos 12–19 (ACorpusCuerpo::CargarCapa)
         g.une(g.esc("Hueco%d" % i, 0.0, cpd=12 + i), cu, "J%d" % i)
+    for i, nm in enumerate(("IX", "IY", "IZ")):      # punto de inserción (glTF, m) de las piezas de fibra tensa: datos primitivos 21–23
+        g.une(g.esc("Insercion" + nm[1], 0.0, cpd=21 + i), cu, nm)
     g.une(g.esc("Abrazo", 0.0, cpd=20), cu, "HUG")      # 1 = dorsal ancho y redondo mayor: pegados a la parrilla costal
     S, D = unreal.MaterialVectorCoordTransformSource, unreal.MaterialVectorCoordTransform
     wpo = _transformar(g, cu, S.TRANSFORMSOURCE_LOCAL, D.TRANSFORM_WORLD)

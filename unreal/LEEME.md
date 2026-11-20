@@ -136,6 +136,23 @@ Reimportar las mallas (`importar_mallas`) tarda 1 h 45 min; `_aplanar` sustituye
   falta hasta 20° para devolverlo). `movimiento.js` añade a la acromioclavicular la báscula mínima que lo deja a su
   distancia de reposo del contorno del tórax y recalcula la glenohumeral (188 posturas). El dorsal ancho (dato primitivo
   20 = 2) pasa además por fuera del ángulo inferior en cada postura.
+- **Bucle de la abducción (tercera pasada):**
+  - `tools/unreal/simular.js` repite en la CPU la cuenta del material sobre una pieza y cuenta los pliegues (aristas que
+    se cierran), la separación del tórax y si el dorsal cubre el ángulo inferior de la escápula. Sirve para afinar sin
+    esperar a Unreal. **Si se cambia `HLSL_POSTURA`, hay que cambiar `simular.js` igual.**
+  - `tools/unreal/torax.js`: contorno real de las costillas (radio por altura y sector angular, filas 4… de la textura
+    de postura, ahora de 32×36). La elipse por altura engañaba: la caja torácica es más cuadrada por detrás. Con la
+    medida buena la báscula añadida a la escápula llega a 25° (204 posturas) y su ángulo inferior queda a k ≈ 1,07.
+  - **Fibra tensa** (dorsal ancho y pectoral mayor; inserción en los datos primitivos 21–23, `movimiento.json →
+    insercion`): el vientre no gira con el húmero, se desplaza y se estira hacia donde va la inserción; solo el tendón
+    gira (peso²). Con giro, el dorsal a 150° tenía 580 pliegues; con fibra tensa y fracción de fibra, 152.
+  - **Fracción de fibra:** el peso de esos músculos es armónico entre la inserción (1) y el origen (0: línea media y
+    cresta ilíaca en el dorsal, borde esternal en el pectoral, clavícula o escápula donde nacen de ellas). Con el peso
+    «por distancia a la inserción» el origen del dorsal se iba detrás del brazo.
+  - Pegado al tórax con límite suave (`tanh`) y límite inferior que conserva el grosor del músculo.
+  - Paso de pruebas `solo id1,id2…` (`ACorpusCuerpo::VerSolo`) para ver un grupo de piezas.
+  - El editor a veces se queda colgado al cerrarse tras `-ExecutePythonScript`: esperar a `CORPUS_RUN_OK` en el registro
+    y cerrar el proceso.
 - Referencias del ritmo escapulohumeral: Braman et al. 2009 (0,43° de rotación superior por grado de elevación, relación
   2,3:1) y Ludewig et al. 2009 (báscula posterior ≈ 19°, rotación posterior de la clavícula ≈ 31°); la tabla `ST_UR` de la
   web ya los sigue en los huesos.
