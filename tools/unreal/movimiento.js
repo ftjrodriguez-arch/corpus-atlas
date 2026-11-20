@@ -114,6 +114,12 @@ const PREPARA = `(async()=>{
       const {cs,H}=window.__huesos,RA=0.012,uid=new Int32Array(n),M=new Map();let nu=0;for(let v=0;v<n;v++){const k=Math.round(pos[v*3]*2e4)+','+Math.round(pos[v*3+1]*2e4)+','+Math.round(pos[v*3+2]*2e4);let q=M.get(k);if(q===undefined){q=nu++;M.set(k,q);}uid[v]=q;}
       const rep=new Int32Array(nu).fill(-1);for(let v=0;v<n;v++)if(rep[uid[v]]<0)rep[uid[v]]=v;
       const nb=Array.from({length:nu},()=>new Set());for(let t=0;t<idx.length;t+=3){const a=uid[idx[t]],b=uid[idx[t+1]],c=uid[idx[t+2]];if(a!==b){nb[a].add(b);nb[b].add(a);}if(b!==c){nb[b].add(c);nb[c].add(b);}if(a!==c){nb[a].add(c);nb[c].add(a);}}
+      /* los fascículos (islas) que se tocan quedan enlazados: cada vértice se une a los de otras islas a menos de 4 mm.
+         Sin esto cada fascículo tenía su propio reparto y uno asomaba entre sus vecinos como una solapa. */
+      {const cs2=0.004,H2=new Map();for(let q=0;q<nu;q++){const v=rep[q],k=Math.floor(pos[v*3]/cs2)+','+Math.floor(pos[v*3+1]/cs2)+','+Math.floor(pos[v*3+2]/cs2);let l=H2.get(k);if(!l)H2.set(k,l=[]);l.push(q);}
+        for(let q=0;q<nu;q++){const v=rep[q],x=pos[v*3],y=pos[v*3+1],z=pos[v*3+2],fx=Math.floor(x/cs2),fy=Math.floor(y/cs2),fz=Math.floor(z/cs2);let m=0;
+          for(let a=-1;a<=1&&m<8;a++)for(let b=-1;b<=1&&m<8;b++)for(let c=-1;c<=1&&m<8;c++){const l=H2.get((fx+a)+','+(fy+b)+','+(fz+c));if(!l)continue;
+            for(const p of l){if(p===q||nb[q].has(p))continue;const w=rep[p];if((pos[w*3]-x)**2+(pos[w*3+1]-y)**2+(pos[w*3+2]-z)**2<cs2*cs2){nb[q].add(p);nb[p].add(q);if(++m>=8)break;}}}}}
       const NB=nb.map(s=>Int32Array.from(s)),ancla=new Array(nu).fill(null);
       for(let q=0;q<nu;q++){const v=rep[q],x=pos[v*3],y=pos[v*3+1],z=pos[v*3+2],fx=Math.floor(x/cs),fy=Math.floor(y/cs),fz=Math.floor(z/cs);let bd=RA*RA,bp=null;
         for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)for(let c=-1;c<=1;c++){const l=H.get((fx+a)+','+(fy+b)+','+(fz+c));if(!l)continue;for(let t=0;t<l.length;t+=4){const d=(l[t]-x)**2+(l[t+1]-y)**2+(l[t+2]-z)**2;if(d<bd){bd=d;bp=l[t+3];}}}ancla[q]=bp;}
@@ -260,6 +266,14 @@ const PREPARA = `(async()=>{
     const aAA = q => { if (q[3] < 0) q = q.map(x => -x); const an = 2 * Math.acos(Math.min(1, q[3])), s = Math.sqrt(Math.max(0, 1 - q[3] * q[3])); return s > 1e-6 ? [q[0] / s, q[1] / s, q[2] / s, an] : [1, 0, 0, 0]; };
     const kDe = p => [TX.k(torax, p), TX.radio(torax, p)];
     const sobre = (p, piv, q) => qRot(q, p.map((x, i) => x - piv[i])).map((x, i) => x + piv[i]);
+    /* Elevación y depresión de la cintura escapular: la clavícula gira sobre la esternoclavicular y la acromioclavicular
+       compensa, de modo que la escápula sube o baja casi sin girar (es una traslación sobre el tórax). En la web la
+       escápula giraba entera con la clavícula. */
+    { const e0 = rom.find(r => r.id === 'escapula');
+      if (e0) e0.movs.slice(0, 2).forEach(M => { for (const S of ['R', 'L']) { if (!M[S]) continue; const iA = R.L.indexOf('acr_' + S), iC = R.L.indexOf('sc_' + S), f5 = x => Math.round(x * 1e5) / 1e5;
+        M[S] = M[S].map(fr => { const ops = []; for (let k = 0; k < fr.length; k += 8) ops.push(fr.slice(k, k + 8));
+          const oC = ops.find(o => o[0] === iC); if (!oC) return fr; const a = aAA(qInv(qAA(oC.slice(1, 4), oC[4]))), sin = ops.filter(o => o[0] !== iA);
+          sin.push([iA, f5(a[0]), f5(a[1]), f5(a[2]), f5(a[3]), 0, 0, 0]); return sin.sort((x, y) => x[0] - y[0]).flat(); }); } }); }
     let nfix = 0, amax = 0;
     for (const r of rom) for (const M of r.movs) for (const S of ['R', 'L']) { if (!M[S]) continue;
       const iA = R.L.indexOf('acr_' + S), iC = R.L.indexOf('sc_' + S), iH = R.L.indexOf('shoulder_' + S), pA = R.piv[iA], pC = R.piv[iC], tip0 = rig['scapBot_' + S], k0 = kDe(tip0)[0];
