@@ -195,7 +195,9 @@ function generar(l) {
   const TAB = JT('tablas_web.json');
   {
     const items = J('bio.json').map(b => {
-      const ops = [L3(b.a, l), ...(b.d || []).map(d => L3(d, l))];
+      // d = [es[3], en[3], pt[3]] (por idioma y luego por distractor): se trasponen a [es, en, pt] por distractor
+      const dk = (b.d && b.d[0]) ? b.d[0].map((_, k) => [b.d[0][k], (b.d[1] || [])[k], (b.d[2] || [])[k]]) : [];
+      const ops = [L3(b.a, l), ...dk.map(d => L3(d, l))];
       const giro = ops.length > 1 ? hash(b.id) % ops.length : 0;   // la correcta no siempre la primera
       const o = ops.map((_, i) => ops[(i + ops.length - giro) % ops.length]);
       return limpio({

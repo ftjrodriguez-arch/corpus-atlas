@@ -1,49 +1,20 @@
 {
- "fecha": "2026-11-21T23:00:48.259Z",
+ "fecha": "2026-11-21T23:02:11.622Z",
  "resumen": {
-  "errores": 4,
-  "avisos": 152,
+  "errores": 0,
+  "avisos": 146,
   "nombres_comprobados": 20985,
-  "errores_por_tipo": {
-   "referencia": 1,
-   "pregunta": 3
-  },
+  "errores_por_tipo": {},
   "avisos_por_tipo": {
    "pares": 37,
    "sin_traducir": 4,
-   "otro_idioma": 6,
-   "mayusculas": 104,
-   "copias": 1
+   "otro_idioma": 1,
+   "mayusculas": 104
   },
   "mayusculas_mismo_valor": 180
  },
  "omitido": [],
- "errores": [
-  {
-   "tipo": "referencia",
-   "archivo": "data/extras.json",
-   "clave": "reg.n1656",
-   "msg": "id que no está en el catálogo"
-  },
-  {
-   "tipo": "pregunta",
-   "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_es.json",
-   "clave": "kinesio",
-   "msg": "456 preguntas con opciones que no son las de bio.json en este idioma (distractores de otra lengua: estudio.js lee d[k][idioma] y la web d[idioma][k]); p. ej. bio_gen_planes_axes «In the frontal plane, about an anteroposterio» | bio_gen_lever_1 «Elevar-se na ponta dos pés, com o tríceps sur» | bio_gen_lever_2 «Flexing the elbow with a load in the hand: th»"
-  },
-  {
-   "tipo": "pregunta",
-   "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_en.json",
-   "clave": "kinesio",
-   "msg": "455 preguntas con opciones que no son las de bio.json en este idioma (distractores de otra lengua: estudio.js lee d[k][idioma] y la web d[idioma][k]); p. ej. bio_gen_planes_axes «No plano transversal, em torno de um eixo lon» | bio_gen_lever_1 «A flexão do cotovelo pelo bíceps braquial ao » | bio_gen_lever_2 «Equilibrar a cabeça sobre o atlas: os extenso»"
-  },
-  {
-   "tipo": "pregunta",
-   "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_pt.json",
-   "clave": "kinesio",
-   "msg": "456 preguntas con opciones que no son las de bio.json en este idioma (distractores de otra lengua: estudio.js lee d[k][idioma] y la web d[idioma][k]); p. ej. bio_gen_planes_axes «In the sagittal plane, about an anteroposteri» | bio_gen_lever_1 «La extensión de la rodilla por el cuádriceps » | bio_gen_lever_2 «Extending the knee while seated: the quadrice»"
-  }
- ],
+ "errores": [],
  "avisos": [
   {
    "tipo": "pares",
@@ -271,49 +242,19 @@
    "tipo": "sin_traducir",
    "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_fr.json",
    "clave": "en inglés",
-   "msg": "5524 frases iguales al inglés (más 1643 términos cortos): kinesio 859, pruebas 253, casos 109, protocolos 8, patologias 409, glosario 3886 (p. ej. kinesio.grupos[0].items[0].q[0].o[0] «In the transverse plane, about a longitudinal (ver…» | kinesio.grupos[0].items[0].q[0].o[1] «No plano transversal, em torno de um eixo longitud…» | kinesio.grupos[0].items[1].q[0].o[0] «A flexão do cotovelo pelo bíceps braquial ao levan…»)"
+   "msg": "4665 frases iguales al inglés (más 1606 términos cortos): pruebas 253, casos 109, protocolos 8, patologias 409, glosario 3886 (p. ej. pruebas.grupos[0].items[0].secs[0][1] «Hip extensors (gluteus maximus), knee extensors (q…» | pruebas.grupos[0].items[0].secs[1][1] «On the way down the same muscles work while length…» | pruebas.grupos[0].items[0].secs[2][1] «Knees track over the feet without valgus; limited …»)"
   },
   {
    "tipo": "sin_traducir",
    "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_de.json",
    "clave": "en inglés",
-   "msg": "5528 frases iguales al inglés (más 3298 términos cortos): lecciones 1, kinesio 859, pruebas 253, casos 112, protocolos 8, patologias 409, glosario 3886 (p. ej. lecciones.grupos[4].items[4].q[2].o[3] «Chorda tympani (VII)» | kinesio.grupos[0].items[0].q[0].o[0] «In the transverse plane, about a longitudinal (ver…» | kinesio.grupos[0].items[0].q[0].o[1] «No plano transversal, em torno de um eixo longitud…»)"
-  },
-  {
-   "tipo": "otro_idioma",
-   "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_es.json",
-   "clave": "opciones de pregunta",
-   "msg": "435 frases que parecen escritas en otra lengua (en 265, pt 170; kinesio 435); p. ej. kinesio.grupos[0].items[1].q[0].o[3] [en] «Rising onto the toes, with the triceps surae …» | kinesio.grupos[0].items[2].q[0].o[0] [en] «Flexing the elbow with a load in the hand: th…» | kinesio.grupos[0].items[2].q[0].o[1] [pt] «Flexionar o cotovelo com uma carga na mão: o …»"
+   "msg": "4669 frases iguales al inglés (más 3263 términos cortos): lecciones 1, pruebas 253, casos 112, protocolos 8, patologias 409, glosario 3886 (p. ej. lecciones.grupos[4].items[4].q[2].o[3] «Chorda tympani (VII)» | pruebas.grupos[0].items[0].secs[0][1] «Hip extensors (gluteus maximus), knee extensors (q…» | pruebas.grupos[0].items[0].secs[1][1] «On the way down the same muscles work while length…»)"
   },
   {
    "tipo": "otro_idioma",
    "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_es.json",
    "clave": "textos",
    "msg": "2 frases que parecen escritas en otra lengua (en 2; glosario 2); p. ej. glosario.grupos[8].items[22].secs[4][1] [en] «• Anterior region of forearm\n• Posterior regi…» | glosario.grupos[8].items[23].secs[4][1] [en] «• Anterior region of wrist\n• Posterior region…»"
-  },
-  {
-   "tipo": "otro_idioma",
-   "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_en.json",
-   "clave": "opciones de pregunta",
-   "msg": "361 frases que parecen escritas en otra lengua (pt 152, es 209; kinesio 361); p. ej. kinesio.grupos[0].items[1].q[0].o[0] [pt] «A flexão do cotovelo pelo bíceps braquial ao …» | kinesio.grupos[0].items[1].q[0].o[2] [es] «La flexión del codo por el bíceps braquial al…» | kinesio.grupos[0].items[2].q[0].o[3] [es] «Equilibrar la cabeza sobre el atlas: los exte…»"
-  },
-  {
-   "tipo": "otro_idioma",
-   "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_pt.json",
-   "clave": "opciones de pregunta",
-   "msg": "468 frases que parecen escritas en otra lengua (en 263, es 205; kinesio 468); p. ej. kinesio.grupos[0].items[1].q[0].o[3] [en] «Knee extension by the quadriceps when kicking…» | kinesio.grupos[0].items[2].q[0].o[0] [en] «Extending the knee while seated: the quadrice…» | kinesio.grupos[0].items[2].q[0].o[3] [es] «Extender la rodilla en sedestación: el cuádri…»"
-  },
-  {
-   "tipo": "otro_idioma",
-   "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_fr.json",
-   "clave": "opciones de pregunta",
-   "msg": "152 frases que parecen escritas en otra lengua (pt 152; kinesio 152); p. ej. kinesio.grupos[0].items[1].q[0].o[0] [pt] «A flexão do cotovelo pelo bíceps braquial ao …» | kinesio.grupos[0].items[3].q[0].o[2] [pt] «A de segundo grau, como o tríceps sural ao fi…» | kinesio.grupos[0].items[14].q[0].o[2] [pt] «Rolamento, deslizamento e giro; a patela ao d…»"
-  },
-  {
-   "tipo": "otro_idioma",
-   "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_de.json",
-   "clave": "opciones de pregunta",
-   "msg": "152 frases que parecen escritas en otra lengua (pt 152; kinesio 152); p. ej. kinesio.grupos[0].items[1].q[0].o[0] [pt] «A flexão do cotovelo pelo bíceps braquial ao …» | kinesio.grupos[0].items[3].q[0].o[2] [pt] «A de segundo grau, como o tríceps sural ao fi…» | kinesio.grupos[0].items[14].q[0].o[2] [pt] «Rolamento, deslizamento e giro; a patela ao d…»"
   },
   {
    "tipo": "sin_traducir",
@@ -950,12 +891,6 @@
    "archivo": "data/i18n_fr.json",
    "clave": "ui: «sagittal» / «Sagittal»",
    "msg": "«sagittal» → \"sagittale\" · «Sagittal» → \"Sagittal\""
-  },
-  {
-   "tipo": "copias",
-   "archivo": "unreal/CorpusAtlas/Content/Datos/movimiento.json",
-   "clave": "movimiento.json",
-   "msg": "distinto de Importar/datos/movimiento.json (falta copiar: ci.copiar_datos())"
   }
  ]
 }
