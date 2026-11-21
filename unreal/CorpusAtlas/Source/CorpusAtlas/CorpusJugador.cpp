@@ -172,6 +172,7 @@ void ACorpusJugador::TickQa()
 		for (const FString& Id : Ids) { const FBox Bi = Cu->Caja(Id.TrimStartAndEnd()); if (Bi.IsValid) { B += Bi; } }
 		Ca->Encuadrar(B); Pausa = 2.0;
 	}
+	else if (Verbo == TEXT("girar") && Ca) { TArray<FString> G; Resto.ParseIntoArrayWS(G); if (G.Num() > 1) { Ca->Girar(FCString::Atof(*G[0]), FCString::Atof(*G[1])); } Pausa = 2.0; }   // girar <grados de guiñada> <grados de cabeceo>, relativos
 	else if (Verbo == TEXT("acercar") && Ca) { Ca->Acercar(FCString::Atof(*Resto)); Pausa = 1.5; }
 	else if (Verbo == TEXT("aislar") && Cu) { Cu->Aislar(Resto.IsEmpty() ? Cu->Seleccionada() : Resto); }
 	else if (Verbo == TEXT("ocultar") && Cu) { Cu->Ocultar(Resto.IsEmpty() ? Cu->Seleccionada() : Resto); }

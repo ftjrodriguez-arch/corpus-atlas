@@ -800,6 +800,29 @@ def ajustar_luces(**cambios):
     unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).save_current_level()
 
 
+def _sin_disco_solar(componente):
+    """La atmósfera dibuja el disco del sol de la luz principal: un círculo blanco deslumbrante al mirar hacia ella
+    (queja del usuario, 2026-11-20). Es un estudio, no un exterior: el disco se apaga y la luz sigue iluminando."""
+    for prop, val in (("atmosphere_sun_disk_color_scale", unreal.LinearColor(0, 0, 0, 0)), ("light_source_angle", 6.0)):
+        try:
+            componente.set_editor_property(prop, val)
+        except Exception as e:  # noqa
+            unreal.log_warning("Corpus: luz principal %s: %s" % (prop, e))
+
+
+def quitar_sol():
+    """Apaga el disco solar en el mapa ya creado (sin rehacerlo) y lo guarda."""
+    actores = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+    n = 0
+    for a in actores.get_all_level_actors():
+        c = a.get_component_by_class(unreal.DirectionalLightComponent) if isinstance(a, unreal.DirectionalLight) else None
+        if c:
+            _sin_disco_solar(c); n += 1
+            unreal.log("Corpus: disco solar apagado en «%s»: %s" % (a.get_actor_label(), c.get_editor_property("atmosphere_sun_disk_color_scale")))
+    unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).save_current_level()
+    return n
+
+
 def crear_mapa():
     """Estudio oscuro con luz de tres puntos, cielo suave, niebla y post-proceso (exposición fija, oclusión, viñeta)."""
     niveles = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
@@ -818,6 +841,7 @@ def crear_mapa():
     c = clave.get_component_by_class(unreal.DirectionalLightComponent)
     c.set_editor_property("intensity", float(LUCES["sol"])); c.set_editor_property("light_color", unreal.Color(255, 244, 230))
     c.set_editor_property("light_source_angle", 3.0)    # sombras suaves de estudio
+    _sin_disco_solar(c)
 
     relleno = pon(unreal.RectLight, pos=(-260, 240, 150), rot=(0, -8, -45), nombre="Luz de relleno")
     r = relleno.get_component_by_class(unreal.RectLightComponent)
