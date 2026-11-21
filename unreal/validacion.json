@@ -1,5 +1,5 @@
 {
- "fecha": "2026-11-21T23:02:11.622Z",
+ "fecha": "2026-11-21T23:20:04.505Z",
  "resumen": {
   "errores": 0,
   "avisos": 146,
@@ -242,13 +242,13 @@
    "tipo": "sin_traducir",
    "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_fr.json",
    "clave": "en inglés",
-   "msg": "4665 frases iguales al inglés (más 1606 términos cortos): pruebas 253, casos 109, protocolos 8, patologias 409, glosario 3886 (p. ej. pruebas.grupos[0].items[0].secs[0][1] «Hip extensors (gluteus maximus), knee extensors (q…» | pruebas.grupos[0].items[0].secs[1][1] «On the way down the same muscles work while length…» | pruebas.grupos[0].items[0].secs[2][1] «Knees track over the feet without valgus; limited …»)"
+   "msg": "3831 frases iguales al inglés (más 1333 términos cortos): pruebas 253, casos 109, protocolos 8, patologias 12, glosario 3449 (p. ej. pruebas.grupos[0].items[0].secs[0][1] «Hip extensors (gluteus maximus), knee extensors (q…» | pruebas.grupos[0].items[0].secs[1][1] «On the way down the same muscles work while length…» | pruebas.grupos[0].items[0].secs[2][1] «Knees track over the feet without valgus; limited …»)"
   },
   {
    "tipo": "sin_traducir",
    "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_de.json",
    "clave": "en inglés",
-   "msg": "4669 frases iguales al inglés (más 3263 términos cortos): lecciones 1, pruebas 253, casos 112, protocolos 8, patologias 409, glosario 3886 (p. ej. lecciones.grupos[4].items[4].q[2].o[3] «Chorda tympani (VII)» | pruebas.grupos[0].items[0].secs[0][1] «Hip extensors (gluteus maximus), knee extensors (q…» | pruebas.grupos[0].items[0].secs[1][1] «On the way down the same muscles work while length…»)"
+   "msg": "3851 frases iguales al inglés (más 3014 términos cortos): lecciones 1, pruebas 253, casos 112, protocolos 8, patologias 18, glosario 3459 (p. ej. lecciones.grupos[4].items[4].q[2].o[3] «Chorda tympani (VII)» | pruebas.grupos[0].items[0].secs[0][1] «Hip extensors (gluteus maximus), knee extensors (q…» | pruebas.grupos[0].items[0].secs[1][1] «On the way down the same muscles work while length…»)"
   },
   {
    "tipo": "otro_idioma",

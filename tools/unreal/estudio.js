@@ -225,9 +225,12 @@ function generar(l) {
   // 5 · Casos clínicos: anatomía clínica (cases) y razonamiento clínico (rc)
   {
     const Cs = J(l === 'es' ? 'cases.json' : `cases_${l}.json`);
+    // cases_fr/de traen la región en inglés: se traduce la española (mismo orden e ids)
+    const regEs = new Map(J('cases.json').map(c => [c.id, c.region]));
+    const region = c => (l === 'fr' || l === 'de') && regEs.has(c.id) && tr(regEs.get(c.id), l) !== regEs.get(c.id) ? tr(regEs.get(c.id), l) : c.region;
     const grupos = [];
     grupos.push({ n: L5(['Anatomía clínica', 'Clinical anatomy', 'Anatomia clínica', 'Anatomie clinique', 'Klinische Anatomie'], l), items: Cs.map(c => limpio({
-      id: 'caso_' + c.id, t: c.titulo, sub: c.region,
+      id: 'caso_' + c.id, t: c.titulo, sub: region(c),
       secs: [...sec(L5(H.pres, l), c.presentacion), ...sec(L5(H.anat, l), c.anatomia), ...sec(L5(H.sign, l), lista(c.signos)), ...sec(L5(H.prue, l), lista(c.pruebas)), ...sec(L5(H.fisio, l), c.fisioterapia)],
       show: [...(c.lesion || []), ...(c.afectados || []), ...(c.relacionados || [])], view: vista(c.camara),
       lado: /^der|^right|^direit|^droit|^recht/i.test(c.side || '') ? 'd' : /^izq|^left|^esquerd|^gauche|^link/i.test(c.side || '') ? 'i' : undefined,
@@ -274,8 +277,9 @@ function generar(l) {
   // 8 y 9 · Glosario y patologías (las patologías salen del glosario, ordenadas por sistema y con imagen si la hay)
   {
     const G = J('glossary.json');
-    const gl = (g, c) => l === 'es' ? g[c] : l === 'pt' ? (g[c + '_pt'] || g[c]) : (g[c + '_en'] || g[c]);      // FR/DE: inglés (el glosario no está traducido)
-    const nombre = g => l === 'es' ? g.t : l === 'pt' ? (g.pt || g.t) : (g.en || g.t);
+    // EN/PT/FR/DE: campos propios del glosario (def_fr, etim_de…); FR/DE sin traducir caen en inglés
+    const gl = (g, c) => l === 'es' ? g[c] : (g[c + '_' + l] || (l === 'pt' ? g[c] : (g[c + '_en'] || g[c])));
+    const nombre = g => l === 'es' ? g.t : (g[l] || (l === 'pt' ? g.t : (g.en || g.t)));
     const porNombre = new Map(G.map(g => [g.t, g]));
     const entrada = (g, pre) => limpio({
       id: pre + hash(g.t).toString(36), t: nombre(g), sub: l === 'es' ? undefined : g.t, _g: g.cat,
