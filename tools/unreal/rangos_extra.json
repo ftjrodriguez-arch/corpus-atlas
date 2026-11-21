@@ -1,0 +1,64 @@
+{
+  "_nota": "Rangos y reglas articulares propios de la edición Unreal. Los lee tools/unreal/movimiento.js al hornear las posturas (no se toca la tabla ROM de la web). Contenido educativo, PENDIENTE DE REVISIÓN PROFESIONAL (Kapandji; Neumann, Kinesiology of the Musculoskeletal System; AAOS).",
+  "_formato": "rangos[]: rom = id del rango de la web al que se añade; n/pos = textos en es, en, pt, fr, de; ax, sg, max, help = como en la tabla ROM de la web (convención del lado derecho); ag = nombres en inglés del catálogo. Si la web ya trae un movimiento con el mismo eje y sentido en ese rango, no se duplica: se comprueba que las posturas coinciden y solo se añaden las traducciones. notas[]: texto bajo el goniómetro para un movimiento (por rom y nombre español).",
+  "rangos": [
+    {
+      "rom": "rodilla",
+      "n": { "es": "Extensión", "en": "Extension", "pt": "Extensão", "fr": "Extension", "de": "Extension" },
+      "ax": "x", "sg": -1, "max": 10, "pl": "sag", "dir": [0, -1, 0],
+      "ag": ["Rectus femoris muscle", "Vastus lateralis muscle", "Vastus medialis muscle", "Vastus intermedius muscle"],
+      "nota": {
+        "es": "0° es la rodilla recta; hasta 10° de hiperextensión (recurvatum) es normal. Agonista: cuádriceps femoral.",
+        "en": "0° is the straight knee; up to 10° of hyperextension (recurvatum) is normal. Agonist: quadriceps femoris.",
+        "pt": "0° é o joelho reto; até 10° de hiperextensão (recurvatum) é normal. Agonista: quadríceps femoral.",
+        "fr": "0° correspond au genou tendu ; jusqu'à 10° d'hyperextension (recurvatum) est normal. Agoniste : quadriceps fémoral.",
+        "de": "0° ist das gestreckte Knie; bis 10° Überstreckung (Rekurvation) sind normal. Agonist: M. quadriceps femoris."
+      }
+    },
+    {
+      "rom": "rodilla",
+      "n": { "es": "Rotación interna", "en": "Internal rotation", "pt": "Rotação interna", "fr": "Rotation interne", "de": "Innenrotation" },
+      "ax": "y", "sg": 1, "max": 30, "pl": "tra", "dir": [0, 0, 1], "help": { "knee": ["x", 90] },
+      "ag": ["Popliteus muscle", "Semitendinosus muscle", "Semimembranosus muscle", "Gracilis muscle", "Sartorius muscle"],
+      "nota": {
+        "es": "Rotación de la tibia con la rodilla a 90° de flexión (en extensión completa la rodilla no rota). Interna: unos 30°.",
+        "en": "Tibial rotation with the knee flexed to 90° (the fully extended knee does not rotate). Internal: about 30°.",
+        "pt": "Rotação da tíbia com o joelho a 90° de flexão (em extensão completa o joelho não roda). Interna: cerca de 30°.",
+        "fr": "Rotation du tibia, genou fléchi à 90° (en extension complète le genou ne tourne pas). Interne : environ 30°.",
+        "de": "Rotation der Tibia bei 90° gebeugtem Knie (das voll gestreckte Knie rotiert nicht). Innenrotation: etwa 30°."
+      }
+    },
+    {
+      "rom": "rodilla",
+      "n": { "es": "Rotación externa", "en": "External rotation", "pt": "Rotação externa", "fr": "Rotation externe", "de": "Außenrotation" },
+      "ax": "y", "sg": -1, "max": 40, "pl": "tra", "dir": [0, 0, 1], "help": { "knee": ["x", 90] },
+      "ag": ["Long head of biceps femoris", "Short head of biceps femoris"],
+      "nota": {
+        "es": "Rotación de la tibia con la rodilla a 90° de flexión. Externa: unos 40° (bíceps femoral).",
+        "en": "Tibial rotation with the knee flexed to 90°. External: about 40° (biceps femoris).",
+        "pt": "Rotação da tíbia com o joelho a 90° de flexão. Externa: cerca de 40° (bíceps femoral).",
+        "fr": "Rotation du tibia, genou fléchi à 90°. Externe : environ 40° (biceps fémoral).",
+        "de": "Rotation der Tibia bei 90° gebeugtem Knie. Außenrotation: etwa 40° (M. biceps femoris)."
+      }
+    }
+  ],
+  "notas": [
+    {
+      "rom": "rodilla", "mov": "Flexión",
+      "nota": {
+        "es": "Rotación automática: en los últimos 15° de extensión la tibia gira unos 10° hacia fuera sobre el fémur y la rodilla queda bloqueada; al empezar a flexionar, el poplíteo la desbloquea girándola hacia dentro.",
+        "en": "Screw-home rotation: over the last 15° of extension the tibia turns about 10° outwards on the femur and the knee locks; as flexion starts, popliteus unlocks it by turning the tibia inwards.",
+        "pt": "Rotação automática: nos últimos 15° de extensão a tíbia gira cerca de 10° para fora sobre o fêmur e o joelho fica travado; ao iniciar a flexão, o poplíteo o destrava girando a tíbia para dentro.",
+        "fr": "Rotation automatique : dans les 15 derniers degrés d'extension, le tibia tourne d'environ 10° en dehors sous le fémur et le genou se verrouille ; au début de la flexion, le poplité le déverrouille en ramenant le tibia en dedans.",
+        "de": "Schlussrotation: In den letzten 15° der Streckung dreht die Tibia etwa 10° nach außen gegen das Femur und das Knie verriegelt; zu Beginn der Beugung entriegelt der M. popliteus, indem er die Tibia nach innen dreht."
+      }
+    }
+  ],
+  "rotacion_automatica": {
+    "_nota": "Rodilla (screw-home, Kapandji; Neumann): la malla de reposo es la rodilla extendida y bloqueada (0°). Al flexionar, la tibia rota hacia dentro de forma progresiva hasta 'grados' en los primeros 'arco' grados de flexión; visto al revés, en los últimos 15° de extensión rota hacia fuera. Solo en cadena abierta (rangos articulares); en la marcha y la sentadilla (pie apoyado) quien gira es el fémur y no se aplica.",
+    "articulacion": "knee",
+    "arco": 15,
+    "grados": 10,
+    "roms": "todos"
+  }
+}

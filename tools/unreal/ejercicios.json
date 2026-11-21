@@ -1,0 +1,280 @@
+{
+  "_nota": "Ejercicios del modo «Ejercicio» del panel de movimiento de la edición Unreal. Los lee tools/unreal/movimiento.js, que hornea las posturas con la propia web y guarda todo en movimiento.json → ejercicios. Añadir un ejercicio = añadir una entrada aquí (Unreal no cambia). Contenido educativo, pendiente de revisión profesional.",
+  "_formato": {
+    "id": "identificador (y id de la entrada de CTESTS de la web de la que salen nombre y textos ex/how/pos; EJ_TXT[id] da errores, progresiones y precauciones)",
+    "fuente": "quién calcula las posturas. «sentadilla» = módulo de cadena cerrada de la web (SQ: fases, grupos musculares con su intensidad y variantes de profundidad salen de la web). «ct» = postura final de la entrada de CTESTS (pose + anchor), recorrida de 0 a 1 según «ciclo»; entonces fases, grupos y niveles se escriben aquí",
+    "variantes": "fuente sentadilla: profundidades de SQ_DEPTH que se hornean; «inicial» es la que se abre",
+    "duracion": "segundos de un ciclo a velocidad normal (cámara lenta = 4 veces más)",
+    "vista": "0 anterior · 1 posterior · 2 derecha · 3 izquierda",
+    "tipo_fase": "por clave de fase: exc (excéntrica), iso (isométrica), con (concéntrica) o vacío (reposo)",
+    "ciclo (fuente ct)": "[[% del ciclo, fracción 0–1 de la postura]…], interpolado con arranque y frenado suaves",
+    "fases (fuente ct)": "[{ini, fin, tipo, n:{es,en,pt,fr,de}, x:{…}}]",
+    "grupos (fuente ct)": "[{en:[nombres del catálogo], n:{…}, x:{…}, tipo:[uno por fase], nivel: intensidad 0–1 con la postura completa}]"
+  },
+  "ui": {
+    "modo": {
+      "es": "Ejercicio",
+      "en": "Exercise",
+      "pt": "Exercício",
+      "fr": "Exercice",
+      "de": "Übung"
+    },
+    "tecnica": {
+      "es": "Técnica y errores",
+      "en": "Technique and mistakes",
+      "pt": "Técnica e erros",
+      "fr": "Technique et erreurs",
+      "de": "Technik und Fehler"
+    },
+    "musculos": {
+      "es": "Músculos activos",
+      "en": "Active muscles",
+      "pt": "Músculos ativos",
+      "fr": "Muscles actifs",
+      "de": "Aktive Muskeln"
+    },
+    "ex": {
+      "es": "Qué trabaja",
+      "en": "What it works",
+      "pt": "O que trabalha",
+      "fr": "Ce qu'il fait travailler",
+      "de": "Was trainiert wird"
+    },
+    "how": {
+      "es": "Cómo se hace",
+      "en": "How to perform",
+      "pt": "Como se faz",
+      "fr": "Réalisation",
+      "de": "Durchführung"
+    },
+    "pos": {
+      "es": "Qué observar",
+      "en": "What to look for",
+      "pt": "O que observar",
+      "fr": "Que rechercher",
+      "de": "Worauf achten"
+    },
+    "err": {
+      "es": "Errores frecuentes",
+      "en": "Common mistakes",
+      "pt": "Erros frequentes",
+      "fr": "Erreurs fréquentes",
+      "de": "Häufige Fehler"
+    },
+    "prog": {
+      "es": "Más fácil y más difícil",
+      "en": "Easier and harder",
+      "pt": "Mais fácil e mais difícil",
+      "fr": "Plus facile et plus difficile",
+      "de": "Leichter und schwerer"
+    },
+    "contra": {
+      "es": "Cuándo evitarlo o adaptarlo",
+      "en": "When to avoid or adapt it",
+      "pt": "Quando evitar ou adaptar",
+      "fr": "Quand l'éviter ou l'adapter",
+      "de": "Wann vermeiden oder anpassen"
+    },
+    "exc": {
+      "es": "Excéntrica",
+      "en": "Eccentric",
+      "pt": "Excêntrica",
+      "fr": "Excentrique",
+      "de": "Exzentrisch"
+    },
+    "con": {
+      "es": "Concéntrica",
+      "en": "Concentric",
+      "pt": "Concêntrica",
+      "fr": "Concentrique",
+      "de": "Konzentrisch"
+    },
+    "iso": {
+      "es": "Isométrica",
+      "en": "Isometric",
+      "pt": "Isométrica",
+      "fr": "Isométrique",
+      "de": "Isometrisch"
+    },
+    "leyenda": {
+      "es": "Actividad muscular: amarillo (poca) → magenta (mucha). Intensidad relativa orientativa, no electromiografía. Contenido educativo, pendiente de revisión profesional.",
+      "en": "Muscle activity: yellow (low) → magenta (high). Approximate relative intensity, not electromyography. Educational content, pending professional review.",
+      "pt": "Atividade muscular: amarelo (pouca) → magenta (muita). Intensidade relativa aproximada, não eletromiografia. Conteúdo educativo, pendente de revisão profissional.",
+      "fr": "Activité musculaire : jaune (faible) → magenta (forte). Intensité relative indicative, pas une électromyographie. Contenu éducatif, en attente de relecture professionnelle.",
+      "de": "Muskelaktivität: Gelb (gering) → Magenta (hoch). Ungefähre relative Intensität, keine Elektromyographie. Lehrinhalt, fachliche Prüfung steht aus."
+    }
+  },
+  "medidas_sentadilla": [
+    {
+      "es": "Cadera",
+      "en": "Hip",
+      "pt": "Quadril",
+      "fr": "Hanche",
+      "de": "Hüfte"
+    },
+    {
+      "es": "Rodilla",
+      "en": "Knee",
+      "pt": "Joelho",
+      "fr": "Genou",
+      "de": "Knie"
+    },
+    {
+      "es": "Tobillo",
+      "en": "Ankle",
+      "pt": "Tornozelo",
+      "fr": "Cheville",
+      "de": "Sprunggelenk"
+    },
+    {
+      "es": "Tronco",
+      "en": "Trunk",
+      "pt": "Tronco",
+      "fr": "Tronc",
+      "de": "Rumpf"
+    }
+  ],
+  "ejercicios": [
+    {
+      "id": "squat",
+      "fuente": "sentadilla",
+      "variantes": [
+        "med",
+        "par",
+        "prof"
+      ],
+      "inicial": "par",
+      "duracion": 4,
+      "vista": 2,
+      "tipo_fase": {
+        "DP": "",
+        "DE": "exc",
+        "FO": "iso",
+        "AS": "con"
+      }
+    }
+  ],
+  "traducciones": {
+    "Extensores de cadera (glúteo mayor) y de rodilla (cuádriceps), sóleo y erectores de la columna.": {
+      "fr": "Extenseurs de la hanche (grand fessier) et du genou (quadriceps), soléaire et érecteurs du rachis.",
+      "de": "Hüftstrecker (M. gluteus maximus) und Kniestrecker (M. quadriceps), M. soleus und Rückenstrecker."
+    },
+    "Al bajar, los mismos músculos trabajan frenando (contracción excéntrica); al subir, acortándose (concéntrica). Cadera ~100°, rodilla ~110°, tobillo ~25° de dorsiflexión.": {
+      "fr": "À la descente, les mêmes muscles travaillent en freinant (contraction excentrique) ; à la remontée, en se raccourcissant (concentrique). Hanche ~100°, genou ~110°, cheville ~25° de flexion dorsale.",
+      "de": "Beim Absenken arbeiten dieselben Muskeln bremsend (exzentrisch), beim Aufrichten verkürzend (konzentrisch). Hüfte ~100°, Knie ~110°, Sprunggelenk ~25° Dorsalextension."
+    },
+    "Rodillas en la línea de los pies, sin valgo; la falta de dorsiflexión del tobillo obliga a inclinar más el tronco.": {
+      "fr": "Genoux dans l'axe des pieds, sans valgus ; un manque de flexion dorsale de la cheville oblige à incliner davantage le tronc.",
+      "de": "Knie in der Linie der Füße, ohne Valgus; fehlende Dorsalextension im Sprunggelenk erzwingt eine stärkere Rumpfvorneigung."
+    },
+    "Rodillas que colapsan hacia dentro (valgo dinámico) por control insuficiente de abductores y rotadores externos de cadera; talones que se levantan o tronco que se inclina en exceso por movilidad limitada de tobillo; pérdida de la curvatura lumbar neutra al final del descenso.": {
+      "fr": "Genoux qui s'effondrent vers l'intérieur (valgus dynamique) par contrôle insuffisant des abducteurs et rotateurs externes de la hanche ; talons qui se soulèvent ou tronc trop incliné par manque de mobilité de la cheville ; perte de la courbure lombaire neutre en fin de descente.",
+      "de": "Nach innen einknickende Knie (dynamischer Valgus) durch unzureichende Kontrolle der Hüftabduktoren und -außenrotatoren; abhebende Fersen oder übermäßige Rumpfvorneigung bei eingeschränkter Sprunggelenkbeweglichkeit; Verlust der neutralen Lendenlordose am Ende der Abwärtsbewegung."
+    },
+    "Regresión: sentadilla a un cajón o banco, con menor profundidad o con apoyo de las manos. Progresión: añadir carga (goblet, barra), aumentar el rango, hacer pausas en la posición baja o pasar a variantes unilaterales.": {
+      "fr": "Régression : squat sur une caisse ou un banc, avec moins de profondeur ou avec appui des mains. Progression : ajouter une charge (goblet, barre), augmenter l'amplitude, marquer des pauses en position basse ou passer aux variantes unilatérales.",
+      "de": "Regression: Kniebeuge auf eine Box oder Bank, mit geringerer Tiefe oder mit Abstützen der Hände. Progression: Last hinzufügen (Goblet, Langhantel), Bewegungsumfang vergrößern, Pausen in der tiefen Position einlegen oder zu einbeinigen Varianten übergehen."
+    },
+    "Adaptar la profundidad y la carga ante dolor femoropatelar, artrosis de rodilla o cadera o en el postoperatorio según las restricciones del cirujano. Con dolor lumbar agudo, reducir carga y rango hasta que se tolere.": {
+      "fr": "Adapter la profondeur et la charge en cas de douleur fémoro-patellaire, d'arthrose du genou ou de la hanche, ou en postopératoire selon les consignes du chirurgien. En cas de lombalgie aiguë, réduire la charge et l'amplitude jusqu'à ce que ce soit toléré.",
+      "de": "Tiefe und Last anpassen bei femoropatellarem Schmerz, Knie- oder Hüftarthrose oder postoperativ gemäß den Vorgaben des Operateurs. Bei akutem Kreuzschmerz Last und Bewegungsumfang reduzieren, bis es toleriert wird."
+    },
+    "Pies a la anchura de los hombros, puntas algo hacia fuera, peso repartido entre talón y antepié.": {
+      "fr": "Pieds écartés à la largeur des épaules, pointes légèrement vers l'extérieur, poids réparti entre le talon et l'avant-pied.",
+      "de": "Füße schulterbreit, Fußspitzen leicht nach außen, Gewicht auf Ferse und Vorfuß verteilt."
+    },
+    "Descenso (fase excéntrica)": {
+      "fr": "Descente (phase excentrique)",
+      "de": "Absenken (exzentrische Phase)"
+    },
+    "Cadera, rodilla y tobillo se flexionan a la vez; los extensores frenan el descenso alargándose. Las rodillas siguen la dirección de los pies.": {
+      "fr": "Hanche, genou et cheville fléchissent en même temps ; les extenseurs freinent la descente en s'allongeant. Les genoux suivent la direction des pieds.",
+      "de": "Hüfte, Knie und Sprunggelenk beugen gleichzeitig; die Strecker bremsen das Absenken, indem sie sich verlängern. Die Knie folgen der Richtung der Füße."
+    },
+    "Fondo (transición isométrica)": {
+      "fr": "Position basse (transition isométrique)",
+      "de": "Tiefster Punkt (isometrischer Übergang)"
+    },
+    "Máxima flexión: el centro de masas sigue sobre el centro del pie. Sin rebote, el cambio de dirección exige la mayor fuerza del ciclo.": {
+      "fr": "Flexion maximale : le centre de masse reste au-dessus du milieu du pied. Sans rebond, le changement de direction exige la plus grande force du cycle.",
+      "de": "Maximale Beugung: Der Körperschwerpunkt bleibt über der Fußmitte. Ohne Abfedern erfordert die Richtungsumkehr die größte Kraft des Zyklus."
+    },
+    "Ascenso (fase concéntrica)": {
+      "fr": "Remontée (phase concentrique)",
+      "de": "Aufrichten (konzentrische Phase)"
+    },
+    "Los mismos músculos se acortan para extender cadera y rodilla; el tronco y la tibia se enderezan a la par.": {
+      "fr": "Les mêmes muscles se raccourcissent pour étendre la hanche et le genou ; le tronc et le tibia se redressent ensemble.",
+      "de": "Dieselben Muskeln verkürzen sich, um Hüfte und Knie zu strecken; Rumpf und Unterschenkel richten sich gemeinsam auf."
+    },
+    "Frenan la flexión de rodilla al bajar y la extienden al subir; su esfuerzo crece con la profundidad.": {
+      "fr": "Ils freinent la flexion du genou à la descente et l'étendent à la remontée ; leur effort augmente avec la profondeur.",
+      "de": "Sie bremsen die Kniebeugung beim Absenken und strecken das Knie beim Aufrichten; ihre Belastung steigt mit der Tiefe."
+    },
+    "Controla la flexión de cadera y la extiende al subir; trabaja más cuanto más baja la cadera.": {
+      "fr": "Il contrôle la flexion de la hanche et l'étend à la remontée ; il travaille d'autant plus que la hanche descend.",
+      "de": "Er kontrolliert die Hüftbeugung und streckt die Hüfte beim Aufrichten; er arbeitet umso stärker, je tiefer die Hüfte sinkt."
+    },
+    "Aductor mayor": {
+      "fr": "Grand adducteur",
+      "de": "M. adductor magnus"
+    },
+    "Con la cadera muy flexionada actúa como extensor potente junto al glúteo mayor.": {
+      "fr": "Hanche très fléchie, il agit comme un puissant extenseur avec le grand fessier.",
+      "de": "Bei stark gebeugter Hüfte wirkt er zusammen mit dem M. gluteus maximus als kräftiger Hüftstrecker."
+    },
+    "Biarticular: extiende la rodilla pero flexiona la cadera, así que cambia poco de longitud y trabaja menos que los vastos.": {
+      "fr": "Biarticulaire : il étend le genou mais fléchit la hanche ; sa longueur varie donc peu et il travaille moins que les vastes.",
+      "de": "Zweigelenkig: Er streckt das Knie, beugt aber die Hüfte; seine Länge ändert sich daher wenig und er arbeitet weniger als die Vasti."
+    },
+    "Cocontracción moderada: ayudan a extender la cadera y estabilizan la rodilla (reducen el cizallamiento anterior de la tibia).": {
+      "fr": "Cocontraction modérée : ils aident à étendre la hanche et stabilisent le genou (ils réduisent le cisaillement antérieur du tibia).",
+      "de": "Mäßige Kokontraktion: Sie helfen bei der Hüftstreckung und stabilisieren das Knie (sie verringern den vorderen Schub der Tibia)."
+    },
+    "Mantienen la rodilla alineada con el pie e impiden que se vaya hacia dentro (valgo dinámico).": {
+      "fr": "Ils maintiennent le genou aligné avec le pied et l'empêchent de partir vers l'intérieur (valgus dynamique).",
+      "de": "Sie halten das Knie in einer Linie mit dem Fuß und verhindern, dass es nach innen ausweicht (dynamischer Valgus)."
+    },
+    "Tríceps sural": {
+      "fr": "Triceps sural",
+      "de": "M. triceps surae"
+    },
+    "Frena el avance de la tibia sobre el pie y mantiene el equilibrio sobre el antepié.": {
+      "fr": "Il freine l'avancée du tibia sur le pied et maintient l'équilibre sur l'avant-pied.",
+      "de": "Er bremst das Vorwandern des Unterschenkels über den Fuß und hält das Gleichgewicht über dem Vorfuß."
+    },
+    "Lleva la tibia hacia delante al iniciar la bajada y corrige el equilibrio si el peso se va hacia los talones.": {
+      "fr": "Il amène le tibia vers l'avant au début de la descente et corrige l'équilibre si le poids part vers les talons.",
+      "de": "Er zieht den Unterschenkel zu Beginn des Absenkens nach vorn und korrigiert das Gleichgewicht, wenn das Gewicht auf die Fersen wandert."
+    },
+    "Erectores de la columna": {
+      "fr": "Érecteurs du rachis",
+      "de": "Rückenstrecker (M. erector spinae)"
+    },
+    "Isométricos: sostienen la columna neutra mientras el tronco se inclina; su carga aumenta con la inclinación.": {
+      "fr": "Isométriques : ils maintiennent le rachis neutre pendant que le tronc s'incline ; leur charge augmente avec l'inclinaison.",
+      "de": "Isometrisch: Sie halten die Wirbelsäule neutral, während sich der Rumpf neigt; ihre Belastung steigt mit der Vorneigung."
+    },
+    "Rigidizan el tronco y elevan la presión intraabdominal junto con los erectores.": {
+      "fr": "Ils rigidifient le tronc et augmentent la pression intra-abdominale avec les érecteurs.",
+      "de": "Sie versteifen den Rumpf und erhöhen gemeinsam mit den Rückenstreckern den intraabdominellen Druck."
+    },
+    "Deltoides anterior y medio": {
+      "fr": "Deltoïde antérieur et moyen",
+      "de": "Vorderer und mittlerer Deltamuskel"
+    },
+    "Sostienen los brazos al frente como contrapeso.": {
+      "fr": "Ils maintiennent les bras vers l'avant comme contrepoids.",
+      "de": "Sie halten die Arme als Gegengewicht nach vorn."
+    },
+    "Media": {
+      "fr": "Demi",
+      "de": "Halb"
+    },
+    "Paralela": {
+      "fr": "Parallèle",
+      "de": "Parallel"
+    }
+  },
+  "_traducciones": "Francés y alemán propios de esta edición para los textos de la web que no están en data/content_fr.json ni content_de.json (clave = texto español). Si la web los traduce algún día, manda la web solo si se borran de aquí. Pendientes de revisión."
+}

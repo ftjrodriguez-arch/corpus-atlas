@@ -1,0 +1,4 @@
+﻿# Registros de las pruebas locales (captura.ps1, compilación, importación)
+*_log.txt
+CorpusAtlas/Content/Python/__pycache__/
+CorpusAtlas/Config/DefaultInput.ini

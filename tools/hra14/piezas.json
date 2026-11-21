@@ -1,0 +1,463 @@
+[
+{
+"id": "n3393",
+"grupo": "ojo",
+"hra": "sclera",
+"lado": "izquierdo",
+"nuevo": false,
+"ancla": "esclera",
+"tris": 5000
+},
+{
+"id": "n3392",
+"grupo": "ojo",
+"hra": "sclera",
+"lado": "derecho",
+"nuevo": false,
+"ancla": "esclera",
+"tris": 5000
+},
+{
+"id": "n3391",
+"grupo": "ojo",
+"hra": "retina",
+"lado": "izquierdo",
+"nuevo": false,
+"tris": 5000
+},
+{
+"id": "n3390",
+"grupo": "ojo",
+"hra": "retina",
+"lado": "derecho",
+"nuevo": false,
+"tris": 5000
+},
+{
+"id": "n3401",
+"grupo": "ojo",
+"hra": "cornea",
+"lado": "izquierdo",
+"nuevo": false,
+"tris": 5000
+},
+{
+"id": "n3400",
+"grupo": "ojo",
+"hra": "cornea",
+"lado": "derecho",
+"nuevo": false,
+"tris": 5000
+},
+{
+"id": "n3399",
+"grupo": "ojo",
+"hra": "iris",
+"lado": "izquierdo",
+"nuevo": false,
+"tris": 5000
+},
+{
+"id": "n3398",
+"grupo": "ojo",
+"hra": "iris",
+"lado": "derecho",
+"nuevo": false,
+"tris": 5000
+},
+{
+"id": "n3397",
+"grupo": "ojo",
+"hra": "lens",
+"lado": "izquierdo",
+"nuevo": false,
+"tris": 5000
+},
+{
+"id": "n3396",
+"grupo": "ojo",
+"hra": "lens",
+"lado": "derecho",
+"nuevo": false,
+"tris": 5000
+},
+{
+"id": "n3389",
+"grupo": "ojo",
+"hra": "vitreous_humor",
+"lado": "izquierdo",
+"nuevo": false,
+"tris": 5000
+},
+{
+"id": "n3388",
+"grupo": "ojo",
+"hra": "vitreous_humor",
+"lado": "derecho",
+"nuevo": false,
+"tris": 5000
+},
+{
+"id": "n3405",
+"grupo": "ojo",
+"hra": "aqueous_humor",
+"lado": "izquierdo",
+"nuevo": false,
+"tris": 5000
+},
+{
+"id": "n3404",
+"grupo": "ojo",
+"hra": "aqueous_humor",
+"lado": "derecho",
+"nuevo": false,
+"tris": 5000
+},
+{
+"id": "h1",
+"grupo": "ojo",
+"hra": "fovea",
+"lado": "izquierdo",
+"nuevo": true,
+"en": "Fovea centralis",
+"es": "Fóvea central",
+"la": "Fovea centralis",
+"sys": "nervioso_central",
+"tris": 600
+},
+{
+"id": "h2",
+"grupo": "ojo",
+"hra": "fovea",
+"lado": "derecho",
+"nuevo": true,
+"en": "Fovea centralis",
+"es": "Fóvea central",
+"la": "Fovea centralis",
+"sys": "nervioso_central",
+"tris": 600
+},
+{
+"id": "h3",
+"grupo": "ojo",
+"hra": "macula_lutea",
+"lado": "izquierdo",
+"nuevo": true,
+"en": "Macula lutea",
+"es": "Mácula lútea",
+"la": "Macula lutea",
+"sys": "nervioso_central",
+"tris": 1500
+},
+{
+"id": "h4",
+"grupo": "ojo",
+"hra": "macula_lutea",
+"lado": "derecho",
+"nuevo": true,
+"en": "Macula lutea",
+"es": "Mácula lútea",
+"la": "Macula lutea",
+"sys": "nervioso_central",
+"tris": 1500
+},
+{
+"id": "h5",
+"grupo": "ojo",
+"hra": "optic_disc",
+"lado": "izquierdo",
+"nuevo": true,
+"en": "Optic disc",
+"es": "Disco del nervio óptico",
+"la": "Discus nervi optici",
+"sys": "nervioso_central",
+"tris": 2000
+},
+{
+"id": "h6",
+"grupo": "ojo",
+"hra": "optic_disc",
+"lado": "derecho",
+"nuevo": true,
+"en": "Optic disc",
+"es": "Disco del nervio óptico",
+"la": "Discus nervi optici",
+"sys": "nervioso_central",
+"tris": 2000
+},
+{
+"id": "h7",
+"grupo": "ojo",
+"hra": "optic_choroid",
+"lado": "izquierdo",
+"nuevo": true,
+"en": "Choroid",
+"es": "Coroides",
+"la": "Choroidea",
+"sys": "nervioso_central",
+"tris": 4000
+},
+{
+"id": "h8",
+"grupo": "ojo",
+"hra": "optic_choroid",
+"lado": "derecho",
+"nuevo": true,
+"en": "Choroid",
+"es": "Coroides",
+"la": "Choroidea",
+"sys": "nervioso_central",
+"tris": 4000
+},
+{
+"id": "h9",
+"grupo": "ojo",
+"hra": "ora_serrata_of_retina",
+"lado": "izquierdo",
+"nuevo": true,
+"en": "Ora serrata",
+"es": "Ora serrata",
+"la": "Ora serrata",
+"sys": "nervioso_central",
+"tris": 3000
+},
+{
+"id": "h10",
+"grupo": "ojo",
+"hra": "ora_serrata_of_retina",
+"lado": "derecho",
+"nuevo": true,
+"en": "Ora serrata",
+"es": "Ora serrata",
+"la": "Ora serrata",
+"sys": "nervioso_central",
+"tris": 3000
+},
+{
+"id": "h11",
+"grupo": "ojo",
+"hra": "ciliary_body",
+"lado": "izquierdo",
+"nuevo": true,
+"en": "Ciliary body",
+"es": "Cuerpo ciliar",
+"la": "Corpus ciliare",
+"sys": "nervioso_central",
+"tris": 4000
+},
+{
+"id": "h12",
+"grupo": "ojo",
+"hra": "ciliary_body",
+"lado": "derecho",
+"nuevo": true,
+"en": "Ciliary body",
+"es": "Cuerpo ciliar",
+"la": "Corpus ciliare",
+"sys": "nervioso_central",
+"tris": 4000
+},
+{
+"id": "h13",
+"grupo": "ojo",
+"hra": "ciliary_processes",
+"lado": "izquierdo",
+"nuevo": true,
+"en": "Ciliary processes",
+"es": "Procesos ciliares",
+"la": "Processus ciliares",
+"sys": "nervioso_central",
+"tris": 6000
+},
+{
+"id": "h14",
+"grupo": "ojo",
+"hra": "ciliary_processes",
+"lado": "derecho",
+"nuevo": true,
+"en": "Ciliary processes",
+"es": "Procesos ciliares",
+"la": "Processus ciliares",
+"sys": "nervioso_central",
+"tris": 6000
+},
+{
+"id": "h15",
+"grupo": "ojo",
+"hra": "ciliary_muscle",
+"lado": "izquierdo",
+"nuevo": true,
+"en": "Ciliary muscle",
+"es": "Músculo ciliar",
+"la": "Musculus ciliaris",
+"sys": "nervioso_central",
+"tris": 5000
+},
+{
+"id": "h16",
+"grupo": "ojo",
+"hra": "ciliary_muscle",
+"lado": "derecho",
+"nuevo": true,
+"en": "Ciliary muscle",
+"es": "Músculo ciliar",
+"la": "Musculus ciliaris",
+"sys": "nervioso_central",
+"tris": 5000
+},
+{
+"id": "h17",
+"grupo": "ojo",
+"hra": "suspensory_ligament_of_lens",
+"lado": "izquierdo",
+"nuevo": true,
+"en": "Zonular fibres (suspensory ligament of lens)",
+"es": "Zónula ciliar (ligamento suspensorio del cristalino)",
+"la": "Zonula ciliaris",
+"sys": "nervioso_central",
+"tris": 4000
+},
+{
+"id": "h18",
+"grupo": "ojo",
+"hra": "suspensory_ligament_of_lens",
+"lado": "derecho",
+"nuevo": true,
+"en": "Zonular fibres (suspensory ligament of lens)",
+"es": "Zónula ciliar (ligamento suspensorio del cristalino)",
+"la": "Zonula ciliaris",
+"sys": "nervioso_central",
+"tris": 4000
+},
+{
+"id": "h19",
+"grupo": "ojo",
+"hra": "trabecular_meshwork",
+"lado": "izquierdo",
+"nuevo": true,
+"en": "Trabecular meshwork",
+"es": "Retículo trabecular",
+"la": "Reticulum trabeculare",
+"sys": "nervioso_central",
+"tris": 4000
+},
+{
+"id": "h20",
+"grupo": "ojo",
+"hra": "trabecular_meshwork",
+"lado": "derecho",
+"nuevo": true,
+"en": "Trabecular meshwork",
+"es": "Retículo trabecular",
+"la": "Reticulum trabeculare",
+"sys": "nervioso_central",
+"tris": 4000
+},
+{
+"id": "h21",
+"grupo": "ojo",
+"hra": "schlemms_canal",
+"lado": "izquierdo",
+"nuevo": true,
+"en": "Schlemm's canal (scleral venous sinus)",
+"es": "Conducto de Schlemm (seno venoso de la esclera)",
+"la": "Sinus venosus sclerae",
+"sys": "nervioso_central",
+"tris": 3000
+},
+{
+"id": "h22",
+"grupo": "ojo",
+"hra": "schlemms_canal",
+"lado": "derecho",
+"nuevo": true,
+"en": "Schlemm's canal (scleral venous sinus)",
+"es": "Conducto de Schlemm (seno venoso de la esclera)",
+"la": "Sinus venosus sclerae",
+"sys": "nervioso_central",
+"tris": 3000
+},
+{
+"id": "h23",
+"grupo": "ojo",
+"hra": "corneo_scleral_junction",
+"lado": "izquierdo",
+"nuevo": true,
+"en": "Limbus (corneoscleral junction)",
+"es": "Limbo esclerocorneal",
+"la": "Limbus corneae",
+"sys": "nervioso_central",
+"tris": 2500
+},
+{
+"id": "h24",
+"grupo": "ojo",
+"hra": "corneo_scleral_junction",
+"lado": "derecho",
+"nuevo": true,
+"en": "Limbus (corneoscleral junction)",
+"es": "Limbo esclerocorneal",
+"la": "Limbus corneae",
+"sys": "nervioso_central",
+"tris": 2500
+},
+{
+"id": "h25",
+"grupo": "ojo",
+"hra": "bulbar_conjunctiva",
+"lado": "izquierdo",
+"nuevo": true,
+"en": "Bulbar conjunctiva",
+"es": "Conjuntiva bulbar",
+"la": "Tunica conjunctiva bulbi",
+"sys": "nervioso_central",
+"tris": 4000
+},
+{
+"id": "h26",
+"grupo": "ojo",
+"hra": "bulbar_conjunctiva",
+"lado": "derecho",
+"nuevo": true,
+"en": "Bulbar conjunctiva",
+"es": "Conjuntiva bulbar",
+"la": "Tunica conjunctiva bulbi",
+"sys": "nervioso_central",
+"tris": 4000
+},
+{
+"id": "n3522",
+"grupo": "traquea",
+"ancla": "traquea",
+"lado": "",
+"nuevo": false
+},
+{
+"id": "h27",
+"grupo": "traquea",
+"hra": "tracheal_cartilage",
+"lado": "",
+"nuevo": true,
+"en": "Tracheal cartilages",
+"es": "Cartílagos traqueales",
+"la": "Cartilagines tracheales",
+"sys": "respiratorio",
+"tris": 9000
+},
+{
+"id": "n2762",
+"grupo": "tonsila",
+"lado": "izquierdo",
+"nuevo": false,
+"tris": 3000,
+"escala": 0.6
+},
+{
+"id": "n2874",
+"grupo": "tonsila",
+"lado": "derecho",
+"nuevo": false,
+"tris": 3000,
+"escala": 0.6
+}
+]
