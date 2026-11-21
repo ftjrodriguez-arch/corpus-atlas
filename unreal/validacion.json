@@ -1,5 +1,5 @@
 {
- "fecha": "2026-11-21T23:20:04.505Z",
+ "fecha": "2026-11-21T23:20:43.772Z",
  "resumen": {
   "errores": 0,
   "avisos": 146,
@@ -242,13 +242,13 @@
    "tipo": "sin_traducir",
    "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_fr.json",
    "clave": "en inglés",
-   "msg": "3831 frases iguales al inglés (más 1333 términos cortos): pruebas 253, casos 109, protocolos 8, patologias 12, glosario 3449 (p. ej. pruebas.grupos[0].items[0].secs[0][1] «Hip extensors (gluteus maximus), knee extensors (q…» | pruebas.grupos[0].items[0].secs[1][1] «On the way down the same muscles work while length…» | pruebas.grupos[0].items[0].secs[2][1] «Knees track over the feet without valgus; limited …»)"
+   "msg": "3568 frases iguales al inglés (más 1330 términos cortos): casos 107, patologias 12, glosario 3449 (p. ej. casos.grupos[0].items[14].sub «breast · female» | casos.grupos[0].items[15].sub «pelvis · female» | casos.grupos[0].items[16].sub «pelvis · female»)"
   },
   {
    "tipo": "sin_traducir",
    "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_de.json",
    "clave": "en inglés",
-   "msg": "3851 frases iguales al inglés (más 3014 términos cortos): lecciones 1, pruebas 253, casos 112, protocolos 8, patologias 18, glosario 3459 (p. ej. lecciones.grupos[4].items[4].q[2].o[3] «Chorda tympani (VII)» | pruebas.grupos[0].items[0].secs[0][1] «Hip extensors (gluteus maximus), knee extensors (q…» | pruebas.grupos[0].items[0].secs[1][1] «On the way down the same muscles work while length…»)"
+   "msg": "3587 frases iguales al inglés (más 3011 términos cortos): lecciones 1, casos 109, patologias 18, glosario 3459 (p. ej. lecciones.grupos[4].items[4].q[2].o[3] «Chorda tympani (VII)» | casos.grupos[0].items[14].sub «breast · female» | casos.grupos[0].items[15].sub «pelvis · female»)"
   },
   {
    "tipo": "otro_idioma",
