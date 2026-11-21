@@ -9,7 +9,7 @@ const M = JSON.parse(fs.readFileSync(path.join(IMP, 'datos', 'movimiento.json'),
 const rig = JSON.parse(fs.readFileSync(path.join(IMP, 'datos', 'rig.json'), 'utf8'));
 const NA = M.articulaciones.length, arts = M.articulaciones.map(a => a.id), TC = M.torax;
 const cross = (a, c) => [a[1] * c[2] - a[2] * c[1], a[2] * c[0] - a[0] * c[2], a[0] * c[1] - a[1] * c[0]], dot = (a, c) => a[0] * c[0] + a[1] * c[1] + a[2] * c[2];
-const gira = (p, pv, e, an) => { const s = Math.sin(an), c = Math.cos(an), d = [p[0] - pv[0], p[1] - pv[1], p[2] - pv[2]], cr = cross(e, d), dt = dot(e, d); return [0, 1, 2].map(i => d[i] * c + cr[i] * s + e[i] * dt * (1 - c) + pv[i]); };
+const gira = (p, pv, e, an) => { if (!an) return p.slice(); const s = Math.sin(an), c = Math.cos(an), d = [p[0] - pv[0], p[1] - pv[1], p[2] - pv[2]], cr = cross(e, d), dt = dot(e, d); return [0, 1, 2].map(i => d[i] * c + cr[i] * s + e[i] * dt * (1 - c) + pv[i]); };
 const sat = x => Math.max(0, Math.min(1, x)), ss = (a, c, x) => { const t = sat((x - a) / (c - a)); return t * t * (3 - 2 * t); };
 
 const GLB = {};
@@ -44,12 +44,14 @@ function vertice(pz, J, g0, ws, op) {
     const jv = pz.js[k]; let code = Math.round(Math.abs(jv)); const tronco = jv === 0 || (code & 31) >= NA - 2;
     if (!hecho && tronco) { hecho = true;
       if (pz.hug > 0 && wl > 0.0005 && op.abrazo !== false) {
-        const k0 = TX.k(TC, g0), R1 = TX.radio(TC, gg), k1 = Math.hypot(gg[0], gg[2] - TC.zc) / R1, libre = sat((wl - 0.25) / 0.6), l4 = libre ** 4;
+        const quieto = gg[0] === g0[0] && gg[1] === g0[1] && gg[2] === g0[2], k0 = TX.k(TC, g0), R1 = TX.radio(TC, gg), k1 = quieto ? k0 : Math.hypot(gg[0], gg[2] - TC.zc) / R1, libre = sat((wl - 0.25) / 0.6), l4 = libre ** 4;
         const kmax = k0 + (0.006 + libre * libre * 0.07 + libre * 0.03 + l4 * l4 * 1.5) / R1, kmin = k0 < 1 ? k0 : 1 + (k0 - 1) * 0.6;
         const kt = Math.max(kmin, k1 > k0 ? k0 + (kmax - k0) * Math.tanh((k1 - k0) / (kmax - k0)) : k1), hy = (gg[1] - TC.y0) / TC.dy, val = sat(hy) * sat(TC.nh - 1 - hy) * sat(pz.hug), s = 1 + (kt / Math.max(k1, 1e-4) - 1) * val;
         gg[0] *= s; gg[2] = TC.zc + (gg[2] - TC.zc) * s;
-        if (pz.hug > 1.5 && op.cubrir !== false) { const ja = J[arts.indexOf('acr_' + Sd)], jc = J[arts.indexOf('sc_' + Sd)]; let bb = rig['scapBot_' + Sd].slice(); bb = gira(bb, ja.p, ja.e, ja.a); bb = gira(bb, jc.p, jc.e, jc.a);
-          const kb = TX.k(TC, bb) + 0.004 / TX.radio(TC, bb), kg = TX.k(TC, gg), cerca = 1 - ss(0.04, 0.20, Math.hypot(gg[0] - bb[0], gg[1] - bb[1], gg[2] - bb[2])), s2 = (kg + cerca * Math.max(0, kb - 1.0)) / Math.max(kg, 1e-4);
+        /* cubrir la punta de la escápula: solo lo que la punta sube respecto al reposo (en reposo la malla ya la cubre: desplazamiento cero) */
+        if (pz.hug > 1.5 && op.cubrir !== false) { const ja = J[arts.indexOf('acr_' + Sd)], jc = J[arts.indexOf('sc_' + Sd)], b0 = rig['scapBot_' + Sd]; let bb = b0.slice(); bb = gira(bb, ja.p, ja.e, ja.a); bb = gira(bb, jc.p, jc.e, jc.a);
+          const kb = TX.k(TC, bb) + 0.004 / TX.radio(TC, bb), kg = TX.k(TC, gg), cerca = 1 - ss(0.04, 0.20, Math.hypot(gg[0] - bb[0], gg[1] - bb[1], gg[2] - bb[2])), 
+            kb0 = TX.k(TC, b0) + 0.004 / TX.radio(TC, b0), cerca0 = 1 - ss(0.04, 0.20, Math.hypot(g0[0] - b0[0], g0[1] - b0[1], g0[2] - b0[2])), s2 = (kg + Math.max(0, cerca * Math.max(0, kb - 1.0) - cerca0 * Math.max(0, kb0 - 1.0))) / Math.max(kg, 1e-4);
           gg[0] *= s2; gg[2] = TC.zc + (gg[2] - TC.zc) * s2; } } }
     if (jv === 0) break;
     const w = sat(ws[k]); if (k === 0 && !tronco) wl = w; const lin = jv < 0;

@@ -38,7 +38,7 @@ const KM = +((ops.find(o => o.startsWith('KM=')) || '').slice(3)) || 0.6, MG = +
 const punta = () => { const ja = J[arts.indexOf('acr_' + Sd)], jc = J[arts.indexOf('sc_' + Sd)]; let bb = rig['scapBot_' + Sd].slice(); bb = gira(bb, ja.p, ja.e, ja.a); return gira(bb, jc.p, jc.e, jc.a); };
 const T = M.torax, cont = y => { const h = Math.max(0, Math.min(31, (y - T.y0) / T.dy)), a = Math.floor(h), A = T.filas[a], B = T.filas[Math.min(a + 1, 31)], f = h - a; return A.map((v, i) => v + (B[i] - v) * f); };
 const cross = (a, c) => [a[1] * c[2] - a[2] * c[1], a[2] * c[0] - a[0] * c[2], a[0] * c[1] - a[1] * c[0]], dot = (a, c) => a[0] * c[0] + a[1] * c[1] + a[2] * c[2];
-const gira = (p, pv, e, an) => { const s = Math.sin(an), c = Math.cos(an), d = p.map((x, i) => x - pv[i]), cr = cross(e, d), dt = dot(e, d); return d.map((x, i) => x * c + cr[i] * s + e[i] * dt * (1 - c) + pv[i]); };
+const gira = (p, pv, e, an) => { if (!an) return p.slice(); const s = Math.sin(an), c = Math.cos(an), d = p.map((x, i) => x - pv[i]), cr = cross(e, d), dt = dot(e, d); return d.map((x, i) => x * c + cr[i] * s + e[i] * dt * (1 - c) + pv[i]); };
 const sat = x => Math.max(0, Math.min(1, x)), ss = (a, c, x) => { const t = sat((x - a) / (c - a)); return t * t * (3 - 2 * t); };
 function postura(g0, ws) {
   let gg = g0.slice(), hecho = false, wl = 0, ip = INS.slice(); const info = {};
@@ -46,13 +46,14 @@ function postura(g0, ws) {
     const jv = js[k]; let code = Math.round(Math.abs(jv)); const tronco = jv === 0 || (code & 31) >= NA - 2;
     if (!hecho && tronco) { hecho = true;
       if (HUG > 0 && wl > 0.0005 && !SIN_ABRAZO) {
-        const k0 = TX.k(TC, g0), k1 = TX.k(TC, gg), R1 = TX.radio(TC, gg);
+        const k0 = TX.k(TC, g0), k1 = (gg[0] === g0[0] && gg[1] === g0[1] && gg[2] === g0[2]) ? k0 : TX.k(TC, gg), R1 = TX.radio(TC, gg);
         const libre = sat((wl - 0.25) / 0.6), l3 = libre ** 3, kmax = k0 + (0.006 + libre * libre * 0.07 + libre * HL + Math.pow(libre, HE) * 1.5) / R1;
         const kmin = k0 < 1 ? k0 : 1 + (k0 - 1) * KM, kt = Math.max(kmin, SUAVE ? (k1 > k0 ? k0 + (kmax - k0) * Math.tanh((k1 - k0) / (kmax - k0)) : k1) : Math.min(k1, kmax)), hy = (gg[1] - TC.y0) / TC.dy, val = sat(hy) * sat(TC.nh - 1 - hy) * sat(HUG), s = 1 + (kt / Math.max(k1, 1e-4) - 1) * val;
         info.k0 = k0; info.k1 = k1; info.kt = kt; info.val = val; info.libre = libre;
         gg[0] *= s; gg[2] = TC.zc + (gg[2] - TC.zc) * s;
         if (HUG > 1.5 && !SIN_CUBRIR) { const bb = punta(), kb = TX.k(TC, bb) + MG / TX.radio(TC, bb), kg = TX.k(TC, gg);
-          const cerca = 1 - ss(0.04, C1, Math.hypot(gg[0] - bb[0], gg[1] - bb[1], gg[2] - bb[2])), s2 = (kg + cerca * Math.max(0, kb - KR)) / Math.max(kg, 1e-4); info.cubre = s2 - 1;
+          const cerca = 1 - ss(0.04, C1, Math.hypot(gg[0] - bb[0], gg[1] - bb[1], gg[2] - bb[2])), b0 = rig['scapBot_' + Sd], kb0 = TX.k(TC, b0) + MG / TX.radio(TC, b0), cerca0 = 1 - ss(0.04, C1, Math.hypot(g0[0] - b0[0], g0[1] - b0[1], g0[2] - b0[2])),
+            s2 = (kg + Math.max(0, cerca * Math.max(0, kb - KR) - cerca0 * Math.max(0, kb0 - KR))) / Math.max(kg, 1e-4); info.cubre = s2 - 1;
           gg[0] *= s2; gg[2] = TC.zc + (gg[2] - TC.zc) * s2; } } }
     if (jv === 0) break;
     const w = sat(ws[k]); if (k === 0 && !tronco) wl = w; if (w < 0.0005) continue; const lin = jv < 0;

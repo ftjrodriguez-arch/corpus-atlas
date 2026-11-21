@@ -520,6 +520,35 @@ Resuelve el «defecto conocido» del apartado de tendones (orígenes anchos pint
     y 201 piezas sin área usan sus dos extremos. El trapecio conserva blanco en acromion y espina (borde mixto).
   - Sin informe del agente `director-clinico`.
 
+### J · El dorsal ancho tapaba la punta inferior del trapecio en reposo
+- **Causa:** el paso «cubrir el ángulo inferior de la escápula» de `HLSL_POSTURA` (dato primitivo 20 = 2, solo el dorsal)
+  sumaba al dorsal todo lo que la punta de la escápula sobresale del contorno costal (k − 1 ≈ 0,05 → hasta **11,3 mm**
+  hacia fuera) también con la postura a cero. En reposo el dorsal salía por encima del trapecio inferior (n1598 / n1601)
+  desde T8–T10: la línea dentada. En los rangos de hombro y cintura escapular no se veía porque ahí manda el correctivo
+  elástico; sí en reposo, tronco, marcha y sentadilla. No eran ni la fibra tensa, ni `Empuje` (0 en el músculo), ni el
+  límite `tanh` (en reposo daba factor 1).
+- **Arreglo:** el dorsal sube solo lo que la punta sube **respecto al reposo**
+  (`max(0, cerca·max(0, kb − 1) − cerca0·max(0, kb0 − 1))`), `Gira` devuelve el punto exacto si el ángulo es 0 y `k1 = k0`
+  si el punto no se ha movido: **sin postura el desplazamiento es exactamente 0** (medido en la CPU para dorsal, trapecio,
+  pectoral y redondo mayor). Mismo cambio en `postura.js` y `simular.js`; después `.\unreal\py.ps1 "ci.crear_materiales()"`.
+- **`tools/unreal/capas.js <fuera> <dentro> [rom mov lado grados] [--corr] [--frente] [--celda=4]`**: celdas vistas desde
+  detrás donde la pieza de dentro asoma por fuera de la otra, con la cuenta del material o con el correctivo.
+  Trapecio inferior sobre dorsal, celdas de 4 mm: reposo 2 de 368 (hasta 2,4 mm; antes, con los 11 mm, casi todo el
+  solape); abducción 90° 2 de 446, 150° 13 de 596 (hasta 6,4 mm junto a la espina de la escápula, x = −0,10, y = 1,35);
+  flexión 90° 2 de 384, 150° 2 de 427. Las 2 celdas fijas son la malla original: la punta del trapecio es un tendón de
+  1–2 mm de ancho sobre la línea media (y = 1,12–1,13) y el dorsal de al lado queda 0,9 mm más atrás (con celdas de 1 mm).
+  No se ve en las capturas y **no se ha tocado la malla** ni el exportador.
+- **Nombres del trapecio:** el catálogo ya tiene bien «Ascending part» (n1598 / n1601, fibras inferiores) y «Descending
+  part» (n1597 / n1600). `correctivos.js` y `tendones_reglas.json` tratan igual las tres porciones. `movimiento.js` sí
+  distingue la descendente (no copia el peso de la esternoclavicular a la acromioclavicular: va a la clavícula) y leía el
+  nombre grabado en el GLB al exportar, con el cruce antiguo; ahora lo toma de `data/catalog.json`. Los GLB de `Importar`
+  siguen con el nombre antiguo en `extras.en` hasta que se vuelva a exportar (solo lo usa `postura.js` para «Latissimus»).
+- Capturas `s1_j_*`, `s1_j_hoja.png` y `s1_j_mosaico.png` (antes / después): reposo con n1598 y con n1601 seleccionados
+  (el resalte llega a la punta), dorsal seleccionado, abducción y flexión a 90° y 150°, flexión y rotación del tronco.
+- Se ve mal / dudoso: en abducción y flexión a 150° queda la solapa del borde del dorsal en la axila (ya anotada en los
+  correctivos; no es de este arreglo) y las 13 celdas junto a la espina de la escápula. Entre el dorsal y el trapecio no
+  hay colisión: el orden lo da la malla de reposo.
+
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.

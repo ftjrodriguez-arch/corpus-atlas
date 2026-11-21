@@ -162,6 +162,7 @@ struct FTorax
     float K(Texture2D T, float3 p) { return length(float2(p.x, p.z - (@ZC@))) / R(T, p); }
     float3 Gira(float3 p, float3 pv, float4 ea)
     {
+        if (ea.w == 0) return p;      // sin giro, el punto exacto (en reposo el desplazamiento es cero, sin redondeos)
         float sn, cs; sincos(ea.w, sn, cs);
         float3 d = p - pv;
         return d * cs + cross(ea.xyz, d) * sn + ea.xyz * dot(ea.xyz, d) * (1 - cs) + pv;
@@ -224,7 +225,7 @@ if (CB > 0.5)
         {
             float k0 = tx.K(Tex, g0);
             float R1 = tx.R(Tex, g);
-            float k1 = length(float2(g.x, g.z - (@ZC@))) / R1;
+            float k1 = any(g != g0) ? length(float2(g.x, g.z - (@ZC@))) / R1 : k0;
             float libre = saturate((wl - 0.25) / 0.6);
             float l4 = libre * libre * libre * libre;
             float kmax = k0 + (0.006 + libre * libre * 0.07 + libre * 0.03 + l4 * l4 * 1.5) / R1;
@@ -238,18 +239,21 @@ if (CB > 0.5)
             g.x *= s;
             g.z = (@ZC@) + (g.z - (@ZC@)) * s;
             // El borde superior del dorsal cubre el ángulo inferior de la escápula, que resbala por debajo al rotar:
-            // las dos caras suben lo mismo, lo justo para quedar por fuera de la punta en esta postura.
+            // las dos caras suben lo mismo, y solo lo que la punta sube RESPECTO AL REPOSO: en reposo la malla ya la cubre.
+            // (Antes se sumaba todo kb - 1 y el dorsal salía 11 mm en reposo: tapaba la punta inferior del trapecio.)
             if (HUG > 1.5)
             {
                 bool der = g0.x < 0;
                 int ja = der ? @ACR_R@ : @ACR_L@, jc = der ? @SC_R@ : @SC_L@;
-                float3 b = float3(der ? (@SBX@) : -(@SBX@), @SBY@, @SBZ@);
-                b = tx.Gira(b, Tex.Load(int3(ja, 1, 0)).xyz, Tex.Load(int3(ja, 0, 0)));
+                float3 b0 = float3(der ? (@SBX@) : -(@SBX@), @SBY@, @SBZ@);
+                float3 b = tx.Gira(b0, Tex.Load(int3(ja, 1, 0)).xyz, Tex.Load(int3(ja, 0, 0)));
                 b = tx.Gira(b, Tex.Load(int3(jc, 1, 0)).xyz, Tex.Load(int3(jc, 0, 0)));
                 float kb = tx.K(Tex, b) + 0.004 / tx.R(Tex, b);
                 float kg = tx.K(Tex, g);
                 float cerca = 1 - smoothstep(0.04, 0.20, length(g - b));
-                float s2 = (kg + cerca * max(0, kb - 1.0)) / max(kg, 1e-4);
+                float kb0 = tx.K(Tex, b0) + 0.004 / tx.R(Tex, b0);
+                float cerca0 = 1 - smoothstep(0.04, 0.20, length(g0 - b0));
+                float s2 = (kg + max(0, cerca * max(0, kb - 1.0) - cerca0 * max(0, kb0 - 1.0))) / max(kg, 1e-4);
                 g.x *= s2;
                 g.z = (@ZC@) + (g.z - (@ZC@)) * s2;
             }

@@ -442,6 +442,9 @@ const PREPARA = `(async()=>{
   if (SIN_PESOS) { console.log('Pesos: sin tocar (--sin-pesos)'); await b.close(); return; }
 
   /* ── pesos ── */
+  /* El nombre en inglés de cada pieza sale del catálogo de hoy, no del que quedó grabado en el GLB al exportar: las
+     tablas TD, HARM y HARMC van por nombre (el catálogo tuvo cruzadas las porciones ascendente y descendente del trapecio). */
+  const CATN = {}; for (const r of JSON.parse(fs.readFileSync(path.join(RAIZ, 'data', 'catalog.json'), 'utf8'))) CATN[r[0]] = r[1];
   let tv = 0, tm = 0, to = 0;
   if (!SOLO) salida.piezas = {};
   for (const c of CUERPOS) {
@@ -459,7 +462,7 @@ const PREPARA = `(async()=>{
           const pos = vista(g, prim.attributes.POSITION), n = pos.length / 3;
           for (const k of Object.keys(prim.attributes)) if (/^TEXCOORD_/.test(k)) delete prim.attributes[k];
           const ind = f === 'muscular.glb' ? Buffer.from(Uint32Array.from(indices(g, prim.indices)).buffer).toString('base64') : '';
-          const r = await E('(en,side,sys,b,bi)=>__movW(en,side,sys,b,bi)', ex.en || '', ex.lado || '', sys, Buffer.from(pos.buffer).toString('base64'), ind);
+          const r = await E('(en,side,sys,b,bi)=>__movW(en,side,sys,b,bi)', CATN[nodo.name] || ex.en || '', ex.lado || '', sys, Buffer.from(pos.buffer).toString('base64'), ind);
           const w = r.w ? new Float32Array(new Uint8Array(Buffer.from(r.w, 'base64')).buffer) : new Float32Array(n * 8);
           nuevos.push([prim, w]); nv += n; if (r.moved) { mv++; P[nodo.name] = r.huecos; } if (r.ins) INS[nodo.name] = r.ins; if (r.over) { ov++; console.log('    aviso: %s (%s) usa %d articulaciones de más', nodo.name, ex.en, r.over); }
         }
