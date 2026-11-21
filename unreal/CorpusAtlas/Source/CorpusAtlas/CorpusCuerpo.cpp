@@ -503,6 +503,52 @@ bool ACorpusCuerpo::Cortado(const FVector& Punto) const
 	return EjeDeCorte >= 0 && (Punto.X * PlanoCorte.X + Punto.Y * PlanoCorte.Y + Punto.Z * PlanoCorte.Z) > PlanoCorte.W;
 }
 
+// ───────── Fantasma y pelar capas ─────────
+
+void ACorpusCuerpo::FantasmaCapas(const TSet<FString>& Solidas)
+{
+	// las capas a la vista que no son «sólidas» pasan a casi transparentes; se guarda la opacidad que tenían
+	const TArray<FString> Visibles = CapasVisibles.Array();
+	for (const FString& Clave : Visibles)
+	{
+		if (Solidas.Contains(Clave) || OpacidadesFantasma.Contains(Clave)) { continue; }
+		OpacidadesFantasma.Add(Clave, OpacidadDeCapa(Clave));
+		OpacidadCapa(Clave, FMath::Min(OpacidadDeCapa(Clave), 0.25f));
+	}
+	bFantasma = true;
+	for (const FString& Clave : Visibles) { AplicarVisibilidad(Clave); }   // el clic atraviesa las capas fantasma
+}
+
+void ACorpusCuerpo::Fantasma(bool bSi)
+{
+	if (bSi == bFantasma) { return; }
+	if (bSi)
+	{
+		// capa que queda sólida: la de la pieza seleccionada; sin selección, los huesos
+		const UCorpusDatos* D = Datos();
+		const FCorpusPieza* P = D ? D->Pieza(IdSeleccionada) : nullptr;
+		FString Solida = P ? CapaDePieza(*P) : FString();
+		if (Solida.IsEmpty() && D) { for (const FCorpusCapa& C : D->Capas()) { if (C.Base == TEXT("oseo") && CapasVisibles.Contains(C.Clave)) { Solida = C.Clave; break; } } }
+		FantasmaCapas(TSet<FString>({ Solida }));
+	}
+	else
+	{
+		bFantasma = false;
+		const TMap<FString, float> Antes = MoveTemp(OpacidadesFantasma);
+		OpacidadesFantasma.Reset();
+		for (const auto& Par : Antes) { OpacidadCapa(Par.Key, Par.Value); AplicarVisibilidad(Par.Key); }
+	}
+	AlCambiarCapas.Broadcast();
+	AlCambiarHerramientas.Broadcast();
+}
+
+void ACorpusCuerpo::PelarProfundidad(const FString& Prof, bool bOcultar)
+{
+	if (bOcultar) { ProfOcultas.Add(Prof); } else { ProfOcultas.Remove(Prof); }
+	for (const auto& Par : IdsPorCapa) { AplicarVisibilidad(Par.Key); }
+	AlCambiarCapas.Broadcast();
+}
+
 void ACorpusCuerpo::CargarCapa(const FString& Clave)
 {
 	if (CapasCargadas.Contains(Clave)) { return; }
@@ -575,13 +621,20 @@ void ACorpusCuerpo::AplicarVisibilidad(const FString& Clave)
 	const TArray<FString>* Ids = IdsPorCapa.Find(Clave);
 	if (!Ids) { return; }
 	const bool bCapa = CapasVisibles.Contains(Clave);
+	const UCorpusDatos* D = Datos();
+	const FCorpusCapa* Capa = D ? D->Capa(Clave) : nullptr;
+	// pelar capas: solo los músculos tienen profundidad (superficial, intermedio, profundo)
+	const bool bPelar = ProfOcultas.Num() > 0 && Capa && Capa->Base == TEXT("muscular");
+	// las capas fantasma se ven pero no se tocan: el clic llega a la capa sólida de debajo
+	const bool bTocable = !(bFantasma && OpacidadesFantasma.Contains(Clave));
 	for (const FString& Id : *Ids)
 	{
 		if (const TObjectPtr<UStaticMeshComponent>* C = Piezas.Find(Id))
 		{
-			const bool bVer = bCapa && !Ocultas.Contains(Id) && (IdAislada.IsEmpty() || IdAislada == Id) && (Grupo.Num() == 0 || Grupo.Contains(Id));
+			bool bVer = bCapa && !Ocultas.Contains(Id) && (IdAislada.IsEmpty() || IdAislada == Id) && (Grupo.Num() == 0 || Grupo.Contains(Id));
+			if (bVer && bPelar && ProfOcultas.Contains(D->Profundidad(Id))) { bVer = false; }
 			(*C)->SetVisibility(bVer);
-			(*C)->SetCollisionEnabled(bVer ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+			(*C)->SetCollisionEnabled(bVer && bTocable ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
 		}
 	}
 }
@@ -760,6 +813,7 @@ void ACorpusCuerpo::PonerVista(const FCorpusVistaPaso& V)
 void ACorpusCuerpo::GuardarEstado()
 {
 	if (bHayGuardado) { return; }
+	if (bFantasma) { Fantasma(false); }   // se guarda el estado real de las capas, no el del modo fantasma
 	bHayGuardado = true;
 	CuerpoGuardado = CuerpoActual; CapasGuardadas = CapasVisibles; OpacidadesGuardadas = Opacidades;
 }
@@ -816,6 +870,7 @@ void ACorpusCuerpo::DescargarTodo()
 void ACorpusCuerpo::PonerCuerpo(ECorpusCuerpo Nuevo)
 {
 	if (Nuevo == CuerpoActual) { return; }
+	if (bFantasma) { Fantasma(false); }
 	if (Nuevo == ECorpusCuerpo::VisibleHuman) { QuitarPostura(); }
 	if (PatronActual >= 0) { PonerMarcha(-1, 0.f); }
 	IdsMarcha.Reset(); GruposMarcha.Reset(); FijosMarcha.Reset();   // el Visible Human no tiene rig

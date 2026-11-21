@@ -28,6 +28,8 @@ public:
 	void QaBuscar(const FString& Texto);
 	/** Pruebas automáticas del panel de estudio: «<módulo> [grupo] [entrada] [paso]», «<módulo> buscar <texto>», «responder <pregunta> <opción>»; vacío = cerrar. */
 	void QaEstudio(const FString& Args);
+	/** Pruebas automáticas de la interfaz: «panel <0|1>»… Devuelve false si el verbo no es suyo. */
+	bool Qa(const FString& Verbo, const FString& Resto);
 
 private:
 	ACorpusCuerpo* Cuerpo() const;
@@ -54,6 +56,8 @@ private:
 	TSharedPtr<SEditableTextBox> Buscador;
 	FDelegateHandle HSel, HCapas, HIdioma, HPostura, HHerr;
 	bool bVerMov = false;
+	bool bPanelPlegado = false;                 // panel izquierdo recogido en un botón
+	TSharedPtr<SVerticalBox> CajaMini;
 	TSharedPtr<SVerticalBox> CajaEst, CajaEstCab;
 	TSharedPtr<class SScrollBox> RolloEst;
 	bool bVerEst = false;

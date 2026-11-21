@@ -83,11 +83,18 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Fill).Padding(18.f)
 		[
 			SNew(SBox).WidthOverride(340.f)
+			.Visibility_Lambda([this]() { return bPanelPlegado ? EVisibility::Collapsed : EVisibility::Visible; })
 			[
 				SNew(SBorder).BorderImage(Panel()).Padding(16.f)
 				[
 					SNew(SVerticalBox)
-					+ SVerticalBox::Slot().AutoHeight()[ Txt(TEXT("CORPUS"), 22, C_TINTA, true) ]
+					+ SVerticalBox::Slot().AutoHeight()
+					[
+						SNew(SHorizontalBox)
+						+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)[ Txt(TEXT("CORPUS"), 22, C_TINTA, true) ]
+						// plegar el panel: el modelo ocupa toda la pantalla
+						+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ Boton(TEXT("«"), [this]() { bPanelPlegado = true; }) ]
+					]
 					+ SVerticalBox::Slot().AutoHeight().Padding(0, 2, 0, 10)[ SAssignNew(CajaBarra, SVerticalBox) ]
 					+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 6)[ SAssignNew(CajaHerr, SVerticalBox) ]
 					+ SVerticalBox::Slot().FillHeight(1.f)
@@ -95,6 +102,15 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 						SNew(SScrollBox) + SScrollBox::Slot()[ SAssignNew(CajaCapas, SVerticalBox) ]
 					]
 				]
+			]
+		]
+		// ── Panel izquierdo plegado: solo un botón para volver a abrirlo ──
+		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(18.f)
+		[
+			SNew(SBox)
+			.Visibility_Lambda([this]() { return bPanelPlegado ? EVisibility::Visible : EVisibility::Collapsed; })
+			[
+				SNew(SBorder).BorderImage(Panel()).Padding(8.f)[ SAssignNew(CajaMini, SVerticalBox) ]
 			]
 		]
 		// ── Arriba: buscador ──
@@ -180,6 +196,12 @@ void SCorpusInterfaz::Reconstruir()
 
 	if (Buscador.IsValid()) { Buscador->SetHintText(FText::FromString(D->T(TEXT("Buscar estructura…")))); }
 
+	if (CajaMini.IsValid())
+	{
+		CajaMini->ClearChildren();
+		CajaMini->AddSlot().AutoHeight()[ Boton(TEXT("»  ") + D->T(TEXT("Capas")), [this]() { bPanelPlegado = false; }) ];
+	}
+
 	CuerpoPintado = (uint8)C->Cuerpo();
 	CajaBarra->ClearChildren();
 	CajaBarra->AddSlot().AutoHeight()[ Txt(D->T(TEXT("Atlas anatómico 3D libre")), 10, C_GRIS) ];
@@ -239,8 +261,16 @@ void SCorpusInterfaz::RehacerHerramientas()
 	CajaHerr->ClearChildren();
 	TWeakObjectPtr<ACorpusCuerpo> WC(C);
 
+	// ── Fantasma: todo translúcido menos la capa de la pieza seleccionada (sin selección, menos los huesos) ──
+	CajaHerr->AddSlot().AutoHeight().Padding(0, 4, 0, 4)[ Txt(Mayus(D->T(TEXT("Disección"))), 9, C_GRIS, true) ];
+	CajaHerr->AddSlot().AutoHeight()
+	[
+		SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(6, 6))
+		+ SWrapBox::Slot()[ Boton(D->T(TEXT("Fantasma")), [WC]() { if (WC.IsValid()) { WC->Fantasma(!WC->EnFantasma()); } }, C->EnFantasma()) ]
+	];
+
 	// ── Plano de corte: sagital, coronal o axial (otra vez sobre el activo lo apaga), posición e invertir ──
-	CajaHerr->AddSlot().AutoHeight().Padding(0, 4, 0, 4)[ Txt(Mayus(D->T(TEXT("Plano de corte"))), 9, C_GRIS, true) ];
+	CajaHerr->AddSlot().AutoHeight().Padding(0, 8, 0, 4)[ Txt(Mayus(D->T(TEXT("Plano de corte"))), 9, C_GRIS, true) ];
 	TSharedRef<SWrapBox> FilaCorte = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(6, 6));
 	const TCHAR* Ejes[] = { TEXT("Sagital"), TEXT("Coronal"), TEXT("Axial") };
 	const int32 Eje = C->EjeCorte();
@@ -464,7 +494,27 @@ void SCorpusInterfaz::RehacerCapas()
 				]
 			]
 		];
+		// pelar capas: los músculos por profundidad (extras.json → dep), como en la web; encendido = se ve
+		if (Clave == TEXT("muscular"))
+		{
+			TSharedRef<SWrapBox> Pelar = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
+			const TPair<const TCHAR*, const TCHAR*> Profs[] = { {TEXT("s"), TEXT("Superficiales")}, {TEXT("i"), TEXT("Intermedios")}, {TEXT("p"), TEXT("Profundos")} };
+			for (const auto& Par : Profs)
+			{
+				const FString Pf(Par.Key);
+				Pelar->AddSlot()
+				[ Boton(D->T(Par.Value), [WC, Pf]() { if (WC.IsValid()) { WC->PelarProfundidad(Pf, !WC->ProfundidadOculta(Pf)); } }, !C->ProfundidadOculta(Pf)) ];
+			}
+			CajaCapas->AddSlot().AutoHeight().Padding(8, 2, 0, 6)[ Pelar ];
+		}
 	}
+}
+
+bool SCorpusInterfaz::Qa(const FString& Verbo, const FString& Resto)
+{
+	// panel <0|1>: pliega (0) o abre (1) el panel izquierdo
+	if (Verbo == TEXT("panel")) { bPanelPlegado = Resto == TEXT("0"); return true; }
+	return false;
 }
 
 void SCorpusInterfaz::RehacerFicha()

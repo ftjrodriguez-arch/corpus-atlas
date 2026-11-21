@@ -124,6 +124,9 @@ struct FCorpusVistaPaso
 	FVector3f Tgt = FVector3f(0.f, 0.95f, 0.f);   // glTF, m
 };
 
+/** Relieve óseo (data/extras.json → lm): nombre en español, inglés y portugués y su punto sobre el hueso (glTF, m). */
+struct FCorpusRelieve { FString Es, En, Pt; FVector3f Pos = FVector3f::ZeroVector; };
+
 /** Claves que distinguen mayúsculas (como los objetos de JavaScript): en i18n_de, «urinario» y «Urinario» son textos distintos. */
 struct FClaveExacta : TDefaultMapKeyFuncs<FString, FString, false>
 {
@@ -195,6 +198,14 @@ public:
 	int32 AnchoCorrectivo() const { return CorrAncho; }
 	float EscalaCorrectivo() const { return CorrEscala; }
 
+	// ── data/extras.json (compartido con la web): profundidad de disección y relieves óseos ──
+	/** Profundidad del músculo: «s» superficial, «i» intermedio, «p» profundo; vacío si no está clasificado. */
+	const FString& Profundidad(const FString& Id) const { static const FString Nada; const FString* P = Prof.Find(Id); return P ? *P : Nada; }
+	/** Relieves del hueso (vacío si no tiene). */
+	const TArray<FCorpusRelieve>& Relieves(const FString& Id) const { static const TArray<FCorpusRelieve> Nada; const TArray<FCorpusRelieve>* R = RelievesPorHueso.Find(Id); return R ? *R : Nada; }
+	/** Nombre del relieve en el idioma actual (fr y de: por el nombre español en sus tablas; si falta, inglés). */
+	FString NombreRelieve(const FCorpusRelieve& R) const;
+
 	/** Módulos de estudio en el idioma actual (se leen la primera vez que se piden). */
 	const FCorpusEstudio& Estudio();
 	/** Texto de interfaz del panel de estudio (clave de la tabla TXT de estudio.js). */
@@ -209,6 +220,9 @@ private:
 	bool bVistasLeidas = false;
 	void CargarMovimiento();
 	void CargarCorrectivos();
+	void CargarExtras();
+	TMap<FString, FString> Prof;
+	TMap<FString, TArray<FCorpusRelieve>> RelievesPorHueso;
 	TMap<FString, FCorpusRejilla> Rejillas;
 	TMap<FString, FCorpusCorrMov> CorrMovs;
 	TArray<uint8> CorrBin;

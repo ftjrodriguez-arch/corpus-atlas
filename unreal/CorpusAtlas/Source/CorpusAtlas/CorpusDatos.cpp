@@ -159,6 +159,7 @@ void UCorpusDatos::Initialize(FSubsystemCollectionBase& Collection)
 	InfoEs = LeerObjeto(TEXT("info.json"));
 	CargarMovimiento();
 	CargarCorrectivos();
+	CargarExtras();
 	UE_LOG(LogCorpus, Log, TEXT("Corpus Atlas: %d estructuras, %d capas, %d articulaciones, %d rangos"), Piezas.Num(), ListaCapas.Num(), Pivotes.Num(), ListaRangos.Num());
 }
 
@@ -326,6 +327,49 @@ void UCorpusDatos::CargarMovimiento()
 	}
 }
 
+// extras.json (el mismo de la web): «dep» = profundidad de disección de cada músculo (s, i, p) y «lm» = relieves de cada
+// hueso: [nombre español, inglés, [x, y, z] en glTF (m), portugués].
+void UCorpusDatos::CargarExtras()
+{
+	const TSharedPtr<FJsonObject> J = LeerObjeto(TEXT("extras.json"));
+	if (!J) { return; }
+	const TSharedPtr<FJsonObject>* O = nullptr;
+	if (J->TryGetObjectField(TEXT("dep"), O))
+	{
+		for (const auto& Par : (*O)->Values) { FString S; if (Par.Value.IsValid() && Par.Value->TryGetString(S)) { Prof.Add(FString(Par.Key), S); } }
+	}
+	if (J->TryGetObjectField(TEXT("lm"), O))
+	{
+		for (const auto& Par : (*O)->Values)
+		{
+			const TArray<TSharedPtr<FJsonValue>>* Lista = nullptr;
+			if (!Par.Value.IsValid() || !Par.Value->TryGetArray(Lista)) { continue; }
+			TArray<FCorpusRelieve>& Rs = RelievesPorHueso.Add(FString(Par.Key));
+			for (const auto& V : *Lista)
+			{
+				const TArray<TSharedPtr<FJsonValue>>* F = nullptr;
+				const TArray<TSharedPtr<FJsonValue>>* P = nullptr;
+				if (!V.IsValid() || !V->TryGetArray(F) || F->Num() < 3 || !(*F)[2].IsValid() || !(*F)[2]->TryGetArray(P) || P->Num() != 3) { continue; }
+				FCorpusRelieve& R = Rs.AddDefaulted_GetRef();
+				R.Es = Cad(*F, 0); R.En = Cad(*F, 1); R.Pt = Cad(*F, 3);
+				R.Pos = FVector3f((float)(*P)[0]->AsNumber(), (float)(*P)[1]->AsNumber(), (float)(*P)[2]->AsNumber());
+			}
+		}
+	}
+	UE_LOG(LogCorpus, Log, TEXT("Corpus Atlas: %d músculos con profundidad y %d huesos con relieves"), Prof.Num(), RelievesPorHueso.Num());
+}
+
+FString UCorpusDatos::NombreRelieve(const FCorpusRelieve& R) const
+{
+	if (IdiomaActual == TEXT("es")) { return R.Es; }
+	if (IdiomaActual == TEXT("en")) { return R.En.IsEmpty() ? R.Es : R.En; }
+	if (IdiomaActual == TEXT("pt")) { return R.Pt.IsEmpty() ? R.Es : R.Pt; }
+	// francés y alemán: tabla de nombres o de interfaz por el texto español; si no está, inglés
+	if (const FTablaTr* N = NombresTr.Find(IdiomaActual)) { if (const FString* S = N->Find(R.Es)) { return *S; } }
+	if (const FTablaTr* Ui = UiTr.Find(IdiomaActual)) { if (const FString* S = Ui->Find(R.Es)) { return *S; } }
+	return R.En.IsEmpty() ? R.Es : R.En;
+}
+
 // correctivos.json + correctivos.bin (tools/unreal/correctivos.js): rejilla elástica de cada músculo del hombro y, por
 // movimiento y lado, el desplazamiento y el giro de cada nodo cada 5°.
 void UCorpusDatos::CargarCorrectivos()
@@ -432,6 +476,8 @@ namespace
 		{TEXT("Concéntrica"), {TEXT("Concentric"), TEXT("Concêntrica"), TEXT("Concentrique"), TEXT("Konzentrisch")}},
 		{TEXT("Isométrica"), {TEXT("Isometric"), TEXT("Isométrica"), TEXT("Isométrique"), TEXT("Isometrisch")}},
 		{TEXT("Relaciones"), {TEXT("Relations"), TEXT("Relações"), TEXT("Rapports"), TEXT("Lagebeziehungen")}},
+		{TEXT("Disección"), {TEXT("Dissection"), TEXT("Dissecção"), TEXT("Dissection"), TEXT("Präparation")}},
+		{TEXT("Fantasma"), {TEXT("Ghost"), TEXT("Fantasma"), TEXT("Fantôme"), TEXT("Geistermodus")}},
 		{TEXT("Plano de corte"), {TEXT("Section plane"), TEXT("Plano de corte"), TEXT("Plan de coupe"), TEXT("Schnittebene")}},
 		{TEXT("Coronal"), {TEXT("Coronal"), TEXT("Coronal"), TEXT("Coronal"), TEXT("Koronal")}},
 		{TEXT("Axial"), {TEXT("Axial"), TEXT("Axial"), TEXT("Axial"), TEXT("Axial")}},

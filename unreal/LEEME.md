@@ -326,6 +326,19 @@ Capturas finales: `unreal/capturas/s1_*` (una hoja de contactos por punto: `s1_<
 - Falta: tapa de sección de verdad (la de ahora es el interior de cada pieza pintado liso: las piezas huecas o abiertas,
   como las fascias, no quedan macizas), plano oblicuo y arrastrar el plano con el ratón sobre el modelo.
 
+### B · Panel plegable, fantasma y pelar capas
+- **Panel izquierdo plegable:** botón ««» junto al título; plegado queda solo el botón «» Capas» (`bPanelPlegado`).
+- **Fantasma** (`ACorpusCuerpo::Fantasma`): las capas a la vista pasan a opacidad 0,25 menos la de la pieza seleccionada
+  (sin selección, menos los huesos); al apagarlo vuelve la opacidad que tenía cada una. Las capas fantasma no se tocan con
+  el ratón: el clic llega a la capa sólida. Se apaga solo al cambiar de cuerpo y al entrar en Estudiar.
+- **Pelar capas:** `UCorpusDatos::CargarExtras` lee `extras.json` → `dep` (545 músculos: s, i, p) y `lm`. Tres botones bajo
+  la capa «Músculos» (Superficiales, Intermedios, Profundos; encendido = se ve), como `DEPTH_OFF` en la web
+  (`ACorpusCuerpo::PelarProfundidad`, aplicado en `AplicarVisibilidad`).
+- Pruebas: `panel <0|1>` · `fantasma <0|1>` · `pelar <s|i|p> [0]` · `pelar` (todos a la vista). Capturas `s1_b_*`.
+- Falta: los músculos sin clasificar en `dep` (unas 37 piezas del hombre: se ven en `s1_b_pelar_sip`) no se pelan nunca;
+  habría que completarlos en `data/extras.json`. El fantasma no sigue a la selección: hay que apagarlo y encenderlo.
+  Los paneles de la derecha (ficha, movimiento, estudio) no se pliegan.
+
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.

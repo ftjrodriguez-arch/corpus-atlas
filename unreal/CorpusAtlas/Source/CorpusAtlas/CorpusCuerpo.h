@@ -107,7 +107,19 @@ public:
 	/** ¿Ese punto del mundo está en la mitad que el corte ha quitado? (el clic del ratón la atraviesa) */
 	bool Cortado(const FVector& Punto) const;
 
+	// ── Fantasma: translúcidas todas las capas menos la de la pieza seleccionada (sin selección, menos los huesos) ──
+	void Fantasma(bool bSi);
+	bool EnFantasma() const { return bFantasma; }
+	// ── Pelar capas: ocultar los músculos por profundidad (data/extras.json → dep: «s», «i», «p»), como DEPTH_OFF en la web ──
+	void PelarProfundidad(const FString& Prof, bool bOcultar);
+	bool ProfundidadOculta(const FString& Prof) const { return ProfOcultas.Contains(Prof); }
+
 private:
+	bool bFantasma = false;
+	TMap<FString, float> OpacidadesFantasma;   // opacidad que tenía cada capa antes de volverla fantasma
+	TSet<FString> ProfOcultas;
+	void FantasmaCapas(const TSet<FString>& Solidas);
+
 	int32 EjeDeCorte = -1;
 	float PosDeCorte = 0.5f;
 	bool bCorteInv = false, bCorteInvPintado = false;

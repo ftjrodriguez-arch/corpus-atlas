@@ -253,7 +253,25 @@ void ACorpusJugador::TickQa()
 		}
 		Pausa = 3.0;
 	}
-	else { ConsoleCommand(Paso); }
+	else if (Verbo == TEXT("fantasma") && Cu) { Cu->Fantasma(Resto != TEXT("0")); Pausa = 4.0; }   // fantasma <0|1>
+	else if (Verbo == TEXT("pelar") && Cu)
+	{
+		// pelar <s|i|p> [0]: oculta los músculos de esa profundidad (con 0 los devuelve)   ·   pelar (solo) = todos a la vista
+		TArray<FString> A; Resto.ParseIntoArrayWS(A);
+		if (A.Num() == 0) { for (const TCHAR* Pf : { TEXT("s"), TEXT("i"), TEXT("p") }) { Cu->PelarProfundidad(Pf, false); } }
+		else { Cu->PelarProfundidad(A[0], !(A.Num() > 1 && A[1] == TEXT("0"))); }
+		Pausa = 2.0;
+	}
+	else
+	{
+		// verbos de la interfaz (panel…); lo demás, a la consola
+		bool bHecho = false;
+		if (ACorpusHUD* H = Cast<ACorpusHUD>(GetHUD()))
+		{
+			if (TSharedPtr<SWidget> W = H->InterfazWidget()) { bHecho = StaticCastSharedPtr<SCorpusInterfaz>(W)->Qa(Verbo, Resto); }
+		}
+		if (!bHecho) { ConsoleCommand(Paso); }
+	}
 	QaHasta = FPlatformTime::Seconds() + Pausa;
 }
 
