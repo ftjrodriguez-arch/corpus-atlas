@@ -384,6 +384,22 @@ Capturas finales: `unreal/capturas/s1_*` (una hoja de contactos por punto: `s1_<
   no se dibuja sobre la articulación; rotación automática de la rodilla, sentadilla y prueba en valgo (otra tarea: hay que
   volver a hornear el movimiento desde la web).
 
+### F · Vínculo en los dos sentidos (estructura → Estudiar)
+- Con el panel Estudiar cerrado, la ficha de la pieza seleccionada trae «Estudiar (N)»: un botón por cada entrada del
+  glosario, de patologías o de lecciones que la nombra (campo `show` de la entrada o de uno de sus pasos en
+  `estudio_<idioma>.json`), con el módulo y el grupo debajo. Se enseñan diez, por turnos entre los tres módulos, y «+ N»
+  si hay más. Al pulsar se abre Estudiar en esa entrada (y en el paso que nombra la estructura) y el panel la enseña en el
+  modelo; al cerrar vuelven capas, opacidades y cámara, como siempre.
+- `SCorpusInterfaz::EnlacesDe` hace el índice nombre en inglés → entradas una vez por idioma (la primera selección lee
+  `estudio_<idioma>.json`, unos 2 MB: se nota un instante). `AbrirEnlace` abre la entrada. El sentido inverso (entrada →
+  modelo) ya estaba en `EnsenarEstudio`.
+- Pruebas: `sel n152; enlace <n>` (enésimo botón de la ficha). Capturas `s1_f_*` (ficha del fémur y del glúteo mayor,
+  entrada del glosario, patología, lección, vuelta al cerrar, e inglés).
+- Falta: ver las entradas que no caben en los diez botones; enlazar también casos, kinesiología y variantes; los relieves
+  óseos (`lm`) y los órganos (`org`) de los ejemplos del glosario no se enlazan (solo `s`); glosario sin francés ni alemán.
+- Sin revisar por el agente `director-clinico`: los puntos C y D enseñan datos ya existentes (`extras.json`, catálogo),
+  pero su contenido sigue pendiente de revisión profesional.
+
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.

@@ -63,6 +63,13 @@ private:
 	TArray<int32> RelVistos;
 	FString RelHueso;
 	bool bFantasmaPorRelieves = false;
+	// Vínculo estructura → estudio: entradas del glosario, patologías y lecciones que nombran la pieza seleccionada
+	// (campo «show» de estudio_<idioma>.json). X módulo, Y grupo, Z entrada, W paso que la nombra.
+	const TArray<FIntVector4>& EnlacesDe(const FString& En);
+	void AbrirEnlace(const FIntVector4& E);
+	TMap<FString, TArray<FIntVector4>> Enlaces;
+	FString EnlacesIdioma;
+	TArray<FIntVector4> EnlacesFicha;           // los que muestra la ficha ahora (pruebas: «enlace <n>»)
 	bool bPanelPlegado = false;                 // panel izquierdo recogido en un botón
 	TSharedPtr<SVerticalBox> CajaMini;
 	TSharedPtr<SVerticalBox> CajaEst, CajaEstCab;

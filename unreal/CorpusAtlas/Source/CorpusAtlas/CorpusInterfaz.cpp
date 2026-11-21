@@ -687,6 +687,13 @@ bool SCorpusInterfaz::Qa(const FString& Verbo, const FString& Resto)
 {
 	// panel <0|1>: pliega (0) o abre (1) el panel izquierdo
 	if (Verbo == TEXT("panel")) { bPanelPlegado = Resto == TEXT("0"); return true; }
+	// enlace <n>: pulsa el enésimo botón «Estudiar» de la ficha de la pieza seleccionada
+	if (Verbo == TEXT("enlace"))
+	{
+		const int32 N = FCString::Atoi(*Resto);
+		if (EnlacesFicha.IsValidIndex(N)) { const FIntVector4 E = EnlacesFicha[N]; AbrirEnlace(E); }
+		return true;
+	}
 	// relieve <todos|off|n|texto>: marca los relieves del hueso seleccionado (n = número en la lista de la ficha, desde 0;
 	// texto = parte de su nombre en español o inglés)
 	if (Verbo == TEXT("relieve"))
@@ -767,6 +774,44 @@ void SCorpusInterfaz::RehacerFicha()
 		}
 	}
 
+	// vínculo con Estudiar: un botón por cada entrada del glosario, de patologías o de lecciones que nombra esta estructura
+	EnlacesFicha.Reset();
+	if (!bVerEst && P->Sistema != TEXT("insercion"))
+	{
+		const TArray<FIntVector4>& Todas = EnlacesDe(P->En);
+		// por turnos entre módulos (glosario, patologías, lecciones): que los diez primeros no sean todos del glosario
+		TArray<FIntVector4> Es;
+		{
+			TArray<TArray<FIntVector4>> PorModulo;
+			for (const FIntVector4& En : Todas) { if (PorModulo.Num() == 0 || PorModulo.Last()[0].X != En.X) { PorModulo.AddDefaulted(); } PorModulo.Last().Add(En); }
+			for (int32 k = 0; Es.Num() < Todas.Num(); ++k) { for (const TArray<FIntVector4>& L : PorModulo) { if (L.IsValidIndex(k)) { Es.Add(L[k]); } } }
+		}
+		if (Es.Num() > 0)
+		{
+			const FCorpusEstudio& E = D->Estudio();
+			const int32 MAXIMO = 10;
+			CajaFicha->AddSlot().AutoHeight().Padding(0, 12, 0, 4)[ Txt(FString::Printf(TEXT("%s (%d)"), *Mayus(D->TE(TEXT("Estudiar"))), Es.Num()), 9, C_GRIS, true) ];
+			for (int32 k = 0; k < Es.Num() && k < MAXIMO; ++k)
+			{
+				const FIntVector4 En = Es[k];
+				const FCorpusModuloEstudio& M = E.Modulos[En.X];
+				const FCorpusItemEstudio& It = M.Grupos[En.Y].Items[En.Z];
+				EnlacesFicha.Add(En);
+				CajaFicha->AddSlot().AutoHeight().Padding(0, 3, 0, 0)
+				[
+					SNew(SButton).ButtonColorAndOpacity(FLinearColor(0.07f, 0.11f, 0.17f)).ContentPadding(FMargin(10, 5)).HAlign(HAlign_Fill)
+					.OnClicked_Lambda([this, En]() { AbrirEnlace(En); return FReply::Handled(); })
+					[
+						SNew(SVerticalBox)
+						+ SVerticalBox::Slot().AutoHeight()[ Txt(It.T, 11, C_TINTA) ]
+						+ SVerticalBox::Slot().AutoHeight()[ Txt(M.N + (M.Grupos.Num() > 1 ? TEXT(" · ") + M.Grupos[En.Y].N : FString()), 9, C_ACENTO) ]
+					]
+				];
+			}
+			if (Es.Num() > MAXIMO) { CajaFicha->AddSlot().AutoHeight().Padding(0, 4, 0, 0)[ Txt(FString::Printf(TEXT("+ %d"), Es.Num() - MAXIMO), 9, C_GRIS) ]; }
+		}
+	}
+
 	// relieves óseos (data/extras.json → lm): uno por botón; se marcan sobre el hueso con su nombre
 	const TArray<FCorpusRelieve>& Rs = D->Relieves(Id);
 	if (Rs.Num() > 0)
@@ -792,6 +837,51 @@ void SCorpusInterfaz::RehacerFicha()
 		CajaFicha->AddSlot().AutoHeight().Padding(0, 12, 0, 2)[ Txt(Mayus(Campo.Key), 9, C_GRIS, true) ];
 		CajaFicha->AddSlot().AutoHeight()[ Txt(Campo.Value, 11, C_TINTA) ];
 	}
+}
+
+const TArray<FIntVector4>& SCorpusInterfaz::EnlacesDe(const FString& En)
+{
+	static const TArray<FIntVector4> Nada;
+	UCorpusDatos* D = Datos();
+	if (!D) { return Nada; }
+	if (EnlacesIdioma != D->Idioma())
+	{
+		// índice nombre en inglés → entradas, una vez por idioma (la primera vez lee estudio_<idioma>.json)
+		EnlacesIdioma = D->Idioma();
+		Enlaces.Reset();
+		const FCorpusEstudio& E = D->Estudio();
+		for (const TCHAR* Mod : { TEXT("glosario"), TEXT("patologias"), TEXT("lecciones") })   // en este orden en la ficha
+		{
+			for (int32 m = 0; m < E.Modulos.Num(); ++m)
+			{
+				if (E.Modulos[m].Id != Mod) { continue; }
+				for (int32 g = 0; g < E.Modulos[m].Grupos.Num(); ++g)
+				{
+					const TArray<FCorpusItemEstudio>& Its = E.Modulos[m].Grupos[g].Items;
+					for (int32 i = 0; i < Its.Num(); ++i)
+					{
+						TSet<FString> Vistos;
+						for (const FString& S : Its[i].Show) { if (!Vistos.Contains(S)) { Vistos.Add(S); Enlaces.FindOrAdd(S).Add(FIntVector4(m, g, i, 0)); } }
+						for (int32 p = 0; p < Its[i].Pasos.Num(); ++p)
+						{
+							for (const FString& S : Its[i].Pasos[p].Show) { if (!Vistos.Contains(S)) { Vistos.Add(S); Enlaces.FindOrAdd(S).Add(FIntVector4(m, g, i, p)); } }
+						}
+					}
+				}
+			}
+		}
+	}
+	const TArray<FIntVector4>* L = Enlaces.Find(En);
+	return L ? *L : Nada;
+}
+
+void SCorpusInterfaz::AbrirEnlace(const FIntVector4& E)
+{
+	// abre Estudiar en esa entrada (y en el paso que nombra la estructura); el panel enseña después la entrada en el modelo
+	EstMod = E.X; EstGrupo = E.Y; EstItem = E.Z; EstPaso = E.W;
+	EstFiltro.Reset(); EstResp.Reset();
+	if (bVerEst) { RehacerEstudio(); EnsenarEstudio(); } else { AbrirEstudio(true); }
+	if (RolloEst.IsValid()) { RolloEst->ScrollToStart(); }
 }
 
 void SCorpusInterfaz::ActualizarMarcas()
