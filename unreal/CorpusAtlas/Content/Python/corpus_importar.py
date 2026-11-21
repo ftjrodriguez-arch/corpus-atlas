@@ -399,6 +399,41 @@ def _girar_normal(g, normal_tangente, giro):
     return _transformar(g, gi, S.TRANSFORMSOURCE_LOCAL, D.TRANSFORM_TANGENT)
 
 
+# ───────────────────────── plano de corte ─────────────────────────
+# Colección de parámetros que leen los dos maestros: «Activo» (0/1) y «Plano» (normal en el mundo en xyz, posición a lo
+# largo de la normal en w, en cm). Se dibuja lo que queda en dot(posición, normal) ≤ w. ACorpusCuerpo::PonerCorte la rellena.
+R_MPC = R_MAT + "/MPC_Corte"
+TAPA_CORTE = 1.0     # brillo de la tapa de la sección (emisivo × color del tejido); afinado en capturas
+HLSL_CORTE = "return A < 0.5 ? 1.0 : (dot(WP, Pl.xyz) > Pl.w ? 0.0 : 1.0);"
+
+
+def _coleccion_corte():
+    """Crea (una sola vez: sus identificadores van grabados en los materiales) la colección MPC_Corte."""
+    if eal.does_asset_exist(R_MPC):
+        return eal.load_asset(R_MPC)
+    mpc = herr.create_asset("MPC_Corte", R_MAT, unreal.MaterialParameterCollection, unreal.MaterialParameterCollectionFactoryNew())
+    e = unreal.CollectionScalarParameter()
+    e.set_editor_property("parameter_name", "Activo"); e.set_editor_property("default_value", 0.0)
+    v = unreal.CollectionVectorParameter()
+    v.set_editor_property("parameter_name", "Plano"); v.set_editor_property("default_value", unreal.LinearColor(1.0, 0.0, 0.0, 0.0))
+    mpc.set_editor_property("scalar_parameters", [e])
+    mpc.set_editor_property("vector_parameters", [v])
+    eal.save_asset(R_MPC)
+    return mpc
+
+
+def _corte(g):
+    """Devuelve (máscara 0/1 del plano de corte, «Activo»). La posición es la del mundo ya con la postura (World Position
+    Offset incluido): el corte atraviesa el cuerpo tal como se ve, también en movimiento."""
+    mpc = _coleccion_corte()
+    act = g.n(unreal.MaterialExpressionCollectionParameter, collection=mpc, parameter_name="Activo")
+    pl = g.n(unreal.MaterialExpressionCollectionParameter, collection=mpc, parameter_name="Plano")
+    wp = g.n(unreal.MaterialExpressionWorldPosition)
+    cu = _custom(g, HLSL_CORTE, ["A", "Pl", "WP"], unreal.CustomMaterialOutputType.CMOT_FLOAT1, desc="Plano de corte")
+    g.une(act, cu, "A"); g.une(pl, cu, "Pl"); g.une(wp, cu, "WP")
+    return cu, act
+
+
 def _maestro(nombre, translucido):
     ruta = "%s/%s" % (R_MAT, nombre)
     if eal.does_asset_exist(ruta):
@@ -414,6 +449,8 @@ def _maestro(nombre, translucido):
         mat.set_editor_property("translucency_lighting_mode", unreal.TranslucencyLightingMode.TLM_VOLUMETRIC_PER_VERTEX_DIRECTIONAL)
     else:
         mat.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_SUBSURFACE)
+        # enmascarado: el plano de corte recorta con la máscara de opacidad (Nanite la admite; translúcido no)
+        mat.set_editor_property("blend_mode", unreal.BlendMode.BLEND_MASKED)
     g = _G(mat)
     MP = unreal.MaterialProperty
 
@@ -490,10 +527,18 @@ def _maestro(nombre, translucido):
     eRGB = g.n(unreal.MaterialExpressionComponentMask, -500, r=True, g=True, b=True, a=False); g.une(estado, eRGB, "")
     eA = g.n(unreal.MaterialExpressionComponentMask, -500, r=True, g=False, b=False, a=False); g.une(estado, eA, "", "A")
     col = g.lerp(col, eRGB, eA)
-    g.sal(col, MP.MP_BASE_COLOR)
     brillo = g.mul(eRGB, g.mul(eA, g.cte(0.35)))                 # el estado brilla un poco: se lee en sombra
+    corte, corte_on = _corte(g)
     if translucido:          # la capa translúcida recibe poca luz: un velo de su propio color la hace legible
         brillo = g.add(brillo, g.mul(col, g.cte(0.35)))
+        g.sal(col, MP.MP_BASE_COLOR)
+    else:
+        # Tapa de la sección: con el corte activo, las caras de dentro (las que se ven a través del hueco) se pintan lisas,
+        # con el color del tejido y sin luz, como la superficie de un corte macizo.
+        cara = g.n(unreal.MaterialExpressionTwoSidedSign)
+        dentro = g.mul(g.un(unreal.MaterialExpressionSaturate, g.mul(cara, g.cte(-1.0))), corte_on)
+        g.sal(g.lerp(col, g.cte(0.0), dentro), MP.MP_BASE_COLOR)
+        brillo = g.add(brillo, g.mul(g.mul(col, dentro), g.cte(TAPA_CORTE)))
     g.sal(brillo, MP.MP_EMISSIVE_COLOR)
 
     # Relieve en espacio tangente: X = fibra, Y = a través. La pendiente de la onda inclina la normal en Y.
@@ -520,8 +565,9 @@ def _maestro(nombre, translucido):
 
     opac = g.esc("Opacidad", 1.0, cpd=4)
     if translucido:
-        g.sal(opac, MP.MP_OPACITY)
+        g.sal(g.mul(opac, corte), MP.MP_OPACITY)
     else:
+        g.sal(corte, MP.MP_OPACITY_MASK)
         # En el modelo Subsurface la opacidad es lo contrario de la dispersión: con opacidad 0,10 el hueso era casi cera
         # translúcida y la luz de frente lo dejaba como una silueta plana, sin relieve. Dispersión 0,10 → opacidad 0,90.
         inv = g.n(unreal.MaterialExpressionOneMinus, -300); g.une(sss, inv, "")

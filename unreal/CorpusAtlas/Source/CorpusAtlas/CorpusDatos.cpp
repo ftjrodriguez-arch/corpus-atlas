@@ -432,6 +432,11 @@ namespace
 		{TEXT("Concéntrica"), {TEXT("Concentric"), TEXT("Concêntrica"), TEXT("Concentrique"), TEXT("Konzentrisch")}},
 		{TEXT("Isométrica"), {TEXT("Isometric"), TEXT("Isométrica"), TEXT("Isométrique"), TEXT("Isometrisch")}},
 		{TEXT("Relaciones"), {TEXT("Relations"), TEXT("Relações"), TEXT("Rapports"), TEXT("Lagebeziehungen")}},
+		{TEXT("Plano de corte"), {TEXT("Section plane"), TEXT("Plano de corte"), TEXT("Plan de coupe"), TEXT("Schnittebene")}},
+		{TEXT("Coronal"), {TEXT("Coronal"), TEXT("Coronal"), TEXT("Coronal"), TEXT("Koronal")}},
+		{TEXT("Axial"), {TEXT("Axial"), TEXT("Axial"), TEXT("Axial"), TEXT("Axial")}},
+		{TEXT("Invertir"), {TEXT("Flip"), TEXT("Inverter"), TEXT("Inverser"), TEXT("Umkehren")}},
+		{TEXT("Quitar corte"), {TEXT("Remove cut"), TEXT("Remover corte"), TEXT("Retirer la coupe"), TEXT("Schnitt entfernen")}},
 	};
 
 	bool BuscarPropia(const FString& Idioma, const FString& Es, FString& Fuera)

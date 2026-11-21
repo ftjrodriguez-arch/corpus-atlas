@@ -47,7 +47,7 @@ namespace
 
 SCorpusInterfaz::~SCorpusInterfaz()
 {
-	if (ACorpusCuerpo* C = Cuerpo()) { C->AlCambiarSeleccion.Remove(HSel); C->AlCambiarCapas.Remove(HCapas); C->AlCambiarPostura.Remove(HPostura); }
+	if (ACorpusCuerpo* C = Cuerpo()) { C->AlCambiarSeleccion.Remove(HSel); C->AlCambiarCapas.Remove(HCapas); C->AlCambiarPostura.Remove(HPostura); C->AlCambiarHerramientas.Remove(HHerr); }
 	if (UCorpusDatos* D = Datos()) { D->AlCambiarIdioma.Remove(HIdioma); }
 }
 
@@ -89,6 +89,7 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 					SNew(SVerticalBox)
 					+ SVerticalBox::Slot().AutoHeight()[ Txt(TEXT("CORPUS"), 22, C_TINTA, true) ]
 					+ SVerticalBox::Slot().AutoHeight().Padding(0, 2, 0, 10)[ SAssignNew(CajaBarra, SVerticalBox) ]
+					+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 6)[ SAssignNew(CajaHerr, SVerticalBox) ]
 					+ SVerticalBox::Slot().FillHeight(1.f)
 					[
 						SNew(SScrollBox) + SScrollBox::Slot()[ SAssignNew(CajaCapas, SVerticalBox) ]
@@ -162,6 +163,7 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 		HSel = C->AlCambiarSeleccion.AddSP(this, &SCorpusInterfaz::RehacerFicha);
 		HCapas = C->AlCambiarCapas.AddSP(this, &SCorpusInterfaz::RehacerCapas);
 		HPostura = C->AlCambiarPostura.AddSP(this, &SCorpusInterfaz::AlCambiarPostura);
+		HHerr = C->AlCambiarHerramientas.AddSP(this, &SCorpusInterfaz::RehacerHerramientas);
 	}
 	if (UCorpusDatos* D = Datos()) { HIdioma = D->AlCambiarIdioma.AddSP(this, &SCorpusInterfaz::Reconstruir); }
 	Reconstruir();
@@ -222,10 +224,45 @@ void SCorpusInterfaz::Reconstruir()
 	CajaBarra->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[ FilaVistas ];
 
 	RehacerEstudio();
+	RehacerHerramientas();
 	RehacerCapas();
 	RehacerFicha();
 	MovPintado = FIntVector(-2, -2, -2);
 	RehacerMovimiento();
+}
+
+void SCorpusInterfaz::RehacerHerramientas()
+{
+	UCorpusDatos* D = Datos();
+	ACorpusCuerpo* C = Cuerpo();
+	if (!D || !C || !CajaHerr.IsValid()) { return; }
+	CajaHerr->ClearChildren();
+	TWeakObjectPtr<ACorpusCuerpo> WC(C);
+
+	// ── Plano de corte: sagital, coronal o axial (otra vez sobre el activo lo apaga), posición e invertir ──
+	CajaHerr->AddSlot().AutoHeight().Padding(0, 4, 0, 4)[ Txt(Mayus(D->T(TEXT("Plano de corte"))), 9, C_GRIS, true) ];
+	TSharedRef<SWrapBox> FilaCorte = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(6, 6));
+	const TCHAR* Ejes[] = { TEXT("Sagital"), TEXT("Coronal"), TEXT("Axial") };
+	const int32 Eje = C->EjeCorte();
+	for (int32 i = 0; i < 3; ++i)
+	{
+		FilaCorte->AddSlot()[ Boton(D->T(Ejes[i]), [WC, i]() { if (WC.IsValid()) { if (WC->EjeCorte() == i) { WC->QuitarCorte(); } else { WC->PonerCorte(i, 0.5f); } } }, Eje == i) ];
+	}
+	if (Eje >= 0)
+	{
+		FilaCorte->AddSlot()[ Boton(D->T(TEXT("Invertir")), [WC]() { if (WC.IsValid()) { WC->InvertirCorte(); } }, C->CorteInvertido()) ];
+		FilaCorte->AddSlot()[ Boton(D->T(TEXT("Quitar corte")), [WC]() { if (WC.IsValid()) { WC->QuitarCorte(); } }) ];
+	}
+	CajaHerr->AddSlot().AutoHeight()[ FilaCorte ];
+	if (Eje >= 0)
+	{
+		CajaHerr->AddSlot().AutoHeight().Padding(0, 6, 0, 0)
+		[
+			SNew(SSlider).MinValue(0.f).MaxValue(1.f)
+			.Value_Lambda([WC]() { return WC.IsValid() ? WC->PosCorte() : 0.5f; })
+			.OnValueChanged_Lambda([WC](float V) { if (WC.IsValid() && WC->EjeCorte() >= 0) { WC->PonerCorte(WC->EjeCorte(), V); } })
+		];
+	}
 }
 
 void SCorpusInterfaz::AlCambiarPostura()

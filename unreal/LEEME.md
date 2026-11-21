@@ -306,6 +306,26 @@ solo 33 llegaban a ella en tendón.
   retináculos; quedan unos 234 músculos con nombre por lado, y varios múltiples van en una sola malla (intercostales,
   interóseos, lumbricales, rotadores, elevadores de las costillas). Estimación, no cotejo con la Terminologia Anatomica.
   No encontrados: condrogloso, intertransversos torácicos y mediales lumbares, cricofaríngeo, compresor de la uretra.
+## Sprint 1 · corte vertical (2026-11-21)
+Capturas finales: `unreal/capturas/s1_*` (una hoja de contactos por punto: `s1_<punto>_hoja.png`).
+
+### A · Plano de corte en vivo
+- `corpus_importar.py`: colección de parámetros `MPC_Corte` (`_coleccion_corte`: «Activo» y «Plano» = normal del mundo en
+  xyz y posición en w, en cm) leída por los dos maestros (`_corte`). El opaco pasa a **enmascarado** (máscara de opacidad;
+  Nanite lo admite y el modelo Subsurface sigue igual) y el translúcido multiplica su opacidad. La posición es la del mundo
+  ya con la postura (World Position Offset incluido): el corte atraviesa el cuerpo tal como se ve, también en movimiento.
+  **Tapa de la sección:** con el corte activo, las caras de dentro se pintan lisas con el color del tejido (`TAPA_CORTE`).
+  La colección se crea una sola vez (sus identificadores quedan grabados en los materiales): no borrarla sin rehacerlos.
+- `ACorpusCuerpo::PonerCorte(eje, posición 0–1)`, `InvertirCorte`, `QuitarCorte`, `Cortado(punto)`. La posición recorre la
+  caja de lo que se ve en ese eje (X sagital, Y coronal, Z axial). El clic del ratón atraviesa la mitad quitada
+  (`ACorpusJugador::PlayerTick` repite el rayo hasta dar con algo que se ve).
+- Interfaz: «Plano de corte» en el panel izquierdo (Sagital, Coronal, Axial; otra vez sobre el activo lo apaga; deslizador
+  de posición, Invertir y Quitar corte). Delegado nuevo `AlCambiarHerramientas`.
+- Pruebas: `corte <sagital|coronal|axial> <0–1>` · `corte invertir` · `corte off`. Capturas `s1_a_*` (sagital, coronal,
+  axial, con el hombro en abducción de 100°, invertido en inglés y apagado).
+- Falta: tapa de sección de verdad (la de ahora es el interior de cada pieza pintado liso: las piezas huecas o abiertas,
+  como las fascias, no quedan macizas), plano oblicuo y arrastrar el plano con el ratón sobre el modelo.
+
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.

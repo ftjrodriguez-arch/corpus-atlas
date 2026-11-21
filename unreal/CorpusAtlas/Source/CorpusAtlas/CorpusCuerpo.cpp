@@ -5,6 +5,9 @@
 #include "Engine/GameInstance.h"
 #include "Materials/MaterialInterface.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialParameterCollection.h"
+#include "Materials/MaterialParameterCollectionInstance.h"
+#include "Engine/World.h"
 #include "Engine/Texture2D.h"
 #include "TextureResource.h"
 
@@ -464,6 +467,40 @@ void ACorpusCuerpo::Tick(float Dt)
 	if (G >= Max) { G = Max; SentidoRepro = -1.f; }
 	if (G <= 0.f) { G = 0.f; SentidoRepro = 1.f; }
 	PonerRango(RangoActual, MovActual, bLadoIzq, G);
+}
+
+// ───────── Plano de corte ─────────
+// Los dos materiales maestros leen la colección MPC_Corte (corpus_importar.py → _corte): «Activo» y «Plano» (normal del
+// mundo en xyz y posición en w, en cm). Se dibuja lo que queda en dot(punto, normal) ≤ w.
+
+void ACorpusCuerpo::PonerCorte(int32 Eje, float Pos)
+{
+	if (!ColeccionCorte) { ColeccionCorte = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/Corpus/Materiales/MPC_Corte.MPC_Corte")); }
+	UMaterialParameterCollectionInstance* Inst = (ColeccionCorte && GetWorld()) ? GetWorld()->GetParameterCollectionInstance(ColeccionCorte) : nullptr;
+	const bool bActivo = Eje >= 0 && Eje <= 2 && Inst;
+	const bool bCambia = (bActivo ? Eje : -1) != EjeDeCorte || bCorteInv != bCorteInvPintado;
+	EjeDeCorte = bActivo ? Eje : -1;
+	PosDeCorte = FMath::Clamp(Pos, 0.f, 1.f);
+	if (bActivo)
+	{
+		// ejes del mundo: X de lado a lado (sagital), Y de atrás adelante (coronal), Z de abajo arriba (axial)
+		const FBox B = Caja(FString());
+		const double Min = B.IsValid ? B.Min[Eje] : -100.0, Max = B.IsValid ? B.Max[Eje] : 100.0;
+		const double D = FMath::Lerp(Min, Max, (double)PosDeCorte);
+		FVector N = FVector::ZeroVector; N[Eje] = 1.0;
+		PlanoCorte = bCorteInv ? FVector4(-N.X, -N.Y, -N.Z, -D) : FVector4(N.X, N.Y, N.Z, D);
+		Inst->SetVectorParameterValue(TEXT("Plano"), FLinearColor((float)PlanoCorte.X, (float)PlanoCorte.Y, (float)PlanoCorte.Z, (float)PlanoCorte.W));
+	}
+	if (!bActivo) { bCorteInv = false; }
+	bCorteInvPintado = bCorteInv;
+	if (Inst) { Inst->SetScalarParameterValue(TEXT("Activo"), bActivo ? 1.f : 0.f); }
+	// mover la posición no rehace la interfaz (el deslizador se está arrastrando); cambiar de eje, invertir o apagar, sí
+	if (bCambia) { AlCambiarHerramientas.Broadcast(); }
+}
+
+bool ACorpusCuerpo::Cortado(const FVector& Punto) const
+{
+	return EjeDeCorte >= 0 && (Punto.X * PlanoCorte.X + Punto.Y * PlanoCorte.Y + Punto.Z * PlanoCorte.Z) > PlanoCorte.W;
 }
 
 void ACorpusCuerpo::CargarCapa(const FString& Clave)

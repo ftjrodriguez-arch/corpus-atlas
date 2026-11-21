@@ -225,6 +225,17 @@ void ACorpusJugador::TickQa()
 		Cu->PonerMarcha(Pi, A.Num() > 1 ? FCString::Atof(*A[1]) : 0.f);
 		Pausa = 2.0;
 	}
+	else if (Verbo == TEXT("corte") && Cu)
+	{
+		// corte <sagital|coronal|axial> <posición 0–1|off>   ·   corte invertir   ·   corte off
+		TArray<FString> A; Resto.ParseIntoArrayWS(A);
+		const FString E = A.Num() > 0 ? A[0] : FString(TEXT("off"));
+		const int32 Eje = E.StartsWith(TEXT("sag")) ? 0 : E.StartsWith(TEXT("cor")) ? 1 : E.StartsWith(TEXT("ax")) ? 2 : -1;
+		if (E == TEXT("invertir")) { Cu->InvertirCorte(); }
+		else if (Eje < 0 || (A.Num() > 1 && A[1] == TEXT("off"))) { Cu->QuitarCorte(); }
+		else { Cu->PonerCorte(Eje, A.Num() > 1 ? FCString::Atof(*A[1]) : 0.5f); }
+		Pausa = 2.0;
+	}
 	else if (Verbo == TEXT("buscar"))
 	{
 		if (ACorpusHUD* H = Cast<ACorpusHUD>(GetHUD()))
@@ -282,8 +293,21 @@ void ACorpusJugador::PlayerTick(float Dt)
 	// Clic sin arrastrar: seleccionar la estructura bajo el cursor. Doble clic: encuadrarla.
 	if (WasInputKeyJustReleased(EKeys::LeftMouseButton) && FVector2D::Distance(Raton, RatonAlPulsar) < 5.f && CuerpoRef.IsValid())
 	{
+		// el rayo atraviesa lo que el plano de corte ha quitado (la colisión sigue entera) hasta dar con algo que se ve
 		FHitResult Toque;
-		const bool bHay = GetHitResultUnderCursor(ECC_Visibility, /*bTraceComplex*/ true, Toque);
+		bool bHay = false;
+		FVector Origen, Dir;
+		if (DeprojectMousePositionToWorld(Origen, Dir))
+		{
+			const FCollisionQueryParams Par(FName(TEXT("CorpusClic")), /*bTraceComplex*/ true);
+			const FVector Hasta = Origen + Dir * 100000.0;
+			FVector Desde = Origen;
+			for (int32 i = 0; i < 64 && GetWorld()->LineTraceSingleByChannel(Toque, Desde, Hasta, ECC_Visibility, Par); ++i)
+			{
+				if (!CuerpoRef->Cortado(Toque.ImpactPoint)) { bHay = true; break; }
+				Desde = Toque.ImpactPoint + Dir * 0.05;
+			}
+		}
 		const FString Id = bHay ? CuerpoRef->IdDe(Toque.GetComponent()) : FString();
 		const double Ahora = GetWorld()->GetTimeSeconds();
 		const bool bDoble = !Id.IsEmpty() && Id == CuerpoRef->Seleccionada() && Ahora - TiempoUltimoClic < 0.35;

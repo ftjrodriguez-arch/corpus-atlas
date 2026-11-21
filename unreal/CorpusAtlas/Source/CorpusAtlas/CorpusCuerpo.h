@@ -59,6 +59,8 @@ public:
 
 	DECLARE_MULTICAST_DELEGATE(FAlCambiar);
 	FAlCambiar AlCambiarSeleccion, AlCambiarCapas, AlCambiarPostura;
+	/** Herramientas de disección (corte, fantasma, pelar capas, mapa de inserciones): cambió algo que la interfaz pinta. */
+	FAlCambiar AlCambiarHerramientas;
 
 	// ── Movimiento: rangos articulares de la web (la GPU deforma las mallas con la textura de postura) ──
 	/** Hay pesos y posturas (movimiento.json) y el cuerpo actual se mueve (el Visible Human no). */
@@ -93,7 +95,25 @@ public:
 
 	virtual void Tick(float Dt) override;
 
+	// ── Plano de corte en vivo (colección de parámetros MPC_Corte, leída por los dos materiales maestros) ──
+	/** Eje: 0 sagital, 1 coronal, 2 axial; otro valor lo apaga. Pos: 0–1 a lo ancho, fondo o alto de lo que se ve. */
+	void PonerCorte(int32 Eje, float Pos);
+	void QuitarCorte() { PonerCorte(-1, 0.5f); }
+	/** Enseña la otra mitad. */
+	void InvertirCorte() { bCorteInv = !bCorteInv; PonerCorte(EjeDeCorte, PosDeCorte); }
+	int32 EjeCorte() const { return EjeDeCorte; }
+	float PosCorte() const { return PosDeCorte; }
+	bool CorteInvertido() const { return bCorteInv; }
+	/** ¿Ese punto del mundo está en la mitad que el corte ha quitado? (el clic del ratón la atraviesa) */
+	bool Cortado(const FVector& Punto) const;
+
 private:
+	int32 EjeDeCorte = -1;
+	float PosDeCorte = 0.5f;
+	bool bCorteInv = false, bCorteInvPintado = false;
+	FVector4 PlanoCorte = FVector4(1, 0, 0, 0);
+	UPROPERTY() TObjectPtr<class UMaterialParameterCollection> ColeccionCorte;
+
 	void CrearTexturaPostura();
 	void PosturaEnReposo();
 	void MezclarFotogramas(const TArray<float>& F0, const TArray<float>& F1, float A);

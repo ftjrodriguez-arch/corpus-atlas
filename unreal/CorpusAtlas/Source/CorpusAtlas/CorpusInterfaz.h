@@ -34,6 +34,8 @@ private:
 	UCorpusDatos* Datos() const;
 	void Reconstruir();
 	void RehacerCapas();
+	/** Herramientas de disección del panel izquierdo: plano de corte… */
+	void RehacerHerramientas();
 	void RehacerFicha();
 	void RehacerResultados(const FText& Texto);
 	/** Panel de movimiento (rango articular): articulación, movimiento, lado, grados y reproducir. */
@@ -48,9 +50,9 @@ private:
 	TSharedRef<SWidget> Boton(const FString& Texto, TFunction<void()> Accion, bool bAcento = false) const;
 
 	TWeakObjectPtr<ACorpusJugador> Jugador;
-	TSharedPtr<SVerticalBox> CajaCapas, CajaFicha, CajaResultados, CajaBarra, CajaMov;
+	TSharedPtr<SVerticalBox> CajaCapas, CajaFicha, CajaResultados, CajaBarra, CajaMov, CajaHerr;
 	TSharedPtr<SEditableTextBox> Buscador;
-	FDelegateHandle HSel, HCapas, HIdioma, HPostura;
+	FDelegateHandle HSel, HCapas, HIdioma, HPostura, HHerr;
 	bool bVerMov = false;
 	TSharedPtr<SVerticalBox> CajaEst, CajaEstCab;
 	TSharedPtr<class SScrollBox> RolloEst;
