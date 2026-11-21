@@ -32,16 +32,43 @@ namespace
 	// FString::ToUpper solo trata ASCII («CIRCULACIóN»); FText usa ICU y respeta tildes y eñes.
 	FString Mayus(const FString& S) { return FText::FromString(S).ToUpper().ToString(); }
 
-	// Mismos tonos que el tema oscuro de la web (--bg, --panel, --ink, --muted, --accent).
-	const FLinearColor C_PANEL(0.012f, 0.016f, 0.022f, 0.90f);
-	const FLinearColor C_PANEL2(0.035f, 0.045f, 0.060f, 1.f);
+	// ── Sistema visual (un solo sitio): paleta, radios y estados de botón ──
+	// Vidrio oscuro azulado con borde fino, tinta casi blanca, gris frío para lo secundario y un acento azul clínico.
+	const FLinearColor C_PANEL(0.010f, 0.014f, 0.020f, 0.86f);
+	const FLinearColor C_PANEL2(0.030f, 0.040f, 0.055f, 1.f);
+	const FLinearColor C_BORDE(0.55f, 0.70f, 0.95f, 0.10f);
 	const FLinearColor C_TINTA(0.90f, 0.92f, 0.95f);
 	const FLinearColor C_GRIS(0.50f, 0.55f, 0.62f);
-	const FLinearColor C_ACENTO(0.10f, 0.55f, 1.0f);
+	const FLinearColor C_ACENTO(0.07f, 0.42f, 0.86f);
+	const FLinearColor C_BOTON(0.050f, 0.065f, 0.090f, 1.f), C_BOTON_ENCIMA(0.085f, 0.110f, 0.150f, 1.f), C_BOTON_PULSADO(0.030f, 0.040f, 0.055f, 1.f);
+	const FLinearColor C_ACENTO_ENCIMA(0.14f, 0.52f, 0.96f), C_ACENTO_PULSADO(0.05f, 0.32f, 0.68f);
 
-	const FSlateBrush* Panel() { static const FSlateRoundedBoxBrush B(C_PANEL, 14.f); return &B; }
+	const FSlateBrush* Panel() { static const FSlateRoundedBoxBrush B(C_PANEL, 16.f, C_BORDE, 1.f); return &B; }
 	const FSlateBrush* Panel2() { static const FSlateRoundedBoxBrush B(C_PANEL2, 8.f); return &B; }
 	const FSlateBrush* Punto() { static const FSlateRoundedBoxBrush B(FLinearColor::White, 6.f); return &B; }
+
+	/** Botón con estados visibles: normal, encima (más claro y con borde), pulsado y activo (acento). */
+	const FButtonStyle& EstiloBoton(bool bAcento)
+	{
+		static FButtonStyle Normal, Acento;
+		static bool bListo = false;
+		if (!bListo)
+		{
+			bListo = true;
+			const auto Llenar = [](FButtonStyle& S, const FLinearColor& N, const FLinearColor& E, const FLinearColor& P, const FLinearColor& Borde)
+			{
+				S = FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("Button");
+				S.SetNormal(FSlateRoundedBoxBrush(N, 7.f, Borde, 1.f));
+				S.SetHovered(FSlateRoundedBoxBrush(E, 7.f, FLinearColor(0.60f, 0.78f, 1.f, 0.35f), 1.f));
+				S.SetPressed(FSlateRoundedBoxBrush(P, 7.f, Borde, 1.f));
+				S.SetDisabled(FSlateRoundedBoxBrush(N * FLinearColor(1, 1, 1, 0.4f), 7.f));
+				S.SetNormalPadding(FMargin(0)); S.SetPressedPadding(FMargin(0, 1, 0, 0));
+			};
+			Llenar(Normal, C_BOTON, C_BOTON_ENCIMA, C_BOTON_PULSADO, FLinearColor(1.f, 1.f, 1.f, 0.06f));
+			Llenar(Acento, C_ACENTO, C_ACENTO_ENCIMA, C_ACENTO_PULSADO, FLinearColor(0.7f, 0.85f, 1.f, 0.30f));
+		}
+		return bAcento ? Acento : Normal;
+	}
 	FSlateFontInfo Letra(int32 Tam, bool bNegrita = false) { return FCoreStyle::GetDefaultFontStyle(bNegrita ? "Bold" : "Regular", Tam); }
 
 	TSharedRef<STextBlock> Txt(const FString& S, int32 Tam, const FLinearColor& Col, bool bNegrita = false)
@@ -149,12 +176,17 @@ public:
 	void Construct(const FArguments&) { SetVisibility(EVisibility::HitTestInvisible); }
 	virtual FVector2D ComputeDesiredSize(float) const override { return FVector2D(210.0, 118.0); }
 	TWeakObjectPtr<ACorpusCuerpo> Cuerpo;
+	mutable float Suave = -1.f;
 
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& G, const FSlateRect& Recorte, FSlateWindowElementList& Fuera, int32 Capa, const FWidgetStyle& Estilo, bool bActivo) const override
 	{
 		const ACorpusCuerpo* Cu = Cuerpo.Get();
 		if (!Cu || Cu->Rango() < 0) { return Capa; }
-		const float Max = FMath::Max(Cu->GradosMax(), 1.f), Ang = FMath::Clamp(Cu->Grados(), 0.f, Max);
+		const float Max = FMath::Max(Cu->GradosMax(), 1.f), Meta = FMath::Clamp(Cu->Grados(), 0.f, Max);
+		// la aguja sigue al ángulo con un pequeño retardo amortiguado (al saltar con el deslizador no da un salto seco)
+		const float Dt = FMath::Min((float)FSlateApplication::Get().GetDeltaTime(), 0.1f);
+		Suave = (Suave < 0.f || FMath::Abs(Meta - Suave) > Max) ? Meta : FMath::Lerp(Suave, Meta, 1.f - FMath::Exp(-16.f * Dt));
+		const float Ang = Suave;
 		const FVector2D Tam = G.GetLocalSize();
 		const FVector2f C((float)Tam.X * 0.5f, (float)Tam.Y - 12.f);
 		const float R = FMath::Min((float)Tam.X * 0.5f - 8.f, (float)Tam.Y - 22.f);
@@ -203,16 +235,53 @@ UCorpusDatos* SCorpusInterfaz::Datos() const
 TSharedRef<SWidget> SCorpusInterfaz::Boton(const FString& Texto, TFunction<void()> Accion, bool bAcento) const
 {
 	return SNew(SButton)
-		.ButtonColorAndOpacity(bAcento ? C_ACENTO : FLinearColor(0.12f, 0.15f, 0.20f))
-		.ContentPadding(FMargin(10.f, 5.f))
+		.ButtonStyle(&EstiloBoton(bAcento))
+		.ContentPadding(FMargin(11.f, 6.f))
 		.OnClicked_Lambda([Accion]() { Accion(); return FReply::Handled(); })
-		[ Txt(Texto, 10, C_TINTA, bAcento) ];
+		[ Txt(Texto, 10, bAcento ? FLinearColor::White : C_TINTA, bAcento) ];
+}
+
+// ───────── Animación de los paneles ─────────
+
+EVisibility SCorpusInterfaz::VisAnim(int32 i) const
+{
+	const FPanelAnim& A = Anim[i];
+	const bool bVer = A.Ver && A.Ver();
+	if (bVer) { return EVisibility::Visible; }
+	return A.V > 0.01f ? EVisibility::HitTestInvisible : EVisibility::Collapsed;   // se está yendo: se ve, pero no se pulsa
+}
+
+void SCorpusInterfaz::Tick(const FGeometry& G, const double Tiempo, const float Dt)
+{
+	SCompoundWidget::Tick(G, Tiempo, Dt);
+	TamVista = G.GetLocalSize();
+	// acercamiento exponencial: ~200 ms hasta el 95 %; suave al principio y al final por el deslizamiento con curva
+	const float K = 1.f - FMath::Exp(-15.f * EscalaAnim * FMath::Min(Dt, 0.1f));
+	for (FPanelAnim& A : Anim)
+	{
+		if (!A.W.IsValid()) { continue; }
+		const float Meta = (A.Ver && A.Ver()) ? 1.f : 0.f;
+		A.V = FMath::Abs(Meta - A.V) < 0.002f ? Meta : FMath::Lerp(A.V, Meta, K);
+		const float E = FMath::InterpEaseOut(0.f, 1.f, A.V, 2.f);
+		A.W->SetRenderOpacity(A.V);
+		A.W->SetRenderTransform(FSlateRenderTransform(A.Desde * (1.f - E)));
+	}
 }
 
 void SCorpusInterfaz::Construct(const FArguments& Args)
 {
 	Jugador = Args._Jugador;
 	SetVisibility(EVisibility::SelfHitTestInvisible);
+
+	// paneles animados: condición para estar a la vista y desde dónde entran (px)
+	Anim[P_IZQ].Ver = [this]() { return !bPanelPlegado; };                     Anim[P_IZQ].Desde = FVector2D(-28, 0);
+	Anim[P_MINI].Ver = [this]() { return bPanelPlegado; };                     Anim[P_MINI].Desde = FVector2D(-16, 0);
+	Anim[P_BUSCA].Ver = []() { return true; };                                 Anim[P_BUSCA].Desde = FVector2D(0, -14);
+	Anim[P_MOV].Ver = [this]() { const ACorpusCuerpo* C = Cuerpo(); return !bVerEst && C && C->MovimientoDisponible() && (bVerMov || C->HayPostura()); };
+	Anim[P_MOV].Desde = FVector2D(0, 24);
+	Anim[P_FICHA].Ver = [this]() { const ACorpusCuerpo* C = Cuerpo(); return !bVerEst && C && !C->Seleccionada().IsEmpty(); };
+	Anim[P_FICHA].Desde = FVector2D(30, 0);
+	Anim[P_EST].Ver = [this]() { return bVerEst; };                            Anim[P_EST].Desde = FVector2D(36, 0);
 
 	ChildSlot
 	[
@@ -222,8 +291,8 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 		// ── Panel izquierdo: cuerpo, idioma y capas ──
 		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Fill).Padding(18.f)
 		[
-			SNew(SBox).WidthOverride(340.f)
-			.Visibility_Lambda([this]() { return bPanelPlegado ? EVisibility::Collapsed : EVisibility::Visible; })
+			SAssignNew(Anim[P_IZQ].W, SBox).WidthOverride(340.f)
+			.Visibility_Lambda([this]() { return VisAnim(P_IZQ); })
 			[
 				SNew(SBorder).BorderImage(Panel()).Padding(16.f)
 				[
@@ -247,8 +316,8 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 		// ── Panel izquierdo plegado: solo un botón para volver a abrirlo ──
 		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(18.f)
 		[
-			SNew(SBox)
-			.Visibility_Lambda([this]() { return bPanelPlegado ? EVisibility::Visible : EVisibility::Collapsed; })
+			SAssignNew(Anim[P_MINI].W, SBox)
+			.Visibility_Lambda([this]() { return VisAnim(P_MINI); })
 			[
 				SNew(SBorder).BorderImage(Panel()).Padding(8.f)[ SAssignNew(CajaMini, SVerticalBox) ]
 			]
@@ -256,7 +325,7 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 		// ── Arriba: buscador ──
 		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Top).Padding(18.f)
 		[
-			SNew(SBox).WidthOverride(460.f)
+			SAssignNew(Anim[P_BUSCA].W, SBox).WidthOverride(460.f)
 			[
 				SNew(SBorder).BorderImage(Panel()).Padding(10.f)
 				[
@@ -277,8 +346,8 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 		// (a la derecha: en el centro tapaba las piernas y los pies, que es lo que hay que ver en la marcha)
 		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom).Padding(18.f)
 		[
-			SNew(SBox).WidthOverride(520.f)
-			.Visibility_Lambda([this]() { const ACorpusCuerpo* C = Cuerpo(); return !bVerEst && C && C->MovimientoDisponible() && (bVerMov || C->HayPostura()) ? EVisibility::Visible : EVisibility::Collapsed; })
+			SAssignNew(Anim[P_MOV].W, SBox).WidthOverride(520.f)
+			.Visibility_Lambda([this]() { return VisAnim(P_MOV); })
 			[
 				SNew(SBorder).BorderImage(Panel()).Padding(14.f)[ SAssignNew(CajaMov, SVerticalBox) ]
 			]
@@ -286,8 +355,10 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 		// ── Derecha: ficha de la estructura seleccionada ──
 		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Top).Padding(18.f)
 		[
-			SNew(SBox).WidthOverride(400.f).MaxDesiredHeight(860.f)
-			.Visibility_Lambda([this]() { const ACorpusCuerpo* C = Cuerpo(); return !bVerEst && C && !C->Seleccionada().IsEmpty() ? EVisibility::Visible : EVisibility::Collapsed; })
+			SAssignNew(Anim[P_FICHA].W, SBox).WidthOverride(400.f)
+			// la ficha no baja hasta el panel de movimiento (antes se pisaban): se acorta y su contenido se desplaza
+			.MaxDesiredHeight_Lambda([this]() { const float Alto = FMath::Max(TamVista.Y, 400.f); const float Mov = (Anim[P_MOV].W.IsValid() && Anim[P_MOV].V > 0.01f) ? (float)Anim[P_MOV].W->GetDesiredSize().Y + 18.f : 0.f; return FOptionalSize(FMath::Clamp(Alto - 36.f - Mov - 12.f, 180.f, 860.f)); })
+			.Visibility_Lambda([this]() { return VisAnim(P_FICHA); })
 			[
 				SNew(SBorder).BorderImage(Panel()).Padding(18.f)
 				[
@@ -298,8 +369,8 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 		// ── Derecha, a toda la altura: panel de estudio (lecciones, recorridos, kinesiología, casos, patologías, glosario) ──
 		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Fill).Padding(18.f)
 		[
-			SNew(SBox).WidthOverride(500.f)
-			.Visibility_Lambda([this]() { return bVerEst ? EVisibility::Visible : EVisibility::Collapsed; })
+			SAssignNew(Anim[P_EST].W, SBox).WidthOverride(500.f)
+			.Visibility_Lambda([this]() { return VisAnim(P_EST); })
 			[
 				SNew(SBorder).BorderImage(Panel()).Padding(16.f)
 				[
@@ -844,6 +915,8 @@ bool SCorpusInterfaz::Qa(const FString& Verbo, const FString& Resto)
 {
 	// panel <0|1>: pliega (0) o abre (1) el panel izquierdo
 	if (Verbo == TEXT("panel")) { bPanelPlegado = Resto == TEXT("0"); return true; }
+	// animlenta <factor>: ralentiza las animaciones de la interfaz (1 = normal) para fotografiarlas a mitad de camino
+	if (Verbo == TEXT("animlenta")) { EscalaAnim = FMath::Clamp(FCString::Atof(*Resto), 0.01f, 1.f); return true; }
 	// tecnica <0|1>: en el modo «Ejercicio», la lista de músculos (0) o los textos de técnica y errores (1)
 	if (Verbo == TEXT("tecnica")) { bEjTecnica = Resto != TEXT("0"); RehacerMovimiento(); return true; }
 	// enlace <n>: pulsa el enésimo botón «Estudiar» de la ficha de la pieza seleccionada
@@ -958,7 +1031,7 @@ void SCorpusInterfaz::RehacerFicha()
 				EnlacesFicha.Add(En);
 				CajaFicha->AddSlot().AutoHeight().Padding(0, 3, 0, 0)
 				[
-					SNew(SButton).ButtonColorAndOpacity(FLinearColor(0.07f, 0.11f, 0.17f)).ContentPadding(FMargin(10, 5)).HAlign(HAlign_Fill)
+					SNew(SButton).ButtonStyle(&EstiloBoton(false)).ContentPadding(FMargin(11, 6)).HAlign(HAlign_Fill)
 					.OnClicked_Lambda([this, En]() { AbrirEnlace(En); return FReply::Handled(); })
 					[
 						SNew(SVerticalBox)
@@ -1097,7 +1170,7 @@ void SCorpusInterfaz::RehacerResultados(const FText& Texto)
 		const FString Sistema = P->Sistema;
 		CajaResultados->AddSlot().AutoHeight().Padding(0, 3, 0, 0)
 		[
-			SNew(SButton).ButtonColorAndOpacity(FLinearColor(0.10f, 0.13f, 0.17f)).ContentPadding(FMargin(10, 5))
+			SNew(SButton).ButtonStyle(&EstiloBoton(false)).ContentPadding(FMargin(11, 6))
 			.OnClicked_Lambda([WC, WJ, Id, Sistema]()
 			{
 				if (WC.IsValid())
@@ -1214,7 +1287,9 @@ void SCorpusInterfaz::RehacerEstudio()
 	{
 		TSharedRef<SVerticalBox> V = SNew(SVerticalBox) + SVerticalBox::Slot().AutoHeight()[ Txt(Titulo, 11, C_TINTA) ];
 		if (!Sub.IsEmpty()) { V->AddSlot().AutoHeight()[ Txt(Sub, 9, C_GRIS) ]; }
-		return SNew(SButton).ButtonColorAndOpacity(Fondo).ContentPadding(FMargin(10, 6)).HAlign(HAlign_Fill)
+		// filas normales con el estilo común; las respuestas corregidas (verde / rojo) conservan su color de fondo
+		const bool bNormal = Fondo.R < 0.2f && Fondo.G < 0.2f;   // ni verde ni rojo
+		return SNew(SButton).ButtonStyle(bNormal ? &EstiloBoton(false) : &FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("Button")).ButtonColorAndOpacity(bNormal ? FLinearColor::White : Fondo).ContentPadding(FMargin(11, 7)).HAlign(HAlign_Fill)
 			.OnClicked_Lambda([Accion]() { Accion(); return FReply::Handled(); })[ V ];
 	};
 	const auto Ir = [this](int32 Grupo, int32 Item)

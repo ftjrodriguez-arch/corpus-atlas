@@ -85,4 +85,19 @@ private:
 	FString EstImg;
 	FIntVector MovPintado = FIntVector(-2, -2, -2);   // rango, movimiento y lado con los que se pintó el panel
 	uint8 CuerpoPintado = 255;   // la barra (hombre / mujer / Visible Human) se rehace cuando cambia el cuerpo
+
+	// ── Animación de los paneles: aparecen y se van con un fundido y un pequeño deslizamiento ──
+	virtual void Tick(const FGeometry& G, const double Tiempo, const float Dt) override;
+	struct FPanelAnim
+	{
+		TSharedPtr<SWidget> W;          // la caja del panel
+		TFunction<bool()> Ver;          // ¿debe estar a la vista?
+		FVector2D Desde;                // de dónde llega (px) cuando aparece
+		float V = 0.f;                  // 0 oculto · 1 a la vista
+	};
+	enum { P_IZQ, P_MINI, P_BUSCA, P_MOV, P_FICHA, P_EST, P_NUM };
+	FPanelAnim Anim[P_NUM];
+	FVector2D TamVista = FVector2D(1600, 900);   // tamaño de la interfaz (para que la ficha no pise el panel de movimiento)
+	float EscalaAnim = 1.f;          // pruebas: «animlenta 0.05» para fotografiar la transición
+	EVisibility VisAnim(int32 i) const;
 };
