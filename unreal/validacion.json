@@ -1,5 +1,5 @@
 {
- "fecha": "2026-11-21T23:20:43.772Z",
+ "fecha": "2026-11-21T23:21:06.388Z",
  "resumen": {
   "errores": 0,
   "avisos": 146,
@@ -11,7 +11,7 @@
    "otro_idioma": 1,
    "mayusculas": 104
   },
-  "mayusculas_mismo_valor": 180
+  "mayusculas_mismo_valor": 182
  },
  "omitido": [],
  "errores": [],
@@ -242,13 +242,13 @@
    "tipo": "sin_traducir",
    "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_fr.json",
    "clave": "en inglés",
-   "msg": "3568 frases iguales al inglés (más 1330 términos cortos): casos 107, patologias 12, glosario 3449 (p. ej. casos.grupos[0].items[14].sub «breast · female» | casos.grupos[0].items[15].sub «pelvis · female» | casos.grupos[0].items[16].sub «pelvis · female»)"
+   "msg": "3562 frases iguales al inglés (más 1312 términos cortos): casos 101, patologias 12, glosario 3449 (p. ej. casos.grupos[1].items[0].secs[3][0] «Test · Slump» | casos.grupos[1].items[1].secs[1][0] «Test · FADIR» | casos.grupos[1].items[1].secs[3][0] «Test · FABER (Patrick)»)"
   },
   {
    "tipo": "sin_traducir",
    "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_de.json",
    "clave": "en inglés",
-   "msg": "3587 frases iguales al inglés (más 3011 términos cortos): lecciones 1, casos 109, patologias 18, glosario 3459 (p. ej. lecciones.grupos[4].items[4].q[2].o[3] «Chorda tympani (VII)» | casos.grupos[0].items[14].sub «breast · female» | casos.grupos[0].items[15].sub «pelvis · female»)"
+   "msg": "3581 frases iguales al inglés (más 2993 términos cortos): lecciones 1, casos 103, patologias 18, glosario 3459 (p. ej. lecciones.grupos[4].items[4].q[2].o[3] «Chorda tympani (VII)» | casos.grupos[1].items[0].secs[3][0] «Test · Slump» | casos.grupos[1].items[1].secs[1][0] «Test · FADIR»)"
   },
   {
    "tipo": "otro_idioma",
