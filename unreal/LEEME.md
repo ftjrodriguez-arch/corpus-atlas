@@ -281,9 +281,31 @@ Botón **Estudiar** (barra izquierda): panel a la derecha con nueve módulos, lo
 - El grano fino se apaga cuando mide menos de un píxel y, de lejos, sube la rugosidad y baja la anisotropía (`lejos`).
 - Arrancan encendidos «Ligamentos, cápsulas y discos» y «Bolsas sinoviales y vainas» (en la web van apagados). Las fascias
   siguen apagadas: las de envoltura tapan los músculos. Todas las piezas de la web están importadas salvo 10 del corazón.
-- **Pendiente:** comprobar músculo por músculo que el extremo llega en tendón hasta su inserción (canal G del color por
-  vértice, que viene de la web); en el antebrazo y el brazo se distingue poco. Separar aponeurosis y retináculos de las
-  fascias de envoltura para poder encenderlos al inicio.
+- **Pendiente:** separar aponeurosis y retináculos de las fascias de envoltura para poder encenderlos al inicio.
+
+### Tendones en los extremos de cada músculo (2026-11-20, a petición del usuario)
+«Todos los músculos terminan en tendones, no en el mismo músculo.» El canal G del color por vértice (tendón) viene de la
+web y estaba casi vacío: de 582 piezas musculares, 305 sin nada de tendón, y de las 267 con área de inserción localizada
+solo 33 llegaban a ella en tendón.
+- `tools/unreal/tendones.js [hombre|mujer]` mide; con `--aplicar` corrige el propio `muscular.glb` (solo sube G, no toca
+  los pesos de movimiento): junto a las áreas de origen e inserción de la capa `insercion` (mismo nombre y lado) el
+  músculo pasa a tendón y se funde con el vientre (5 % de la longitud de la pieza, entre 3 y 20 mm; fundido hasta 2,2×).
+  Las piezas sin área (218 en el hombre) usan sus dos extremos si son alargadas; esfínteres, orbiculares y constrictores
+  se dejan como están. Resultado: 253 de 267 llegan en tendón. Informe en `unreal/tendones_informe.json`.
+- Orden: `exportar.js` → `movimiento.js` → `tendones.js --aplicar` (hombre y mujer) → reimportar la capa muscular
+  (`.\unreal\py.ps1 'ci.importar_mallas(["hombre/muscular", "mujer/muscular"])'`, unos 12 min).
+- Es una regla geométrica, no una disección: la longitud real de cada tendón (largo en el antebrazo, corto en el glúteo)
+  no está modelada, y en las piezas sin área de inserción el extremo se decide por la forma. Pendiente de revisión anatómica.
+- **Defecto conocido** (mosaico_tendones.png): los orígenes anchos y carnosos (infraespinoso y supraespinoso en sus fosas,
+  deltoides, glúteos) quedan demasiado blancos, porque toda el área de origen se trata como tendón. Hay que distinguir
+  inserción tendinosa de origen carnoso (por ejemplo, bajar la intensidad cuando el área cubre gran parte de la pieza).
+  --aplicar solo sube G y no guarda el valor original: para rehacerlo hay que volver a exportar la capa muscular
+  (exportar.js + movimiento.js) o guardar antes una copia del canal.
+- **Recuento** (2026-11-20): la capa ósea tiene los 206 huesos (208 piezas: el esternón va en tres) más 31 cartílagos y 28
+  dientes (faltan las muelas del juicio). La capa muscular tiene 582 piezas: unas 54 son tendones, aponeurosis y
+  retináculos; quedan unos 234 músculos con nombre por lado, y varios múltiples van en una sola malla (intercostales,
+  interóseos, lumbricales, rotadores, elevadores de las costillas). Estimación, no cotejo con la Terminologia Anatomica.
+  No encontrados: condrogloso, intertransversos torácicos y mediales lumbares, cricofaríngeo, compresor de la uretra.
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.
