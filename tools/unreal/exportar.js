@@ -18,7 +18,7 @@
 'use strict';
 const fs=require('fs'),path=require('path');
 const RAIZ=path.resolve(__dirname,'..','..');
-const SAL=path.resolve(process.argv[2]||path.join(RAIZ,'unreal','CorpusAtlas','Importar'));
+const SAL=path.resolve((require.main===module&&process.argv[2])||path.join(RAIZ,'unreal','CorpusAtlas','Importar'));
 const lee=f=>JSON.parse(fs.readFileSync(path.join(RAIZ,f),'utf8'));
 
 /* Capas de la web (index.html, tabla SYS): sexo y capa base de la que toma el material */
@@ -184,6 +184,8 @@ const MAN={version:'',unidades:'metros, Y arriba (glTF); Unreal convierte a cm y
 function terminar(id,k,g,origen){
   const c=CAT[id]||[id,id,id,'',k,'',''];
   if(!g.col||g.col.length!==g.pos.length){g.col=new Uint8Array(g.pos.length);for(let i=0;i<g.col.length;i+=3)g.col[i]=235;}
+  /* SOLO_COLOR (tendones.js --restaurar): basta la posición y el color tal como los da la web; sin normales ni tangentes */
+  if(module.exports.SOLO_COLOR)return {id,pos:g.pos,idx:g.idx,col:g.col,origen,extras:{en:c[1],es:c[2],la:c[3],sistema:k,lado:c[5]||''}};
   g.nrm=normales(g);const b=BS(k);
   if(g.pos.length>=9){if(b==='muscular'||(b==='articular'&&LIGRX.test(c[1])))g.tan=tangentes(fibras(g.pos),g.nrm);else if(TUBOS.includes(b))g.tan=tangentes(ejes(g.pos),g.nrm);}
   return {id,pos:g.pos,idx:g.idx,col:g.col,nrm:g.nrm,tan:g.tan,origen,extras:{en:c[1],es:c[2],la:c[3],sistema:k,lado:c[5]||''}};}
@@ -196,9 +198,8 @@ function guardar(cuerpo,k,piezas){if(!piezas.length)return;const rel=cuerpo+'/'+
   escribirGLB(path.join(SAL,rel),piezas);MAN.archivos.push({archivo:rel,cuerpo,sistema:k,base:BS(k),piezas:piezas.length,triangulos:tris});
   console.log(('  '+rel).padEnd(38),String(piezas.length).padStart(5),'piezas',String(tris).padStart(9),'triángulos');}
 
-require(path.join(RAIZ,'draco','draco_decoder.js'))({onModuleLoaded(dm){try{
-  MAN.version=(fs.readFileSync(path.join(RAIZ,'sw.js'),'utf8').match(/corpus-v\d+/)||[''])[0];
-  console.log('Corpus Atlas',MAN.version,'→',SAL);
+/* Geometrías que sustituyen a las de la capa ligera (alta resolución regional, corazón HRA, HRA v1.4) y piezas ocultas */
+function fuentes(dm){
   /* alta resolución regional */
   const HRGEO={};
   for(const r of HRREG)for(const lv of ['loc','nv']){const f='hr/'+r+'_'+lv;if(!fs.existsSync(path.join(RAIZ,f+'.txt')))continue;
@@ -215,22 +216,34 @@ require(path.join(RAIZ,'draco','draco_decoder.js'))({onModuleLoaded(dm){try{
   const HRA14={};
   if(fs.existsSync(path.join(RAIZ,'data/hra14.glb')))for(const o of leerGLB(fs.readFileSync(path.join(RAIZ,'data/hra14.glb')),dm)){
     const id=CAT[o.name]?o.name:(CAT[o.parent]?o.parent:null);if(id){HRA14[id]=o;HRGEO[id]={g:o,o:'hra14'};}}
-  const copia=g=>({pos:new Float32Array(g.pos),idx:g.idx,col:g.col?new Uint8Array(g.col):null});
-
-  console.log('Cuerpo de hombre');
-  for(const k in SYS){const s=SYS[k];if(s.sex==='vh')continue;if(!fs.existsSync(path.join(RAIZ,'m2/'+k+'.txt')))continue;
+  return {HRGEO,HRA14,oculto};}
+const copia=g=>({pos:new Float32Array(g.pos),idx:g.idx,col:g.col?new Uint8Array(g.col):null});
+/* Piezas de una capa del cuerpo base (hombre, o las capas solo de mujer), en el orden en que se escriben en su GLB */
+function capaBase(dm,F,k){const {HRGEO,HRA14,oculto}=F,s=SYS[k];if(!s||s.sex==='vh'||!fs.existsSync(path.join(RAIZ,'m2/'+k+'.txt')))return null;
     const cuerpo=s.sex==='f'?'mujer':'hombre',P=[],visto=new Set();
     for(const o of leerB64('m2/'+k+'.txt',dm)){if(oculto.has(o.name)||visto.has(o.name))continue;visto.add(o.name);seamFix('m2/'+k,o.name,o.pos);
       const h=cuerpo==='hombre'&&HRGEO[o.name];P.push(terminar(o.name,k,h?copia(h.g):o,h?h.o:'m2'));}
     for(const q of NUEVOS[k]||[]){if(visto.has(q.id))continue;visto.add(q.id);P.push(terminar(q.id,k,nuevosGeo(q),'blender'));}
     if(cuerpo==='hombre')for(const id in HRA14){if(visto.has(id)||CAT[id][4]!==k)continue;visto.add(id);P.push(terminar(id,k,copia(HRA14[id]),'hra14'));}
-    guardar(cuerpo,k,P);}
-
-  console.log('Cuerpo de mujer (piezas que cambian respecto al hombre)');
-  for(const k of FEM.ovr||[]){const f='m2/'+k+'__f';if(!fs.existsSync(path.join(RAIZ,f+'.txt')))continue;const P=[];
+    return {cuerpo,P};}
+/* Piezas de una capa que cambian en el cuerpo de mujer */
+function capaMujer(dm,k){const f='m2/'+k+'__f';if(!(FEM.ovr||[]).includes(k)||!fs.existsSync(path.join(RAIZ,f+'.txt')))return null;const P=[];
     for(const o of leerB64(f+'.txt',dm)){seamFix(f,o.name,o.pos);P.push(terminar(o.name,k,o,'m2__f'));}
     for(const q of NUEVOS[k]||[])if(q.f)P.push(terminar(q.id,k,nuevosGeo(q.f),'blender_f'));
-    guardar('mujer',k,P);}
+    return P;}
+const conDraco=fn=>require(path.join(RAIZ,'draco','draco_decoder.js'))({onModuleLoaded:fn});
+module.exports={SYS,fuentes,capaBase,capaMujer,conDraco,SOLO_COLOR:false};
+
+if(require.main===module)conDraco(dm=>{try{
+  MAN.version=(fs.readFileSync(path.join(RAIZ,'sw.js'),'utf8').match(/corpus-v\d+/)||[''])[0];
+  console.log('Corpus Atlas',MAN.version,'→',SAL);
+  const F=fuentes(dm),oculto=F.oculto;
+
+  console.log('Cuerpo de hombre');
+  for(const k in SYS){const r=capaBase(dm,F,k);if(r)guardar(r.cuerpo,k,r.P);}
+
+  console.log('Cuerpo de mujer (piezas que cambian respecto al hombre)');
+  for(const k of FEM.ovr||[]){const P=capaMujer(dm,k);if(P)guardar('mujer',k,P);}
 
   console.log('Visible Human Female');
   for(const k in SYS){if(SYS[k].sex!=='vh'||!fs.existsSync(path.join(RAIZ,'m2/'+k+'.txt')))continue;
@@ -243,4 +256,4 @@ require(path.join(RAIZ,'draco','draco_decoder.js'))({onModuleLoaded(dm){try{
   const T=MAN.archivos.reduce((s,a)=>s+a.triangulos,0);
   console.log(`Listo: ${MAN.archivos.length} archivos GLB, ${Object.keys(MAN.piezas).length} piezas, ${T.toLocaleString('es')} triángulos, ${nd} archivos de datos.`);
   process.exit(0);
-}catch(e){console.error(e);process.exit(1);}}});
+}catch(e){console.error(e);process.exit(1);}});

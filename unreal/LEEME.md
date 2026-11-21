@@ -471,6 +471,55 @@ Capturas finales: `unreal/capturas/s1_*` (una hoja de contactos por punto: `s1_<
   estimación, no EMG; sin el perfil de movilidad de la persona, sin avisos de tope de tobillo o cadera y sin flecha de
   fuerzas. Sin rotación automática de rodilla (ver G). Textos pendientes de revisión profesional y del `director-clinico`.
 
+### I · Tendones: origen carnoso frente a inserción tendinosa
+Resuelve el «defecto conocido» del apartado de tendones (orígenes anchos pintados de blanco).
+- **Canal original recuperado sin reexportar.** `exportar.js` es ahora también un módulo (`fuentes`, `capaBase`,
+  `capaMujer`, `conDraco`, `SOLO_COLOR`; usado desde la consola hace lo mismo que antes). `tendones.js <cuerpo> --restaurar`
+  recalcula con esas funciones solo el color de la capa muscular, comprueba pieza por pieza que número, orden y posición
+  de los vértices coinciden con `muscular.glb` (hombre: 582 piezas y 1.006.301 vértices; mujer: 185 y 340.185; todos
+  iguales) y parchea el canal G. Tarda 6 s. Si algo no coincide, no escribe y lo dice. Los pesos (TEXCOORD) no se tocan,
+  así que no hubo que rehacer pesos ni correctivos.
+- **Copias** en `unreal/CorpusAtlas/Importar/canal_g/` (no se sube, como el resto de `Importar`): `<cuerpo>_muscular_g_original.bin`
+  (la web), `…_g_pintado_antes.bin` (lo que había, la primera vez), `…_g_aplicado.bin` (lo último aplicado) y
+  `<cuerpo>_muscular.json` (piezas y vértices, en el orden del GLB). Un byte por vértice.
+- **`--aplicar` parte siempre del original** (se puede repetir sin acumular) y decide unión por unión (músculo × área de la
+  capa `insercion`) con `tools/unreal/tendones_reglas.json`:
+  1. `musculos`: entrada explícita para 34 músculos de cadera, muslo y rodilla (origen e inserción: `tendon`,
+     `aponeurosis`, `mixto` = borde fino, `carnoso` = no se pinta), con su nota y `revisado: false`. Criterio de Gray y
+     Moore, **pendiente de revisión profesional**.
+  2. `patrones`: excepciones del resto del cuerpo (manguito rotador, redondo mayor, deltoides, trapecio, romboides,
+     dorsal ancho, pectorales, serrato, braquial, tríceps, temporal, profundos del antebrazo, músculos de la pierna,
+     recto y oblicuos del abdomen, esternocleidomastoideo) y las piezas que son enteras tendón, aponeurosis o retináculo
+     (`todo`: tracto iliotibial, retináculos, aponeurosis palmar y plantar, línea alba…).
+  3. Geometría para lo demás: si la zona del área cubre ≥ 25 % de los vértices de la pieza, carnosa; 15–25 %, mixta;
+     menos, tendón.
+  - `hueso` (expresión regular sobre el hueso del área, de `inserciones.json`) manda sobre el papel del catálogo, que
+    falla a menudo (pectoral mayor, trapecio, serrato, dorsal ancho figuran al revés).
+  - Si la regla da un extremo tendinoso y el atlas no tiene área para él (vastos, recto femoral, ilíaco, glúteo menor,
+    obturadores, gemelos…), se pinta el extremo de la pieza opuesto a las áreas que sí hay; sin ninguna área (piriforme,
+    psoas, aductor corto, bíceps corto), el que mira hacia `insercion_hacia`.
+- Resultado en el hombre: 632 uniones → 346 tendón, 12 aponeurosis, 94 mixtas y 180 carnosas; de las tendinosas con área
+  llegan en tendón 284 de 288. El tendón pasa del 12,9 % de los vértices (web) al 28 % (antes del arreglo era bastante más:
+  infraespinoso 67 % → 23 %, vasto medial 74 % → 10 %, vasto intermedio 100 % → 25 %, ilíaco 65 % → 25 %).
+- Orden: `tendones.js <cuerpo> --restaurar` (una vez, o tras reexportar) → `--aplicar` → reimportar la capa muscular
+  (`.\unreal\py.ps1 'ci.importar_mallas(["hombre/muscular", "mujer/muscular"])' -Limite 3000`: 626 s y 546 s las dos veces).
+  `--lista` enseña la decisión de cada unión; el informe queda en `unreal/tendones_informe.json`.
+- Capturas `s1_i_*`, `s1_i_hoja.png` y `mosaico_tendones.png` (el mismo juego): frente, espalda, hombro y escápula,
+  deltoides de lado, glúteos, muslo anterior y posterior, rodilla y pierna (frente, detrás, lado), las mismas zonas sin
+  los músculos superficiales, mujer y abducción del hombro a 120° (los correctivos siguen bien: la geometría no cambió).
+- Se ve mal / dudoso:
+  - Una primera pasada dejó una mancha blanca sobre la escápula que no era el infraespinoso sino el **dorsal ancho**
+    (su área del ángulo inferior, que el catálogo marca como inserción): corregido con su patrón. Puede haber más casos
+    así en zonas que no se han mirado de cerca (antebrazo, mano, pie, cara, cuello).
+  - 23 uniones carnosas siguen blancas porque lo trae **el canal de la web**, que aquí no se rebaja: ilíaco, pectíneo,
+    gemelo superior, pectoral mayor esternocostal, serrato anterior, oblicuo interno, extensor largo de los dedos, fibular
+    largo, pterigoideo medial… Hay que decidir si se corrige en la web o se permite a las reglas bajar el canal.
+  - El aductor mayor queda con borde fino en toda la línea áspera y sin su tendón del tubérculo del aductor; el vasto
+    lateral, con borde fino donde Gray describe una aponeurosis ancha; glúteo mayor sin la parte aponeurótica de su origen.
+  - Sigue siendo una regla, no una disección: la longitud de cada tendón no está modelada (zona = 5 % de la pieza, 3–20 mm)
+    y 201 piezas sin área usan sus dos extremos. El trapecio conserva blanco en acromion y espina (borde mixto).
+  - Sin informe del agente `director-clinico`.
+
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.
