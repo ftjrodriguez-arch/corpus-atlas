@@ -554,9 +554,43 @@ namespace
 		}
 	}
 
+	/** Lee los pares texto → texto de un objeto JSON (Ruta = claves desde la raíz; vacía = la raíz) distinguiendo
+	    mayúsculas: recorre los símbolos del lector en vez de usar FJsonObject, cuyo mapa no las distingue. */
+	bool LeerParesExactos(const FString& Archivo, const TArray<FString>& Ruta, FTablaTr& T, bool bPisar)
+	{
+		FString Texto;
+		if (!FFileHelper::LoadFileToString(Texto, *FPaths::Combine(UCorpusDatos::CarpetaDatos(), Archivo))) { return false; }
+		const TSharedRef<TJsonReader<>> R = TJsonReaderFactory<>::Create(Texto);
+		TArray<FString> Pila;   // claves de los objetos abiertos (la raíz no tiene); las listas llevan «[» delante
+		EJsonNotation N;
+		int32 Leidos = 0;
+		while (R->ReadNext(N))
+		{
+			switch (N)
+			{
+			case EJsonNotation::ObjectStart: Pila.Add(R->GetIdentifier()); break;
+			case EJsonNotation::ArrayStart: Pila.Add(TEXT("[") + R->GetIdentifier()); break;
+			case EJsonNotation::ObjectEnd: case EJsonNotation::ArrayEnd: if (Pila.Num() > 0) { Pila.Pop(); } break;
+			case EJsonNotation::String:
+			{
+				if (Pila.Num() != Ruta.Num() + 1) { break; }
+				bool bEsta = true;
+				for (int32 i = 0; i < Ruta.Num() && bEsta; ++i) { bEsta = Pila[i + 1].Equals(Ruta[i], ESearchCase::CaseSensitive); }
+				const FString K = R->GetIdentifier(), V = R->GetValueAsString();
+				if (bEsta && !V.IsEmpty() && (bPisar || !T.Contains(K))) { T.Add(K, V); ++Leidos; }
+				break;
+			}
+			case EJsonNotation::Error: return Leidos > 0;
+			default: break;
+			}
+		}
+		return Leidos > 0;
+	}
+
 	// Textos propios de esta edición que no están en los JSON de la web: es → en, pt, fr, de.
 	struct FTrPropia { const TCHAR* Es; const TCHAR* L[4]; };
 	const FTrPropia TR_PROPIA[] = {
+		{TEXT("máx."), {TEXT("max."), TEXT("máx."), TEXT("max."), TEXT("max.")}},
 		{TEXT("Respiratorio"), {TEXT("Respiratory"), TEXT("Respiratório"), TEXT("Respiratoire"), TEXT("Atmungssystem")}},
 		{TEXT("Digestivo"), {TEXT("Digestive"), TEXT("Digestório"), TEXT("Digestif"), TEXT("Verdauungssystem")}},
 		{TEXT("Urinario"), {TEXT("Urinary"), TEXT("Urinário"), TEXT("Urinaire"), TEXT("Harnsystem")}},
@@ -612,16 +646,21 @@ void UCorpusDatos::CargarIdioma(const FString& Codigo)
 		if (const TSharedPtr<FJsonObject> J = LeerObjeto(TEXT("i18n.json")))
 		{
 			const TSharedPtr<FJsonObject>* UiJ = nullptr;
-			if (J->TryGetObjectField(TEXT("ui"), UiJ) && (*UiJ)->TryGetObjectField(Codigo, O)) { Volcar(*O, Ui, true); UiAprox.Add(Codigo, *O); }
-			if (Codigo == TEXT("pt") && J->TryGetObjectField(TEXT("names"), O)) { Volcar(*O, Nombres, true); }
+			if (J->TryGetObjectField(TEXT("ui"), UiJ) && (*UiJ)->TryGetObjectField(Codigo, O)) { UiAprox.Add(Codigo, *O); }
+			if (!LeerParesExactos(TEXT("i18n.json"), { TEXT("ui"), Codigo }, Ui, true) && O) { Volcar(*O, Ui, true); }
+			if (Codigo == TEXT("pt")) { LeerParesExactos(TEXT("i18n.json"), { TEXT("names") }, Nombres, true); }
 		}
 	}
 	else if (const TSharedPtr<FJsonObject> J = LeerObjeto(FString::Printf(TEXT("i18n_%s.json"), *Codigo)))
 	{
-		if (J->TryGetObjectField(TEXT("ui"), O)) { Volcar(*O, Ui, true); UiAprox.Add(Codigo, *O); }
-		if (J->TryGetObjectField(TEXT("names"), O)) { Volcar(*O, Nombres, true); }
+		// Las claves se leen distinguiendo mayúsculas («Cadera» → Hanche, «cadera» → cadera): el FJsonObject de Unreal
+		// las funde en una sola y dejaba en francés y alemán nombres de articulación equivocados en los botones.
+		const FString Arch = FString::Printf(TEXT("i18n_%s.json"), *Codigo);
+		if (J->TryGetObjectField(TEXT("ui"), O)) { UiAprox.Add(Codigo, *O); }
+		if (!LeerParesExactos(Arch, { TEXT("ui") }, Ui, true) && O) { Volcar(*O, Ui, true); }
+		LeerParesExactos(Arch, { TEXT("names") }, Nombres, true);
 		// content_fr/de: textos largos (español → traducción); no pisan la interfaz
-		Volcar(LeerObjeto(FString::Printf(TEXT("content_%s.json"), *Codigo)), Ui, false);
+		LeerParesExactos(FString::Printf(TEXT("content_%s.json"), *Codigo), {}, Ui, false);
 	}
 	UiTr.Add(Codigo, MoveTemp(Ui));
 	NombresTr.Add(Codigo, MoveTemp(Nombres));

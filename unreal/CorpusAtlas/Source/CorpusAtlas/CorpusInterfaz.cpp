@@ -727,7 +727,7 @@ void SCorpusInterfaz::RehacerMovimiento()
 					+ SVerticalBox::Slot().AutoHeight()
 					[
 						SNew(STextBlock).Font(Letra(13, true)).ColorAndOpacity(FSlateColor(FLinearColor(FColor::FromHex(TEXT("f0a040")))))
-						.Text_Lambda([WC]() { return WC.IsValid() ? FText::FromString(FString::Printf(TEXT("máx. %d°  ·  %d %%"), FMath::RoundToInt(WC->GradosMax()), WC->GradosMax() > 0.f ? FMath::RoundToInt(100.f * WC->Grados() / WC->GradosMax()) : 0)) : FText(); })
+						.Text_Lambda([WC, WDm = TWeakObjectPtr<UCorpusDatos>(D)]() { return WC.IsValid() ? FText::FromString(FString::Printf(TEXT("%s %d°  ·  %d %%"), WDm.IsValid() ? *WDm->T(TEXT("máx.")) : TEXT("máx."), FMath::RoundToInt(WC->GradosMax()), WC->GradosMax() > 0.f ? FMath::RoundToInt(100.f * WC->Grados() / WC->GradosMax()) : 0)) : FText(); })
 					]
 				]
 			]

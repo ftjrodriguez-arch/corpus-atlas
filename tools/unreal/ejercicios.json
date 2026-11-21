@@ -157,7 +157,7 @@
   "traducciones": {
     "Extensores de cadera (glúteo mayor) y de rodilla (cuádriceps), sóleo y erectores de la columna.": {
       "fr": "Extenseurs de la hanche (grand fessier) et du genou (quadriceps), soléaire et érecteurs du rachis.",
-      "de": "Hüftstrecker (M. gluteus maximus) und Kniestrecker (M. quadriceps), M. soleus und Rückenstrecker."
+      "de": "Hüftstrecker (M. gluteus maximus) und Kniestrecker (M. quadriceps femoris), M. soleus und Rückenstrecker."
     },
     "Al bajar, los mismos músculos trabajan frenando (contracción excéntrica); al subir, acortándose (concéntrica). Cadera ~100°, rodilla ~110°, tobillo ~25° de dorsiflexión.": {
       "fr": "À la descente, les mêmes muscles travaillent en freinant (contraction excentrique) ; à la remontée, en se raccourcissant (concentrique). Hanche ~100°, genou ~110°, cheville ~25° de flexion dorsale.",
@@ -176,8 +176,8 @@
       "de": "Regression: Kniebeuge auf eine Box oder Bank, mit geringerer Tiefe oder mit Abstützen der Hände. Progression: Last hinzufügen (Goblet, Langhantel), Bewegungsumfang vergrößern, Pausen in der tiefen Position einlegen oder zu einbeinigen Varianten übergehen."
     },
     "Adaptar la profundidad y la carga ante dolor femoropatelar, artrosis de rodilla o cadera o en el postoperatorio según las restricciones del cirujano. Con dolor lumbar agudo, reducir carga y rango hasta que se tolere.": {
-      "fr": "Adapter la profondeur et la charge en cas de douleur fémoro-patellaire, d'arthrose du genou ou de la hanche, ou en postopératoire selon les consignes du chirurgien. En cas de lombalgie aiguë, réduire la charge et l'amplitude jusqu'à ce que ce soit toléré.",
-      "de": "Tiefe und Last anpassen bei femoropatellarem Schmerz, Knie- oder Hüftarthrose oder postoperativ gemäß den Vorgaben des Operateurs. Bei akutem Kreuzschmerz Last und Bewegungsumfang reduzieren, bis es toleriert wird."
+      "fr": "Adapter la profondeur et la charge en cas de douleur fémoro-patellaire, d'arthrose du genou ou de la hanche, ou en postopératoire selon les consignes du chirurgien. En cas de lombalgie aiguë, réduire la charge et l'amplitude selon la tolérance.",
+      "de": "Tiefe und Last anpassen bei patellofemoralem Schmerz, Knie- oder Hüftarthrose oder postoperativ gemäß den Vorgaben des Operateurs. Bei akutem Kreuzschmerz Last und Bewegungsumfang reduzieren, nach Toleranz."
     },
     "Pies a la anchura de los hombros, puntas algo hacia fuera, peso repartido entre talón y antepié.": {
       "fr": "Pieds écartés à la largeur des épaules, pointes légèrement vers l'extérieur, poids réparti entre le talon et l'avant-pied.",
@@ -189,7 +189,7 @@
     },
     "Cadera, rodilla y tobillo se flexionan a la vez; los extensores frenan el descenso alargándose. Las rodillas siguen la dirección de los pies.": {
       "fr": "Hanche, genou et cheville fléchissent en même temps ; les extenseurs freinent la descente en s'allongeant. Les genoux suivent la direction des pieds.",
-      "de": "Hüfte, Knie und Sprunggelenk beugen gleichzeitig; die Strecker bremsen das Absenken, indem sie sich verlängern. Die Knie folgen der Richtung der Füße."
+      "de": "Hüfte, Knie und Sprunggelenk beugen sich gleichzeitig; die Strecker bremsen das Absenken, indem sie sich verlängern. Die Knie folgen der Richtung der Füße."
     },
     "Fondo (transición isométrica)": {
       "fr": "Position basse (transition isométrique)",
@@ -197,7 +197,7 @@
     },
     "Máxima flexión: el centro de masas sigue sobre el centro del pie. Sin rebote, el cambio de dirección exige la mayor fuerza del ciclo.": {
       "fr": "Flexion maximale : le centre de masse reste au-dessus du milieu du pied. Sans rebond, le changement de direction exige la plus grande force du cycle.",
-      "de": "Maximale Beugung: Der Körperschwerpunkt bleibt über der Fußmitte. Ohne Abfedern erfordert die Richtungsumkehr die größte Kraft des Zyklus."
+      "de": "Maximale Beugung: Der Körperschwerpunkt bleibt über der Fußmitte. Ohne Nachfedern erfordert die Richtungsumkehr die größte Kraft des Zyklus."
     },
     "Ascenso (fase concéntrica)": {
       "fr": "Remontée (phase concentrique)",
@@ -229,7 +229,7 @@
     },
     "Cocontracción moderada: ayudan a extender la cadera y estabilizan la rodilla (reducen el cizallamiento anterior de la tibia).": {
       "fr": "Cocontraction modérée : ils aident à étendre la hanche et stabilisent le genou (ils réduisent le cisaillement antérieur du tibia).",
-      "de": "Mäßige Kokontraktion: Sie helfen bei der Hüftstreckung und stabilisieren das Knie (sie verringern den vorderen Schub der Tibia)."
+      "de": "Mäßige Kokontraktion: Sie helfen bei der Hüftstreckung und stabilisieren das Knie (sie verringern den anteriore Tibiatranslation)."
     },
     "Mantienen la rodilla alineada con el pie e impiden que se vaya hacia dentro (valgo dinámico).": {
       "fr": "Ils maintiennent le genou aligné avec le pied et l'empêchent de partir vers l'intérieur (valgus dynamique).",
@@ -268,8 +268,8 @@
       "de": "Sie halten die Arme als Gegengewicht nach vorn."
     },
     "Media": {
-      "fr": "Demi",
-      "de": "Halb"
+      "fr": "Demi-squat",
+      "de": "Halbe Kniebeuge"
     },
     "Paralela": {
       "fr": "Parallèle",

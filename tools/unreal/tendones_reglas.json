@@ -31,10 +31,10 @@
  },
  "musculos": {
   "Gluteus maximus muscle": {
-   "origen": "carnoso",
+   "origen": "mixto",
    "insercion": "aponeurosis",
    "revisado": false,
-   "nota": "Origen carnoso en el ilion, sacro, cóccix y ligamento sacrotuberoso; termina en lámina tendinosa: tracto iliotibial y tuberosidad glútea."
+   "nota": "Origen carnoso en ilion, sacro y cóccix, en parte por aponeurosis (del erector de la columna, glútea) y el ligamento sacrotuberoso; termina en lámina tendinosa: tracto iliotibial y tuberosidad glútea."
   },
   "Gluteus medius muscle": {
    "origen": "carnoso",
@@ -102,7 +102,7 @@
    "insercion": "tendon",
    "revisado": false,
    "insercion_hacia": "abajo",
-   "nota": "Fascículos carnosos en cuerpos, discos y apófisis costales T12–L5; tendón al trocánter menor. Sin áreas en el atlas."
+   "nota": "Fascículos carnosos en cuerpos vertebrales y discos de T12 a L5 y en las apófisis costales de L1 a L5; tendón al trocánter menor. Sin áreas en el atlas."
   },
   "Psoas minor muscle": {
    "origen": "carnoso",
@@ -248,6 +248,15 @@
  },
  "patrones": [
   {
+   "re": "^Pronator quadratus",
+   "origen": "carnoso",
+   "insercion": "carnoso",
+   "hueso": {
+    "Radius|Ulna": "carnoso"
+   },
+   "nota": "sin tendón: origen e inserción carnosos en el cuarto distal del cúbito y del radio"
+  },
+  {
    "re": "tract$|aponeurosis|retinacul|\\btendon\\b|linea alba|rectus sheath",
    "todo": "tendon",
    "nota": "piezas que son enteras tendón, aponeurosis o retináculo (tracto iliotibial…)"
@@ -293,10 +302,10 @@
    "re": "part of trapezius",
    "hueso": {
     "Clavicle": "carnoso",
-    "Scapula": "mixto",
+    "Scapula": "aponeurosis",
     "Occipital": "mixto"
    },
-   "nota": "inserciones en clavícula, acromion y espina: fibras carnosas con borde tendinoso"
+   "nota": "inserción en la clavícula carnosa; en el acromion y la espina de la escápula, lámina tendinosa (la porción ascendente acaba en un tendón aplanado sobre el tubérculo de la espina, con bolsa subtendinosa)"
   },
   {
    "re": "^Rhomboid",
@@ -347,7 +356,7 @@
    "hueso": {
     "Clavicle": "carnoso"
    },
-   "insercion": "tendon",
+   "insercion": "carnoso",
    "origen": "tendon",
    "nota": "tendón corto en la primera costilla; inserción carnosa en el surco de la clavícula"
   },
@@ -384,7 +393,7 @@
    "nota": "origen carnoso en la fosa temporal; tendón en la apófisis coronoides"
   },
   {
-   "re": "^(Flexor pollicis longus|Flexor digitorum profundus|Extensor indicis|Extensor pollicis (longus|brevis)|Abductor pollicis longus|Pronator quadratus)",
+   "re": "^(Flexor pollicis longus|Flexor digitorum profundus|Extensor indicis|Extensor pollicis (longus|brevis)|Abductor pollicis longus)",
    "hueso": {
     "Radius|Ulna|Humerus": "carnoso",
     "phalanx|metacarpal": "tendon"
@@ -442,9 +451,11 @@
    "hueso": {
     "sternum": "tendon",
     "Clavicle": "mixto",
-    "Temporal|Occipital": "tendon"
+    "Temporal": "tendon",
+    "Occipital": "aponeurosis"
    },
-   "nota": "cabeza esternal tendinosa, clavicular carnosa y aponeurótica; tendón en la mastoides"
+   "nota": "cabeza esternal tendinosa, clavicular carnosa y aponeurótica; tendón en la mastoides y aponeurosis delgada en la línea nucal superior"
   }
- ]
+ ],
+ "revision_clinica": "2026-11-21: correcciones del agente director-clinico aplicadas (psoas, glúteo mayor, trapecio, subclavio, esternocleidomastoideo, pronador cuadrado). Pendiente: tendón del aductor mayor al tubérculo del aductor."
 }
