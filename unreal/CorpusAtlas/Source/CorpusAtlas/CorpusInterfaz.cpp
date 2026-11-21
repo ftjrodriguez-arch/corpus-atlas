@@ -19,6 +19,11 @@
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Notifications/SProgressBar.h"
+#include "Widgets/SLeafWidget.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Fonts/FontMeasure.h"
+#include "Rendering/DrawElements.h"
+#include "Rendering/SlateRenderer.h"
 #include "ImageUtils.h"
 #include "Misc/Paths.h"
 
@@ -44,6 +49,95 @@ namespace
 		return SNew(STextBlock).Text(FText::FromString(S)).Font(Letra(Tam, bNegrita)).ColorAndOpacity(FSlateColor(Col)).AutoWrapText(true);
 	}
 }
+
+// ───────── Marcas sobre el modelo (relieves óseos) ─────────
+// Un punto amarillo sobre cada relieve y su nombre. Con una sola marca, el rótulo va al lado; con varias, los rótulos se
+// ordenan en dos columnas a los lados del hueso, unidos a su punto por una línea (como en una lámina de atlas), para que
+// no se pisen. Se dibuja en la interfaz, encima del modelo (la web también las pinta sin prueba de profundidad).
+class SCorpusMarcas : public SLeafWidget
+{
+public:
+	SLATE_BEGIN_ARGS(SCorpusMarcas) {}
+	SLATE_END_ARGS()
+	void Construct(const FArguments&) { SetVisibility(EVisibility::HitTestInvisible); }
+	virtual FVector2D ComputeDesiredSize(float) const override { return FVector2D::ZeroVector; }
+
+	TWeakObjectPtr<ACorpusJugador> Jugador;
+	TArray<TPair<FVector, FString>> Puntos;   // punto del mundo y rótulo
+
+	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& G, const FSlateRect& Recorte, FSlateWindowElementList& Fuera, int32 Capa, const FWidgetStyle& Estilo, bool bActivo) const override
+	{
+		const ACorpusJugador* J = Jugador.Get();
+		const ACorpusCuerpo* Cu = J ? J->Cuerpo() : nullptr;
+		int32 VX = 0, VY = 0;
+		if (J) { J->GetViewportSize(VX, VY); }
+		if (!Cu || Puntos.Num() == 0 || VX < 2 || VY < 2 || Cu->HayPostura()) { return Capa; }   // las marcas son de reposo
+		const FVector2D Tam = G.GetLocalSize();
+		const FVector2D Esc(Tam.X / VX, Tam.Y / VY);
+		const FSlateFontInfo Fuente = Letra(Puntos.Num() == 1 ? 12 : 9, true);
+		const TSharedRef<FSlateFontMeasure> Medir = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+		const FLinearColor Amarillo(FColor::FromHex(TEXT("ffd34d")));
+
+		struct FM { FVector2D P, T; FString S; };   // punto, tamaño del texto y texto
+		TArray<FM> Ms;
+		for (const auto& Par : Puntos)
+		{
+			FVector2D Px;
+			if (!J->ProjectWorldLocationToScreen(Par.Key, Px)) { continue; }
+			Ms.Add({ Px * Esc, FVector2D(Medir->Measure(Par.Value, Fuente)), Par.Value });
+		}
+		if (Ms.Num() == 0) { return Capa; }
+		const auto Rotulo = [&](const FM& M, const FVector2D& Pos)   // Pos = esquina superior izquierda del rótulo
+		{
+			const FVector2D Caja = M.T + FVector2D(12, 6);
+			FSlateDrawElement::MakeBox(Fuera, Capa + 1, G.ToPaintGeometry(Caja, FSlateLayoutTransform(Pos)), Panel2(), ESlateDrawEffect::None, FLinearColor(0.02f, 0.03f, 0.045f, 0.92f));   // el color pasado sustituye al del pincel
+			FSlateDrawElement::MakeText(Fuera, Capa + 2, G.ToPaintGeometry(M.T, FSlateLayoutTransform(Pos + FVector2D(6, 3))), M.S, Fuente, ESlateDrawEffect::None, C_TINTA);
+		};
+		const auto Punto8 = [&](const FVector2D& P)
+		{
+			FSlateDrawElement::MakeBox(Fuera, Capa + 3, G.ToPaintGeometry(FVector2D(12, 12), FSlateLayoutTransform(P - FVector2D(6, 6))), Punto(), ESlateDrawEffect::None, FLinearColor(0, 0, 0, 0.8f));
+			FSlateDrawElement::MakeBox(Fuera, Capa + 4, G.ToPaintGeometry(FVector2D(8, 8), FSlateLayoutTransform(P - FVector2D(4, 4))), Punto(), ESlateDrawEffect::None, Amarillo);
+		};
+		if (Ms.Num() == 1)
+		{
+			Punto8(Ms[0].P);
+			Rotulo(Ms[0], Ms[0].P + FVector2D(14, -Ms[0].T.Y * 0.5 - 3));
+			return Capa + 4;
+		}
+		// dos columnas: a la izquierda los puntos de la mitad izquierda del hueso en pantalla, a la derecha los demás
+		double MinX = Ms[0].P.X, MaxX = Ms[0].P.X;
+		TArray<double> Xs;
+		for (const FM& M : Ms) { MinX = FMath::Min(MinX, M.P.X); MaxX = FMath::Max(MaxX, M.P.X); Xs.Add(M.P.X); }
+		Xs.Sort();
+		const double Medio = Xs[Xs.Num() / 2];
+		const double Paso = Ms[0].T.Y + 10.0;
+		for (int32 Lado = 0; Lado < 2; ++Lado)
+		{
+			TArray<const FM*> Col;
+			for (const FM& M : Ms) { if ((M.P.X < Medio) == (Lado == 0)) { Col.Add(&M); } }
+			if (Col.Num() == 0) { continue; }
+			Col.Sort([](const FM& A, const FM& B) { return A.P.Y < B.P.Y; });
+			// alturas: cada rótulo a la altura de su punto si cabe; si no, debajo del anterior. Luego se centra la columna.
+			TArray<double> Ys;
+			double Suma = 0, SumaP = 0;
+			for (int32 i = 0; i < Col.Num(); ++i) { Ys.Add(i == 0 ? Col[i]->P.Y : FMath::Max(Col[i]->P.Y, Ys[i - 1] + Paso)); Suma += Ys[i]; SumaP += Col[i]->P.Y; }
+			double Corr = (SumaP - Suma) / Col.Num();
+			Corr = FMath::Clamp(Corr, 74.0 - Ys[0], FMath::Max(74.0 - Ys[0], Tam.Y - Paso - Ys.Last()));   // por debajo del buscador
+			const double XCol = Lado == 0 ? FMath::Max(MinX - 70.0, 360.0) : FMath::Min(MaxX + 70.0, Tam.X - 430.0);
+			for (int32 i = 0; i < Col.Num(); ++i)
+			{
+				const FM& M = *Col[i];
+				const double Y = Ys[i] + Corr;
+				const FVector2D Pos(Lado == 0 ? XCol - M.T.X - 12.0 : XCol, Y - M.T.Y * 0.5 - 3.0);
+				const FVector2D Ancla(XCol, Y);
+				FSlateDrawElement::MakeLines(Fuera, Capa, G.ToPaintGeometry(), TArray<FVector2f>({ FVector2f(M.P), FVector2f(Ancla) }), ESlateDrawEffect::None, FLinearColor(1.f, 0.83f, 0.30f, 0.75f), true, 1.2f);
+				Rotulo(M, Pos);
+				Punto8(M.P);
+			}
+		}
+		return Capa + 4;
+	}
+};
 
 SCorpusInterfaz::~SCorpusInterfaz()
 {
@@ -79,6 +173,8 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 	ChildSlot
 	[
 		SNew(SOverlay)
+		// ── Debajo de los paneles: marcas de los relieves óseos sobre el modelo ──
+		+ SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Fill)[ SAssignNew(Marcas, SCorpusMarcas) ]
 		// ── Panel izquierdo: cuerpo, idioma y capas ──
 		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Fill).Padding(18.f)
 		[
@@ -182,6 +278,7 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 		HHerr = C->AlCambiarHerramientas.AddSP(this, &SCorpusInterfaz::RehacerHerramientas);
 	}
 	if (UCorpusDatos* D = Datos()) { HIdioma = D->AlCambiarIdioma.AddSP(this, &SCorpusInterfaz::Reconstruir); }
+	if (Marcas.IsValid()) { Marcas->Jugador = Jugador; }
 	Reconstruir();
 }
 
@@ -514,6 +611,24 @@ bool SCorpusInterfaz::Qa(const FString& Verbo, const FString& Resto)
 {
 	// panel <0|1>: pliega (0) o abre (1) el panel izquierdo
 	if (Verbo == TEXT("panel")) { bPanelPlegado = Resto == TEXT("0"); return true; }
+	// relieve <todos|off|n|texto>: marca los relieves del hueso seleccionado (n = número en la lista de la ficha, desde 0;
+	// texto = parte de su nombre en español o inglés)
+	if (Verbo == TEXT("relieve"))
+	{
+		UCorpusDatos* D = Datos(); ACorpusCuerpo* C = Cuerpo();
+		TArray<int32> Cuales;
+		const TArray<FCorpusRelieve> Vacio;
+		const TArray<FCorpusRelieve>& Rs = (D && C) ? D->Relieves(C->Seleccionada()) : Vacio;
+		if (Resto == TEXT("todos")) { for (int32 i = 0; i < Rs.Num(); ++i) { Cuales.Add(i); } }
+		else if (Resto.IsNumeric()) { Cuales.Add(FCString::Atoi(*Resto)); }
+		else if (Resto != TEXT("off") && !Resto.IsEmpty())
+		{
+			const FString Q = UCorpusDatos::Plano(Resto);
+			for (int32 i = 0; i < Rs.Num() && Cuales.Num() == 0; ++i) { if (UCorpusDatos::Plano(Rs[i].Es).Contains(Q) || UCorpusDatos::Plano(Rs[i].En).Contains(Q)) { Cuales.Add(i); } }
+		}
+		VerRelieves(Cuales, Cuales.Num() == 1);
+		return true;
+	}
 	return false;
 }
 
@@ -525,6 +640,13 @@ void SCorpusInterfaz::RehacerFicha()
 	CajaFicha->ClearChildren();
 	const FString Id = C->Seleccionada();
 	const FCorpusPieza* P = D->Pieza(Id);
+	// las marcas de relieves son del hueso seleccionado: al cambiar de pieza se quitan (y el fantasma que encendieron)
+	if (Id != RelHueso)
+	{
+		RelHueso = Id; RelVistos.Reset();
+		if (bFantasmaPorRelieves) { bFantasmaPorRelieves = false; C->Fantasma(false); }
+	}
+	ActualizarMarcas();
 	if (!P) { return; }
 	TWeakObjectPtr<ACorpusCuerpo> WC(C);
 	TWeakObjectPtr<ACorpusJugador> WJ(Jugador);
@@ -543,11 +665,62 @@ void SCorpusInterfaz::RehacerFicha()
 		+ SWrapBox::Slot()[ Boton(D->T(TEXT("Ocultar")), [WC, Id]() { if (WC.IsValid()) { WC->Ocultar(Id); } }) ]
 	];
 
+	// relieves óseos (data/extras.json → lm): uno por botón; se marcan sobre el hueso con su nombre
+	const TArray<FCorpusRelieve>& Rs = D->Relieves(Id);
+	if (Rs.Num() > 0)
+	{
+		CajaFicha->AddSlot().AutoHeight().Padding(0, 12, 0, 4)[ Txt(FString::Printf(TEXT("%s (%d)"), *Mayus(D->T(TEXT("Accidentes óseos"))), Rs.Num()), 9, C_GRIS, true) ];
+		TArray<int32> Todos; for (int32 i = 0; i < Rs.Num(); ++i) { Todos.Add(i); }
+		CajaFicha->AddSlot().AutoHeight()
+		[
+			SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(6, 6))
+			+ SWrapBox::Slot()[ Boton(D->T(TEXT("Mostrar todos")), [this, Todos]() { VerRelieves(Todos, false); }, RelVistos.Num() == Rs.Num()) ]
+			+ SWrapBox::Slot()[ Boton(D->T(TEXT("Ocultar marcas")), [this]() { VerRelieves(TArray<int32>(), false); }) ]
+		];
+		TSharedRef<SWrapBox> Lista = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
+		for (int32 i = 0; i < Rs.Num(); ++i)
+		{
+			Lista->AddSlot()[ Boton(D->NombreRelieve(Rs[i]), [this, i]() { VerRelieves(TArray<int32>({ i }), true); }, RelVistos.Num() < Rs.Num() && RelVistos.Contains(i)) ];
+		}
+		CajaFicha->AddSlot().AutoHeight().Padding(0, 6, 0, 0)[ Lista ];
+	}
+
 	for (const TPair<FString, FString>& Campo : D->Ficha(Id))
 	{
 		CajaFicha->AddSlot().AutoHeight().Padding(0, 12, 0, 2)[ Txt(Mayus(Campo.Key), 9, C_GRIS, true) ];
 		CajaFicha->AddSlot().AutoHeight()[ Txt(Campo.Value, 11, C_TINTA) ];
 	}
+}
+
+void SCorpusInterfaz::ActualizarMarcas()
+{
+	UCorpusDatos* D = Datos();
+	ACorpusCuerpo* C = Cuerpo();
+	if (!Marcas.IsValid()) { return; }
+	Marcas->Puntos.Reset();
+	if (!D || !C || bVerEst) { return; }
+	const TArray<FCorpusRelieve>& Rs = D->Relieves(RelHueso);
+	for (const int32 i : RelVistos) { if (Rs.IsValidIndex(i)) { Marcas->Puntos.Emplace(C->PuntoMundo(Rs[i].Pos), D->NombreRelieve(Rs[i])); } }
+}
+
+void SCorpusInterfaz::VerRelieves(const TArray<int32>& Cuales, bool bEnfocar)
+{
+	UCorpusDatos* D = Datos();
+	ACorpusCuerpo* C = Cuerpo();
+	if (!D || !C) { return; }
+	RelHueso = C->Seleccionada();
+	RelVistos = Cuales;
+	// como la web (rayos X al enseñar relieves): lo que tapa el hueso pasa a fantasma mientras haya marcas
+	if (Cuales.Num() > 0 && !C->EnFantasma()) { bFantasmaPorRelieves = true; C->Fantasma(true); }
+	else if (Cuales.Num() == 0 && bFantasmaPorRelieves) { bFantasmaPorRelieves = false; C->Fantasma(false); }
+	const TArray<FCorpusRelieve>& Rs = D->Relieves(RelHueso);
+	ACorpusCamara* Cam = Jugador.IsValid() ? Jugador->CamaraOrbital() : nullptr;
+	if (bEnfocar && Cam && Cuales.Num() == 1 && Rs.IsValidIndex(Cuales[0]))
+	{
+		// la cámara se acerca al relieve (unos 9 cm alrededor)
+		Cam->Encuadrar(FBox::BuildAABB(C->PuntoMundo(Rs[Cuales[0]].Pos), FVector(9.0)));
+	}
+	RehacerFicha();
 }
 
 void SCorpusInterfaz::QaBuscar(const FString& Texto)

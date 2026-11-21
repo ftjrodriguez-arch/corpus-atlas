@@ -54,6 +54,9 @@ public:
 	/** Caja en el mundo de una pieza, o de todo lo visible si Id está vacío. */
 	FBox Caja(const FString& Id) const;
 
+	/** Punto del mundo (cm) de una posición de reposo en glTF (m): relieves óseos, marcas. No sigue a la postura. */
+	FVector PuntoMundo(const FVector3f& Gltf) const { return GetActorTransform().TransformPosition(FVector(Gltf.X, Gltf.Z, Gltf.Y) * 100.0); }
+
 	/** Color de estado por pieza (datos primitivos 0–3: rgb + fuerza). La marcha, la sentadilla y los ejercicios lo usarán para la actividad muscular. */
 	void PonerEstado(const FString& Id, const FLinearColor& Color, float Fuerza);
 

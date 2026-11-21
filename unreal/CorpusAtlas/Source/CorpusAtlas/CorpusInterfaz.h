@@ -56,6 +56,13 @@ private:
 	TSharedPtr<SEditableTextBox> Buscador;
 	FDelegateHandle HSel, HCapas, HIdioma, HPostura, HHerr;
 	bool bVerMov = false;
+	// Relieves óseos (extras.json → lm) del hueso seleccionado que se están marcando sobre el modelo
+	void VerRelieves(const TArray<int32>& Cuales, bool bEnfocar);
+	void ActualizarMarcas();
+	TSharedPtr<class SCorpusMarcas> Marcas;
+	TArray<int32> RelVistos;
+	FString RelHueso;
+	bool bFantasmaPorRelieves = false;
 	bool bPanelPlegado = false;                 // panel izquierdo recogido en un botón
 	TSharedPtr<SVerticalBox> CajaMini;
 	TSharedPtr<SVerticalBox> CajaEst, CajaEstCab;

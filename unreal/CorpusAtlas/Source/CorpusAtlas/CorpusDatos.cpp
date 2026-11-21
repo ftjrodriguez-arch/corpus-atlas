@@ -476,6 +476,7 @@ namespace
 		{TEXT("Concéntrica"), {TEXT("Concentric"), TEXT("Concêntrica"), TEXT("Concentrique"), TEXT("Konzentrisch")}},
 		{TEXT("Isométrica"), {TEXT("Isometric"), TEXT("Isométrica"), TEXT("Isométrique"), TEXT("Isometrisch")}},
 		{TEXT("Relaciones"), {TEXT("Relations"), TEXT("Relações"), TEXT("Rapports"), TEXT("Lagebeziehungen")}},
+		{TEXT("Accidentes óseos"), {TEXT("Bony landmarks"), TEXT("Acidentes ósseos"), TEXT("Reliefs osseux"), TEXT("Knochenpunkte")}},
 		{TEXT("Disección"), {TEXT("Dissection"), TEXT("Dissecção"), TEXT("Dissection"), TEXT("Präparation")}},
 		{TEXT("Fantasma"), {TEXT("Ghost"), TEXT("Fantasma"), TEXT("Fantôme"), TEXT("Geistermodus")}},
 		{TEXT("Plano de corte"), {TEXT("Section plane"), TEXT("Plano de corte"), TEXT("Plan de coupe"), TEXT("Schnittebene")}},

@@ -339,6 +339,18 @@ Capturas finales: `unreal/capturas/s1_*` (una hoja de contactos por punto: `s1_<
   habría que completarlos en `data/extras.json`. El fantasma no sigue a la selección: hay que apagarlo y encenderlo.
   Los paneles de la derecha (ficha, movimiento, estudio) no se pliegan.
 
+### C · Relieves óseos
+- Datos: `data/extras.json` → `lm` (64 huesos; el fémur, n152 / n267, tiene 29), leídos por `UCorpusDatos::CargarExtras`
+  (`Relieves(id)`, `NombreRelieve`). Nada en C++: nombres y puntos salen del JSON.
+- Ficha del hueso: «Accidentes óseos (N)» con un botón por relieve, «Mostrar todos» y «Ocultar marcas». Un relieve solo:
+  la cámara se acerca y el rótulo va junto al punto. Todos: rótulos en dos columnas a los lados del hueso unidos a su
+  punto por una línea (`SCorpusMarcas`, dibujado en Slate encima del modelo, como la web sin prueba de profundidad).
+  Mientras hay marcas se enciende el fantasma (lo que tapa el hueso queda translúcido) y se apaga al quitarlas.
+- Pruebas: `sel n152; relieve todos` · `relieve <n | parte del nombre>` · `relieve off`. Capturas `s1_c_*`.
+- Falta: nombres en francés y alemán (no están en los datos: salen en inglés); las marcas son de reposo y se esconden
+  con una postura puesta; no se puede hacer clic en una marca; el relieve no se resalta como zona sobre la malla (solo
+  punto y rótulo); con muchos rótulos el último puede salirse por abajo; enlazar los relieves (`lm`) del glosario.
+
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.
