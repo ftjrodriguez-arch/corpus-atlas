@@ -597,6 +597,28 @@ defecto era solo de la deformación.
   pliegues de los músculos del muslo suben (a 90°, 823 → 1.114, sobre todo isquiosurales y grácil a media altura, por la
   combinación con el peso de rodilla de la web) aunque no se ven en las capturas. Pendiente de revisión profesional.
 
+### L · Muslo: la masa sigue continua al flexionar la cadera
+- Mismo cambio que K (un solo campo de peso de cadera para todos los músculos de la región): antes cada músculo del muslo
+  traía su reparto propio de la web, con mezcla lineal, y a partir de unos 60° se abrían en tiras.
+- **Medido (hombre, derecho):** parejas de puntos de dos músculos distintos que en reposo están a menos de 3 mm y se
+  separan más de 5 mm: flexión de cadera 90° 128 → 38, 120° 167 → 57; flexión de rodilla 135° (con la cadera) 141 → 62;
+  fondo de la sentadilla 192 → 69. Separación máxima 58 → 21 mm (120°) y 58 → 19 mm (sentadilla). Los huecos de la ingle
+  y de la pelvis (glúteo medio con tracto iliotibial, pectíneo con aductores, glúteo medio con menor) desaparecen.
+- Los que quedan (máximo 17 mm) están junto a la rótula a 135° de rodilla (recto femoral con los vastos) y son iguales
+  antes y después: los da el peso de rodilla de la web, distinto en cada músculo. Haría falta un campo común también
+  para la rodilla.
+- **Muslo y abdomen en el fondo de la sentadilla: no resuelto.** No hay colisión entre el muslo y la pared abdominal; con
+  la cuenta de puntos del muslo por dentro de la cara anterior de la pared (> 3 mm; 700 ya en reposo, junto a la ingle)
+  sale 1.012 → 1.154 en la sentadilla y 1.273 → 1.932 a 120° de cadera (aductores, pectíneo y grácil junto al pubis). En las
+  capturas de lado no se ve el cruce, de frente lo tapan los muslos. Haría falta un plano o una superficie de contacto
+  (ingle) en el material.
+- **Se ve todavía:** la cámara «lado» ve la cara interna del muslo que se mueve; a 101° y 135° siguen viéndose líneas
+  oscuras entre grácil, sartorio y aductores que convergen hacia la ingle (`s1_l_mosaico.png`), parecidas a las de antes.
+  La medida dice que ya no se separan más de 5 mm, así que son sobre todo el surco entre músculos que se abren en abanico
+  y su sombra, pero a la vista no es la «masa continua» pedida. No se da por resuelto.
+- Capturas `antes_l_*` y `s1_l_*`: flexión de rodilla 0–135° de lado, por detrás y de frente (`s1_l_rod_hoja.png`) y
+  `s1_l_mosaico.png`.
+
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.
