@@ -254,6 +254,13 @@ void ACorpusJugador::TickQa()
 		Pausa = 3.0;
 	}
 	else if (Verbo == TEXT("fantasma") && Cu) { Cu->Fantasma(Resto != TEXT("0")); Pausa = 4.0; }   // fantasma <0|1>
+	else if (Verbo == TEXT("reproducir") && Cu) { Cu->Reproducir(Resto != TEXT("0")); Pausa = 0.05; }   // reproducir <0|1> el rango puesto con «rom»
+	else if (Verbo == TEXT("grados") && Cu)
+	{
+		// anota en el registro el ángulo actual (para comprobar la aceleración de la reproducción): «grados [segundos de espera]»
+		UE_LOG(LogTemp, Display, TEXT("CorpusQa grados %.2f s %.1f de %.0f"), GetWorld()->GetTimeSeconds(), Cu->Grados(), Cu->GradosMax());
+		Pausa = Resto.IsEmpty() ? 0.25 : FCString::Atod(*Resto);
+	}
 	else if (Verbo == TEXT("mapa") && Cu) { Cu->MapaInserciones(Resto != TEXT("0")); Pausa = 4.0; }   // mapa <0|1>: origen e inserción de la pieza seleccionada
 	else if (Verbo == TEXT("pelar") && Cu)
 	{

@@ -461,12 +461,29 @@ void ACorpusCuerpo::Tick(float Dt)
 		return;
 	}
 	if (!bReproduciendo || RangoActual < 0) { return; }
-	// ida y vuelta entre 0 y el máximo, a unos 45° por segundo (como el botón ▶ de la web)
+	// ida y vuelta entre 0 y el máximo con aceleración y frenado suaves (medio coseno): sale despacio, pasa por el centro
+	// del rango a la velocidad máxima y frena al llegar al tope, como un movimiento real. La media sigue siendo de unos
+	// 45° por segundo (la web va a velocidad constante); los rangos cortos tardan al menos 1,2 s.
 	const float Max = GradosMax();
-	float G = GradosActual + SentidoRepro * 45.f * Dt;
-	if (G >= Max) { G = Max; SentidoRepro = -1.f; }
-	if (G <= 0.f) { G = 0.f; SentidoRepro = 1.f; }
-	PonerRango(RangoActual, MovActual, bLadoIzq, G);
+	if (Max <= 0.f) { return; }
+	const float Duracion = FMath::Max(Max / 45.f, 1.2f);
+	FaseRepro += SentidoRepro * Dt / Duracion;
+	if (FaseRepro >= 1.f) { FaseRepro = 1.f; SentidoRepro = -1.f; }
+	if (FaseRepro <= 0.f) { FaseRepro = 0.f; SentidoRepro = 1.f; }
+	PonerRango(RangoActual, MovActual, bLadoIzq, Max * 0.5f * (1.f - FMath::Cos(PI * FaseRepro)));
+}
+
+void ACorpusCuerpo::Reproducir(bool bSi)
+{
+	bReproduciendo = bSi && RangoActual >= 0;
+	if (bReproduciendo)
+	{
+		// fase que corresponde al ángulo actual (el deslizador puede haberlo dejado en cualquier punto)
+		const float Max = GradosMax();
+		FaseRepro = Max > 0.f ? FMath::Acos(FMath::Clamp(1.f - 2.f * GradosActual / Max, -1.f, 1.f)) / PI : 0.f;
+		if (FaseRepro >= 1.f) { SentidoRepro = -1.f; } else if (FaseRepro <= 0.f) { SentidoRepro = 1.f; }
+	}
+	AlCambiarPostura.Broadcast();
 }
 
 // ───────── Plano de corte ─────────

@@ -370,6 +370,20 @@ Capturas finales: `unreal/capturas/s1_*` (una hoja de contactos por punto: `s1_<
   corto); es un color por área, no una proyección pintada sobre la malla del hueso; sin rugosidad diferenciada en las zonas
   de inserción; el mapa no sigue todavía a varias piezas a la vez (una región entera).
 
+### E · Goniómetro en pantalla y reproducción suave
+- `SCorpusGonio` (Slate, en lo alto del panel de movimiento): transportador de 180°, brazo fijo a 0°, brazo móvil en el
+  ángulo actual, arco recorrido en naranja y tope del rango marcado; al lado, el ángulo en grande, el máximo y el
+  porcentaje del rango, con articulación, movimiento y lado. Lee `Grados()` y `GradosMax()` de `ACorpusCuerpo`.
+- Reproducción: `ACorpusCuerpo::Tick` ya no va a 45°/s constantes. Avanza una fase 0–1 y el ángulo es
+  máx · (1 − cos(π·fase)) / 2: arranca despacio, pasa por el centro del rango a la velocidad máxima y frena en el tope
+  (media de 45°/s; mínimo 1,2 s por recorrido). `Reproducir()` arranca desde el ángulo en que esté el deslizador.
+- Pruebas: `rom rodilla 0 R 68` · `reproducir <0|1>` · `grados [s]` (anota el ángulo en el registro). Medido en la
+  flexión de rodilla cada 0,25 s: 0 → 3 → 11 → 23 → 38 → 55 → 73 → 91 → 106 → 120 → 129 → 134 → 135°.
+  Capturas `s1_e_*` (rodilla a 0, 34, 68, 101 y 135°, abducción de cadera a 45° en español e inglés, reposo).
+- Falta: el goniómetro es un indicador, no el goniómetro manipulable de la web (colocado por el usuario sobre el modelo);
+  no se dibuja sobre la articulación; rotación automática de la rodilla, sentadilla y prueba en valgo (otra tarea: hay que
+  volver a hornear el movimiento desde la web).
+
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.

@@ -71,7 +71,8 @@ public:
 	/** Coloca la postura del movimiento Mov del rango Rango a Grados (lado izquierdo si bIzq). Rango < 0 = reposo. */
 	void PonerRango(int32 Rango, int32 Mov, bool bIzq, float Grados);
 	void QuitarPostura() { PonerRango(-1, 0, false, 0.f); }
-	void Reproducir(bool bSi) { bReproduciendo = bSi && RangoActual >= 0; AlCambiarPostura.Broadcast(); }
+	/** Ida y vuelta entre 0 y el máximo con arranque y frenado suaves; empieza desde el ángulo en que esté. */
+	void Reproducir(bool bSi);
 	bool Reproduciendo() const { return bReproduciendo; }
 	int32 Rango() const { return RangoActual; }
 	int32 Movimiento() const { return MovActual; }
@@ -173,6 +174,7 @@ private:
 	int32 RangoActual = -1, MovActual = 0;
 	bool bLadoIzq = false, bReproduciendo = false;
 	float GradosActual = 0.f, SentidoRepro = 1.f;
+	float FaseRepro = 0.f;   // 0–1 del recorrido de ida; el ángulo es máx · (1 − cos(π·fase)) / 2
 
 private:
 	UCorpusDatos* Datos() const;

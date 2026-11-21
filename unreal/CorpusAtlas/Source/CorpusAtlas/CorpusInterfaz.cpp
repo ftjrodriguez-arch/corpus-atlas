@@ -139,6 +139,50 @@ public:
 	}
 };
 
+// ───────── Goniómetro en pantalla ─────────
+// Semicírculo graduado: brazo fijo a 0°, brazo móvil en el ángulo actual, arco recorrido en color y el tope del rango marcado.
+class SCorpusGonio : public SLeafWidget
+{
+public:
+	SLATE_BEGIN_ARGS(SCorpusGonio) {}
+	SLATE_END_ARGS()
+	void Construct(const FArguments&) { SetVisibility(EVisibility::HitTestInvisible); }
+	virtual FVector2D ComputeDesiredSize(float) const override { return FVector2D(210.0, 118.0); }
+	TWeakObjectPtr<ACorpusCuerpo> Cuerpo;
+
+	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& G, const FSlateRect& Recorte, FSlateWindowElementList& Fuera, int32 Capa, const FWidgetStyle& Estilo, bool bActivo) const override
+	{
+		const ACorpusCuerpo* Cu = Cuerpo.Get();
+		if (!Cu || Cu->Rango() < 0) { return Capa; }
+		const float Max = FMath::Max(Cu->GradosMax(), 1.f), Ang = FMath::Clamp(Cu->Grados(), 0.f, Max);
+		const FVector2D Tam = G.GetLocalSize();
+		const FVector2f C((float)Tam.X * 0.5f, (float)Tam.Y - 12.f);
+		const float R = FMath::Min((float)Tam.X * 0.5f - 8.f, (float)Tam.Y - 22.f);
+		const auto En = [&](float Grados, float Radio) { const float A = FMath::DegreesToRadians(Grados); return C + FVector2f(FMath::Cos(A), -FMath::Sin(A)) * Radio; };
+		const auto Arco = [&](float A0, float A1, float Radio, const FLinearColor& Col, float Grosor, int32 L)
+		{
+			TArray<FVector2f> P;
+			const int32 N = FMath::Max(2, FMath::CeilToInt(FMath::Abs(A1 - A0) / 3.f) + 1);
+			for (int32 k = 0; k < N; ++k) { P.Add(En(FMath::Lerp(A0, A1, (float)k / (N - 1)), Radio)); }
+			FSlateDrawElement::MakeLines(Fuera, L, G.ToPaintGeometry(), P, ESlateDrawEffect::None, Col, true, Grosor);
+		};
+		const auto Linea = [&](const FVector2f& A, const FVector2f& B, const FLinearColor& Col, float Grosor, int32 L)
+		{
+			FSlateDrawElement::MakeLines(Fuera, L, G.ToPaintGeometry(), TArray<FVector2f>({ A, B }), ESlateDrawEffect::None, Col, true, Grosor);
+		};
+		const FLinearColor Gris(0.30f, 0.34f, 0.40f), Naranja(FColor::FromHex(TEXT("f0a040")));
+		Arco(0.f, 180.f, R, FLinearColor(0.14f, 0.17f, 0.22f), 2.f, Capa);            // transportador entero
+		for (int32 g = 0; g <= 180; g += 15) { Linea(En((float)g, R - (g % 45 == 0 ? 10.f : 5.f)), En((float)g, R), Gris, 1.f, Capa); }
+		Arco(0.f, Max, R, Gris, 5.f, Capa + 1);                                        // rango de este movimiento
+		Arco(0.f, Ang, R, Naranja, 5.f, Capa + 2);                                     // recorrido
+		Linea(En(Max, R - 14.f), En(Max, R + 6.f), C_TINTA, 2.f, Capa + 2);             // tope
+		Linea(C, En(0.f, R - 4.f), C_GRIS, 3.f, Capa + 2);                              // brazo fijo
+		Linea(C, En(Ang, R - 4.f), C_TINTA, 3.5f, Capa + 3);                            // brazo móvil
+		FSlateDrawElement::MakeBox(Fuera, Capa + 4, G.ToPaintGeometry(FVector2D(12, 12), FSlateLayoutTransform(FVector2D(C) - FVector2D(6, 6))), Punto(), ESlateDrawEffect::None, Naranja);
+		return Capa + 4;
+	}
+};
+
 SCorpusInterfaz::~SCorpusInterfaz()
 {
 	if (ACorpusCuerpo* C = Cuerpo()) { C->AlCambiarSeleccion.Remove(HSel); C->AlCambiarCapas.Remove(HCapas); C->AlCambiarPostura.Remove(HPostura); C->AlCambiarHerramientas.Remove(HHerr); }
@@ -502,6 +546,37 @@ void SCorpusInterfaz::RehacerMovimiento()
 		}
 		CajaMov->AddSlot().AutoHeight().Padding(0, 6, 0, 0)[ Txt(D->T(TEXT("Actividad muscular: amarillo (poca) → magenta (mucha). Datos de laboratorio: Fukuchi 2018, Schreiber 2019, Lencioni 2019.")), 8, C_GRIS) ];
 		return;
+	}
+	// goniómetro: el ángulo actual en grande, el máximo del movimiento y el transportador
+	if (Rs.IsValidIndex(Ri) && Rs[Ri].Movs.IsValidIndex(Mi))
+	{
+		TSharedRef<SCorpusGonio> Gonio = SNew(SCorpusGonio);
+		Gonio->Cuerpo = WC;
+		FString Titulo = D->T(Rs[Ri].Nombre) + TEXT(" · ") + D->T(Rs[Ri].Movs[Mi].Nombre);
+		if (Rs[Ri].bLados) { Titulo += TEXT(" · ") + D->T(bIzq ? TEXT("Izquierdo") : TEXT("Derecho")); }
+		CajaMov->AddSlot().AutoHeight().Padding(0, 0, 0, 10)
+		[
+			SNew(SBorder).BorderImage(Panel2()).Padding(FMargin(12, 8))
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ Gonio ]
+				+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center).Padding(16, 0, 0, 0)
+				[
+					SNew(SVerticalBox)
+					+ SVerticalBox::Slot().AutoHeight()[ Txt(Mayus(Titulo), 9, C_GRIS, true) ]
+					+ SVerticalBox::Slot().AutoHeight()
+					[
+						SNew(STextBlock).Font(Letra(44, true)).ColorAndOpacity(FSlateColor(C_TINTA))
+						.Text_Lambda([WC]() { return WC.IsValid() ? FText::FromString(FString::Printf(TEXT("%d°"), FMath::RoundToInt(WC->Grados()))) : FText(); })
+					]
+					+ SVerticalBox::Slot().AutoHeight()
+					[
+						SNew(STextBlock).Font(Letra(13, true)).ColorAndOpacity(FSlateColor(FLinearColor(FColor::FromHex(TEXT("f0a040")))))
+						.Text_Lambda([WC]() { return WC.IsValid() ? FText::FromString(FString::Printf(TEXT("máx. %d°  ·  %d %%"), FMath::RoundToInt(WC->GradosMax()), WC->GradosMax() > 0.f ? FMath::RoundToInt(100.f * WC->Grados() / WC->GradosMax()) : 0)) : FText(); })
+					]
+				]
+			]
+		];
 	}
 	TSharedRef<SWrapBox> FilaR = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
 	for (int32 i = 0; i < Rs.Num(); ++i)
