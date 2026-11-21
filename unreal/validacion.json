@@ -1,5 +1,5 @@
 {
- "fecha": "2026-11-21T23:40:51.361Z",
+ "fecha": "2026-11-21T23:44:03.593Z",
  "resumen": {
   "errores": 0,
   "avisos": 146,
@@ -242,13 +242,13 @@
    "tipo": "sin_traducir",
    "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_fr.json",
    "clave": "en inglés",
-   "msg": "1597 frases iguales al inglés (más 788 términos cortos): casos 101, patologias 1, glosario 1495 (p. ej. casos.grupos[1].items[0].secs[3][0] «Test · Slump» | casos.grupos[1].items[1].secs[1][0] «Test · FADIR» | casos.grupos[1].items[1].secs[3][0] «Test · FABER (Patrick)»)"
+   "msg": "1294 frases iguales al inglés (más 710 términos cortos): casos 101, patologias 1, glosario 1192 (p. ej. casos.grupos[1].items[0].secs[3][0] «Test · Slump» | casos.grupos[1].items[1].secs[1][0] «Test · FADIR» | casos.grupos[1].items[1].secs[3][0] «Test · FABER (Patrick)»)"
   },
   {
    "tipo": "sin_traducir",
    "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_de.json",
    "clave": "en inglés",
-   "msg": "1600 frases iguales al inglés (más 2447 términos cortos): lecciones 1, casos 103, patologias 1, glosario 1495 (p. ej. lecciones.grupos[4].items[4].q[2].o[3] «Chorda tympani (VII)» | casos.grupos[1].items[0].secs[3][0] «Test · Slump» | casos.grupos[1].items[1].secs[1][0] «Test · FADIR»)"
+   "msg": "1290 frases iguales al inglés (más 2360 términos cortos): lecciones 1, casos 103, patologias 1, glosario 1185 (p. ej. lecciones.grupos[4].items[4].q[2].o[3] «Chorda tympani (VII)» | casos.grupos[1].items[0].secs[3][0] «Test · Slump» | casos.grupos[1].items[1].secs[1][0] «Test · FADIR»)"
   },
   {
    "tipo": "otro_idioma",
