@@ -1,15 +1,16 @@
 {
- "fecha": "2026-11-21T23:27:18.983Z",
+ "fecha": "2026-11-21T23:32:53.673Z",
  "resumen": {
   "errores": 0,
-  "avisos": 146,
+  "avisos": 147,
   "nombres_comprobados": 20985,
   "errores_por_tipo": {},
   "avisos_por_tipo": {
    "pares": 37,
    "sin_traducir": 4,
    "otro_idioma": 1,
-   "mayusculas": 104
+   "mayusculas": 104,
+   "copias": 1
   },
   "mayusculas_mismo_valor": 182
  },
@@ -242,13 +243,13 @@
    "tipo": "sin_traducir",
    "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_fr.json",
    "clave": "en inglés",
-   "msg": "2925 frases iguales al inglés (más 1130 términos cortos): casos 101, patologias 11, glosario 2813 (p. ej. casos.grupos[1].items[0].secs[3][0] «Test · Slump» | casos.grupos[1].items[1].secs[1][0] «Test · FADIR» | casos.grupos[1].items[1].secs[3][0] «Test · FABER (Patrick)»)"
+   "msg": "2265 frases iguales al inglés (más 955 términos cortos): casos 101, patologias 1, glosario 2163 (p. ej. casos.grupos[1].items[0].secs[3][0] «Test · Slump» | casos.grupos[1].items[1].secs[1][0] «Test · FADIR» | casos.grupos[1].items[1].secs[3][0] «Test · FABER (Patrick)»)"
   },
   {
    "tipo": "sin_traducir",
    "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_de.json",
    "clave": "en inglés",
-   "msg": "2936 frases iguales al inglés (más 2799 términos cortos): lecciones 1, casos 103, patologias 17, glosario 2815 (p. ej. lecciones.grupos[4].items[4].q[2].o[3] «Chorda tympani (VII)» | casos.grupos[1].items[0].secs[3][0] «Test · Slump» | casos.grupos[1].items[1].secs[1][0] «Test · FADIR»)"
+   "msg": "2261 frases iguales al inglés (más 2613 términos cortos): lecciones 1, casos 103, patologias 1, glosario 2156 (p. ej. lecciones.grupos[4].items[4].q[2].o[3] «Chorda tympani (VII)» | casos.grupos[1].items[0].secs[3][0] «Test · Slump» | casos.grupos[1].items[1].secs[1][0] «Test · FADIR»)"
   },
   {
    "tipo": "otro_idioma",
@@ -891,6 +892,12 @@
    "archivo": "data/i18n_fr.json",
    "clave": "ui: «sagittal» / «Sagittal»",
    "msg": "«sagittal» → \"sagittale\" · «Sagittal» → \"Sagittal\""
+  },
+  {
+   "tipo": "copias",
+   "archivo": "unreal/CorpusAtlas/Content/Datos/movimiento.json",
+   "clave": "movimiento.json",
+   "msg": "distinto de Importar/datos/movimiento.json (falta copiar: ci.copiar_datos())"
   }
  ]
 }
