@@ -436,6 +436,7 @@ const PREPARA = `(async()=>{
   const antes = (SIN_PESOS || SOLO) && fs.existsSync(jf) ? JSON.parse(fs.readFileSync(jf, 'utf8')) : null;
   const salida = { version: 2, unidades: 'm, glTF (Y arriba)', paso: PASO, ax: R.AX, ax_de: R.L.slice(-3),
     articulaciones: R.L.map((k, i) => ({ id: k, pivote: R.piv[i] })), rom, marcha, ejercicios, torax, abrazo, piezas: antes ? antes.piezas : {}, insercion: antes && antes.insercion ? antes.insercion : {} };
+  if (antes && antes.cadera) salida.cadera = antes.cadera;      /* parámetros de cadera.js: los pesos que van con ellos no cambian */
   fs.mkdirSync(path.join(IMP, 'datos'), { recursive: true });
   fs.writeFileSync(jf, JSON.stringify(salida));
   console.log('Posturas: datos/movimiento.json');
@@ -474,5 +475,7 @@ const PREPARA = `(async()=>{
   }
   fs.writeFileSync(path.join(IMP, 'datos', 'movimiento.json'), JSON.stringify(salida));
   console.log('Pesos: %d vértices, %d mallas con movimiento, %d mallas recortadas a 8 articulaciones', tv, tm, to);
+  /* mejora sobre la web: un solo campo de peso para la cadera en toda la capa muscular (tools/unreal/cadera.js) */
+  if (!SOLO || SOLO === 'muscular') { console.log('Cadera:'); require('./cadera.js').aplicar(CUERPOS); }
   await b.close();
 })().catch(e => { console.error(e); process.exit(1); });

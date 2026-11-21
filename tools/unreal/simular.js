@@ -18,6 +18,7 @@ const SUAVE = ops.includes('suave');
 const RR = +((ops.find(o => o.startsWith('R=')) || '').slice(2)) || 0, R0 = +((ops.find(o => o.startsWith('R0=')) || '').slice(3)) || 0.02;
 const M = JSON.parse(fs.readFileSync(path.join(IMP, 'datos', 'movimiento.json'), 'utf8'));
 const rig = JSON.parse(fs.readFileSync(path.join(IMP, 'datos', 'rig.json'), 'utf8'));
+const CAD = Object.assign({ cuerda: 0, radio: 0.075, adelgaza: 0 }, M.cadera || {});
 const NA = M.articulaciones.length, arts = M.articulaciones.map(a => a.id), cuerpo = capa.split('/')[0];
 const mv = M.rom.find(r => r.id === rom).movs[+mi], F = mv[lado], fr = F[Math.min(F.length - 1, Math.round(+grados / mv.paso))];
 const J = arts.map((_, i) => ({ e: [0, 0, 0], a: 0, t: [0, 0, 0], p: M.articulaciones[i].pivote }));
@@ -43,7 +44,8 @@ const sat = x => Math.max(0, Math.min(1, x)), ss = (a, c, x) => { const t = sat(
 function postura(g0, ws) {
   let gg = g0.slice(), hecho = false, wl = 0, ip = INS.slice(); const info = {};
   for (let k = 0; k < 9; k++) {
-    const jv = js[k]; let code = Math.round(Math.abs(jv)); const tronco = jv === 0 || (code & 31) >= NA - 2;
+    const jv = js[k]; let code = Math.round(Math.abs(jv)); if (code === 31) continue;
+    const tronco = jv === 0 || (code & 31) >= NA - 2;
     if (!hecho && tronco) { hecho = true;
       if (HUG > 0 && wl > 0.0005 && !SIN_ABRAZO) {
         const k0 = TX.k(TC, g0), k1 = (gg[0] === g0[0] && gg[1] === g0[1] && gg[2] === g0[2]) ? k0 : TX.k(TC, gg), R1 = TX.radio(TC, gg);
@@ -59,7 +61,15 @@ function postura(g0, ws) {
     const w = sat(ws[k]); if (k === 0 && !tronco) wl = w; if (w < 0.0005) continue; const lin = jv < 0;
     for (let t = 0; t < 3; t++) { const j = (code & 31) - 1; code >>= 5; if (j < 0) break; const o = J[j]; if (!o.a && !o.t.some(x => x)) continue;
       if (FIB && lin) { const r = gira(gg, o.p, o.e, o.a), ri = gira(ip, o.p, o.e, o.a), q = Math.pow(w, QP); gg = gg.map((x, i) => { const tx = x + w * (ri[i] - ip[i]); return tx + (r[i] - tx) * q; }); ip = ri; continue; }
-      const r = gira(gg, o.p, o.e, lin ? o.a : o.a * w); gg = lin ? gg.map((x, i) => x + (r[i] - x) * w) : r; gg = gg.map((x, i) => x + o.t[i] * w); }
+      const r = gira(gg, o.p, o.e, lin ? o.a : o.a * w);
+      if (lin) gg = gg.map((x, i) => x + (r[i] - x) * w);
+      else if (w < 0.9995 && (j === arts.indexOf('hip_R') || j === arts.indexOf('hip_L'))) { /* cadera: arco mezclado con la cuerda y adelgazado hacia la esfera de la articulación (como postura.js) */
+        const rc = gira(gg, o.p, o.e, o.a); gg = gg.map((x, i) => r[i] + (x + (rc[i] - x) * w - r[i]) * CAD.cuerda);
+        if (CAD.adelgaza > 0 && Math.abs(js[k + 1]) === 31 && Math.abs(js[k + 2]) === 31 && Math.abs(js[k + 3]) === 31) { const gr = [ws[k + 1], ws[k + 2], ws[k + 3]].map(v => (v - 0.5) / 0.005), vel = cross(o.e, g0.map((x, i) => x - o.p[i]));
+          const lam = Math.max(1, Math.min(3.5, 1 + CAD.adelgaza * o.a * dot(gr, vel))), d = gg.map((x, i) => x - o.p[i]), rr = Math.hypot(d[0], d[1], d[2]);
+          if (lam > 1 && rr > CAD.radio) { const s = (CAD.radio + (rr - CAD.radio) / lam) / rr; gg = d.map((x, i) => o.p[i] + x * s); } } }
+      else gg = r;
+      gg = gg.map((x, i) => x + o.t[i] * w); }
   }
   return [gg, info];
 }

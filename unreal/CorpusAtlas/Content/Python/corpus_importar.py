@@ -82,6 +82,8 @@ def copiar_datos():
     n = 0
     origen = os.path.join(IMPORTAR, "datos")
     for f in os.listdir(origen):
+        if os.path.isdir(os.path.join(origen, f)):
+            continue        # carpetas (estudio_img) no: daban PermissionError y cortaban la copia
         shutil.copy2(os.path.join(origen, f), os.path.join(DATOS, f)); n += 1
     shutil.copy2(os.path.join(IMPORTAR, "manifiesto.json"), os.path.join(DATOS, "manifiesto.json"))
     unreal.log("Corpus: %d archivos de datos copiados a Content/Datos" % (n + 1))
@@ -215,6 +217,7 @@ if (CB > 0.5)
 {
     float jv = js[k];
     int code = (int)round(abs(jv));
+    if (code == 31) continue;      // hueco de datos (gradiente del peso de cadera), no es una articulación
     // Antes de girar el tronco (o al acabar): las piezas pegadas al tórax conservan su distancia relativa a las costillas
     // (k = r / radio de las costillas; 1 = sobre ellas). Solo hacia el húmero (peso alto) hay holgura: pliegue axilar.
     bool tronco = (jv == 0) || ((code & 31) >= @NA_TRONCO@);
@@ -287,7 +290,27 @@ if (CB > 0.5)
         else if (w >= 0.0005)
         {
             float3 r = tx.Gira(g, pv, float4(ea.xyz, lin ? ea.w : ea.w * w));
-            g = lin ? g + (r - g) * w : r;
+            if (lin) g = g + (r - g) * w;
+            else if (w < 0.9995 && (j == @HIP_R@ || j == @HIP_L@))
+            {
+                // Cadera (tools/unreal/cadera.js): arco alrededor de la cabeza femoral mezclado con la cuerda recta, y lo que
+                // queda por fuera de la esfera de los huesos de la cadera se adelgaza hacia ella, tanto como se estira. El tejido que se estira al
+                // flexionar (glúteo mayor) envuelve la articulación sin aumentar de volumen ni colgar.
+                float3 rc = tx.Gira(g, pv, ea);
+                g = lerp(r, g + (rc - g) * w, @CAD_CUERDA@);
+                // estiramiento local = ángulo · ∇w · (eje × radio); el gradiente del peso va en los tres huecos de datos
+                // (código 31) que siguen al de la cadera, como 0,5 + g · 0,005
+                if (k < 5 && round(abs(js[k + 1])) == 31 && round(abs(js[k + 2])) == 31 && round(abs(js[k + 3])) == 31)
+                {
+                    float3 gw = (float3(ws[k + 1], ws[k + 2], ws[k + 3]) - 0.5) / 0.005;
+                    float lam = clamp(1 + @CAD_ADELGAZA@ * ea.w * dot(gw, cross(ea.xyz, g0 - pv)), 1, 3.5);
+                    float3 dc = g - pv;
+                    float rr = length(dc);
+                    if (lam > 1 && rr > @CAD_RADIO@)
+                        g = pv + dc * ((@CAD_RADIO@ + (rr - @CAD_RADIO@) / lam) / rr);
+                }
+            }
+            else g = r;
         }
         if (w < 0.0005) continue;
         g += tr * w;
@@ -357,6 +380,7 @@ def _postura(g):
     with open(os.path.join(IMPORTAR, "datos", "rig.json"), encoding="utf-8") as h:
         sb = json.load(h)["scapBot_R"]          # ángulo inferior de la escápula derecha (la izquierda, en espejo)
     tor = mov["torax"]
+    cad = dict({"cuerda": 0.0, "radio": 0.075, "adelgaza": 0.0}, **(mov.get("cadera") or {}))      # tools/unreal/cadera.js
     ancho_corr = 512        # ancho de la textura de correctivos (correctivos.json → ancho)
     for f in (os.path.join(IMPORTAR, "datos", "correctivos.json"), os.path.join(DATOS, "correctivos.json")):
         if os.path.exists(f):
@@ -370,7 +394,9 @@ def _postura(g):
     codigo = HLSL_POSTURA
     for k, v in (("CW", ancho_corr), ("NA_TRONCO", len(arts) - 2), ("Y0", float(tor["y0"])), ("DY", float(tor["dy"])), ("ZC", float(tor["zc"])),
                  ("NH", int(tor["nh"])), ("NS", int(tor["ns"])), ("ACR_R", arts.index("acr_R")), ("ACR_L", arts.index("acr_L")),
-                 ("SC_R", arts.index("sc_R")), ("SC_L", arts.index("sc_L")), ("SBX", sb[0]), ("SBY", sb[1]), ("SBZ", sb[2])):
+                 ("SC_R", arts.index("sc_R")), ("SC_L", arts.index("sc_L")), ("SBX", sb[0]), ("SBY", sb[1]), ("SBZ", sb[2]),
+                 ("HIP_R", arts.index("hip_R")), ("HIP_L", arts.index("hip_L")), ("CAD_CUERDA", float(cad["cuerda"])), ("CAD_RADIO", float(cad["radio"])),
+                 ("CAD_ADELGAZA", float(cad["adelgaza"]))):
         codigo = codigo.replace("@%s@" % k, repr(v))
     cu = _custom(g, codigo, ["Tex", "P", "U0", "U1", "U2", "U3"] + ["J%d" % i for i in range(8)] + ["HUG", "IX", "IY", "IZ"]
                  + ["TexC", "CB", "CNX", "CNY", "CNZ", "COX", "COY", "COZ", "CH"], CMOT.CMOT_FLOAT3,
