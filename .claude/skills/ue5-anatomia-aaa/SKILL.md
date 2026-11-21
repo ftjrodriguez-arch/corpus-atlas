@@ -78,6 +78,17 @@ los recorridos `heart`, `resp`, `renal`, `syn` y `micro`. Las escenas microscóp
 panel. *Falta:* clic en una estructura → su entrada; relieves óseos (`lm`) resaltados sobre el hueso; examen práctico
 de identificación en 3D con puntuación; glosario en francés y alemán.
 
+## Rigor de los datos (tomado de los skills del usuario `ue5-anatomia-biomecanica-aaa` y `ue5-motor-y-calidad-visual`)
+- Nomenclatura de la Terminologia Anatomica (TA2) en español, con el latín como sinónimo; portugués de Brasil.
+- Un dato clínico dudoso se marca como pendiente de revisión; nunca se inventa. Los JSON nuevos de esta edición
+  (`tools/unreal/*.json`) llevan por registro `fuente` (texto de referencia) y `estado` (`verificado` | `pendiente_revision`).
+- Enlazar por id del catálogo cuando exista; el nombre en inglés solo donde la web ya lo usa así.
+- `node tools/unreal/validar.js` antes de entregar cualquier cambio de datos (ids existentes, rangos coherentes,
+  sin duplicados, mismos módulos en los cinco idiomas, claves que el lector de Unreal funde por mayúsculas).
+- El color nunca es la única señal: cada código de color (agonista, actividad, origen/inserción) lleva rótulo o
+  leyenda, y la paleta debe tener variante segura para daltonismo (pendiente).
+
 ## Antes de dar algo por hecho
-1. El dato está en JSON, no en C++. 2. Compila. 3. Capturas con `ue5-visual-qa`. 4. Informe del agente
-`director-clinico` sin errores abiertos. 5. `unreal/LEEME.md` actualizado con lo hecho y lo que falta.
+1. El dato está en JSON, no en C++. 2. Compila. 3. `node tools/unreal/validar.js` sin errores nuevos.
+4. Capturas con `ue5-visual-qa`. 5. Informe del agente `director-clinico` sin errores abiertos.
+6. `unreal/LEEME.md` y `PENDIENTES.md` actualizados con lo hecho y lo que falta.

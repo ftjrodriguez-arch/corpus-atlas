@@ -59,6 +59,12 @@ Las fotos quedan en `unreal/capturas/`. Juntarlas siempre en una hoja:
 - [ ] Al cerrar un panel vuelven capas, opacidades, cuerpo y cámara.
 - [ ] Probado en un segundo idioma.
 
+## Rendimiento e interfaz (tomado de los skills del usuario)
+- Tras un cambio visual importante, medir con los pasos de consola `stat unit` y `stat gpu` en la misma escena
+  antes y después, y anotar los milisegundos en `unreal/LEEME.md`.
+- Probar la interfaz al menos en 1280×720 y 1920×1080 (`captura.ps1` acepta `r.SetRes 1280x720w` como paso de consola).
+- Al corregir algo visual, la captura de antes y la de después van lado a lado (`unreal/mosaico.ps1`).
+
 ## Trampas conocidas
 - El usuario prueba la aplicación en la misma ventana que abre `captura.ps1`: si la mueve, las fotos salen alteradas
   (otro encuadre, capas apagadas, una ficha abierta). Repetir antes de dar un resultado por malo.
