@@ -38,6 +38,17 @@ public:
 	/** Deja a la vista solo esas piezas (de las capas encendidas). Lista vacía = todas. Lo usan las pruebas y lo usarán las lecciones. */
 	void VerSolo(const TArray<FString>& Ids);
 
+	// ── Estudio: lecciones, recorridos, casos y patologías enseñan estructuras en el modelo ──
+	/** Ids (en el cuerpo actual) de las estructuras con esos nombres en inglés; Lado «d» o «i» deja solo ese lado en las pares. */
+	TArray<FString> IdsDeNombres(const TArray<FString>& En, const FString& Lado = FString()) const;
+	/** Enseña solo esas piezas: enciende sus capas (y las de Capas) y oculta lo demás. Sin piezas, solo enciende las capas. */
+	void Ensenar(const TArray<FString>& Ids, const TArray<FString>& Capas);
+	/** Recorridos: capas, opacidades, piezas aisladas y ocultas como en ese paso de la web. */
+	void PonerVista(const struct FCorpusVistaPaso& V);
+	/** Guarda y devuelve cuerpo, capas y opacidades (al entrar y al salir del panel de estudio). */
+	void GuardarEstado();
+	void RestaurarEstado();
+
 	/** Id de la pieza a la que pertenece un componente (clic del ratón). */
 	FString IdDe(const UPrimitiveComponent* Comp) const;
 	/** Caja en el mundo de una pieza, o de todo lo visible si Id está vacío. */
@@ -131,4 +142,11 @@ private:
 	FString IdSeleccionada, IdAislada;
 	TSet<FString> Grupo;
 	ECorpusCuerpo CuerpoActual = ECorpusCuerpo::Hombre;
+	// estado guardado al entrar en el panel de estudio
+	bool bHayGuardado = false;
+	ECorpusCuerpo CuerpoGuardado = ECorpusCuerpo::Hombre;
+	TSet<FString> CapasGuardadas;
+	TMap<FString, float> OpacidadesGuardadas;
+	/** Capa (clave) en la que está la pieza en el cuerpo actual, o vacío si no existe en él. */
+	FString CapaDePieza(const struct FCorpusPieza& P) const;
 };

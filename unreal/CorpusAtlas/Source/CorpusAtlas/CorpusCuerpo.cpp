@@ -649,6 +649,103 @@ void ACorpusCuerpo::MostrarTodo()
 	for (const auto& Par : IdsPorCapa) { AplicarVisibilidad(Par.Key); }
 }
 
+// ───────── Estudio ─────────
+
+FString ACorpusCuerpo::CapaDePieza(const FCorpusPieza& P) const
+{
+	// misma regla que CargarCapa: la mujer usa la malla del hombre si la pieza no cambia
+	const UCorpusDatos* D = Datos();
+	const FCorpusMalla* M = P.Mallas.Find(CarpetaCuerpo());
+	if (!M && D && CuerpoActual == ECorpusCuerpo::Mujer && !D->EsSoloHombre(P.Id)) { M = P.Mallas.Find(TEXT("hombre")); }
+	return M ? M->Sistema : FString();
+}
+
+TArray<FString> ACorpusCuerpo::IdsDeNombres(const TArray<FString>& En, const FString& Lado) const
+{
+	TArray<FString> Ids;
+	const UCorpusDatos* D = Datos();
+	if (!D || En.Num() == 0) { return Ids; }
+	const TSet<FString> Nombres(En);
+	const FString Quiero = Lado == TEXT("d") ? TEXT("derecho") : Lado == TEXT("i") ? TEXT("izquierdo") : FString();
+	for (const auto& Par : D->TodasLasPiezas())
+	{
+		const FCorpusPieza& P = Par.Value;
+		if (!Nombres.Contains(P.En) || P.Sistema == TEXT("insercion")) { continue; }   // los orígenes e inserciones llevan el nombre del músculo
+		if (!Quiero.IsEmpty() && !P.Lado.IsEmpty() && P.Lado != Quiero) { continue; }
+		const FString Capa = CapaDePieza(P);
+		if (Capa.IsEmpty() || !CapaDisponible(Capa)) { continue; }
+		Ids.Add(P.Id);
+	}
+	return Ids;
+}
+
+void ACorpusCuerpo::Ensenar(const TArray<FString>& Ids, const TArray<FString>& Capas)
+{
+	const UCorpusDatos* D = Datos();
+	if (!D) { return; }
+	TSet<FString> Encender(Capas);
+	for (const FString& Id : Ids) { if (const FCorpusPieza* P = D->Pieza(Id)) { const FString C = CapaDePieza(*P); if (!C.IsEmpty()) { Encender.Add(C); } } }
+	for (const FString& Clave : Encender)
+	{
+		if (CapasVisibles.Contains(Clave) || !CapaDisponible(Clave)) { continue; }
+		CapasVisibles.Add(Clave); CargarCapa(Clave);
+	}
+	Ocultas.Reset(); IdAislada.Reset();
+	Grupo = TSet<FString>(Ids);
+	for (const auto& Par : IdsPorCapa) { AplicarVisibilidad(Par.Key); }
+	AlCambiarCapas.Broadcast();
+}
+
+void ACorpusCuerpo::PonerVista(const FCorpusVistaPaso& V)
+{
+	const UCorpusDatos* D = Datos();
+	if (!D) { return; }
+	// los ids de las piezas aisladas son los del cuerpo con el que la web hace ese recorrido
+	const ECorpusCuerpo Quiero = V.bMujer ? ECorpusCuerpo::Mujer : ECorpusCuerpo::Hombre;
+	if (CuerpoActual != Quiero) { Grupo.Reset(); PonerCuerpo(Quiero); }
+	for (const FCorpusCapa& C : D->Capas())
+	{
+		if (!CapaDisponible(C.Clave)) { continue; }
+		const float* Op = V.Capas.Find(C.Clave);
+		if (Op)
+		{
+			if (!FMath::IsNearlyEqual(OpacidadDeCapa(C.Clave), *Op, 0.01f)) { OpacidadCapa(C.Clave, *Op); }
+			if (!CapasVisibles.Contains(C.Clave)) { CapasVisibles.Add(C.Clave); CargarCapa(C.Clave); }
+		}
+		else { CapasVisibles.Remove(C.Clave); }
+	}
+	Ocultas = TSet<FString>(V.Ocultas); IdAislada.Reset();
+	Grupo = V.bIso ? TSet<FString>(V.Iso) : TSet<FString>();
+	for (const auto& Par : IdsPorCapa) { AplicarVisibilidad(Par.Key); }
+	AlCambiarCapas.Broadcast();
+}
+
+void ACorpusCuerpo::GuardarEstado()
+{
+	if (bHayGuardado) { return; }
+	bHayGuardado = true;
+	CuerpoGuardado = CuerpoActual; CapasGuardadas = CapasVisibles; OpacidadesGuardadas = Opacidades;
+}
+
+void ACorpusCuerpo::RestaurarEstado()
+{
+	if (!bHayGuardado) { return; }
+	bHayGuardado = false;
+	const UCorpusDatos* D = Datos();
+	if (!D) { return; }
+	if (CuerpoActual != CuerpoGuardado) { PonerCuerpo(CuerpoGuardado); }
+	Grupo.Reset(); Ocultas.Reset(); IdAislada.Reset();
+	for (const FCorpusCapa& C : D->Capas())
+	{
+		if (!CapaDisponible(C.Clave)) { continue; }
+		if (const float* Op = OpacidadesGuardadas.Find(C.Clave)) { if (!FMath::IsNearlyEqual(OpacidadDeCapa(C.Clave), *Op, 0.01f)) { OpacidadCapa(C.Clave, *Op); } }
+		if (CapasGuardadas.Contains(C.Clave)) { if (!CapasVisibles.Contains(C.Clave)) { CapasVisibles.Add(C.Clave); CargarCapa(C.Clave); } }
+		else { CapasVisibles.Remove(C.Clave); }
+	}
+	for (const auto& Par : IdsPorCapa) { AplicarVisibilidad(Par.Key); }
+	AlCambiarCapas.Broadcast();
+}
+
 FString ACorpusCuerpo::IdDe(const UPrimitiveComponent* Comp) const
 {
 	if (!Comp || Comp->GetOwner() != this) { return FString(); }

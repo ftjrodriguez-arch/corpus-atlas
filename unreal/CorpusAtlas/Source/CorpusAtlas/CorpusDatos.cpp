@@ -9,14 +9,16 @@ DEFINE_LOG_CATEGORY_STATIC(LogCorpus, Log, All);
 namespace
 {
 	struct FDefCapa { const TCHAR* Clave; const TCHAR* Nombre; const TCHAR* Color; bool bOn; float Op; const TCHAR* Grupo; const TCHAR* Sexo; const TCHAR* Base; };
-	// Misma tabla que SYS en index.html (orden, nombres, colores, capas encendidas al inicio y opacidad).
+	// Misma tabla que SYS en index.html (orden, nombres, colores y opacidad). A diferencia de la web, aquí arrancan encendidos
+	// los ligamentos, cápsulas y discos y las bolsas y vainas (petición del usuario: al abrir no se veían). Las fascias siguen
+	// apagadas porque las de envoltura (fascia lata, crural, braquial…) tapan los músculos.
 	const FDefCapa DEF_CAPAS[] = {
 		{TEXT("oseo"), TEXT("Huesos, cartílagos y dientes"), TEXT("ece2cb"), true, 1.f, TEXT("Aparato locomotor"), TEXT(""), TEXT("")},
 		{TEXT("muscular"), TEXT("Músculos"), TEXT("a3392f"), true, 1.f, TEXT("Aparato locomotor"), TEXT(""), TEXT("")},
 		{TEXT("insercion"), TEXT("Orígenes e inserciones"), TEXT("2f9e5b"), false, 1.f, TEXT("Aparato locomotor"), TEXT(""), TEXT("")},
-		{TEXT("articular"), TEXT("Ligamentos, cápsulas y discos"), TEXT("d3dde6"), false, 1.f, TEXT("Aparato locomotor"), TEXT(""), TEXT("")},
+		{TEXT("articular"), TEXT("Ligamentos, cápsulas y discos"), TEXT("d3dde6"), true, 1.f, TEXT("Aparato locomotor"), TEXT(""), TEXT("")},
 		{TEXT("fascia"), TEXT("Fascias y retináculos"), TEXT("cdb594"), false, .7f, TEXT("Aparato locomotor"), TEXT(""), TEXT("")},
-		{TEXT("bolsas"), TEXT("Bolsas sinoviales y vainas"), TEXT("8fb7c9"), false, 1.f, TEXT("Aparato locomotor"), TEXT(""), TEXT("")},
+		{TEXT("bolsas"), TEXT("Bolsas sinoviales y vainas"), TEXT("8fb7c9"), true, 1.f, TEXT("Aparato locomotor"), TEXT(""), TEXT("")},
 		{TEXT("arterial"), TEXT("Arterias y corazón"), TEXT("c53a2f"), false, 1.f, TEXT("Circulación"), TEXT(""), TEXT("")},
 		{TEXT("venoso"), TEXT("Venas"), TEXT("3f62ad"), false, 1.f, TEXT("Circulación"), TEXT(""), TEXT("")},
 		{TEXT("linfatico"), TEXT("Ganglios y órganos linfáticos"), TEXT("6aa874"), false, 1.f, TEXT("Circulación"), TEXT(""), TEXT("")},
@@ -586,4 +588,134 @@ TArray<FString> UCorpusDatos::Buscar(const FString& Texto, int32 Maximo) const
 	Empiezan.Append(Inserciones);
 	if (Empiezan.Num() > Maximo) { Empiezan.SetNum(Maximo); }
 	return Empiezan;
+}
+
+// ───────── Módulos de estudio (estudio_<idioma>.json y estudio_vistas.json, de tools/unreal/estudio.js) ─────────
+namespace
+{
+	TArray<FString> ListaCad(const TSharedPtr<FJsonObject>& O, const TCHAR* Campo)
+	{
+		TArray<FString> R;
+		const TArray<TSharedPtr<FJsonValue>>* A = nullptr;
+		if (O.IsValid() && O->TryGetArrayField(Campo, A)) { for (const auto& V : *A) { FString S; if (V.IsValid() && V->TryGetString(S)) { R.Add(S); } } }
+		return R;
+	}
+	FString CampoCad(const TSharedPtr<FJsonObject>& O, const TCHAR* Campo) { FString S; if (O.IsValid()) { O->TryGetStringField(Campo, S); } return S; }
+	int32 CampoEnt(const TSharedPtr<FJsonObject>& O, const TCHAR* Campo, int32 Def) { double N = Def; if (O.IsValid()) { O->TryGetNumberField(Campo, N); } return (int32)N; }
+}
+
+const FCorpusEstudio& UCorpusDatos::Estudio()
+{
+	if (const FCorpusEstudio* Ya = EstudioPorIdioma.Find(IdiomaActual)) { return *Ya; }
+	FCorpusEstudio E;
+	if (const TSharedPtr<FJsonObject> J = LeerObjeto(FString::Printf(TEXT("estudio_%s.json"), *IdiomaActual)))
+	{
+		J->TryGetStringField(TEXT("aviso"), E.Aviso);
+		const TSharedPtr<FJsonObject>* Ui = nullptr;
+		if (J->TryGetObjectField(TEXT("ui"), Ui)) { for (const auto& Par : (*Ui)->Values) { FString S; if (Par.Value.IsValid() && Par.Value->TryGetString(S)) { E.Ui.Add(FString(Par.Key), S); } } }
+		const TArray<TSharedPtr<FJsonValue>>* Mods = nullptr;
+		if (J->TryGetArrayField(TEXT("modulos"), Mods))
+		{
+			for (const auto& VM : *Mods)
+			{
+				const TSharedPtr<FJsonObject>* OM = nullptr;
+				if (!VM.IsValid() || !VM->TryGetObject(OM)) { continue; }
+				FCorpusModuloEstudio M; M.Id = CampoCad(*OM, TEXT("id")); M.N = CampoCad(*OM, TEXT("n"));
+				const TArray<TSharedPtr<FJsonValue>>* Grs = nullptr;
+				if ((*OM)->TryGetArrayField(TEXT("grupos"), Grs))
+				{
+					for (const auto& VG : *Grs)
+					{
+						const TSharedPtr<FJsonObject>* OG = nullptr;
+						if (!VG.IsValid() || !VG->TryGetObject(OG)) { continue; }
+						FCorpusGrupoEstudio G; G.N = CampoCad(*OG, TEXT("n"));
+						const TArray<TSharedPtr<FJsonValue>>* Its = nullptr;
+						if ((*OG)->TryGetArrayField(TEXT("items"), Its))
+						{
+							G.Items.Reserve(Its->Num());
+							for (const auto& VI : *Its)
+							{
+								const TSharedPtr<FJsonObject>* OI = nullptr;
+								if (!VI.IsValid() || !VI->TryGetObject(OI)) { continue; }
+								FCorpusItemEstudio& I = G.Items.AddDefaulted_GetRef();
+								I.Id = CampoCad(*OI, TEXT("id")); I.T = CampoCad(*OI, TEXT("t")); I.Sub = CampoCad(*OI, TEXT("sub"));
+								I.Img = CampoCad(*OI, TEXT("img")); I.Cred = CampoCad(*OI, TEXT("cred")); I.Lado = CampoCad(*OI, TEXT("lado"));
+								I.Show = ListaCad(*OI, TEXT("show")); I.Capas = ListaCad(*OI, TEXT("capas")); I.Vista = CampoEnt(*OI, TEXT("view"), -1);
+								const TArray<TSharedPtr<FJsonValue>>* A = nullptr;
+								if ((*OI)->TryGetArrayField(TEXT("secs"), A))
+								{
+									for (const auto& VS : *A) { const TArray<TSharedPtr<FJsonValue>>* Par = nullptr; if (VS.IsValid() && VS->TryGetArray(Par) && Par->Num() == 2) { I.Secs.Emplace(Cad(*Par, 0), Cad(*Par, 1)); } }
+								}
+								if ((*OI)->TryGetArrayField(TEXT("pasos"), A))
+								{
+									for (const auto& VP : *A)
+									{
+										const TSharedPtr<FJsonObject>* OP = nullptr;
+										if (!VP.IsValid() || !VP->TryGetObject(OP)) { continue; }
+										FCorpusPasoEstudio& P = I.Pasos.AddDefaulted_GetRef();
+										P.T = CampoCad(*OP, TEXT("t")); P.X = CampoCad(*OP, TEXT("x")); P.Ver = CampoCad(*OP, TEXT("ver"));
+										P.Show = ListaCad(*OP, TEXT("show")); P.Vista = CampoEnt(*OP, TEXT("view"), -1);
+									}
+								}
+								if ((*OI)->TryGetArrayField(TEXT("q"), A))
+								{
+									for (const auto& VQ : *A)
+									{
+										const TSharedPtr<FJsonObject>* OQ = nullptr;
+										if (!VQ.IsValid() || !VQ->TryGetObject(OQ)) { continue; }
+										FCorpusPregunta& Q = I.Q.AddDefaulted_GetRef();
+										Q.P = CampoCad(*OQ, TEXT("p")); Q.X = CampoCad(*OQ, TEXT("x")); Q.O = ListaCad(*OQ, TEXT("o")); Q.A = CampoEnt(*OQ, TEXT("a"), 0);
+									}
+								}
+							}
+						}
+						M.Grupos.Add(MoveTemp(G));
+					}
+				}
+				E.Modulos.Add(MoveTemp(M));
+			}
+		}
+	}
+	return EstudioPorIdioma.Add(IdiomaActual, MoveTemp(E));
+}
+
+FString UCorpusDatos::TE(const FString& Clave)
+{
+	const FString* S = Estudio().Ui.Find(Clave);
+	return S ? *S : Clave;
+}
+
+const FCorpusVistaPaso* UCorpusDatos::VistaDePaso(const FString& Clave)
+{
+	if (!bVistasLeidas)
+	{
+		bVistasLeidas = true;
+		if (const TSharedPtr<FJsonObject> J = LeerObjeto(TEXT("estudio_vistas.json")))
+		{
+			for (const auto& Par : J->Values)
+			{
+				const TSharedPtr<FJsonObject>* O = nullptr;
+				if (!Par.Value.IsValid() || !Par.Value->TryGetObject(O)) { continue; }
+				FCorpusVistaPaso V;
+				const TSharedPtr<FJsonObject>* Capas = nullptr;
+				if ((*O)->TryGetObjectField(TEXT("capas"), Capas)) { for (const auto& C : (*Capas)->Values) { double Op = 1; if (C.Value.IsValid() && C.Value->TryGetNumber(Op)) { V.Capas.Add(FString(C.Key), (float)Op); } } }
+				const TArray<TSharedPtr<FJsonValue>>* Iso = nullptr;
+				V.bIso = (*O)->TryGetArrayField(TEXT("iso"), Iso);
+				V.Iso = ListaCad(*O, TEXT("iso")); V.Ocultas = ListaCad(*O, TEXT("ocultas"));
+				V.bMujer = CampoCad(*O, TEXT("cuerpo")) == TEXT("f");
+				const TSharedPtr<FJsonObject>* Cam = nullptr;
+				if ((*O)->TryGetObjectField(TEXT("cam"), Cam))
+				{
+					double N = 0;
+					if ((*Cam)->TryGetNumberField(TEXT("th"), N)) { V.Th = (float)N; }
+					if ((*Cam)->TryGetNumberField(TEXT("ph"), N)) { V.Ph = (float)N; }
+					if ((*Cam)->TryGetNumberField(TEXT("r"), N)) { V.R = (float)N; }
+					const TArray<TSharedPtr<FJsonValue>>* T3 = nullptr;
+					if ((*Cam)->TryGetArrayField(TEXT("tgt"), T3) && T3->Num() == 3) { V.Tgt = FVector3f((float)(*T3)[0]->AsNumber(), (float)(*T3)[1]->AsNumber(), (float)(*T3)[2]->AsNumber()); }
+				}
+				VistasPaso.Add(FString(Par.Key), MoveTemp(V));
+			}
+		}
+	}
+	return VistasPaso.Find(Clave);
 }

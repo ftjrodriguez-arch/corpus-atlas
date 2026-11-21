@@ -26,6 +26,8 @@ public:
 	void Encuadrar(const FBox& Caja, bool bInmediato = false);
 	/** Vistas fijas: 0 anterior, 1 posterior, 2 derecha, 3 izquierda, 4 superior, 5 inferior. */
 	void Vista(int32 Cual);
+	/** Órbita de la web (recorridos): objetivo en glTF (m), radio (m), azimut th y ángulo polar ph (rad). */
+	void OrbitaWeb(const FVector3f& Tgt, float R, float Th, float Ph);
 
 	UPROPERTY(VisibleAnywhere, Category = "Corpus") TObjectPtr<UCameraComponent> Camara;
 

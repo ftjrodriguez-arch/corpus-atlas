@@ -19,6 +19,8 @@
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Notifications/SProgressBar.h"
+#include "ImageUtils.h"
+#include "Misc/Paths.h"
 
 namespace
 {
@@ -119,7 +121,7 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom).Padding(18.f)
 		[
 			SNew(SBox).WidthOverride(520.f)
-			.Visibility_Lambda([this]() { const ACorpusCuerpo* C = Cuerpo(); return C && C->MovimientoDisponible() && (bVerMov || C->HayPostura()) ? EVisibility::Visible : EVisibility::Collapsed; })
+			.Visibility_Lambda([this]() { const ACorpusCuerpo* C = Cuerpo(); return !bVerEst && C && C->MovimientoDisponible() && (bVerMov || C->HayPostura()) ? EVisibility::Visible : EVisibility::Collapsed; })
 			[
 				SNew(SBorder).BorderImage(Panel()).Padding(14.f)[ SAssignNew(CajaMov, SVerticalBox) ]
 			]
@@ -128,11 +130,28 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Top).Padding(18.f)
 		[
 			SNew(SBox).WidthOverride(400.f).MaxDesiredHeight(860.f)
-			.Visibility_Lambda([this]() { const ACorpusCuerpo* C = Cuerpo(); return C && !C->Seleccionada().IsEmpty() ? EVisibility::Visible : EVisibility::Collapsed; })
+			.Visibility_Lambda([this]() { const ACorpusCuerpo* C = Cuerpo(); return !bVerEst && C && !C->Seleccionada().IsEmpty() ? EVisibility::Visible : EVisibility::Collapsed; })
 			[
 				SNew(SBorder).BorderImage(Panel()).Padding(18.f)
 				[
 					SNew(SScrollBox) + SScrollBox::Slot()[ SAssignNew(CajaFicha, SVerticalBox) ]
+				]
+			]
+		]
+		// ── Derecha, a toda la altura: panel de estudio (lecciones, recorridos, kinesiología, casos, patologías, glosario) ──
+		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Fill).Padding(18.f)
+		[
+			SNew(SBox).WidthOverride(500.f)
+			.Visibility_Lambda([this]() { return bVerEst ? EVisibility::Visible : EVisibility::Collapsed; })
+			[
+				SNew(SBorder).BorderImage(Panel()).Padding(16.f)
+				[
+					SNew(SVerticalBox)
+					+ SVerticalBox::Slot().AutoHeight()[ SAssignNew(CajaEstCab, SVerticalBox) ]
+					+ SVerticalBox::Slot().FillHeight(1.f).Padding(0, 8, 0, 0)
+					[
+						SAssignNew(RolloEst, SScrollBox) + SScrollBox::Slot()[ SAssignNew(CajaEst, SVerticalBox) ]
+					]
 				]
 			]
 		]
@@ -199,8 +218,10 @@ void SCorpusInterfaz::Reconstruir()
 			MovPintado = FIntVector(-2, -2, -2); RehacerMovimiento();
 		}, bVerMov) ];
 	}
+	FilaVistas->AddSlot()[ Boton(D->TE(TEXT("Estudiar")), [this]() { AbrirEstudio(!bVerEst); }, bVerEst) ];
 	CajaBarra->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[ FilaVistas ];
 
+	RehacerEstudio();
 	RehacerCapas();
 	RehacerFicha();
 	MovPintado = FIntVector(-2, -2, -2);
@@ -484,4 +505,307 @@ void SCorpusInterfaz::RehacerResultados(const FText& Texto)
 			]
 		];
 	}
+}
+
+// ───────── Panel de estudio ─────────
+
+const FCorpusItemEstudio* SCorpusInterfaz::ItemEstudio() const
+{
+	UCorpusDatos* D = Datos();
+	if (!D) { return nullptr; }
+	const FCorpusEstudio& E = D->Estudio();
+	if (!E.Modulos.IsValidIndex(EstMod) || !E.Modulos[EstMod].Grupos.IsValidIndex(EstGrupo)) { return nullptr; }
+	const FCorpusGrupoEstudio& G = E.Modulos[EstMod].Grupos[EstGrupo];
+	return G.Items.IsValidIndex(EstItem) ? &G.Items[EstItem] : nullptr;
+}
+
+void SCorpusInterfaz::AbrirEstudio(bool bSi)
+{
+	bVerEst = bSi;
+	if (ACorpusCuerpo* C = Cuerpo())
+	{
+		if (bSi) { bVerMov = false; C->Seleccionar(FString()); }
+		else
+		{
+			C->RestaurarEstado();
+			// la cámara vuelve al cuerpo entero, de frente
+			if (ACorpusCamara* Cam = Jugador.IsValid() ? Jugador->CamaraOrbital() : nullptr) { Cam->Vista(0); Cam->Encuadrar(C->Caja(FString())); }
+		}
+	}
+	Reconstruir();
+	if (bSi) { EnsenarEstudio(); }
+}
+
+void SCorpusInterfaz::EnsenarEstudio()
+{
+	UCorpusDatos* D = Datos();
+	ACorpusCuerpo* C = Cuerpo();
+	const FCorpusItemEstudio* It = ItemEstudio();
+	if (!D || !C || !It || !bVerEst) { return; }
+	ACorpusCamara* Cam = Jugador.IsValid() ? Jugador->CamaraOrbital() : nullptr;
+	const auto Encuadrar = [C, Cam](const TArray<FString>& Ids, int32 Vista)
+	{
+		if (!Cam) { return; }
+		if (Vista >= 0) { Cam->Vista(Vista); }
+		FBox B(ForceInit);
+		for (const FString& Id : Ids) { const FBox Bi = C->Caja(Id); if (Bi.IsValid) { B += Bi; } }
+		if (!B.IsValid) { B = C->Caja(FString()); }
+		Cam->Encuadrar(B);
+	};
+	C->GuardarEstado();
+	if (It->Pasos.IsValidIndex(EstPaso))
+	{
+		const FCorpusPasoEstudio& P = It->Pasos[EstPaso];
+		if (!P.Ver.IsEmpty())
+		{
+			// recorrido: lo mismo que enseña la web en ese paso
+			if (const FCorpusVistaPaso* V = D->VistaDePaso(P.Ver))
+			{
+				C->PonerVista(*V);
+				if (Cam) { Cam->OrbitaWeb(V->Tgt, V->R, V->Th, V->Ph); }
+			}
+			return;
+		}
+		if (P.Show.Num() > 0)
+		{
+			const TArray<FString> Ids = C->IdsDeNombres(P.Show, It->Lado);
+			if (Ids.Num() > 0) { C->Ensenar(Ids, It->Capas); Encuadrar(Ids, P.Vista); }
+			return;
+		}
+	}
+	if (It->Show.Num() > 0 || It->Capas.Num() > 0)
+	{
+		const TArray<FString> Ids = C->IdsDeNombres(It->Show, It->Lado);
+		if (Ids.Num() > 0 || It->Show.Num() == 0) { C->Ensenar(Ids, It->Capas); Encuadrar(Ids, It->Vista); }
+	}
+}
+
+void SCorpusInterfaz::RehacerEstudio()
+{
+	UCorpusDatos* D = Datos();
+	ACorpusCuerpo* C = Cuerpo();
+	if (!D || !C || !CajaEst.IsValid() || !CajaEstCab.IsValid()) { return; }
+	CajaEst->ClearChildren();
+	CajaEstCab->ClearChildren();
+	if (!bVerEst) { return; }
+	const FCorpusEstudio& E = D->Estudio();
+	if (E.Modulos.Num() == 0)
+	{
+		CajaEst->AddSlot().AutoHeight()[ Txt(TEXT("Faltan los datos de estudio: node tools/unreal/estudio.js"), 11, C_GRIS) ];
+		return;
+	}
+	EstMod = FMath::Clamp(EstMod, 0, E.Modulos.Num() - 1);
+	const FCorpusModuloEstudio& M = E.Modulos[EstMod];
+	TWeakObjectPtr<ACorpusCuerpo> WC(C);
+
+	// fila ancha con el texto a la izquierda (entradas de las listas)
+	const auto Fila = [](const FString& Titulo, const FString& Sub, TFunction<void()> Accion, const FLinearColor& Fondo = FLinearColor(0.10f, 0.13f, 0.17f)) -> TSharedRef<SWidget>
+	{
+		TSharedRef<SVerticalBox> V = SNew(SVerticalBox) + SVerticalBox::Slot().AutoHeight()[ Txt(Titulo, 11, C_TINTA) ];
+		if (!Sub.IsEmpty()) { V->AddSlot().AutoHeight()[ Txt(Sub, 9, C_GRIS) ]; }
+		return SNew(SButton).ButtonColorAndOpacity(Fondo).ContentPadding(FMargin(10, 6)).HAlign(HAlign_Fill)
+			.OnClicked_Lambda([Accion]() { Accion(); return FReply::Handled(); })[ V ];
+	};
+	const auto Ir = [this](int32 Grupo, int32 Item)
+	{
+		const bool bSalir = EstItem >= 0 && Item < 0;
+		EstGrupo = Grupo; EstItem = Item; EstPaso = 0; EstResp.Reset();
+		if (bSalir)
+		{
+			if (ACorpusCuerpo* Cu = Cuerpo())
+			{
+				Cu->RestaurarEstado();
+				if (ACorpusCamara* Cam = Jugador.IsValid() ? Jugador->CamaraOrbital() : nullptr) { Cam->Vista(0); Cam->Encuadrar(Cu->Caja(FString())); }
+			}
+		}
+		RehacerEstudio();
+		if (RolloEst.IsValid()) { RolloEst->ScrollToStart(); }
+		EnsenarEstudio();
+	};
+
+	// ── cabecera: título, cerrar y módulos ──
+	CajaEstCab->AddSlot().AutoHeight()
+	[
+		SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)[ Txt(Mayus(D->TE(TEXT("Estudiar"))), 13, C_TINTA, true) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ Boton(D->TE(TEXT("Cerrar")), [this]() { AbrirEstudio(false); }) ]
+	];
+	TSharedRef<SWrapBox> Mods = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
+	for (int32 i = 0; i < E.Modulos.Num(); ++i)
+	{
+		Mods->AddSlot()[ Boton(E.Modulos[i].N, [this, i, Ir]() { EstMod = i; EstFiltro.Reset(); Ir(-1, -1); }, i == EstMod) ];
+	}
+	CajaEstCab->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[ Mods ];
+
+	const FCorpusItemEstudio* It = ItemEstudio();
+	if (!It)
+	{
+		// ── listas: buscador, grupos y entradas ──
+		CajaEstCab->AddSlot().AutoHeight().Padding(0, 8, 0, 0)
+		[
+			SNew(SEditableTextBox).Font(Letra(11)).HintText(FText::FromString(D->TE(TEXT("Buscar")))).Text(FText::FromString(EstFiltro))
+			.OnTextCommitted_Lambda([this](const FText& T, ETextCommit::Type) { const FString S = T.ToString().TrimStartAndEnd(); if (S != EstFiltro) { EstFiltro = S; EstGrupo = -1; EstItem = -1; RehacerEstudio(); } })
+		];
+		if (EstFiltro.Len() >= 2)
+		{
+			const FString Q = UCorpusDatos::Plano(EstFiltro);
+			int32 N = 0;
+			for (int32 g = 0; g < M.Grupos.Num() && N < 80; ++g)
+			{
+				for (int32 i = 0; i < M.Grupos[g].Items.Num() && N < 80; ++i)
+				{
+					const FCorpusItemEstudio& X = M.Grupos[g].Items[i];
+					if (!UCorpusDatos::Plano(X.T).Contains(Q) && !UCorpusDatos::Plano(X.Sub).Contains(Q)) { continue; }
+					CajaEst->AddSlot().AutoHeight().Padding(0, 3, 0, 0)[ Fila(X.T, M.Grupos[g].N, [Ir, g, i]() { Ir(g, i); }) ];
+					++N;
+				}
+			}
+			if (N == 0) { CajaEst->AddSlot().AutoHeight().Padding(0, 6)[ Txt(D->TE(TEXT("Nada")), 11, C_GRIS) ]; }
+			return;
+		}
+		const bool bUnGrupo = M.Grupos.Num() == 1;
+		if (!M.Grupos.IsValidIndex(EstGrupo) && !bUnGrupo)
+		{
+			for (int32 g = 0; g < M.Grupos.Num(); ++g)
+			{
+				CajaEst->AddSlot().AutoHeight().Padding(0, 3, 0, 0)
+				[ Fila(M.Grupos[g].N, FString::Printf(TEXT("%d %s"), M.Grupos[g].Items.Num(), *D->TE(TEXT("Entradas"))), [Ir, g]() { Ir(g, -1); }, FLinearColor(0.07f, 0.11f, 0.17f)) ];
+			}
+			if (M.Id == TEXT("patologias") && !E.Aviso.IsEmpty()) { CajaEst->AddSlot().AutoHeight().Padding(0, 12, 0, 0)[ Txt(E.Aviso, 9, C_GRIS) ]; }
+			return;
+		}
+		const int32 g = bUnGrupo ? 0 : EstGrupo;
+		if (!bUnGrupo)
+		{
+			CajaEst->AddSlot().AutoHeight()[ SNew(SHorizontalBox) + SHorizontalBox::Slot().AutoWidth()[ Boton(D->TE(TEXT("Volver")), [Ir]() { Ir(-1, -1); }) ] ];
+			CajaEst->AddSlot().AutoHeight().Padding(0, 8, 0, 4)[ Txt(M.Grupos[g].N, 13, C_ACENTO, true) ];
+		}
+		for (int32 i = 0; i < M.Grupos[g].Items.Num(); ++i)
+		{
+			const FCorpusItemEstudio& X = M.Grupos[g].Items[i];
+			CajaEst->AddSlot().AutoHeight().Padding(0, 3, 0, 0)[ Fila(X.T, X.Sub, [Ir, g, i]() { Ir(g, i); }) ];
+		}
+		return;
+	}
+
+	// ── ficha de una entrada ──
+	const int32 gAct = EstGrupo;
+	const bool bUnSolo = M.Grupos.Num() == 1;
+	CajaEst->AddSlot().AutoHeight()
+	[
+		SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5))
+		+ SWrapBox::Slot()[ Boton(D->TE(TEXT("Volver")), [this, Ir, gAct, bUnSolo]() { Ir((EstFiltro.Len() >= 2 || bUnSolo) ? -1 : gAct, -1); }) ]
+		+ SWrapBox::Slot()[ Boton(D->TE(TEXT("Ver")), [this]() { EnsenarEstudio(); }, true) ]
+		+ SWrapBox::Slot()[ Boton(D->TE(TEXT("Todo")), [WC]() { if (WC.IsValid()) { WC->RestaurarEstado(); WC->MostrarTodo(); } }) ]
+	];
+	CajaEst->AddSlot().AutoHeight().Padding(0, 10, 0, 0)[ Txt(It->T, 15, C_TINTA, true) ];
+	FString Sub = M.Grupos[EstGrupo].N;
+	if (!It->Sub.IsEmpty()) { Sub += TEXT(" · ") + It->Sub; }
+	CajaEst->AddSlot().AutoHeight().Padding(0, 3, 0, 0)[ Txt(Sub, 10, C_ACENTO, true) ];
+
+	// ilustración (patologías): imagen con licencia abierta y su atribución
+	if (!It->Img.IsEmpty())
+	{
+		if (EstImg != It->Img || !EstTex.IsValid())
+		{
+			EstImg = It->Img;
+			EstTex.Reset(FImageUtils::ImportFileAsTexture2D(FPaths::Combine(UCorpusDatos::CarpetaDatos(), TEXT("estudio_img"), It->Img)));
+			EstPincel = MakeShared<FSlateBrush>();
+			if (EstTex.IsValid())
+			{
+				EstPincel->SetResourceObject(EstTex.Get());
+				EstPincel->ImageSize = FVector2D(EstTex->GetSizeX(), EstTex->GetSizeY());
+			}
+		}
+		if (EstTex.IsValid() && EstPincel.IsValid())
+		{
+			const float Prop = (float)EstTex->GetSizeY() / FMath::Max(1, EstTex->GetSizeX());
+			const float Alto = FMath::Min(456.f * Prop, 520.f);
+			CajaEst->AddSlot().AutoHeight().Padding(0, 10, 0, 0).HAlign(HAlign_Left)
+			[
+				SNew(SBox).WidthOverride(Alto / FMath::Max(Prop, 0.01f)).HeightOverride(Alto)[ SNew(SImage).Image(EstPincel.Get()) ]
+			];
+			CajaEst->AddSlot().AutoHeight().Padding(0, 3, 0, 0)[ Txt(D->TE(TEXT("Imagen")) + TEXT(": ") + It->Cred, 8, C_GRIS) ];
+		}
+	}
+
+	// pasos (lecciones y recorridos)
+	if (It->Pasos.Num() > 0)
+	{
+		EstPaso = FMath::Clamp(EstPaso, 0, It->Pasos.Num() - 1);
+		const FCorpusPasoEstudio& P = It->Pasos[EstPaso];
+		const int32 NP = It->Pasos.Num();
+		TSharedRef<SVerticalBox> Caja = SNew(SVerticalBox);
+		Caja->AddSlot().AutoHeight()[ Txt(FString::Printf(TEXT("%s %d / %d"), *Mayus(D->TE(TEXT("Paso"))), EstPaso + 1, NP), 9, C_GRIS, true) ];
+		Caja->AddSlot().AutoHeight().Padding(0, 3, 0, 0)[ Txt(P.T, 13, C_ACENTO, true) ];
+		Caja->AddSlot().AutoHeight().Padding(0, 5, 0, 0)[ Txt(P.X, 11, C_TINTA) ];
+		const auto IrPaso = [this](int32 Paso) { EstPaso = Paso; RehacerEstudio(); EnsenarEstudio(); };
+		TSharedRef<SHorizontalBox> Nav = SNew(SHorizontalBox);
+		if (EstPaso > 0) { Nav->AddSlot().AutoWidth().Padding(0, 0, 6, 0)[ Boton(D->TE(TEXT("Anterior")), [IrPaso, this]() { IrPaso(EstPaso - 1); }) ]; }
+		if (EstPaso < NP - 1) { Nav->AddSlot().AutoWidth()[ Boton(D->TE(TEXT("Siguiente")), [IrPaso, this]() { IrPaso(EstPaso + 1); }, true) ]; }
+		Caja->AddSlot().AutoHeight().Padding(0, 10, 0, 0)[ Nav ];
+		CajaEst->AddSlot().AutoHeight().Padding(0, 12, 0, 0)[ SNew(SBorder).BorderImage(Panel2()).Padding(12.f)[ Caja ] ];
+	}
+
+	for (const TPair<FString, FString>& S : It->Secs)
+	{
+		CajaEst->AddSlot().AutoHeight().Padding(0, 12, 0, 2)[ Txt(Mayus(S.Key), 9, C_GRIS, true) ];
+		CajaEst->AddSlot().AutoHeight()[ Txt(S.Value, 11, C_TINTA) ];
+	}
+
+	// preguntas
+	if (It->Q.Num() > 0)
+	{
+		CajaEst->AddSlot().AutoHeight().Padding(0, 16, 0, 2)[ Txt(Mayus(D->TE(TEXT("Preguntas"))), 9, C_GRIS, true) ];
+		int32 Aciertos = 0, Hechas = 0;
+		for (int32 q = 0; q < It->Q.Num(); ++q)
+		{
+			const FCorpusPregunta& Q = It->Q[q];
+			const int32* Elegida = EstResp.Find(q);
+			if (Elegida) { ++Hechas; if (*Elegida == Q.A) { ++Aciertos; } }
+			CajaEst->AddSlot().AutoHeight().Padding(0, 8, 0, 2)[ Txt(It->Q.Num() > 1 ? FString::Printf(TEXT("%d. %s"), q + 1, *Q.P) : Q.P, 11, C_TINTA, true) ];
+			for (int32 o = 0; o < Q.O.Num(); ++o)
+			{
+				FLinearColor Fondo(0.10f, 0.13f, 0.17f);
+				if (Elegida) { if (o == Q.A) { Fondo = FLinearColor(0.05f, 0.38f, 0.16f); } else if (o == *Elegida) { Fondo = FLinearColor(0.50f, 0.10f, 0.10f); } }
+				CajaEst->AddSlot().AutoHeight().Padding(0, 3, 0, 0)[ Fila(Q.O[o], FString(), [this, q, o]() { if (!EstResp.Contains(q)) { EstResp.Add(q, o); RehacerEstudio(); } }, Fondo) ];
+			}
+			if (Elegida)
+			{
+				const bool bBien = *Elegida == Q.A;
+				CajaEst->AddSlot().AutoHeight().Padding(0, 5, 0, 0)[ Txt(D->TE(bBien ? TEXT("Correcto") : TEXT("Incorrecto")), 10, bBien ? FLinearColor(0.25f, 0.85f, 0.40f) : FLinearColor(1.f, 0.40f, 0.35f), true) ];
+				if (!Q.X.IsEmpty()) { CajaEst->AddSlot().AutoHeight().Padding(0, 3, 0, 0)[ Txt(Q.X, 10, C_TINTA) ]; }
+			}
+		}
+		if (It->Q.Num() > 1 && Hechas == It->Q.Num())
+		{
+			CajaEst->AddSlot().AutoHeight().Padding(0, 12, 0, 0)[ Txt(FString::Printf(TEXT("%s: %d / %d"), *D->TE(TEXT("Aciertos")), Aciertos, It->Q.Num()), 13, C_ACENTO, true) ];
+		}
+	}
+	if (M.Id == TEXT("patologias") || M.Id == TEXT("casos") || M.Id == TEXT("protocolos")) { CajaEst->AddSlot().AutoHeight().Padding(0, 16, 0, 0)[ Txt(E.Aviso, 9, C_GRIS) ]; }
+}
+
+void SCorpusInterfaz::QaEstudio(const FString& Args)
+{
+	UCorpusDatos* D = Datos();
+	TArray<FString> A; Args.ParseIntoArrayWS(A);
+	if (!D || A.Num() == 0) { AbrirEstudio(false); return; }
+	if (A[0] == TEXT("responder"))
+	{
+		if (A.Num() > 2) { EstResp.Add(FCString::Atoi(*A[1]), FCString::Atoi(*A[2])); RehacerEstudio(); if (RolloEst.IsValid()) { RolloEst->ScrollToEnd(); } }
+		return;
+	}
+	if (A[0] == TEXT("bajar")) { if (RolloEst.IsValid()) { RolloEst->SetScrollOffset(A.Num() > 1 ? FCString::Atof(*A[1]) : 400.f); } return; }
+	const FCorpusEstudio& E = D->Estudio();
+	for (int32 i = 0; i < E.Modulos.Num(); ++i) { if (E.Modulos[i].Id == A[0]) { EstMod = i; } }
+	EstFiltro.Reset(); EstGrupo = -1; EstItem = -1; EstPaso = 0; EstResp.Reset();
+	if (A.Num() > 2 && A[1] == TEXT("buscar")) { EstFiltro = A[2]; }
+	else
+	{
+		if (A.Num() > 1) { EstGrupo = FCString::Atoi(*A[1]); }
+		if (A.Num() > 2) { EstItem = FCString::Atoi(*A[2]); }
+		if (A.Num() > 3) { EstPaso = FCString::Atoi(*A[3]); }
+	}
+	if (ACorpusCuerpo* C = Cuerpo()) { C->RestaurarEstado(); }
+	if (!bVerEst) { AbrirEstudio(true); } else { RehacerEstudio(); EnsenarEstudio(); }
 }

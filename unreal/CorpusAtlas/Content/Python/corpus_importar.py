@@ -50,7 +50,7 @@ def _hex(h):
 #   fibra: relieve de las estrías · anis: brillo alargado · sss: dispersión bajo la superficie · poro: grano fino
 TEJIDOS = {
     "oseo":                dict(color="ece2cb", rug=0.62, esp=0.35, fibra=0.00, anis=0.0, sss=0.10, sss_color="e8c9a0", poro=0.55, esc=0.0),
-    "muscular":            dict(color="a3392f", rug=0.42, esp=0.50, fibra=0.85, anis=0.55, sss=0.22, sss_color="8a4a3e", poro=0.10, esc=9.0),
+    "muscular":            dict(color="a3392f", rug=0.50, esp=0.35, fibra=0.85, anis=0.55, sss=0.30, sss_color="8a3026", poro=0.10, esc=9.0),
     "articular":           dict(color="d3dde6", rug=0.30, esp=0.60, fibra=0.55, anis=0.70, sss=0.30, sss_color="c8d6e8", poro=0.05, esc=14.0),
     "insercion":           dict(color="2f9e5b", rug=0.55, esp=0.30, fibra=0.00, anis=0.0, sss=0.05, sss_color="2f9e5b", poro=0.00, esc=0.0),
     "fascia":              dict(color="cdb594", rug=0.35, esp=0.55, fibra=0.35, anis=0.50, sss=0.35, sss_color="d8c4a8", poro=0.05, esc=16.0),
@@ -69,8 +69,8 @@ TEJIDOS = {
 }
 # Multiplicador del color base tras el tinte del órgano: el hueso (tinte 242,236,220) quemaba la imagen con la exposición
 # del estudio. Comprobado en capturas (unreal/capturas).
-ALBEDO = {"oseo": 0.30, "articular": 0.55, "bolsas": 0.80, "fascia": 0.80}
-DESATURAR = {"muscular": 0.30}     # la web se ve salmón, no rojo puro (capturas 2026-11-20)
+ALBEDO = {"oseo": 0.40, "articular": 0.55, "bolsas": 0.80, "fascia": 0.80}
+DESATURAR = {"muscular": 0.24}     # la web se ve salmón, no rojo puro (capturas 2026-11-20)
 FIBRA = ("muscular", "articular", "fascia", "arterial", "venoso", "nervioso_periferico", "linfatico")
 
 
@@ -453,7 +453,14 @@ def _maestro(nombre, translucido):
     # Grano fino (poro del hueso, irregularidad del tejido): ruido 3D barato
     ruido = g.n(unreal.MaterialExpressionNoise, -400, scale=6.0, levels=2, output_min=-1.0, output_max=1.0)
     g.une(pos, ruido, "")     # primera entrada del ruido = posición («Position» no existe con ese nombre en 5.8)
-    grano = g.mul(ruido, poro)
+    # De lejos el grano mide menos de un píxel: cada píxel recibía una normal al azar y el brillo de todos ellos sumado
+    # lavaba el músculo a rosa casi blanco (a cuerpo entero). Se apaga entre 0,25 y 0,5 ciclos por píxel, como las estrías,
+    # y «lejos» (0 cerca, 1 a cuerpo entero) sube la rugosidad y baja la anisotropía para que no quede un velo brillante.
+    pix = g.add(g.un(unreal.MaterialExpressionAbs, g.un(unreal.MaterialExpressionDDX, u)),
+                g.un(unreal.MaterialExpressionAbs, g.un(unreal.MaterialExpressionDDY, u)))      # cm por píxel
+    vg = g.un(unreal.MaterialExpressionSaturate, g.add(g.cte(2.0), g.mul(pix, g.cte(-24.0))))  # ruido a 6 ciclos/cm
+    lejos = g.un(unreal.MaterialExpressionSaturate, g.mul(pix, g.cte(8.0)))
+    grano = g.mul(g.mul(ruido, poro), vg)
 
     # Máscaras por vértice; el cartílago articular no lleva estrías
     mB = g.n(unreal.MaterialExpressionComponentMask, -600, r=False, g=False, b=True, a=False); g.une(vc, mB, "")
@@ -504,17 +511,21 @@ def _maestro(nombre, translucido):
     r = g.lerp(rug, g.cte(0.22), mG)
     r = g.lerp(r, g.cte(0.16), mB)
     r = g.add(r, g.mul(g.mul(onda, fuerza), g.cte(-0.05)))
+    r = g.un(unreal.MaterialExpressionSaturate, g.add(r, g.mul(lejos, g.cte(0.30))))
     g.sal(r, MP.MP_ROUGHNESS)
     g.sal(esp, MP.MP_SPECULAR)
     if not translucido:
-        g.sal(g.mul(anis, noCart), MP.MP_ANISOTROPY)
+        g.sal(g.mul(g.mul(anis, noCart), g.lerp(g.cte(1.0), g.cte(0.25), lejos)), MP.MP_ANISOTROPY)
     g.sal(g.mul(mR, g.cte(1.0)), MP.MP_AMBIENT_OCCLUSION)
 
     opac = g.esc("Opacidad", 1.0, cpd=4)
     if translucido:
         g.sal(opac, MP.MP_OPACITY)
     else:
-        g.sal(sss, MP.MP_OPACITY)                 # en el modelo Subsurface, la opacidad regula la dispersión
+        # En el modelo Subsurface la opacidad es lo contrario de la dispersión: con opacidad 0,10 el hueso era casi cera
+        # translúcida y la luz de frente lo dejaba como una silueta plana, sin relieve. Dispersión 0,10 → opacidad 0,90.
+        inv = g.n(unreal.MaterialExpressionOneMinus, -300); g.une(sss, inv, "")
+        g.sal(inv, MP.MP_OPACITY)
         g.sal(sss_c, MP.MP_SUBSURFACE_COLOR)
 
     mel.layout_material_expressions(mat)

@@ -98,6 +98,32 @@ struct FCorpusPatronMarcha
 	TArray<TArray<float>> Frames, Raiz;   // por instante: giros (como los rangos) y raíz del cuerpo [cuaternión xyzw, posición xyz] en glTF
 };
 
+/** Módulos de estudio (estudio_<idioma>.json, tools/unreal/estudio.js): lecciones, recorridos, kinesiología, pruebas,
+    casos, protocolos, variantes, patologías y glosario, todos con la misma forma. */
+struct FCorpusPregunta { FString P, X; TArray<FString> O; int32 A = 0; };
+struct FCorpusPasoEstudio { FString T, X, Ver; TArray<FString> Show; int32 Vista = -1; };
+struct FCorpusItemEstudio
+{
+	FString Id, T, Sub, Img, Cred, Lado;
+	TArray<TPair<FString, FString>> Secs;     // título de sección → texto
+	TArray<FCorpusPasoEstudio> Pasos;
+	TArray<FCorpusPregunta> Q;
+	TArray<FString> Show, Capas;              // nombres en inglés del catálogo y capas que se encienden
+	int32 Vista = -1;
+};
+struct FCorpusGrupoEstudio { FString N; TArray<FCorpusItemEstudio> Items; };
+struct FCorpusModuloEstudio { FString Id, N; TArray<FCorpusGrupoEstudio> Grupos; };
+struct FCorpusEstudio { TArray<FCorpusModuloEstudio> Modulos; TMap<FString, FString> Ui; FString Aviso; };
+/** Lo que la web enseña en un paso de un recorrido: capas con su opacidad, piezas aisladas u ocultas, cuerpo y cámara (órbita). */
+struct FCorpusVistaPaso
+{
+	TMap<FString, float> Capas;
+	TArray<FString> Iso, Ocultas;
+	bool bIso = false, bMujer = false;
+	float Th = 0.f, Ph = 1.45f, R = 3.f;
+	FVector3f Tgt = FVector3f(0.f, 0.95f, 0.f);   // glTF, m
+};
+
 /** Claves que distinguen mayúsculas (como los objetos de JavaScript): en i18n_de, «urinario» y «Urinario» son textos distintos. */
 struct FClaveExacta : TDefaultMapKeyFuncs<FString, FString, false>
 {
@@ -169,7 +195,18 @@ public:
 	int32 AnchoCorrectivo() const { return CorrAncho; }
 	float EscalaCorrectivo() const { return CorrEscala; }
 
+	/** Módulos de estudio en el idioma actual (se leen la primera vez que se piden). */
+	const FCorpusEstudio& Estudio();
+	/** Texto de interfaz del panel de estudio (clave de la tabla TXT de estudio.js). */
+	FString TE(const FString& Clave);
+	const FCorpusVistaPaso* VistaDePaso(const FString& Clave);
+	/** Sin tildes ni mayúsculas (para buscar). */
+	static FString Plano(const FString& S);
+
 private:
+	TMap<FString, FCorpusEstudio> EstudioPorIdioma;
+	TMap<FString, FCorpusVistaPaso> VistasPaso;
+	bool bVistasLeidas = false;
 	void CargarMovimiento();
 	void CargarCorrectivos();
 	TMap<FString, FCorpusRejilla> Rejillas;
@@ -194,7 +231,6 @@ private:
 	static bool LeerLista(const FString& Archivo, TArray<TSharedPtr<FJsonValue>>& Fuera);
 	void CargarCatalogo(const FString& Archivo, const FString& Campo);
 	void CargarIdioma(const FString& Codigo);
-	static FString Plano(const FString& S);
 
 	TMap<FString, FCorpusPieza> Piezas;
 	TArray<FCorpusCapa> ListaCapas;

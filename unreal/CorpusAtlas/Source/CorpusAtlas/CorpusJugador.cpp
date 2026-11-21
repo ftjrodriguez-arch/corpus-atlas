@@ -86,6 +86,22 @@ void ACorpusCamara::Vista(int32 Cual)
 	if (Cual >= 0 && Cual < 6) { Yaw = Y[Cual]; Pitch = P[Cual]; }
 }
 
+void ACorpusCamara::OrbitaWeb(const FVector3f& Tgt, float R, float Th, float Ph)
+{
+	// glTF (x, y, z) m → Unreal (x, z, y) cm. En la web la cámara está en tgt + r·(sen ph·sen th, cos ph, sen ph·cos th).
+	Objetivo = FVector(Tgt.X, Tgt.Z, Tgt.Y) * 100.0;
+	Yaw = FMath::RadiansToDegrees(FMath::Atan2(-FMath::Cos(Th), -FMath::Sin(Th)));
+	Pitch = FMath::Clamp(FMath::RadiansToDegrees(Ph) - 90.f, -89.f, 89.f);
+	// la web tiene 30° de campo vertical; aquí 30° son horizontales: para ver lo mismo de alto, la cámara se aleja por el aspecto
+	float Aspecto = 16.f / 9.f;
+	if (GEngine && GEngine->GameViewport)
+	{
+		FVector2D Tam; GEngine->GameViewport->GetViewportSize(Tam);
+		if (Tam.X > 1.f && Tam.Y > 1.f) { Aspecto = Tam.X / Tam.Y; }
+	}
+	Distancia = FMath::Clamp(R * 100.f * FMath::Max(Aspecto, 1.f), 6.f, 1500.f);
+}
+
 // ───────── Control ─────────
 
 ACorpusJugador::ACorpusJugador()
@@ -215,6 +231,16 @@ void ACorpusJugador::TickQa()
 		{
 			if (TSharedPtr<SWidget> W = H->InterfazWidget()) { StaticCastSharedPtr<SCorpusInterfaz>(W)->QaBuscar(Resto); }
 		}
+	}
+	else if (Verbo == TEXT("estudio"))
+	{
+		// estudio <módulo> [grupo] [entrada] [paso] · estudio <módulo> buscar <texto> · estudio responder <pregunta> <opción>
+		// · estudio bajar <píxeles> · estudio (solo) = cerrar
+		if (ACorpusHUD* H = Cast<ACorpusHUD>(GetHUD()))
+		{
+			if (TSharedPtr<SWidget> W = H->InterfazWidget()) { StaticCastSharedPtr<SCorpusInterfaz>(W)->QaEstudio(Resto); }
+		}
+		Pausa = 3.0;
 	}
 	else { ConsoleCommand(Paso); }
 	QaHasta = FPlatformTime::Seconds() + Pausa;

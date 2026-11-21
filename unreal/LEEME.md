@@ -238,6 +238,52 @@ y Unreal solo reproduce el resultado. Solo en los rangos `hombro` y `escapula`; 
   imágenes en una hoja de contactos (12 posturas de hombro, 12 de pierna revisadas así).
 - Fuentes y lista inicial del futuro módulo de patologías: `unreal/PATOLOGIAS_FUENTES.md`.
 
+## Fase 2 · Estudiar: lecciones, recorridos, kinesiología, casos, patologías y glosario (2026-11-20)
+Botón **Estudiar** (barra izquierda): panel a la derecha con nueve módulos, los cinco idiomas y la misma forma para todos
+(módulo → grupo → entrada → ficha con pasos, imagen, secciones y preguntas que se corrigen al contestar).
+
+| Módulo | Entradas | De dónde sale |
+|---|---|---|
+| Lecciones | 83 | `data/lessons*.json` (pasos que aíslan las estructuras y 5 preguntas) |
+| Recorridos | 84 (369 pasos) | tabla `TOURS` de la web, incluido «Sinapsis e impulso nervioso» |
+| Kinesiología y biomecánica | 463 | `data/bio.json` |
+| Pruebas y ejercicios | 92 | tabla `CTESTS` de la web (texto y estructuras; sin la postura) |
+| Casos clínicos | 90 | `data/cases*.json` y `data/rc.json` |
+| Protocolos | 8 | `data/protocols.json` |
+| Variantes anatómicas | 32 | `data/variants.json` |
+| Patologías | 172 en 10 sistemas | glosario (enfermedades y lesiones) + ilustraciones de Commons |
+| Glosario | 1.503 | `data/glossary.json` (FR/DE en inglés: no está traducido) |
+
+- `tools/unreal/recorridos.js` abre la web sin ventana y, por cada paso de cada recorrido, anota lo que la web enseña:
+  capas y opacidad, piezas aisladas (`isoSet`), ocultas, cuerpo y órbita de la cámara → `recorridos_web.json`; también saca
+  `CTESTS` y `BIO_R` a `tablas_web.json`. Unreal reproduce eso (`ACorpusCuerpo::PonerVista`, `ACorpusCamara::OrbitaWeb`).
+  Solo se repite si cambian los recorridos de la web (con `python -m http.server 8765` y Playwright en `NODE_PATH`).
+- `tools/unreal/estudio.js` genera `estudio_<idioma>.json`, `estudio_vistas.json` y `estudio_img/` en `Importar/datos` y
+  en `Content/Datos` (no hace falta el editor). FR/DE usan `content_fr/de.json` como la web; si falta, inglés.
+- **Patologías:** sistemas en la tabla `SIS` de `estudio.js` (encéfalo y médula, nervios periféricos, músculos-tendones-ligamentos,
+  huesos y articulaciones, corazón, vasos, pulmón y pleura, digestivo, riñón-urinario-reproductor, sentidos-endocrino).
+  `tools/unreal/patologias_img.js` baja de Wikimedia Commons solo archivos con licencia CC BY, CC BY-SA, CC0 o dominio
+  público (la pregunta a la API archivo por archivo) y guarda la atribución en `unreal/patologias/atribuciones.json`;
+  `patologias_jpg.ps1` las pasa a JPG. Hay 24 ilustraciones (rótulos en inglés); el resto de patologías resalta las
+  estructuras en el modelo. Aviso fijo: contenido educativo. Con Node 26 hace falta `--dns-result-order=ipv4first`.
+- C++: `UCorpusDatos::Estudio()`, `TE()`, `VistaDePaso()`; `ACorpusCuerpo::IdsDeNombres`, `Ensenar`, `PonerVista`,
+  `GuardarEstado` / `RestaurarEstado` (al cerrar el panel vuelven capas, opacidades, cuerpo y cámara); panel en
+  `SCorpusInterfaz::RehacerEstudio`. Pruebas: `estudio <módulo> [grupo] [entrada] [paso]`, `estudio <módulo> buscar <texto>`,
+  `estudio responder <pregunta> <opción>`, `estudio bajar <px>`, `estudio` (cerrar). Capturas `est_*`, `fin_*` y `mosaico_estudio.png`.
+- **No está:** los recorridos no tienen las animaciones de la web (latido, partículas, respiración, gráficos, etiquetas);
+  las pruebas y ejercicios no colocan la postura; sin vídeo; kinesiología sin los movimientos `mv`; sin repaso espaciado
+  ni progreso guardado; contenido clínico pendiente de revisión profesional.
+
+### Material: hueso plano, músculo lavado y capas de inicio (misma pasada, a petición del usuario)
+- El parámetro «Dispersion» iba directo a la opacidad del modelo Subsurface, que significa lo contrario: con 0,10 el hueso
+  era casi cera translúcida y de frente quedaba como una silueta blanca sin relieve; el músculo se lavaba a rosa. Ahora
+  opacidad = 1 − dispersión. Hueso `Albedo` 0,40; músculo rug 0,50, esp 0,35, dispersión 0,30 (`8a3026`), `DESATURAR` 0,24.
+- El grano fino se apaga cuando mide menos de un píxel y, de lejos, sube la rugosidad y baja la anisotropía (`lejos`).
+- Arrancan encendidos «Ligamentos, cápsulas y discos» y «Bolsas sinoviales y vainas» (en la web van apagados). Las fascias
+  siguen apagadas: las de envoltura tapan los músculos. Todas las piezas de la web están importadas salvo 10 del corazón.
+- **Pendiente:** comprobar músculo por músculo que el extremo llega en tendón hasta su inserción (canal G del color por
+  vértice, que viene de la web); en el antebrazo y el brazo se distingue poco. Separar aponeurosis y retináculos de las
+  fascias de envoltura para poder encenderlos al inicio.
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.
