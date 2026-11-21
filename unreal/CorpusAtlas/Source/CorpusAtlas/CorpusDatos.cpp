@@ -303,6 +303,93 @@ void UCorpusDatos::CargarMovimiento()
 			}
 		}
 	}
+	// ejercicios: interfaz y lista (fases, grupos, variantes con sus fotogramas y textos), todo por idiomas
+	const TSharedPtr<FJsonObject>* EJ = nullptr;
+	if (J->TryGetObjectField(TEXT("ejercicios"), EJ))
+	{
+		const auto Texto = [](const TSharedPtr<FJsonObject>& O, FCorpusTexto& Fuera)
+		{
+			if (!O.IsValid()) { return; }
+			for (const auto& Par : O->Values) { FString S; if (Par.Value.IsValid() && Par.Value->TryGetString(S)) { Fuera.Add(FString(Par.Key), S); } }
+		};
+		const auto TextoDe = [&Texto](const TSharedPtr<FJsonObject>& O, const TCHAR* Campo, FCorpusTexto& Fuera)
+		{
+			const TSharedPtr<FJsonObject>* T = nullptr;
+			if (O->TryGetObjectField(Campo, T)) { Texto(*T, Fuera); }
+		};
+		const auto Tabla = [](const TSharedPtr<FJsonObject>& O, const TCHAR* Campo, TArray<TArray<float>>& Fuera)
+		{
+			const TArray<TSharedPtr<FJsonValue>>* L = nullptr;
+			if (!O->TryGetArrayField(Campo, L)) { return; }
+			for (const auto& Fr : *L) { TArray<float>& D = Fuera.AddDefaulted_GetRef(); for (const auto& X : Fr->AsArray()) { D.Add((float)X->AsNumber()); } }
+		};
+		const TSharedPtr<FJsonObject>* Ui = nullptr;
+		if ((*EJ)->TryGetObjectField(TEXT("ui"), Ui))
+		{
+			for (const auto& Par : (*Ui)->Values) { const TSharedPtr<FJsonObject>* T = nullptr; if (Par.Value.IsValid() && Par.Value->TryGetObject(T)) { Texto(*T, UiEjercicios.Add(FString(Par.Key))); } }
+		}
+		const TArray<TSharedPtr<FJsonValue>>* Lista = nullptr;
+		if ((*EJ)->TryGetArrayField(TEXT("lista"), Lista))
+		{
+			for (const auto& V : *Lista)
+			{
+				const TSharedPtr<FJsonObject> O = V->AsObject();
+				if (!O.IsValid()) { continue; }
+				FCorpusEjercicio& E = ListaEjercicios.AddDefaulted_GetRef();
+				E.Id = O->GetStringField(TEXT("id")); TextoDe(O, TEXT("n"), E.Nombre);
+				double N = 0;
+				if (O->TryGetNumberField(TEXT("paso"), N)) { E.Paso = FMath::Max(0.1f, (float)N); }
+				if (O->TryGetNumberField(TEXT("duracion"), N)) { E.Duracion = FMath::Max(0.5f, (float)N); }
+				if (O->TryGetNumberField(TEXT("vista"), N)) { E.Vista = (int32)N; }
+				if (O->TryGetNumberField(TEXT("inicial"), N)) { E.Inicial = (int32)N; }
+				const TArray<TSharedPtr<FJsonValue>>* L = nullptr;
+				if (O->TryGetArrayField(TEXT("fases"), L))
+				{
+					for (const auto& FV : *L)
+					{
+						const TSharedPtr<FJsonObject> F = FV->AsObject();
+						FCorpusFaseEj& Fa = E.Fases.AddDefaulted_GetRef();
+						Fa.Ini = (float)F->GetNumberField(TEXT("ini")); Fa.Fin = (float)F->GetNumberField(TEXT("fin"));
+						F->TryGetStringField(TEXT("tipo"), Fa.Tipo); TextoDe(F, TEXT("n"), Fa.Nombre); TextoDe(F, TEXT("x"), Fa.Texto);
+					}
+				}
+				if (O->TryGetArrayField(TEXT("grupos"), L))
+				{
+					for (const auto& GV : *L)
+					{
+						const TSharedPtr<FJsonObject> G = GV->AsObject();
+						FCorpusGrupoEj& Gr = E.Grupos.AddDefaulted_GetRef();
+						TextoDe(G, TEXT("n"), Gr.Nombre); TextoDe(G, TEXT("x"), Gr.Texto);
+						const TArray<TSharedPtr<FJsonValue>>* A2 = nullptr;
+						if (G->TryGetArrayField(TEXT("en"), A2)) { for (const auto& X : *A2) { Gr.En.Add(X->AsString()); } }
+						if (G->TryGetArrayField(TEXT("tipo"), A2)) { for (const auto& X : *A2) { Gr.Tipo.Add(X->AsString()); } }
+						if (G->TryGetArrayField(TEXT("lv"), A2)) { for (const auto& X : *A2) { Gr.Nivel.Add((float)X->AsNumber()); } }
+					}
+				}
+				if (O->TryGetArrayField(TEXT("medidas"), L)) { for (const auto& MV : *L) { Texto(MV->AsObject(), E.Medidas.AddDefaulted_GetRef()); } }
+				if (O->TryGetArrayField(TEXT("variantes"), L))
+				{
+					for (const auto& VV : *L)
+					{
+						const TSharedPtr<FJsonObject> Va = VV->AsObject();
+						FCorpusVarianteEj& Vr = E.Variantes.AddDefaulted_GetRef();
+						Vr.Id = Va->GetStringField(TEXT("id")); TextoDe(Va, TEXT("n"), Vr.Nombre);
+						Tabla(Va, TEXT("frames"), Vr.Frames); Tabla(Va, TEXT("raiz"), Vr.Raiz); Tabla(Va, TEXT("med"), Vr.Medidas);
+					}
+				}
+				if (O->TryGetArrayField(TEXT("textos"), L))
+				{
+					for (const auto& TV : *L)
+					{
+						const TArray<TSharedPtr<FJsonValue>>& Par = TV->AsArray();
+						if (Par.Num() != 2) { continue; }
+						TPair<FCorpusTexto, FCorpusTexto>& T2 = E.Textos.AddDefaulted_GetRef();
+						Texto(Par[0]->AsObject(), T2.Key); Texto(Par[1]->AsObject(), T2.Value);
+					}
+				}
+			}
+		}
+	}
 	const TArray<TSharedPtr<FJsonValue>>* R = nullptr;
 	if (J->TryGetArrayField(TEXT("rom"), R))
 	{

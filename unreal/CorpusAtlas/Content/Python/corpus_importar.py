@@ -447,6 +447,13 @@ def _maestro(nombre, translucido):
     else:
         mat = herr.create_asset(nombre, R_MAT, unreal.Material, unreal.MaterialFactoryNew())
     mat.set_editor_property("two_sided", True)
+    # La postura (World Position Offset) puede llevar un vértice a más de 1 m de su sitio. Nanite recorta por grupos de
+    # triángulos con la caja de REPOSO: si esa caja queda fuera de la pantalla (cuerpo movido por la raíz en la sentadilla, zoom
+    # sobre una mano levantada), el grupo desaparecía. Con el desplazamiento máximo declarado, Nanite agranda esas cajas.
+    try:
+        mat.set_editor_property("max_world_position_offset_displacement", 220.0)
+    except Exception as e:
+        unreal.log_warning("Corpus: sin max_world_position_offset_displacement: %s" % e)
     if translucido:
         mat.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
         # volumétrica: recibe luz de todas las fuentes (con «superficie por píxel» la piel salía negra)

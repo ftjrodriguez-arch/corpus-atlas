@@ -42,6 +42,8 @@ private:
 	void RehacerResultados(const FText& Texto);
 	/** Panel de movimiento (rango articular): articulación, movimiento, lado, grados y reproducir. */
 	void RehacerMovimiento();
+	FIntVector ClaveMov() const;
+	bool bEjTecnica = false;   // modo «Ejercicio»: textos de técnica y errores en lugar de la lista de músculos
 	void AlCambiarPostura();
 	/** Panel de estudio: módulos → grupos → entradas → ficha con pasos, imagen y preguntas. */
 	void RehacerEstudio();

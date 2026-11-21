@@ -222,6 +222,18 @@ const PREPARA = `(async()=>{
       R.push([i,f(o.ax.x),f(o.ax.y),f(o.ax.z),f(o.ang),o.tr?f(o.tr.x):0,o.tr?f(o.tr.y):0,o.tr?f(o.tr.z):0]);};
     for(const o of ops){if(/^ankle_/.test(o.jn)){const sp=ankleSplit(o),S2=o.jn.slice(6);pon('ankle_st_'+S2,sp.sw);pon('ankle_tc_'+S2,sp.tw);}else pon(o.jn,o);}
     R.sort((a,b)=>a[0]-b[0]);return {R,fuera};};
+  /* ejercicios. Sentadilla: el módulo de cadena cerrada de la web (SQ). applyPose() resuelve piernas, pelvis y raíz del cuerpo
+     (pies fijos en el suelo); el resolutor guarda estado de una postura a la siguiente, así que se recorre el ciclo en orden. */
+  window.__movSqIni=d=>{gait.on=false;try{gaitRootOff();}catch(e){}SQ.depth=d;SQ.bottom=null;SQ.base=null;SQ.st=null;SQ.lv=null;SQ.lastPitch=0;SQ.p=0;SQ.on=true;
+    SQ.bottom=sqBottom();const B=SQ.bottom,r1=v=>Math.round(v*10)/10;return {K:r1(B.K),H:r1(B.H),A:r1(B.A),tau:r1(B.tau),L:r1(B.L),limit:B.limit||'',warn:B.warn||[]};};
+  window.__movSq=p=>{SQ.p=p;const tab=currentTab;currentTab='mov';let cap=null;const D0=deform;deform=a=>{cap=a;};try{applyPose();}finally{deform=D0;currentTab=tab;}
+    const r=aOps(cap),q=body.quaternion,ps=body.position,f=v=>Math.round(v*1e5)/1e5,A=SQ.cur;r.raiz=[q.x,q.y,q.z,q.w,ps.x,ps.y,ps.z].map(f);r.med=[A.H,A.K,A.A,A.tau].map(v=>Math.round(v*10)/10);return r;};
+  window.__movSqFin=()=>{SQ.on=false;sqApplyRoot(false);};
+  window.__movSqMeta=paso=>({fases:SQ_PH.map(f=>({ini:f[0],fin:f[1],k:f[3],n:SQ_PHN[f[3]],x:SQ_PHG[f[3]]})),
+    grupos:SQ_M.map((m,i)=>{const lv=[];for(let p=0;p<100;p+=paso)lv.push(Math.round(sqLevel(i,p)*1000)/1000);return {en:m[0],n:m[1],x:m[2],tipo:m[3],lv};}),
+    variantes:Object.entries(SQ_DEPTH).map(([k,v])=>({id:k,n:v.n}))});
+  /* nombre y textos de un ejercicio: entrada de CTESTS (ex, how, pos) y EJ_TXT (errores, progresiones, precauciones) */
+  window.__movEjTxt=id=>{const c=CTESTS.find(x=>x.id===id),e=(typeof EJ_TXT!=='undefined'&&EJ_TXT[id])||{};return c?{n:c.n,ex:c.ex,how:c.how,pos:c.pos,err:e.err,prog:e.prog,contra:e.contra}:null;};
   const v3=v=>[v.x,v.y,v.z].map(x=>Math.round(x*1e6)/1e6);const rodilla={};for(const S of ['R','L']){const J=JOINTS['knee_'+S];rodilla[S]={largo:v3(J.long||new V3(0,1,0)),x:v3(J.xax||new V3(1,0,0))};}
   return {L,AX,rodilla,piv:L.map(k=>{const p=piv(k);return [p.x,p.y,p.z].map(v=>Math.round(v*1e5)/1e5);}),
     rom:ROM.filter(j=>!${JSON.stringify(ROM_FUERA)}.includes(j.id)).map(j=>({id:j.id,n:j.n,sided:!!j.sided,moves:j.moves.map(m=>({n:m.n,max:m.max,ax:m.ax,sg:m.sg,ag:m.ag||[]}))}))};
@@ -237,6 +249,35 @@ const PREPARA = `(async()=>{
   await p.waitForFunction(() => window.__qa && __qa.ready && __qa.ev('SYS.oseo.state') === 'loaded', null, { timeout: 300000 });
   const R = await E(PREPARA);
   console.log('Articulaciones (%d, AX=%d): %s', R.L.length, R.AX, R.L.join(' '));
+
+  /* ── ejercicios (tools/unreal/ejercicios.json): fotogramas del ciclo con la raíz del cuerpo, fases, músculos y textos ──
+     Cada «fuente» sabe hornear una clase de ejercicio; un ejercicio nuevo de una fuente que ya existe es solo una entrada
+     más en el JSON. Los textos van en cinco idiomas (idiomas.js: mismo criterio que estudio.js). */
+  const EJ = JSON.parse(fs.readFileSync(path.join(__dirname, 'ejercicios.json'), 'utf8')), ID = require('./idiomas.js');
+  const c5 = a => { const o = ID.cinco(a); if (!o) return o; const t = (EJ.traducciones || {})[o.es]; if (t) { for (const l of ['fr', 'de']) if (t[l]) { o[l] = t[l]; ID.faltan[l].delete(o.es); } } return o; };
+  const textosEj = async e => { const T = await E('id=>__movEjTxt(id)', e.id); if (!T) throw new Error('ejercicio sin entrada en CTESTS: ' + e.id);
+    return { n: c5(T.n), textos: ['ex', 'how', 'pos', 'err', 'prog', 'contra'].filter(k => T[k]).map(k => [EJ.ui[k], c5(T[k])]) }; };
+  const FUENTES = {
+    sentadilla: async e => { const PS = 2, meta = await E('p=>__movSqMeta(p)', PS), T = await textosEj(e);
+      const fases = meta.fases.map(f => ({ ini: f.ini, fin: f.fin, tipo: (e.tipo_fase || {})[f.k] || '', n: c5(f.n), x: c5(f.x) }));
+      const orden = { DE: 0, FO: 1, AS: 2 };
+      const grupos = meta.grupos.map(g => ({ en: g.en, n: c5(g.n), x: c5(g.x), tipo: meta.fases.map(f => orden[f.k] === undefined ? '' : g.tipo[orden[f.k]]), lv: g.lv }));
+      const variantes = [];
+      for (const v of meta.variantes.filter(v => !e.variantes || e.variantes.includes(v.id))) { const fondo = await E('d=>__movSqIni(d)', v.id), V = { id: v.id, n: c5(v.n), fondo, frames: [], raiz: [], med: [] };
+        for (let p = 0; p < 100; p += PS) { const r = await E('p=>__movSq(p)', p); V.frames.push(r.R.flat()); V.raiz.push(r.raiz); V.med.push(r.med); if (r.fuera.length) console.log('  aviso: sentadilla fuera del rig: %s', [...new Set(r.fuera)].join(',')); }
+        variantes.push(V); console.log('  ejercicio %s/%s: %d instantes, fondo cadera %s° rodilla %s° tobillo %s° tronco %s°%s', e.id, v.id, V.frames.length, fondo.H, fondo.K, fondo.A, fondo.tau, fondo.limit ? ' (tope: ' + fondo.limit + ')' : ''); }
+      await E('()=>__movSqFin()');
+      return { id: e.id, n: T.n, paso: PS, duracion: e.duracion || 4, vista: e.vista === undefined ? 2 : e.vista, inicial: Math.max(0, variantes.findIndex(v => v.id === e.inicial)),
+        fases, grupos, medidas: EJ.medidas_sentadilla, variantes, textos: T.textos }; },
+  };
+  const hornearEjercicios = async () => { const lista = [];
+    for (const e of EJ.ejercicios || []) { if (!FUENTES[e.fuente]) { console.log('  aviso: ejercicio %s con fuente desconocida «%s»', e.id, e.fuente); continue; } lista.push(await FUENTES[e.fuente](e)); }
+    for (const l of ['fr', 'de']) if (ID.faltan[l].size) console.log('  ejercicios: %d textos sin %s (salen en inglés):\n    %s', ID.faltan[l].size, l, [...ID.faltan[l]].map(s => JSON.stringify(s)).join('\n    '));
+    return { ui: EJ.ui, lista }; };
+  const jf0 = path.join(IMP, 'datos', 'movimiento.json');
+  if (process.argv.includes('--solo-ejercicios')) {   // rápido: deja rangos, marcha y pesos como están y rehace solo los ejercicios
+    const antes0 = JSON.parse(fs.readFileSync(jf0, 'utf8')); antes0.ejercicios = await hornearEjercicios();
+    fs.writeFileSync(jf0, JSON.stringify(antes0)); console.log('Ejercicios: datos/movimiento.json (lo demás sin tocar)'); await b.close(); return; }
 
   /* ── posturas ── */
   const rom = [];
@@ -265,6 +306,7 @@ const PREPARA = `(async()=>{
     for (let p = 0; p < 100; p += marcha.paso) { const r = await E('(k,p)=>__movGait(k,p)', pt.id, p); pt.frames.push(r.R.flat()); pt.raiz.push(r.raiz); r.fuera.forEach(x => fu.add(x.replace(/_[RL]$/, ''))); }
     console.log('  marcha %s: %d instantes%s', pt.id, pt.frames.length, fu.size ? ' (fuera del rig: ' + [...fu].join(',') + ')' : ''); }
   await E('()=>__movGaitFin()');
+  const ejercicios = await hornearEjercicios();
   /* cuaterniones [x, y, z, w] y eje-ángulo para retocar las posturas horneadas */
   const qAA = (ax, an) => { const s = Math.sin(an / 2); return [ax[0] * s, ax[1] * s, ax[2] * s, Math.cos(an / 2)]; };
   const qMul = (a, b) => [a[3] * b[0] + a[0] * b[3] + a[1] * b[2] - a[2] * b[1], a[3] * b[1] - a[0] * b[2] + a[1] * b[3] + a[2] * b[0], a[3] * b[2] + a[0] * b[1] - a[1] * b[0] + a[2] * b[3], a[3] * b[3] - a[0] * b[0] - a[1] * b[1] - a[2] * b[2]];
@@ -393,7 +435,7 @@ const PREPARA = `(async()=>{
   const jf = path.join(IMP, 'datos', 'movimiento.json');
   const antes = (SIN_PESOS || SOLO) && fs.existsSync(jf) ? JSON.parse(fs.readFileSync(jf, 'utf8')) : null;
   const salida = { version: 2, unidades: 'm, glTF (Y arriba)', paso: PASO, ax: R.AX, ax_de: R.L.slice(-3),
-    articulaciones: R.L.map((k, i) => ({ id: k, pivote: R.piv[i] })), rom, marcha, torax, abrazo, piezas: antes ? antes.piezas : {}, insercion: antes && antes.insercion ? antes.insercion : {} };
+    articulaciones: R.L.map((k, i) => ({ id: k, pivote: R.piv[i] })), rom, marcha, ejercicios, torax, abrazo, piezas: antes ? antes.piezas : {}, insercion: antes && antes.insercion ? antes.insercion : {} };
   fs.mkdirSync(path.join(IMP, 'datos'), { recursive: true });
   fs.writeFileSync(jf, JSON.stringify(salida));
   console.log('Posturas: datos/movimiento.json');

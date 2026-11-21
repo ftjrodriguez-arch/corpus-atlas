@@ -95,7 +95,26 @@ public:
 	/** Tipo de contracción del grupo en este instante en el miembro derecho: «exc», «con», «iso» o vacío si descansa. */
 	FString TipoDeGrupo(int32 Gi) const;
 	static FLinearColor ColorDeNivel(float Nivel);
-	bool HayPostura() const { return RangoActual >= 0 || PatronActual >= 0; }
+	/** Misma escala amarillo → magenta con la intensidad 0–1 tal cual (ejercicios). */
+	static FLinearColor ColorDeIntensidad(float Nivel);
+	bool HayPostura() const { return RangoActual >= 0 || PatronActual >= 0 || EjActual >= 0; }
+
+	// ── Ejercicios (sentadilla…): ciclo horneado desde la web con la raíz del cuerpo (pies en el suelo), fases y músculos ──
+	/** Coloca el instante Ciclo (0–100 %) de la variante Variante del ejercicio Ej. Ej < 0 = salir del ejercicio. */
+	void PonerEjercicio(int32 Ej, int32 Variante, float Ciclo);
+	void ReproducirEjercicio(bool bSi) { bEjEnCurso = bSi && EjActual >= 0; AlCambiarPostura.Broadcast(); }
+	bool EjercicioEnCurso() const { return bEjEnCurso; }
+	void EjercicioLento(bool bSi) { bEjLento = bSi; AlCambiarPostura.Broadcast(); }
+	bool EsEjercicioLento() const { return bEjLento; }
+	int32 Ejercicio() const { return EjActual; }
+	int32 VarianteDeEjercicio() const { return VarEj; }
+	float CicloDeEjercicio() const { return CicloEj; }
+	/** Fase del ciclo en este instante (índice en Fases), o -1. */
+	int32 FaseDeEjercicio() const;
+	/** Intensidad (0–1) de un grupo muscular del ejercicio en este instante. */
+	float NivelDeGrupoEj(int32 Gi) const;
+	/** Ángulos que enseña el ejercicio en este instante (cadera, rodilla…), interpolados. */
+	TArray<float> MedidasDeEjercicio() const;
 
 	virtual void Tick(float Dt) override;
 
@@ -154,6 +173,10 @@ private:
 	TSet<FString> IdsMarcha;
 	TMap<FString, FIntPoint> GruposMarcha;      // pieza → (grupo muscular, 0 derecho / 1 izquierdo)
 	TMap<FString, FLinearColor> FijosMarcha;    // músculos débiles o espásticos del patrón
+	int32 EjActual = -1, VarEj = 0;
+	float CicloEj = 0.f;
+	bool bEjEnCurso = false, bEjLento = false;
+	TMap<FString, int32> GruposEj;              // pieza → grupo muscular del ejercicio
 	void SubirPostura();
 	void AjustarLimites(UStaticMeshComponent* C) const;
 	void PintarAgonistas(const TArray<FString>& En, const FString& Lado);

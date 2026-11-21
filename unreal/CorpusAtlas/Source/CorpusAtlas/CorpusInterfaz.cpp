@@ -379,7 +379,7 @@ void SCorpusInterfaz::Reconstruir()
 		FilaVistas->AddSlot()[ Boton(D->T(TEXT("Movimiento")), [this, WC]()
 		{
 			bVerMov = !bVerMov;
-			if (WC.IsValid() && !bVerMov) { WC->QuitarPostura(); }
+			if (WC.IsValid() && !bVerMov) { WC->PonerMarcha(-1, 0.f); WC->PonerEjercicio(-1, 0, 0.f); WC->QuitarPostura(); }
 			MovPintado = FIntVector(-2, -2, -2); RehacerMovimiento();
 		}, bVerMov) ];
 	}
@@ -442,7 +442,16 @@ void SCorpusInterfaz::AlCambiarPostura()
 	// en reproducción la postura cambia en cada fotograma: el panel solo se rehace si cambian rango, movimiento o lado
 	const ACorpusCuerpo* C = Cuerpo();
 	if (!C) { return; }
-	if (FIntVector(C->PatronMarcha() >= 0 ? 1000 + C->PatronMarcha() : C->Rango(), C->Movimiento(), (C->LadoIzquierdo() ? 1 : 0) + (C->Reproduciendo() ? 2 : 0) + (C->MarchaEnCurso() ? 4 : 0) + (C->EsMarchaLenta() ? 8 : 0)) != MovPintado) { RehacerMovimiento(); }
+	if (ClaveMov() != MovPintado) { RehacerMovimiento(); }
+}
+
+// Con qué se pintó el panel de movimiento: modo (rango, marcha 1000+, ejercicio 2000+), movimiento o variante, y botones encendidos
+FIntVector SCorpusInterfaz::ClaveMov() const
+{
+	const ACorpusCuerpo* C = Cuerpo();
+	if (!C) { return FIntVector(-2, -2, -2); }
+	if (C->Ejercicio() >= 0) { return FIntVector(2000 + C->Ejercicio(), C->VarianteDeEjercicio(), (C->EjercicioEnCurso() ? 16 : 0) + (C->EsEjercicioLento() ? 32 : 0) + (bEjTecnica ? 64 : 0)); }
+	return FIntVector(C->PatronMarcha() >= 0 ? 1000 + C->PatronMarcha() : C->Rango(), C->Movimiento(), (C->LadoIzquierdo() ? 1 : 0) + (C->Reproduciendo() ? 2 : 0) + (C->MarchaEnCurso() ? 4 : 0) + (C->EsMarchaLenta() ? 8 : 0));
 }
 
 void SCorpusInterfaz::RehacerMovimiento()
@@ -450,7 +459,7 @@ void SCorpusInterfaz::RehacerMovimiento()
 	UCorpusDatos* D = Datos();
 	ACorpusCuerpo* C = Cuerpo();
 	if (!D || !C || !CajaMov.IsValid()) { return; }
-	MovPintado = FIntVector(C->PatronMarcha() >= 0 ? 1000 + C->PatronMarcha() : C->Rango(), C->Movimiento(), (C->LadoIzquierdo() ? 1 : 0) + (C->Reproduciendo() ? 2 : 0) + (C->MarchaEnCurso() ? 4 : 0) + (C->EsMarchaLenta() ? 8 : 0));
+	MovPintado = ClaveMov();
 	CajaMov->ClearChildren();
 	if (!C->MovimientoDisponible()) { return; }
 	TWeakObjectPtr<ACorpusCuerpo> WC(C);
@@ -460,14 +469,160 @@ void SCorpusInterfaz::RehacerMovimiento()
 
 	// modo: rango articular o marcha
 	const bool bMarcha = C->PatronMarcha() >= 0;
+	const int32 Ei = C->Ejercicio();
+	const bool bEj = D->Ejercicios().IsValidIndex(Ei);
+	TWeakObjectPtr<ACorpusJugador> WJ(Jugador);
 	{
 		TSharedRef<SHorizontalBox> Modos = SNew(SHorizontalBox);
-		Modos->AddSlot().AutoWidth().Padding(0, 0, 5, 0)[ Boton(D->T(TEXT("Rango articular")), [WC]() { if (WC.IsValid()) { WC->PonerMarcha(-1, 0.f); } }, !bMarcha) ];
+		Modos->AddSlot().AutoWidth().Padding(0, 0, 5, 0)[ Boton(D->T(TEXT("Rango articular")), [WC]() { if (WC.IsValid()) { WC->PonerMarcha(-1, 0.f); WC->PonerEjercicio(-1, 0, 0.f); } }, !bMarcha && !bEj) ];
 		if (D->PatronesMarcha().Num() > 0)
 		{
-			Modos->AddSlot().AutoWidth()[ Boton(D->T(TEXT("Marcha")), [WC]() { if (WC.IsValid()) { WC->QuitarPostura(); WC->PonerMarcha(0, 0.f); WC->ReproducirMarcha(true); } }, bMarcha) ];
+			Modos->AddSlot().AutoWidth().Padding(0, 0, 5, 0)[ Boton(D->T(TEXT("Marcha")), [WC]() { if (WC.IsValid()) { WC->QuitarPostura(); WC->PonerMarcha(0, 0.f); WC->ReproducirMarcha(true); } }, bMarcha) ];
+		}
+		if (D->Ejercicios().Num() > 0)
+		{
+			// ejercicios horneados (movimiento.json → ejercicios): al entrar, la vista que pide el ejercicio
+			Modos->AddSlot().AutoWidth()[ Boton(D->TEj(TEXT("modo")), [WC, WJ, D]()
+			{
+				if (!WC.IsValid()) { return; }
+				WC->QuitarPostura(); WC->PonerEjercicio(0, -1, 0.f); WC->ReproducirEjercicio(true);
+				if (WJ.IsValid() && WJ->CamaraOrbital() && D->Ejercicios().Num() > 0) { WJ->CamaraOrbital()->Vista(D->Ejercicios()[0].Vista); }
+			}, bEj) ];
 		}
 		CajaMov->AddSlot().AutoHeight().Padding(0, 0, 0, 8)[ Modos ];
+	}
+	if (bEj)
+	{
+		const FCorpusEjercicio& E = D->Ejercicios()[Ei];
+		const int32 Vi = C->VarianteDeEjercicio();
+		TWeakObjectPtr<UCorpusDatos> WD(D);
+		// ejercicio y variante (profundidad…)
+		TSharedRef<SWrapBox> FilaE = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
+		for (int32 i = 0; i < D->Ejercicios().Num(); ++i)
+		{
+			FilaE->AddSlot()[ Boton(D->Tx(D->Ejercicios()[i].Nombre), [WC, i]() { if (WC.IsValid()) { WC->PonerEjercicio(i, -1, 0.f); WC->ReproducirEjercicio(true); } }, i == Ei) ];
+		}
+		if (E.Variantes.Num() > 1)
+		{
+			FilaE->AddSlot()[ SNew(SSpacer).Size(FVector2D(10, 1)) ];
+			for (int32 v = 0; v < E.Variantes.Num(); ++v)
+			{
+				FilaE->AddSlot()[ Boton(D->Tx(E.Variantes[v].Nombre), [WC, Ei, v]() { if (WC.IsValid()) { WC->PonerEjercicio(Ei, v, WC->CicloDeEjercicio()); } }, v == Vi) ];
+			}
+		}
+		CajaMov->AddSlot().AutoHeight()[ FilaE ];
+		// fase del ciclo (excéntrica al bajar, isométrica abajo, concéntrica al subir) y qué ocurre en ella
+		CajaMov->AddSlot().AutoHeight().Padding(0, 10, 0, 0)
+		[
+			SNew(STextBlock).Font(Letra(13, true)).ColorAndOpacity(FSlateColor(C_ACENTO))
+			.Text_Lambda([WC, WD, Ei]()
+			{
+				if (!WC.IsValid() || !WD.IsValid() || !WD->Ejercicios().IsValidIndex(Ei)) { return FText(); }
+				const TArray<FCorpusFaseEj>& Fs = WD->Ejercicios()[Ei].Fases; const int32 F = WC->FaseDeEjercicio();
+				if (!Fs.IsValidIndex(F)) { return FText(); }
+				FString S = WD->Tx(Fs[F].Nombre);
+				// el tipo de contracción, si el nombre de la fase no lo dice ya
+				if (!Fs[F].Tipo.IsEmpty()) { const FString Tp = WD->TEj(Fs[F].Tipo); if (!S.Contains(Tp.ToLower())) { S += TEXT(" · ") + Tp; } }
+				return FText::FromString(FString::Printf(TEXT("%s · %d %%"), *S, FMath::RoundToInt(WC->CicloDeEjercicio())));
+			})
+		];
+		CajaMov->AddSlot().AutoHeight().Padding(0, 2, 0, 0)
+		[
+			SNew(STextBlock).Font(Letra(10)).ColorAndOpacity(FSlateColor(C_TINTA)).AutoWrapText(true)
+			.Text_Lambda([WC, WD, Ei]()
+			{
+				if (!WC.IsValid() || !WD.IsValid() || !WD->Ejercicios().IsValidIndex(Ei)) { return FText(); }
+				const TArray<FCorpusFaseEj>& Fs = WD->Ejercicios()[Ei].Fases; const int32 F = WC->FaseDeEjercicio();
+				return Fs.IsValidIndex(F) ? FText::FromString(WD->Tx(Fs[F].Texto)) : FText();
+			})
+		];
+		// ángulos de este instante (cadera, rodilla, tobillo, tronco…)
+		if (E.Medidas.Num() > 0)
+		{
+			CajaMov->AddSlot().AutoHeight().Padding(0, 6, 0, 0)
+			[
+				SNew(STextBlock).Font(Letra(11, true)).ColorAndOpacity(FSlateColor(FLinearColor(FColor::FromHex(TEXT("f0a040")))))
+				.Text_Lambda([WC, WD, Ei]()
+				{
+					if (!WC.IsValid() || !WD.IsValid() || !WD->Ejercicios().IsValidIndex(Ei)) { return FText(); }
+					const TArray<FCorpusTexto>& Ms = WD->Ejercicios()[Ei].Medidas; const TArray<float> V = WC->MedidasDeEjercicio();
+					FString S;
+					for (int32 i = 0; i < FMath::Min(Ms.Num(), V.Num()); ++i) { S += FString::Printf(TEXT("%s%s %d°"), i ? TEXT("  ·  ") : TEXT(""), *WD->Tx(Ms[i]), FMath::RoundToInt(V[i])); }
+					return FText::FromString(S);
+				})
+			];
+		}
+		TSharedRef<SHorizontalBox> FilaC = SNew(SHorizontalBox);
+		FilaC->AddSlot().FillWidth(1.f).VAlign(VAlign_Center)
+		[
+			SNew(SSlider).MinValue(0.f).MaxValue(99.9f)
+			.Value_Lambda([WC]() { return WC.IsValid() ? WC->CicloDeEjercicio() : 0.f; })
+			.OnValueChanged_Lambda([WC](float V) { if (WC.IsValid()) { WC->ReproducirEjercicio(false); WC->PonerEjercicio(WC->Ejercicio(), WC->VarianteDeEjercicio(), V); } })
+		];
+		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(10, 0, 0, 0)[ Boton(D->T(C->EjercicioEnCurso() ? TEXT("Pausa") : TEXT("Reproducir")), [WC]() { if (WC.IsValid()) { WC->ReproducirEjercicio(!WC->EjercicioEnCurso()); } }, true) ];
+		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(5, 0, 0, 0)[ Boton(D->T(TEXT("Cámara lenta")), [WC]() { if (WC.IsValid()) { WC->EjercicioLento(!WC->EsEjercicioLento()); } }, C->EsEjercicioLento()) ];
+		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(5, 0, 0, 0)[ Boton(D->T(TEXT("Reposo")), [WC]() { if (WC.IsValid()) { WC->PonerEjercicio(-1, 0, 0.f); } }) ];
+		CajaMov->AddSlot().AutoHeight().Padding(0, 10, 0, 0)[ FilaC ];
+		CajaMov->AddSlot().AutoHeight().Padding(0, 8, 0, 0)
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot().AutoWidth().Padding(0, 0, 5, 0)[ Boton(D->TEj(TEXT("musculos")), [this]() { bEjTecnica = false; RehacerMovimiento(); }, !bEjTecnica) ]
+			+ SHorizontalBox::Slot().AutoWidth()[ Boton(D->TEj(TEXT("tecnica")), [this]() { bEjTecnica = true; RehacerMovimiento(); }, bEjTecnica) ]
+		];
+		if (bEjTecnica)
+		{
+			// técnica: qué trabaja, cómo se hace, qué observar, errores, progresiones y precauciones (textos de la web)
+			TSharedRef<SVerticalBox> Tec = SNew(SVerticalBox);
+			for (const auto& Par : E.Textos)
+			{
+				Tec->AddSlot().AutoHeight().Padding(0, 6, 0, 1)[ Txt(Mayus(D->Tx(Par.Key)), 9, C_ACENTO, true) ];
+				Tec->AddSlot().AutoHeight()[ Txt(D->Tx(Par.Value), 10, C_TINTA) ];
+			}
+			CajaMov->AddSlot().AutoHeight().MaxHeight(330.f).Padding(0, 4, 0, 0)[ SNew(SScrollBox) + SScrollBox::Slot()[ Tec ] ];
+		}
+		else
+		{
+			// músculos: cada grupo con su intensidad en este instante (barra) y el tipo de contracción en esta fase
+			TSharedRef<SVerticalBox> Ley = SNew(SVerticalBox);
+			for (int32 g = 0; g < E.Grupos.Num(); ++g)
+			{
+				const FCorpusGrupoEj& G = E.Grupos[g];
+				Ley->AddSlot().AutoHeight().Padding(0, 1)
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)
+					[
+						SNew(STextBlock).Font(Letra(9)).Text(FText::FromString(D->Tx(G.Nombre))).ToolTipText(FText::FromString(D->Tx(G.Texto)))
+						.ColorAndOpacity_Lambda([WC, g]() { return FSlateColor(WC.IsValid() && WC->NivelDeGrupoEj(g) > 0.05f ? C_TINTA : C_GRIS); })
+					]
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(6, 0)
+					[
+						SNew(SBox).WidthOverride(90.f).HeightOverride(7.f)
+						[
+							SNew(SProgressBar).FillImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderPadding(FVector2D::ZeroVector)
+							.Percent_Lambda([WC, g]() { return TOptional<float>(WC.IsValid() ? FMath::Clamp(WC->NivelDeGrupoEj(g), 0.f, 1.f) : 0.f); })
+							.FillColorAndOpacity_Lambda([WC, g]() { return FSlateColor(WC.IsValid() ? ACorpusCuerpo::ColorDeIntensidad(WC->NivelDeGrupoEj(g)) : FLinearColor::Gray); })
+						]
+					]
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+					[
+						SNew(SBox).WidthOverride(84.f)
+						[
+							SNew(STextBlock).Font(Letra(9)).ColorAndOpacity(FSlateColor(C_ACENTO))
+							.Text_Lambda([WC, WD, Ei, g]()
+							{
+								if (!WC.IsValid() || !WD.IsValid() || !WD->Ejercicios().IsValidIndex(Ei) || !WD->Ejercicios()[Ei].Grupos.IsValidIndex(g)) { return FText(); }
+								const TArray<FString>& Tp = WD->Ejercicios()[Ei].Grupos[g].Tipo; const int32 F = WC->FaseDeEjercicio();
+								return (Tp.IsValidIndex(F) && !Tp[F].IsEmpty()) ? FText::FromString(WD->TEj(Tp[F])) : FText();
+							})
+						]
+					]
+				];
+			}
+			CajaMov->AddSlot().AutoHeight().Padding(0, 6, 0, 0)[ Ley ];
+		}
+		CajaMov->AddSlot().AutoHeight().Padding(0, 6, 0, 0)[ Txt(D->TEj(TEXT("leyenda")), 8, C_GRIS) ];
+		return;
 	}
 	if (bMarcha)
 	{
@@ -689,6 +844,8 @@ bool SCorpusInterfaz::Qa(const FString& Verbo, const FString& Resto)
 {
 	// panel <0|1>: pliega (0) o abre (1) el panel izquierdo
 	if (Verbo == TEXT("panel")) { bPanelPlegado = Resto == TEXT("0"); return true; }
+	// tecnica <0|1>: en el modo «Ejercicio», la lista de músculos (0) o los textos de técnica y errores (1)
+	if (Verbo == TEXT("tecnica")) { bEjTecnica = Resto != TEXT("0"); RehacerMovimiento(); return true; }
 	// enlace <n>: pulsa el enésimo botón «Estudiar» de la ficha de la pieza seleccionada
 	if (Verbo == TEXT("enlace"))
 	{

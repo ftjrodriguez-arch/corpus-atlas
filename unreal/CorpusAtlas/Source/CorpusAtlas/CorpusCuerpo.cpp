@@ -313,6 +313,7 @@ void ACorpusCuerpo::PonerMarcha(int32 Patron, float Ciclo)
 	const bool bAntes = HayPostura();
 	const FCorpusPatronMarcha* P = (MovimientoDisponible() && D->PatronesMarcha().IsValidIndex(Patron) && D->PatronesMarcha()[Patron].Frames.Num() > 1) ? &D->PatronesMarcha()[Patron] : nullptr;
 	const bool bCambiaPatron = (P ? Patron : -1) != PatronActual;
+	if (P && EjActual >= 0) { PonerEjercicio(-1, 0, 0.f); }   // la marcha saca del ejercicio
 	if (P && RangoActual >= 0) { RangoActual = -1; bReproduciendo = false; GradosActual = 0.f; PintarAgonistas(TArray<FString>(), FString()); }
 	if (P) { PonerCorrectivo(nullptr, 0, false, 0, 0, 0.f); }   // en la marcha los músculos van solo con sus pesos
 	PatronActual = P ? Patron : -1;
@@ -395,6 +396,7 @@ FString ACorpusCuerpo::TipoDeGrupo(int32 Gi) const
 }
 
 FLinearColor ACorpusCuerpo::ColorDeNivel(float Nivel) { return ColorNivel(FMath::Clamp(Nivel / 0.6f, 0.f, 1.f)); }
+FLinearColor ACorpusCuerpo::ColorDeIntensidad(float Nivel) { return ColorNivel(FMath::Clamp(Nivel, 0.f, 1.f)); }
 
 int32 ACorpusCuerpo::FaseDeMarcha() const
 {
@@ -404,12 +406,122 @@ int32 ACorpusCuerpo::FaseDeMarcha() const
 	return D->FasesMarcha().Num() - 1;
 }
 
+// ───────── Ejercicios ─────────
+// Igual que la marcha: los instantes del ciclo vienen horneados de la web (la sentadilla, de su módulo de cadena cerrada), con
+// la raíz del cuerpo que deja los pies en el suelo. Fases, grupos musculares e intensidades son datos (movimiento.json).
+
+void ACorpusCuerpo::PonerEjercicio(int32 Ej, int32 Variante, float Ciclo)
+{
+	const UCorpusDatos* D = Datos();
+	if (!D) { return; }
+	CrearTexturaPostura();
+	const bool bAntes = HayPostura();
+	const FCorpusEjercicio* E = (MovimientoDisponible() && D->Ejercicios().IsValidIndex(Ej)) ? &D->Ejercicios()[Ej] : nullptr;
+	const FCorpusVarianteEj* V = nullptr;
+	if (E) { Variante = E->Variantes.IsValidIndex(Variante) ? Variante : FMath::Clamp(E->Inicial, 0, FMath::Max(E->Variantes.Num() - 1, 0)); V = E->Variantes.IsValidIndex(Variante) ? &E->Variantes[Variante] : nullptr; }
+	if (!V || V->Frames.Num() < 2) { E = nullptr; V = nullptr; }
+	const bool bCambia = (E ? Ej : -1) != EjActual;
+	if (E && PatronActual >= 0) { PonerMarcha(-1, 0.f); }
+	if (E && RangoActual >= 0) { RangoActual = -1; bReproduciendo = false; GradosActual = 0.f; PintarAgonistas(TArray<FString>(), FString()); }
+	if (E) { PonerCorrectivo(nullptr, 0, false, 0, 0, 0.f); }   // en los ejercicios los músculos van solo con sus pesos
+	EjActual = E ? Ej : -1; VarEj = E ? Variante : 0;
+	PosturaEnReposo();
+	FTransform Raiz0 = FTransform::Identity;
+	int32 I0 = 0, I1 = 0; float A = 0.f;
+	if (E)
+	{
+		CicloEj = FMath::Fmod(FMath::Fmod(Ciclo, 100.f) + 100.f, 100.f);
+		const int32 N = V->Frames.Num();
+		const float X = CicloEj / E->Paso;
+		I0 = FMath::FloorToInt(X) % N; I1 = (I0 + 1) % N; A = X - FMath::FloorToFloat(X);
+		MezclarFotogramas(V->Frames[I0], V->Frames[I1], A);
+		if (V->Raiz.IsValidIndex(I0) && V->Raiz.IsValidIndex(I1) && V->Raiz[I0].Num() >= 7 && V->Raiz[I1].Num() >= 7)
+		{
+			// raíz del cuerpo en glTF → Unreal, como en la marcha: posición (x, z, y) · 100 y cuaternión (−x, −z, −y, w)
+			const TArray<float>& R0 = V->Raiz[I0]; const TArray<float>& R1 = V->Raiz[I1];
+			const FQuat Q = FQuat::Slerp(FQuat(-R0[0], -R0[2], -R0[1], R0[3]), FQuat(-R1[0], -R1[2], -R1[1], R1[3]), A);
+			const FVector T = FMath::Lerp(FVector(R0[4], R0[6], R0[5]), FVector(R1[4], R1[6], R1[5]), A) * 100.0;
+			Raiz0 = FTransform(Q, T);
+		}
+	}
+	else { bEjEnCurso = false; CicloEj = 0.f; }
+	if (Raiz && (E || bCambia)) { Raiz->SetRelativeTransform(Raiz0 * TransformBase); }
+	SubirPostura();
+	if (HayPostura() != bAntes) { for (auto& Par : Piezas) { if (Par.Value) { AjustarLimites(Par.Value); } } }
+
+	// músculos: cada grupo con su intensidad en este instante (amarillo → magenta, como la marcha), los dos lados
+	if (bCambia)
+	{
+		for (const auto& Par : GruposEj) { if (Par.Key != IdSeleccionada) { PonerEstado(Par.Key, FLinearColor::Black, 0.f); } }
+		GruposEj.Reset();
+		if (E)
+		{
+			TMap<FString, int32> GrupoDe;
+			for (int32 g = 0; g < E->Grupos.Num(); ++g) { for (const FString& En : E->Grupos[g].En) { GrupoDe.Add(En, g); } }
+			for (const auto& Par : Piezas)
+			{
+				const FCorpusPieza* Pz = D->Pieza(Par.Key);
+				if (!Pz || Pz->Sistema != TEXT("muscular")) { continue; }
+				if (const int32* G = GrupoDe.Find(Pz->En)) { GruposEj.Add(Par.Key, *G); }
+			}
+		}
+	}
+	if (E)
+	{
+		for (const auto& Par : GruposEj)
+		{
+			if (Par.Key == IdSeleccionada) { continue; }
+			const TArray<float>& Nv = E->Grupos[Par.Value].Nivel;
+			const float L = (Nv.IsValidIndex(I0) && Nv.IsValidIndex(I1)) ? FMath::Lerp(Nv[I0], Nv[I1], A) : 0.f;
+			PonerEstado(Par.Key, ColorNivel(FMath::Clamp(L, 0.f, 1.f)), L > 0.05f ? FMath::Clamp(0.30f + 0.6f * L, 0.f, 0.88f) : 0.f);
+		}
+	}
+	AlCambiarPostura.Broadcast();
+}
+
+int32 ACorpusCuerpo::FaseDeEjercicio() const
+{
+	const UCorpusDatos* D = Datos();
+	if (!D || !D->Ejercicios().IsValidIndex(EjActual)) { return -1; }
+	const TArray<FCorpusFaseEj>& F = D->Ejercicios()[EjActual].Fases;
+	for (int32 i = 0; i < F.Num(); ++i) { if (CicloEj >= F[i].Ini && CicloEj < F[i].Fin) { return i; } }
+	return F.Num() - 1;
+}
+
+float ACorpusCuerpo::NivelDeGrupoEj(int32 Gi) const
+{
+	const UCorpusDatos* D = Datos();
+	if (!D || !D->Ejercicios().IsValidIndex(EjActual) || !D->Ejercicios()[EjActual].Grupos.IsValidIndex(Gi)) { return 0.f; }
+	const FCorpusEjercicio& E = D->Ejercicios()[EjActual];
+	const TArray<float>& Nv = E.Grupos[Gi].Nivel;
+	if (Nv.Num() == 0) { return 0.f; }
+	const float X = CicloEj / E.Paso;
+	const int32 I0 = FMath::FloorToInt(X) % Nv.Num(), I1 = (I0 + 1) % Nv.Num();
+	return FMath::Lerp(Nv[I0], Nv[I1], X - FMath::FloorToFloat(X));
+}
+
+TArray<float> ACorpusCuerpo::MedidasDeEjercicio() const
+{
+	TArray<float> Fuera;
+	const UCorpusDatos* D = Datos();
+	if (!D || !D->Ejercicios().IsValidIndex(EjActual) || !D->Ejercicios()[EjActual].Variantes.IsValidIndex(VarEj)) { return Fuera; }
+	const FCorpusEjercicio& E = D->Ejercicios()[EjActual];
+	const TArray<TArray<float>>& M = E.Variantes[VarEj].Medidas;
+	if (M.Num() == 0) { return Fuera; }
+	const float X = CicloEj / E.Paso;
+	const int32 I0 = FMath::FloorToInt(X) % M.Num(), I1 = (I0 + 1) % M.Num();
+	const float A = X - FMath::FloorToFloat(X);
+	for (int32 i = 0; i < FMath::Min(M[I0].Num(), M[I1].Num()); ++i) { Fuera.Add(FMath::Lerp(M[I0][i], M[I1][i], A)); }
+	return Fuera;
+}
+
 void ACorpusCuerpo::PonerRango(int32 Rango, int32 Mov, bool bIzq, float Grados)
 {
 	const UCorpusDatos* D = Datos();
 	if (!D) { return; }
 	CrearTexturaPostura();
 	if (PatronActual >= 0 && Rango >= 0) { PonerMarcha(-1, 0.f); }   // un rango articular saca de la marcha
+	if (EjActual >= 0 && Rango >= 0) { PonerEjercicio(-1, 0, 0.f); }  // y del ejercicio
 	const bool bAntes = HayPostura();
 	const FCorpusRango* R = (MovimientoDisponible() && D->Rangos().IsValidIndex(Rango)) ? &D->Rangos()[Rango] : nullptr;
 	const FCorpusMovimiento* M = (R && R->Movs.IsValidIndex(Mov)) ? &R->Movs[Mov] : nullptr;
@@ -458,6 +570,14 @@ void ACorpusCuerpo::Tick(float Dt)
 		const UCorpusDatos* D = Datos();
 		const float Vel = (D && D->PatronesMarcha().IsValidIndex(PatronActual)) ? D->PatronesMarcha()[PatronActual].Velocidad : 1.f;
 		PonerMarcha(PatronActual, CicloMarcha + Dt * 100.f * Vel / (bMarchaLenta ? 4.4f : 1.1f));
+		return;
+	}
+	if (EjActual >= 0 && bEjEnCurso)
+	{
+		// un ciclo dura lo que diga el ejercicio (la sentadilla, 4 s como en la web); a cámara lenta, cuatro veces más
+		const UCorpusDatos* D = Datos();
+		const float Dur = (D && D->Ejercicios().IsValidIndex(EjActual)) ? D->Ejercicios()[EjActual].Duracion : 4.f;
+		PonerEjercicio(EjActual, VarEj, CicloEj + Dt * 100.f / (Dur * (bEjLento ? 4.f : 1.f)));
 		return;
 	}
 	if (!bReproduciendo || RangoActual < 0) { return; }
@@ -962,6 +1082,8 @@ void ACorpusCuerpo::PonerCuerpo(ECorpusCuerpo Nuevo)
 	if (bFantasma) { Fantasma(false); }
 	if (Nuevo == ECorpusCuerpo::VisibleHuman) { QuitarPostura(); }
 	if (PatronActual >= 0) { PonerMarcha(-1, 0.f); }
+	if (EjActual >= 0) { PonerEjercicio(-1, 0, 0.f); }
+	GruposEj.Reset();
 	IdsMarcha.Reset(); GruposMarcha.Reset(); FijosMarcha.Reset();   // el Visible Human no tiene rig
 	IdsAgonistas.Reset();
 	const bool bDeVH = CuerpoActual == ECorpusCuerpo::VisibleHuman, bAVH = Nuevo == ECorpusCuerpo::VisibleHuman;

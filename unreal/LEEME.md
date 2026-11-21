@@ -430,6 +430,47 @@ Capturas finales: `unreal/capturas/s1_*` (una hoja de contactos por punto: `s1_<
   lector de `i18n_de/fr` (claves «Rodilla» y «rodilla» fundidas), sin tocar aquí. Pendiente de revisión profesional y del
   informe del agente `director-clinico`.
 
+### H · Modo «Ejercicio»: sentadilla en cadena cerrada
+- **Datos:** `tools/unreal/ejercicios.json` (una entrada por ejercicio: `fuente`, variantes, duración, vista, tipo de
+  contracción de cada fase; textos de interfaz en cinco idiomas y las traducciones al francés y al alemán que la web no
+  tiene). `movimiento.js` lo hornea en `movimiento.json → ejercicios` = `{ui, lista:[{id, n, paso, duracion, vista,
+  inicial, fases, grupos, medidas, variantes:[{id, n, frames, raiz, med}], textos}]}`.
+- **Sentadilla** (`fuente: "sentadilla"`): se llama a `applyPose()` de la web con su módulo `SQ` puesto, cada 2 % del
+  ciclo y para las tres profundidades (media, paralela, profunda; perfil por defecto: hombre de 30 años). Sale lo mismo
+  que en la web: piernas resueltas en cadena cerrada, pelvis y **raíz del cuerpo** (pies fijos en el suelo), brazos de
+  contrapeso, fases (`SQ_PH`, `SQ_PHN`, `SQ_PHG`), los 11 grupos de `SQ_M` con su tipo de contracción por fase y su
+  intensidad (`sqLevel`), los ángulos de cadera, rodilla, tobillo y tronco de cada instante, y los textos de `CTESTS`
+  (ex, how, pos) y `EJ_TXT` (errores, progresiones, precauciones). Comprobado en Node con los datos horneados: talón y
+  punta del pie no se mueven en todo el ciclo.
+- **Idiomas:** `tools/unreal/idiomas.js` (mismo criterio que `estudio.js`: [es, en, pt] de la web; fr y de por el texto
+  español en `content_fr/de` e `i18n_fr/de`; si falta, inglés). A la sentadilla le faltaban 30 textos en francés y alemán:
+  están en `ejercicios.json → traducciones` (propias de esta edición, pendientes de revisión).
+- **Unreal:** `FCorpusEjercicio` y compañía en `UCorpusDatos` (`Ejercicios()`, `Tx()`, `TEj()`);
+  `ACorpusCuerpo::PonerEjercicio(ejercicio, variante, % del ciclo)` interpola los instantes, mueve el actor con la raíz
+  (como la marcha) y pinta cada grupo con su intensidad, amarillo → magenta. Un ciclo dura 4 s (16 s a cámara lenta).
+  Panel de movimiento, tercer modo **«Ejercicio»**: ejercicio y profundidad, fase con su tipo (excéntrica al bajar,
+  isométrica abajo, concéntrica al subir) y su explicación, ángulos, deslizador, reproducir / pausa, cámara lenta, reposo,
+  y dos pestañas: «Músculos activos» (barra de intensidad y tipo de contracción) y «Técnica y errores».
+- **Añadir un ejercicio:** una entrada más en `ejercicios.json` y volver a hornear; Unreal no cambia. Hoy solo existe la
+  fuente `sentadilla`. Los otros 27 ejercicios funcionales de `CTESTS` (postura final + `anchor`) necesitan una fuente
+  `ct` en `movimiento.js` (repetir la cuenta de `ctTick`: unas 20 líneas) y, en su entrada, las fases, los grupos y los
+  niveles, que la web no tiene para ellos. **No está hecha.**
+- **Nanite recortaba los pies** (arreglado, y afectaba también a los rangos al hacer zoom): Nanite descarta grupos de
+  triángulos con su caja de reposo; con el cuerpo bajado por la raíz, la caja de reposo de los pies queda bajo el borde
+  de la pantalla y desaparecían desde el 36 % del ciclo. Los dos materiales maestros declaran ahora
+  `max_world_position_offset_displacement = 220` cm (`corpus_importar.py`; después `ci.crear_materiales()`).
+- Regenerar: `python -m http.server 8765`, `node tools/unreal/movimiento.js --solo-ejercicios` (7 s; deja rangos, marcha
+  y pesos como están) y copiar `movimiento.json` a `Content/Datos`.
+- Pruebas: `ejercicio <id> [variante|-] [%]` · `ejercicio` (salir) · `tecnica <0|1>`. Capturas `s1_h_*` y `s1_h_hoja.png`
+  (0, 26, 50, 74 y 96 % de lado y de frente; fondo de la media y la profunda; por detrás; esqueleto; técnica; alemán y francés).
+- Se ve mal / dudoso: **el glúteo mayor se hincha como un globo en el fondo** (cadera a 126°; es el defecto ya anotado de
+  los pesos de la cadera por encima de 90°); los muslos y la pared abdominal se atraviesan en el fondo; las rodillas quedan
+  muy abiertas vistas de frente (lo da el resolutor de la web con 14° de rotación externa y 9° de abducción de partida);
+  la «paralela» baja a 126° de cadera y 127° de rodilla y la «profunda» apenas más (132°, tope de rodilla del perfil), así
+  que casi no se distinguen; la intensidad no depende de la profundidad elegida (`sqLevel` solo mira la fase) y es una
+  estimación, no EMG; sin el perfil de movilidad de la persona, sin avisos de tope de tobillo o cadera y sin flecha de
+  fuerzas. Sin rotación automática de rodilla (ver G). Textos pendientes de revisión profesional y del `director-clinico`.
+
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.

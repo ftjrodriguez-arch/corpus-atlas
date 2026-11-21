@@ -226,6 +226,20 @@ void ACorpusJugador::TickQa()
 		Cu->PonerMarcha(Pi, A.Num() > 1 ? FCString::Atof(*A[1]) : 0.f);
 		Pausa = 2.0;
 	}
+	else if (Verbo == TEXT("ejercicio") && Cu)
+	{
+		// ejercicio <id> [id de la variante | -] [% del ciclo]   ·   ejercicio (solo) = salir
+		TArray<FString> A; Resto.ParseIntoArrayWS(A);
+		int32 Ei = -1, Vi = -1;
+		if (const UCorpusDatos* D = GetGameInstance() ? GetGameInstance()->GetSubsystem<UCorpusDatos>() : nullptr)
+		{
+			for (int32 i = 0; A.Num() > 0 && i < D->Ejercicios().Num(); ++i) { if (D->Ejercicios()[i].Id == A[0]) { Ei = i; } }
+			if (D->Ejercicios().IsValidIndex(Ei) && A.Num() > 1) { for (int32 v = 0; v < D->Ejercicios()[Ei].Variantes.Num(); ++v) { if (D->Ejercicios()[Ei].Variantes[v].Id == A[1]) { Vi = v; } } }
+		}
+		Cu->ReproducirEjercicio(false);
+		Cu->PonerEjercicio(Ei, Vi, A.Num() > 2 ? FCString::Atof(*A[2]) : 0.f);
+		Pausa = 2.0;
+	}
 	else if (Verbo == TEXT("corte") && Cu)
 	{
 		// corte <sagital|coronal|axial> <posición 0–1|off>   ·   corte invertir   ·   corte off

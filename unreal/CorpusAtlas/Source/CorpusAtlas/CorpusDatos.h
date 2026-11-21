@@ -101,6 +101,33 @@ struct FCorpusPatronMarcha
 	TArray<TArray<float>> Frames, Raiz;   // por instante: giros (como los rangos) y raíz del cuerpo [cuaternión xyzw, posición xyz] en glTF
 };
 
+/** Ejercicios (movimiento.json → ejercicios, de tools/unreal/ejercicios.json): fotogramas del ciclo con la raíz del cuerpo,
+    fases, grupos musculares con su intensidad y textos, todo en cinco idiomas. Un ejercicio nuevo es una entrada más. */
+using FCorpusTexto = TMap<FString, FString>;   // idioma → texto
+struct FCorpusFaseEj { float Ini = 0, Fin = 0; FString Tipo; FCorpusTexto Nombre, Texto; };   // Tipo: «exc», «iso», «con» o vacío
+struct FCorpusGrupoEj
+{
+	TArray<FString> En; FCorpusTexto Nombre, Texto;
+	TArray<FString> Tipo;      // tipo de contracción en cada fase
+	TArray<float> Nivel;       // intensidad 0–1 en cada fotograma
+};
+struct FCorpusVarianteEj
+{
+	FString Id; FCorpusTexto Nombre;
+	TArray<TArray<float>> Frames, Raiz, Medidas;   // por instante: giros, raíz [cuaternión xyzw, posición xyz] en glTF y ángulos que se enseñan
+};
+struct FCorpusEjercicio
+{
+	FString Id; FCorpusTexto Nombre;
+	float Paso = 2.f, Duracion = 4.f;   // % del ciclo entre fotogramas y segundos por ciclo
+	int32 Vista = 2, Inicial = 0;
+	TArray<FCorpusFaseEj> Fases;
+	TArray<FCorpusGrupoEj> Grupos;
+	TArray<FCorpusTexto> Medidas;       // rótulos de los ángulos (cadera, rodilla…)
+	TArray<FCorpusVarianteEj> Variantes;
+	TArray<TPair<FCorpusTexto, FCorpusTexto>> Textos;   // título → texto (qué trabaja, cómo se hace, errores…)
+};
+
 /** Módulos de estudio (estudio_<idioma>.json, tools/unreal/estudio.js): lecciones, recorridos, kinesiología, pruebas,
     casos, protocolos, variantes, patologías y glosario, todos con la misma forma. */
 struct FCorpusPregunta { FString P, X; TArray<FString> O; int32 A = 0; };
@@ -196,6 +223,12 @@ public:
 	const TArray<FCorpusPatronMarcha>& PatronesMarcha() const { return Patrones; }
 	float PasoMarcha() const { return PasoCiclo; }
 
+	const TArray<FCorpusEjercicio>& Ejercicios() const { return ListaEjercicios; }
+	/** Texto por idiomas en el idioma actual (si falta: inglés, español). */
+	FString Tx(const FCorpusTexto& M) const { for (const FString& L : { IdiomaActual, FString(TEXT("en")), FString(TEXT("es")) }) { if (const FString* S = M.Find(L)) { if (!S->IsEmpty()) { return *S; } } } return FString(); }
+	/** Texto de interfaz del modo «Ejercicio» (tabla ui de ejercicios.json). */
+	FString TEj(const FString& Clave) const { const FCorpusTexto* M = UiEjercicios.Find(Clave); return M ? Tx(*M) : Clave; }
+
 	/** Correctivos elásticos de los músculos del hombro (correctivos.json + correctivos.bin). */
 	const FCorpusRejilla* Rejilla(const FString& Carpeta, const FString& Id) const { return Rejillas.Find(Carpeta + TEXT("/") + Id); }
 	const FCorpusRejilla* RejillaDe(const FString& Clave) const { return Rejillas.Find(Clave); }
@@ -244,6 +277,8 @@ private:
 	TArray<FCorpusFaseMarcha> Fases;
 	TArray<FCorpusGrupoMarcha> Grupos;
 	TArray<FCorpusPatronMarcha> Patrones;
+	TArray<FCorpusEjercicio> ListaEjercicios;
+	TMap<FString, FCorpusTexto> UiEjercicios;
 	float PasoCiclo = 2.f;
 	TArray<TArray<float>> Torax;
 	TMap<FString, FVector3f> Insercion;
