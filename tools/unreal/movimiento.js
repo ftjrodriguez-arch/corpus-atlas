@@ -212,7 +212,7 @@ const PREPARA = `(async()=>{
   window.__movGaitMeta=()=>({fases:GAIT_PH.map(f=>[f[0],f[1],f[2],f[3],f[4]]),
     grupos:GAIT_M.map((m,i)=>({en:m[0],tramos:m[1],n:m[2],tipo:m[3],txt:m[4],lv:GAIT_LV[i]||[]})),
     patrones:Object.entries(GAIT_P).map(([k,v])=>({id:k,n:v.n,t:sinHTML(v.t),debiles:v.weak||[],espasticos:v.spastic||[],vel:v.speed||1}))});
-  window.__movPose=(jid,mi,S,t)=>{const j=ROM.find(x=>x.id===jid);curJ=j;curM=j.moves[mi];romSide=S;angle=t;
+  window.__movPose=(jid,mi,S,t)=>{const j=ROM.find(x=>x.id===jid);curJ=j;curM=typeof mi==='object'?Object.assign({pl:'sag',dir:[0,-1,0],ag:[]},mi):j.moves[mi];romSide=S;angle=t;
     const tab=currentTab;currentTab='mov';let cap=null;const D0=deform;deform=a=>{cap=a;};
     try{applyPose();}finally{deform=D0;currentTab=tab;}
     const act=(cap||[]).map(a=>{if(a.tr||!/^knee_/.test(a.jn))return a;const tt=kneeTr(a.q,a.jn);return tt?Object.assign({},a,{tr:tt}):a;});
@@ -222,8 +222,9 @@ const PREPARA = `(async()=>{
       R.push([i,f(o.ax.x),f(o.ax.y),f(o.ax.z),f(o.ang),o.tr?f(o.tr.x):0,o.tr?f(o.tr.y):0,o.tr?f(o.tr.z):0]);};
     for(const o of ops){if(/^ankle_/.test(o.jn)){const sp=ankleSplit(o),S2=o.jn.slice(6);pon('ankle_st_'+S2,sp.sw);pon('ankle_tc_'+S2,sp.tw);}else pon(o.jn,o);}
     R.sort((a,b)=>a[0]-b[0]);return {R,fuera};};
-  return {L,AX,piv:L.map(k=>{const p=piv(k);return [p.x,p.y,p.z].map(v=>Math.round(v*1e5)/1e5);}),
-    rom:ROM.filter(j=>!${JSON.stringify(ROM_FUERA)}.includes(j.id)).map(j=>({id:j.id,n:j.n,sided:!!j.sided,moves:j.moves.map(m=>({n:m.n,max:m.max,ax:m.ax,ag:m.ag||[]}))}))};
+  const v3=v=>[v.x,v.y,v.z].map(x=>Math.round(x*1e6)/1e6);const rodilla={};for(const S of ['R','L']){const J=JOINTS['knee_'+S];rodilla[S]={largo:v3(J.long||new V3(0,1,0)),x:v3(J.xax||new V3(1,0,0))};}
+  return {L,AX,rodilla,piv:L.map(k=>{const p=piv(k);return [p.x,p.y,p.z].map(v=>Math.round(v*1e5)/1e5);}),
+    rom:ROM.filter(j=>!${JSON.stringify(ROM_FUERA)}.includes(j.id)).map(j=>({id:j.id,n:j.n,sided:!!j.sided,moves:j.moves.map(m=>({n:m.n,max:m.max,ax:m.ax,sg:m.sg,ag:m.ag||[]}))}))};
 })()`;
 
 (async () => {
@@ -264,6 +265,54 @@ const PREPARA = `(async()=>{
     for (let p = 0; p < 100; p += marcha.paso) { const r = await E('(k,p)=>__movGait(k,p)', pt.id, p); pt.frames.push(r.R.flat()); pt.raiz.push(r.raiz); r.fuera.forEach(x => fu.add(x.replace(/_[RL]$/, ''))); }
     console.log('  marcha %s: %d instantes%s', pt.id, pt.frames.length, fu.size ? ' (fuera del rig: ' + [...fu].join(',') + ')' : ''); }
   await E('()=>__movGaitFin()');
+  /* cuaterniones [x, y, z, w] y eje-ángulo para retocar las posturas horneadas */
+  const qAA = (ax, an) => { const s = Math.sin(an / 2); return [ax[0] * s, ax[1] * s, ax[2] * s, Math.cos(an / 2)]; };
+  const qMul = (a, b) => [a[3] * b[0] + a[0] * b[3] + a[1] * b[2] - a[2] * b[1], a[3] * b[1] - a[0] * b[2] + a[1] * b[3] + a[2] * b[0], a[3] * b[2] + a[0] * b[1] - a[1] * b[0] + a[2] * b[3], a[3] * b[3] - a[0] * b[0] - a[1] * b[1] - a[2] * b[2]];
+  const qInv = q => [-q[0], -q[1], -q[2], q[3]];
+  const qRot = (q, v) => { const u = [q[0], q[1], q[2]], c1 = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]].map(x => 2 * x);
+    const c2 = [u[1] * c1[2] - u[2] * c1[1], u[2] * c1[0] - u[0] * c1[2], u[0] * c1[1] - u[1] * c1[0]]; return v.map((x, i) => x + q[3] * c1[i] + c2[i]); };
+  const aAA = q => { if (q[3] < 0) q = q.map(x => -x); const an = 2 * Math.acos(Math.min(1, q[3])), s = Math.sqrt(Math.max(0, 1 - q[3] * q[3])); return s > 1e-6 ? [q[0] / s, q[1] / s, q[2] / s, an] : [1, 0, 0, 0]; };
+  /* ── rangos propios de esta edición (tools/unreal/rangos_extra.json): no se toca la tabla ROM de la web ──
+     Cada entrada se hornea con applyPose() de la web como un movimiento más. Si la web ya trae ese movimiento (mismo eje,
+     sentido y máximo en ese rango) no se duplica: se comprueba que las posturas coinciden y se le añaden las traducciones
+     y la nota. Así el JSON vale tanto si la web lo tiene como si no. */
+  const EXTRA = JSON.parse(fs.readFileSync(path.join(__dirname, 'rangos_extra.json'), 'utf8'));
+  const hornea = async (jid, mv, S, max) => { const fr = [];
+    for (let t = 0; t <= max + 1e-6; t += PASO) fr.push((await E('(j,mi,S,t)=>__movPose(j,mi,S,t)', jid, mv, S, Math.min(t, max))).R.flat());
+    if (max % PASO) fr.push((await E('(j,mi,S,t)=>__movPose(j,mi,S,t)', jid, mv, S, max)).R.flat());
+    return fr; };
+  for (const e of EXTRA.rangos || []) {
+    const r = rom.find(x => x.id === e.rom), meta = R.rom.find(x => x.id === e.rom);
+    if (!r) { console.log('  aviso: rangos_extra pide el rango «%s», que no existe', e.rom); continue; }
+    const mv = { n: e.n.es, ax: e.ax, sg: e.sg, max: e.max, pl: e.pl || 'sag', dir: e.dir || [0, -1, 0], help: e.help || {}, ag: e.ag || [] };
+    const ya = meta.moves.findIndex(m => m.ax === e.ax && m.sg === e.sg && m.max === e.max);
+    if (ya >= 0) {
+      const propio = await hornea(e.rom, mv, 'R', e.max), web = r.movs[ya].R; let dif = propio.length === web.length ? 0 : Infinity;
+      for (let i = 0; i < Math.min(propio.length, web.length); i++) { if (propio[i].length !== web[i].length) { dif = Infinity; break; } for (let k = 0; k < propio[i].length; k++) dif = Math.max(dif, Math.abs(propio[i][k] - web[i][k])); }
+      console.log('  extra %s/%s: la web ya lo trae («%s»); posturas %s', e.rom, e.n.es, r.movs[ya].n, dif < 1e-4 ? 'idénticas' : 'DISTINTAS (dif. máx. ' + dif + '): se deja la de la web');
+      r.movs[ya].tr = e.n; if (e.nota) r.movs[ya].nota = e.nota; continue; }
+    const M = { n: e.n.es, tr: e.n, max: e.max, paso: PASO, ag: e.ag || [], propio: true }; if (e.nota) M.nota = e.nota;
+    for (const S of ((r.lados || e.ax !== 'x') ? ['R', 'L'] : ['R'])) M[S] = await hornea(e.rom, mv, S, e.max);
+    r.movs.push(M); console.log('  extra %s/%s: horneado (%d posturas por lado)', e.rom, e.n.es, M.R.length); }
+  for (const nt of EXTRA.notas || []) { const r = rom.find(x => x.id === nt.rom), M = r && r.movs.find(m => m.n === nt.mov); if (M) M.nota = nt.nota; else console.log('  aviso: nota sin movimiento: %s/%s', nt.rom, nt.mov); }
+  /* ── mejora sobre la web: rotación automática de la rodilla (screw-home) ──
+     La malla de reposo es la rodilla extendida y bloqueada. Al flexionar, la tibia rota hacia dentro alrededor de su eje
+     largo, de forma progresiva, hasta «grados» en los primeros «arco» grados de flexión (al revés: en los últimos 15° de
+     extensión rota hacia fuera). Se compone después del giro de la web (q · q_axial, como el orden clínico de qOf).
+     Solo en los rangos articulares (cadena abierta): en la marcha y la sentadilla el pie está apoyado y giraría sobre el suelo. */
+  { const RA = EXTRA.rotacion_automatica; let nra = 0, amax = 0;
+    if (RA && RA.grados) for (const S of ['R', 'L']) { const iK = R.L.indexOf(RA.articulacion + '_' + S), ej = R.rodilla[S]; if (iK < 0) continue;
+      for (const r of rom) for (const M of r.movs) for (const lado of ['R', 'L']) { if (!M[lado]) continue;
+        M[lado] = M[lado].map(fr => { let toca = false; const out = fr.slice();
+          for (let k = 0; k < out.length; k += 8) { if (out[k] !== iK || !out[k + 4]) continue;
+            const q = qAA(out.slice(k + 1, k + 4), out[k + 4]);
+            const flex = 2 * Math.atan2(q[0] * ej.x[0] + q[1] * ej.x[1] + q[2] * ej.x[2], q[3]) * 180 / Math.PI;   // componente de flexión (grados)
+            let u = flex / RA.arco; u = u < 0 ? 0 : u > 1 ? 1 : u; const rot = RA.grados * u * u * (3 - 2 * u) * (S === 'L' ? -1 : 1);   // + = rotación interna en el lado derecho
+            if (Math.abs(rot) < 1e-4) continue;
+            const a = aAA(qMul(q, qAA(ej.largo, rot * Math.PI / 180))), f5 = x => Math.round(x * 1e5) / 1e5;
+            out[k + 1] = f5(a[0]); out[k + 2] = f5(a[1]); out[k + 3] = f5(a[2]); out[k + 4] = f5(a[3]); toca = true; amax = Math.max(amax, Math.abs(rot)); }
+          if (toca) nra++; return out; }); } }
+    console.log('Rotación automática de la rodilla: %d posturas, hasta %s° en los primeros %d° de flexión', nra, amax.toFixed(1), RA ? RA.arco : 0); }
   /* ── mejora sobre la web: la columna toracolumbar no gira en una sola bisagra ──
      En la web todo el giro de «tronco» ocurre en L3 y la zona lumbar hace joroba. Aquí se reparte entre la charnela
      lumbosacra (lumb, S1), L3 (trunk) y la toracolumbar (thor, T12), con el reparto fisiológico de cada movimiento:
@@ -290,12 +339,6 @@ const PREPARA = `(async()=>{
      contorno del tórax; la glenohumeral se recalcula para que el húmero quede exactamente donde estaba. */
   {
     const rig = JSON.parse(fs.readFileSync(path.join(RAIZ, 'data', 'rig.json'), 'utf8'));
-    const qAA = (ax, an) => { const s = Math.sin(an / 2); return [ax[0] * s, ax[1] * s, ax[2] * s, Math.cos(an / 2)]; };
-    const qMul = (a, b) => [a[3] * b[0] + a[0] * b[3] + a[1] * b[2] - a[2] * b[1], a[3] * b[1] - a[0] * b[2] + a[1] * b[3] + a[2] * b[0], a[3] * b[2] + a[0] * b[1] - a[1] * b[0] + a[2] * b[3], a[3] * b[3] - a[0] * b[0] - a[1] * b[1] - a[2] * b[2]];
-    const qInv = q => [-q[0], -q[1], -q[2], q[3]];
-    const qRot = (q, v) => { const u = [q[0], q[1], q[2]], c1 = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]].map(x => 2 * x);
-      const c2 = [u[1] * c1[2] - u[2] * c1[1], u[2] * c1[0] - u[0] * c1[2], u[0] * c1[1] - u[1] * c1[0]]; return v.map((x, i) => x + q[3] * c1[i] + c2[i]); };
-    const aAA = q => { if (q[3] < 0) q = q.map(x => -x); const an = 2 * Math.acos(Math.min(1, q[3])), s = Math.sqrt(Math.max(0, 1 - q[3] * q[3])); return s > 1e-6 ? [q[0] / s, q[1] / s, q[2] / s, an] : [1, 0, 0, 0]; };
     const kDe = p => [TX.k(torax, p), TX.radio(torax, p)];
     const sobre = (p, piv, q) => qRot(q, p.map((x, i) => x - piv[i])).map((x, i) => x + piv[i]);
     /* Elevación y depresión de la cintura escapular: la clavícula gira sobre la esternoclavicular y la acromioclavicular

@@ -58,6 +58,7 @@ struct FCorpusMovimiento
 	FString Nombre;
 	float Max = 0.f, Paso = 5.f;
 	TArray<FString> Agonistas;                 // nombres en inglés del catálogo (se pintan de naranja, como en la web)
+	TMap<FString, FString> Nombres, Notas;     // por idioma (rangos_extra.json): nombre propio y nota bajo el goniómetro
 	TArray<TArray<float>> Derecho, Izquierdo;  // por fotograma: [índice, eje xyz, ángulo (rad), traslación xyz] × articulaciones
 };
 
@@ -176,6 +177,10 @@ public:
 	const TArray<FVector3f>& PivotesArticulaciones() const { return Pivotes; }
 	const TArray<FCorpusRango>& Rangos() const { return ListaRangos; }
 	int32 IndiceGrupoTronco() const { return IndiceTronco; }
+	/** Nombre del movimiento en el idioma actual: el propio de rangos_extra.json si lo trae; si no, como la interfaz de la web. */
+	FString NombreMov(const FCorpusMovimiento& M) const { const FString* S = M.Nombres.Find(IdiomaActual); return S && !S->IsEmpty() ? *S : T(M.Nombre); }
+	/** Nota del movimiento (rotación automática de la rodilla, posición de medida…) en el idioma actual, o vacío. */
+	FString NotaMov(const FCorpusMovimiento& M) const { const FString* S = M.Notas.Find(IdiomaActual); if (!S) { S = M.Notas.Find(TEXT("es")); } return S ? *S : FString(); }
 	/** Articulaciones que mueven la pieza en ese cuerpo (carpeta «hombre» o «mujer»): códigos para los datos primitivos 12–19. */
 	const TArray<float>* HuecosMovimiento(const FString& Carpeta, const FString& Id) const { return Huecos.Find(Carpeta + TEXT("/") + Id); }
 

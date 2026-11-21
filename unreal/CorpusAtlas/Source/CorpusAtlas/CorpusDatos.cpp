@@ -321,6 +321,10 @@ void UCorpusDatos::CargarMovimiento()
 				Mv.Max = (float)M->GetNumberField(TEXT("max"));
 				Mv.Paso = (float)M->GetNumberField(TEXT("paso"));
 				for (const auto& Ag : M->GetArrayField(TEXT("ag"))) { Mv.Agonistas.Add(Ag->AsString()); }
+				// textos propios de la edición (tools/unreal/rangos_extra.json): nombre y nota por idioma
+				const TSharedPtr<FJsonObject>* Tx = nullptr;
+				if (M->TryGetObjectField(TEXT("tr"), Tx)) { for (const auto& Par : (*Tx)->Values) { FString S; if (Par.Value.IsValid() && Par.Value->TryGetString(S)) { Mv.Nombres.Add(FString(Par.Key), S); } } }
+				if (M->TryGetObjectField(TEXT("nota"), Tx)) { for (const auto& Par : (*Tx)->Values) { FString S; if (Par.Value.IsValid() && Par.Value->TryGetString(S)) { Mv.Notas.Add(FString(Par.Key), S); } } }
 				LeerFrames(M, TEXT("R"), Mv.Derecho);
 				LeerFrames(M, TEXT("L"), Mv.Izquierdo);
 			}

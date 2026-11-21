@@ -400,6 +400,36 @@ Capturas finales: `unreal/capturas/s1_*` (una hoja de contactos por punto: `s1_<
 - Sin revisar por el agente `director-clinico`: los puntos C y D enseñan datos ya existentes (`extras.json`, catálogo),
   pero su contenido sigue pendiente de revisión profesional.
 
+### G · Rodilla: extensión, rotaciones tibiales y rotación automática
+- **Los tres rangos ya venían de la web.** La auditoría leyó solo la tabla `ROM` principal (rodilla = «Flexión»), pero
+  `ROM_ADD` de `index.html` añade «Extensión» (10°, cuádriceps), «Rotación interna» (30°) y «Rotación externa» (40°, ambas
+  con la rodilla a 90°), y `movimiento.json` ya los traía. No se han duplicado.
+- `tools/unreal/rangos_extra.json` (datos, cinco idiomas): rangos propios de la edición (`rangos`), notas bajo el
+  goniómetro (`notas`) y la regla de la rotación automática. `movimiento.js` hornea cada rango propio con `applyPose()`
+  de la web (`__movPose` admite un movimiento que no está en la tabla ROM); si la web ya trae ese movimiento (mismo eje,
+  sentido y máximo) no lo repite: compara las posturas (las tres salieron idénticas) y solo le añade nombre y nota por idioma.
+  Un rango que la web no tenga se añade con una entrada más en el JSON, sin tocar código.
+- **Rotación automática (screw-home):** la malla de reposo es la rodilla extendida y bloqueada. En los primeros 15° de
+  flexión la tibia rota hacia dentro hasta 10° alrededor de su eje largo, de forma progresiva (al revés: en los últimos
+  15° de extensión rota hacia fuera). Se compone después del giro de la web (q · q_axial) en las 174 posturas de los
+  rangos que flexionan la rodilla (flexión de rodilla y de cadera, rotaciones de cadera y de rodilla). **No se aplica en
+  la marcha ni en la sentadilla:** con el pie apoyado quien gira es el fémur y el pie resbalaría sobre el suelo; haría
+  falta repartir el giro en la cadera.
+- C++: `FCorpusMovimiento::Nombres` / `Notas`, `UCorpusDatos::NombreMov` y `NotaMov`; el panel enseña la nota bajo los
+  botones del movimiento.
+- Regenerar: `python -m http.server 8765` y `node tools/unreal/movimiento.js --sin-pesos` (12 min: lo lento es la marcha),
+  y copiar `Importar/datos/movimiento.json` a `Content/Datos`.
+- Capturas `s1_g_*` y `s1_g_hoja.png`: flexión de lado y de frente (0, 34, 68, 101, 135°), esqueleto de frente a 0, 5, 10,
+  15 y 30° (la tibia gira y el peroné asoma), extensión 0–10°, rotación interna 0–30° y externa 0–40° vistas por detrás,
+  y la interna en alemán.
+- Se ve mal / dudoso: en la flexión de rodilla (con la cadera acompañando) los músculos del muslo se abren en tiras con
+  huecos entre ellas desde unos 60° (ya pasaba antes; es el reparto de pesos de la cadera, no la rodilla). Los 10° y los 15°
+  son valores de libro (Kapandji, Neumann), no medidos sobre este modelo; la rotación gira alrededor del eje largo de la
+  tibia, no del eje real (que pasa por el cóndilo medial). En las rotaciones a 90° el neutro ya lleva los 10° internos del
+  desbloqueo. En alemán y francés los nombres de varias articulaciones salen mal («cadera» por Knie): fallo anterior del
+  lector de `i18n_de/fr` (claves «Rodilla» y «rodilla» fundidas), sin tocar aquí. Pendiente de revisión profesional y del
+  informe del agente `director-clinico`.
+
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.

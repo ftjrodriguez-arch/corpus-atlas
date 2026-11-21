@@ -552,7 +552,7 @@ void SCorpusInterfaz::RehacerMovimiento()
 	{
 		TSharedRef<SCorpusGonio> Gonio = SNew(SCorpusGonio);
 		Gonio->Cuerpo = WC;
-		FString Titulo = D->T(Rs[Ri].Nombre) + TEXT(" · ") + D->T(Rs[Ri].Movs[Mi].Nombre);
+		FString Titulo = D->T(Rs[Ri].Nombre) + TEXT(" · ") + D->NombreMov(Rs[Ri].Movs[Mi]);
 		if (Rs[Ri].bLados) { Titulo += TEXT(" · ") + D->T(bIzq ? TEXT("Izquierdo") : TEXT("Derecho")); }
 		CajaMov->AddSlot().AutoHeight().Padding(0, 0, 0, 10)
 		[
@@ -590,9 +590,11 @@ void SCorpusInterfaz::RehacerMovimiento()
 	TSharedRef<SWrapBox> FilaM = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
 	for (int32 m = 0; m < R.Movs.Num(); ++m)
 	{
-		FilaM->AddSlot()[ Boton(D->T(R.Movs[m].Nombre), [WC, Ri, m, bIzq]() { if (WC.IsValid()) { WC->Reproducir(false); WC->PonerRango(Ri, m, bIzq, 0.f); } }, m == Mi) ];
+		FilaM->AddSlot()[ Boton(D->NombreMov(R.Movs[m]), [WC, Ri, m, bIzq]() { if (WC.IsValid()) { WC->Reproducir(false); WC->PonerRango(Ri, m, bIzq, 0.f); } }, m == Mi) ];
 	}
 	CajaMov->AddSlot().AutoHeight().Padding(0, 10, 0, 0)[ FilaM ];
+	// nota del movimiento (rangos_extra.json): rotación automática de la rodilla, posición de medida…
+	if (R.Movs.IsValidIndex(Mi)) { const FString Nota = D->NotaMov(R.Movs[Mi]); if (!Nota.IsEmpty()) { CajaMov->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[ Txt(Nota, 9, C_GRIS) ]; } }
 
 	// lado: en las articulaciones pares, derecho o izquierdo; en el tronco y el cuello, el sentido de la inclinación o el giro
 	TSharedRef<SHorizontalBox> Fila = SNew(SHorizontalBox);
