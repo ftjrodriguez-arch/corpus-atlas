@@ -117,7 +117,21 @@ public:
 	void PelarProfundidad(const FString& Prof, bool bOcultar);
 	bool ProfundidadOculta(const FString& Prof) const { return ProfOcultas.Contains(Prof); }
 
+	// ── Mapa de origen (rojo) e inserción (azul): las áreas de la capa «insercion» del hueso o músculo seleccionado ──
+	/** Enciende las áreas del hueso seleccionado (todas las que tiene dibujadas encima) o del músculo seleccionado (las suyas),
+	    coloreadas por su papel, y deja translúcido lo que tapa el hueso. Con false las apaga. */
+	void MapaInserciones(bool bSi);
+	bool EnMapaInserciones() const { return bMapa; }
+	const TSet<FString>& AreasDelMapa() const { return IdsMapa; }
+	/** ¿La pieza (hueso o músculo) tiene áreas de origen o inserción en el cuerpo actual? */
+	bool TieneInserciones(const FString& Id) const;
+	static FLinearColor ColorOrigen() { return FLinearColor(FColor::FromHex(TEXT("d01818"))); }
+	static FLinearColor ColorInsercion() { return FLinearColor(FColor::FromHex(TEXT("1f55e0"))); }
+
 private:
+	bool bMapa = false, bFantasmaPorMapa = false;
+	TSet<FString> IdsMapa;
+	TArray<FString> AreasDe(const FString& Id) const;
 	bool bFantasma = false;
 	TMap<FString, float> OpacidadesFantasma;   // opacidad que tenía cada capa antes de volverla fantasma
 	TSet<FString> ProfOcultas;

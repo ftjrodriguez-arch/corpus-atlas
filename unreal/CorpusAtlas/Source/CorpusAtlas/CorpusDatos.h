@@ -29,6 +29,8 @@ struct FCorpusPieza
 	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString La;
 	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Sistema;
 	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Lado;
+	/** Áreas de la capa «insercion»: «origen» o «inserción» (séptimo campo del catálogo). */
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Rol;
 	/** Clave = cuerpo («hombre», «mujer», «vh»). */
 	UPROPERTY(BlueprintReadOnly, Category = "Corpus") TMap<FString, FCorpusMalla> Mallas;
 };
@@ -206,6 +208,10 @@ public:
 	/** Nombre del relieve en el idioma actual (fr y de: por el nombre español en sus tablas; si falta, inglés). */
 	FString NombreRelieve(const FCorpusRelieve& R) const;
 
+	/** Hueso sobre el que está dibujada un área de origen o inserción (tools/unreal/inserciones.js), o vacío. */
+	const FString& HuesoDeInsercion(const FString& Carpeta, const FString& Id) const { static const FString Nada; const FString* H = HuesoDeArea.Find(Carpeta + TEXT("/") + Id); return H ? *H : Nada; }
+	static bool EsOrigen(const FCorpusPieza& P) { return P.Rol.StartsWith(TEXT("or")); }
+
 	/** Módulos de estudio en el idioma actual (se leen la primera vez que se piden). */
 	const FCorpusEstudio& Estudio();
 	/** Texto de interfaz del panel de estudio (clave de la tabla TXT de estudio.js). */
@@ -221,6 +227,8 @@ private:
 	void CargarMovimiento();
 	void CargarCorrectivos();
 	void CargarExtras();
+	void CargarInserciones();
+	TMap<FString, FString> HuesoDeArea;   // «cuerpo/id del área» → id del hueso (inserciones.json)
 	TMap<FString, FString> Prof;
 	TMap<FString, TArray<FCorpusRelieve>> RelievesPorHueso;
 	TMap<FString, FCorpusRejilla> Rejillas;

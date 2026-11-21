@@ -52,7 +52,7 @@ TEJIDOS = {
     "oseo":                dict(color="ece2cb", rug=0.62, esp=0.35, fibra=0.00, anis=0.0, sss=0.10, sss_color="e8c9a0", poro=0.55, esc=0.0),
     "muscular":            dict(color="a3392f", rug=0.50, esp=0.35, fibra=0.85, anis=0.55, sss=0.30, sss_color="8a3026", poro=0.10, esc=9.0),
     "articular":           dict(color="d3dde6", rug=0.30, esp=0.60, fibra=0.55, anis=0.70, sss=0.30, sss_color="c8d6e8", poro=0.05, esc=14.0),
-    "insercion":           dict(color="2f9e5b", rug=0.55, esp=0.30, fibra=0.00, anis=0.0, sss=0.05, sss_color="2f9e5b", poro=0.00, esc=0.0),
+    "insercion":           dict(color="2f9e5b", rug=0.55, esp=0.30, fibra=0.00, anis=0.0, sss=0.0, sss_color="000000", poro=0.00, esc=0.0),   # sin dispersión: la verde teñía de naranja el rojo del mapa de orígenes
     "fascia":              dict(color="cdb594", rug=0.35, esp=0.55, fibra=0.35, anis=0.50, sss=0.35, sss_color="d8c4a8", poro=0.05, esc=16.0),
     "bolsas":              dict(color="8fb7c9", rug=0.20, esp=0.70, fibra=0.00, anis=0.0, sss=0.50, sss_color="9cc4d8", poro=0.00, esc=0.0),
     "arterial":            dict(color="c53a2f", rug=0.28, esp=0.60, fibra=0.12, anis=0.30, sss=0.40, sss_color="8a1510", poro=0.00, esc=20.0),
@@ -71,6 +71,7 @@ TEJIDOS = {
 # del estudio. Comprobado en capturas (unreal/capturas).
 ALBEDO = {"oseo": 0.40, "articular": 0.55, "bolsas": 0.80, "fascia": 0.80}
 DESATURAR = {"muscular": 0.24}     # la web se ve salmón, no rojo puro (capturas 2026-11-20)
+EMPUJE = {"insercion": 0.06}       # cm hacia fuera: las áreas de origen e inserción no parpadean con el hueso
 FIBRA = ("muscular", "articular", "fascia", "arterial", "venoso", "nervioso_periferico", "linfatico")
 
 
@@ -385,6 +386,9 @@ def _postura(g):
     g.une(g.esc("Abrazo", 0.0, cpd=20), cu, "HUG")      # 1 = dorsal ancho y redondo mayor: pegados a la parrilla costal
     S, D = unreal.MaterialVectorCoordTransformSource, unreal.MaterialVectorCoordTransform
     wpo = _transformar(g, cu, S.TRANSFORMSOURCE_LOCAL, D.TRANSFORM_WORLD)
+    # «Empuje» (cm): separa la pieza de lo que tiene debajo a lo largo de su normal. Las áreas de origen e inserción están
+    # dibujadas justo sobre el hueso y sin esto parpadean con él (tabla EMPUJE).
+    wpo = g.add(wpo, g.mul(g.n(unreal.MaterialExpressionVertexNormalWS), g.esc("Empuje", 0.0)))
     g.sal(wpo, unreal.MaterialProperty.MP_WORLD_POSITION_OFFSET)
     vi = g.n(unreal.MaterialExpressionVertexInterpolator, -300)
     g.une(cu, vi, "VS", "Q")
@@ -600,6 +604,7 @@ def crear_materiales():
                 mel.set_material_instance_scalar_parameter_value(mi, p, float(t[k]))
             mel.set_material_instance_scalar_parameter_value(mi, "Albedo", float(ALBEDO.get(clave, 1.0)))
             mel.set_material_instance_scalar_parameter_value(mi, "Desaturar", float(DESATURAR.get(clave, 0.0)))
+            mel.set_material_instance_scalar_parameter_value(mi, "Empuje", float(EMPUJE.get(clave, 0.0)))
             eal.save_asset(ruta)
     unreal.log("Corpus: materiales creados en " + R_MAT)
 

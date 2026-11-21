@@ -351,6 +351,25 @@ Capturas finales: `unreal/capturas/s1_*` (una hoja de contactos por punto: `s1_<
   con una postura puesta; no se puede hacer clic en una marca; el relieve no se resalta como zona sobre la malla (solo
   punto y rótulo); con muchos rótulos el último puede salirse por abajo; enlazar los relieves (`lm`) del glosario.
 
+### D · Mapa de origen (rojo) e inserción (azul)
+- Datos: las áreas son las 705 mallas de la capa `insercion`; el catálogo (`data/catalog.json`, séptimo campo) dice si cada
+  una es «origen» o «inserción» (`FCorpusPieza::Rol`) y llevan el nombre y el lado de su músculo. Lo que no decía ningún
+  dato es **sobre qué hueso** está cada área: lo calcula `node tools/unreal/inserciones.js` (cada vértice vota por el hueso
+  más cercano a menos de 15 mm) → `inserciones.json` en `Importar/datos` y `Content/Datos` (705 de 705 con hueso, hombre y
+  mujer). Repetirlo si cambian los huesos o las áreas (`exportar.js`).
+- `ACorpusCuerpo::MapaInserciones`: con un **hueso** seleccionado enciende todas las áreas dibujadas sobre él; con un
+  **músculo**, las suyas. Rojo = origen, azul = inserción (color de estado por pieza); lo que tapa el hueso queda fantasma
+  y la pieza seleccionada pierde su tinte azul (queda el contorno). Se apaga al elegir otra pieza que no sea una de sus áreas.
+- Ficha: botón «Orígenes e inserciones» (solo si la pieza tiene áreas) y, encendido, la leyenda con los músculos que nacen
+  y los que terminan ahí. La ficha de un área dice si es origen o inserción.
+- Material: parámetro `Empuje` (tabla `EMPUJE`, 0,6 mm para `insercion`): separa las áreas del hueso para que no parpadeen;
+  `insercion` sin dispersión (la verde teñía de naranja el rojo).
+- Pruebas: `sel n152; mapa 1` · `mapa 0`. Capturas `s1_d_*` (fémur anterior y posterior, glúteo mayor, inglés, apagado).
+- Falta / dudoso: la clasificación origen-inserción es la del catálogo de la web y hay que revisarla (en el fémur la cabeza
+  corta del bíceps femoral figura como «inserción» y es un origen; faltan áreas del glúteo menor, obturadores y aductor
+  corto); es un color por área, no una proyección pintada sobre la malla del hueso; sin rugosidad diferenciada en las zonas
+  de inserción; el mapa no sigue todavía a varias piezas a la vez (una región entera).
+
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.

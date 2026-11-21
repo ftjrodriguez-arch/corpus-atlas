@@ -254,6 +254,7 @@ void ACorpusJugador::TickQa()
 		Pausa = 3.0;
 	}
 	else if (Verbo == TEXT("fantasma") && Cu) { Cu->Fantasma(Resto != TEXT("0")); Pausa = 4.0; }   // fantasma <0|1>
+	else if (Verbo == TEXT("mapa") && Cu) { Cu->MapaInserciones(Resto != TEXT("0")); Pausa = 4.0; }   // mapa <0|1>: origen e inserción de la pieza seleccionada
 	else if (Verbo == TEXT("pelar") && Cu)
 	{
 		// pelar <s|i|p> [0]: oculta los músculos de esa profundidad (con 0 los devuelve)   ·   pelar (solo) = todos a la vista

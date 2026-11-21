@@ -390,6 +390,7 @@ void SCorpusInterfaz::RehacerHerramientas()
 			.OnValueChanged_Lambda([WC](float V) { if (WC.IsValid() && WC->EjeCorte() >= 0) { WC->PonerCorte(WC->EjeCorte(), V); } })
 		];
 	}
+	RehacerFicha();   // la ficha pinta el estado del mapa de origen e inserción
 }
 
 void SCorpusInterfaz::AlCambiarPostura()
@@ -637,15 +638,16 @@ void SCorpusInterfaz::RehacerFicha()
 	UCorpusDatos* D = Datos();
 	ACorpusCuerpo* C = Cuerpo();
 	if (!D || !C || !CajaFicha.IsValid()) { return; }
-	CajaFicha->ClearChildren();
 	const FString Id = C->Seleccionada();
 	const FCorpusPieza* P = D->Pieza(Id);
-	// las marcas de relieves son del hueso seleccionado: al cambiar de pieza se quitan (y el fantasma que encendieron)
+	// las marcas de relieves son del hueso seleccionado: al cambiar de pieza se quitan (y el fantasma que encendieron).
+	// Antes de vaciar la ficha: apagar el fantasma vuelve a llamar aquí.
 	if (Id != RelHueso)
 	{
 		RelHueso = Id; RelVistos.Reset();
 		if (bFantasmaPorRelieves) { bFantasmaPorRelieves = false; C->Fantasma(false); }
 	}
+	CajaFicha->ClearChildren();
 	ActualizarMarcas();
 	if (!P) { return; }
 	TWeakObjectPtr<ACorpusCuerpo> WC(C);
@@ -655,15 +657,40 @@ void SCorpusInterfaz::RehacerFicha()
 	if (!P->La.IsEmpty()) { CajaFicha->AddSlot().AutoHeight().Padding(0, 2, 0, 0)[ Txt(P->La, 11, C_GRIS) ]; }
 	FString Sub = D->NombreCapa(P->Sistema);
 	if (!P->Lado.IsEmpty()) { Sub += TEXT(" · ") + D->NombreLado(P->Lado); }
+	if (!P->Rol.IsEmpty()) { Sub += TEXT(" · ") + D->T(UCorpusDatos::EsOrigen(*P) ? TEXT("Origen") : TEXT("Inserción")); }   // áreas de la capa «insercion»
 	CajaFicha->AddSlot().AutoHeight().Padding(0, 6, 0, 10)[ Txt(Sub, 10, C_ACENTO, true) ];
 
-	CajaFicha->AddSlot().AutoHeight()
-	[
-		SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(6, 6))
+	TSharedRef<SWrapBox> Acciones = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(6, 6))
 		+ SWrapBox::Slot()[ Boton(D->T(TEXT("Encuadrar")), [WJ]() { if (WJ.IsValid()) { WJ->EncuadrarSeleccion(); } }, true) ]
 		+ SWrapBox::Slot()[ Boton(D->T(TEXT("Aislar")), [WC, Id]() { if (WC.IsValid()) { WC->Aislar(Id); } }) ]
-		+ SWrapBox::Slot()[ Boton(D->T(TEXT("Ocultar")), [WC, Id]() { if (WC.IsValid()) { WC->Ocultar(Id); } }) ]
-	];
+		+ SWrapBox::Slot()[ Boton(D->T(TEXT("Ocultar")), [WC, Id]() { if (WC.IsValid()) { WC->Ocultar(Id); } }) ];
+	// mapa de origen (rojo) e inserción (azul) del hueso o del músculo seleccionado
+	const bool bMapa = C->EnMapaInserciones();
+	if (bMapa || C->TieneInserciones(Id))
+	{
+		Acciones->AddSlot()[ Boton(D->T(TEXT("Orígenes e inserciones")), [WC]() { if (WC.IsValid()) { WC->MapaInserciones(!WC->EnMapaInserciones()); } }, bMapa) ];
+	}
+	CajaFicha->AddSlot().AutoHeight()[ Acciones ];
+	if (bMapa)
+	{
+		// leyenda: qué músculos nacen (rojo) y cuáles terminan (azul) en las áreas encendidas
+		TArray<FString> Nombres[2];
+		for (const FString& A : C->AreasDelMapa()) { if (const FCorpusPieza* Pa = D->Pieza(A)) { Nombres[UCorpusDatos::EsOrigen(*Pa) ? 0 : 1].AddUnique(D->NombrePieza(A)); } }
+		const TCHAR* Titulos[2] = { TEXT("Origen"), TEXT("Inserción") };
+		const FLinearColor Colores[2] = { ACorpusCuerpo::ColorOrigen(), ACorpusCuerpo::ColorInsercion() };
+		for (int32 k = 0; k < 2; ++k)
+		{
+			if (Nombres[k].Num() == 0) { continue; }
+			Nombres[k].Sort();
+			CajaFicha->AddSlot().AutoHeight().Padding(0, 10, 0, 2)
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 6, 0)[ SNew(SBox).WidthOverride(12.f).HeightOverride(12.f)[ SNew(SImage).Image(Punto()).ColorAndOpacity(Colores[k]) ] ]
+				+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)[ Txt(FString::Printf(TEXT("%s (%d)"), *Mayus(D->T(Titulos[k])), Nombres[k].Num()), 9, C_GRIS, true) ]
+			];
+			CajaFicha->AddSlot().AutoHeight()[ Txt(FString::Join(Nombres[k], TEXT(" · ")), 10, C_TINTA) ];
+		}
+	}
 
 	// relieves óseos (data/extras.json → lm): uno por botón; se marcan sobre el hueso con su nombre
 	const TArray<FCorpusRelieve>& Rs = D->Relieves(Id);

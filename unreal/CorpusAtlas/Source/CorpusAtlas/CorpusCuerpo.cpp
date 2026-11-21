@@ -542,6 +542,69 @@ void ACorpusCuerpo::Fantasma(bool bSi)
 	AlCambiarHerramientas.Broadcast();
 }
 
+// ───────── Mapa de origen e inserción ─────────
+// Las áreas son las mallas de la capa «insercion» (llevan el nombre y el lado de su músculo; el catálogo dice si son origen
+// o inserción). Sobre qué hueso está cada una lo calcula tools/unreal/inserciones.js (inserciones.json).
+
+TArray<FString> ACorpusCuerpo::AreasDe(const FString& Id) const
+{
+	TArray<FString> Fuera;
+	const UCorpusDatos* D = Datos();
+	const FCorpusPieza* P = D ? D->Pieza(Id) : nullptr;
+	if (!P) { return Fuera; }
+	const FCorpusCapa* Capa = D->Capa(CapaDePieza(*P));
+	if (!Capa || Capa->Clave == TEXT("insercion")) { return Fuera; }
+	const bool bHueso = Capa->Base == TEXT("oseo");
+	const FString Cuerpo = CarpetaCuerpo();
+	for (const auto& Par : D->TodasLasPiezas())
+	{
+		const FCorpusPieza& A = Par.Value;
+		if (A.Sistema != TEXT("insercion") || CapaDePieza(A) != TEXT("insercion")) { continue; }
+		if (bHueso ? (D->HuesoDeInsercion(Cuerpo, A.Id) == Id) : (A.En == P->En && A.Lado == P->Lado)) { Fuera.Add(A.Id); }
+	}
+	return Fuera;
+}
+
+bool ACorpusCuerpo::TieneInserciones(const FString& Id) const { return AreasDe(Id).Num() > 0; }
+
+void ACorpusCuerpo::MapaInserciones(bool bSi)
+{
+	const UCorpusDatos* D = Datos();
+	for (const FString& Id : IdsMapa) { if (Id != IdSeleccionada) { PonerEstado(Id, FLinearColor::Black, 0.f); } }
+	IdsMapa.Reset();
+	bMapa = false;
+	if (bSi && D)
+	{
+		const TArray<FString> Areas = AreasDe(IdSeleccionada);
+		if (Areas.Num() > 0)
+		{
+			CargarCapa(TEXT("insercion"));
+			for (const FString& Id : Areas)
+			{
+				const FCorpusPieza* A = D->Pieza(Id);
+				if (!A || !Piezas.Contains(Id)) { continue; }
+				IdsMapa.Add(Id);
+				PonerEstado(Id, UCorpusDatos::EsOrigen(*A) ? ColorOrigen() : ColorInsercion(), 0.95f);
+			}
+			bMapa = IdsMapa.Num() > 0;
+		}
+	}
+	AplicarVisibilidad(TEXT("insercion"));
+	// con el mapa a la vista la pieza seleccionada pierde su tinte azul (queda el contorno): se confundiría con las inserciones
+	if (!IdSeleccionada.IsEmpty() && !IdsMapa.Contains(IdSeleccionada)) { PonerEstado(IdSeleccionada, COLOR_SELECCION, bMapa ? 0.f : 0.55f); }
+	// lo que tapa el hueso (músculos, ligamentos…) queda translúcido mientras se mira el mapa
+	if (bMapa && !bFantasma)
+	{
+		TSet<FString> Solidas; Solidas.Add(TEXT("insercion"));
+		if (D) { for (const FCorpusCapa& C : D->Capas()) { if (C.Base == TEXT("oseo")) { Solidas.Add(C.Clave); } } }
+		bFantasmaPorMapa = true;
+		FantasmaCapas(Solidas);
+	}
+	else if (!bMapa && bFantasmaPorMapa) { bFantasmaPorMapa = false; Fantasma(false); }
+	AlCambiarCapas.Broadcast();
+	AlCambiarHerramientas.Broadcast();
+}
+
 void ACorpusCuerpo::PelarProfundidad(const FString& Prof, bool bOcultar)
 {
 	if (bOcultar) { ProfOcultas.Add(Prof); } else { ProfOcultas.Remove(Prof); }
@@ -632,6 +695,7 @@ void ACorpusCuerpo::AplicarVisibilidad(const FString& Clave)
 		if (const TObjectPtr<UStaticMeshComponent>* C = Piezas.Find(Id))
 		{
 			bool bVer = bCapa && !Ocultas.Contains(Id) && (IdAislada.IsEmpty() || IdAislada == Id) && (Grupo.Num() == 0 || Grupo.Contains(Id));
+			if (bMapa && IdsMapa.Contains(Id)) { bVer = true; }   // mapa de origen e inserción: sus áreas se ven aunque la capa esté apagada
 			if (bVer && bPelar && ProfOcultas.Contains(D->Profundidad(Id))) { bVer = false; }
 			(*C)->SetVisibility(bVer);
 			(*C)->SetCollisionEnabled(bVer && bTocable ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
@@ -693,9 +757,14 @@ void ACorpusCuerpo::PonerEstado(const FString& Id, const FLinearColor& Color, fl
 void ACorpusCuerpo::Seleccionar(const FString& Id)
 {
 	if (Id == IdSeleccionada) { return; }
+	// el mapa de origen e inserción es de la pieza con la que se encendió: se apaga al elegir otra (salvo una de sus áreas)
+	if (bMapa && !IdsMapa.Contains(Id)) { MapaInserciones(false); }
 	if (!IdSeleccionada.IsEmpty())
 	{
-		PonerEstado(IdSeleccionada, FLinearColor::Black, 0.f);
+		const UCorpusDatos* D = Datos();
+		const FCorpusPieza* Area = (bMapa && D && IdsMapa.Contains(IdSeleccionada)) ? D->Pieza(IdSeleccionada) : nullptr;
+		if (Area) { PonerEstado(IdSeleccionada, UCorpusDatos::EsOrigen(*Area) ? ColorOrigen() : ColorInsercion(), 0.95f); }
+		else { PonerEstado(IdSeleccionada, FLinearColor::Black, 0.f); }
 		if (const TObjectPtr<UStaticMeshComponent>* C = Piezas.Find(IdSeleccionada)) { (*C)->SetRenderCustomDepth(false); }
 	}
 	IdSeleccionada = Piezas.Contains(Id) ? Id : FString();
@@ -813,6 +882,7 @@ void ACorpusCuerpo::PonerVista(const FCorpusVistaPaso& V)
 void ACorpusCuerpo::GuardarEstado()
 {
 	if (bHayGuardado) { return; }
+	if (bMapa) { MapaInserciones(false); }
 	if (bFantasma) { Fantasma(false); }   // se guarda el estado real de las capas, no el del modo fantasma
 	bHayGuardado = true;
 	CuerpoGuardado = CuerpoActual; CapasGuardadas = CapasVisibles; OpacidadesGuardadas = Opacidades;
@@ -865,11 +935,13 @@ void ACorpusCuerpo::DescargarTodo()
 {
 	for (auto& Par : Piezas) { if (Par.Value) { Par.Value->DestroyComponent(); } }
 	Piezas.Reset(); IdsPorCapa.Reset(); CapasCargadas.Reset(); Ocultas.Reset(); IdAislada.Reset(); IdSeleccionada.Reset();
+	IdsMapa.Reset(); bMapa = false;
 }
 
 void ACorpusCuerpo::PonerCuerpo(ECorpusCuerpo Nuevo)
 {
 	if (Nuevo == CuerpoActual) { return; }
+	if (bMapa) { MapaInserciones(false); }
 	if (bFantasma) { Fantasma(false); }
 	if (Nuevo == ECorpusCuerpo::VisibleHuman) { QuitarPostura(); }
 	if (PatronActual >= 0) { PonerMarcha(-1, 0.f); }

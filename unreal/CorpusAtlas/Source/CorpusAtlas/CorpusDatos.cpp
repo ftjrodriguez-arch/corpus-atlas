@@ -99,7 +99,7 @@ void UCorpusDatos::CargarCatalogo(const FString& Archivo, const FString& Campo)
 		FCorpusPieza P;
 		P.Id = Cad(*Fila, 0);
 		if (P.Id.IsEmpty() || Piezas.Contains(P.Id)) { continue; }
-		P.En = Cad(*Fila, 1); P.Es = Cad(*Fila, 2); P.La = Cad(*Fila, 3); P.Sistema = Cad(*Fila, 4); P.Lado = Cad(*Fila, 5);
+		P.En = Cad(*Fila, 1); P.Es = Cad(*Fila, 2); P.La = Cad(*Fila, 3); P.Sistema = Cad(*Fila, 4); P.Lado = Cad(*Fila, 5); P.Rol = Cad(*Fila, 6);
 		Piezas.Add(P.Id, MoveTemp(P));
 	}
 }
@@ -160,6 +160,7 @@ void UCorpusDatos::Initialize(FSubsystemCollectionBase& Collection)
 	CargarMovimiento();
 	CargarCorrectivos();
 	CargarExtras();
+	CargarInserciones();
 	UE_LOG(LogCorpus, Log, TEXT("Corpus Atlas: %d estructuras, %d capas, %d articulaciones, %d rangos"), Piezas.Num(), ListaCapas.Num(), Pivotes.Num(), ListaRangos.Num());
 }
 
@@ -357,6 +358,19 @@ void UCorpusDatos::CargarExtras()
 		}
 	}
 	UE_LOG(LogCorpus, Log, TEXT("Corpus Atlas: %d músculos con profundidad y %d huesos con relieves"), Prof.Num(), RelievesPorHueso.Num());
+}
+
+// inserciones.json (tools/unreal/inserciones.js): { cuerpo: { id del área de origen o inserción: id del hueso } }
+void UCorpusDatos::CargarInserciones()
+{
+	const TSharedPtr<FJsonObject> J = LeerObjeto(TEXT("inserciones.json"));
+	if (!J) { return; }
+	for (const auto& Cu : J->Values)
+	{
+		const TSharedPtr<FJsonObject>* O = nullptr;
+		if (!Cu.Value.IsValid() || !Cu.Value->TryGetObject(O)) { continue; }
+		for (const auto& Par : (*O)->Values) { FString H; if (Par.Value.IsValid() && Par.Value->TryGetString(H)) { HuesoDeArea.Add(FString(Cu.Key) + TEXT("/") + FString(Par.Key), H); } }
+	}
 }
 
 FString UCorpusDatos::NombreRelieve(const FCorpusRelieve& R) const
