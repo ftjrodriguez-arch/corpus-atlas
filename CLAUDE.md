@@ -133,6 +133,35 @@ Lee primero `CEREBRO.md` (visión, arquitectura del movimiento, criterios, decis
 - Dividir `index.html` en módulos sin romper el modo sin conexión.
 - Ideas: perfil de movilidad desde las mediciones del paciente; puente de glúteo; activación muscular continua.
 
+## Edición Unreal: reglas de producción (2026-11-20, aprobadas por el usuario)
+Destino: aplicación educativa médica para estudiantes de medicina, fisioterapia, anatomía, fisiología y entrenamiento.
+Estado, flujo y pendientes en `unreal/LEEME.md`; plan en `unreal/PLAN_SPRINTS.md`. Skills del proyecto:
+`.claude/skills/ue5-anatomia-aaa` y `.claude/skills/ue5-visual-qa`; agentes `director-clinico` (solo lectura) y `arquitecto-ue5`.
+
+- **Datos, no código.** Ningún origen, inserción, accidente óseo, rango articular, fase fisiológica ni definición va escrito
+  en C++. Todo vive en JSON: los de `data/` (compartidos con la web, fuente de verdad) y los generados por
+  `tools/unreal/*.js` en `Content/Datos`, que lee `UCorpusDatos`. No se pasan a `UDataTable`: romperían el vínculo con la web.
+  Si un dato falta, se añade al JSON y a su generador, nunca a una tabla dentro del C++.
+- **Anti-juguete.** Prohibido representar huesos, músculos u órganos con primitivas (cubos, esferas, cilindros). Solo mallas
+  anatómicas reales con licencia que permita publicar (Z-Anatomy, HRA, NIH 3D, modelado propio en Blender), con Nanite,
+  luz de estudio de tres puntos con Lumen y los materiales por tejido de `corpus_importar.py`. Los esquemas de fisiología
+  a escala microscópica (sinapsis, nefrona, alvéolo) se modelan en Blender como el acino de la web, no con primitivas.
+- **Movimiento.** No se reimplementa la biomecánica: sale de la web (`tools/unreal/movimiento.js`) y la GPU deforma las
+  mallas. Las correcciones biomecánicas se hacen en ese generador y luego se llevan a la web en rama aparte.
+- **Cámara e interfaz.** El modelo ocupa la mayor parte de la pantalla; paneles oscuros translúcidos y plegables; órbita,
+  desplazamiento, rueda, doble clic para encuadrar y seis vistas. Herramientas de disección: aislar, ocultar, fantasma
+  (opacidad por capa), pelar capas y plano de corte. La interfaz es Slate (`SCorpusInterfaz`); no migrar a CommonUI ni a
+  Enhanced Input sin una razón medible.
+- **Áreas.** M1 anatomía por capas y accidentes óseos · M2 biomecánica articular · M3 musculación y kinesiología ·
+  M4 talleres de fisiología · M5 diccionario, glosario y examen práctico.
+- **Vínculo en los dos sentidos.** Clic en una estructura → su ficha y su entrada del glosario; buscar un término → la
+  cámara va a la estructura, se enciende su capa y se resalta.
+- **Verificación visual obligatoria.** Nada se da por terminado sin capturas (`unreal/captura.ps1`) de frente, de lado,
+  de detalle y una tira del movimiento, revisadas en hoja de contactos. Cerrar la ventana de pruebas mientras se captura:
+  si el usuario la mueve, las fotos salen alteradas.
+- **Rigor clínico.** Todo contenido nuevo pasa por el agente `director-clinico` y se marca como pendiente de revisión
+  profesional hasta que un anatomista o fisioterapeuta lo valide. Aviso fijo: contenido educativo.
+
 ## Atribución de commits
 Termina los mensajes de commit con:
 Co-Authored-By: Claude <noreply@anthropic.com>
