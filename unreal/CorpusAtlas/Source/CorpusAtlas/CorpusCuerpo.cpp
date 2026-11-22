@@ -165,18 +165,18 @@ void ACorpusCuerpo::SubirCorrectivo()
 		[](uint8* Datos, const FUpdateTextureRegion2D* R) { FMemory::Free(Datos); delete R; });
 }
 
-void ACorpusCuerpo::PonerCorrectivo(const FCorpusRango* R, int32 Mov, bool bIzq, int32 I0, int32 I1, float A)
+void ACorpusCuerpo::PonerCorrectivo(const FString& Rom, int32 Mov, bool bIzq, int32 I0, int32 I1, float A)
 {
 	const UCorpusDatos* D = Datos();
 	CrearTexturaCorrectivo();
-	const FCorpusCorrMov* CM = (D && R) ? D->Correctivo(R->Id, Mov, bIzq) : nullptr;
+	const FCorpusCorrMov* CM = (D && !Rom.IsEmpty()) ? D->Correctivo(Rom, Mov, bIzq) : nullptr;
 	if (!CM || CM->Cuadros < 1)
 	{
 		// este movimiento no lleva correctivos: los músculos vuelven a moverse solo con sus pesos
 		if (bCorrActivo) { bCorrActivo = false; ClaveCorr.Reset(); Correctivo[0].X = 0.f; SubirCorrectivo(); }
 		return;
 	}
-	const FString Clave = FString::Printf(TEXT("%s/%d/%d"), *R->Id, Mov, bIzq ? 1 : 0);
+	const FString Clave = FString::Printf(TEXT("%s/%d/%d"), *Rom, Mov, bIzq ? 1 : 0);
 	const int32 Mitad = AnchoCorr * FilasCorr;
 	if (Clave != ClaveCorr)
 	{
@@ -315,7 +315,7 @@ void ACorpusCuerpo::PonerMarcha(int32 Patron, float Ciclo)
 	const bool bCambiaPatron = (P ? Patron : -1) != PatronActual;
 	if (P && EjActual >= 0) { PonerEjercicio(-1, 0, 0.f); }   // la marcha saca del ejercicio
 	if (P && RangoActual >= 0) { RangoActual = -1; bReproduciendo = false; GradosActual = 0.f; PintarAgonistas(TArray<FString>(), FString()); }
-	if (P) { PonerCorrectivo(nullptr, 0, false, 0, 0, 0.f); }   // en la marcha los músculos van solo con sus pesos
+	if (P) { PonerCorrectivo(FString(), 0, false, 0, 0, 0.f); }   // en la marcha los músculos van solo con sus pesos
 	PatronActual = P ? Patron : -1;
 	PosturaEnReposo();
 	FTransform Raiz0 = FTransform::Identity;
@@ -423,7 +423,6 @@ void ACorpusCuerpo::PonerEjercicio(int32 Ej, int32 Variante, float Ciclo)
 	const bool bCambia = (E ? Ej : -1) != EjActual;
 	if (E && PatronActual >= 0) { PonerMarcha(-1, 0.f); }
 	if (E && RangoActual >= 0) { RangoActual = -1; bReproduciendo = false; GradosActual = 0.f; PintarAgonistas(TArray<FString>(), FString()); }
-	if (E) { PonerCorrectivo(nullptr, 0, false, 0, 0, 0.f); }   // en los ejercicios los músculos van solo con sus pesos
 	EjActual = E ? Ej : -1; VarEj = E ? Variante : 0;
 	PosturaEnReposo();
 	FTransform Raiz0 = FTransform::Identity;
@@ -435,6 +434,9 @@ void ACorpusCuerpo::PonerEjercicio(int32 Ej, int32 Variante, float Ciclo)
 		const float X = CicloEj / E->Paso;
 		I0 = FMath::FloorToInt(X) % N; I1 = (I0 + 1) % N; A = X - FMath::FloorToFloat(X);
 		MezclarFotogramas(V->Frames[I0], V->Frames[I1], A);
+		// correctivos elásticos del hombro horneados para cada instante del ejercicio («ej:<id>», los dos lados a la vez;
+		// tools/unreal/correctivos.js). Si el ejercicio no mueve el hombro no hay y los músculos van solo con sus pesos.
+		PonerCorrectivo(TEXT("ej:") + E->Id, Variante, false, I0, I1, A);
 		if (V->Raiz.IsValidIndex(I0) && V->Raiz.IsValidIndex(I1) && V->Raiz[I0].Num() >= 7 && V->Raiz[I1].Num() >= 7)
 		{
 			// raíz del cuerpo en glTF → Unreal, como en la marcha: posición (x, z, y) · 100 y cuaternión (−x, −z, −y, w)
@@ -444,7 +446,7 @@ void ACorpusCuerpo::PonerEjercicio(int32 Ej, int32 Variante, float Ciclo)
 			Raiz0 = FTransform(Q, T);
 		}
 	}
-	else { bEjEnCurso = false; CicloEj = 0.f; }
+	else { bEjEnCurso = false; CicloEj = 0.f; if (bCambia) { PonerCorrectivo(FString(), 0, false, 0, 0, 0.f); } }   // al salir del ejercicio
 	if (Raiz && (E || bCambia)) { Raiz->SetRelativeTransform(Raiz0 * TransformBase); }
 	SubirPostura();
 	if (HayPostura() != bAntes) { for (auto& Par : Piezas) { if (Par.Value) { AjustarLimites(Par.Value); } } }
@@ -544,12 +546,12 @@ void ACorpusCuerpo::PonerRango(int32 Rango, int32 Mov, bool bIzq, float Grados)
 			const float A = G1 > G0 ? FMath::Clamp((GradosActual - G0) / (G1 - G0), 0.f, 1.f) : 0.f;
 			MezclarFotogramas(F[I0], F[I1], A);
 			// músculos del hombro: su rejilla elástica en esos mismos dos cuadros
-			PonerCorrectivo(R, MovActual, bLadoIzq && M->Izquierdo.Num() > 0, I0, I1, A);
+			PonerCorrectivo(R->Id, MovActual, bLadoIzq && M->Izquierdo.Num() > 0, I0, I1, A);
 			bCorr = true;
 		}
 	}
 	else { GradosActual = 0.f; }
-	if (!bCorr) { PonerCorrectivo(nullptr, 0, false, 0, 0, 0.f); }
+	if (!bCorr) { PonerCorrectivo(FString(), 0, false, 0, 0, 0.f); }
 	SubirPostura();
 
 	if (HayPostura() != bAntes) { for (auto& Par : Piezas) { if (Par.Value) { AjustarLimites(Par.Value); } } }

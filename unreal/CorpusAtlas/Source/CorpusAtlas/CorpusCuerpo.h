@@ -188,7 +188,8 @@ private:
 	// Correctivos elásticos del hombro: la rejilla de cada músculo en una textura (mitad superior: desplazamiento de cada
 	// nodo; mitad inferior: su giro). El texel 0 dice si están activos y en qué fila empiezan los giros.
 	void CrearTexturaCorrectivo();
-	void PonerCorrectivo(const struct FCorpusRango* R, int32 Mov, bool bIzq, int32 I0, int32 I1, float A);
+	/** Rom = id del rango («hombro», «escapula») o «ej:<id del ejercicio>»; vacío = sin correctivo. */
+	void PonerCorrectivo(const FString& Rom, int32 Mov, bool bIzq, int32 I0, int32 I1, float A);
 	void SubirCorrectivo();
 	TArray<FVector4f> Correctivo;
 	int32 AnchoCorr = 4, FilasCorr = 1;

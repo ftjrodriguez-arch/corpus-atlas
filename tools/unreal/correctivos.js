@@ -314,12 +314,17 @@ if (require.main === module) {
         peor.push([m1.plieg + m1.dentro, `${PR.mus.en.replace(/ muscle| part of| head of/g, '').slice(0, 22)} ${m0.plieg}→${m1.plieg} / ${m0.dentro}(${(m0.hondo * 1000).toFixed(0)})→${m1.dentro}(${(m1.hondo * 1000).toFixed(0)}) / ${m0.est.toFixed(2)}→${m1.est.toFixed(2)}`]); }
       peor.sort((x, y) => y[0] - x[0]); console.log('%s: pliegues %d→%d · dentro %d→%d\n    %s', nm.padEnd(9), T[0], T[1], T[2], T[3], peor.slice(0, 5).map(x => x[1]).join('\n    ')); tot.p0 = (tot.p0 || 0) + T[0]; tot.p1 = (tot.p1 || 0) + T[1]; tot.d0 = (tot.d0 || 0) + T[2]; tot.d1 = (tot.d1 || 0) + T[3]; }
     console.log('TOTAL: pliegues %d→%d · dentro %d→%d', tot.p0, tot.p1, tot.d0, tot.d1); }
-  else if (orden === 'hornear') {
+  else if (orden === 'hornear' || orden === 'hornear-ejercicios') {
+    /* hornear-ejercicios [ids separados por comas]: no rehace los rangos; añade (o sustituye) los correctivos de esos
+       ejercicios al final de correctivos.json/.bin que ya existen (mismas piezas, mismas rejillas). */
+    const SOLO_EJ = orden === 'hornear-ejercicios', LISTA_EJ = SOLO_EJ && a[0] ? a[0].split(',') : null; if (SOLO_EJ) a.length = 0;
     /* correctivos.json: piezas «cuerpo/id» → {base (primer texel en la textura), n, o, h, act (nodos guardados), ai (dónde está su lista en el .bin)}
        y movs [{rom, mov, lado, cuadros, piezas: {«cuerpo/id»: posición en el .bin}}].
        correctivos.bin: listas de nodos (uint32, índice en la rejilla completa) y, por cuadro y nodo, 7 enteros de 16 bits:
        desplazamiento xyz (1/20000 m) y giro xyzw (1/32767). Los nodos vecinos de los activos se rellenan por extrapolación. */
     const cuerpos = (a[0] || 'hombre,mujer').split(','), PASO = 5, partes = [], piezas = {}, movs = []; let base = 1, pos = 0; const t0 = Date.now();
+    const dirD = path.join(PO.IMP, 'datos'), VIEJO = SOLO_EJ ? JSON.parse(fs.readFileSync(path.join(dirD, 'correctivos.json'), 'utf8')) : null;
+    if (SOLO_EJ) { const bin0 = fs.readFileSync(path.join(dirD, 'correctivos.bin')); partes.push(bin0); pos = bin0.length; }
     const pon = buf => { const o = pos; partes.push(buf); pos += buf.length; const pad = (4 - pos % 4) % 4; if (pad) { partes.push(Buffer.alloc(pad)); pos += pad; } return o; };
     const PRs = [];
     for (const cuerpo of cuerpos) for (const S of ['R', 'L']) for (const id of ids(cuerpo, S)) { const PR = preparar(cuerpo, id, S), RJ = PR.RJ, n = RJ.n, nn = n[0] * n[1] * n[2];
@@ -329,20 +334,32 @@ if (require.main === module) {
         if (l.length) { anillo.push(q); vec.push(l); } }
       const lista = Uint32Array.from(RJ.nodos.concat(anillo));
       PR.anillo = vec; PR.clave = cuerpo + '/' + id; PRs.push(PR);
-      piezas[PR.clave] = { base, n, o: RJ.o.map(v => Math.round(v * 1e6) / 1e6), h: Math.round(RJ.h * 1e6) / 1e6, act: lista.length, ai: pon(Buffer.from(lista.buffer)), lado: S }; base += nn; }
+      piezas[PR.clave] = SOLO_EJ ? VIEJO.piezas[PR.clave] : { base, n, o: RJ.o.map(v => Math.round(v * 1e6) / 1e6), h: Math.round(RJ.h * 1e6) / 1e6, act: lista.length, ai: pon(Buffer.from(lista.buffer)), lado: S };
+      if (SOLO_EJ && (!piezas[PR.clave] || piezas[PR.clave].act !== lista.length)) throw new Error('la rejilla de ' + PR.clave + ' no coincide con correctivos.json: hay que hornear todo'); base += nn; }
     console.log('%d piezas, %d texeles por mapa', PRs.length, base);
-    for (const rom of ROMS) { const R = PO.M.rom.find(r => r.id === rom); R.movs.forEach((mv, mi) => { for (const S of ['R', 'L']) { if (!mv[S]) continue;
+    const cuadros = (PR, rom, mi, gs) => { const C = resolver(PR, rom, mi, gs), N = PR.RJ.N, NA = N + PR.anillo.length, buf = new Int16Array(gs.length * NA * 7), prev = new Float32Array(NA * 4); for (let i = 0; i < NA; i++) prev[i * 4 + 3] = 1;
+      C.forEach((c, k) => { const x0 = PR.RJ.x0, D = new Float32Array(NA * 3), Q = new Float32Array(NA * 4);
+        for (let i = 0; i < N; i++) { D[i * 3] = c.X[i * 3] - x0[i * 3]; D[i * 3 + 1] = c.X[i * 3 + 1] - x0[i * 3 + 1]; D[i * 3 + 2] = c.X[i * 3 + 2] - x0[i * 3 + 2]; for (let q = 0; q < 4; q++) Q[i * 4 + q] = c.Q[i * 4 + q]; }
+        PR.anillo.forEach((l, j) => { const i = N + j; for (const v of l) { for (let q = 0; q < 3; q++) D[i * 3 + q] += D[v * 3 + q] / l.length; const sg = (Q[v * 4] * Q[l[0] * 4] + Q[v * 4 + 1] * Q[l[0] * 4 + 1] + Q[v * 4 + 2] * Q[l[0] * 4 + 2] + Q[v * 4 + 3] * Q[l[0] * 4 + 3]) < 0 ? -1 : 1; for (let q = 0; q < 4; q++) Q[i * 4 + q] += sg * Q[v * 4 + q]; } });
+        for (let i = 0; i < NA; i++) { let l = Math.hypot(Q[i * 4], Q[i * 4 + 1], Q[i * 4 + 2], Q[i * 4 + 3]) || 1; if (Q[i * 4] * prev[i * 4] + Q[i * 4 + 1] * prev[i * 4 + 1] + Q[i * 4 + 2] * prev[i * 4 + 2] + Q[i * 4 + 3] * prev[i * 4 + 3] < 0) l = -l;   /* mismo signo que en el cuadro anterior */
+          const o = (k * NA + i) * 7; for (let q = 0; q < 3; q++) buf[o + q] = Math.max(-32767, Math.min(32767, Math.round(D[i * 3 + q] * 20000)));
+          for (let q = 0; q < 4; q++) { const v = Q[i * 4 + q] / l; prev[i * 4 + q] = v; buf[o + 3 + q] = Math.round(v * 32767); } } });
+      return pon(Buffer.from(buf.buffer)); };
+    if (SOLO_EJ) movs.push(...VIEJO.movs.filter(m => !(m.rom.startsWith('ej:') && (!LISTA_EJ || LISTA_EJ.includes(m.rom.slice(3))))));
+    for (const rom of SOLO_EJ ? [] : ROMS) { const R = PO.M.rom.find(r => r.id === rom); R.movs.forEach((mv, mi) => { for (const S of ['R', 'L']) { if (!mv[S]) continue;
       const gs = []; for (let g = 0; g <= mv.max + 1e-6; g += PASO) gs.push(Math.min(g, mv.max)); if (mv.max % PASO) gs.push(mv.max);
       const M = { rom, mov: mi, lado: S, cuadros: gs.length, piezas: {} }; let pl = 0, de = 0;
-      for (const PR of PRs) { if (PR.S !== S) continue; const C = resolver(PR, rom, mi, gs), N = PR.RJ.N, NA = N + PR.anillo.length, buf = new Int16Array(gs.length * NA * 7), prev = new Float32Array(NA * 4); for (let i = 0; i < NA; i++) prev[i * 4 + 3] = 1;
-        C.forEach((c, k) => { const x0 = PR.RJ.x0, D = new Float32Array(NA * 3), Q = new Float32Array(NA * 4);
-          for (let i = 0; i < N; i++) { D[i * 3] = c.X[i * 3] - x0[i * 3]; D[i * 3 + 1] = c.X[i * 3 + 1] - x0[i * 3 + 1]; D[i * 3 + 2] = c.X[i * 3 + 2] - x0[i * 3 + 2]; for (let q = 0; q < 4; q++) Q[i * 4 + q] = c.Q[i * 4 + q]; }
-          PR.anillo.forEach((l, j) => { const i = N + j; for (const v of l) { for (let q = 0; q < 3; q++) D[i * 3 + q] += D[v * 3 + q] / l.length; const sg = (Q[v * 4] * Q[l[0] * 4] + Q[v * 4 + 1] * Q[l[0] * 4 + 1] + Q[v * 4 + 2] * Q[l[0] * 4 + 2] + Q[v * 4 + 3] * Q[l[0] * 4 + 3]) < 0 ? -1 : 1; for (let q = 0; q < 4; q++) Q[i * 4 + q] += sg * Q[v * 4 + q]; } });
-          for (let i = 0; i < NA; i++) { let l = Math.hypot(Q[i * 4], Q[i * 4 + 1], Q[i * 4 + 2], Q[i * 4 + 3]) || 1; if (Q[i * 4] * prev[i * 4] + Q[i * 4 + 1] * prev[i * 4 + 1] + Q[i * 4 + 2] * prev[i * 4 + 2] + Q[i * 4 + 3] * prev[i * 4 + 3] < 0) l = -l;   /* mismo signo que en el cuadro anterior */
-            const o = (k * NA + i) * 7; for (let q = 0; q < 3; q++) buf[o + q] = Math.max(-32767, Math.min(32767, Math.round(D[i * 3 + q] * 20000)));
-            for (let q = 0; q < 4; q++) { const v = Q[i * 4 + q] / l; prev[i * 4 + q] = v; buf[o + 3 + q] = Math.round(v * 32767); } } });
-        M.piezas[PR.clave] = pon(Buffer.from(buf.buffer)); }
+      for (const PR of PRs) { if (PR.S !== S) continue; M.piezas[PR.clave] = cuadros(PR, rom, mi, gs); }
       movs.push(M); console.log('  %s %d %s (%s): %d cuadros · %d s', rom, mi, S, mv.n, gs.length, Math.round((Date.now() - t0) / 1000)); } }); }
+    /* ejercicios que mueven el hombro o la cintura escapular (movimiento.json → ejercicios): un correctivo por instante, con
+       los músculos de los DOS lados a la vez (rom «ej:<id>», mov = índice de la variante, lado R). Sin esto el dorsal
+       ancho volvía a deformarse en la elevación lateral, el press y el remo (Unreal los usaba solo en los rangos). */
+    const HOMBRO = new Set(['shoulder_R', 'shoulder_L', 'sc_R', 'sc_L', 'acr_R', 'acr_L'].map(n => PO.arts.indexOf(n)));
+    const usaHombro = v => v.frames.some(fr => { for (let k = 0; k < fr.length; k += 8) if (HOMBRO.has(fr[k]) && Math.abs(fr[k + 4]) > 0.05) return true; return false; });
+    for (const e of ((PO.M.ejercicios || {}).lista || [])) (e.variantes || []).forEach((v, vi) => { if (!usaHombro(v) || (LISTA_EJ && !LISTA_EJ.includes(e.id))) return;
+      const gs = v.frames.map((_, k) => k * e.paso), M = { rom: 'ej:' + e.id, mov: vi, lado: 'R', cuadros: gs.length, piezas: {} };
+      for (const PR of PRs) M.piezas[PR.clave] = cuadros(PR, M.rom, v.id, gs);
+      movs.push(M); console.log('  ejercicio %s/%s: %d cuadros, los dos lados · %d s', e.id, v.id, gs.length, Math.round((Date.now() - t0) / 1000)); });
     const dir = path.join(PO.IMP, 'datos');
     fs.writeFileSync(path.join(dir, 'correctivos.bin'), Buffer.concat(partes));
     fs.writeFileSync(path.join(dir, 'correctivos.json'), JSON.stringify({ version: 1, paso: PASO, ancho: 512, texeles: base, escala: 20000, piezas, movs }));

@@ -165,3 +165,5 @@ Estado, flujo y pendientes en `unreal/LEEME.md`; plan en `unreal/PLAN_SPRINTS.md
 ## Atribución de commits
 Termina los mensajes de commit con:
 Co-Authored-By: Claude <noreply@anthropic.com>
+
+> **Al empezar en Claude Code:** leer primero `TRASPASO_CLAUDE_CODE.md` (estado y siguiente paso).
