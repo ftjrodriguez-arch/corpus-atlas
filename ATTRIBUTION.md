@@ -40,6 +40,7 @@
 
 ## Software y tipografías · Software and fonts
 - three.js r147 (MIT), decodificador Draco de Google (Apache 2.0) y tipografías Spectral, Public Sans y JetBrains Mono (SIL OFL 1.1), incluidos en la app: ver `THIRD_PARTY_LICENSES.md`.
+- Edición Unreal: tipografía **Inter** de Rasmus Andersson (https://github.com/rsms/inter, SIL Open Font License 1.1), pesos Regular, SemiBold y Bold sin modificar, en `unreal/CorpusAtlas/Content/Slate/Fuentes/` junto con su archivo de licencia. Si faltan los TTF, la interfaz usa la fuente por defecto de Unreal.
 
 ## Privacidad · Privacy
 - Sin cuentas ni servidor propio: el progreso se guarda solo en el dispositivo de cada persona.

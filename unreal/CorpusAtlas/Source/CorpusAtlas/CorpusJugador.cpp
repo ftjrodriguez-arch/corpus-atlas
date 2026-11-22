@@ -357,16 +357,29 @@ void ACorpusJugador::PlayerTick(float Dt)
 		if (bDoble) { EncuadrarSeleccion(); }
 	}
 
-	// Teclado: F encuadra, H oculta, I aísla, Esc muestra todo, 1–6 vistas fijas.
-	if (WasInputKeyJustPressed(EKeys::F)) { EncuadrarSeleccion(); }
-	if (CuerpoRef.IsValid() && !CuerpoRef->Seleccionada().IsEmpty())
+	// Teclado: Ctrl+F al buscador, F encuadra, H oculta, I aísla, 1–6 vistas fijas; Esc cierra lo último abierto
+	// (resultados → ficha → Estudiar) y, si no queda nada, muestra todo. Mientras se escribe en un cuadro de texto, las
+	// letras y los números son del texto: no actúan sobre el modelo.
+	TSharedPtr<SCorpusInterfaz> Ui;
+	if (ACorpusHUD* H = Cast<ACorpusHUD>(GetHUD())) { if (TSharedPtr<SWidget> W = H->InterfazWidget()) { Ui = StaticCastSharedPtr<SCorpusInterfaz>(W); } }
+	const bool bEscribiendo = SCorpusInterfaz::Escribiendo();
+	const bool bCtrl = IsInputKeyDown(EKeys::LeftControl) || IsInputKeyDown(EKeys::RightControl);
+	if (bCtrl && WasInputKeyJustPressed(EKeys::F)) { if (Ui.IsValid()) { Ui->EnfocarBuscador(); } }
+	else if (!bEscribiendo)
 	{
-		if (WasInputKeyJustPressed(EKeys::H)) { CuerpoRef->Ocultar(CuerpoRef->Seleccionada()); }
-		if (WasInputKeyJustPressed(EKeys::I)) { CuerpoRef->Aislar(CuerpoRef->Seleccionada()); }
+		if (WasInputKeyJustPressed(EKeys::F)) { EncuadrarSeleccion(); }
+		if (CuerpoRef.IsValid() && !CuerpoRef->Seleccionada().IsEmpty())
+		{
+			if (WasInputKeyJustPressed(EKeys::H)) { CuerpoRef->Ocultar(CuerpoRef->Seleccionada()); }
+			if (WasInputKeyJustPressed(EKeys::I)) { CuerpoRef->Aislar(CuerpoRef->Seleccionada()); }
+		}
+		static const FKey Numeros[] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six };
+		for (int32 i = 0; i < 6; ++i) { if (WasInputKeyJustPressed(Numeros[i])) { C->Vista(i); } }
 	}
-	if (WasInputKeyJustPressed(EKeys::Escape) && CuerpoRef.IsValid()) { CuerpoRef->MostrarTodo(); }
-	static const FKey Numeros[] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six };
-	for (int32 i = 0; i < 6; ++i) { if (WasInputKeyJustPressed(Numeros[i])) { C->Vista(i); } }
+	if (WasInputKeyJustPressed(EKeys::Escape) && CuerpoRef.IsValid())
+	{
+		if (!Ui.IsValid() || !Ui->CerrarConEsc()) { CuerpoRef->MostrarTodo(); }
+	}
 }
 
 // ───────── Interfaz y modo de juego ─────────

@@ -623,6 +623,7 @@ namespace
 		{TEXT("Axial"), {TEXT("Axial"), TEXT("Axial"), TEXT("Axial"), TEXT("Axial")}},
 		{TEXT("Invertir"), {TEXT("Flip"), TEXT("Inverter"), TEXT("Inverser"), TEXT("Umkehren")}},
 		{TEXT("Quitar corte"), {TEXT("Remove cut"), TEXT("Remover corte"), TEXT("Retirer la coupe"), TEXT("Schnitt entfernen")}},
+		{TEXT("Tamaño del texto"), {TEXT("Text size"), TEXT("Tamanho do texto"), TEXT("Taille du texte"), TEXT("Textgröße")}},
 	};
 
 	bool BuscarPropia(const FString& Idioma, const FString& Es, FString& Fuera)

@@ -9,6 +9,10 @@
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/Layout/SBox.h"
+#include "Widgets/Layout/SDPIScaler.h"
+#include "Fonts/CompositeFont.h"
+#include "Misc/ConfigCacheIni.h"
+#include "CoreGlobals.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Layout/SSpacer.h"
 #include "Widgets/Layout/SWrapBox.h"
@@ -32,49 +36,276 @@ namespace
 	// FString::ToUpper solo trata ASCII («CIRCULACIóN»); FText usa ICU y respeta tildes y eñes.
 	FString Mayus(const FString& S) { return FText::FromString(S).ToUpper().ToString(); }
 
-	// ── Sistema visual (un solo sitio): paleta, radios y estados de botón ──
+	// ═════════ Sistema visual (un solo sitio; reglas en unreal/PLAN_INTERFAZ.md) ═════════
+	// Ningún color, tamaño de letra ni relleno suelto en el resto del archivo: todo sale de aquí.
+	// Los colores son lineales (Slate los pasa a sRGB al pintar); los que el plan da en hexadecimal sRGB van convertidos al lado.
+
+	// ── Paleta ──
 	// Vidrio oscuro azulado con borde fino, tinta casi blanca, gris frío para lo secundario y un acento azul clínico.
 	const FLinearColor C_PANEL(0.010f, 0.014f, 0.020f, 0.86f);
 	const FLinearColor C_PANEL2(0.030f, 0.040f, 0.055f, 1.f);
 	const FLinearColor C_BORDE(0.55f, 0.70f, 0.95f, 0.10f);
-	const FLinearColor C_TINTA(0.90f, 0.92f, 0.95f);
-	const FLinearColor C_GRIS(0.50f, 0.55f, 0.62f);
-	const FLinearColor C_ACENTO(0.07f, 0.42f, 0.86f);
-	const FLinearColor C_BOTON(0.050f, 0.065f, 0.090f, 1.f), C_BOTON_ENCIMA(0.085f, 0.110f, 0.150f, 1.f), C_BOTON_PULSADO(0.030f, 0.040f, 0.055f, 1.f);
+	const FLinearColor C_TINTA(0.791f, 0.823f, 0.871f);              // #E6EAF0
+	const FLinearColor C_GRIS(0.212f, 0.262f, 0.342f);               // #7F8C9E · etiquetas y texto secundario (≈ 5:1 sobre el panel)
+	const FLinearColor C_TINTA_OSCURA(0.0033f, 0.0065f, 0.0144f);    // #0B1320 · texto sobre el acento (≈ 7,5:1; el blanco daba 2,46:1)
+	const FLinearColor C_ACENTO(0.07f, 0.42f, 0.86f);                // acción principal y selección
 	const FLinearColor C_ACENTO_ENCIMA(0.14f, 0.52f, 0.96f), C_ACENTO_PULSADO(0.05f, 0.32f, 0.68f);
+	const FLinearColor C_AMBAR(0.871f, 0.352f, 0.051f);              // #F0A040 · medidas, clínica, avisos
+	const FLinearColor C_BIEN(0.25f, 0.85f, 0.40f), C_MAL(1.f, 0.40f, 0.35f);   // examen: solo borde e indicación
+	const FLinearColor C_BOTON(0.050f, 0.065f, 0.090f, 1.f), C_BOTON_ENCIMA(0.085f, 0.110f, 0.150f, 1.f), C_BOTON_PULSADO(0.030f, 0.040f, 0.055f, 1.f);
+	const FLinearColor C_BORDE_BOTON(1.f, 1.f, 1.f, 0.06f), C_BORDE_ENCIMA(0.60f, 0.78f, 1.f, 0.35f);
+	const FLinearColor C_FOCO(0.85f, 0.92f, 1.f, 0.95f);             // anillo de foco del teclado
+	const FLinearColor C_BARRA(0.212f, 0.262f, 0.342f, 0.55f), C_BARRA_ENCIMA(0.212f, 0.262f, 0.342f, 0.85f);   // deslizadores
+	const FLinearColor C_ROLLO(0.212f, 0.262f, 0.342f, 0.50f), C_ROLLO_ENCIMA(0.212f, 0.262f, 0.342f, 0.80f);   // barras de desplazamiento
+	const FLinearColor C_MARCA(1.f, 0.651f, 0.074f);                 // #FFD34D · punto de un relieve óseo
+	const FLinearColor C_MARCA_LINEA(1.f, 0.651f, 0.074f, 0.75f);
+	const FLinearColor C_ROTULO(0.02f, 0.03f, 0.045f, 0.92f);        // fondo de los rótulos sobre el modelo
+	const FLinearColor C_SOMBRA_PUNTO(0.f, 0.f, 0.f, 0.8f);
+	const FLinearColor C_GONIO_FONDO(0.14f, 0.17f, 0.22f), C_GONIO_ESCALA(0.30f, 0.34f, 0.40f);
 
-	const FSlateBrush* Panel() { static const FSlateRoundedBoxBrush B(C_PANEL, 16.f, C_BORDE, 1.f); return &B; }
-	const FSlateBrush* Panel2() { static const FSlateRoundedBoxBrush B(C_PANEL2, 8.f); return &B; }
+	// ── Espaciado (múltiplos de 4) y radios ──
+	constexpr float E_1 = 4.f, E_2 = 8.f, E_3 = 12.f, E_4 = 16.f, E_5 = 20.f, E_6 = 24.f;
+	constexpr float M_PANTALLA = E_4;     // margen de los paneles al borde de la ventana
+	constexpr float R_PANEL = 16.f, R_TARJETA = 10.f, R_BOTON = 8.f;
+	const FMargin RELLENO_PANEL(E_5);
+	const FMargin RELLENO_BOTON(E_3, E_2);
+	constexpr float BOTON_ALTO_MIN = 32.f, BOTON_ANCHO_MIN = 36.f;
+	constexpr float HUECO = 6.f;          // entre botones de una fila (InnerSlotPadding)
+
+	// ── Escala tipográfica (pt de Slate) ──
+	constexpr float T_GONIO = 32.f, T_TITULO = 18.f, T_SECCION = 13.f, T_CUERPO = 10.5f, T_NOTA = 11.f, T_SECUNDARIO = 10.f, T_ETIQUETA = 9.f;
+	constexpr float T_MARCAS = 12.f, T_MARCAS_VARIAS = 10.f, T_BUSCADOR = 12.f, T_MARCA_CORPUS = 22.f;
+	enum class EPeso : uint8 { Regular, Media, Negrita };
+
+	const FSlateBrush* Panel() { static const FSlateRoundedBoxBrush B(C_PANEL, R_PANEL, C_BORDE, 1.f); return &B; }
+	const FSlateBrush* Panel2() { static const FSlateRoundedBoxBrush B(C_PANEL2, R_BOTON); return &B; }
+	const FSlateBrush* Tarjeta() { static const FSlateRoundedBoxBrush B(C_PANEL2, R_TARJETA); return &B; }
 	const FSlateBrush* Punto() { static const FSlateRoundedBoxBrush B(FLinearColor::White, 6.f); return &B; }
+	const FSlateBrush* Foco() { static const FSlateRoundedBoxBrush B(FLinearColor::Transparent, R_BOTON, C_FOCO, 2.f); return &B; }
 
-	/** Botón con estados visibles: normal, encima (más claro y con borde), pulsado y activo (acento). */
-	const FButtonStyle& EstiloBoton(bool bAcento)
+	// ── Tipografía: Inter (SIL OFL 1.1) desde Content/Slate/Fuentes; si falta algún archivo, la fuente por defecto ──
+	TSharedPtr<const FCompositeFont> FuenteInter()
 	{
-		static FButtonStyle Normal, Acento;
+		static TSharedPtr<FStandaloneCompositeFont> Fuente;
+		static bool bProbada = false;
+		if (!bProbada)
+		{
+			bProbada = true;
+			const FString Dir = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() / TEXT("Slate/Fuentes"));
+			const TPair<FName, const TCHAR*> Pesos[] = { { FName(TEXT("Regular")), TEXT("Inter-Regular.ttf") }, { FName(TEXT("SemiBold")), TEXT("Inter-SemiBold.ttf") }, { FName(TEXT("Bold")), TEXT("Inter-Bold.ttf") } };
+			bool bTodas = true;
+			for (const auto& P : Pesos) { bTodas &= FPaths::FileExists(Dir / P.Value); }
+			if (bTodas)
+			{
+				Fuente = MakeShared<FStandaloneCompositeFont>();
+				for (const auto& P : Pesos) { Fuente->DefaultTypeface.AppendFont(P.Key, Dir / P.Value, EFontHinting::Default, EFontLoadingPolicy::LazyLoad); }
+				// lo que Inter no tenga (flechas raras, otros alfabetos) lo pinta la fuente por defecto
+				Fuente->FallbackTypeface.Typeface = FCoreStyle::GetDefaultFont()->DefaultTypeface;
+				UE_LOG(LogTemp, Display, TEXT("Corpus: tipografía Inter cargada de %s"), *Dir);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Corpus: faltan los TTF de Inter en %s; se usa la fuente por defecto"), *Dir);
+			}
+		}
+		return Fuente;
+	}
+
+	FSlateFontInfo Letra(float Tam, EPeso Peso = EPeso::Regular)
+	{
+		const TSharedPtr<const FCompositeFont> Inter = FuenteInter();
+		if (Inter.IsValid())
+		{
+			return FSlateFontInfo(Inter, Tam, Peso == EPeso::Negrita ? FName(TEXT("Bold")) : Peso == EPeso::Media ? FName(TEXT("SemiBold")) : FName(TEXT("Regular")));
+		}
+		// Roboto por defecto no tiene semi-negrita: «Bold» para los dos pesos fuertes
+		return FCoreStyle::GetDefaultFontStyle(Peso == EPeso::Regular ? "Regular" : "Bold", Tam);
+	}
+	/** Etiqueta en mayúsculas: 9 pt negrita, gris, con algo de espaciado entre letras. */
+	FSlateFontInfo LetraEtiqueta() { FSlateFontInfo F = Letra(T_ETIQUETA, EPeso::Negrita); F.LetterSpacing = 60; return F; }
+
+	TSharedRef<STextBlock> Txt(const FString& S, float Tam, const FLinearColor& Col, EPeso Peso = EPeso::Regular)
+	{
+		return SNew(STextBlock).Text(FText::FromString(S)).Font(Letra(Tam, Peso)).ColorAndOpacity(FSlateColor(Col)).AutoWrapText(true);
+	}
+	/** Texto de una sola línea (botones, nombres de capa): no se parte; si no cabe, termina en «…» y el nombre completo va en el ToolTip. */
+	TSharedRef<STextBlock> TxtLinea(const FString& S, float Tam, const FLinearColor& Col, EPeso Peso = EPeso::Regular)
+	{
+		return SNew(STextBlock).Text(FText::FromString(S)).Font(Letra(Tam, Peso)).ColorAndOpacity(FSlateColor(Col))
+			.OverflowPolicy(ETextOverflowPolicy::Ellipsis).ToolTipText(FText::FromString(S));
+	}
+	/** Etiqueta de sección (CAPAS, DISECCIÓN, ESTUDIAR…): el texto se pasa sin poner en mayúsculas. */
+	TSharedRef<STextBlock> Etiqueta(const FString& S)
+	{
+		return SNew(STextBlock).Text(FText::FromString(Mayus(S))).Font(LetraEtiqueta()).ColorAndOpacity(FSlateColor(C_GRIS)).AutoWrapText(true);
+	}
+
+	// ── Botones: normal, principal (acento con texto oscuro), seleccionado (borde y texto en acento) y respuestas del examen ──
+	const FButtonStyle& EstiloBoton(ECorpusBoton Papel)
+	{
+		static FButtonStyle Normal, Principal, Sel;
 		static bool bListo = false;
 		if (!bListo)
 		{
 			bListo = true;
-			const auto Llenar = [](FButtonStyle& S, const FLinearColor& N, const FLinearColor& E, const FLinearColor& P, const FLinearColor& Borde)
+			const auto Llenar = [](FButtonStyle& S, const FLinearColor& N, const FLinearColor& E, const FLinearColor& P, const FLinearColor& Borde, const FLinearColor& BordeEncima, float Grosor)
 			{
 				S = FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("Button");
-				S.SetNormal(FSlateRoundedBoxBrush(N, 7.f, Borde, 1.f));
-				S.SetHovered(FSlateRoundedBoxBrush(E, 7.f, FLinearColor(0.60f, 0.78f, 1.f, 0.35f), 1.f));
-				S.SetPressed(FSlateRoundedBoxBrush(P, 7.f, Borde, 1.f));
-				S.SetDisabled(FSlateRoundedBoxBrush(N * FLinearColor(1, 1, 1, 0.4f), 7.f));
+				S.SetNormal(FSlateRoundedBoxBrush(N, R_BOTON, Borde, Grosor));
+				S.SetHovered(FSlateRoundedBoxBrush(E, R_BOTON, BordeEncima, Grosor));
+				S.SetPressed(FSlateRoundedBoxBrush(P, R_BOTON, Borde, Grosor));
+				S.SetDisabled(FSlateRoundedBoxBrush(N * FLinearColor(1, 1, 1, 0.4f), R_BOTON));
 				S.SetNormalPadding(FMargin(0)); S.SetPressedPadding(FMargin(0, 1, 0, 0));
 			};
-			Llenar(Normal, C_BOTON, C_BOTON_ENCIMA, C_BOTON_PULSADO, FLinearColor(1.f, 1.f, 1.f, 0.06f));
-			Llenar(Acento, C_ACENTO, C_ACENTO_ENCIMA, C_ACENTO_PULSADO, FLinearColor(0.7f, 0.85f, 1.f, 0.30f));
+			Llenar(Normal, C_BOTON, C_BOTON_ENCIMA, C_BOTON_PULSADO, C_BORDE_BOTON, C_BORDE_ENCIMA, 1.f);
+			Llenar(Principal, C_ACENTO, C_ACENTO_ENCIMA, C_ACENTO_PULSADO, C_BORDE_ENCIMA, C_FOCO, 1.f);
+			Llenar(Sel, C_BOTON, C_BOTON_ENCIMA, C_BOTON_PULSADO, C_ACENTO, C_ACENTO_ENCIMA, 1.5f);
 		}
-		return bAcento ? Acento : Normal;
+		return Papel == ECorpusBoton::Principal ? Principal : Papel == ECorpusBoton::Seleccionado ? Sel : Normal;
 	}
-	FSlateFontInfo Letra(int32 Tam, bool bNegrita = false) { return FCoreStyle::GetDefaultFontStyle(bNegrita ? "Bold" : "Regular", Tam); }
-
-	TSharedRef<STextBlock> Txt(const FString& S, int32 Tam, const FLinearColor& Col, bool bNegrita = false)
+	const FButtonStyle& EstiloRespuesta(bool bBien)
 	{
-		return SNew(STextBlock).Text(FText::FromString(S)).Font(Letra(Tam, bNegrita)).ColorAndOpacity(FSlateColor(Col)).AutoWrapText(true);
+		static FButtonStyle Bien, Mal;
+		static bool bListo = false;
+		if (!bListo)
+		{
+			bListo = true;
+			for (int32 k = 0; k < 2; ++k)
+			{
+				FButtonStyle& S = k == 0 ? Bien : Mal;
+				const FLinearColor& Borde = k == 0 ? C_BIEN : C_MAL;
+				S = EstiloBoton(ECorpusBoton::Normal);
+				S.SetNormal(FSlateRoundedBoxBrush(C_BOTON, R_BOTON, Borde, 2.f));
+				S.SetHovered(FSlateRoundedBoxBrush(C_BOTON_ENCIMA, R_BOTON, Borde, 2.f));
+				S.SetPressed(FSlateRoundedBoxBrush(C_BOTON_PULSADO, R_BOTON, Borde, 2.f));
+			}
+		}
+		return bBien ? Bien : Mal;
 	}
+	FLinearColor ColorTextoBoton(ECorpusBoton Papel) { return Papel == ECorpusBoton::Principal ? C_TINTA_OSCURA : Papel == ECorpusBoton::Seleccionado ? C_ACENTO_ENCIMA : C_TINTA; }
+
+	/** Envuelve un botón con su tamaño mínimo (32 × 36) y el anillo de foco: solo se ve cuando el foco llegó con el teclado. */
+	TSharedRef<SWidget> ConFoco(const TSharedRef<SButton>& B)
+	{
+		const TWeakPtr<SButton> W(B);
+		return SNew(SBox).MinDesiredHeight(BOTON_ALTO_MIN).MinDesiredWidth(BOTON_ANCHO_MIN)
+		[
+			SNew(SOverlay)
+			+ SOverlay::Slot()[ B ]
+			+ SOverlay::Slot()
+			[
+				SNew(SImage).Image(Foco())
+				.Visibility_Lambda([W]()
+				{
+					const TSharedPtr<SButton> P = W.Pin();
+					const TOptional<EFocusCause> Causa = P.IsValid() ? P->HasAnyUserFocus() : TOptional<EFocusCause>();
+					return (Causa.IsSet() && Causa.GetValue() != EFocusCause::Mouse) ? EVisibility::HitTestInvisible : EVisibility::Hidden;
+				})
+			]
+		];
+	}
+
+	/** Fila ancha pulsable (resultado del buscador, enlace a Estudiar, entrada de una lista, opción de una pregunta). */
+	TSharedRef<SWidget> BotonFila(const TSharedRef<SWidget>& Contenido, TFunction<void()> Accion, const FButtonStyle* Estilo = nullptr)
+	{
+		return ConFoco(SNew(SButton).ButtonStyle(Estilo ? Estilo : &EstiloBoton(ECorpusBoton::Normal)).ContentPadding(RELLENO_BOTON).HAlign(HAlign_Fill)
+			.OnClicked_Lambda([Accion]() { Accion(); return FReply::Handled(); })
+			[ Contenido ]);
+	}
+
+	// ── Casilla, deslizador, campo de texto y barras de desplazamiento ──
+	const FCheckBoxStyle& EstiloCasilla()
+	{
+		static FCheckBoxStyle S;
+		static bool bListo = false;
+		if (!bListo)
+		{
+			bListo = true;
+			S = FCoreStyle::Get().GetWidgetStyle<FCheckBoxStyle>("Checkbox");   // conserva la marca de verificación del motor
+			const FVector2f Lado(18.f, 18.f);
+			S.SetBackgroundImage(FSlateRoundedBoxBrush(FLinearColor::Transparent, 4.f, C_GRIS, 1.5f, Lado));
+			S.SetBackgroundHoveredImage(FSlateRoundedBoxBrush(C_BOTON_ENCIMA, 4.f, C_TINTA, 1.5f, Lado));
+			S.SetBackgroundPressedImage(FSlateRoundedBoxBrush(C_BOTON_PULSADO, 4.f, C_TINTA, 1.5f, Lado));
+			S.CheckedImage.TintColor = FSlateColor(C_ACENTO_ENCIMA);
+			S.CheckedHoveredImage.TintColor = FSlateColor(C_ACENTO_ENCIMA);
+			S.CheckedPressedImage.TintColor = FSlateColor(C_ACENTO);
+			S.SetPadding(FMargin(E_2, 0.f, 0.f, 0.f));
+		}
+		return S;
+	}
+	const FSliderStyle& EstiloDeslizador()
+	{
+		static FSliderStyle S;
+		static bool bListo = false;
+		if (!bListo)
+		{
+			bListo = true;
+			S = FCoreStyle::Get().GetWidgetStyle<FSliderStyle>("Slider");
+			S.SetNormalBarImage(FSlateRoundedBoxBrush(C_BARRA, 2.f));
+			S.SetHoveredBarImage(FSlateRoundedBoxBrush(C_BARRA_ENCIMA, 2.f));
+			S.SetDisabledBarImage(FSlateRoundedBoxBrush(C_BARRA * FLinearColor(1, 1, 1, 0.5f), 2.f));
+			S.SetNormalThumbImage(FSlateRoundedBoxBrush(C_TINTA, 7.f, FVector2f(14.f, 14.f)));
+			S.SetHoveredThumbImage(FSlateRoundedBoxBrush(FLinearColor::White, 7.f, C_ACENTO_ENCIMA, 2.f, FVector2f(14.f, 14.f)));
+			S.SetDisabledThumbImage(FSlateRoundedBoxBrush(C_GRIS, 7.f, FVector2f(14.f, 14.f)));
+			S.SetBarThickness(4.f);
+		}
+		return S;
+	}
+	const FScrollBarStyle& EstiloRollo()
+	{
+		static FScrollBarStyle S;
+		static bool bListo = false;
+		if (!bListo)
+		{
+			bListo = true;
+			S = FCoreStyle::Get().GetWidgetStyle<FScrollBarStyle>("ScrollBar");
+			S.SetVerticalBackgroundImage(FSlateNoResource()).SetHorizontalBackgroundImage(FSlateNoResource());
+			S.SetVerticalTopSlotImage(FSlateNoResource()).SetVerticalBottomSlotImage(FSlateNoResource());
+			S.SetHorizontalTopSlotImage(FSlateNoResource()).SetHorizontalBottomSlotImage(FSlateNoResource());
+			S.SetNormalThumbImage(FSlateRoundedBoxBrush(C_ROLLO, 3.f));
+			S.SetHoveredThumbImage(FSlateRoundedBoxBrush(C_ROLLO_ENCIMA, 3.f));
+			S.SetDraggedThumbImage(FSlateRoundedBoxBrush(C_ROLLO_ENCIMA, 3.f));
+			S.SetThickness(6.f);
+		}
+		return S;
+	}
+	const FEditableTextBoxStyle& EstiloCampo()
+	{
+		static FEditableTextBoxStyle S;
+		static bool bListo = false;
+		if (!bListo)
+		{
+			bListo = true;
+			S = FCoreStyle::Get().GetWidgetStyle<FEditableTextBoxStyle>("NormalEditableTextBox");
+			S.SetBackgroundImageNormal(FSlateRoundedBoxBrush(C_PANEL2, R_BOTON, C_BORDE_BOTON, 1.f));
+			S.SetBackgroundImageHovered(FSlateRoundedBoxBrush(C_PANEL2, R_BOTON, C_BORDE_ENCIMA, 1.f));
+			S.SetBackgroundImageFocused(FSlateRoundedBoxBrush(C_PANEL2, R_BOTON, C_FOCO, 2.f));
+			S.SetBackgroundImageReadOnly(FSlateRoundedBoxBrush(C_PANEL2, R_BOTON));
+			S.SetBackgroundColor(FSlateColor(FLinearColor::White));   // el color ya va en los pinceles
+			S.SetForegroundColor(FSlateColor(C_TINTA)).SetFocusedForegroundColor(FSlateColor(C_TINTA));   // la ayuda sale de este color con poca opacidad: gris
+			S.SetFont(Letra(T_BUSCADOR));
+			S.SetPadding(FMargin(E_3, E_2));
+			S.SetScrollBarStyle(EstiloRollo());
+		}
+		return S;
+	}
+	const FVector2f GROSOR_ROLLO(6.f, 6.f);
+
+	/** Curva de escala por el lado corto de la ventana (px): 720 → 0,9 · 1080 → 1,0 · 1440 → 1,25 · 2160 → 1,6. Fuera, proporcional. */
+	float EscalaPorLado(float Lado)
+	{
+		static const FVector2f P[] = { {720.f, 0.9f}, {1080.f, 1.0f}, {1440.f, 1.25f}, {2160.f, 1.6f} };
+		if (Lado <= P[0].X) { return FMath::Max(0.5f, P[0].Y * Lado / P[0].X); }
+		for (int32 i = 1; i < (int32)UE_ARRAY_COUNT(P); ++i)
+		{
+			if (Lado <= P[i].X) { return FMath::Lerp(P[i - 1].Y, P[i].Y, (Lado - P[i - 1].X) / (P[i].X - P[i - 1].X)); }
+		}
+		return P[3].Y * Lado / P[3].X;
+	}
+	// Configuración del usuario (GameUserSettings.ini, no se sube a Git): «Tamaño del texto»
+	const TCHAR* INI_SECCION = TEXT("CorpusAtlas.Interfaz");
+	const TCHAR* INI_TAM_TEXTO = TEXT("TamTexto");
+	constexpr float ANCHO_MIN_PANELES = 1320.f;   // capas + buscador + ficha sin pisarse (unidades de Slate)
 }
 
 // ───────── Marcas sobre el modelo (relieves óseos) ─────────
@@ -91,6 +322,8 @@ public:
 
 	TWeakObjectPtr<ACorpusJugador> Jugador;
 	TArray<TPair<FVector, FString>> Puntos;   // punto del mundo y rótulo
+	// Zona libre entre los paneles (unidades de Slate, ya escaladas): la pone SCorpusInterfaz::Tick con la geometría real
+	double LimIzq = 360.0, LimDer = 430.0, LimArriba = 74.0;   // borde derecho del panel izquierdo · ancho ocupado a la derecha · bajo el buscador
 
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& G, const FSlateRect& Recorte, FSlateWindowElementList& Fuera, int32 Capa, const FWidgetStyle& Estilo, bool bActivo) const override
 	{
@@ -101,9 +334,8 @@ public:
 		if (!Cu || Puntos.Num() == 0 || VX < 2 || VY < 2 || Cu->HayPostura()) { return Capa; }   // las marcas son de reposo
 		const FVector2D Tam = G.GetLocalSize();
 		const FVector2D Esc(Tam.X / VX, Tam.Y / VY);
-		const FSlateFontInfo Fuente = Letra(Puntos.Num() == 1 ? 12 : 9, true);
+		const FSlateFontInfo Fuente = Letra(Puntos.Num() == 1 ? T_MARCAS : T_MARCAS_VARIAS, EPeso::Negrita);
 		const TSharedRef<FSlateFontMeasure> Medir = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
-		const FLinearColor Amarillo(FColor::FromHex(TEXT("ffd34d")));
 
 		struct FM { FVector2D P, T; FString S; };   // punto, tamaño del texto y texto
 		TArray<FM> Ms;
@@ -116,19 +348,19 @@ public:
 		if (Ms.Num() == 0) { return Capa; }
 		const auto Rotulo = [&](const FM& M, const FVector2D& Pos)   // Pos = esquina superior izquierda del rótulo
 		{
-			const FVector2D Caja = M.T + FVector2D(12, 6);
-			FSlateDrawElement::MakeBox(Fuera, Capa + 1, G.ToPaintGeometry(Caja, FSlateLayoutTransform(Pos)), Panel2(), ESlateDrawEffect::None, FLinearColor(0.02f, 0.03f, 0.045f, 0.92f));   // el color pasado sustituye al del pincel
-			FSlateDrawElement::MakeText(Fuera, Capa + 2, G.ToPaintGeometry(M.T, FSlateLayoutTransform(Pos + FVector2D(6, 3))), M.S, Fuente, ESlateDrawEffect::None, C_TINTA);
+			const FVector2D Caja = M.T + FVector2D(E_3, E_2);
+			FSlateDrawElement::MakeBox(Fuera, Capa + 1, G.ToPaintGeometry(Caja, FSlateLayoutTransform(Pos)), Panel2(), ESlateDrawEffect::None, C_ROTULO);   // el color pasado sustituye al del pincel
+			FSlateDrawElement::MakeText(Fuera, Capa + 2, G.ToPaintGeometry(M.T, FSlateLayoutTransform(Pos + FVector2D(E_3 * 0.5f, E_1))), M.S, Fuente, ESlateDrawEffect::None, C_TINTA);
 		};
 		const auto Punto8 = [&](const FVector2D& P)
 		{
-			FSlateDrawElement::MakeBox(Fuera, Capa + 3, G.ToPaintGeometry(FVector2D(12, 12), FSlateLayoutTransform(P - FVector2D(6, 6))), Punto(), ESlateDrawEffect::None, FLinearColor(0, 0, 0, 0.8f));
-			FSlateDrawElement::MakeBox(Fuera, Capa + 4, G.ToPaintGeometry(FVector2D(8, 8), FSlateLayoutTransform(P - FVector2D(4, 4))), Punto(), ESlateDrawEffect::None, Amarillo);
+			FSlateDrawElement::MakeBox(Fuera, Capa + 3, G.ToPaintGeometry(FVector2D(12, 12), FSlateLayoutTransform(P - FVector2D(6, 6))), Punto(), ESlateDrawEffect::None, C_SOMBRA_PUNTO);
+			FSlateDrawElement::MakeBox(Fuera, Capa + 4, G.ToPaintGeometry(FVector2D(8, 8), FSlateLayoutTransform(P - FVector2D(4, 4))), Punto(), ESlateDrawEffect::None, C_MARCA);
 		};
 		if (Ms.Num() == 1)
 		{
 			Punto8(Ms[0].P);
-			Rotulo(Ms[0], Ms[0].P + FVector2D(14, -Ms[0].T.Y * 0.5 - 3));
+			Rotulo(Ms[0], Ms[0].P + FVector2D(E_4, -Ms[0].T.Y * 0.5 - E_1));
 			return Capa + 4;
 		}
 		// dos columnas: a la izquierda los puntos de la mitad izquierda del hueso en pantalla, a la derecha los demás
@@ -149,15 +381,18 @@ public:
 			double Suma = 0, SumaP = 0;
 			for (int32 i = 0; i < Col.Num(); ++i) { Ys.Add(i == 0 ? Col[i]->P.Y : FMath::Max(Col[i]->P.Y, Ys[i - 1] + Paso)); Suma += Ys[i]; SumaP += Col[i]->P.Y; }
 			double Corr = (SumaP - Suma) / Col.Num();
-			Corr = FMath::Clamp(Corr, 74.0 - Ys[0], FMath::Max(74.0 - Ys[0], Tam.Y - Paso - Ys.Last()));   // por debajo del buscador
-			const double XCol = Lado == 0 ? FMath::Max(MinX - 70.0, 360.0) : FMath::Min(MaxX + 70.0, Tam.X - 430.0);
+			Corr = FMath::Clamp(Corr, LimArriba - Ys[0], FMath::Max(LimArriba - Ys[0], Tam.Y - Paso - Ys.Last()));   // por debajo del buscador
+			// las columnas no se meten bajo los paneles: el rótulo más ancho de cada columna cabe entero entre el panel y el modelo
+			double AnchoCol = 0;
+			for (const FM* M : Col) { AnchoCol = FMath::Max(AnchoCol, M->T.X + E_3); }
+			const double XCol = Lado == 0 ? FMath::Max(MinX - 70.0, LimIzq + AnchoCol) : FMath::Min(MaxX + 70.0, Tam.X - LimDer - AnchoCol);
 			for (int32 i = 0; i < Col.Num(); ++i)
 			{
 				const FM& M = *Col[i];
 				const double Y = Ys[i] + Corr;
-				const FVector2D Pos(Lado == 0 ? XCol - M.T.X - 12.0 : XCol, Y - M.T.Y * 0.5 - 3.0);
+				const FVector2D Pos(Lado == 0 ? XCol - M.T.X - E_3 : XCol, Y - M.T.Y * 0.5 - E_1);
 				const FVector2D Ancla(XCol, Y);
-				FSlateDrawElement::MakeLines(Fuera, Capa, G.ToPaintGeometry(), TArray<FVector2f>({ FVector2f(M.P), FVector2f(Ancla) }), ESlateDrawEffect::None, FLinearColor(1.f, 0.83f, 0.30f, 0.75f), true, 1.2f);
+				FSlateDrawElement::MakeLines(Fuera, Capa, G.ToPaintGeometry(), TArray<FVector2f>({ FVector2f(M.P), FVector2f(Ancla) }), ESlateDrawEffect::None, C_MARCA_LINEA, true, 1.2f);
 				Rotulo(M, Pos);
 				Punto8(M.P);
 			}
@@ -202,8 +437,9 @@ public:
 		{
 			FSlateDrawElement::MakeLines(Fuera, L, G.ToPaintGeometry(), TArray<FVector2f>({ A, B }), ESlateDrawEffect::None, Col, true, Grosor);
 		};
-		const FLinearColor Gris(0.30f, 0.34f, 0.40f), Naranja(FColor::FromHex(TEXT("f0a040")));
-		Arco(0.f, 180.f, R, FLinearColor(0.14f, 0.17f, 0.22f), 2.f, Capa);            // transportador entero
+		const FLinearColor& Gris = C_GONIO_ESCALA;
+		const FLinearColor& Naranja = C_AMBAR;
+		Arco(0.f, 180.f, R, C_GONIO_FONDO, 2.f, Capa);                                 // transportador entero
 		for (int32 g = 0; g <= 180; g += 15) { Linea(En((float)g, R - (g % 45 == 0 ? 10.f : 5.f)), En((float)g, R), Gris, 1.f, Capa); }
 		Arco(0.f, Max, R, Gris, 5.f, Capa + 1);                                        // rango de este movimiento
 		Arco(0.f, Ang, R, Naranja, 5.f, Capa + 2);                                     // recorrido
@@ -232,13 +468,57 @@ UCorpusDatos* SCorpusInterfaz::Datos() const
 	return GI ? GI->GetSubsystem<UCorpusDatos>() : nullptr;
 }
 
-TSharedRef<SWidget> SCorpusInterfaz::Boton(const FString& Texto, TFunction<void()> Accion, bool bAcento) const
+TSharedRef<SWidget> SCorpusInterfaz::Boton(const FString& Texto, TFunction<void()> Accion, ECorpusBoton Papel) const
 {
-	return SNew(SButton)
-		.ButtonStyle(&EstiloBoton(bAcento))
-		.ContentPadding(FMargin(11.f, 6.f))
+	return ConFoco(SNew(SButton)
+		.ButtonStyle(&EstiloBoton(Papel))
+		.ContentPadding(RELLENO_BOTON)
+		.VAlign(VAlign_Center)
 		.OnClicked_Lambda([Accion]() { Accion(); return FReply::Handled(); })
-		[ Txt(Texto, 10, bAcento ? FLinearColor::White : C_TINTA, bAcento) ];
+		[ SNew(STextBlock).Text(FText::FromString(Texto)).Font(Letra(T_CUERPO, Papel == ECorpusBoton::Normal ? EPeso::Regular : EPeso::Media))
+			.ColorAndOpacity(FSlateColor(ColorTextoBoton(Papel))) ]);   // una sola línea: «Mostrar todo», «100 %» no se parten
+}
+
+void SCorpusInterfaz::PonerTamTexto(int32 Por)
+{
+	TamTexto = (Por == 90 || Por == 125 || Por == 150) ? Por : 100;
+	if (GConfig)
+	{
+		GConfig->SetInt(INI_SECCION, INI_TAM_TEXTO, TamTexto, GGameUserSettingsIni);
+		GConfig->Flush(false, GGameUserSettingsIni);
+	}
+}
+
+bool SCorpusInterfaz::Escribiendo()
+{
+	if (!FSlateApplication::IsInitialized()) { return false; }
+	const TSharedPtr<SWidget> F = FSlateApplication::Get().GetKeyboardFocusedWidget();
+	if (!F.IsValid()) { return false; }
+	const FName Tipo = F->GetType();
+	return Tipo == FName(TEXT("SEditableText")) || Tipo == FName(TEXT("SMultiLineEditableText")) || Tipo == FName(TEXT("SEditableTextBox"));
+}
+
+void SCorpusInterfaz::EnfocarBuscador()
+{
+	if (Buscador.IsValid() && FSlateApplication::IsInitialized()) { FSlateApplication::Get().SetKeyboardFocus(Buscador, EFocusCause::SetDirectly); }
+}
+
+bool SCorpusInterfaz::CerrarConEsc()
+{
+	// 1) resultados del buscador
+	if (Buscador.IsValid() && !Buscador->GetText().IsEmpty())
+	{
+		Buscador->SetText(FText::GetEmpty());
+		RehacerResultados(FText::GetEmpty());
+		if (FSlateApplication::IsInitialized()) { FSlateApplication::Get().ClearKeyboardFocus(EFocusCause::Cleared); }
+		return true;
+	}
+	// 2) ficha de la estructura seleccionada
+	ACorpusCuerpo* C = Cuerpo();
+	if (C && !bVerEst && !C->Seleccionada().IsEmpty()) { C->Seleccionar(FString()); return true; }
+	// 3) Estudiar
+	if (bVerEst) { AbrirEstudio(false); return true; }
+	return false;
 }
 
 // ───────── Animación de los paneles ─────────
@@ -254,7 +534,33 @@ EVisibility SCorpusInterfaz::VisAnim(int32 i) const
 void SCorpusInterfaz::Tick(const FGeometry& G, const double Tiempo, const float Dt)
 {
 	SCompoundWidget::Tick(G, Tiempo, Dt);
-	TamVista = G.GetLocalSize();
+	// escala: la curva del plan por el lado corto de la ventana en píxeles × «Tamaño del texto». El motor ya aplica su propia
+	// escala por resolución (curva de DefaultEngine.ini, que no se toca): se descuenta para que mande la nuestra.
+	{
+		const float EscMotor = FMath::Max((float)G.GetAccumulatedLayoutTransform().GetScale(), 0.01f);
+		const FVector2D Local = G.GetLocalSize();
+		const FVector2D Px = Local * (double)EscMotor;
+		if (Px.X > 1.0 && Px.Y > 1.0)
+		{
+			float Meta = EscalaPorLado((float)FMath::Min(Px.X, Px.Y)) * TamTexto / 100.f;
+			// con letra grande en ventanas estrechas, tope para que capas, buscador y ficha quepan sin pisarse
+			Meta = FMath::Min(Meta, (float)Px.X / ANCHO_MIN_PANELES);
+			const float Nueva = Meta / EscMotor;
+			if (FMath::Abs(Nueva - EscalaUI) > 0.001f) { EscalaUI = Nueva; }
+		}
+	}
+	TamVista = FVector2D(G.GetLocalSize()) / (double)FMath::Max(EscalaUI, 0.01f);   // en las unidades de dentro del SDPIScaler
+	// zona libre para los rótulos de los relieves: medida sobre los paneles de verdad (no con cifras fijas)
+	if (Marcas.IsValid())
+	{
+		const bool bIzq = Anim[P_IZQ].W.IsValid() && Anim[P_IZQ].V > 0.5f;
+		const TSharedPtr<SWidget>& Izq = bIzq ? Anim[P_IZQ].W : Anim[P_MINI].W;
+		Marcas->LimIzq = M_PANTALLA + (Izq.IsValid() ? Izq->GetDesiredSize().X : 0.0) + E_2;
+		const bool bFicha = Anim[P_FICHA].W.IsValid() && Anim[P_FICHA].V > 0.01f;
+		Marcas->LimDer = M_PANTALLA + (bFicha ? Anim[P_FICHA].W->GetDesiredSize().X : 0.0) + E_2;
+		// solo el campo del buscador (más su marco): la lista de resultados se cierra con Esc
+		Marcas->LimArriba = M_PANTALLA + 2.0 * E_3 + (Buscador.IsValid() ? Buscador->GetDesiredSize().Y : 40.0) + E_2;
+	}
 	// acercamiento exponencial: ~200 ms hasta el 95 %; suave al principio y al final por el deslizamiento con curva
 	const float K = 1.f - FMath::Exp(-15.f * EscalaAnim * FMath::Min(Dt, 0.1f));
 	for (FPanelAnim& A : Anim)
@@ -273,115 +579,157 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 	Jugador = Args._Jugador;
 	SetVisibility(EVisibility::SelfHitTestInvisible);
 
-	// paneles animados: condición para estar a la vista y desde dónde entran (px)
-	Anim[P_IZQ].Ver = [this]() { return !bPanelPlegado; };                     Anim[P_IZQ].Desde = FVector2D(-28, 0);
-	Anim[P_MINI].Ver = [this]() { return bPanelPlegado; };                     Anim[P_MINI].Desde = FVector2D(-16, 0);
-	Anim[P_BUSCA].Ver = []() { return true; };                                 Anim[P_BUSCA].Desde = FVector2D(0, -14);
+	// «Tamaño del texto» guardado en la configuración del usuario (GameUserSettings.ini)
+	{
+		int32 Guardado = 100;
+		if (GConfig && GConfig->GetInt(INI_SECCION, INI_TAM_TEXTO, Guardado, GGameUserSettingsIni)) { TamTexto = (Guardado == 90 || Guardado == 125 || Guardado == 150) ? Guardado : 100; }
+	}
+
+	// paneles animados: condición para estar a la vista y desde dónde entran (desplazamientos ≤ 12 px, PLAN_INTERFAZ.md)
+	Anim[P_IZQ].Ver = [this]() { return !bPanelPlegado; };                     Anim[P_IZQ].Desde = FVector2D(-12, 0);
+	Anim[P_MINI].Ver = [this]() { return bPanelPlegado; };                     Anim[P_MINI].Desde = FVector2D(-8, 0);
+	Anim[P_BUSCA].Ver = []() { return true; };                                 Anim[P_BUSCA].Desde = FVector2D(0, -8);
 	Anim[P_MOV].Ver = [this]() { const ACorpusCuerpo* C = Cuerpo(); return !bVerEst && C && C->MovimientoDisponible() && (bVerMov || C->HayPostura()); };
-	Anim[P_MOV].Desde = FVector2D(0, 24);
+	Anim[P_MOV].Desde = FVector2D(0, 12);
 	Anim[P_FICHA].Ver = [this]() { const ACorpusCuerpo* C = Cuerpo(); return !bVerEst && C && !C->Seleccionada().IsEmpty(); };
-	Anim[P_FICHA].Desde = FVector2D(30, 0);
-	Anim[P_EST].Ver = [this]() { return bVerEst; };                            Anim[P_EST].Desde = FVector2D(36, 0);
+	Anim[P_FICHA].Desde = FVector2D(12, 0);
+	Anim[P_EST].Ver = [this]() { return bVerEst; };                            Anim[P_EST].Desde = FVector2D(12, 0);
 
 	ChildSlot
 	[
+		// toda la interfaz escala con la ventana y con «Tamaño del texto» (EscalaUI se calcula en Tick)
+		SNew(SDPIScaler).DPIScale_Lambda([this]() { return EscalaUI; })
+		[
 		SNew(SOverlay)
 		// ── Debajo de los paneles: marcas de los relieves óseos sobre el modelo ──
 		+ SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Fill)[ SAssignNew(Marcas, SCorpusMarcas) ]
 		// ── Panel izquierdo: cuerpo, idioma y capas ──
-		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Fill).Padding(18.f)
+		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Fill).Padding(M_PANTALLA)
 		[
-			SAssignNew(Anim[P_IZQ].W, SBox).WidthOverride(340.f)
+			SAssignNew(Anim[P_IZQ].W, SBox).WidthOverride(360.f)
 			.Visibility_Lambda([this]() { return VisAnim(P_IZQ); })
 			[
-				SNew(SBorder).BorderImage(Panel()).Padding(16.f)
+				SNew(SBorder).BorderImage(Panel()).Padding(RELLENO_PANEL)
 				[
 					SNew(SVerticalBox)
 					+ SVerticalBox::Slot().AutoHeight()
 					[
 						SNew(SHorizontalBox)
-						+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)[ Txt(TEXT("CORPUS"), 22, C_TINTA, true) ]
+						+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)[ Txt(TEXT("CORPUS"), T_MARCA_CORPUS, C_TINTA, EPeso::Negrita) ]
 						// plegar el panel: el modelo ocupa toda la pantalla
 						+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ Boton(TEXT("«"), [this]() { bPanelPlegado = true; }) ]
 					]
-					+ SVerticalBox::Slot().AutoHeight().Padding(0, 2, 0, 10)[ SAssignNew(CajaBarra, SVerticalBox) ]
-					+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 6)[ SAssignNew(CajaHerr, SVerticalBox) ]
+					+ SVerticalBox::Slot().AutoHeight().Padding(0, E_1, 0, E_3)[ SAssignNew(CajaBarra, SVerticalBox) ]
+					+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, E_2)[ SAssignNew(CajaHerr, SVerticalBox) ]
 					+ SVerticalBox::Slot().FillHeight(1.f)
 					[
-						SNew(SScrollBox) + SScrollBox::Slot()[ SAssignNew(CajaCapas, SVerticalBox) ]
+						SNew(SScrollBox).ScrollBarStyle(&EstiloRollo()).ScrollBarThickness(GROSOR_ROLLO)
+						+ SScrollBox::Slot()[ SAssignNew(CajaCapas, SVerticalBox) ]
 					]
 				]
 			]
 		]
 		// ── Panel izquierdo plegado: solo un botón para volver a abrirlo ──
-		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(18.f)
+		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(M_PANTALLA)
 		[
 			SAssignNew(Anim[P_MINI].W, SBox)
 			.Visibility_Lambda([this]() { return VisAnim(P_MINI); })
 			[
-				SNew(SBorder).BorderImage(Panel()).Padding(8.f)[ SAssignNew(CajaMini, SVerticalBox) ]
+				SNew(SBorder).BorderImage(Panel()).Padding(E_2)[ SAssignNew(CajaMini, SVerticalBox) ]
 			]
 		]
 		// ── Arriba: buscador ──
-		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Top).Padding(18.f)
+		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Top).Padding(M_PANTALLA)
 		[
 			SAssignNew(Anim[P_BUSCA].W, SBox).WidthOverride(460.f)
 			[
-				SNew(SBorder).BorderImage(Panel()).Padding(10.f)
+				SNew(SBorder).BorderImage(Panel()).Padding(E_3)
 				[
 					SNew(SVerticalBox)
 					+ SVerticalBox::Slot().AutoHeight()
 					[
-						SAssignNew(Buscador, SEditableTextBox).Font(Letra(12))
+						SAssignNew(Buscador, SEditableTextBox).Style(&EstiloCampo())
 						.OnTextChanged(this, &SCorpusInterfaz::RehacerResultados)
+						// Esc dentro del buscador: borra la búsqueda y suelta el foco (no llega al modelo)
+						.OnKeyDownHandler_Lambda([this](const FGeometry&, const FKeyEvent& K)
+						{
+							if (K.GetKey() == EKeys::Escape && Buscador.IsValid())
+							{
+								const bool bHabia = !Buscador->GetText().IsEmpty();
+								if (bHabia) { Buscador->SetText(FText::GetEmpty()); RehacerResultados(FText::GetEmpty()); }
+								FSlateApplication::Get().ClearKeyboardFocus(EFocusCause::Cleared);
+								return bHabia ? FReply::Handled() : FReply::Unhandled();   // vacío: Esc sigue (cierra la ficha o Estudiar)
+							}
+							return FReply::Unhandled();
+						})
 					]
 					+ SVerticalBox::Slot().AutoHeight().MaxHeight(420.f)
 					[
-						SNew(SScrollBox) + SScrollBox::Slot()[ SAssignNew(CajaResultados, SVerticalBox) ]
+						SNew(SScrollBox).ScrollBarStyle(&EstiloRollo()).ScrollBarThickness(GROSOR_ROLLO)
+						+ SScrollBox::Slot()[ SAssignNew(CajaResultados, SVerticalBox) ]
 					]
 				]
 			]
 		]
 		// ── Abajo: movimiento (rango articular) ──
 		// (a la derecha: en el centro tapaba las piernas y los pies, que es lo que hay que ver en la marcha)
-		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom).Padding(18.f)
+		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom).Padding(M_PANTALLA)
 		[
 			SAssignNew(Anim[P_MOV].W, SBox).WidthOverride(520.f)
 			.Visibility_Lambda([this]() { return VisAnim(P_MOV); })
 			[
-				SNew(SBorder).BorderImage(Panel()).Padding(14.f)[ SAssignNew(CajaMov, SVerticalBox) ]
+				SNew(SBorder).BorderImage(Panel()).Padding(E_4)[ SAssignNew(CajaMov, SVerticalBox) ]
 			]
 		]
 		// ── Derecha: ficha de la estructura seleccionada ──
-		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Top).Padding(18.f)
+		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Top).Padding(M_PANTALLA)
 		[
 			SAssignNew(Anim[P_FICHA].W, SBox).WidthOverride(400.f)
-			// la ficha no baja hasta el panel de movimiento (antes se pisaban): se acorta y su contenido se desplaza
-			.MaxDesiredHeight_Lambda([this]() { const float Alto = FMath::Max(TamVista.Y, 400.f); const float Mov = (Anim[P_MOV].W.IsValid() && Anim[P_MOV].V > 0.01f) ? (float)Anim[P_MOV].W->GetDesiredSize().Y + 18.f : 0.f; return FOptionalSize(FMath::Clamp(Alto - 36.f - Mov - 12.f, 180.f, 860.f)); })
-			.Visibility_Lambda([this]() { return VisAnim(P_FICHA); })
+			// la ficha no baja hasta el panel de movimiento (antes se pisaban): se acorta y su contenido se desplaza.
+			// TamVista y los tamaños deseados están en las mismas unidades (dentro del SDPIScaler).
+			.MaxDesiredHeight_Lambda([this]()
+			{
+				const float Alto = FMath::Max((float)TamVista.Y, 400.f);
+				const float Mov = (Anim[P_MOV].W.IsValid() && Anim[P_MOV].V > 0.01f) ? (float)Anim[P_MOV].W->GetDesiredSize().Y + M_PANTALLA : 0.f;
+				return FOptionalSize(FMath::Clamp(Alto - 2.f * M_PANTALLA - Mov - E_3, 120.f, 860.f));
+			})
+			.Visibility_Lambda([this]()
+			{
+				// con el texto grande el panel de movimiento puede ocupar casi toda la altura: si la ficha no cabe
+				// encima (menos de 120), se oculta en lugar de montarse sobre él
+				if (Anim[P_MOV].W.IsValid() && Anim[P_MOV].V > 0.01f)
+				{
+					const float Libre = FMath::Max((float)TamVista.Y, 400.f) - 2.f * M_PANTALLA - (float)Anim[P_MOV].W->GetDesiredSize().Y - M_PANTALLA - E_3;
+					if (Libre < 120.f) { return EVisibility::Collapsed; }
+				}
+				return VisAnim(P_FICHA);
+			})
 			[
-				SNew(SBorder).BorderImage(Panel()).Padding(18.f)
+				SNew(SBorder).BorderImage(Panel()).Padding(RELLENO_PANEL)
 				[
-					SNew(SScrollBox) + SScrollBox::Slot()[ SAssignNew(CajaFicha, SVerticalBox) ]
+					SNew(SScrollBox).ScrollBarStyle(&EstiloRollo()).ScrollBarThickness(GROSOR_ROLLO)
+					+ SScrollBox::Slot()[ SAssignNew(CajaFicha, SVerticalBox) ]
 				]
 			]
 		]
 		// ── Derecha, a toda la altura: panel de estudio (lecciones, recorridos, kinesiología, casos, patologías, glosario) ──
-		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Fill).Padding(18.f)
+		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Fill).Padding(M_PANTALLA)
 		[
 			SAssignNew(Anim[P_EST].W, SBox).WidthOverride(500.f)
 			.Visibility_Lambda([this]() { return VisAnim(P_EST); })
 			[
-				SNew(SBorder).BorderImage(Panel()).Padding(16.f)
+				SNew(SBorder).BorderImage(Panel()).Padding(RELLENO_PANEL)
 				[
 					SNew(SVerticalBox)
 					+ SVerticalBox::Slot().AutoHeight()[ SAssignNew(CajaEstCab, SVerticalBox) ]
-					+ SVerticalBox::Slot().FillHeight(1.f).Padding(0, 8, 0, 0)
+					+ SVerticalBox::Slot().FillHeight(1.f).Padding(0, E_2, 0, 0)
 					[
-						SAssignNew(RolloEst, SScrollBox) + SScrollBox::Slot()[ SAssignNew(CajaEst, SVerticalBox) ]
+						SAssignNew(RolloEst, SScrollBox).ScrollBarStyle(&EstiloRollo()).ScrollBarThickness(GROSOR_ROLLO)
+						+ SScrollBox::Slot()[ SAssignNew(CajaEst, SVerticalBox) ]
 					]
 				]
 			]
+		]
 		]
 	];
 
@@ -416,29 +764,38 @@ void SCorpusInterfaz::Reconstruir()
 
 	CuerpoPintado = (uint8)C->Cuerpo();
 	CajaBarra->ClearChildren();
-	CajaBarra->AddSlot().AutoHeight()[ Txt(D->T(TEXT("Atlas anatómico 3D libre")), 10, C_GRIS) ];
+	CajaBarra->AddSlot().AutoHeight()[ Txt(D->T(TEXT("Atlas anatómico 3D libre")), T_SECUNDARIO, C_GRIS) ];
 
 	// Cuerpo: hombre, mujer o Visible Human
-	TSharedRef<SWrapBox> FilaCuerpo = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(6, 6));
+	TSharedRef<SWrapBox> FilaCuerpo = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
 	const TPair<const TCHAR*, ECorpusCuerpo> Cuerpos[] = { {TEXT("Hombre"), ECorpusCuerpo::Hombre}, {TEXT("Mujer"), ECorpusCuerpo::Mujer}, {TEXT("Visible Human"), ECorpusCuerpo::VisibleHuman} };
 	for (const auto& Par : Cuerpos)
 	{
 		const ECorpusCuerpo Cual = Par.Value;
-		FilaCuerpo->AddSlot()[ Boton(D->T(Par.Key), [WC, Cual]() { if (WC.IsValid()) { WC->PonerCuerpo(Cual); } }, C->Cuerpo() == Cual) ];
+		FilaCuerpo->AddSlot()[ BotonSel(D->T(Par.Key), [WC, Cual]() { if (WC.IsValid()) { WC->PonerCuerpo(Cual); } }, C->Cuerpo() == Cual) ];
 	}
-	CajaBarra->AddSlot().AutoHeight().Padding(0, 10, 0, 0)[ FilaCuerpo ];
+	CajaBarra->AddSlot().AutoHeight().Padding(0, E_3, 0, 0)[ FilaCuerpo ];
 
 	// Idioma
-	TSharedRef<SWrapBox> FilaIdioma = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(6, 6));
+	TSharedRef<SWrapBox> FilaIdioma = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
 	for (const TCHAR* L : { TEXT("es"), TEXT("en"), TEXT("pt"), TEXT("fr"), TEXT("de") })
 	{
 		const FString Cod(L);
-		FilaIdioma->AddSlot()[ Boton(Cod.ToUpper(), [WD, Cod]() { if (WD.IsValid()) { WD->PonerIdioma(Cod); } }, D->Idioma() == Cod) ];
+		FilaIdioma->AddSlot()[ BotonSel(Cod.ToUpper(), [WD, Cod]() { if (WD.IsValid()) { WD->PonerIdioma(Cod); } }, D->Idioma() == Cod) ];
 	}
-	CajaBarra->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[ FilaIdioma ];
+	CajaBarra->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)[ FilaIdioma ];
+
+	// Tamaño del texto (90 · 100 · 125 · 150 %): multiplica la escala por resolución; se guarda para la próxima vez
+	CajaBarra->AddSlot().AutoHeight().Padding(0, E_3, 0, E_1)[ Etiqueta(D->T(TEXT("Tamaño del texto"))) ];
+	TSharedRef<SWrapBox> FilaTam = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
+	for (const int32 Por : { 90, 100, 125, 150 })
+	{
+		FilaTam->AddSlot()[ BotonSel(FString::Printf(TEXT("%d %%"), Por), [this, Por]() { PonerTamTexto(Por); Reconstruir(); }, TamTexto == Por) ];
+	}
+	CajaBarra->AddSlot().AutoHeight()[ FilaTam ];
 
 	// Vistas fijas y mostrar todo
-	TSharedRef<SWrapBox> FilaVistas = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(6, 6));
+	TSharedRef<SWrapBox> FilaVistas = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
 	const TCHAR* Vistas[] = { TEXT("Anterior"), TEXT("Posterior"), TEXT("Derecha"), TEXT("Izquierda"), TEXT("Superior"), TEXT("Inferior") };
 	for (int32 i = 0; i < 6; ++i)
 	{
@@ -452,10 +809,10 @@ void SCorpusInterfaz::Reconstruir()
 			bVerMov = !bVerMov;
 			if (WC.IsValid() && !bVerMov) { WC->PonerMarcha(-1, 0.f); WC->PonerEjercicio(-1, 0, 0.f); WC->QuitarPostura(); }
 			MovPintado = FIntVector(-2, -2, -2); RehacerMovimiento();
-		}, bVerMov) ];
+		}, bVerMov ? ECorpusBoton::Seleccionado : ECorpusBoton::Normal) ];
 	}
-	FilaVistas->AddSlot()[ Boton(D->TE(TEXT("Estudiar")), [this]() { AbrirEstudio(!bVerEst); }, bVerEst) ];
-	CajaBarra->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[ FilaVistas ];
+	FilaVistas->AddSlot()[ BotonSel(D->TE(TEXT("Estudiar")), [this]() { AbrirEstudio(!bVerEst); }, bVerEst) ];
+	CajaBarra->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)[ FilaVistas ];
 
 	RehacerEstudio();
 	RehacerHerramientas();
@@ -474,33 +831,34 @@ void SCorpusInterfaz::RehacerHerramientas()
 	TWeakObjectPtr<ACorpusCuerpo> WC(C);
 
 	// ── Fantasma: todo translúcido menos la capa de la pieza seleccionada (sin selección, menos los huesos) ──
-	CajaHerr->AddSlot().AutoHeight().Padding(0, 4, 0, 4)[ Txt(Mayus(D->T(TEXT("Disección"))), 9, C_GRIS, true) ];
+	CajaHerr->AddSlot().AutoHeight().Padding(0, E_1, 0, E_1)[ Etiqueta(D->T(TEXT("Disección"))) ];
 	CajaHerr->AddSlot().AutoHeight()
 	[
-		SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(6, 6))
-		+ SWrapBox::Slot()[ Boton(D->T(TEXT("Fantasma")), [WC]() { if (WC.IsValid()) { WC->Fantasma(!WC->EnFantasma()); } }, C->EnFantasma()) ]
+		SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO))
+		+ SWrapBox::Slot()[ BotonSel(D->T(TEXT("Fantasma")), [WC]() { if (WC.IsValid()) { WC->Fantasma(!WC->EnFantasma()); } }, C->EnFantasma()) ]
 	];
 
 	// ── Plano de corte: sagital, coronal o axial (otra vez sobre el activo lo apaga), posición e invertir ──
-	CajaHerr->AddSlot().AutoHeight().Padding(0, 8, 0, 4)[ Txt(Mayus(D->T(TEXT("Plano de corte"))), 9, C_GRIS, true) ];
-	TSharedRef<SWrapBox> FilaCorte = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(6, 6));
+	CajaHerr->AddSlot().AutoHeight().Padding(0, E_2, 0, E_1)[ Etiqueta(D->T(TEXT("Plano de corte"))) ];
+	TSharedRef<SWrapBox> FilaCorte = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
 	const TCHAR* Ejes[] = { TEXT("Sagital"), TEXT("Coronal"), TEXT("Axial") };
 	const int32 Eje = C->EjeCorte();
 	for (int32 i = 0; i < 3; ++i)
 	{
-		FilaCorte->AddSlot()[ Boton(D->T(Ejes[i]), [WC, i]() { if (WC.IsValid()) { if (WC->EjeCorte() == i) { WC->QuitarCorte(); } else { WC->PonerCorte(i, 0.5f); } } }, Eje == i) ];
+		FilaCorte->AddSlot()[ BotonSel(D->T(Ejes[i]), [WC, i]() { if (WC.IsValid()) { if (WC->EjeCorte() == i) { WC->QuitarCorte(); } else { WC->PonerCorte(i, 0.5f); } } }, Eje == i) ];
 	}
 	if (Eje >= 0)
 	{
-		FilaCorte->AddSlot()[ Boton(D->T(TEXT("Invertir")), [WC]() { if (WC.IsValid()) { WC->InvertirCorte(); } }, C->CorteInvertido()) ];
+		FilaCorte->AddSlot()[ BotonSel(D->T(TEXT("Invertir")), [WC]() { if (WC.IsValid()) { WC->InvertirCorte(); } }, C->CorteInvertido()) ];
 		FilaCorte->AddSlot()[ Boton(D->T(TEXT("Quitar corte")), [WC]() { if (WC.IsValid()) { WC->QuitarCorte(); } }) ];
 	}
 	CajaHerr->AddSlot().AutoHeight()[ FilaCorte ];
 	if (Eje >= 0)
 	{
-		CajaHerr->AddSlot().AutoHeight().Padding(0, 6, 0, 0)
+		CajaHerr->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)
 		[
-			SNew(SSlider).MinValue(0.f).MaxValue(1.f)
+			SNew(SSlider).Style(&EstiloDeslizador()).MinValue(0.f).MaxValue(1.f)
+			.ToolTipText_Lambda([WC]() { return FText::FromString(FString::Printf(TEXT("%d %%"), WC.IsValid() ? FMath::RoundToInt(100.f * WC->PosCorte()) : 50)); })
 			.Value_Lambda([WC]() { return WC.IsValid() ? WC->PosCorte() : 0.5f; })
 			.OnValueChanged_Lambda([WC](float V) { if (WC.IsValid() && WC->EjeCorte() >= 0) { WC->PonerCorte(WC->EjeCorte(), V); } })
 		];
@@ -545,22 +903,22 @@ void SCorpusInterfaz::RehacerMovimiento()
 	TWeakObjectPtr<ACorpusJugador> WJ(Jugador);
 	{
 		TSharedRef<SHorizontalBox> Modos = SNew(SHorizontalBox);
-		Modos->AddSlot().AutoWidth().Padding(0, 0, 5, 0)[ Boton(D->T(TEXT("Rango articular")), [WC]() { if (WC.IsValid()) { WC->PonerMarcha(-1, 0.f); WC->PonerEjercicio(-1, 0, 0.f); } }, !bMarcha && !bEj) ];
+		Modos->AddSlot().AutoWidth().Padding(0, 0, HUECO, 0)[ BotonSel(D->T(TEXT("Rango articular")), [WC]() { if (WC.IsValid()) { WC->PonerMarcha(-1, 0.f); WC->PonerEjercicio(-1, 0, 0.f); } }, !bMarcha && !bEj) ];
 		if (D->PatronesMarcha().Num() > 0)
 		{
-			Modos->AddSlot().AutoWidth().Padding(0, 0, 5, 0)[ Boton(D->T(TEXT("Marcha")), [WC]() { if (WC.IsValid()) { WC->QuitarPostura(); WC->PonerMarcha(0, 0.f); WC->ReproducirMarcha(true); } }, bMarcha) ];
+			Modos->AddSlot().AutoWidth().Padding(0, 0, HUECO, 0)[ BotonSel(D->T(TEXT("Marcha")), [WC]() { if (WC.IsValid()) { WC->QuitarPostura(); WC->PonerMarcha(0, 0.f); WC->ReproducirMarcha(true); } }, bMarcha) ];
 		}
 		if (D->Ejercicios().Num() > 0)
 		{
 			// ejercicios horneados (movimiento.json → ejercicios): al entrar, la vista que pide el ejercicio
-			Modos->AddSlot().AutoWidth()[ Boton(D->TEj(TEXT("modo")), [WC, WJ, D]()
+			Modos->AddSlot().AutoWidth()[ BotonSel(D->TEj(TEXT("modo")), [WC, WJ, D]()
 			{
 				if (!WC.IsValid()) { return; }
 				WC->QuitarPostura(); WC->PonerEjercicio(0, -1, 0.f); WC->ReproducirEjercicio(true);
 				if (WJ.IsValid() && WJ->CamaraOrbital() && D->Ejercicios().Num() > 0) { WJ->CamaraOrbital()->Vista(D->Ejercicios()[0].Vista); }
 			}, bEj) ];
 		}
-		CajaMov->AddSlot().AutoHeight().Padding(0, 0, 0, 8)[ Modos ];
+		CajaMov->AddSlot().AutoHeight().Padding(0, 0, 0, E_2)[ Modos ];
 	}
 	if (bEj)
 	{
@@ -568,24 +926,24 @@ void SCorpusInterfaz::RehacerMovimiento()
 		const int32 Vi = C->VarianteDeEjercicio();
 		TWeakObjectPtr<UCorpusDatos> WD(D);
 		// ejercicio y variante (profundidad…)
-		TSharedRef<SWrapBox> FilaE = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
+		TSharedRef<SWrapBox> FilaE = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
 		for (int32 i = 0; i < D->Ejercicios().Num(); ++i)
 		{
-			FilaE->AddSlot()[ Boton(D->Tx(D->Ejercicios()[i].Nombre), [WC, i]() { if (WC.IsValid()) { WC->PonerEjercicio(i, -1, 0.f); WC->ReproducirEjercicio(true); } }, i == Ei) ];
+			FilaE->AddSlot()[ BotonSel(D->Tx(D->Ejercicios()[i].Nombre), [WC, i]() { if (WC.IsValid()) { WC->PonerEjercicio(i, -1, 0.f); WC->ReproducirEjercicio(true); } }, i == Ei) ];
 		}
 		if (E.Variantes.Num() > 1)
 		{
-			FilaE->AddSlot()[ SNew(SSpacer).Size(FVector2D(10, 1)) ];
+			FilaE->AddSlot()[ SNew(SSpacer).Size(FVector2D(E_2, 1)) ];
 			for (int32 v = 0; v < E.Variantes.Num(); ++v)
 			{
-				FilaE->AddSlot()[ Boton(D->Tx(E.Variantes[v].Nombre), [WC, Ei, v]() { if (WC.IsValid()) { WC->PonerEjercicio(Ei, v, WC->CicloDeEjercicio()); } }, v == Vi) ];
+				FilaE->AddSlot()[ BotonSel(D->Tx(E.Variantes[v].Nombre), [WC, Ei, v]() { if (WC.IsValid()) { WC->PonerEjercicio(Ei, v, WC->CicloDeEjercicio()); } }, v == Vi) ];
 			}
 		}
 		CajaMov->AddSlot().AutoHeight()[ FilaE ];
 		// fase del ciclo (excéntrica al bajar, isométrica abajo, concéntrica al subir) y qué ocurre en ella
-		CajaMov->AddSlot().AutoHeight().Padding(0, 10, 0, 0)
+		CajaMov->AddSlot().AutoHeight().Padding(0, E_3, 0, 0)
 		[
-			SNew(STextBlock).Font(Letra(13, true)).ColorAndOpacity(FSlateColor(C_ACENTO))
+			SNew(STextBlock).Font(Letra(T_SECCION, EPeso::Media)).ColorAndOpacity(FSlateColor(C_TINTA))
 			.Text_Lambda([WC, WD, Ei]()
 			{
 				if (!WC.IsValid() || !WD.IsValid() || !WD->Ejercicios().IsValidIndex(Ei)) { return FText(); }
@@ -597,9 +955,9 @@ void SCorpusInterfaz::RehacerMovimiento()
 				return FText::FromString(FString::Printf(TEXT("%s · %d %%"), *S, FMath::RoundToInt(WC->CicloDeEjercicio())));
 			})
 		];
-		CajaMov->AddSlot().AutoHeight().Padding(0, 2, 0, 0)
+		CajaMov->AddSlot().AutoHeight().Padding(0, E_1, 0, 0)
 		[
-			SNew(STextBlock).Font(Letra(10)).ColorAndOpacity(FSlateColor(C_TINTA)).AutoWrapText(true)
+			SNew(STextBlock).Font(Letra(T_CUERPO)).ColorAndOpacity(FSlateColor(C_TINTA)).AutoWrapText(true)
 			.Text_Lambda([WC, WD, Ei]()
 			{
 				if (!WC.IsValid() || !WD.IsValid() || !WD->Ejercicios().IsValidIndex(Ei)) { return FText(); }
@@ -610,9 +968,9 @@ void SCorpusInterfaz::RehacerMovimiento()
 		// ángulos de este instante (cadera, rodilla, tobillo, tronco…)
 		if (E.Medidas.Num() > 0)
 		{
-			CajaMov->AddSlot().AutoHeight().Padding(0, 6, 0, 0)
+			CajaMov->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)
 			[
-				SNew(STextBlock).Font(Letra(11, true)).ColorAndOpacity(FSlateColor(FLinearColor(FColor::FromHex(TEXT("f0a040")))))
+				SNew(STextBlock).Font(Letra(T_NOTA, EPeso::Media)).ColorAndOpacity(FSlateColor(C_AMBAR))
 				.Text_Lambda([WC, WD, Ei]()
 				{
 					if (!WC.IsValid() || !WD.IsValid() || !WD->Ejercicios().IsValidIndex(Ei)) { return FText(); }
@@ -626,19 +984,20 @@ void SCorpusInterfaz::RehacerMovimiento()
 		TSharedRef<SHorizontalBox> FilaC = SNew(SHorizontalBox);
 		FilaC->AddSlot().FillWidth(1.f).VAlign(VAlign_Center)
 		[
-			SNew(SSlider).MinValue(0.f).MaxValue(99.9f)
+			SNew(SSlider).Style(&EstiloDeslizador()).MinValue(0.f).MaxValue(99.9f)
+			.ToolTipText_Lambda([WC]() { return FText::FromString(FString::Printf(TEXT("%d %%"), WC.IsValid() ? FMath::RoundToInt(WC->CicloDeEjercicio()) : 0)); })
 			.Value_Lambda([WC]() { return WC.IsValid() ? WC->CicloDeEjercicio() : 0.f; })
 			.OnValueChanged_Lambda([WC](float V) { if (WC.IsValid()) { WC->ReproducirEjercicio(false); WC->PonerEjercicio(WC->Ejercicio(), WC->VarianteDeEjercicio(), V); } })
 		];
-		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(10, 0, 0, 0)[ Boton(D->T(C->EjercicioEnCurso() ? TEXT("Pausa") : TEXT("Reproducir")), [WC]() { if (WC.IsValid()) { WC->ReproducirEjercicio(!WC->EjercicioEnCurso()); } }, true) ];
-		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(5, 0, 0, 0)[ Boton(D->T(TEXT("Cámara lenta")), [WC]() { if (WC.IsValid()) { WC->EjercicioLento(!WC->EsEjercicioLento()); } }, C->EsEjercicioLento()) ];
-		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(5, 0, 0, 0)[ Boton(D->T(TEXT("Reposo")), [WC]() { if (WC.IsValid()) { WC->PonerEjercicio(-1, 0, 0.f); } }) ];
-		CajaMov->AddSlot().AutoHeight().Padding(0, 10, 0, 0)[ FilaC ];
-		CajaMov->AddSlot().AutoHeight().Padding(0, 8, 0, 0)
+		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(E_3, 0, 0, 0)[ Boton(D->T(C->EjercicioEnCurso() ? TEXT("Pausa") : TEXT("Reproducir")), [WC]() { if (WC.IsValid()) { WC->ReproducirEjercicio(!WC->EjercicioEnCurso()); } }, ECorpusBoton::Principal) ];
+		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(HUECO, 0, 0, 0)[ BotonSel(D->T(TEXT("Cámara lenta")), [WC]() { if (WC.IsValid()) { WC->EjercicioLento(!WC->EsEjercicioLento()); } }, C->EsEjercicioLento()) ];
+		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(HUECO, 0, 0, 0)[ Boton(D->T(TEXT("Reposo")), [WC]() { if (WC.IsValid()) { WC->PonerEjercicio(-1, 0, 0.f); } }) ];
+		CajaMov->AddSlot().AutoHeight().Padding(0, E_3, 0, 0)[ FilaC ];
+		CajaMov->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)
 		[
 			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot().AutoWidth().Padding(0, 0, 5, 0)[ Boton(D->TEj(TEXT("musculos")), [this]() { bEjTecnica = false; RehacerMovimiento(); }, !bEjTecnica) ]
-			+ SHorizontalBox::Slot().AutoWidth()[ Boton(D->TEj(TEXT("tecnica")), [this]() { bEjTecnica = true; RehacerMovimiento(); }, bEjTecnica) ]
+			+ SHorizontalBox::Slot().AutoWidth().Padding(0, 0, HUECO, 0)[ BotonSel(D->TEj(TEXT("musculos")), [this]() { bEjTecnica = false; RehacerMovimiento(); }, !bEjTecnica) ]
+			+ SHorizontalBox::Slot().AutoWidth()[ BotonSel(D->TEj(TEXT("tecnica")), [this]() { bEjTecnica = true; RehacerMovimiento(); }, bEjTecnica) ]
 		];
 		if (bEjTecnica)
 		{
@@ -646,10 +1005,13 @@ void SCorpusInterfaz::RehacerMovimiento()
 			TSharedRef<SVerticalBox> Tec = SNew(SVerticalBox);
 			for (const auto& Par : E.Textos)
 			{
-				Tec->AddSlot().AutoHeight().Padding(0, 6, 0, 1)[ Txt(Mayus(D->Tx(Par.Key)), 9, C_ACENTO, true) ];
-				Tec->AddSlot().AutoHeight()[ Txt(D->Tx(Par.Value), 10, C_TINTA) ];
+				Tec->AddSlot().AutoHeight().Padding(0, E_2, 0, E_1)[ Etiqueta(D->Tx(Par.Key)) ];
+				Tec->AddSlot().AutoHeight()[ Txt(D->Tx(Par.Value), T_NOTA, C_TINTA) ];
 			}
-			CajaMov->AddSlot().AutoHeight().MaxHeight(330.f).Padding(0, 4, 0, 0)[ SNew(SScrollBox) + SScrollBox::Slot()[ Tec ] ];
+			CajaMov->AddSlot().AutoHeight().MaxHeight(330.f).Padding(0, E_1, 0, 0)
+			[
+				SNew(SScrollBox).ScrollBarStyle(&EstiloRollo()).ScrollBarThickness(GROSOR_ROLLO) + SScrollBox::Slot()[ Tec ]
+			];
 		}
 		else
 		{
@@ -658,28 +1020,28 @@ void SCorpusInterfaz::RehacerMovimiento()
 			for (int32 g = 0; g < E.Grupos.Num(); ++g)
 			{
 				const FCorpusGrupoEj& G = E.Grupos[g];
-				Ley->AddSlot().AutoHeight().Padding(0, 1)
+				Ley->AddSlot().AutoHeight().Padding(0, 2)
 				[
 					SNew(SHorizontalBox)
 					+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)
 					[
-						SNew(STextBlock).Font(Letra(9)).Text(FText::FromString(D->Tx(G.Nombre))).ToolTipText(FText::FromString(D->Tx(G.Texto)))
+						SNew(STextBlock).Font(Letra(T_SECUNDARIO)).Text(FText::FromString(D->Tx(G.Nombre))).ToolTipText(FText::FromString(D->Tx(G.Texto)))
 						.ColorAndOpacity_Lambda([WC, g]() { return FSlateColor(WC.IsValid() && WC->NivelDeGrupoEj(g) > 0.05f ? C_TINTA : C_GRIS); })
 					]
-					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(6, 0)
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(E_2, 0)
 					[
-						SNew(SBox).WidthOverride(90.f).HeightOverride(7.f)
+						SNew(SBox).WidthOverride(88.f).HeightOverride(8.f)
 						[
 							SNew(SProgressBar).FillImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderPadding(FVector2D::ZeroVector)
 							.Percent_Lambda([WC, g]() { return TOptional<float>(WC.IsValid() ? FMath::Clamp(WC->NivelDeGrupoEj(g), 0.f, 1.f) : 0.f); })
-							.FillColorAndOpacity_Lambda([WC, g]() { return FSlateColor(WC.IsValid() ? ACorpusCuerpo::ColorDeIntensidad(WC->NivelDeGrupoEj(g)) : FLinearColor::Gray); })
+							.FillColorAndOpacity_Lambda([WC, g]() { return FSlateColor(WC.IsValid() ? ACorpusCuerpo::ColorDeIntensidad(WC->NivelDeGrupoEj(g)) : C_GRIS); })
 						]
 					]
 					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
 					[
-						SNew(SBox).WidthOverride(84.f)
+						SNew(SBox).WidthOverride(96.f)
 						[
-							SNew(STextBlock).Font(Letra(9)).ColorAndOpacity(FSlateColor(C_ACENTO))
+							SNew(STextBlock).Font(Letra(T_SECUNDARIO)).ColorAndOpacity(FSlateColor(C_GRIS))
 							.Text_Lambda([WC, WD, Ei, g]()
 							{
 								if (!WC.IsValid() || !WD.IsValid() || !WD->Ejercicios().IsValidIndex(Ei) || !WD->Ejercicios()[Ei].Grupos.IsValidIndex(g)) { return FText(); }
@@ -690,74 +1052,75 @@ void SCorpusInterfaz::RehacerMovimiento()
 					]
 				];
 			}
-			CajaMov->AddSlot().AutoHeight().Padding(0, 6, 0, 0)[ Ley ];
+			CajaMov->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)[ Ley ];
 		}
-		CajaMov->AddSlot().AutoHeight().Padding(0, 6, 0, 0)[ Txt(D->TEj(TEXT("leyenda")), 8, C_GRIS) ];
+		CajaMov->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)[ Txt(D->TEj(TEXT("leyenda")), T_SECUNDARIO, C_GRIS) ];
 		return;
 	}
 	if (bMarcha)
 	{
 		const TArray<FCorpusPatronMarcha>& Ps = D->PatronesMarcha();
 		const int32 Pi = C->PatronMarcha();
-		TSharedRef<SWrapBox> FilaP = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
+		TSharedRef<SWrapBox> FilaP = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
 		for (int32 i = 0; i < Ps.Num(); ++i)
 		{
-			FilaP->AddSlot()[ Boton(D->T(Ps[i].Nombre), [WC, i]() { if (WC.IsValid()) { WC->PonerMarcha(i, WC->CicloDeMarcha()); } }, i == Pi) ];
+			FilaP->AddSlot()[ BotonSel(D->T(Ps[i].Nombre), [WC, i]() { if (WC.IsValid()) { WC->PonerMarcha(i, WC->CicloDeMarcha()); } }, i == Pi) ];
 		}
 		CajaMov->AddSlot().AutoHeight()[ FilaP ];
 		TWeakObjectPtr<UCorpusDatos> WD(D);
 		// fase del ciclo (del miembro derecho) y qué ocurre en ella
-		CajaMov->AddSlot().AutoHeight().Padding(0, 10, 0, 0)
+		CajaMov->AddSlot().AutoHeight().Padding(0, E_3, 0, 0)
 		[
-			SNew(STextBlock).Font(Letra(13, true)).ColorAndOpacity(FSlateColor(C_ACENTO))
+			SNew(STextBlock).Font(Letra(T_SECCION, EPeso::Media)).ColorAndOpacity(FSlateColor(C_TINTA))
 			.Text_Lambda([WC, WD]() { if (!WC.IsValid() || !WD.IsValid()) { return FText(); } const int32 F = WC->FaseDeMarcha(); if (!WD->FasesMarcha().IsValidIndex(F)) { return FText(); }
 				return FText::FromString(FString::Printf(TEXT("%s · %d %%"), *WD->T(WD->FasesMarcha()[F].Nombre), FMath::RoundToInt(WC->CicloDeMarcha()))); })
 		];
-		CajaMov->AddSlot().AutoHeight().Padding(0, 2, 0, 0)
+		CajaMov->AddSlot().AutoHeight().Padding(0, E_1, 0, 0)
 		[
-			SNew(STextBlock).Font(Letra(10)).ColorAndOpacity(FSlateColor(C_TINTA)).AutoWrapText(true)
+			SNew(STextBlock).Font(Letra(T_CUERPO)).ColorAndOpacity(FSlateColor(C_TINTA)).AutoWrapText(true)
 			.Text_Lambda([WC, WD]() { if (!WC.IsValid() || !WD.IsValid()) { return FText(); } const int32 F = WC->FaseDeMarcha(); return WD->FasesMarcha().IsValidIndex(F) ? FText::FromString(WD->T(WD->FasesMarcha()[F].Texto)) : FText(); })
 		];
-		if (Ps.IsValidIndex(Pi) && !Ps[Pi].Texto.IsEmpty()) { CajaMov->AddSlot().AutoHeight().Padding(0, 6, 0, 0)[ Txt(D->T(Ps[Pi].Texto), 9, C_GRIS) ]; }
+		if (Ps.IsValidIndex(Pi) && !Ps[Pi].Texto.IsEmpty()) { CajaMov->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)[ Txt(D->T(Ps[Pi].Texto), T_NOTA, C_GRIS) ]; }
 		TSharedRef<SHorizontalBox> FilaC = SNew(SHorizontalBox);
 		FilaC->AddSlot().FillWidth(1.f).VAlign(VAlign_Center)
 		[
-			SNew(SSlider).MinValue(0.f).MaxValue(99.9f)
+			SNew(SSlider).Style(&EstiloDeslizador()).MinValue(0.f).MaxValue(99.9f)
+			.ToolTipText_Lambda([WC]() { return FText::FromString(FString::Printf(TEXT("%d %%"), WC.IsValid() ? FMath::RoundToInt(WC->CicloDeMarcha()) : 0)); })
 			.Value_Lambda([WC]() { return WC.IsValid() ? WC->CicloDeMarcha() : 0.f; })
 			.OnValueChanged_Lambda([WC](float V) { if (WC.IsValid()) { WC->ReproducirMarcha(false); WC->PonerMarcha(WC->PatronMarcha(), V); } })
 		];
-		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(10, 0, 0, 0)[ Boton(D->T(C->MarchaEnCurso() ? TEXT("Pausa") : TEXT("Reproducir")), [WC]() { if (WC.IsValid()) { WC->ReproducirMarcha(!WC->MarchaEnCurso()); } }, true) ];
-		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(5, 0, 0, 0)[ Boton(D->T(TEXT("Cámara lenta")), [WC]() { if (WC.IsValid()) { WC->MarchaLenta(!WC->EsMarchaLenta()); } }, C->EsMarchaLenta()) ];
-		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(5, 0, 0, 0)[ Boton(D->T(TEXT("Reposo")), [WC]() { if (WC.IsValid()) { WC->PonerMarcha(-1, 0.f); } }) ];
-		CajaMov->AddSlot().AutoHeight().Padding(0, 10, 0, 0)[ FilaC ];
+		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(E_3, 0, 0, 0)[ Boton(D->T(C->MarchaEnCurso() ? TEXT("Pausa") : TEXT("Reproducir")), [WC]() { if (WC.IsValid()) { WC->ReproducirMarcha(!WC->MarchaEnCurso()); } }, ECorpusBoton::Principal) ];
+		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(HUECO, 0, 0, 0)[ BotonSel(D->T(TEXT("Cámara lenta")), [WC]() { if (WC.IsValid()) { WC->MarchaLenta(!WC->EsMarchaLenta()); } }, C->EsMarchaLenta()) ];
+		FilaC->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(HUECO, 0, 0, 0)[ Boton(D->T(TEXT("Reposo")), [WC]() { if (WC.IsValid()) { WC->PonerMarcha(-1, 0.f); } }) ];
+		CajaMov->AddSlot().AutoHeight().Padding(0, E_3, 0, 0)[ FilaC ];
 		// leyenda: cada grupo muscular con su intensidad en este instante (barra) y el tipo de contracción (miembro derecho)
 		{
 			TSharedRef<SVerticalBox> Ley = SNew(SVerticalBox);
 			for (int32 g = 0; g < D->GruposMarcha().Num(); ++g)
 			{
 				const FCorpusGrupoMarcha& G = D->GruposMarcha()[g];
-				Ley->AddSlot().AutoHeight().Padding(0, 1)
+				Ley->AddSlot().AutoHeight().Padding(0, 2)
 				[
 					SNew(SHorizontalBox)
 					+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)
 					[
-						SNew(STextBlock).Font(Letra(9)).Text(FText::FromString(D->T(G.Nombre))).ToolTipText(FText::FromString(D->T(G.Texto)))
+						SNew(STextBlock).Font(Letra(T_SECUNDARIO)).Text(FText::FromString(D->T(G.Nombre))).ToolTipText(FText::FromString(D->T(G.Texto)))
 						.ColorAndOpacity_Lambda([WC, g]() { return FSlateColor(WC.IsValid() && WC->NivelDeGrupo(g) > 0.05f ? C_TINTA : C_GRIS); })
 					]
-					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(6, 0)
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(E_2, 0)
 					[
-						SNew(SBox).WidthOverride(70.f).HeightOverride(7.f)
+						SNew(SBox).WidthOverride(72.f).HeightOverride(8.f)
 						[
 							SNew(SProgressBar).FillImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderPadding(FVector2D::ZeroVector)   // relleno blanco: el color es el de la actividad
 							.Percent_Lambda([WC, g]() { return TOptional<float>(WC.IsValid() ? FMath::Clamp(WC->NivelDeGrupo(g) / 0.6f, 0.f, 1.f) : 0.f); })
-							.FillColorAndOpacity_Lambda([WC, g]() { return FSlateColor(WC.IsValid() ? ACorpusCuerpo::ColorDeNivel(WC->NivelDeGrupo(g)) : FLinearColor::Gray); })
+							.FillColorAndOpacity_Lambda([WC, g]() { return FSlateColor(WC.IsValid() ? ACorpusCuerpo::ColorDeNivel(WC->NivelDeGrupo(g)) : C_GRIS); })
 						]
 					]
 					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
 					[
-						SNew(SBox).WidthOverride(78.f)
+						SNew(SBox).WidthOverride(96.f)
 						[
-							SNew(STextBlock).Font(Letra(9)).ColorAndOpacity(FSlateColor(C_ACENTO))
+							SNew(STextBlock).Font(Letra(T_SECUNDARIO)).ColorAndOpacity(FSlateColor(C_GRIS))
 							.Text_Lambda([WC, WD, g]()
 							{
 								if (!WC.IsValid() || !WD.IsValid()) { return FText(); }
@@ -768,9 +1131,9 @@ void SCorpusInterfaz::RehacerMovimiento()
 					]
 				];
 			}
-			CajaMov->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[ Ley ];
+			CajaMov->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)[ Ley ];
 		}
-		CajaMov->AddSlot().AutoHeight().Padding(0, 6, 0, 0)[ Txt(D->T(TEXT("Actividad muscular: amarillo (poca) → magenta (mucha). Datos de laboratorio: Fukuchi 2018, Schreiber 2019, Lencioni 2019.")), 8, C_GRIS) ];
+		CajaMov->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)[ Txt(D->T(TEXT("Actividad muscular: amarillo (poca) → magenta (mucha). Datos de laboratorio: Fukuchi 2018, Schreiber 2019, Lencioni 2019.")), T_SECUNDARIO, C_GRIS) ];
 		return;
 	}
 	// goniómetro: el ángulo actual en grande, el máximo del movimiento y el transportador
@@ -780,74 +1143,80 @@ void SCorpusInterfaz::RehacerMovimiento()
 		Gonio->Cuerpo = WC;
 		FString Titulo = D->T(Rs[Ri].Nombre) + TEXT(" · ") + D->NombreMov(Rs[Ri].Movs[Mi]);
 		if (Rs[Ri].bLados) { Titulo += TEXT(" · ") + D->T(bIzq ? TEXT("Izquierdo") : TEXT("Derecho")); }
-		CajaMov->AddSlot().AutoHeight().Padding(0, 0, 0, 10)
+		CajaMov->AddSlot().AutoHeight().Padding(0, 0, 0, E_3)
 		[
-			SNew(SBorder).BorderImage(Panel2()).Padding(FMargin(12, 8))
+			SNew(SBorder).BorderImage(Tarjeta()).Padding(FMargin(E_3, E_2))
 			[
 				SNew(SHorizontalBox)
 				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ Gonio ]
-				+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center).Padding(16, 0, 0, 0)
+				+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center).Padding(E_4, 0, 0, 0)
 				[
 					SNew(SVerticalBox)
-					+ SVerticalBox::Slot().AutoHeight()[ Txt(Mayus(Titulo), 9, C_GRIS, true) ]
-					+ SVerticalBox::Slot().AutoHeight()
+					+ SVerticalBox::Slot().AutoHeight()[ Etiqueta(Titulo) ]
+					+ SVerticalBox::Slot().AutoHeight().Padding(0, E_1, 0, 0)
 					[
-						SNew(STextBlock).Font(Letra(44, true)).ColorAndOpacity(FSlateColor(C_TINTA))
+						SNew(STextBlock).Font(Letra(T_GONIO, EPeso::Negrita)).ColorAndOpacity(FSlateColor(C_TINTA))
 						.Text_Lambda([WC]() { return WC.IsValid() ? FText::FromString(FString::Printf(TEXT("%d°"), FMath::RoundToInt(WC->Grados()))) : FText(); })
 					]
 					+ SVerticalBox::Slot().AutoHeight()
 					[
-						SNew(STextBlock).Font(Letra(13, true)).ColorAndOpacity(FSlateColor(FLinearColor(FColor::FromHex(TEXT("f0a040")))))
+						SNew(STextBlock).Font(Letra(T_SECCION, EPeso::Media)).ColorAndOpacity(FSlateColor(C_AMBAR))
 						.Text_Lambda([WC, WDm = TWeakObjectPtr<UCorpusDatos>(D)]() { return WC.IsValid() ? FText::FromString(FString::Printf(TEXT("%s %d°  ·  %d %%"), WDm.IsValid() ? *WDm->T(TEXT("máx.")) : TEXT("máx."), FMath::RoundToInt(WC->GradosMax()), WC->GradosMax() > 0.f ? FMath::RoundToInt(100.f * WC->Grados() / WC->GradosMax()) : 0)) : FText(); })
 					]
 				]
 			]
 		];
 	}
-	TSharedRef<SWrapBox> FilaR = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
+	TSharedRef<SWrapBox> FilaR = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
 	for (int32 i = 0; i < Rs.Num(); ++i)
 	{
-		FilaR->AddSlot()[ Boton(D->T(Rs[i].Nombre), [WC, i, bIzq]() { if (WC.IsValid()) { WC->Reproducir(false); WC->PonerRango(i, 0, bIzq, 0.f); } }, i == Ri) ];
+		FilaR->AddSlot()[ BotonSel(D->T(Rs[i].Nombre), [WC, i, bIzq]() { if (WC.IsValid()) { WC->Reproducir(false); WC->PonerRango(i, 0, bIzq, 0.f); } }, i == Ri) ];
 	}
-	CajaMov->AddSlot().AutoHeight().Padding(0, 6, 0, 0)[ FilaR ];
+	CajaMov->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)[ FilaR ];
 	if (!Rs.IsValidIndex(Ri)) { return; }
 
 	const FCorpusRango& R = Rs[Ri];
-	TSharedRef<SWrapBox> FilaM = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
+	TSharedRef<SWrapBox> FilaM = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
 	for (int32 m = 0; m < R.Movs.Num(); ++m)
 	{
-		FilaM->AddSlot()[ Boton(D->NombreMov(R.Movs[m]), [WC, Ri, m, bIzq]() { if (WC.IsValid()) { WC->Reproducir(false); WC->PonerRango(Ri, m, bIzq, 0.f); } }, m == Mi) ];
+		FilaM->AddSlot()[ BotonSel(D->NombreMov(R.Movs[m]), [WC, Ri, m, bIzq]() { if (WC.IsValid()) { WC->Reproducir(false); WC->PonerRango(Ri, m, bIzq, 0.f); } }, m == Mi) ];
 	}
-	CajaMov->AddSlot().AutoHeight().Padding(0, 10, 0, 0)[ FilaM ];
-	// nota del movimiento (rangos_extra.json): rotación automática de la rodilla, posición de medida…
-	if (R.Movs.IsValidIndex(Mi)) { const FString Nota = D->NotaMov(R.Movs[Mi]); if (!Nota.IsEmpty()) { CajaMov->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[ Txt(Nota, 9, C_GRIS) ]; } }
+	CajaMov->AddSlot().AutoHeight().Padding(0, E_3, 0, 0)[ FilaM ];
+	// nota del movimiento (rangos_extra.json): rotación automática de la rodilla, posición de medida… (nota clínica: 11 pt)
+	if (R.Movs.IsValidIndex(Mi)) { const FString Nota = D->NotaMov(R.Movs[Mi]); if (!Nota.IsEmpty()) { CajaMov->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)[ Txt(Nota, T_NOTA, C_GRIS) ]; } }
 
-	// lado: en las articulaciones pares, derecho o izquierdo; en el tronco y el cuello, el sentido de la inclinación o el giro
-	TSharedRef<SHorizontalBox> Fila = SNew(SHorizontalBox);
+	// lado: en las articulaciones pares, derecho o izquierdo; en el tronco y el cuello, el sentido de la inclinación o el giro.
+	// Va en su propia fila: junto al deslizador y los botones se salía del panel con «Hacia la izquierda».
 	if (R.Movs.IsValidIndex(Mi) && R.Movs[Mi].Izquierdo.Num() > 0)
 	{
 		const TCHAR* LD = R.bLados ? TEXT("Derecho") : TEXT("Hacia la derecha");
 		const TCHAR* LI = R.bLados ? TEXT("Izquierdo") : TEXT("Hacia la izquierda");
-		Fila->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 5, 0)[ Boton(D->T(LD), [WC, Ri, Mi]() { if (WC.IsValid()) { WC->PonerRango(Ri, Mi, false, WC->Grados()); } }, !bIzq) ];
-		Fila->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 10, 0)[ Boton(D->T(LI), [WC, Ri, Mi]() { if (WC.IsValid()) { WC->PonerRango(Ri, Mi, true, WC->Grados()); } }, bIzq) ];
+		CajaMov->AddSlot().AutoHeight().Padding(0, E_3, 0, 0)
+		[
+			SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO))
+			+ SWrapBox::Slot()[ BotonSel(D->T(LD), [WC, Ri, Mi]() { if (WC.IsValid()) { WC->PonerRango(Ri, Mi, false, WC->Grados()); } }, !bIzq) ]
+			+ SWrapBox::Slot()[ BotonSel(D->T(LI), [WC, Ri, Mi]() { if (WC.IsValid()) { WC->PonerRango(Ri, Mi, true, WC->Grados()); } }, bIzq) ]
+		];
 	}
+	TSharedRef<SHorizontalBox> Fila = SNew(SHorizontalBox);
 	Fila->AddSlot().FillWidth(1.f).VAlign(VAlign_Center)
 	[
-		SNew(SSlider).MinValue(0.f).MaxValue(1.f)
+		SNew(SSlider).Style(&EstiloDeslizador()).MinValue(0.f).MaxValue(1.f)
+		.ToolTipText_Lambda([WC]() { return FText::FromString(FString::Printf(TEXT("%d %%"), WC.IsValid() && WC->GradosMax() > 0.f ? FMath::RoundToInt(100.f * WC->Grados() / WC->GradosMax()) : 0)); })
 		.Value_Lambda([WC]() { return WC.IsValid() && WC->GradosMax() > 0.f ? WC->Grados() / WC->GradosMax() : 0.f; })
 		.OnValueChanged_Lambda([WC](float V) { if (WC.IsValid()) { WC->Reproducir(false); WC->PonerRango(WC->Rango(), WC->Movimiento(), WC->LadoIzquierdo(), V * WC->GradosMax()); } })
 	];
-	Fila->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(10, 0)
+	Fila->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(E_3, 0)
 	[
-		SNew(SBox).WidthOverride(84.f)
+		SNew(SBox).WidthOverride(96.f)
 		[
-			SNew(STextBlock).Font(Letra(12, true)).ColorAndOpacity(FSlateColor(C_TINTA))
+			SNew(STextBlock).Font(Letra(T_BUSCADOR, EPeso::Media)).ColorAndOpacity(FSlateColor(C_TINTA))
 			.Text_Lambda([WC]() { return WC.IsValid() ? FText::FromString(FString::Printf(TEXT("%d° / %d°"), FMath::RoundToInt(WC->Grados()), FMath::RoundToInt(WC->GradosMax()))) : FText(); })
 		]
 	];
-	Fila->AddSlot().AutoWidth().VAlign(VAlign_Center)[ Boton(D->T(C->Reproduciendo() ? TEXT("Pausa") : TEXT("Reproducir")), [WC]() { if (WC.IsValid()) { WC->Reproducir(!WC->Reproduciendo()); } }, true) ];
-	Fila->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(5, 0, 0, 0)[ Boton(D->T(TEXT("Reposo")), [WC]() { if (WC.IsValid()) { WC->QuitarPostura(); } }) ];
-	CajaMov->AddSlot().AutoHeight().Padding(0, 12, 0, 0)[ Fila ];
+	Fila->AddSlot().AutoWidth().VAlign(VAlign_Center)[ Boton(D->T(C->Reproduciendo() ? TEXT("Pausa") : TEXT("Reproducir")), [WC]() { if (WC.IsValid()) { WC->Reproducir(!WC->Reproduciendo()); } }, ECorpusBoton::Principal) ];
+	Fila->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(HUECO, 0, 0, 0)[ Boton(D->T(TEXT("Reposo")), [WC]() { if (WC.IsValid()) { WC->QuitarPostura(); } }) ];
+	CajaMov->AddSlot().AutoHeight().Padding(0, E_3, 0, 0)[ Fila ];
 }
 
 void SCorpusInterfaz::RehacerCapas()
@@ -865,30 +1234,43 @@ void SCorpusInterfaz::RehacerCapas()
 		if (Capa.Grupo != Grupo)
 		{
 			Grupo = Capa.Grupo;
-			CajaCapas->AddSlot().AutoHeight().Padding(0, 12, 0, 4)[ Txt(Mayus(D->T(Grupo)), 9, C_GRIS, true) ];
+			CajaCapas->AddSlot().AutoHeight().Padding(0, E_3, 0, E_1)[ Etiqueta(D->T(Grupo)) ];
 		}
 		const FString Clave = Capa.Clave;
 		CajaCapas->AddSlot().AutoHeight().Padding(0, 2)
 		[
-			SNew(SBorder).BorderImage(Panel2()).Padding(FMargin(8, 5))
+			SNew(SBorder).BorderImage(Panel2()).Padding(FMargin(E_2, HUECO))
 			[
 				SNew(SHorizontalBox)
+				// la fila entera (casilla, color y nombre) enciende o apaga la capa
 				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
 				[
-					SNew(SCheckBox)
+					SNew(SCheckBox).Style(&EstiloCasilla())
 					.IsChecked_Lambda([WC, Clave]() { return WC.IsValid() && WC->CapaVisible(Clave) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; })
 					.OnCheckStateChanged_Lambda([WC, Clave](ECheckBoxState E) { if (WC.IsValid()) { WC->MostrarCapa(Clave, E == ECheckBoxState::Checked); } })
 				]
-				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(6, 0)
+				// color y nombre en su propia columna (con ancho limitado: el nombre termina en «…» antes del deslizador);
+				// pulsarlos también enciende o apaga la capa
+				+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center).Padding(E_2, 0, 0, 0)
 				[
-					SNew(SBox).WidthOverride(12.f).HeightOverride(12.f)[ SNew(SImage).Image(Punto()).ColorAndOpacity(Capa.Color) ]
-				]
-				+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)[ Txt(D->T(Capa.Nombre), 10, C_TINTA) ]
-				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(6, 0, 0, 0)
-				[
-					SNew(SBox).WidthOverride(64.f)
+					SNew(SButton).ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder")).ContentPadding(0)
+					.Clipping(EWidgetClipping::ClipToBounds)
+					.OnClicked_Lambda([WC, Clave]() { if (WC.IsValid()) { WC->MostrarCapa(Clave, !WC->CapaVisible(Clave)); } return FReply::Handled(); })
 					[
-						SNew(SSlider).MinValue(0.05f).MaxValue(1.f)
+						SNew(SHorizontalBox)
+						+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, E_2, 0)
+						[
+							SNew(SBox).WidthOverride(12.f).HeightOverride(12.f)[ SNew(SImage).Image(Punto()).ColorAndOpacity(Capa.Color) ]
+						]
+						+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)[ TxtLinea(D->T(Capa.Nombre), T_CUERPO, C_TINTA) ]
+					]
+				]
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(E_2, 0, 0, 0)
+				[
+					SNew(SBox).WidthOverride(72.f)   // fase 2: la opacidad solo aparecerá al pasar el ratón
+					[
+						SNew(SSlider).Style(&EstiloDeslizador()).MinValue(0.05f).MaxValue(1.f).StepSize(0.05f).MouseUsesStep(true)
+						.ToolTipText_Lambda([WC, Clave]() { return FText::FromString(FString::Printf(TEXT("%d %%"), FMath::RoundToInt(100.f * (WC.IsValid() ? WC->OpacidadDeCapa(Clave) : 1.f)))); })
 						.Value_Lambda([WC, Clave]() { return WC.IsValid() ? WC->OpacidadDeCapa(Clave) : 1.f; })
 						.OnValueChanged_Lambda([WC, Clave](float V) { if (WC.IsValid()) { WC->OpacidadCapa(Clave, V); } })
 					]
@@ -898,15 +1280,15 @@ void SCorpusInterfaz::RehacerCapas()
 		// pelar capas: los músculos por profundidad (extras.json → dep), como en la web; encendido = se ve
 		if (Clave == TEXT("muscular"))
 		{
-			TSharedRef<SWrapBox> Pelar = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
+			TSharedRef<SWrapBox> Pelar = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
 			const TPair<const TCHAR*, const TCHAR*> Profs[] = { {TEXT("s"), TEXT("Superficiales")}, {TEXT("i"), TEXT("Intermedios")}, {TEXT("p"), TEXT("Profundos")} };
 			for (const auto& Par : Profs)
 			{
 				const FString Pf(Par.Key);
 				Pelar->AddSlot()
-				[ Boton(D->T(Par.Value), [WC, Pf]() { if (WC.IsValid()) { WC->PelarProfundidad(Pf, !WC->ProfundidadOculta(Pf)); } }, !C->ProfundidadOculta(Pf)) ];
+				[ BotonSel(D->T(Par.Value), [WC, Pf]() { if (WC.IsValid()) { WC->PelarProfundidad(Pf, !WC->ProfundidadOculta(Pf)); } }, !C->ProfundidadOculta(Pf)) ];
 			}
-			CajaCapas->AddSlot().AutoHeight().Padding(8, 2, 0, 6)[ Pelar ];
+			CajaCapas->AddSlot().AutoHeight().Padding(E_2, E_1, 0, E_2)[ Pelar ];
 		}
 	}
 }
@@ -915,6 +1297,19 @@ bool SCorpusInterfaz::Qa(const FString& Verbo, const FString& Resto)
 {
 	// panel <0|1>: pliega (0) o abre (1) el panel izquierdo
 	if (Verbo == TEXT("panel")) { bPanelPlegado = Resto == TEXT("0"); return true; }
+	// texto <90|100|125|150>: «Tamaño del texto» (se guarda en la configuración del usuario, como al pulsar el botón)
+	if (Verbo == TEXT("texto")) { PonerTamTexto(FCString::Atoi(*Resto)); Reconstruir(); return true; }
+	// movimiento <0|1>: abre (1) o cierra (0) el panel de movimiento, como el botón «Movimiento» del panel izquierdo
+	if (Verbo == TEXT("movimiento"))
+	{
+		ACorpusCuerpo* C = Cuerpo();
+		bVerMov = Resto != TEXT("0");
+		if (C && !bVerMov) { C->PonerMarcha(-1, 0.f); C->PonerEjercicio(-1, 0, 0.f); C->QuitarPostura(); }
+		Reconstruir();
+		return true;
+	}
+	// esc: lo mismo que la tecla Esc (resultados → ficha → Estudiar)
+	if (Verbo == TEXT("esc")) { if (!CerrarConEsc()) { if (ACorpusCuerpo* C = Cuerpo()) { C->MostrarTodo(); } } return true; }
 	// animlenta <factor>: ralentiza las animaciones de la interfaz (1 = normal) para fotografiarlas a mitad de camino
 	if (Verbo == TEXT("animlenta")) { EscalaAnim = FMath::Clamp(FCString::Atof(*Resto), 0.01f, 1.f); return true; }
 	// tecnica <0|1>: en el modo «Ejercicio», la lista de músculos (0) o los textos de técnica y errores (1)
@@ -967,22 +1362,22 @@ void SCorpusInterfaz::RehacerFicha()
 	TWeakObjectPtr<ACorpusCuerpo> WC(C);
 	TWeakObjectPtr<ACorpusJugador> WJ(Jugador);
 
-	CajaFicha->AddSlot().AutoHeight()[ Txt(D->NombrePieza(Id), 17, C_TINTA, true) ];
-	if (!P->La.IsEmpty()) { CajaFicha->AddSlot().AutoHeight().Padding(0, 2, 0, 0)[ Txt(P->La, 11, C_GRIS) ]; }
+	CajaFicha->AddSlot().AutoHeight()[ Txt(D->NombrePieza(Id), T_TITULO, C_TINTA, EPeso::Negrita) ];
+	if (!P->La.IsEmpty()) { CajaFicha->AddSlot().AutoHeight().Padding(0, E_1, 0, 0)[ Txt(P->La, T_NOTA, C_GRIS) ]; }
 	FString Sub = D->NombreCapa(P->Sistema);
 	if (!P->Lado.IsEmpty()) { Sub += TEXT(" · ") + D->NombreLado(P->Lado); }
 	if (!P->Rol.IsEmpty()) { Sub += TEXT(" · ") + D->T(UCorpusDatos::EsOrigen(*P) ? TEXT("Origen") : TEXT("Inserción")); }   // áreas de la capa «insercion»
-	CajaFicha->AddSlot().AutoHeight().Padding(0, 6, 0, 10)[ Txt(Sub, 10, C_ACENTO, true) ];
+	CajaFicha->AddSlot().AutoHeight().Padding(0, E_2, 0, E_3)[ Txt(Sub, T_SECUNDARIO, C_GRIS, EPeso::Media) ];
 
-	TSharedRef<SWrapBox> Acciones = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(6, 6))
-		+ SWrapBox::Slot()[ Boton(D->T(TEXT("Encuadrar")), [WJ]() { if (WJ.IsValid()) { WJ->EncuadrarSeleccion(); } }, true) ]
+	TSharedRef<SWrapBox> Acciones = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO))
+		+ SWrapBox::Slot()[ Boton(D->T(TEXT("Encuadrar")), [WJ]() { if (WJ.IsValid()) { WJ->EncuadrarSeleccion(); } }, ECorpusBoton::Principal) ]
 		+ SWrapBox::Slot()[ Boton(D->T(TEXT("Aislar")), [WC, Id]() { if (WC.IsValid()) { WC->Aislar(Id); } }) ]
 		+ SWrapBox::Slot()[ Boton(D->T(TEXT("Ocultar")), [WC, Id]() { if (WC.IsValid()) { WC->Ocultar(Id); } }) ];
 	// mapa de origen (rojo) e inserción (azul) del hueso o del músculo seleccionado
 	const bool bMapa = C->EnMapaInserciones();
 	if (bMapa || C->TieneInserciones(Id))
 	{
-		Acciones->AddSlot()[ Boton(D->T(TEXT("Orígenes e inserciones")), [WC]() { if (WC.IsValid()) { WC->MapaInserciones(!WC->EnMapaInserciones()); } }, bMapa) ];
+		Acciones->AddSlot()[ BotonSel(D->T(TEXT("Orígenes e inserciones")), [WC]() { if (WC.IsValid()) { WC->MapaInserciones(!WC->EnMapaInserciones()); } }, bMapa) ];
 	}
 	CajaFicha->AddSlot().AutoHeight()[ Acciones ];
 	if (bMapa)
@@ -996,13 +1391,13 @@ void SCorpusInterfaz::RehacerFicha()
 		{
 			if (Nombres[k].Num() == 0) { continue; }
 			Nombres[k].Sort();
-			CajaFicha->AddSlot().AutoHeight().Padding(0, 10, 0, 2)
+			CajaFicha->AddSlot().AutoHeight().Padding(0, E_3, 0, E_1)
 			[
 				SNew(SHorizontalBox)
-				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 6, 0)[ SNew(SBox).WidthOverride(12.f).HeightOverride(12.f)[ SNew(SImage).Image(Punto()).ColorAndOpacity(Colores[k]) ] ]
-				+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)[ Txt(FString::Printf(TEXT("%s (%d)"), *Mayus(D->T(Titulos[k])), Nombres[k].Num()), 9, C_GRIS, true) ]
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, E_2, 0)[ SNew(SBox).WidthOverride(12.f).HeightOverride(12.f)[ SNew(SImage).Image(Punto()).ColorAndOpacity(Colores[k]) ] ]
+				+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)[ Etiqueta(FString::Printf(TEXT("%s (%d)"), *D->T(Titulos[k]), Nombres[k].Num())) ]
 			];
-			CajaFicha->AddSlot().AutoHeight()[ Txt(FString::Join(Nombres[k], TEXT(" · ")), 10, C_TINTA) ];
+			CajaFicha->AddSlot().AutoHeight()[ Txt(FString::Join(Nombres[k], TEXT(" · ")), T_CUERPO, C_TINTA) ];
 		}
 	}
 
@@ -1022,25 +1417,22 @@ void SCorpusInterfaz::RehacerFicha()
 		{
 			const FCorpusEstudio& E = D->Estudio();
 			const int32 MAXIMO = 10;
-			CajaFicha->AddSlot().AutoHeight().Padding(0, 12, 0, 4)[ Txt(FString::Printf(TEXT("%s (%d)"), *Mayus(D->TE(TEXT("Estudiar"))), Es.Num()), 9, C_GRIS, true) ];
+			CajaFicha->AddSlot().AutoHeight().Padding(0, E_3, 0, E_1)[ Etiqueta(FString::Printf(TEXT("%s (%d)"), *D->TE(TEXT("Estudiar")), Es.Num())) ];
 			for (int32 k = 0; k < Es.Num() && k < MAXIMO; ++k)
 			{
 				const FIntVector4 En = Es[k];
 				const FCorpusModuloEstudio& M = E.Modulos[En.X];
 				const FCorpusItemEstudio& It = M.Grupos[En.Y].Items[En.Z];
 				EnlacesFicha.Add(En);
-				CajaFicha->AddSlot().AutoHeight().Padding(0, 3, 0, 0)
+				CajaFicha->AddSlot().AutoHeight().Padding(0, E_1, 0, 0)
 				[
-					SNew(SButton).ButtonStyle(&EstiloBoton(false)).ContentPadding(FMargin(11, 6)).HAlign(HAlign_Fill)
-					.OnClicked_Lambda([this, En]() { AbrirEnlace(En); return FReply::Handled(); })
-					[
-						SNew(SVerticalBox)
-						+ SVerticalBox::Slot().AutoHeight()[ Txt(It.T, 11, C_TINTA) ]
-						+ SVerticalBox::Slot().AutoHeight()[ Txt(M.N + (M.Grupos.Num() > 1 ? TEXT(" · ") + M.Grupos[En.Y].N : FString()), 9, C_ACENTO) ]
-					]
+					BotonFila(SNew(SVerticalBox)
+						+ SVerticalBox::Slot().AutoHeight()[ Txt(It.T, T_NOTA, C_TINTA) ]
+						+ SVerticalBox::Slot().AutoHeight()[ Txt(M.N + (M.Grupos.Num() > 1 ? TEXT(" · ") + M.Grupos[En.Y].N : FString()), T_SECUNDARIO, C_GRIS) ],
+						[this, En]() { AbrirEnlace(En); })
 				];
 			}
-			if (Es.Num() > MAXIMO) { CajaFicha->AddSlot().AutoHeight().Padding(0, 4, 0, 0)[ Txt(FString::Printf(TEXT("+ %d"), Es.Num() - MAXIMO), 9, C_GRIS) ]; }
+			if (Es.Num() > MAXIMO) { CajaFicha->AddSlot().AutoHeight().Padding(0, E_1, 0, 0)[ Txt(FString::Printf(TEXT("+ %d"), Es.Num() - MAXIMO), T_SECUNDARIO, C_GRIS) ]; }
 		}
 	}
 
@@ -1048,26 +1440,27 @@ void SCorpusInterfaz::RehacerFicha()
 	const TArray<FCorpusRelieve>& Rs = D->Relieves(Id);
 	if (Rs.Num() > 0)
 	{
-		CajaFicha->AddSlot().AutoHeight().Padding(0, 12, 0, 4)[ Txt(FString::Printf(TEXT("%s (%d)"), *Mayus(D->T(TEXT("Accidentes óseos"))), Rs.Num()), 9, C_GRIS, true) ];
+		CajaFicha->AddSlot().AutoHeight().Padding(0, E_3, 0, E_1)[ Etiqueta(FString::Printf(TEXT("%s (%d)"), *D->T(TEXT("Accidentes óseos")), Rs.Num())) ];
 		TArray<int32> Todos; for (int32 i = 0; i < Rs.Num(); ++i) { Todos.Add(i); }
 		CajaFicha->AddSlot().AutoHeight()
 		[
-			SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(6, 6))
-			+ SWrapBox::Slot()[ Boton(D->T(TEXT("Mostrar todos")), [this, Todos]() { VerRelieves(Todos, false); }, RelVistos.Num() == Rs.Num()) ]
+			SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO))
+			+ SWrapBox::Slot()[ BotonSel(D->T(TEXT("Mostrar todos")), [this, Todos]() { VerRelieves(Todos, false); }, RelVistos.Num() == Rs.Num()) ]
 			+ SWrapBox::Slot()[ Boton(D->T(TEXT("Ocultar marcas")), [this]() { VerRelieves(TArray<int32>(), false); }) ]
 		];
-		TSharedRef<SWrapBox> Lista = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
+		TSharedRef<SWrapBox> Lista = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
 		for (int32 i = 0; i < Rs.Num(); ++i)
 		{
-			Lista->AddSlot()[ Boton(D->NombreRelieve(Rs[i]), [this, i]() { VerRelieves(TArray<int32>({ i }), true); }, RelVistos.Num() < Rs.Num() && RelVistos.Contains(i)) ];
+			Lista->AddSlot()[ BotonSel(D->NombreRelieve(Rs[i]), [this, i]() { VerRelieves(TArray<int32>({ i }), true); }, RelVistos.Num() < Rs.Num() && RelVistos.Contains(i)) ];
 		}
-		CajaFicha->AddSlot().AutoHeight().Padding(0, 6, 0, 0)[ Lista ];
+		CajaFicha->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)[ Lista ];
 	}
 
+	// campos de la ficha (descripción, relaciones, clínica…): lectura larga y notas clínicas a 11 pt
 	for (const TPair<FString, FString>& Campo : D->Ficha(Id))
 	{
-		CajaFicha->AddSlot().AutoHeight().Padding(0, 12, 0, 2)[ Txt(Mayus(Campo.Key), 9, C_GRIS, true) ];
-		CajaFicha->AddSlot().AutoHeight()[ Txt(Campo.Value, 11, C_TINTA) ];
+		CajaFicha->AddSlot().AutoHeight().Padding(0, E_3, 0, E_1)[ Etiqueta(Campo.Key) ];
+		CajaFicha->AddSlot().AutoHeight()[ Txt(Campo.Value, T_NOTA, C_TINTA) ];
 	}
 }
 
@@ -1165,28 +1558,24 @@ void SCorpusInterfaz::RehacerResultados(const FText& Texto)
 	{
 		const FCorpusPieza* P = D->Pieza(Id);
 		if (!P || !C->CapaDisponible(P->Sistema)) { continue; }
-		FString Etiqueta = D->NombrePieza(Id);
-		if (!P->Lado.IsEmpty()) { Etiqueta += TEXT(" · ") + D->NombreLado(P->Lado); }
+		FString Nombre = D->NombrePieza(Id);
+		if (!P->Lado.IsEmpty()) { Nombre += TEXT(" · ") + D->NombreLado(P->Lado); }
 		const FString Sistema = P->Sistema;
-		CajaResultados->AddSlot().AutoHeight().Padding(0, 3, 0, 0)
+		CajaResultados->AddSlot().AutoHeight().Padding(0, E_1, 0, 0)
 		[
-			SNew(SButton).ButtonStyle(&EstiloBoton(false)).ContentPadding(FMargin(11, 6))
-			.OnClicked_Lambda([WC, WJ, Id, Sistema]()
-			{
-				if (WC.IsValid())
+			BotonFila(SNew(SVerticalBox)
+				+ SVerticalBox::Slot().AutoHeight()[ Txt(Nombre, T_NOTA, C_TINTA) ]
+				+ SVerticalBox::Slot().AutoHeight()[ Txt(D->NombreCapa(Sistema), T_SECUNDARIO, C_GRIS) ],
+				[WC, WJ, Id, Sistema]()
 				{
-					// como en la web: buscar enciende la capa de la estructura, la selecciona y la encuadra
-					WC->MostrarCapa(Sistema, true);
-					WC->Seleccionar(Id);
-					if (WJ.IsValid()) { WJ->EncuadrarSeleccion(); }
-				}
-				return FReply::Handled();
-			})
-			[
-				SNew(SVerticalBox)
-				+ SVerticalBox::Slot().AutoHeight()[ Txt(Etiqueta, 11, C_TINTA) ]
-				+ SVerticalBox::Slot().AutoHeight()[ Txt(D->NombreCapa(Sistema), 9, C_GRIS) ]
-			]
+					if (WC.IsValid())
+					{
+						// como en la web: buscar enciende la capa de la estructura, la selecciona y la encuadra
+						WC->MostrarCapa(Sistema, true);
+						WC->Seleccionar(Id);
+						if (WJ.IsValid()) { WJ->EncuadrarSeleccion(); }
+					}
+				})
 		];
 	}
 }
@@ -1275,7 +1664,7 @@ void SCorpusInterfaz::RehacerEstudio()
 	const FCorpusEstudio& E = D->Estudio();
 	if (E.Modulos.Num() == 0)
 	{
-		CajaEst->AddSlot().AutoHeight()[ Txt(TEXT("Faltan los datos de estudio: node tools/unreal/estudio.js"), 11, C_GRIS) ];
+		CajaEst->AddSlot().AutoHeight()[ Txt(TEXT("Faltan los datos de estudio: node tools/unreal/estudio.js"), T_NOTA, C_GRIS) ];
 		return;
 	}
 	EstMod = FMath::Clamp(EstMod, 0, E.Modulos.Num() - 1);
@@ -1283,14 +1672,12 @@ void SCorpusInterfaz::RehacerEstudio()
 	TWeakObjectPtr<ACorpusCuerpo> WC(C);
 
 	// fila ancha con el texto a la izquierda (entradas de las listas)
-	const auto Fila = [](const FString& Titulo, const FString& Sub, TFunction<void()> Accion, const FLinearColor& Fondo = FLinearColor(0.10f, 0.13f, 0.17f)) -> TSharedRef<SWidget>
+	// Respuesta: 0 sin corregir · 1 la correcta · 2 la elegida y equivocada (verde y rojo solo en el borde)
+	const auto Fila = [](const FString& Titulo, const FString& Sub, TFunction<void()> Accion, int32 Respuesta = 0) -> TSharedRef<SWidget>
 	{
-		TSharedRef<SVerticalBox> V = SNew(SVerticalBox) + SVerticalBox::Slot().AutoHeight()[ Txt(Titulo, 11, C_TINTA) ];
-		if (!Sub.IsEmpty()) { V->AddSlot().AutoHeight()[ Txt(Sub, 9, C_GRIS) ]; }
-		// filas normales con el estilo común; las respuestas corregidas (verde / rojo) conservan su color de fondo
-		const bool bNormal = Fondo.R < 0.2f && Fondo.G < 0.2f;   // ni verde ni rojo
-		return SNew(SButton).ButtonStyle(bNormal ? &EstiloBoton(false) : &FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("Button")).ButtonColorAndOpacity(bNormal ? FLinearColor::White : Fondo).ContentPadding(FMargin(11, 7)).HAlign(HAlign_Fill)
-			.OnClicked_Lambda([Accion]() { Accion(); return FReply::Handled(); })[ V ];
+		TSharedRef<SVerticalBox> V = SNew(SVerticalBox) + SVerticalBox::Slot().AutoHeight()[ Txt(Titulo, T_NOTA, C_TINTA) ];
+		if (!Sub.IsEmpty()) { V->AddSlot().AutoHeight()[ Txt(Sub, T_SECUNDARIO, C_GRIS) ]; }
+		return BotonFila(V, MoveTemp(Accion), Respuesta == 0 ? nullptr : &EstiloRespuesta(Respuesta == 1));
 	};
 	const auto Ir = [this](int32 Grupo, int32 Item)
 	{
@@ -1313,23 +1700,23 @@ void SCorpusInterfaz::RehacerEstudio()
 	CajaEstCab->AddSlot().AutoHeight()
 	[
 		SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)[ Txt(Mayus(D->TE(TEXT("Estudiar"))), 13, C_TINTA, true) ]
+		+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)[ Txt(Mayus(D->TE(TEXT("Estudiar"))), T_SECCION, C_TINTA, EPeso::Negrita) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Boton(D->TE(TEXT("Cerrar")), [this]() { AbrirEstudio(false); }) ]
 	];
-	TSharedRef<SWrapBox> Mods = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5));
+	TSharedRef<SWrapBox> Mods = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
 	for (int32 i = 0; i < E.Modulos.Num(); ++i)
 	{
-		Mods->AddSlot()[ Boton(E.Modulos[i].N, [this, i, Ir]() { EstMod = i; EstFiltro.Reset(); Ir(-1, -1); }, i == EstMod) ];
+		Mods->AddSlot()[ BotonSel(E.Modulos[i].N, [this, i, Ir]() { EstMod = i; EstFiltro.Reset(); Ir(-1, -1); }, i == EstMod) ];
 	}
-	CajaEstCab->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[ Mods ];
+	CajaEstCab->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)[ Mods ];
 
 	const FCorpusItemEstudio* It = ItemEstudio();
 	if (!It)
 	{
 		// ── listas: buscador, grupos y entradas ──
-		CajaEstCab->AddSlot().AutoHeight().Padding(0, 8, 0, 0)
+		CajaEstCab->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)
 		[
-			SNew(SEditableTextBox).Font(Letra(11)).HintText(FText::FromString(D->TE(TEXT("Buscar")))).Text(FText::FromString(EstFiltro))
+			SNew(SEditableTextBox).Style(&EstiloCampo()).HintText(FText::FromString(D->TE(TEXT("Buscar")))).Text(FText::FromString(EstFiltro))
 			.OnTextCommitted_Lambda([this](const FText& T, ETextCommit::Type) { const FString S = T.ToString().TrimStartAndEnd(); if (S != EstFiltro) { EstFiltro = S; EstGrupo = -1; EstItem = -1; RehacerEstudio(); } })
 		];
 		if (EstFiltro.Len() >= 2)
@@ -1342,11 +1729,11 @@ void SCorpusInterfaz::RehacerEstudio()
 				{
 					const FCorpusItemEstudio& X = M.Grupos[g].Items[i];
 					if (!UCorpusDatos::Plano(X.T).Contains(Q) && !UCorpusDatos::Plano(X.Sub).Contains(Q)) { continue; }
-					CajaEst->AddSlot().AutoHeight().Padding(0, 3, 0, 0)[ Fila(X.T, M.Grupos[g].N, [Ir, g, i]() { Ir(g, i); }) ];
+					CajaEst->AddSlot().AutoHeight().Padding(0, E_1, 0, 0)[ Fila(X.T, M.Grupos[g].N, [Ir, g, i]() { Ir(g, i); }) ];
 					++N;
 				}
 			}
-			if (N == 0) { CajaEst->AddSlot().AutoHeight().Padding(0, 6)[ Txt(D->TE(TEXT("Nada")), 11, C_GRIS) ]; }
+			if (N == 0) { CajaEst->AddSlot().AutoHeight().Padding(0, E_2)[ Txt(D->TE(TEXT("Nada")), T_NOTA, C_GRIS) ]; }
 			return;
 		}
 		const bool bUnGrupo = M.Grupos.Num() == 1;
@@ -1354,40 +1741,42 @@ void SCorpusInterfaz::RehacerEstudio()
 		{
 			for (int32 g = 0; g < M.Grupos.Num(); ++g)
 			{
-				CajaEst->AddSlot().AutoHeight().Padding(0, 3, 0, 0)
-				[ Fila(M.Grupos[g].N, FString::Printf(TEXT("%d %s"), M.Grupos[g].Items.Num(), *D->TE(TEXT("Entradas"))), [Ir, g]() { Ir(g, -1); }, FLinearColor(0.07f, 0.11f, 0.17f)) ];
+				CajaEst->AddSlot().AutoHeight().Padding(0, E_1, 0, 0)
+				[ Fila(M.Grupos[g].N, FString::Printf(TEXT("%d %s"), M.Grupos[g].Items.Num(), *D->TE(TEXT("Entradas"))), [Ir, g]() { Ir(g, -1); }) ];
 			}
-			if (M.Id == TEXT("patologias") && !E.Aviso.IsEmpty()) { CajaEst->AddSlot().AutoHeight().Padding(0, 12, 0, 0)[ Txt(E.Aviso, 9, C_GRIS) ]; }
+			if (M.Id == TEXT("patologias") && !E.Aviso.IsEmpty()) { CajaEst->AddSlot().AutoHeight().Padding(0, E_3, 0, 0)[ Txt(E.Aviso, T_SECUNDARIO, C_GRIS) ]; }
 			return;
 		}
 		const int32 g = bUnGrupo ? 0 : EstGrupo;
 		if (!bUnGrupo)
 		{
 			CajaEst->AddSlot().AutoHeight()[ SNew(SHorizontalBox) + SHorizontalBox::Slot().AutoWidth()[ Boton(D->TE(TEXT("Volver")), [Ir]() { Ir(-1, -1); }) ] ];
-			CajaEst->AddSlot().AutoHeight().Padding(0, 8, 0, 4)[ Txt(M.Grupos[g].N, 13, C_ACENTO, true) ];
+			CajaEst->AddSlot().AutoHeight().Padding(0, E_2, 0, E_1)[ Txt(M.Grupos[g].N, T_SECCION, C_TINTA, EPeso::Media) ];
 		}
 		for (int32 i = 0; i < M.Grupos[g].Items.Num(); ++i)
 		{
 			const FCorpusItemEstudio& X = M.Grupos[g].Items[i];
-			CajaEst->AddSlot().AutoHeight().Padding(0, 3, 0, 0)[ Fila(X.T, X.Sub, [Ir, g, i]() { Ir(g, i); }) ];
+			CajaEst->AddSlot().AutoHeight().Padding(0, E_1, 0, 0)[ Fila(X.T, X.Sub, [Ir, g, i]() { Ir(g, i); }) ];
 		}
 		return;
 	}
 
 	// ── ficha de una entrada ──
+	// una sola acción principal por panel: «Siguiente» si la entrada tiene pasos; si no, «Ver»
 	const int32 gAct = EstGrupo;
 	const bool bUnSolo = M.Grupos.Num() == 1;
+	const bool bConPasos = It->Pasos.Num() > 1;
 	CajaEst->AddSlot().AutoHeight()
 	[
-		SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(5, 5))
+		SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO))
 		+ SWrapBox::Slot()[ Boton(D->TE(TEXT("Volver")), [this, Ir, gAct, bUnSolo]() { Ir((EstFiltro.Len() >= 2 || bUnSolo) ? -1 : gAct, -1); }) ]
-		+ SWrapBox::Slot()[ Boton(D->TE(TEXT("Ver")), [this]() { EnsenarEstudio(); }, true) ]
+		+ SWrapBox::Slot()[ Boton(D->TE(TEXT("Ver")), [this]() { EnsenarEstudio(); }, bConPasos ? ECorpusBoton::Normal : ECorpusBoton::Principal) ]
 		+ SWrapBox::Slot()[ Boton(D->TE(TEXT("Todo")), [WC]() { if (WC.IsValid()) { WC->RestaurarEstado(); WC->MostrarTodo(); } }) ]
 	];
-	CajaEst->AddSlot().AutoHeight().Padding(0, 10, 0, 0)[ Txt(It->T, 15, C_TINTA, true) ];
+	CajaEst->AddSlot().AutoHeight().Padding(0, E_3, 0, 0)[ Txt(It->T, T_TITULO, C_TINTA, EPeso::Negrita) ];
 	FString Sub = M.Grupos[EstGrupo].N;
 	if (!It->Sub.IsEmpty()) { Sub += TEXT(" · ") + It->Sub; }
-	CajaEst->AddSlot().AutoHeight().Padding(0, 3, 0, 0)[ Txt(Sub, 10, C_ACENTO, true) ];
+	CajaEst->AddSlot().AutoHeight().Padding(0, E_1, 0, 0)[ Txt(Sub, T_SECUNDARIO, C_GRIS, EPeso::Media) ];
 
 	// ilustración (patologías): imagen con licencia abierta y su atribución
 	if (!It->Img.IsEmpty())
@@ -1406,12 +1795,12 @@ void SCorpusInterfaz::RehacerEstudio()
 		if (EstTex.IsValid() && EstPincel.IsValid())
 		{
 			const float Prop = (float)EstTex->GetSizeY() / FMath::Max(1, EstTex->GetSizeX());
-			const float Alto = FMath::Min(456.f * Prop, 520.f);
-			CajaEst->AddSlot().AutoHeight().Padding(0, 10, 0, 0).HAlign(HAlign_Left)
+			const float Alto = FMath::Min(448.f * Prop, 520.f);   // ancho útil del panel: 500 − 2 × 20 de relleno − la barra de desplazamiento
+			CajaEst->AddSlot().AutoHeight().Padding(0, E_3, 0, 0).HAlign(HAlign_Left)
 			[
 				SNew(SBox).WidthOverride(Alto / FMath::Max(Prop, 0.01f)).HeightOverride(Alto)[ SNew(SImage).Image(EstPincel.Get()) ]
 			];
-			CajaEst->AddSlot().AutoHeight().Padding(0, 3, 0, 0)[ Txt(D->TE(TEXT("Imagen")) + TEXT(": ") + It->Cred, 8, C_GRIS) ];
+			CajaEst->AddSlot().AutoHeight().Padding(0, E_1, 0, 0)[ Txt(D->TE(TEXT("Imagen")) + TEXT(": ") + It->Cred, T_SECUNDARIO, C_GRIS) ];
 		}
 	}
 
@@ -1422,53 +1811,52 @@ void SCorpusInterfaz::RehacerEstudio()
 		const FCorpusPasoEstudio& P = It->Pasos[EstPaso];
 		const int32 NP = It->Pasos.Num();
 		TSharedRef<SVerticalBox> Caja = SNew(SVerticalBox);
-		Caja->AddSlot().AutoHeight()[ Txt(FString::Printf(TEXT("%s %d / %d"), *Mayus(D->TE(TEXT("Paso"))), EstPaso + 1, NP), 9, C_GRIS, true) ];
-		Caja->AddSlot().AutoHeight().Padding(0, 3, 0, 0)[ Txt(P.T, 13, C_ACENTO, true) ];
-		Caja->AddSlot().AutoHeight().Padding(0, 5, 0, 0)[ Txt(P.X, 11, C_TINTA) ];
+		Caja->AddSlot().AutoHeight()[ Etiqueta(FString::Printf(TEXT("%s %d / %d"), *D->TE(TEXT("Paso")), EstPaso + 1, NP)) ];
+		Caja->AddSlot().AutoHeight().Padding(0, E_1, 0, 0)[ Txt(P.T, T_SECCION, C_TINTA, EPeso::Media) ];
+		Caja->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)[ Txt(P.X, T_NOTA, C_TINTA) ];
 		const auto IrPaso = [this](int32 Paso) { EstPaso = Paso; RehacerEstudio(); EnsenarEstudio(); };
 		TSharedRef<SHorizontalBox> Nav = SNew(SHorizontalBox);
-		if (EstPaso > 0) { Nav->AddSlot().AutoWidth().Padding(0, 0, 6, 0)[ Boton(D->TE(TEXT("Anterior")), [IrPaso, this]() { IrPaso(EstPaso - 1); }) ]; }
-		if (EstPaso < NP - 1) { Nav->AddSlot().AutoWidth()[ Boton(D->TE(TEXT("Siguiente")), [IrPaso, this]() { IrPaso(EstPaso + 1); }, true) ]; }
-		Caja->AddSlot().AutoHeight().Padding(0, 10, 0, 0)[ Nav ];
-		CajaEst->AddSlot().AutoHeight().Padding(0, 12, 0, 0)[ SNew(SBorder).BorderImage(Panel2()).Padding(12.f)[ Caja ] ];
+		if (EstPaso > 0) { Nav->AddSlot().AutoWidth().Padding(0, 0, HUECO, 0)[ Boton(D->TE(TEXT("Anterior")), [IrPaso, this]() { IrPaso(EstPaso - 1); }) ]; }
+		if (EstPaso < NP - 1) { Nav->AddSlot().AutoWidth()[ Boton(D->TE(TEXT("Siguiente")), [IrPaso, this]() { IrPaso(EstPaso + 1); }, ECorpusBoton::Principal) ]; }
+		Caja->AddSlot().AutoHeight().Padding(0, E_3, 0, 0)[ Nav ];
+		CajaEst->AddSlot().AutoHeight().Padding(0, E_3, 0, 0)[ SNew(SBorder).BorderImage(Tarjeta()).Padding(E_3)[ Caja ] ];
 	}
 
 	for (const TPair<FString, FString>& S : It->Secs)
 	{
-		CajaEst->AddSlot().AutoHeight().Padding(0, 12, 0, 2)[ Txt(Mayus(S.Key), 9, C_GRIS, true) ];
-		CajaEst->AddSlot().AutoHeight()[ Txt(S.Value, 11, C_TINTA) ];
+		CajaEst->AddSlot().AutoHeight().Padding(0, E_3, 0, E_1)[ Etiqueta(S.Key) ];
+		CajaEst->AddSlot().AutoHeight()[ Txt(S.Value, T_NOTA, C_TINTA) ];
 	}
 
-	// preguntas
+	// preguntas (verde y rojo solo en el borde de la opción y en el rótulo «Correcto» / «Incorrecto»)
 	if (It->Q.Num() > 0)
 	{
-		CajaEst->AddSlot().AutoHeight().Padding(0, 16, 0, 2)[ Txt(Mayus(D->TE(TEXT("Preguntas"))), 9, C_GRIS, true) ];
+		CajaEst->AddSlot().AutoHeight().Padding(0, E_4, 0, E_1)[ Etiqueta(D->TE(TEXT("Preguntas"))) ];
 		int32 Aciertos = 0, Hechas = 0;
 		for (int32 q = 0; q < It->Q.Num(); ++q)
 		{
 			const FCorpusPregunta& Q = It->Q[q];
 			const int32* Elegida = EstResp.Find(q);
 			if (Elegida) { ++Hechas; if (*Elegida == Q.A) { ++Aciertos; } }
-			CajaEst->AddSlot().AutoHeight().Padding(0, 8, 0, 2)[ Txt(It->Q.Num() > 1 ? FString::Printf(TEXT("%d. %s"), q + 1, *Q.P) : Q.P, 11, C_TINTA, true) ];
+			CajaEst->AddSlot().AutoHeight().Padding(0, E_3, 0, E_1)[ Txt(It->Q.Num() > 1 ? FString::Printf(TEXT("%d. %s"), q + 1, *Q.P) : Q.P, T_SECCION, C_TINTA, EPeso::Media) ];
 			for (int32 o = 0; o < Q.O.Num(); ++o)
 			{
-				FLinearColor Fondo(0.10f, 0.13f, 0.17f);
-				if (Elegida) { if (o == Q.A) { Fondo = FLinearColor(0.05f, 0.38f, 0.16f); } else if (o == *Elegida) { Fondo = FLinearColor(0.50f, 0.10f, 0.10f); } }
-				CajaEst->AddSlot().AutoHeight().Padding(0, 3, 0, 0)[ Fila(Q.O[o], FString(), [this, q, o]() { if (!EstResp.Contains(q)) { EstResp.Add(q, o); RehacerEstudio(); } }, Fondo) ];
+				const int32 Resp = !Elegida ? 0 : o == Q.A ? 1 : o == *Elegida ? 2 : 0;
+				CajaEst->AddSlot().AutoHeight().Padding(0, E_1, 0, 0)[ Fila(Q.O[o], FString(), [this, q, o]() { if (!EstResp.Contains(q)) { EstResp.Add(q, o); RehacerEstudio(); } }, Resp) ];
 			}
 			if (Elegida)
 			{
 				const bool bBien = *Elegida == Q.A;
-				CajaEst->AddSlot().AutoHeight().Padding(0, 5, 0, 0)[ Txt(D->TE(bBien ? TEXT("Correcto") : TEXT("Incorrecto")), 10, bBien ? FLinearColor(0.25f, 0.85f, 0.40f) : FLinearColor(1.f, 0.40f, 0.35f), true) ];
-				if (!Q.X.IsEmpty()) { CajaEst->AddSlot().AutoHeight().Padding(0, 3, 0, 0)[ Txt(Q.X, 10, C_TINTA) ]; }
+				CajaEst->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)[ Txt(D->TE(bBien ? TEXT("Correcto") : TEXT("Incorrecto")), T_CUERPO, bBien ? C_BIEN : C_MAL, EPeso::Negrita) ];
+				if (!Q.X.IsEmpty()) { CajaEst->AddSlot().AutoHeight().Padding(0, E_1, 0, 0)[ Txt(Q.X, T_NOTA, C_TINTA) ]; }
 			}
 		}
 		if (It->Q.Num() > 1 && Hechas == It->Q.Num())
 		{
-			CajaEst->AddSlot().AutoHeight().Padding(0, 12, 0, 0)[ Txt(FString::Printf(TEXT("%s: %d / %d"), *D->TE(TEXT("Aciertos")), Aciertos, It->Q.Num()), 13, C_ACENTO, true) ];
+			CajaEst->AddSlot().AutoHeight().Padding(0, E_3, 0, 0)[ Txt(FString::Printf(TEXT("%s: %d / %d"), *D->TE(TEXT("Aciertos")), Aciertos, It->Q.Num()), T_SECCION, C_TINTA, EPeso::Negrita) ];
 		}
 	}
-	if (M.Id == TEXT("patologias") || M.Id == TEXT("casos") || M.Id == TEXT("protocolos")) { CajaEst->AddSlot().AutoHeight().Padding(0, 16, 0, 0)[ Txt(E.Aviso, 9, C_GRIS) ]; }
+	if (M.Id == TEXT("patologias") || M.Id == TEXT("casos") || M.Id == TEXT("protocolos")) { CajaEst->AddSlot().AutoHeight().Padding(0, E_4, 0, 0)[ Txt(E.Aviso, T_SECUNDARIO, C_GRIS) ]; }
 }
 
 void SCorpusInterfaz::QaEstudio(const FString& Args)

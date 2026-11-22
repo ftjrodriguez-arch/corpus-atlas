@@ -14,6 +14,10 @@ class UCorpusDatos;
 class SVerticalBox;
 class SEditableTextBox;
 
+/** Papel de un botón (PLAN_INTERFAZ.md): acción principal del panel (acento con texto oscuro), selección dentro de un
+ *  grupo (borde y texto en acento, sin relleno) o normal. */
+enum class ECorpusBoton : uint8 { Normal, Principal, Seleccionado };
+
 class SCorpusInterfaz : public SCompoundWidget
 {
 public:
@@ -30,6 +34,13 @@ public:
 	void QaEstudio(const FString& Args);
 	/** Pruebas automáticas de la interfaz: «panel <0|1>»… Devuelve false si el verbo no es suyo. */
 	bool Qa(const FString& Verbo, const FString& Resto);
+
+	/** Esc: cierra lo último abierto, en este orden: resultados del buscador → ficha → Estudiar. False si no había nada. */
+	bool CerrarConEsc();
+	/** Ctrl+F: el foco del teclado va al buscador. */
+	void EnfocarBuscador();
+	/** ¿Hay un cuadro de texto con el foco del teclado? (entonces F, H, I y los números no actúan sobre el modelo) */
+	static bool Escribiendo();
 
 private:
 	ACorpusCuerpo* Cuerpo() const;
@@ -51,7 +62,9 @@ private:
 	/** Enseña en el modelo la entrada (o el paso) que se está leyendo. */
 	void EnsenarEstudio();
 	const struct FCorpusItemEstudio* ItemEstudio() const;
-	TSharedRef<SWidget> Boton(const FString& Texto, TFunction<void()> Accion, bool bAcento = false) const;
+	TSharedRef<SWidget> Boton(const FString& Texto, TFunction<void()> Accion, ECorpusBoton Papel = ECorpusBoton::Normal) const;
+	/** Atajo: seleccionado si bSel, normal si no (cuerpo, idioma, articulación, lado…). */
+	TSharedRef<SWidget> BotonSel(const FString& Texto, TFunction<void()> Accion, bool bSel) const { return Boton(Texto, MoveTemp(Accion), bSel ? ECorpusBoton::Seleccionado : ECorpusBoton::Normal); }
 
 	TWeakObjectPtr<ACorpusJugador> Jugador;
 	TSharedPtr<SVerticalBox> CajaCapas, CajaFicha, CajaResultados, CajaBarra, CajaMov, CajaHerr;
@@ -97,7 +110,12 @@ private:
 	};
 	enum { P_IZQ, P_MINI, P_BUSCA, P_MOV, P_FICHA, P_EST, P_NUM };
 	FPanelAnim Anim[P_NUM];
-	FVector2D TamVista = FVector2D(1600, 900);   // tamaño de la interfaz (para que la ficha no pise el panel de movimiento)
+	FVector2D TamVista = FVector2D(1600, 900);   // tamaño de la interfaz en unidades de Slate, ya escalada (para que la ficha no pise el panel de movimiento)
 	float EscalaAnim = 1.f;          // pruebas: «animlenta 0.05» para fotografiar la transición
 	EVisibility VisAnim(int32 i) const;
+
+	// ── Escala de la interfaz: curva por el lado corto de la ventana × «Tamaño del texto» (configuración del usuario) ──
+	float EscalaUI = 1.f;            // la que aplica el SDPIScaler (descontada la escala que ya pone el motor)
+	int32 TamTexto = 100;            // 90 · 100 · 125 · 150 %
+	void PonerTamTexto(int32 Por);
 };

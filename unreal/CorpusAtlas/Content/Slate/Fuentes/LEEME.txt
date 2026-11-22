@@ -1,0 +1,15 @@
+Tipografía de la interfaz Slate de Corpus Atlas (edición Unreal)
+
+Aquí van, sin modificar, tres archivos de la publicación oficial de Inter
+(https://github.com/rsms/inter/releases, licencia SIL Open Font License 1.1):
+
+  Inter-Regular.ttf
+  Inter-SemiBold.ttf
+  Inter-Bold.ttf
+  LICENSE.txt   (el archivo de licencia OFL que viene en el mismo ZIP)
+
+En el ZIP de Inter 4.x los TTF estáticos están en la carpeta «extras/ttf/».
+CorpusInterfaz.cpp (FuenteInter) los carga desde esta carpeta; si falta
+alguno, la interfaz usa la fuente por defecto de Unreal y lo anota en el
+registro («faltan los TTF de Inter»). DefaultGame.ini empaqueta la carpeta
+con DirectoriesToAlwaysStageAsNonUFS.

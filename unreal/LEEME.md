@@ -628,6 +628,46 @@ defecto era solo de la deformación.
 - Capturas `antes_l_*` y `s1_l_*`: flexión de rodilla 0–135° de lado, por detrás y de frente (`s1_l_rod_hoja.png`) y
   `s1_l_mosaico.png`.
 
+## Interfaz · Fase 1 de `PLAN_INTERFAZ.md`: legibilidad y sistema visual (2026-11-22) — SIN COMPILAR NI CAPTURAR
+Código escrito en una sesión sin consola (no se pudo compilar, ejecutar `captura.ps1` ni descargar Inter). Hay que
+compilar, capturar y revisar antes de darlo por bueno.
+- **Escala:** `SCorpusInterfaz` envuelve todo en un `SDPIScaler`. En `Tick` se mide la ventana en píxeles (tamaño local ×
+  escala acumulada del motor), se aplica la curva por lado corto 720 → 0,9 · 1080 → 1,0 · 1440 → 1,25 · 2160 → 1,6
+  (`EscalaPorLado`) × «Tamaño del texto» y se divide por la escala que ya pone el motor (su curva de `DefaultEngine.ini`
+  no se toca). Tope: la interfaz nunca baja de 1.320 unidades de ancho (`ANCHO_MIN_PANELES`), para que capas, buscador y
+  ficha no se pisen; con 125–150 % en ventanas estrechas el ajuste se nota menos.
+- **Tamaño del texto:** fila 90 · 100 · 125 · 150 % en el panel izquierdo; se guarda en `GameUserSettings.ini`
+  (`[CorpusAtlas.Interfaz] TamTexto`), nunca en `DefaultEngine.ini`. Prueba: `texto <90|100|125|150>`.
+- **Sistema visual** al principio de `CorpusInterfaz.cpp`: paleta (`C_*`, tinta #E6EAF0, gris #7F8C9E, ámbar #F0A040,
+  convertidos a lineal), espaciado (`E_1`…`E_6`, margen 16, relleno de panel 20, botón 12 × 8), escala tipográfica
+  (`T_GONIO` 32 · `T_TITULO` 18 · `T_SECCION` 13 · `T_CUERPO` 10,5 · `T_NOTA` 11 · `T_SECUNDARIO` 10 · `T_ETIQUETA` 9 con
+  espaciado), `Letra()` con Inter (`FuenteInter`, respaldo Roboto) y `Etiqueta()`. Ya no queda ningún `FLinearColor` suelto
+  fuera de la paleta ni tamaños de 8–9 pt en texto de lectura (leyendas y créditos a 10, notas clínicas y fichas a 11).
+- **Botones** (`ECorpusBoton`): `Principal` = acento con texto oscuro #0B1320 (≈ 7,5:1; antes blanco 2,46:1), una por
+  panel (Encuadrar en la ficha, Reproducir en movimiento, Siguiente —o Ver si no hay pasos— en Estudiar); `Seleccionado`
+  = borde de 1,5 px y texto en acento sin relleno (cuerpo, idioma, tamaño, fantasma, corte, profundidad, articulación,
+  movimiento, lado, patrón, ejercicio, módulo, relieves); `Normal`. Mínimo 32 × 36 (`ConFoco`), anillo de foco de 2 px
+  claro solo cuando el foco llega por teclado. Respuestas del examen: verde o rojo solo en el borde (`EstiloRespuesta`).
+- **Controles:** casilla de 18 px con borde gris de 1,5 px y la fila entera (color + nombre) clicable; deslizadores con
+  barra de 4 px, tirador de 14 px y el valor en % en el ToolTip (opacidad: 96 de ancho, paso 0,05); buscador con fondo
+  PANEL2, borde de foco y letra de 12; barras de desplazamiento de 6 px gris al 50 %.
+- **Teclado** (`CorpusJugador.cpp`): Ctrl+F lleva al buscador; F, H, I y 1–6 no actúan mientras un cuadro de texto tiene
+  el foco (`SCorpusInterfaz::Escribiendo`); Esc cierra resultados → ficha → Estudiar (`CerrarConEsc`) y, si no queda nada,
+  muestra todo como antes; Esc dentro del buscador borra la búsqueda. Pruebas: `esc`.
+- **Geometría:** las marcas de relieves ya no usan 360 / `Tam.X − 430` / 74 fijos: `Tick` les pasa el borde real del
+  panel izquierdo (o del plegado), el ancho de la ficha y el alto del buscador, y cada columna de rótulos se aparta lo que
+  mide su rótulo más ancho (antes los de la izquierda podían quedar bajo el panel de capas). La altura máxima de la ficha
+  usa `TamVista` en unidades de dentro del escalador. Entradas de los paneles con desplazamiento ≤ 12 px.
+- **Movimiento:** la fila de lado (derecho/izquierdo o «hacia la derecha/izquierda») va en su propia fila: junto al
+  deslizador se salía del panel. Panel de movimiento para capturas: `movimiento 1` (nuevo), o `rom rodilla 0 R 68`,
+  o `ejercicio squat` (el id es `squat`, no `sentadilla`).
+- **Inter:** `Content/Slate/Fuentes/` (ver `LEEME.txt` de esa carpeta) con `Inter-Regular.ttf`, `Inter-SemiBold.ttf`,
+  `Inter-Bold.ttf` y `LICENSE.txt` de https://github.com/rsms/inter/releases (OFL 1.1). **Aún no están:** hay que bajarlos.
+  `DefaultGame.ini` empaqueta la carpeta (`DirectoriesToAlwaysStageAsNonUFS`); atribución en `ATTRIBUTION.md`.
+- **Falta de esta fase:** compilar; capturas `ui_f1_*` (inicio · `sel n1394` ficha · `buscar biceps` · `estudio 0 0 0` ·
+  `movimiento 1`/`rom`) a 1280×720, 1600×900 y 2560×1440 y hoja antes/después; lupa del buscador (no hay icono propio);
+  comprobar que Tab mueve el foco entre botones en la ventana del juego.
+
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.
