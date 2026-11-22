@@ -1,6 +1,13 @@
 # Sprint 2: ejercicios con postura (fuente «ct» de movimiento.js) (2026-11-22)
 Set-Location (Split-Path $PSScriptRoot -Parent)
 "node: " + (Get-Command node -ErrorAction SilentlyContinue).Source
+$pw = Join-Path $env:LOCALAPPDATA "corpus-playwright"
+if (-not (Test-Path "$pw\node_modules\playwright")) {
+  "== INSTALAR PLAYWRIGHT (solo la primera vez) =="
+  New-Item -ItemType Directory -Force $pw | Out-Null
+  Push-Location $pw; npm init -y 2>&1 | Out-Null; npm i playwright@1 2>&1 | Select-Object -Last 3; npx playwright install chromium 2>&1 | Select-Object -Last 2; Pop-Location
+}
+$env:NODE_PATH = "$pw\node_modules"
 "NODE_PATH: $env:NODE_PATH"
 $srv = Start-Process -FilePath "py" -ArgumentList "-m", "http.server", "8765" -PassThru -WindowStyle Hidden
 Start-Sleep -Seconds 3

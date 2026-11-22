@@ -20,9 +20,8 @@
 ## Sprint 2 (aparato locomotor) — en curso
 - [x] Músculos agrupados separados uno a uno (`tools/unreal/separar.js`): intercostales, subcostales, interóseos dorsales de mano y pie, lumbricales de la mano, interóseos plantares y rotadores (C3–L5)
 - [ ] Interóseos palmares y lumbricales del pie: modelarlos en Blender (la malla de la web no trae sus formas)
-- [ ] 10 ejercicios nuevos con postura (fuente «ct» de `movimiento.js`, `ejercicios.json`): FALTA HORNEARLOS en el PC:
-      `python -m http.server 8765` en la raíz y `node tools/unreal/movimiento.js --solo-ejercicios`, después `ci.copiar_datos()`
-      (o doble clic en `unreal/Claude_Tarea.bat`, que ya lo hace y saca capturas `ej_*`)
+- [x] 10 ejercicios nuevos con postura (zancada, peso muerto, sentarse y levantarse, abducción de cadera, curl, elevación lateral y frontal, press, remo, patada de glúteo), horneados el 2026-11-22 (capturas `ej_*`)
+- [ ] Francés y alemán de 30 textos de técnica, progresiones y precauciones de esos ejercicios (salen en inglés): añadirlos a `ejercicios.json → traducciones` y volver a hornear
 - [ ] Pruebas ortopédicas con postura (las de paciente tumbado necesitan la raíz del cuerpo acostado)
 - [ ] Dedos de mano y pie con movimiento (el rig solo tiene 27 articulaciones y 5 bits por hueco)
 - [ ] Cinta de suelo y gráficas de la marcha
