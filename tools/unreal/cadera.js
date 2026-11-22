@@ -33,8 +33,9 @@ const CERO = /^(Hip bone|Sacrum|Coccyx|Vertebra L\d+)$/, UNO = /^(Femur|Patella|
    queda por fuera: grosor / (1 + adelgaza · ángulo · 6,75·w²·(1 − w)), máximo donde el tejido se acerca al muslo (w = 2/3) */
 /* Medido con el glúteo mayor derecho (cuerda / adelgaza → volumen a 90° y 120°, radio posteroinferior a 120°):
    0/0 → 156 %, 174 %, 10,7 cm (arco puro: la bolsa) · 0,5/1 → 91 %, 95 %, 8,4 cm · 1/1 → 90 %, 83 %, 7,4 cm, sin
-   tejido bajo la tuberosidad isquiática desde 120° · 1/2 → 81 %, 77 % (adelgaza demasiado). */
-const PARAM = { cuerda: 1.0, radio: 0.075, adelgaza: 1.0 };
+   tejido bajo la tuberosidad isquiática desde 120° · 1/2 → 81 %, 77 % (adelgaza demasiado). Con la fracción de fibra
+   armónica (segunda pasada): 1/1 → 86 %, 75 % (sentadilla 73 %); 1/0,7 → 89 %, 77 % (sentadilla 75 %, elegido). */
+const PARAM = { cuerda: 1.0, radio: 0.075, adelgaza: 0.7 };
 const H = 0.005;            // celda de la rejilla (m)
 const PLIEGUE = 0.105;      // distancia de la cabeza femoral, a lo largo del fémur, a partir de la cual todo va con el fémur
 const LD = S => S === 'R' ? 'derecho' : 'izquierdo';
@@ -103,8 +104,40 @@ function pesosFibra(cuerpo, pz, S) {
   if (O[3] < 4 || I[3] < 4) return null;
   let u = [I[0] / I[3] - O[0] / O[3], I[1] / I[3] - O[1] / O[3], I[2] / I[3] - O[2] / O[3]]; const lu = Math.hypot(...u); u = u.map(v => v / lu);
   const s = new Float32Array(pz.nv); let s0 = 1e9, s1 = -1e9; for (let i = 0; i < pz.nv; i++) { const v = P[i * 3] * u[0] + P[i * 3 + 1] * u[1] + P[i * 3 + 2] * u[2]; s[i] = v; if (v < s0) s0 = v; if (v > s1) s1 = v; }
-  const W = new Float32Array(pz.nv), dw = new Float32Array(pz.nv), kk = 1 / ((s1 - s0) * (FIB_B - FIB_A)); for (let i = 0; i < pz.nv; i++) { const t = sat(((s[i] - s0) / (s1 - s0) - FIB_A) / (FIB_B - FIB_A)); W[i] = t * t * (3 - 2 * t); dw[i] = 6 * t * (1 - t) * kk; }
-  W.grad = i => [u[0] * dw[i], u[1] * dw[i], u[2] * dw[i]];
+  if (process.env.CORPUS_FIBRA === 'proy') {      // la versión anterior (proyección sobre una sola dirección), para comparar
+    const W = new Float32Array(pz.nv), dw = new Float32Array(pz.nv), kk = 1 / ((s1 - s0) * (FIB_B - FIB_A)); for (let i = 0; i < pz.nv; i++) { const t = sat(((s[i] - s0) / (s1 - s0) - FIB_A) / (FIB_B - FIB_A)); W[i] = t * t * (3 - 2 * t); dw[i] = 6 * t * (1 - t) * kk; }
+    W.grad = i => [u[0] * dw[i], u[1] * dw[i], u[2] * dw[i]];
+    return W; }
+  /* Fracción de fibra ARMÓNICA (Laplace): 0 en los vértices pegados a la pelvis, 1 en los pegados al fémur y en los que
+     tocan el tracto iliotibial por debajo del trocánter (inserción de las fibras superficiales). Con una sola dirección
+     global las fibras bajas (del cóccix, casi horizontales) se quedaban con peso 0 junto al pliegue glúteo y hacían una
+     solapa colgante a 120°; así cada fibra va de su origen a su inserción. */
+  const hip = PO.M.articulaciones[PO.arts.indexOf('hip_' + S)].pivote, itt = new Map(), ci = 0.012;
+  for (const nd of PO.capa(cuerpo + '/muscular').g.nodes) { if (nd.mesh === undefined || !/^Iliotibial tract/.test((nd.extras || {}).en || '') || nd.extras.lado !== LD(S)) continue; const T = PO.pieza(cuerpo + '/muscular', nd.name);
+    for (let i = 0; i < T.nv; i++) { if (T.P[i * 3 + 1] > hip[1] - 0.06) continue; const k = Math.floor(T.P[i * 3] / ci) + ',' + Math.floor(T.P[i * 3 + 1] / ci) + ',' + Math.floor(T.P[i * 3 + 2] / ci); let l = itt.get(k); if (!l) itt.set(k, l = []); l.push(T.P[i * 3], T.P[i * 3 + 1], T.P[i * 3 + 2]); } }
+  const cercaITT = (x, y, z) => { const fx = Math.floor(x / ci), fy = Math.floor(y / ci), fz = Math.floor(z / ci); for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (let e = -1; e <= 1; e++) { const l = itt.get((fx + a) + ',' + (fy + b) + ',' + (fz + e)); if (!l) continue; for (let t = 0; t < l.length; t += 3) if ((l[t] - x) ** 2 + (l[t + 1] - y) ** 2 + (l[t + 2] - z) ** 2 < ci * ci) return true; } return false; };
+  /* Rejilla de 5 mm alrededor del músculo; los nodos más cercanos a los vértices de origen valen 0 y a los de inserción 1;
+     el resto, Laplace (Gauss-Seidel), con las caras de la caja sin flujo. Es continuo en el volumen: igual en todo el
+     grosor y sin el ruido de una malla de 1.663 vértices. */
+  const ext = [[9, 9, 9], [-9, -9, -9]]; for (let i = 0; i < pz.nv; i++) for (let k = 0; k < 3; k++) { ext[0][k] = Math.min(ext[0][k], P[i * 3 + k]); ext[1][k] = Math.max(ext[1][k], P[i * 3 + k]); }
+  const hh = 0.005, b0 = ext[0].map(v => v - 0.03), n = ext[1].map((v, k) => Math.ceil((v + 0.03 - b0[k]) / hh) + 1), sy = n[0], sz = n[0] * n[1], nn = sz * n[2];
+  const val = new Float32Array(nn), fijo = new Int8Array(nn).fill(-1);
+  for (let iz = 0; iz < n[2]; iz++) for (let iy = 0; iy < n[1]; iy++) for (let ix = 0; ix < n[0]; ix++) { const x = b0[0] + ix * hh, y = b0[1] + iy * hh, z = b0[2] + iz * hh; val[ix + sy * iy + sz * iz] = sat(((x * u[0] + y * u[1] + z * u[2]) - s0) / (s1 - s0)); }
+  let no = 0, ni = 0;
+  for (let i = 0; i < pz.nv; i++) { const x = P[i * 3], y = P[i * 3 + 1], z = P[i * 3 + 2], q = Math.round((x - b0[0]) / hh) + sy * Math.round((y - b0[1]) / hh) + sz * Math.round((z - b0[2]) / hh);
+    if (cerca(G[1], x, y, z) || cercaITT(x, y, z)) { fijo[q] = 1; val[q] = 1; ni++; } else if (fijo[q] !== 1 && cerca(G[0], x, y, z)) { fijo[q] = 0; val[q] = 0; no++; } }
+  for (let it = 0, dmax = 1; it < 3000 && dmax > 1e-5; it++) { dmax = 0;
+    for (let iz = 0; iz < n[2]; iz++) for (let iy = 0; iy < n[1]; iy++) { let q = sy * iy + sz * iz;
+      for (let ix = 0; ix < n[0]; ix++, q++) { if (fijo[q] >= 0) continue; let s = 0, c = 0;
+        if (ix > 0) { s += val[q - 1]; c++; } if (ix < n[0] - 1) { s += val[q + 1]; c++; } if (iy > 0) { s += val[q - sy]; c++; } if (iy < n[1] - 1) { s += val[q + sy]; c++; } if (iz > 0) { s += val[q - sz]; c++; } if (iz < n[2] - 1) { s += val[q + sz]; c++; }
+        const d = (s / c - val[q]) * 1.9; val[q] += d; if (Math.abs(d) > dmax) dmax = Math.abs(d); } } }
+  const en = p => { const f = p.map((v, k) => Math.min(n[k] - 1.0001, Math.max(0, (v - b0[k]) / hh))), ix = Math.floor(f[0]), iy = Math.floor(f[1]), iz = Math.floor(f[2]), tx = f[0] - ix, ty = f[1] - iy, tz = f[2] - iz, q = ix + sy * iy + sz * iz;
+    const x00 = val[q] + (val[q + 1] - val[q]) * tx, x10 = val[q + sy] + (val[q + sy + 1] - val[q + sy]) * tx, x01 = val[q + sz] + (val[q + sz + 1] - val[q + sz]) * tx, x11 = val[q + sz + sy] + (val[q + sz + sy + 1] - val[q + sz + sy]) * tx;
+    const y0 = x00 + (x10 - x00) * ty, y1 = x01 + (x11 - x01) * ty; return sat(y0 + (y1 - y0) * tz); };
+  const fW = x => { const t = sat((x - FIB_A) / (FIB_B - FIB_A)); return t * t * (3 - 2 * t); };
+  const W = new Float32Array(pz.nv); for (let i = 0; i < pz.nv; i++) W[i] = fW(en([P[i * 3], P[i * 3 + 1], P[i * 3 + 2]]));
+  W.grad = i => { const p = [P[i * 3], P[i * 3 + 1], P[i * 3 + 2]], d = 0.004; return [0, 1, 2].map(k => { const a = p.slice(), b = p.slice(); a[k] += d; b[k] -= d; return (fW(en(a)) - fW(en(b))) / (2 * d); }); };
+  W.info = `fibra armónica en rejilla ${n.join('×')}: ${no} vértices de origen, ${ni} de inserción`;
   return W;
 }
 

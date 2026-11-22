@@ -560,13 +560,18 @@ defecto era solo de la deformación.
   - **Un solo campo de peso** de cadera para toda la región (Laplace en una rejilla de 5 mm: 0 en pelvis, sacro, cóccix y
     lumbares, 1 en el fémur y en todo lo que queda a más de 10,5 cm de la cabeza femoral a lo largo del fémur). Dos
     músculos vecinos reciben el mismo peso y se mueven juntos.
-  - **Glúteo mayor: fracción de fibra** (0 en la línea de origen, 1 en la tuberosidad glútea y el tracto iliotibial,
-    igual en todo el grosor): resbala como una banda en vez de dejar la cara superficial colgando.
+  - **Glúteo mayor: fracción de fibra armónica** (Laplace en una rejilla de 5 mm alrededor del músculo: 0 en los
+    vértices pegados a pelvis, sacro y cóccix, 1 en los pegados al fémur y al tracto iliotibial por debajo del
+    trocánter; igual en todo el grosor): resbala como una banda en vez de dejar la cara superficial colgando. La primera
+    versión proyectaba sobre una sola dirección origen → inserción y las fibras bajas del cóccix (casi horizontales) se
+    quedaban con peso 0: a 120° dejaban una solapa y destapaban la tuberosidad isquiática, la bolsa isquiática del
+    glúteo mayor (azul) y los tendones del obturador interno y el gemelo inferior: el «gancho» que colgaba por detrás
+    (`CORPUS_FIBRA=proy` la recupera para comparar). La armónica sobre la propia malla (1.663 vértices) salió arrugada.
   - **Arco y cuerda** (`cuerda`) y **adelgazamiento** (`adelgaza`): en los huecos de cadera con peso intermedio el punto
     va por la cuerda recta entre reposo y giro completo (la banda tensa se pega a la articulación) y lo que queda fuera
     de una esfera de 7,5 cm alrededor de la cabeza femoral se acerca a ella tanto como se estira el tejido
     (estiramiento = ángulo · ∇peso · (eje × radio)). El gradiente del peso viaja en tres huecos de datos (código 31)
-    detrás del de la cadera. Parámetros en `movimiento.json → cadera` = `{cuerda: 1, radio: 0.075, adelgaza: 1}`; los
+    detrás del de la cadera. Parámetros en `movimiento.json → cadera` = `{cuerda: 1, radio: 0.075, adelgaza: 0.7}`; los
     leen `postura.js`, `simular.js` y `HLSL_POSTURA` (`@CAD_CUERDA@`, `@CAD_RADIO@`, `@CAD_ADELGAZA@`). Con postura cero
     el desplazamiento sigue siendo exactamente 0 (sin giro no se entra en el bucle y `lam > 1` protege el adelgazamiento).
   - Órdenes: `node tools/unreal/cadera.js aplicar [hombre,mujer]` (reescribe los TEXCOORD de `muscular.glb` y los huecos
@@ -575,15 +580,17 @@ defecto era solo de la deformación.
     estado sin tocar nada (la copia de antes está en `Importar/antes_kl`, no se sube).
   - `movimiento.js --sin-pesos` y `--solo=<capa>` conservan ahora `movimiento.json → cadera`. `copiar_datos()` salta las
     carpetas (`estudio_img` cortaba la copia con PermissionError).
-- **Medido (hombre, lado derecho; antes → después):** volumen del glúteo mayor a 60/90/120° de flexión y en el fondo de
-  la sentadilla 125/138/151/135 % → 90/90/83/80 %; glúteo medio a 120° 166 % → 71 %; radio del glúteo mayor en el cuadrante
-  posteroinferior de la cadera (lo que «cuelga») 10,7 cm → 8,2 cm a 90° y 7,4 cm a 120° y en la sentadilla; tejido por
-  debajo de la tuberosidad isquiática con el muslo flexionado 4,2 cm → 0,5 cm a 90° y 0 a 120° (el isquion queda
-  descubierto al flexionar, como en la sedestación); pliegues del glúteo mayor a 120° 154 → 69. Mujer: 138/152/133 % →
-  97/86/82 %. Sin cambio en extensión (79–87 %) ni en abducción.
-- Barrido de parámetros (volumen a 90°/120°, radio posteroinferior a 120°): arco puro con el campo nuevo 156/174 %, 10,7 cm;
-  `cuerda 0,5 · adelgaza 1` 91/95 %, 8,4 cm; **`1 · 1` 90/83 %, 7,4 cm (elegido)**; `1 · 2` 81/77 % y `0 · 4` 56 %
-  (adelgaza de más sin ganar contorno).
+- **Medido (hombre, lado derecho; antes → primera pasada → final):** volumen del glúteo mayor a 60/90/120° de flexión y
+  en el fondo de la sentadilla 125/138/151/135 % → 90/90/83/80 % → **94/89/77/75 %**; glúteo medio a 120° 166 % → 71 % →
+  75 %; tejido del glúteo mayor por debajo de la tuberosidad isquiática 4,2 cm → 0,5 cm a 90° y 0 a 120° → 0,8 cm a 90° y
+  0 a 120°; pliegues (aristas que se cierran) del glúteo mayor a 120° 44 → 3 → 23 y en la sentadilla 69 → 4 → 43 (la
+  banda arruga algo su borde medial bajo). Sin cambio en extensión (82 %) ni en abducción.
+- Barrido de parámetros (volumen a 90°/120°): arco puro con el campo nuevo 156/174 %; `cuerda 0,5 · adelgaza 1` 91/95 %;
+  `1 · 1` 90/83 % (primera pasada); `1 · 2` 81/77 %; `0 · 4` 56 %. Con la fibra armónica: `1 · 1` 86/75 % (sentadilla
+  73 %), **`1 · 0,7` 89/77 %, sentadilla 75 % (elegido)**.
+- **El otro «apéndice» que asoma bajo la nalga en la sentadilla de lado** es el cremáster (x34, capa muscular): está en
+  su sitio, no se mueve con la cadera (y = 0,733 en reposo y en la postura) y antes lo tapaba el glúteo hinchado. No es
+  un defecto de la deformación.
 - Regenerar: `node tools/unreal/cadera.js aplicar hombre,mujer` (o `movimiento.js --solo=muscular`), después
   `tendones.js <cuerpo> --aplicar` y `.\unreal\py.ps1 'ci.copiar_datos(); ci.crear_materiales(); ci.importar_mallas(["hombre/muscular", "mujer/muscular"])' -Limite 3000`
   (unos 10 min). Cambiar solo `cuerda`/`adelgaza` no necesita reimportar: basta `movimiento.json` y `ci.crear_materiales()`.
@@ -592,17 +599,19 @@ defecto era solo de la deformación.
   lo anterior (`s1_k_control_hoja.png`, `s1_k_control_mos.png`): reposo por detrás igual que antes (sin postura el
   desplazamiento es 0), abducción del hombro a 120° con correctivos y el trapecio ascendente (n1598) seleccionado en
   reposo con el resalte hasta su punta inferior (punto J).
-- Se ve mal / dudoso: visto por detrás a 90–120° el glúteo mayor sigue siendo una masa redondeada (más pequeña y pegada,
-  pero no la banda aplanada de una disección); el glúteo medio pierde volumen a 120° y en la sentadilla (64–71 %); los
-  pliegues de los músculos del muslo suben (a 90°, 823 → 1.114, sobre todo isquiosurales y grácil a media altura, por la
-  combinación con el peso de rodilla de la web) aunque no se ven en las capturas. Pendiente de revisión profesional.
+- Se ve mal / dudoso: visto por detrás a 90–120° el glúteo mayor se lee mejor como lámina diagonal del sacro al
+  trocánter y ya tapa la tuberosidad, pero conserva el contorno redondeado de la malla de reposo (no es la banda plana y
+  tensa de una disección: haría falta un correctivo elástico como el del hombro, horneado por postura, también para la
+  sentadilla); el glúteo medio baja al 66–75 % a 120° y en la sentadilla; los pliegues de los músculos del muslo suben (a
+  90°, 823 → 1.074, isquiosurales y grácil a media altura, por la combinación con el peso de rodilla de la web) aunque no
+  se ven en las capturas. Pendiente de revisión profesional y del `director-clinico`.
 
 ### L · Muslo: la masa sigue continua al flexionar la cadera
 - Mismo cambio que K (un solo campo de peso de cadera para todos los músculos de la región): antes cada músculo del muslo
   traía su reparto propio de la web, con mezcla lineal, y a partir de unos 60° se abrían en tiras.
 - **Medido (hombre, derecho):** parejas de puntos de dos músculos distintos que en reposo están a menos de 3 mm y se
-  separan más de 5 mm: flexión de cadera 90° 128 → 38, 120° 167 → 57; flexión de rodilla 135° (con la cadera) 141 → 62;
-  fondo de la sentadilla 192 → 69. Separación máxima 58 → 21 mm (120°) y 58 → 19 mm (sentadilla). Los huecos de la ingle
+  separan más de 5 mm: flexión de cadera 90° 128 → 37, 120° 167 → 56; flexión de rodilla 135° (con la cadera) 141 → 62;
+  fondo de la sentadilla 192 → 71. Separación máxima 58 → 20 mm (120°) y 58 → 20 mm (sentadilla). Los huecos de la ingle
   y de la pelvis (glúteo medio con tracto iliotibial, pectíneo con aductores, glúteo medio con menor) desaparecen.
 - Los que quedan (máximo 17 mm) están junto a la rótula a 135° de rodilla (recto femoral con los vastos) y son iguales
   antes y después: los da el peso de rodilla de la web, distinto en cada músculo. Haría falta un campo común también
