@@ -21,6 +21,9 @@
 #include "Widgets/Input/SCheckBox.h"
 #include "Widgets/Input/SSlider.h"
 #include "Widgets/Input/SEditableTextBox.h"
+#include "Widgets/Input/SComboButton.h"
+#include "Widgets/Layout/SUniformGridPanel.h"
+#include "Widgets/Layout/SScaleBox.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Notifications/SProgressBar.h"
 #include "Widgets/SLeafWidget.h"
@@ -62,6 +65,11 @@ namespace
 	const FLinearColor C_ROTULO(0.02f, 0.03f, 0.045f, 0.92f);        // fondo de los rótulos sobre el modelo
 	const FLinearColor C_SOMBRA_PUNTO(0.f, 0.f, 0.f, 0.8f);
 	const FLinearColor C_GONIO_FONDO(0.14f, 0.17f, 0.22f), C_GONIO_ESCALA(0.30f, 0.34f, 0.40f);
+	const FLinearColor C_BORDE_MODO(0.14f, 0.52f, 0.96f, 0.55f);     // borde del panel derecho del modo activo (acento, translúcido)
+	const FLinearColor C_MENU(0.018f, 0.024f, 0.034f, 0.98f);         // fondo de los menús desplegables (casi opaco: se leen sobre el modelo)
+	const FLinearColor C_SEPARADOR(1.f, 1.f, 1.f, 0.08f);             // rayas verticales entre grupos de la barra de disección
+	const FLinearColor C_DEGRADADO_FIN(C_PANEL.R, C_PANEL.G, C_PANEL.B, 0.95f);   // pie de la lista de capas: el contenido se funde en el panel
+	const FLinearColor C_DEGRADADO_INICIO(C_PANEL.R, C_PANEL.G, C_PANEL.B, 0.f);
 
 	// ── Espaciado (múltiplos de 4) y radios ──
 	constexpr float E_1 = 4.f, E_2 = 8.f, E_3 = 12.f, E_4 = 16.f, E_5 = 20.f, E_6 = 24.f;
@@ -71,6 +79,13 @@ namespace
 	const FMargin RELLENO_BOTON(E_3, E_2);
 	constexpr float BOTON_ALTO_MIN = 32.f, BOTON_ANCHO_MIN = 36.f;
 	constexpr float HUECO = 6.f;          // entre botones de una fila (InnerSlotPadding)
+	// ── Anchos y altos de los paneles (unidades de Slate, dentro del escalador) ──
+	constexpr float ANCHO_IZQ = 360.f, ANCHO_FICHA = 400.f, ANCHO_EST = 500.f, ANCHO_MOV = 520.f, ANCHO_BUSCADOR = 460.f;
+	constexpr float ANCHO_OPACIDAD = 96.f, ANCHO_PORCENTAJE = 40.f, ANCHO_CORTE = 96.f, ANCHO_PELADO = 96.f;
+	constexpr float ALTO_BARRA = 44.f, R_PILDORA = 22.f;   // barra flotante de disección
+	constexpr float ALTO_DEGRADADO = 24.f, ALTO_SUBRAYADO = 2.f;
+	constexpr float ANCHO_VISTA = 40.f;   // celda de la cruceta de vistas
+	constexpr float DUR_MODO = 0.18f;     // el subrayado de la barra de modos tarda 180 ms en cambiar de pestaña
 
 	// ── Escala tipográfica (pt de Slate) ──
 	constexpr float T_GONIO = 32.f, T_TITULO = 18.f, T_SECCION = 13.f, T_CUERPO = 10.5f, T_NOTA = 11.f, T_SECUNDARIO = 10.f, T_ETIQUETA = 9.f;
@@ -82,6 +97,12 @@ namespace
 	const FSlateBrush* Tarjeta() { static const FSlateRoundedBoxBrush B(C_PANEL2, R_TARJETA); return &B; }
 	const FSlateBrush* Punto() { static const FSlateRoundedBoxBrush B(FLinearColor::White, 6.f); return &B; }
 	const FSlateBrush* Foco() { static const FSlateRoundedBoxBrush B(FLinearColor::Transparent, R_BOTON, C_FOCO, 2.f); return &B; }
+	/** Panel derecho del modo activo: el mismo vidrio con el borde teñido de acento. */
+	const FSlateBrush* PanelModo() { static const FSlateRoundedBoxBrush B(C_PANEL, R_PANEL, C_BORDE_MODO, 1.f); return &B; }
+	/** Barra flotante de disección: píldora (alto 44, radio 22). */
+	const FSlateBrush* Pildora() { static const FSlateRoundedBoxBrush B(C_PANEL, R_PILDORA, C_BORDE, 1.f); return &B; }
+	const FSlateBrush* PincelSubrayado() { static const FSlateRoundedBoxBrush B(C_ACENTO_ENCIMA, 1.f); return &B; }
+	const FSlateBrush* PincelBlanco() { return FCoreStyle::Get().GetBrush("WhiteBrush"); }
 
 	// ── Tipografía: Inter (SIL OFL 1.1) desde Content/Slate/Fuentes; si falta algún archivo, la fuente por defecto ──
 	TSharedPtr<const FCompositeFont> FuenteInter()
@@ -291,6 +312,72 @@ namespace
 	}
 	const FVector2f GROSOR_ROLLO(6.f, 6.f);
 
+	/** Pestañas (barra de modos) y cabeceras de grupo: sin fondo; al pasar el ratón, el del botón. */
+	const FButtonStyle& EstiloPestana()
+	{
+		static FButtonStyle S;
+		static bool bListo = false;
+		if (!bListo)
+		{
+			bListo = true;
+			S = EstiloBoton(ECorpusBoton::Normal);
+			S.SetNormal(FSlateNoResource());
+			S.SetHovered(FSlateRoundedBoxBrush(C_BOTON_ENCIMA, R_BOTON));
+			S.SetPressed(FSlateRoundedBoxBrush(C_BOTON_PULSADO, R_BOTON));
+			S.SetDisabled(FSlateNoResource());
+		}
+		return S;
+	}
+	/** Menús desplegables (idioma, ajustes): el botón es uno normal; el menú, una tarjeta casi opaca con borde claro. */
+	const FComboButtonStyle& EstiloMenu()
+	{
+		static FComboButtonStyle S;
+		static bool bListo = false;
+		if (!bListo)
+		{
+			bListo = true;
+			S = FCoreStyle::Get().GetWidgetStyle<FComboButtonStyle>("ComboButton");
+			S.SetButtonStyle(EstiloBoton(ECorpusBoton::Normal));
+			S.SetDownArrowImage(FSlateNoResource());   // la flecha es el chevrón de texto (Chevron), con la tipografía de la interfaz
+			S.SetMenuBorderBrush(FSlateRoundedBoxBrush(C_MENU, R_TARJETA, C_BORDE_ENCIMA, 1.f));
+			S.SetMenuBorderPadding(FMargin(E_2));
+			S.SetContentPadding(RELLENO_BOTON);
+			S.SetShadowColorAndOpacity(FLinearColor::Transparent);
+		}
+		return S;
+	}
+	/** «›» de Inter: hacia la derecha (plegado) o girado 90° hacia abajo (abierto, menú). Sin recursos de iconos. */
+	TSharedRef<SWidget> Chevron(bool bAbajo, const FLinearColor& Col)
+	{
+		return SNew(STextBlock).Text(FText::FromString(TEXT("›"))).Font(Letra(T_SECCION, EPeso::Media)).ColorAndOpacity(FSlateColor(Col))
+			.RenderTransformPivot(FVector2D(0.5f, 0.5f))
+			.RenderTransform(bAbajo ? TOptional<FSlateRenderTransform>(FSlateRenderTransform(FQuat2f(FMath::DegreesToRadians(90.f)))) : TOptional<FSlateRenderTransform>());
+	}
+	/** Raya vertical entre grupos de botones de la barra de disección. */
+	TSharedRef<SWidget> Separador()
+	{
+		return SNew(SBox).WidthOverride(1.f).HeightOverride(20.f)[ SNew(SImage).Image(PincelBlanco()).ColorAndOpacity(C_SEPARADOR) ];
+	}
+
+	// Pelar capas como nivel: 0 todos los músculos · 1 sin los superficiales · 2 sin superficiales ni intermedios (los profundos
+	// quedan siempre; para quitar todos los músculos está la casilla de su capa). Usa PelarProfundidad (extras.json → dep).
+	int32 NivelPelado(const ACorpusCuerpo* Cu)
+	{
+		if (!Cu) { return 0; }
+		return Cu->ProfundidadOculta(TEXT("i")) ? 2 : Cu->ProfundidadOculta(TEXT("s")) ? 1 : 0;
+	}
+	void PonerPelado(ACorpusCuerpo* Cu, int32 Nivel)
+	{
+		if (!Cu) { return; }
+		Nivel = FMath::Clamp(Nivel, 0, 2);
+		// solo lo que cambia: cada PelarProfundidad avisa del cambio de capas y la lista de capas se rehace entera
+		const auto Pon = [Cu](const TCHAR* P, bool bOcultar) { if (Cu->ProfundidadOculta(P) != bOcultar) { Cu->PelarProfundidad(P, bOcultar); } };
+		Pon(TEXT("s"), Nivel >= 1);
+		Pon(TEXT("i"), Nivel >= 2);
+		Pon(TEXT("p"), false);
+	}
+	const TCHAR* const NOMBRES_PELADO[3] = { TEXT("Superficiales"), TEXT("Intermedios"), TEXT("Profundos") };
+
 	/** Curva de escala por el lado corto de la ventana (px): 720 → 0,9 · 1080 → 1,0 · 1440 → 1,25 · 2160 → 1,6. Fuera, proporcional. */
 	float EscalaPorLado(float Lado)
 	{
@@ -451,6 +538,26 @@ public:
 	}
 };
 
+// ───────── Degradado al pie de una lista desplazable ─────────
+// 24 px que funden el contenido en el panel cuando queda más lista por debajo (la visibilidad la decide quien lo usa).
+class SCorpusDegradado : public SLeafWidget
+{
+public:
+	SLATE_BEGIN_ARGS(SCorpusDegradado) {}
+	SLATE_END_ARGS()
+	void Construct(const FArguments&) {}
+	virtual FVector2D ComputeDesiredSize(float) const override { return FVector2D(1.0, ALTO_DEGRADADO); }
+	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& G, const FSlateRect& Recorte, FSlateWindowElementList& Fuera, int32 Capa, const FWidgetStyle& Estilo, bool bActivo) const override
+	{
+		// Orient_Horizontal: las paradas son líneas horizontales y el color cambia de arriba abajo (posiciones en espacio local)
+		TArray<FSlateGradientStop> Paradas;
+		Paradas.Add(FSlateGradientStop(FVector2D(0.0, 0.0), C_DEGRADADO_INICIO));
+		Paradas.Add(FSlateGradientStop(FVector2D(0.0, G.GetLocalSize().Y), C_DEGRADADO_FIN));
+		FSlateDrawElement::MakeGradient(Fuera, Capa, G.ToPaintGeometry(), Paradas, Orient_Horizontal);
+		return Capa;
+	}
+};
+
 SCorpusInterfaz::~SCorpusInterfaz()
 {
 	if (ACorpusCuerpo* C = Cuerpo()) { C->AlCambiarSeleccion.Remove(HSel); C->AlCambiarCapas.Remove(HCapas); C->AlCambiarPostura.Remove(HPostura); C->AlCambiarHerramientas.Remove(HHerr); }
@@ -505,6 +612,11 @@ void SCorpusInterfaz::EnfocarBuscador()
 
 bool SCorpusInterfaz::CerrarConEsc()
 {
+	// 0) un menú desplegable abierto (idioma, tamaño del texto): Esc solo lo cierra
+	for (const TSharedPtr<SComboButton>& M : { MenuIdioma, MenuAjustes })
+	{
+		if (M.IsValid() && M->IsOpen()) { M->SetIsOpen(false); return true; }
+	}
 	// 1) resultados del buscador
 	if (Buscador.IsValid() && !Buscador->GetText().IsEmpty())
 	{
@@ -550,6 +662,18 @@ void SCorpusInterfaz::Tick(const FGeometry& G, const double Tiempo, const float 
 		}
 	}
 	TamVista = FVector2D(G.GetLocalSize()) / (double)FMath::Max(EscalaUI, 0.01f);   // en las unidades de dentro del SDPIScaler
+	ActualizarZonaLibre();
+	// la barra de disección pinta la pieza aislada; la tecla I la cambia sin pasar por la interfaz
+	if (const ACorpusCuerpo* Cu = Cuerpo()) { if (Cu->Aislada() != AisladaPintada) { RehacerHerramientas(); } }
+	// subrayado de la barra de modos: 180 ms con salida suave hasta la pestaña del modo activo
+	{
+		const int32 Meta = ModoActivo();
+		if (Meta != ModoMeta) { ModoDesde = ModoPos; ModoMeta = Meta; ModoT = 0.f; }
+		ModoT = FMath::Min(1.f, ModoT + FMath::Min(Dt, 0.1f) * EscalaAnim / DUR_MODO);
+		ModoPos = FMath::Lerp(ModoDesde, (float)ModoMeta, FMath::InterpEaseOut(0.f, 1.f, ModoT, 2.f));
+		if (FilaModos.IsValid()) { const float A = (float)FilaModos->GetTickSpaceGeometry().GetLocalSize().X / 3.f; if (A > 1.f) { AnchoPestana = A; } }
+		if (Subrayado.IsValid()) { Subrayado->SetRenderTransform(FSlateRenderTransform(FVector2D(ModoPos * AnchoPestana + E_3, 0.0))); }
+	}
 	// zona libre para los rótulos de los relieves: medida sobre los paneles de verdad (no con cifras fijas)
 	if (Marcas.IsValid())
 	{
@@ -594,6 +718,8 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 	Anim[P_FICHA].Ver = [this]() { const ACorpusCuerpo* C = Cuerpo(); return !bVerEst && C && !C->Seleccionada().IsEmpty(); };
 	Anim[P_FICHA].Desde = FVector2D(12, 0);
 	Anim[P_EST].Ver = [this]() { return bVerEst; };                            Anim[P_EST].Desde = FVector2D(12, 0);
+	Anim[P_BARRA].Ver = [this]() { return !bVerEst; };                         Anim[P_BARRA].Desde = FVector2D(0, 8);   // en Estudiar manda el recorrido
+	Anim[P_VISTAS].Ver = []() { return true; };                                Anim[P_VISTAS].Desde = FVector2D(-8, 0);
 
 	ChildSlot
 	[
@@ -603,45 +729,124 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 		SNew(SOverlay)
 		// ── Debajo de los paneles: marcas de los relieves óseos sobre el modelo ──
 		+ SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Fill)[ SAssignNew(Marcas, SCorpusMarcas) ]
-		// ── Panel izquierdo: cuerpo, idioma y capas ──
+		// ── Columna izquierda: barra de modos y, debajo, el panel de capas (o su botón cuando está plegado) ──
 		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Fill).Padding(M_PANTALLA)
 		[
-			SAssignNew(Anim[P_IZQ].W, SBox).WidthOverride(360.f)
-			.Visibility_Lambda([this]() { return VisAnim(P_IZQ); })
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot().AutoHeight()[ SNew(SBox).WidthOverride(ANCHO_IZQ)[ SAssignNew(CajaModos, SVerticalBox) ] ]
+			+ SVerticalBox::Slot().FillHeight(1.f).Padding(0, E_2, 0, 0)
 			[
-				SNew(SBorder).BorderImage(Panel()).Padding(RELLENO_PANEL)
+				SNew(SOverlay)
+				// panel izquierdo: cabecera (marca, idioma, ajustes, plegar), cuerpo y capas
+				+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Fill)
 				[
-					SNew(SVerticalBox)
-					+ SVerticalBox::Slot().AutoHeight()
+					SAssignNew(Anim[P_IZQ].W, SBox).WidthOverride(ANCHO_IZQ)
+					.Visibility_Lambda([this]() { return VisAnim(P_IZQ); })
 					[
-						SNew(SHorizontalBox)
-						+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)[ Txt(TEXT("CORPUS"), T_MARCA_CORPUS, C_TINTA, EPeso::Negrita) ]
-						// plegar el panel: el modelo ocupa toda la pantalla
-						+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ Boton(TEXT("«"), [this]() { bPanelPlegado = true; }) ]
+						SNew(SBorder).BorderImage(Panel()).Padding(RELLENO_PANEL)
+						[
+							SNew(SVerticalBox)
+							+ SVerticalBox::Slot().AutoHeight()[ SAssignNew(CajaBarra, SVerticalBox) ]
+							+ SVerticalBox::Slot().FillHeight(1.f).Padding(0, E_3, 0, 0)
+							[
+								SNew(SOverlay)
+								+ SOverlay::Slot()
+								[
+									SAssignNew(RolloCapas, SScrollBox).ScrollBarStyle(&EstiloRollo()).ScrollBarThickness(GROSOR_ROLLO)
+									+ SScrollBox::Slot()[ SAssignNew(CajaCapas, SVerticalBox) ]
+								]
+								// degradado de 24 px al pie mientras quede lista por debajo
+								+ SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Bottom)
+								[
+									SNew(SCorpusDegradado)
+									.Visibility_Lambda([this]()
+									{
+										const bool bMas = RolloCapas.IsValid() && RolloCapas->GetScrollOffsetOfEnd() - RolloCapas->GetScrollOffset() > 1.f;
+										return bMas ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
+									})
+								]
+							]
+						]
 					]
-					+ SVerticalBox::Slot().AutoHeight().Padding(0, E_1, 0, E_3)[ SAssignNew(CajaBarra, SVerticalBox) ]
-					+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, E_2)[ SAssignNew(CajaHerr, SVerticalBox) ]
-					+ SVerticalBox::Slot().FillHeight(1.f)
+				]
+				// panel plegado: solo un botón para volver a abrirlo
+				+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top)
+				[
+					SAssignNew(Anim[P_MINI].W, SBox)
+					.Visibility_Lambda([this]() { return VisAnim(P_MINI); })
 					[
-						SNew(SScrollBox).ScrollBarStyle(&EstiloRollo()).ScrollBarThickness(GROSOR_ROLLO)
-						+ SScrollBox::Slot()[ SAssignNew(CajaCapas, SVerticalBox) ]
+						SNew(SBorder).BorderImage(Panel()).Padding(E_2)[ SAssignNew(CajaMini, SVerticalBox) ]
 					]
 				]
 			]
 		]
-		// ── Panel izquierdo plegado: solo un botón para volver a abrirlo ──
-		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(M_PANTALLA)
+		// ── Abajo a la izquierda, sobre el visor: cruceta de vistas (sigue al borde del panel izquierdo mientras se pliega) ──
+		+ SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Bottom)
 		[
-			SAssignNew(Anim[P_MINI].W, SBox)
-			.Visibility_Lambda([this]() { return VisAnim(P_MINI); })
+			SNew(SBox).HAlign(HAlign_Left).Padding_Lambda([this]() { return FMargin(BordeIzq(), 0.f, 0.f, M_PANTALLA); })
 			[
-				SNew(SBorder).BorderImage(Panel()).Padding(E_2)[ SAssignNew(CajaMini, SVerticalBox) ]
+				SAssignNew(Anim[P_VISTAS].W, SBox)
+				.Visibility_Lambda([this]() { return VisAnim(P_VISTAS); })
+				[
+					SNew(SBorder).BorderImage(Panel()).Padding(E_1)[ SAssignNew(CajaVistas, SVerticalBox) ]
+				]
 			]
 		]
-		// ── Arriba: buscador ──
-		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Top).Padding(M_PANTALLA)
+		// ── Abajo, centrada en la zona libre: barra flotante de disección ──
+		// (posición calculada a mano: SBox con relleno y HAlign_Center descentraba la barra hacia la derecha)
+		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Bottom)
 		[
-			SAssignNew(Anim[P_BUSCA].W, SBox).WidthOverride(460.f)
+			SNew(SBox)
+			.Padding_Lambda([this]()
+			{
+				// a la izquierda, después de la cruceta; a la derecha, antes de lo que llega al pie (estudio, ficha larga, movimiento)
+				const float Izq = BordeIzq() + (Anim[P_VISTAS].W.IsValid() ? (float)Anim[P_VISTAS].W->GetDesiredSize().X + E_3 : 0.f);
+				// siempre abajo (subirla por encima del panel de movimiento la dejaba flotando sobre el pecho del modelo)
+				const float Der = BordeDer(true);
+				const float Ancho = Anim[P_BARRA].W.IsValid() ? (float)Anim[P_BARRA].W->GetDesiredSize().X : 0.f;
+				const float Hueco = FMath::Max((float)TamVista.X - Izq - Der, 0.f);
+				// la escala (si no cabe) se aplica alrededor del centro: el centro visual queda en el centro del hueco
+				return FMargin(FMath::Max(Izq + 0.5f * (Hueco - Ancho), 0.f), 0.f, 0.f, M_PANTALLA);
+			})
+			[
+				// si no cabe (junto al panel de movimiento, ventana estrecha o texto grande) se encoge entera en lugar de pisar los paneles.
+				// Escala propia por fotograma: SScaleBox se quedaba con una escala inválida tras ocultarse la barra (Estudiar) y no volvía.
+				SNew(SBox).RenderTransformPivot(FVector2D(0.5f, 1.f))
+				.RenderTransform_Lambda([this]()
+				{
+					const float Izq = BordeIzq() + (Anim[P_VISTAS].W.IsValid() ? (float)Anim[P_VISTAS].W->GetDesiredSize().X + E_3 : 0.f);
+					const float Hueco = FMath::Max((float)TamVista.X - Izq - BordeDer(true), 160.f);
+					const float Ancho = Anim[P_BARRA].W.IsValid() ? (float)Anim[P_BARRA].W->GetDesiredSize().X : 0.f;
+					const float S = Ancho > 1.f ? FMath::Clamp(Hueco / Ancho, 0.5f, 1.f) : 1.f;
+					return TOptional<FSlateRenderTransform>(FSlateRenderTransform(S));
+				})
+				[
+					SAssignNew(Anim[P_BARRA].W, SBox).HeightOverride(ALTO_BARRA)
+					.Visibility_Lambda([this]() { return VisAnim(P_BARRA); })
+					[
+						SNew(SBorder).BorderImage(Pildora()).Padding(FMargin(E_2, 0.f)).VAlign(VAlign_Center)[ SAssignNew(CajaHerr, SVerticalBox) ]
+					]
+				]
+			]
+		]
+		// ── Arriba: buscador, centrado entre la barra de modos y los paneles de la derecha (se encoge si no cabe) ──
+		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top)
+		[
+			SNew(SBox)
+			.Padding_Lambda([this]()
+			{
+				// centrado a mano entre la barra de modos y los paneles de la derecha; si no cabe, se estrecha (WidthOverride_Lambda)
+				const float Izq = M_PANTALLA + ANCHO_IZQ + E_2, Der = BordeDer(false);
+				const float Hueco = FMath::Max((float)TamVista.X - Izq - Der, 0.f);
+				return FMargin(Izq + FMath::Max(0.5f * (Hueco - FMath::Min(ANCHO_BUSCADOR, Hueco)), 0.f), M_PANTALLA, 0.f, M_PANTALLA);
+			})
+			[
+			SAssignNew(Anim[P_BUSCA].W, SBox)
+			.WidthOverride_Lambda([this]()
+			{
+				const float Hueco = (float)TamVista.X - (M_PANTALLA + ANCHO_IZQ + E_2) - BordeDer(false);
+				return FOptionalSize(FMath::Clamp(Hueco, 200.f, ANCHO_BUSCADOR));
+			})
 			[
 				SNew(SBorder).BorderImage(Panel()).Padding(E_3)
 				[
@@ -670,21 +875,23 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 					]
 				]
 			]
+			]
 		]
 		// ── Abajo: movimiento (rango articular) ──
 		// (a la derecha: en el centro tapaba las piernas y los pies, que es lo que hay que ver en la marcha)
 		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom).Padding(M_PANTALLA)
 		[
-			SAssignNew(Anim[P_MOV].W, SBox).WidthOverride(520.f)
+			SAssignNew(Anim[P_MOV].W, SBox).WidthOverride(ANCHO_MOV)
 			.Visibility_Lambda([this]() { return VisAnim(P_MOV); })
 			[
-				SNew(SBorder).BorderImage(Panel()).Padding(E_4)[ SAssignNew(CajaMov, SVerticalBox) ]
+				// el modo activo tiñe el borde de su panel
+				SNew(SBorder).BorderImage_Lambda([this]() { return ModoActivo() == 1 ? PanelModo() : Panel(); }).Padding(E_4)[ SAssignNew(CajaMov, SVerticalBox) ]
 			]
 		]
 		// ── Derecha: ficha de la estructura seleccionada ──
 		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Top).Padding(M_PANTALLA)
 		[
-			SAssignNew(Anim[P_FICHA].W, SBox).WidthOverride(400.f)
+			SAssignNew(Anim[P_FICHA].W, SBox).WidthOverride(ANCHO_FICHA)
 			// la ficha no baja hasta el panel de movimiento (antes se pisaban): se acorta y su contenido se desplaza.
 			// TamVista y los tamaños deseados están en las mismas unidades (dentro del SDPIScaler).
 			.MaxDesiredHeight_Lambda([this]()
@@ -705,7 +912,7 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 				return VisAnim(P_FICHA);
 			})
 			[
-				SNew(SBorder).BorderImage(Panel()).Padding(RELLENO_PANEL)
+				SNew(SBorder).BorderImage_Lambda([this]() { return ModoActivo() == 0 ? PanelModo() : Panel(); }).Padding(RELLENO_PANEL)
 				[
 					SNew(SScrollBox).ScrollBarStyle(&EstiloRollo()).ScrollBarThickness(GROSOR_ROLLO)
 					+ SScrollBox::Slot()[ SAssignNew(CajaFicha, SVerticalBox) ]
@@ -715,10 +922,10 @@ void SCorpusInterfaz::Construct(const FArguments& Args)
 		// ── Derecha, a toda la altura: panel de estudio (lecciones, recorridos, kinesiología, casos, patologías, glosario) ──
 		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Fill).Padding(M_PANTALLA)
 		[
-			SAssignNew(Anim[P_EST].W, SBox).WidthOverride(500.f)
+			SAssignNew(Anim[P_EST].W, SBox).WidthOverride(ANCHO_EST)
 			.Visibility_Lambda([this]() { return VisAnim(P_EST); })
 			[
-				SNew(SBorder).BorderImage(Panel()).Padding(RELLENO_PANEL)
+				SNew(SBorder).BorderImage(PanelModo()).Padding(RELLENO_PANEL)   // solo se ve en el modo Estudiar
 				[
 					SNew(SVerticalBox)
 					+ SVerticalBox::Slot().AutoHeight()[ SAssignNew(CajaEstCab, SVerticalBox) ]
@@ -752,68 +959,118 @@ void SCorpusInterfaz::Reconstruir()
 	if (!D || !C || !CajaBarra.IsValid()) { return; }
 	TWeakObjectPtr<ACorpusCuerpo> WC(C);
 	TWeakObjectPtr<UCorpusDatos> WD(D);
-	TWeakObjectPtr<ACorpusJugador> WJ(Jugador);
 
 	if (Buscador.IsValid()) { Buscador->SetHintText(FText::FromString(D->T(TEXT("Buscar estructura…")))); }
 
 	if (CajaMini.IsValid())
 	{
 		CajaMini->ClearChildren();
-		CajaMini->AddSlot().AutoHeight()[ Boton(TEXT("»  ") + D->T(TEXT("Capas")), [this]() { bPanelPlegado = false; }) ];
+		CajaMini->AddSlot().AutoHeight()
+		[
+			SNew(SBox).ToolTipText(FText::FromString(D->T(TEXT("Abrir el panel de capas"))))[ Boton(TEXT("»  ") + D->T(TEXT("Capas")), [this]() { PlegarPanel(false); }) ]
+		];
 	}
 
 	CuerpoPintado = (uint8)C->Cuerpo();
 	CajaBarra->ClearChildren();
-	CajaBarra->AddSlot().AutoHeight()[ Txt(D->T(TEXT("Atlas anatómico 3D libre")), T_SECUNDARIO, C_GRIS) ];
 
-	// Cuerpo: hombre, mujer o Visible Human
-	TSharedRef<SWrapBox> FilaCuerpo = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
-	const TPair<const TCHAR*, ECorpusCuerpo> Cuerpos[] = { {TEXT("Hombre"), ECorpusCuerpo::Hombre}, {TEXT("Mujer"), ECorpusCuerpo::Mujer}, {TEXT("Visible Human"), ECorpusCuerpo::VisibleHuman} };
-	for (const auto& Par : Cuerpos)
+	// ── Cabecera: marca, idioma y ajustes (menús desplegables) y plegar ──
 	{
-		const ECorpusCuerpo Cual = Par.Value;
-		FilaCuerpo->AddSlot()[ BotonSel(D->T(Par.Key), [WC, Cual]() { if (WC.IsValid()) { WC->PonerCuerpo(Cual); } }, C->Cuerpo() == Cual) ];
-	}
-	CajaBarra->AddSlot().AutoHeight().Padding(0, E_3, 0, 0)[ FilaCuerpo ];
-
-	// Idioma
-	TSharedRef<SWrapBox> FilaIdioma = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
-	for (const TCHAR* L : { TEXT("es"), TEXT("en"), TEXT("pt"), TEXT("fr"), TEXT("de") })
-	{
-		const FString Cod(L);
-		FilaIdioma->AddSlot()[ BotonSel(Cod.ToUpper(), [WD, Cod]() { if (WD.IsValid()) { WD->PonerIdioma(Cod); } }, D->Idioma() == Cod) ];
-	}
-	CajaBarra->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)[ FilaIdioma ];
-
-	// Tamaño del texto (90 · 100 · 125 · 150 %): multiplica la escala por resolución; se guarda para la próxima vez
-	CajaBarra->AddSlot().AutoHeight().Padding(0, E_3, 0, E_1)[ Etiqueta(D->T(TEXT("Tamaño del texto"))) ];
-	TSharedRef<SWrapBox> FilaTam = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
-	for (const int32 Por : { 90, 100, 125, 150 })
-	{
-		FilaTam->AddSlot()[ BotonSel(FString::Printf(TEXT("%d %%"), Por), [this, Por]() { PonerTamTexto(Por); Reconstruir(); }, TamTexto == Por) ];
-	}
-	CajaBarra->AddSlot().AutoHeight()[ FilaTam ];
-
-	// Vistas fijas y mostrar todo
-	TSharedRef<SWrapBox> FilaVistas = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
-	const TCHAR* Vistas[] = { TEXT("Anterior"), TEXT("Posterior"), TEXT("Derecha"), TEXT("Izquierda"), TEXT("Superior"), TEXT("Inferior") };
-	for (int32 i = 0; i < 6; ++i)
-	{
-		FilaVistas->AddSlot()[ Boton(D->T(Vistas[i]), [WJ, i]() { if (WJ.IsValid() && WJ->CamaraOrbital()) { WJ->CamaraOrbital()->Vista(i); } }) ];
-	}
-	FilaVistas->AddSlot()[ Boton(D->T(TEXT("Mostrar todo")), [WC]() { if (WC.IsValid()) { WC->MostrarTodo(); } }) ];
-	if (C->MovimientoDisponible())
-	{
-		FilaVistas->AddSlot()[ Boton(D->T(TEXT("Movimiento")), [this, WC]()
+		// idioma: código del activo en el botón; en el menú, cada idioma con su nombre propio (no se traduce)
+		TSharedRef<SVerticalBox> ListaIdiomas = SNew(SVerticalBox);
+		ListaIdiomas->AddSlot().AutoHeight().Padding(E_1, 0, E_1, E_1)[ Etiqueta(D->T(TEXT("Idioma"))) ];
+		const TPair<const TCHAR*, const TCHAR*> Idiomas[] = { {TEXT("es"), TEXT("Español")}, {TEXT("en"), TEXT("English")}, {TEXT("pt"), TEXT("Português (Brasil)")}, {TEXT("fr"), TEXT("Français")}, {TEXT("de"), TEXT("Deutsch")} };
+		for (const auto& Par : Idiomas)
 		{
-			bVerMov = !bVerMov;
-			if (WC.IsValid() && !bVerMov) { WC->PonerMarcha(-1, 0.f); WC->PonerEjercicio(-1, 0, 0.f); WC->QuitarPostura(); }
-			MovPintado = FIntVector(-2, -2, -2); RehacerMovimiento();
-		}, bVerMov ? ECorpusBoton::Seleccionado : ECorpusBoton::Normal) ];
-	}
-	FilaVistas->AddSlot()[ BotonSel(D->TE(TEXT("Estudiar")), [this]() { AbrirEstudio(!bVerEst); }, bVerEst) ];
-	CajaBarra->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)[ FilaVistas ];
+			const FString Cod(Par.Key);
+			const bool bSel = D->Idioma() == Cod;
+			ListaIdiomas->AddSlot().AutoHeight().Padding(0, 1)
+			[
+				SNew(SBox).MinDesiredWidth(200.f)
+				[
+					BotonFila(SNew(SHorizontalBox)
+						+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, E_3, 0)
+						[ SNew(SBox).WidthOverride(24.f)[ TxtLinea(Cod.ToUpper(), T_CUERPO, bSel ? C_ACENTO_ENCIMA : C_GRIS, EPeso::Negrita) ] ]
+						+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)[ TxtLinea(Par.Value, T_CUERPO, bSel ? C_ACENTO_ENCIMA : C_TINTA, bSel ? EPeso::Media : EPeso::Regular) ],
+						[this, WD, Cod]()
+						{
+							if (MenuIdioma.IsValid()) { MenuIdioma->SetIsOpen(false); }
+							if (WD.IsValid()) { WD->PonerIdioma(Cod); }   // rehace la interfaz entera (Reconstruir)
+						},
+						bSel ? &EstiloBoton(ECorpusBoton::Seleccionado) : nullptr)
+				]
+			];
+		}
+		// ajustes: «Tamaño del texto» (90 · 100 · 125 · 150 %, multiplica la escala por resolución; se guarda para la próxima vez)
+		TSharedRef<SVerticalBox> ListaAjustes = SNew(SVerticalBox);
+		ListaAjustes->AddSlot().AutoHeight().Padding(E_1, 0, E_1, E_2)[ Etiqueta(D->T(TEXT("Tamaño del texto"))) ];
+		TSharedRef<SHorizontalBox> FilaTam = SNew(SHorizontalBox);
+		for (const int32 Por : { 90, 100, 125, 150 })
+		{
+			FilaTam->AddSlot().AutoWidth().Padding(Por == 90 ? 0.f : HUECO, 0, 0, 0)
+			[ BotonSel(FString::Printf(TEXT("%d %%"), Por), [this, Por]() { if (MenuAjustes.IsValid()) { MenuAjustes->SetIsOpen(false); } PonerTamTexto(Por); Reconstruir(); }, TamTexto == Por) ];
+		}
+		ListaAjustes->AddSlot().AutoHeight()[ FilaTam ];
 
+		const auto Menu = [](TSharedPtr<SComboButton>& Guardar, const TSharedRef<SWidget>& Etiq, const FString& Ayuda, const TSharedRef<SWidget>& Contenido) -> TSharedRef<SWidget>
+		{
+			return SNew(SBox).MinDesiredHeight(BOTON_ALTO_MIN)
+			[
+				SAssignNew(Guardar, SComboButton).ComboButtonStyle(&EstiloMenu()).ButtonStyle(&EstiloBoton(ECorpusBoton::Normal))
+				.HasDownArrow(false).ContentPadding(FMargin(E_2, E_1)).VAlign(VAlign_Center)
+				// el menú se dibuja dentro de esta ventana (sale en las capturas y respeta la escala de la interfaz)
+				.Method(EPopupMethod::UseCurrentWindow).MenuPlacement(MenuPlacement_BelowAnchor)
+				.ToolTipText(FText::FromString(Ayuda))
+				.ButtonContent()[ Etiq ]
+				.MenuContent()[ Contenido ]
+			];
+		};
+		CajaBarra->AddSlot().AutoHeight()
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)[ Txt(TEXT("CORPUS"), T_MARCA_CORPUS, C_TINTA, EPeso::Negrita) ]
+			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, HUECO, 0)
+			[
+				Menu(MenuIdioma,
+					SNew(SHorizontalBox)
+					// texto sin ToolTip propio: así se ve el del botón («Idioma»)
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ SNew(STextBlock).Text(FText::FromString(D->Idioma().ToUpper())).Font(Letra(T_CUERPO, EPeso::Media)).ColorAndOpacity(FSlateColor(C_TINTA)) ]
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(E_1, 0, 0, 0)[ Chevron(true, C_GRIS) ],
+					D->T(TEXT("Idioma")), ListaIdiomas)
+			]
+			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, HUECO, 0)
+			[
+				Menu(MenuAjustes, SNew(STextBlock).Text(FText::FromString(TEXT("Aa"))).Font(Letra(T_CUERPO, EPeso::Media)).ColorAndOpacity(FSlateColor(C_TINTA)),
+					D->T(TEXT("Ajustes")) + TEXT(": ") + D->T(TEXT("Tamaño del texto")), ListaAjustes)
+			]
+			// plegar el panel: el modelo ocupa toda la pantalla
+			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+			[ SNew(SBox).ToolTipText(FText::FromString(D->T(TEXT("Plegar el panel"))))[ Boton(TEXT("«"), [this]() { PlegarPanel(true); }) ] ]
+		];
+	}
+	CajaBarra->AddSlot().AutoHeight().Padding(0, E_1, 0, 0)[ Txt(D->T(TEXT("Atlas anatómico 3D libre")), T_SECUNDARIO, C_GRIS) ];
+
+	// ── Cuerpo: hombre, mujer o Visible Human, como control segmentado (tres partes iguales dentro de una tarjeta) ──
+	{
+		TSharedRef<SUniformGridPanel> Seg = SNew(SUniformGridPanel).SlotPadding(FMargin(2.f, 0.f));
+		const TPair<const TCHAR*, ECorpusCuerpo> Cuerpos[] = { {TEXT("Hombre"), ECorpusCuerpo::Hombre}, {TEXT("Mujer"), ECorpusCuerpo::Mujer}, {TEXT("Visible Human"), ECorpusCuerpo::VisibleHuman} };
+		for (int32 k = 0; k < 3; ++k)
+		{
+			const ECorpusCuerpo Cual = Cuerpos[k].Value;
+			const bool bSel = C->Cuerpo() == Cual;
+			const ECorpusBoton Papel = bSel ? ECorpusBoton::Seleccionado : ECorpusBoton::Normal;
+			Seg->AddSlot(k, 0)
+			[
+				ConFoco(SNew(SButton).ButtonStyle(&EstiloBoton(Papel)).ContentPadding(FMargin(E_1, E_2)).HAlign(HAlign_Center).VAlign(VAlign_Center)
+					.OnClicked_Lambda([WC, Cual]() { if (WC.IsValid()) { WC->PonerCuerpo(Cual); } return FReply::Handled(); })
+					[ TxtLinea(D->T(Cuerpos[k].Key), T_CUERPO, ColorTextoBoton(Papel), bSel ? EPeso::Media : EPeso::Regular) ])
+			];
+		}
+		CajaBarra->AddSlot().AutoHeight().Padding(0, E_3, 0, 0)[ SNew(SBorder).BorderImage(Panel2()).Padding(2.f)[ Seg ] ];
+	}
+
+	RehacerModos();
+	RehacerVistas();
 	RehacerEstudio();
 	RehacerHerramientas();
 	RehacerCapas();
@@ -828,42 +1085,263 @@ void SCorpusInterfaz::RehacerHerramientas()
 	ACorpusCuerpo* C = Cuerpo();
 	if (!D || !C || !CajaHerr.IsValid()) { return; }
 	CajaHerr->ClearChildren();
+	AisladaPintada = C->Aislada();
 	TWeakObjectPtr<ACorpusCuerpo> WC(C);
+	TWeakObjectPtr<UCorpusDatos> WD(D);
+	TSharedRef<SHorizontalBox> Fila = SNew(SHorizontalBox);
+	const auto Pon = [&Fila](const TSharedRef<SWidget>& W, float Antes) { Fila->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(Antes, 0.f, 0.f, 0.f)[ W ]; };
+	const auto Raya = [&Pon]() { Pon(Separador(), E_2); };
+	const FString SinSel = D->T(TEXT("Selecciona una estructura en el modelo"));
+
+	// ── Aislar y ocultar la estructura seleccionada (sin selección quedan desactivados; aislar otra vez lo deshace) ──
+	Pon(BotonBarra(D->T(TEXT("Aislar")), D->T(TEXT("Aislar la estructura seleccionada (I)")),
+		[WC]()
+		{
+			if (!WC.IsValid()) { return; }
+			const FString A = WC->Aislada(), S = WC->Seleccionada();
+			WC->Aislar((!A.IsEmpty() && (S.IsEmpty() || S == A)) ? A : S);   // Tick rehace la barra al ver el cambio
+		},
+		C->Aislada().IsEmpty() ? ECorpusBoton::Normal : ECorpusBoton::Seleccionado,
+		TAttribute<bool>::CreateLambda([WC]() { return WC.IsValid() && (!WC->Seleccionada().IsEmpty() || !WC->Aislada().IsEmpty()); }), SinSel), 0.f);
+	Pon(BotonBarra(D->T(TEXT("Ocultar")), D->T(TEXT("Ocultar la estructura seleccionada (H)")),
+		[WC]() { if (WC.IsValid() && !WC->Seleccionada().IsEmpty()) { WC->Ocultar(WC->Seleccionada()); } },
+		ECorpusBoton::Normal, TAttribute<bool>::CreateLambda([WC]() { return WC.IsValid() && !WC->Seleccionada().IsEmpty(); }), SinSel), HUECO);
+	Raya();
 
 	// ── Fantasma: todo translúcido menos la capa de la pieza seleccionada (sin selección, menos los huesos) ──
-	CajaHerr->AddSlot().AutoHeight().Padding(0, E_1, 0, E_1)[ Etiqueta(D->T(TEXT("Disección"))) ];
-	CajaHerr->AddSlot().AutoHeight()
-	[
-		SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO))
-		+ SWrapBox::Slot()[ BotonSel(D->T(TEXT("Fantasma")), [WC]() { if (WC.IsValid()) { WC->Fantasma(!WC->EnFantasma()); } }, C->EnFantasma()) ]
-	];
+	Pon(BotonBarra(D->T(TEXT("Fantasma")), D->T(TEXT("Fantasma: todo translúcido menos la capa de la estructura seleccionada")),
+		[WC]() { if (WC.IsValid()) { WC->Fantasma(!WC->EnFantasma()); } }, C->EnFantasma() ? ECorpusBoton::Seleccionado : ECorpusBoton::Normal), E_2);
+	Raya();
 
-	// ── Plano de corte: sagital, coronal o axial (otra vez sobre el activo lo apaga), posición e invertir ──
-	CajaHerr->AddSlot().AutoHeight().Padding(0, E_2, 0, E_1)[ Etiqueta(D->T(TEXT("Plano de corte"))) ];
-	TSharedRef<SWrapBox> FilaCorte = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
+	// ── Pelar capas de músculo: − devuelve una, + quita la más superficial; en medio, la más superficial que se ve ──
+	Pon(BotonBarra(TEXT("−"), D->T(TEXT("Devuelve la última capa de músculos quitada")),
+		[WC]() { if (WC.IsValid()) { PonerPelado(WC.Get(), NivelPelado(WC.Get()) - 1); } }, ECorpusBoton::Normal,
+		TAttribute<bool>::CreateLambda([WC]() { return NivelPelado(WC.Get()) > 0; })), E_2);
+	Pon(SNew(SBox).MinDesiredWidth(ANCHO_PELADO).HAlign(HAlign_Center)
+		.ToolTipText(FText::FromString(D->T(TEXT("Capa de músculos más superficial a la vista"))))
+		[
+			SNew(STextBlock).Font(Letra(T_SECUNDARIO, EPeso::Media)).ColorAndOpacity(FSlateColor(C_TINTA))
+			.Text_Lambda([WC, WD]() { return WD.IsValid() ? FText::FromString(WD->T(NOMBRES_PELADO[NivelPelado(WC.Get())])) : FText(); })
+		], E_1);
+	Pon(BotonBarra(TEXT("+"), D->T(TEXT("Pelar: quita la capa de músculos más superficial")),
+		[WC]() { if (WC.IsValid()) { PonerPelado(WC.Get(), NivelPelado(WC.Get()) + 1); } }, ECorpusBoton::Normal,
+		TAttribute<bool>::CreateLambda([WC]() { return WC.IsValid() && NivelPelado(WC.Get()) < 2; })), E_1);
+	Raya();
+
+	// ── Plano de corte: S, C o A (la inicial del plano en el idioma; otra vez sobre el activo lo apaga), posición e invertir ──
 	const TCHAR* Ejes[] = { TEXT("Sagital"), TEXT("Coronal"), TEXT("Axial") };
+	const TCHAR* AyudaEjes[] = { TEXT("Corte sagital"), TEXT("Corte coronal"), TEXT("Corte axial") };
 	const int32 Eje = C->EjeCorte();
 	for (int32 i = 0; i < 3; ++i)
 	{
-		FilaCorte->AddSlot()[ BotonSel(D->T(Ejes[i]), [WC, i]() { if (WC.IsValid()) { if (WC->EjeCorte() == i) { WC->QuitarCorte(); } else { WC->PonerCorte(i, 0.5f); } } }, Eje == i) ];
+		Pon(BotonBarra(Mayus(D->T(Ejes[i])).Left(1), D->T(AyudaEjes[i]),
+			[WC, i]() { if (WC.IsValid()) { if (WC->EjeCorte() == i) { WC->QuitarCorte(); } else { WC->PonerCorte(i, 0.5f); } } },
+			Eje == i ? ECorpusBoton::Seleccionado : ECorpusBoton::Normal), i == 0 ? E_2 : HUECO);
 	}
 	if (Eje >= 0)
 	{
-		FilaCorte->AddSlot()[ BotonSel(D->T(TEXT("Invertir")), [WC]() { if (WC.IsValid()) { WC->InvertirCorte(); } }, C->CorteInvertido()) ];
-		FilaCorte->AddSlot()[ Boton(D->T(TEXT("Quitar corte")), [WC]() { if (WC.IsValid()) { WC->QuitarCorte(); } }) ];
+		Pon(SNew(SBox).WidthOverride(ANCHO_CORTE)
+			[
+				SNew(SSlider).Style(&EstiloDeslizador()).MinValue(0.f).MaxValue(1.f)
+				.ToolTipText_Lambda([WC, WD]() { return FText::FromString(FString::Printf(TEXT("%s: %d %%"), WD.IsValid() ? *WD->T(TEXT("Posición del corte")) : TEXT(""), WC.IsValid() ? FMath::RoundToInt(100.f * WC->PosCorte()) : 50)); })
+				.Value_Lambda([WC]() { return WC.IsValid() ? WC->PosCorte() : 0.5f; })
+				.OnValueChanged_Lambda([WC](float V) { if (WC.IsValid() && WC->EjeCorte() >= 0) { WC->PonerCorte(WC->EjeCorte(), V); } })
+			], E_2);
+		Pon(BotonBarra(D->T(TEXT("Invertir")), D->T(TEXT("Enseña la otra mitad")),
+			[WC]() { if (WC.IsValid()) { WC->InvertirCorte(); } }, C->CorteInvertido() ? ECorpusBoton::Seleccionado : ECorpusBoton::Normal), E_2);
 	}
-	CajaHerr->AddSlot().AutoHeight()[ FilaCorte ];
-	if (Eje >= 0)
-	{
-		CajaHerr->AddSlot().AutoHeight().Padding(0, E_2, 0, 0)
+	Raya();
+
+	// ── Restablecer: muestra todo y quita aislado, ocultas, corte, fantasma y pelado ──
+	Pon(BotonBarra(D->T(TEXT("Restablecer")), D->T(TEXT("Restablecer: muestra todo y quita el corte, el fantasma y el pelado")),
+		[this, WC]()
+		{
+			if (!WC.IsValid()) { return; }
+			if (RelVistos.Num() > 0) { VerRelieves(TArray<int32>(), false); }   // apaga el fantasma que encendieron las marcas
+			WC->MostrarTodo();
+			WC->QuitarCorte();
+			WC->Fantasma(false);
+			PonerPelado(WC.Get(), 0);
+		}, ECorpusBoton::Normal), E_2);
+
+	CajaHerr->AddSlot().AutoHeight()[ Fila ];
+	RehacerFicha();   // la ficha pinta el estado del mapa de origen e inserción
+}
+
+TSharedRef<SWidget> SCorpusInterfaz::BotonBarra(const FString& Texto, const FString& Ayuda, TFunction<void()> Accion, ECorpusBoton Papel, TAttribute<bool> Activo, const FString& AyudaInactivo) const
+{
+	const FLinearColor ColTexto = ColorTextoBoton(Papel);
+	return ConFoco(SNew(SButton)
+		.ButtonStyle(&EstiloBoton(Papel))
+		.ContentPadding(FMargin(E_3, E_1))
+		.HAlign(HAlign_Center).VAlign(VAlign_Center)
+		.IsEnabled(Activo)
+		// con el botón desactivado, la ayuda dice qué falta (p. ej. seleccionar una estructura)
+		.ToolTipText_Lambda([Activo, Ayuda, AyudaInactivo]() { return FText::FromString((!AyudaInactivo.IsEmpty() && !Activo.Get()) ? AyudaInactivo : Ayuda); })
+		.OnClicked_Lambda([Accion]() { Accion(); return FReply::Handled(); })
 		[
-			SNew(SSlider).Style(&EstiloDeslizador()).MinValue(0.f).MaxValue(1.f)
-			.ToolTipText_Lambda([WC]() { return FText::FromString(FString::Printf(TEXT("%d %%"), WC.IsValid() ? FMath::RoundToInt(100.f * WC->PosCorte()) : 50)); })
-			.Value_Lambda([WC]() { return WC.IsValid() ? WC->PosCorte() : 0.5f; })
-			.OnValueChanged_Lambda([WC](float V) { if (WC.IsValid() && WC->EjeCorte() >= 0) { WC->PonerCorte(WC->EjeCorte(), V); } })
+			SNew(STextBlock).Text(FText::FromString(Texto)).Font(Letra(T_CUERPO, Papel == ECorpusBoton::Normal ? EPeso::Regular : EPeso::Media))
+			.ColorAndOpacity_Lambda([Activo, ColTexto]() { return FSlateColor(Activo.Get() ? ColTexto : C_GRIS); })
+		]);
+}
+
+void SCorpusInterfaz::RehacerVistas()
+{
+	UCorpusDatos* D = Datos();
+	if (!D || !CajaVistas.IsValid()) { return; }
+	CajaVistas->ClearChildren();
+	TWeakObjectPtr<ACorpusJugador> WJ(Jugador);
+	// cruceta: superior arriba, inferior abajo y, en medio, derecha · anterior · izquierda (la derecha del cuerpo a la izquierda
+	// de quien mira de frente, como en una lámina); posterior en la esquina. Abreviatura en el botón y nombre completo en la ayuda.
+	struct FVistaCruz { int32 Vista, Col, Fila; const TCHAR* Corto; const TCHAR* Largo; };
+	const FVistaCruz Vs[] = {
+		{4, 1, 0, TEXT("Sup."), TEXT("Vista superior (5)")},
+		{2, 0, 1, TEXT("Dcha."), TEXT("Vista derecha (3)")},
+		{0, 1, 1, TEXT("Ant."), TEXT("Vista anterior (1)")},
+		{3, 2, 1, TEXT("Izda."), TEXT("Vista izquierda (4)")},
+		{5, 1, 2, TEXT("Inf."), TEXT("Vista inferior (6)")},
+		{1, 2, 2, TEXT("Post."), TEXT("Vista posterior (2)")},
+	};
+	TSharedRef<SUniformGridPanel> Cruz = SNew(SUniformGridPanel).SlotPadding(FMargin(1.f)).MinDesiredSlotWidth(ANCHO_VISTA).MinDesiredSlotHeight(BOTON_ALTO_MIN);
+	for (const FVistaCruz& V : Vs)
+	{
+		const int32 Cual = V.Vista;
+		Cruz->AddSlot(V.Col, V.Fila)
+		[
+			ConFoco(SNew(SButton).ButtonStyle(&EstiloBoton(ECorpusBoton::Normal)).ContentPadding(FMargin(E_1, E_1)).HAlign(HAlign_Center).VAlign(VAlign_Center)
+				.ToolTipText(FText::FromString(D->T(V.Largo)))
+				.OnClicked_Lambda([WJ, Cual]() { if (WJ.IsValid() && WJ->CamaraOrbital()) { WJ->CamaraOrbital()->Vista(Cual); } return FReply::Handled(); })
+				[ SNew(STextBlock).Text(FText::FromString(D->T(V.Corto))).Font(Letra(T_SECUNDARIO, EPeso::Media)).ColorAndOpacity(FSlateColor(C_TINTA)) ])
 		];
 	}
-	RehacerFicha();   // la ficha pinta el estado del mapa de origen e inserción
+	CajaVistas->AddSlot().AutoHeight()[ Cruz ];
+}
+
+int32 SCorpusInterfaz::ModoActivo() const
+{
+	if (bVerEst) { return 2; }
+	const ACorpusCuerpo* C = Cuerpo();
+	return (C && C->MovimientoDisponible() && (bVerMov || C->HayPostura())) ? 1 : 0;   // igual que la condición del panel de movimiento
+}
+
+void SCorpusInterfaz::PonerModo(int32 Modo)
+{
+	ACorpusCuerpo* C = Cuerpo();
+	if (!C) { return; }
+	if (Modo == 1 && !C->MovimientoDisponible()) { return; }
+	// al salir de Movimiento el cuerpo vuelve al reposo (rango, marcha y ejercicio)
+	if (Modo != 1 && (bVerMov || C->HayPostura())) { C->PonerMarcha(-1, 0.f); C->PonerEjercicio(-1, 0, 0.f); C->QuitarPostura(); }
+	if (Modo == 2) { bVerMov = false; if (!bVerEst) { AbrirEstudio(true); } return; }
+	bVerMov = Modo == 1;
+	if (bVerEst) { AbrirEstudio(false); }   // ya llama a Reconstruir
+	else { Reconstruir(); }
+}
+
+void SCorpusInterfaz::RehacerModos()
+{
+	UCorpusDatos* D = Datos();
+	ACorpusCuerpo* C = Cuerpo();
+	if (!D || !C || !CajaModos.IsValid()) { return; }
+	CajaModos->ClearChildren();
+	const bool bMovOk = C->MovimientoDisponible();
+	const FString Nombres[3] = { D->T(TEXT("Explorar")), D->T(TEXT("Movimiento")), D->TE(TEXT("Estudiar")) };
+	const FString Ayudas[3] = {
+		D->T(TEXT("Explorar: capas, fichas y disección")),
+		D->T(bMovOk ? TEXT("Movimiento: rangos articulares, marcha y ejercicios") : TEXT("Este cuerpo no tiene movimiento")),
+		D->T(TEXT("Estudiar: lecciones, recorridos, glosario y preguntas")) };
+	TSharedRef<SUniformGridPanel> Pestanas = SNew(SUniformGridPanel);
+	for (int32 m = 0; m < 3; ++m)
+	{
+		Pestanas->AddSlot(m, 0)
+		[
+			ConFoco(SNew(SButton).ButtonStyle(&EstiloPestana()).ContentPadding(FMargin(E_2, E_2)).HAlign(HAlign_Center).VAlign(VAlign_Center)
+				.IsEnabled(m != 1 || bMovOk)
+				.ToolTipText(FText::FromString(Ayudas[m]))
+				.OnClicked_Lambda([this, m]() { PonerModo(m); return FReply::Handled(); })
+				[
+					SNew(STextBlock).Text(FText::FromString(Nombres[m])).Font(Letra(T_CUERPO, EPeso::Media)).OverflowPolicy(ETextOverflowPolicy::Ellipsis)
+					.ColorAndOpacity_Lambda([this, m]() { return FSlateColor(ModoActivo() == m ? C_TINTA : C_GRIS); })
+				])
+		];
+	}
+	FilaModos = Pestanas;
+	CajaModos->AddSlot().AutoHeight()
+	[
+		SNew(SBorder).BorderImage(Panel()).Padding(E_1)
+		[
+			SNew(SOverlay)
+			+ SOverlay::Slot()[ Pestanas ]
+			// subrayado de acento bajo la pestaña activa: Tick lo desliza (FPanelAnim no: aquí cambia la posición, no la visibilidad)
+			+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Bottom)
+			[
+				SAssignNew(Subrayado, SBox).HeightOverride(ALTO_SUBRAYADO).Visibility(EVisibility::HitTestInvisible)
+				.WidthOverride_Lambda([this]() { return FOptionalSize(FMath::Max(AnchoPestana - 2.f * E_3, 8.f)); })
+				[ SNew(SImage).Image(PincelSubrayado()) ]
+			]
+		]
+	];
+	Subrayado->SetRenderTransform(FSlateRenderTransform(FVector2D(ModoPos * AnchoPestana + E_3, 0.0)));
+}
+
+// ───────── Plegado automático y zona libre ─────────
+
+void SCorpusInterfaz::PlegarPanel(bool bPlegar)
+{
+	bPanelPlegado = bPlegar;
+	bPlegadoAuto = false;
+	const ACorpusCuerpo* C = Cuerpo();
+	// abierto a mano con la ficha o Estudiar a la vista: se respeta hasta que se cierren
+	bAbiertoAMano = !bPlegar && (bVerEst || (C && !C->Seleccionada().IsEmpty()));
+	ActualizarZonaLibre();
+}
+
+void SCorpusInterfaz::PlegadoAutomatico()
+{
+	const ACorpusCuerpo* C = Cuerpo();
+	const bool bTapa = bVerEst || (C && !C->Seleccionada().IsEmpty());
+	if (bTapa)
+	{
+		if (!bPanelPlegado && !bAbiertoAMano) { bPanelPlegado = true; bPlegadoAuto = true; }
+	}
+	else
+	{
+		bAbiertoAMano = false;
+		if (bPlegadoAuto) { bPanelPlegado = false; bPlegadoAuto = false; }   // se cerró lo que lo plegó: vuelve
+	}
+}
+
+void SCorpusInterfaz::ActualizarZonaLibre()
+{
+	ACorpusCamara* Cam = Jugador.IsValid() ? Jugador->CamaraOrbital() : nullptr;
+	const double W = TamVista.X;
+	if (!Cam || W < 100.0) { return; }
+	// con el estado de destino (no el animado): la cámara ya se mueve con suavidad por su cuenta
+	const auto Ve = [this](int32 i) { return Anim[i].W.IsValid() && Anim[i].Ver && Anim[i].Ver(); };
+	const double Izq = bPanelPlegado ? 0.0 : M_PANTALLA + ANCHO_IZQ;
+	double Der = 0.0;
+	if (Ve(P_EST)) { Der = FMath::Max(Der, (double)(M_PANTALLA + ANCHO_EST)); }
+	if (Ve(P_FICHA)) { Der = FMath::Max(Der, (double)(M_PANTALLA + ANCHO_FICHA)); }
+	if (Ve(P_MOV)) { Der = FMath::Max(Der, (double)(M_PANTALLA + ANCHO_MOV)); }
+	const double Libre = FMath::Max(W - Izq - Der, 0.3 * W);
+	const double Centro = 0.5 * (Izq + (W - Der));
+	Cam->PonerZonaLibre((float)(2.0 * Centro / W - 1.0), (float)(Libre / W));
+}
+
+float SCorpusInterfaz::BordeIzq() const
+{
+	return M_PANTALLA + (Anim[P_IZQ].W.IsValid() ? Anim[P_IZQ].V : 0.f) * (ANCHO_IZQ + E_2);
+}
+
+float SCorpusInterfaz::BordeDer(bool bAbajo) const
+{
+	float D = 0.f;
+	const auto Ocupa = [&](int32 i, float Ancho) { if (Anim[i].W.IsValid()) { D = FMath::Max(D, Anim[i].V * (Ancho + E_2)); } };
+	Ocupa(P_EST, ANCHO_EST);
+	// la ficha solo cuenta abajo si es tan larga que llega a la altura de la barra de disección
+	const bool bFichaAbajo = Anim[P_FICHA].W.IsValid() && (float)Anim[P_FICHA].W->GetDesiredSize().Y + 2.f * M_PANTALLA + ALTO_BARRA + E_2 > (float)TamVista.Y;
+	if (!bAbajo || bFichaAbajo) { Ocupa(P_FICHA, ANCHO_FICHA); }
+	if (bAbajo) { Ocupa(P_MOV, ANCHO_MOV); }
+	return M_PANTALLA + D;
 }
 
 void SCorpusInterfaz::AlCambiarPostura()
@@ -1227,20 +1705,61 @@ void SCorpusInterfaz::RehacerCapas()
 	if ((uint8)C->Cuerpo() != CuerpoPintado) { Reconstruir(); return; }   // cambió el cuerpo: también la barra
 	CajaCapas->ClearChildren();
 	TWeakObjectPtr<ACorpusCuerpo> WC(C);
-	FString Grupo;
+	TWeakObjectPtr<UCorpusDatos> WD(D);
+	// grupos en el orden de la tabla de capas, solo con las capas que existen en este cuerpo
+	TArray<TPair<FString, TArray<const FCorpusCapa*>>> Grupos;
 	for (const FCorpusCapa& Capa : D->Capas())
 	{
 		if (!C->CapaDisponible(Capa.Clave)) { continue; }
-		if (Capa.Grupo != Grupo)
-		{
-			Grupo = Capa.Grupo;
-			CajaCapas->AddSlot().AutoHeight().Padding(0, E_3, 0, E_1)[ Etiqueta(D->T(Grupo)) ];
-		}
-		const FString Clave = Capa.Clave;
-		CajaCapas->AddSlot().AutoHeight().Padding(0, 2)
+		if (Grupos.Num() == 0 || Grupos.Last().Key != Capa.Grupo) { Grupos.Emplace(Capa.Grupo, TArray<const FCorpusCapa*>()); }
+		Grupos.Last().Value.Add(&Capa);
+	}
+	for (int32 gi = 0; gi < Grupos.Num(); ++gi)
+	{
+		const FString NombreGrupo = Grupos[gi].Key;
+		TArray<FString> Claves;
+		for (const FCorpusCapa* Cp : Grupos[gi].Value) { Claves.Add(Cp->Clave); }
+		const bool bPlegado = GruposPlegados.Contains(NombreGrupo);
+		// cabecera del grupo: chevrón, nombre y «capas a la vista / capas del grupo»; pulsarla pliega o despliega
+		const auto Visibles = [WC, Claves]() { int32 N = 0; if (WC.IsValid()) { for (const FString& K : Claves) { N += WC->CapaVisible(K) ? 1 : 0; } } return N; };
+		CajaCapas->AddSlot().AutoHeight().Padding(0, gi == 0 ? 0.f : E_2, 0, E_1)
 		[
-			SNew(SBorder).BorderImage(Panel2()).Padding(FMargin(E_2, HUECO))
+			SNew(SButton).ButtonStyle(&EstiloPestana()).ContentPadding(FMargin(E_1, E_1))
+			.ToolTipText_Lambda([WD, Visibles, Claves]() { return FText::FromString(FString::Printf(TEXT("%d/%d %s"), Visibles(), Claves.Num(), WD.IsValid() ? *WD->T(TEXT("capas a la vista")) : TEXT(""))); })
+			.OnClicked_Lambda([this, NombreGrupo]()
+			{
+				if (GruposPlegados.Contains(NombreGrupo)) { GruposPlegados.Remove(NombreGrupo); } else { GruposPlegados.Add(NombreGrupo); }
+				RehacerCapas();
+				return FReply::Handled();
+			})
 			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, E_2, 0)[ SNew(SBox).WidthOverride(10.f).HAlign(HAlign_Center)[ Chevron(!bPlegado, C_GRIS) ] ]
+				+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)[ Etiqueta(D->T(NombreGrupo)) ]
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(E_2, 0, 0, 0)
+				[
+					SNew(STextBlock).Font(Letra(T_SECUNDARIO, EPeso::Media)).ColorAndOpacity(FSlateColor(C_GRIS))
+					.Text_Lambda([Visibles, Claves]() { return FText::FromString(FString::Printf(TEXT("%d/%d"), Visibles(), Claves.Num())); })
+				]
+			]
+		];
+		if (bPlegado) { continue; }
+	for (const FCorpusCapa* CapaP : Grupos[gi].Value)
+	{
+		const FCorpusCapa& Capa = *CapaP;
+		const FString Clave = Capa.Clave;
+		// la opacidad solo se ve al pasar el ratón por la fila o mientras se arrastra; si no, el nombre usa todo el ancho
+		const TSharedRef<SBorder> FilaCapa = SNew(SBorder).BorderImage(Panel2()).Padding(FMargin(E_2, HUECO));
+		const TWeakPtr<SBorder> WFila(FilaCapa);
+		const TSharedRef<bool> bArrastra = MakeShared<bool>(false);
+		const auto VerOpacidad = [this, WFila, bArrastra, Clave]()
+		{
+			const TSharedPtr<SBorder> F = WFila.Pin();
+			return (*bArrastra || (F.IsValid() && F->IsHovered()) || QaOpacidad == Clave) ? EVisibility::Visible : EVisibility::Collapsed;
+		};
+		CajaCapas->AddSlot().AutoHeight().Padding(0, 2)[ FilaCapa ];
+		FilaCapa->SetContent
+		(
 				SNew(SHorizontalBox)
 				// la fila entera (casilla, color y nombre) enciende o apaga la capa
 				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
@@ -1267,45 +1786,101 @@ void SCorpusInterfaz::RehacerCapas()
 				]
 				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(E_2, 0, 0, 0)
 				[
-					SNew(SBox).WidthOverride(72.f)   // fase 2: la opacidad solo aparecerá al pasar el ratón
+					SNew(SBox).WidthOverride(ANCHO_OPACIDAD).Visibility_Lambda(VerOpacidad)
 					[
 						SNew(SSlider).Style(&EstiloDeslizador()).MinValue(0.05f).MaxValue(1.f).StepSize(0.05f).MouseUsesStep(true)
-						.ToolTipText_Lambda([WC, Clave]() { return FText::FromString(FString::Printf(TEXT("%d %%"), FMath::RoundToInt(100.f * (WC.IsValid() ? WC->OpacidadDeCapa(Clave) : 1.f)))); })
+						.ToolTipText_Lambda([WC, WD, Clave]() { return FText::FromString(FString::Printf(TEXT("%s: %d %%"), WD.IsValid() ? *WD->T(TEXT("Opacidad")) : TEXT(""), FMath::RoundToInt(100.f * (WC.IsValid() ? WC->OpacidadDeCapa(Clave) : 1.f)))); })
 						.Value_Lambda([WC, Clave]() { return WC.IsValid() ? WC->OpacidadDeCapa(Clave) : 1.f; })
 						.OnValueChanged_Lambda([WC, Clave](float V) { if (WC.IsValid()) { WC->OpacidadCapa(Clave, V); } })
+						.OnMouseCaptureBegin_Lambda([bArrastra]() { *bArrastra = true; })
+						.OnMouseCaptureEnd_Lambda([bArrastra]() { *bArrastra = false; })
 					]
 				]
-			]
-		];
-		// pelar capas: los músculos por profundidad (extras.json → dep), como en la web; encendido = se ve
-		if (Clave == TEXT("muscular"))
-		{
-			TSharedRef<SWrapBox> Pelar = SNew(SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(HUECO, HUECO));
-			const TPair<const TCHAR*, const TCHAR*> Profs[] = { {TEXT("s"), TEXT("Superficiales")}, {TEXT("i"), TEXT("Intermedios")}, {TEXT("p"), TEXT("Profundos")} };
-			for (const auto& Par : Profs)
-			{
-				const FString Pf(Par.Key);
-				Pelar->AddSlot()
-				[ BotonSel(D->T(Par.Value), [WC, Pf]() { if (WC.IsValid()) { WC->PelarProfundidad(Pf, !WC->ProfundidadOculta(Pf)); } }, !C->ProfundidadOculta(Pf)) ];
-			}
-			CajaCapas->AddSlot().AutoHeight().Padding(E_2, E_1, 0, E_2)[ Pelar ];
-		}
+				// el porcentaje a la derecha del deslizador
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+				[
+					SNew(SBox).WidthOverride(ANCHO_PORCENTAJE).HAlign(HAlign_Right).Visibility_Lambda(VerOpacidad)
+					[
+						SNew(STextBlock).Font(Letra(T_SECUNDARIO)).ColorAndOpacity(FSlateColor(C_GRIS))
+						.Text_Lambda([WC, Clave]() { return FText::FromString(FString::Printf(TEXT("%d %%"), FMath::RoundToInt(100.f * (WC.IsValid() ? WC->OpacidadDeCapa(Clave) : 1.f)))); })
+					]
+				]
+		);
 	}
+	}
+	// (pelar capas por profundidad pasó a la barra de disección: − / +)
 }
 
 bool SCorpusInterfaz::Qa(const FString& Verbo, const FString& Resto)
 {
 	// panel <0|1>: pliega (0) o abre (1) el panel izquierdo
-	if (Verbo == TEXT("panel")) { bPanelPlegado = Resto == TEXT("0"); return true; }
+	// (como los botones « y »: abrirlo a mano con una ficha a la vista impide que se vuelva a plegar solo)
+	if (Verbo == TEXT("panel")) { PlegarPanel(Resto == TEXT("0")); return true; }
 	// texto <90|100|125|150>: «Tamaño del texto» (se guarda en la configuración del usuario, como al pulsar el botón)
 	if (Verbo == TEXT("texto")) { PonerTamTexto(FCString::Atoi(*Resto)); Reconstruir(); return true; }
-	// movimiento <0|1>: abre (1) o cierra (0) el panel de movimiento, como el botón «Movimiento» del panel izquierdo
-	if (Verbo == TEXT("movimiento"))
+	// movimiento <0|1>: modo Movimiento (1) o vuelta a Explorar (0), como la barra de modos
+	if (Verbo == TEXT("movimiento")) { PonerModo(Resto != TEXT("0") ? 1 : 0); return true; }
+	// modo <explorar|movimiento|estudiar>: la barra de modos (también 0, 1, 2)
+	if (Verbo == TEXT("modo"))
 	{
-		ACorpusCuerpo* C = Cuerpo();
-		bVerMov = Resto != TEXT("0");
-		if (C && !bVerMov) { C->PonerMarcha(-1, 0.f); C->PonerEjercicio(-1, 0, 0.f); C->QuitarPostura(); }
-		Reconstruir();
+		const int32 M = Resto.StartsWith(TEXT("mov")) || Resto == TEXT("1") ? 1 : Resto.StartsWith(TEXT("est")) || Resto == TEXT("2") ? 2 : 0;
+		PonerModo(M);
+		return true;
+	}
+	// menu <idioma|ajustes> <0|1>: abre (1) o cierra (0) el menú desplegable de la cabecera (si el panel está plegado, lo abre)
+	if (Verbo == TEXT("menu"))
+	{
+		FString Cual, Valor;
+		if (!Resto.Split(TEXT(" "), &Cual, &Valor)) { Cual = Resto; Valor = TEXT("1"); }
+		const bool bAbrir = Valor.TrimStartAndEnd() != TEXT("0");
+		if (bAbrir && bPanelPlegado) { PlegarPanel(false); }
+		const TSharedPtr<SComboButton> M = Cual.StartsWith(TEXT("aj")) ? MenuAjustes : MenuIdioma;
+		if (M.IsValid()) { M->SetIsOpen(bAbrir, /*bFocusMenu*/ false); }
+		return true;
+	}
+	// grupo <clave de capa o nombre del grupo> <0|1>: pliega (0) o despliega (1) un grupo de capas
+	// (grupo muscular 0 → «Aparato locomotor»; grupo circulacion 0)
+	if (Verbo == TEXT("grupo"))
+	{
+		UCorpusDatos* D = Datos();
+		FString Cual, Valor;
+		if (!Resto.Split(TEXT(" "), &Cual, &Valor)) { Cual = Resto; Valor = TEXT("0"); }
+		FString Nombre;
+		if (D)
+		{
+			if (const FCorpusCapa* Cp = D->Capa(Cual)) { Nombre = Cp->Grupo; }
+			else
+			{
+				const FString Q = UCorpusDatos::Plano(Cual);
+				for (const FCorpusCapa& Cp2 : D->Capas()) { if (UCorpusDatos::Plano(Cp2.Grupo).Contains(Q)) { Nombre = Cp2.Grupo; break; } }
+			}
+		}
+		if (!Nombre.IsEmpty())
+		{
+			if (Valor.TrimStartAndEnd() == TEXT("0")) { GruposPlegados.Add(Nombre); } else { GruposPlegados.Remove(Nombre); }
+			RehacerCapas();
+		}
+		return true;
+	}
+	// verop <clave|off>: deja a la vista el deslizador de opacidad de esa capa (en la captura no hay ratón encima)
+	if (Verbo == TEXT("verop")) { QaOpacidad = Resto == TEXT("off") ? FString() : Resto; return true; }
+	// zona: anota en el registro la zona libre que se le pasa a la cámara (comprobar el encuadre con paneles abiertos)
+	if (Verbo == TEXT("zona"))
+	{
+		const auto Ve = [this](int32 i) { return Anim[i].Ver && Anim[i].Ver(); };
+		UE_LOG(LogTemp, Display, TEXT("CorpusQa zona: vista %.0f x %.0f · plegado %d · ficha %d · estudio %d · movimiento %d · borde izq %.0f · der %.0f / abajo %.0f"),
+			TamVista.X, TamVista.Y, bPanelPlegado ? 1 : 0, Ve(P_FICHA) ? 1 : 0, Ve(P_EST) ? 1 : 0, Ve(P_MOV) ? 1 : 0, BordeIzq(), BordeDer(false), BordeDer(true));
+		// geometría real (px absolutos) de los paneles flotantes: para depurar su colocación
+		const TCHAR* Nom[] = { TEXT("izq"), TEXT("mini"), TEXT("busca"), TEXT("mov"), TEXT("ficha"), TEXT("est"), TEXT("barra"), TEXT("vistas") };
+		const int32 Idx[] = { P_IZQ, P_MINI, P_BUSCA, P_MOV, P_FICHA, P_EST, P_BARRA, P_VISTAS };
+		for (int32 k = 0; k < 8; ++k)
+		{
+			if (!Anim[Idx[k]].W.IsValid()) { continue; }
+			const FGeometry& G = Anim[Idx[k]].W->GetCachedGeometry();
+			UE_LOG(LogTemp, Display, TEXT("CorpusQa zona %s: x %.0f y %.0f · %.0f x %.0f px · deseado %.0f x %.0f · V %.2f · vis %s"), Nom[k],
+				G.GetAbsolutePosition().X, G.GetAbsolutePosition().Y, G.GetAbsoluteSize().X, G.GetAbsoluteSize().Y,
+				Anim[Idx[k]].W->GetDesiredSize().X, Anim[Idx[k]].W->GetDesiredSize().Y, Anim[Idx[k]].V, *Anim[Idx[k]].W->GetVisibility().ToString());
+		}
 		return true;
 	}
 	// esc: lo mismo que la tecla Esc (resultados → ficha → Estudiar)
@@ -1347,6 +1922,10 @@ void SCorpusInterfaz::RehacerFicha()
 	UCorpusDatos* D = Datos();
 	ACorpusCuerpo* C = Cuerpo();
 	if (!D || !C || !CajaFicha.IsValid()) { return; }
+	// abrir una ficha pliega el panel izquierdo (y cerrarla lo devuelve si lo plegó ella); la cámara sabe enseguida qué zona
+	// queda libre, antes de que EncuadrarSeleccion (buscador, doble clic) calcule el encuadre
+	PlegadoAutomatico();
+	ActualizarZonaLibre();
 	const FString Id = C->Seleccionada();
 	const FCorpusPieza* P = D->Pieza(Id);
 	// las marcas de relieves son del hueso seleccionado: al cambiar de pieza se quitan (y el fantasma que encendieron).
@@ -1597,8 +2176,17 @@ void SCorpusInterfaz::AbrirEstudio(bool bSi)
 	bVerEst = bSi;
 	if (ACorpusCuerpo* C = Cuerpo())
 	{
-		if (bSi) { bVerMov = false; C->Seleccionar(FString()); }
-		else
+		if (bSi)
+		{
+			// Estudiar y Movimiento no van a la vez: el cuerpo vuelve al reposo
+			if (bVerMov || C->HayPostura()) { C->PonerMarcha(-1, 0.f); C->PonerEjercicio(-1, 0, 0.f); C->QuitarPostura(); }
+			bVerMov = false;
+			C->Seleccionar(FString());
+		}
+		// Estudiar pliega el panel izquierdo (cerrarlo lo devuelve); la zona libre se actualiza antes de encuadrar
+		PlegadoAutomatico();
+		ActualizarZonaLibre();
+		if (!bSi)
 		{
 			C->RestaurarEstado();
 			// la cámara vuelve al cuerpo entero, de frente

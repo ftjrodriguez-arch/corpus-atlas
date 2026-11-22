@@ -668,6 +668,52 @@ compilar, capturar y revisar antes de darlo por bueno.
   `movimiento 1`/`rom`) a 1280×720, 1600×900 y 2560×1440 y hoja antes/después; lupa del buscador (no hay icono propio);
   comprobar que Tab mueve el foco entre botones en la ventana del juego.
 
+## Interfaz · Fase 2 de `PLAN_INTERFAZ.md`: orden y espacio para el modelo (2026-11-22) — SIN COMPILAR NI CAPTURAR
+Escrito en una sesión sin consola (solo lectura y escritura de archivos): falta compilar, capturar y revisar. Se apoya en el
+sistema visual de la Fase 1 (`C_*`, `E_*`, `T_*`, `Letra`, `ECorpusBoton`, `ConFoco`, `TxtLinea`); los anchos de los paneles
+pasan a constantes (`ANCHO_IZQ` 360 · `ANCHO_FICHA` 400 · `ANCHO_EST` 500 · `ANCHO_MOV` 520 · `ANCHO_BUSCADOR` 460).
+- **Barra de modos** Explorar · Movimiento · Estudiar encima del panel izquierdo (`RehacerModos`, `PonerModo`, `ModoActivo`):
+  pestañas iguales (`SUniformGridPanel`) y subrayado de acento que `Tick` desliza en 180 ms con salida suave. Sustituye a
+  los botones «Movimiento» y «Estudiar» del panel. Movimiento queda desactivado en el Visible Human. El borde del panel
+  derecho del modo activo se tiñe (`PanelModo`): ficha en Explorar, movimiento en Movimiento, estudio en Estudiar.
+  Salir de Movimiento devuelve el cuerpo al reposo; entrar en Estudiar también.
+- **Barra flotante de disección** abajo, centrada en la zona libre (`RehacerHerramientas`, `BotonBarra`, píldora de 44 de
+  alto y radio 22): Aislar · Ocultar (desactivados sin selección; la ayuda dice qué falta) | Fantasma | − nivel + (pelar
+  músculos: superficiales → intermedios → profundos, con `PelarProfundidad`) | S · C · A (inicial del plano en el idioma),
+  y con un corte activo su deslizador e Invertir | Restablecer (muestra todo y quita corte, fantasma, pelado y marcas).
+  Se aparta de la cruceta y de lo que llega al pie; si no cabe junto al panel de movimiento sube por encima; en último caso
+  se encoge (`SScaleBox` solo hacia abajo). No sale en Estudiar.
+- **Cruceta de vistas** abajo a la izquierda, sobre el visor (`RehacerVistas`): Sup. arriba, Dcha. · Ant. · Izda. en medio
+  (la derecha del cuerpo a la izquierda de quien mira de frente), Inf. abajo y Post. en la esquina; ayuda con el nombre
+  completo y la tecla (1–6). Sigue al borde del panel izquierdo mientras se pliega.
+- **Cabecera del panel izquierdo:** idioma y «Aa» (Tamaño del texto) en menús desplegables (`SComboButton` con
+  `EPopupMethod::UseCurrentWindow`: el menú se dibuja dentro de la ventana, sale en las capturas y respeta la escala) y «
+  para plegar. El panel queda con cabecera, cuerpo (control segmentado Hombre · Mujer · Visible Human) y capas.
+- **Capas:** grupos plegables con chevrón y contador «2/6» (capas a la vista del grupo); la opacidad (deslizador de 96 y
+  su %) solo aparece al pasar el ratón por la fila o mientras se arrastra, y si no el nombre usa todo el ancho; degradado
+  de 24 px al pie de la lista mientras quede lista por debajo (`SCorpusDegradado`). Pelar salió de la fila de Músculos.
+- **Plegado automático:** abrir una ficha o Estudiar pliega el panel izquierdo (`PlegadoAutomatico`); al cerrarlos vuelve
+  si lo plegaron ellos. Abrirlo a mano con » se respeta hasta que se cierren.
+- **Encuadre con paneles:** `ACorpusCamara::CalcCamera` descentra la proyección (`FMinimalViewInfo::OffCenterProjectionOffset`)
+  para que el objetivo quede en el centro de la zona libre, con suavidad, y `Encuadrar` ajusta la distancia al ancho libre
+  (`PonerZonaLibre`, que la interfaz llama en cada `Tick` y antes de encuadrar desde la ficha, el buscador o Estudiar).
+  La órbita sigue girando alrededor del objetivo y el clic usa la misma matriz (`DeprojectMousePositionToWorld`).
+- **Buscador:** centrado entre la barra de modos y los paneles de la derecha; se encoge si no cabe (ya no pisa la ficha ni
+  Estudiar en ventanas estrechas).
+- **Textos nuevos** en `TR_PROPIA` (`CorpusDatos.cpp`) en en/pt/fr/de. No es contenido clínico nuevo (rótulos de interfaz).
+- **Pruebas nuevas:** `modo <explorar|movimiento|estudiar>` · `menu <idioma|ajustes> <0|1>` · `grupo <clave de capa o
+  nombre del grupo> <0|1>` (1 = abierto) · `verop <clave|off>` (deja a la vista la opacidad de una fila) · `zona` (anota en
+  el registro la zona libre y los bordes). `movimiento <0|1>` y `panel <0|1>` siguen y pasan por los mismos caminos que los
+  botones.
+- **Capturas por hacer** (1280×720, 1600×900 y 2560×1440; `ui_f2_*`):
+  ```powershell
+  .\unreal\captura.ps1 -Pasos "esperar 4; foto ui_f2_inicio; sel n1394; esperar 1; foto ui_f2_ficha; esc; modo estudiar; esperar 2; foto ui_f2_estudio; modo movimiento; rom rodilla 0 R 68; foto ui_f2_movimiento; modo explorar; corte sagital 0.5; fantasma 1; pelar s; foto ui_f2_diseccion; todo; corte off; fantasma 0; pelar; menu idioma 1; esperar 1; foto ui_f2_menu_idioma; menu idioma 0; grupo muscular 0; verop oseo; foto ui_f2_grupo; grupo muscular 1; verop off; texto 150; esperar 1; foto ui_f2_texto150; texto 100; zona"
+  ```
+- **Falta / riesgos:** compilar; comprobar el signo del descentrado (si el cuerpo se va hacia los paneles en lugar de
+  apartarse, cambiar el signo en `CalcCamera`) y que Lumen y las sombras no cambian con la proyección descentrada; que el
+  ratón encima de la fila (`SBorder::IsHovered`) enciende la opacidad sin parpadeo; que el menú desplegable se cierra al
+  pulsar fuera; que «›» girado se ve bien con Inter; FR/DE en la barra de modos y en la barra de disección sin «…».
+
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.

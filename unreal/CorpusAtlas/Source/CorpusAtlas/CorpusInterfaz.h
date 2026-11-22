@@ -47,8 +47,44 @@ private:
 	UCorpusDatos* Datos() const;
 	void Reconstruir();
 	void RehacerCapas();
-	/** Herramientas de disección del panel izquierdo: plano de corte… */
+	/** Barra flotante de disección (abajo, en el centro de la zona libre): aislar, ocultar, fantasma, pelar, corte y restablecer. */
 	void RehacerHerramientas();
+	/** Botón de la barra de disección: con ayuda (ToolTip) y desactivable. */
+	TSharedRef<SWidget> BotonBarra(const FString& Texto, const FString& Ayuda, TFunction<void()> Accion, ECorpusBoton Papel, TAttribute<bool> Activo = true, const FString& AyudaInactivo = FString()) const;
+	/** Cruceta de vistas fijas (abajo a la izquierda, sobre el visor). */
+	void RehacerVistas();
+	TSharedPtr<SVerticalBox> CajaVistas;
+	FString AisladaPintada;                     // la barra se rehace si cambia la pieza aislada (también con la tecla I)
+
+	// ── Barra de modos Explorar · Movimiento · Estudiar (arriba a la izquierda) con subrayado que se desliza ──
+	/** 0 Explorar · 1 Movimiento · 2 Estudiar. */
+	int32 ModoActivo() const;
+	void PonerModo(int32 Modo);
+	void RehacerModos();
+	TSharedPtr<SVerticalBox> CajaModos;
+	TSharedPtr<SWidget> FilaModos, Subrayado;
+	float ModoPos = 0.f, ModoDesde = 0.f, ModoT = 1.f;   // posición del subrayado (en pestañas), de dónde salió y avance 0–1
+	int32 ModoMeta = 0;
+	float AnchoPestana = 112.f;                 // ancho medido de cada pestaña (la barra mide ANCHO_IZQ; se lee de la geometría)
+
+	// ── Cabecera del panel izquierdo: idioma y ajustes en menús desplegables ──
+	TSharedPtr<class SComboButton> MenuIdioma, MenuAjustes;
+
+	// ── Capas: grupos plegables, opacidad al pasar el ratón ──
+	TSet<FString> GruposPlegados;               // nombre del grupo (en español, como en la tabla de capas)
+	FString QaOpacidad;                         // pruebas: «verop <clave>» deja a la vista la opacidad de esa fila
+	TSharedPtr<class SScrollBox> RolloCapas;
+
+	// ── Plegado automático del panel izquierdo y zona libre para la cámara ──
+	bool bPlegadoAuto = false;                  // lo plegó una ficha o Estudiar: se vuelve a abrir al cerrarlos
+	bool bAbiertoAMano = false;                 // el usuario lo abrió con la ficha o Estudiar a la vista: no se vuelve a plegar
+	void PlegarPanel(bool bPlegar);             // botones « y » (y pruebas «panel»)
+	void PlegadoAutomatico();
+	/** Le dice a la cámara qué parte del ancho dejan libre los paneles (con su estado de destino, no el animado). */
+	void ActualizarZonaLibre();
+	/** Borde de la zona libre en unidades de Slate (dentro del escalador), con los paneles animados. bAbajo: lo que llega al pie. */
+	float BordeIzq() const;
+	float BordeDer(bool bAbajo) const;
 	void RehacerFicha();
 	void RehacerResultados(const FText& Texto);
 	/** Panel de movimiento (rango articular): articulación, movimiento, lado, grados y reproducir. */
@@ -108,7 +144,7 @@ private:
 		FVector2D Desde;                // de dónde llega (px) cuando aparece
 		float V = 0.f;                  // 0 oculto · 1 a la vista
 	};
-	enum { P_IZQ, P_MINI, P_BUSCA, P_MOV, P_FICHA, P_EST, P_NUM };
+	enum { P_IZQ, P_MINI, P_BUSCA, P_MOV, P_FICHA, P_EST, P_BARRA, P_VISTAS, P_NUM };
 	FPanelAnim Anim[P_NUM];
 	FVector2D TamVista = FVector2D(1600, 900);   // tamaño de la interfaz en unidades de Slate, ya escalada (para que la ficha no pise el panel de movimiento)
 	float EscalaAnim = 1.f;          // pruebas: «animlenta 0.05» para fotografiar la transición

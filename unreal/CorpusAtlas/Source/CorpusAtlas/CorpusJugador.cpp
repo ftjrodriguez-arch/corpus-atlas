@@ -13,6 +13,7 @@
 #include "Misc/Parse.h"
 #include "Misc/Paths.h"
 #include "UnrealClient.h"
+#include "Camera/CameraTypes.h"
 #if WITH_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -38,8 +39,24 @@ void ACorpusCamara::Tick(float Dt)
 	DistanciaSuave = FMath::Lerp(DistanciaSuave, Distancia, K);
 	YawSuave += FMath::FindDeltaAngleDegrees(YawSuave, Yaw) * K;
 	PitchSuave = FMath::Lerp(PitchSuave, Pitch, K);
+	CentroLibreSuave = FMath::Lerp(CentroLibreSuave, CentroLibre, K);
 	const FRotator R(PitchSuave, YawSuave, 0.f);
 	SetActorLocationAndRotation(ObjetivoSuave - R.Vector() * DistanciaSuave, R);
+}
+
+void ACorpusCamara::PonerZonaLibre(float CentroX, float FraccionAncho)
+{
+	CentroLibre = FMath::Clamp(CentroX, -0.7f, 0.7f);
+	FraccionLibre = FMath::Clamp(FraccionAncho, 0.3f, 1.f);
+}
+
+void ACorpusCamara::CalcCamera(float Dt, FMinimalViewInfo& Vista)
+{
+	Super::CalcCamera(Dt, Vista);
+	// proyección descentrada (FMinimalViewInfo::CalculateProjectionMatrix): con desplazamiento X el centro de la vista cae en
+	// la coordenada normalizada −X. Así el cuerpo queda en el centro de la zona libre sin mover la cámara: la órbita sigue
+	// girando alrededor del objetivo y el clic (DeprojectMousePositionToWorld usa la misma matriz) sigue acertando.
+	Vista.OffCenterProjectionOffset = FVector2D(-CentroLibreSuave, 0.0);
 }
 
 void ACorpusCamara::Girar(float DYaw, float DPitch)
@@ -74,7 +91,8 @@ void ACorpusCamara::Encuadrar(const FBox& Caja, bool bInmediato)
 		if (Tam.X > 1.f && Tam.Y > 1.f) { Aspecto = Tam.X / Tam.Y; }
 	}
 	const float TanH = FMath::Tan(FMath::DegreesToRadians(Camara->FieldOfView * 0.5f));
-	const float TanMin = FMath::Min(TanH, TanH / Aspecto);
+	// a lo ancho solo cuenta la zona que dejan libre los paneles (PonerZonaLibre)
+	const float TanMin = FMath::Min(TanH * FraccionLibre, TanH / Aspecto);
 	Distancia = FMath::Clamp(Radio / TanMin * 1.05f, 6.f, 1500.f);
 	if (bInmediato) { ObjetivoSuave = Objetivo; DistanciaSuave = Distancia; }
 }

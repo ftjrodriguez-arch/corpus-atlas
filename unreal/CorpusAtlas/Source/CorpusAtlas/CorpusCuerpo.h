@@ -34,6 +34,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Corpus") const FString& Seleccionada() const { return IdSeleccionada; }
 	UFUNCTION(BlueprintCallable, Category = "Corpus") void Ocultar(const FString& Id);
 	UFUNCTION(BlueprintCallable, Category = "Corpus") void Aislar(const FString& Id);
+	/** Pieza aislada ahora (vacío si no hay ninguna): la barra de disección la pinta como seleccionada. */
+	const FString& Aislada() const { return IdAislada; }
 	UFUNCTION(BlueprintCallable, Category = "Corpus") void MostrarTodo();
 	/** Deja a la vista solo esas piezas (de las capas encendidas). Lista vacía = todas. Lo usan las pruebas y lo usarán las lecciones. */
 	void VerSolo(const TArray<FString>& Ids);

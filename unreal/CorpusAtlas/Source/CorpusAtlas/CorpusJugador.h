@@ -28,10 +28,16 @@ public:
 	void Vista(int32 Cual);
 	/** Órbita de la web (recorridos): objetivo en glTF (m), radio (m), azimut th y ángulo polar ph (rad). */
 	void OrbitaWeb(const FVector3f& Tgt, float R, float Th, float Ph);
+	/** Zona de la pantalla que dejan libre los paneles de la interfaz: centro en coordenadas normalizadas (−1 borde izquierdo,
+	 *  0 centro, 1 borde derecho) y fracción del ancho. La proyección se descentra para que el objetivo quede en el centro de
+	 *  esa zona (se desliza con suavidad) y Encuadrar ajusta la distancia a su ancho. */
+	void PonerZonaLibre(float CentroX, float FraccionAncho);
+	virtual void CalcCamera(float Dt, struct FMinimalViewInfo& Vista) override;
 
 	UPROPERTY(VisibleAnywhere, Category = "Corpus") TObjectPtr<UCameraComponent> Camara;
 
 private:
+	float CentroLibre = 0.f, CentroLibreSuave = 0.f, FraccionLibre = 1.f;
 	FVector Objetivo = FVector(0, 0, 95), ObjetivoSuave = FVector(0, 0, 95);
 	float Distancia = 420.f, DistanciaSuave = 420.f;
 	float Yaw = -90.f, Pitch = -5.f, YawSuave = -90.f, PitchSuave = -5.f;
