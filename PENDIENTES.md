@@ -17,6 +17,16 @@
 - [x] Validador de datos (`tools/unreal/validar.js`): 0 errores
 - [x] Nombres en francés y alemán: 59 traducciones erróneas de claves en minúscula corregidas (p. ej. «rodilla» → «cadera» en alemán); avisos de mayúsculas 104 → 53, los que quedan son significados distintos
 
+## Sprint 2 (aparato locomotor) — en curso
+- [x] Músculos agrupados separados uno a uno (`tools/unreal/separar.js`): intercostales, subcostales, interóseos dorsales de mano y pie, lumbricales de la mano, interóseos plantares y rotadores (C3–L5)
+- [ ] Interóseos palmares y lumbricales del pie: modelarlos en Blender (la malla de la web no trae sus formas)
+- [ ] 10 ejercicios nuevos con postura (fuente «ct» de `movimiento.js`, `ejercicios.json`): FALTA HORNEARLOS en el PC:
+      `python -m http.server 8765` en la raíz y `node tools/unreal/movimiento.js --solo-ejercicios`, después `ci.copiar_datos()`
+      (o doble clic en `unreal/Claude_Tarea.bat`, que ya lo hace y saca capturas `ej_*`)
+- [ ] Pruebas ortopédicas con postura (las de paciente tumbado necesitan la raíz del cuerpo acostado)
+- [ ] Dedos de mano y pie con movimiento (el rig solo tiene 27 articulaciones y 5 bits por hueco)
+- [ ] Cinta de suelo y gráficas de la marcha
+
 ## Contenido clínico pendiente de revisión profesional
 - Reglas de tendones (`tools/unreal/tendones_reglas.json`), notas de rodilla (`rangos_extra.json`), sentadilla y sus
   traducciones FR/DE (`ejercicios.json`), imprecisiones de `unreal/AUDITORIA_CADERA_RODILLA.md`.
