@@ -26,6 +26,39 @@
 - [ ] Dedos de mano y pie con movimiento (el rig solo tiene 27 articulaciones y 5 bits por hueco)
 - [ ] Cinta de suelo y gráficas de la marcha
 
+## Trabajo repartido en otros chats (anotado el 2026-11-22)
+El usuario siguió por error el trabajo de Corpus en otros chats en paralelo a la sesión «Corpus Atlas Unreal compilación
+y pruebas». Todo está en la misma rama; esto es lo que cada uno dejó a medias.
+
+**Chat del teléfono (claude.ai, sesión `session_01DmC7U1BKkg61unuu5pmdvd`, 22 nov., commits f916243…929d614)**
+Hizo Sprint 1 L2/N, Sprint 2 (músculos separados, 10 ejercicios), 59 traducciones FR/DE y dejó `TRASPASO_CLAUDE_CODE.md`.
+- [ ] Dorsal ancho deformado en elevación lateral y press: correctivos del hombro también en el modo Ejercicio.
+      El código está compilado (DLL de las 14:09) y hay capturas `unreal/capturas/dor_*` (14:16) **sin revisar ni subir**.
+      Falta mirarlas por delante y por detrás, comprobar que `dor_rom_abd150` sigue igual y hacer el commit.
+- [ ] Capturas `unreal/capturas/col_*` (12:22, color del músculo antes/después) sin subir.
+- [ ] El resto de su lista ya está arriba en el Sprint 2 (FR/DE de ejercicios, pruebas ortopédicas, interóseos y
+      lumbricales, dedos, cinta y gráficas) y en `unreal/PLAN_SPRINTS.md`.
+
+**Chat «?» (local, 20 nov.): correctivos elásticos del hombro y leyenda de la marcha** (hecho y subido)
+- [ ] Al elevar la escápula 40° se abre un hueco bajo la clavícula.
+- [ ] El dorsal hace un pliegue junto al ángulo inferior de la escápula en abducción de 150°.
+- [ ] Los músculos no chocan entre sí, solo con los huesos.
+- [ ] Correctivos de la mujer horneados pero sin capturas en Unreal; su brazo levantado salía pálido.
+- [ ] Llevar los correctivos a la cadera (glúteo mayor en flexión > 90°; ver también el punto K del LEEME).
+- [ ] Piel del Visible Human algo anaranjada.
+- [ ] Post-procesos de la web sin pasar: `musPost`, `latHug`, `kneePush`.
+
+**Este chat (interfaz Slate, 21–22 nov., commits ced53f1…bdd71b0)** (fases 1–3 hechas y subidas)
+- [ ] Probar en el PC con el ratón real: clic y doble clic con la cámara descentrada, menús que se cierran al pulsar fuera, Tab entre botones.
+- [ ] Comprobar si el filtro de visión de color tiñe también el modelo 3D (no sale en las capturas).
+- [ ] Detalles menores del director clínico en la ficha: «Función» repetido en ligamentos (y «Funktion» en alemán),
+      mostrar el `tipo` en ligamentos, añadir «Región» y «Plano muscular», matices de traducción («Clinical notes»).
+- [ ] La web tiene el mismo rótulo erróneo «Referencias» en los huesos (Unreal ya dice «Palpación e imagen»): corregirlo en rama aparte.
+- [ ] `data/hoja_rotulos.png` es una copia suelta creada por error (la buena está en `unreal/capturas/`): borrarla con permiso del usuario.
+
+**Chat «Mejora general» (21 nov.)**: no es de Corpus (Grok, Codex, NVIDIA y el juego del robot). Ahí quedó
+pendiente guardar la clave `NVIDIA_API_KEY` y averiguar por qué Grok no termina las preguntas largas.
+
 ## Contenido clínico pendiente de revisión profesional
 - Reglas de tendones (`tools/unreal/tendones_reglas.json`), notas de rodilla (`rangos_extra.json`), sentadilla y sus
   traducciones FR/DE (`ejercicios.json`), imprecisiones de `unreal/AUDITORIA_CADERA_RODILLA.md`.
