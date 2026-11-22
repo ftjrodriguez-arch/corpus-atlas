@@ -36,6 +36,13 @@ Hizo Sprint 1 L2/N, Sprint 2 (músculos separados, 10 ejercicios), 59 traduccion
       Revisado el 2026-11-22 en `hoja_dorsal.png` y `hoja_dorsal_cerca.png`: continuo y sin abultarse en elevación
       lateral, press y remo. En abducción de 150° sigue el pliegue junto al ángulo inferior (anotado abajo).
 - [x] Capturas `unreal/capturas/col_*` (color del músculo antes/después) subidas.
+- [x] Aponeurosis del dorsal ancho (rombo blanco lumbar, como en los atlas que envió el usuario): `tools/unreal/aponeurosis_dorsal.js`
+      pinta el canal G del propio dorsal (frontera T10 → cresta ilíaca) y `tendones_reglas.json` incluye ya la hoja posterior de la
+      fascia toracolumbar. Hombre y mujer reimportados; capturas `hoja_fascia_toracolumbar.png` y `hoja_aponeurosis_dorsal.png`.
+      Pendiente de revisión profesional. Si se repite `tendones.js --aplicar`, volver a ejecutar `aponeurosis_dorsal.js` después.
+- [ ] Remo al 100 % (final del tirón): músculos profundos atraviesan el dorsal ancho por detrás (`hoja_row_tiron.png`); hasta el
+      85 % sale entero. Falta hornear o ajustar el correctivo `ej:row` en ese extremo.
+- [ ] `tendones.js --restaurar` ya no funciona con los músculos separados (n1633_4… no están en la web): adaptarlo a `separar.js`.
 - [ ] El resto de su lista ya está arriba en el Sprint 2 (FR/DE de ejercicios, pruebas ortopédicas, interóseos y
       lumbricales, dedos, cinta y gráficas) y en `unreal/PLAN_SPRINTS.md`.
 

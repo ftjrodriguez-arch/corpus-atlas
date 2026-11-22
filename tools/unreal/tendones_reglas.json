@@ -257,9 +257,9 @@
    "nota": "sin tendón: origen e inserción carnosos en el cuarto distal del cúbito y del radio"
   },
   {
-   "re": "tract$|aponeurosis|retinacul|\\btendon\\b|linea alba|rectus sheath",
+   "re": "tract$|aponeurosis|retinacul|\\btendon\\b|linea alba|rectus sheath|layer of thoracolumbar fascia",
    "todo": "tendon",
-   "nota": "piezas que son enteras tendón, aponeurosis o retináculo (tracto iliotibial…)"
+   "nota": "piezas que son enteras tendón, aponeurosis o retináculo (tracto iliotibial…). La hoja posterior de la fascia toracolumbar va en la capa muscular y es el rombo blanco lumbar donde nace el dorsal ancho (antes salía granate como el músculo; referencias del usuario, 2026-11-22)"
   },
   {
    "re": "^Latissimus dorsi",
