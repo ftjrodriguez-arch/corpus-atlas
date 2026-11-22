@@ -660,8 +660,13 @@ defecto era solo de la deformación.
 - **Separados (hombre 16 grupos → 96 piezas, mujer 6 → 60):** intercostales externos (11 espacios), internos (10) e
   íntimos (9), subcostales (9.º–11.º espacio), interóseos dorsales de la mano (4) y del pie (4), lumbricales de la mano
   (4) e interóseos plantares (3).
-- **Sin separar (una sola pieza en la malla de la web):** interóseos palmares de la mano, lumbricales del pie y
-  rotadores. Haría falta cortarlos por geometría (por dedo o por vértebra) o modelarlos en Blender.
+- **Rotadores, cortados por vértebra** (la malla de la web es una sola pieza): cada triángulo va con la vértebra más
+  cercana (`corte: true`), 22 niveles de C3 a L5 por lado → «Músculos rotadores de T7», etc. (hombre y mujer, +44 piezas).
+- **Sin separar:** interóseos palmares de la mano (174 triángulos: la web no trae sus formas) y lumbricales del pie (el
+  corte da dos trozos). Hay que modelarlos en Blender.
+- `importar_mallas` avisa si el número de mallas no coincide con `manifiesto.json → archivos[].piezas`; `separar.js` lo
+  recalcula. Interchange importa también las mallas de los grupos (siguen en el GLB, fuera de la escena): quedan en
+  Content sin usarse.
 - C++: `FCorpusPieza::EnPropio` (8.º campo del catálogo). `En` sigue siendo el del grupo para que valgan su ficha, el
   buscador en inglés y la profundidad de disección; `NombrePieza` enseña el nombre propio en inglés (y en francés y
   alemán mientras no haya traducción).

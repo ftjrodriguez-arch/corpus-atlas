@@ -27,7 +27,8 @@ const roman = n => ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 
 const COSTILLA = new RegExp('^(' + ORD.slice(1).join('|') + ') rib$');
 const METACARPO = new RegExp('^(First|Second|Third|Fourth|Fifth) metacarpal bone$');
 const METATARSO = new RegExp('^(First|Second|Third|Fourth|Fifth) metatarsal bone$');
-const numDe = en => ORD.indexOf(en.split(' ')[0]);
+const VERT = [''].concat([1, 2, 3, 4, 5, 6, 7].map(n => 'C' + n), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => 'T' + n), [1, 2, 3, 4, 5].map(n => 'L' + n));
+const numDe = en => { const v = /^Vertebra ([CTL]\d+)$/.exec(en); return v ? VERT.indexOf(v[1]) : ORD.indexOf(en.split(' ')[0]); };
 
 /* grupos: en = nombre del grupo en inglés · ref = huesos vecinos · num = número anatómico a partir de los dos huesos más
    cercanos (o del más cercano, uno: true) · nombres por número */
@@ -48,6 +49,11 @@ const GRUPOS = [
     es: n => `${ord_es(n)} músculo interóseo dorsal del pie`, enN: n => `${ord_en(n)} dorsal interosseous muscle of foot`, la: n => `Musculus interosseus dorsalis pedis ${roman(n)}` },
   { en: 'Plantar interossei muscles', ref: METATARSO, num: a => a - 2, uno: true,
     es: n => `${ord_es(n)} músculo interóseo plantar`, enN: n => `${ord_en(n)} plantar interosseous muscle`, la: n => `Musculus interosseus plantaris ${roman(n)}` },
+  /* una sola pieza en la malla de la web: se corta por el hueso más cercano a cada triángulo (corte: true) */
+  /* interóseos palmares (174 triángulos) y lumbricales del pie (dos trozos) no se cortan: la malla de la web no trae sus
+     formas por separado; quedan como grupo hasta modelarlos */
+  { en: 'Rotatores', ref: /^Vertebra [CTL]\d+$/, corte: true, num: a => a,
+    es: n => `Músculos rotadores de ${VERT[n]}`, enN: n => `Rotatores (${VERT[n]})`, la: n => `Musculi rotatores (${VERT[n]})` },
 ];
 const MIN_TRI = 40;   // componentes menores se unen al componente grande más cercano
 
@@ -64,10 +70,22 @@ function componentes(pz) {
   return grandes;
 }
 
+/* corte de una pieza de un solo componente: cada triángulo va con el hueso de referencia más cercano a su centro;
+   los trozos de menos de MIN_TRI triángulos se unen al trozo vecino más cercano */
+function cortar(pz, H, G) {
+  const P = pz.P, I = pz.I, por = new Map();
+  for (let t = 0; t < I.length; t += 3) { const c = [0, 1, 2].map(k => (P[I[t] * 3 + k] + P[I[t + 1] * 3 + k] + P[I[t + 2] * 3 + k]) / 3);
+    let bn = -1, bd = 1e9; for (const h of H) { for (let i = 0; i < h.P.length; i += 6) { const d = (h.P[i] - c[0]) ** 2 + (h.P[i + 1] - c[1]) ** 2 + (h.P[i + 2] - c[2]) ** 2; if (d < bd) { bd = d; bn = h.n; } } }
+    const n = G.num(bn); if (!por.has(n)) por.set(n, { ts: [], n, voto: 'corte ' + bn, c: [0, 0, 0] }); const o = por.get(n); o.ts.push(t); for (let k = 0; k < 3; k++) o.c[k] += c[k]; }
+  let L = [...por.values()]; for (const o of L) o.c = o.c.map(v => v / o.ts.length);
+  const chicos = L.filter(o => o.ts.length < MIN_TRI); L = L.filter(o => o.ts.length >= MIN_TRI);
+  for (const ch of chicos) { let best = null, bd = 1e9; for (const g of L) { const d = Math.hypot(...g.c.map((v, k) => v - ch.c[k])); if (d < bd) { bd = d; best = g; } } if (best) best.ts.push(...ch.ts); }
+  return L;
+}
 /* huesos de referencia del lado de la pieza */
 function huesosRef(cuerpo, re, lado) {
   const L = []; for (const c of cuerpo === 'hombre' ? ['hombre'] : [cuerpo, 'hombre']) { let C; try { C = PO.capa(c + '/oseo'); } catch (e) { continue; }
-    for (const nd of C.g.nodes) { if (nd.mesh === undefined) continue; const e = nd.extras || {}; if (!re.test(e.en || '') || (e.lado || '') !== lado || L.some(h => h.en === e.en)) continue; const pz = PO.pieza(c + '/oseo', nd.name); L.push({ en: e.en, n: numDe(e.en), P: pz.P }); } }
+    for (const nd of C.g.nodes) { if (nd.mesh === undefined) continue; const e = nd.extras || {}; if (!re.test(e.en || '') || ((e.lado || '') !== lado && (e.lado || '') !== '') || L.some(h => h.en === e.en)) continue; const pz = PO.pieza(c + '/oseo', nd.name); L.push({ en: e.en, n: numDe(e.en), P: pz.P }); } }
   return L;
 }
 /* número anatómico: voto de los huesos más cercanos a (hasta 600) vértices del componente */
@@ -93,12 +111,14 @@ function repartir(comps) {
 }
 
 function plan(cuerpo) {
-  const C = PO.capa(cuerpo + '/muscular'), R = [];
-  for (const nd of C.g.nodes) { if (nd.mesh === undefined) continue; const e = nd.extras || {}, G = GRUPOS.find(g => g.en === e.en); if (!G) continue;
-    const pz = PO.pieza(cuerpo + '/muscular', nd.name), comps = componentes(pz); if (comps.length < 2) { R.push({ nd, G, pz, comps, nota: 'un solo componente: sin separar' }); continue; }
+  const C = PO.capa(cuerpo + '/muscular'), R = [], hechos = new Set(C.g.nodes.map(x => (x.extras || {}).grupo).filter(Boolean));
+  for (const nd of C.g.nodes) { if (nd.mesh === undefined) continue; const e = nd.extras || {}, G = GRUPOS.find(g => g.en === e.en); if (!G || e.grupo || hechos.has(nd.name)) continue;   /* ya separado en una pasada anterior */
+    const pz = PO.pieza(cuerpo + '/muscular', nd.name);
+    if (G.corte) { const H = huesosRef(cuerpo, G.ref, e.lado || ''), comps = cortar(pz, H, G); R.push({ nd, G, pz, comps, nota: comps.length < 2 ? 'el corte dio una sola parte: sin separar' : '' }); continue; }
+    const comps = componentes(pz); if (comps.length < 2) { R.push({ nd, G, pz, comps, nota: 'un solo componente: sin separar' }); continue; }
     const H = huesosRef(cuerpo, G.ref, e.lado || ''); for (const c of comps) Object.assign(c, numerar(pz, c, H, G));
     repartir(comps);
-    const ns = comps.map(c => c.n), rep = ns.filter((v, i) => ns.indexOf(v) !== i), malos = ns.filter(v => !(v >= 1 && v <= 12));
+    const ns = comps.map(c => c.n), rep = ns.filter((v, i) => ns.indexOf(v) !== i), malos = ns.filter(v => !(v >= 1 && v <= 24));
     R.push({ nd, G, pz, comps, nota: rep.length ? 'números repetidos ' + rep.join(',') + ': sin separar' : malos.length ? 'números fuera de rango: sin separar' : '' }); }
   return R;
 }
@@ -159,6 +179,7 @@ function aplicar(cuerpos) {
     fs.writeFileSync(fG + '.tmp', Buffer.concat([cab, hj, js, hb, binP])); fs.renameSync(fG + '.tmp', fG);
     console.log(`${cuerpo}/muscular.glb: ${R.length} grupos → ${nPz} piezas`);
   }
+  for (const a of MAN.archivos || []) a.piezas = Object.values(MAN.piezas).filter(p => Object.values(p).some(m => m.a === a.archivo)).length;   /* lo comprueba importar_mallas */
   fs.writeFileSync(fMan, JSON.stringify(MAN)); fs.writeFileSync(fMov, JSON.stringify(MOV)); fs.writeFileSync(fCat, JSON.stringify(CAT));
   console.log('manifiesto, movimiento y catálogo de Importar actualizados (copiar_datos() los lleva a Content/Datos)');
 }
