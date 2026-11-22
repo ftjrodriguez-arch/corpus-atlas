@@ -219,17 +219,21 @@ function resolver(PR, rom, mi, grados) {
     /* objetivos de los anclajes: el vértice sigue rígidamente a su hueso */
     const obj = anc.map(a => a.pi < 0 ? [mus.P[a.v * 3], mus.P[a.v * 3 + 1], mus.P[a.v * 3 + 2]] : PO.vertice(H.pzs[a.pi], J, [mus.P[a.v * 3], mus.P[a.v * 3 + 1], mus.P[a.v * 3 + 2]], pesosDe(H.pzs[a.pi], a.vi), { abrazo: false }));
     const RB = sdfs.map(o => rigido(o.pz, J));
-    const ITS = gr === 0 ? 1 : 14;
+    /* 0° es el reposo solo en los rangos: el instante 0 de un ejercicio («ej:») ya es una postura (en el remo, tronco
+       inclinado y brazos colgando). Antes se resolvía con una iteración y sin colisiones y el dorsal quedaba con su forma
+       de reposo, atravesado por el serrato y el redondo mayor. Ese primer cuadro parte del reposo: más iteraciones. */
+    const reposo = gr === 0 && !String(rom).startsWith('ej:'), primero = gr === grados[0];
+    const ITS = reposo ? 1 : primero ? 40 : 14;
     /* anclajes deslizantes (vientres del brazo): sujetos al húmero de lado, libres a lo largo de él: así el vientre puede
        acortarse cuando se flexiona el codo o se acerca el origen */
     const rig0 = anc.some(a => a.desl) ? obj.map(o => o.slice()) : null; let eje = null;
     if (rig0) { const hz = H.pzs.find(p => p.en === 'Humerus' && p.lado === LD(S)), T = rigido(hz, J), A = PO.rig['shoulder_' + S], Bq = PO.rig['elbow_' + S], d = Bq.map((v, k) => v - A[k]), R = T.R;
       eje = [R[0] * d[0] + R[3] * d[1] + R[6] * d[2], R[1] * d[0] + R[4] * d[1] + R[7] * d[2], R[2] * d[0] + R[5] * d[1] + R[8] * d[2]]; const l = Math.hypot(...eje); eje = eje.map(v => v / l); }
     for (let it = 0; it < ITS; it++) {
-      if (rig0 && gr !== 0) anc.forEach((a, n) => { if (!a.desl) return; const r = rig0[n], s = (en(a.t, 0) - r[0]) * eje[0] + (en(a.t, 1) - r[1]) * eje[1] + (en(a.t, 2) - r[2]) * eje[2]; obj[n] = [r[0] + eje[0] * s, r[1] + eje[1] * s, r[2] + eje[2] * s]; });
+      if (rig0 && !reposo) anc.forEach((a, n) => { if (!a.desl) return; const r = rig0[n], s = (en(a.t, 0) - r[0]) * eje[0] + (en(a.t, 1) - r[1]) * eje[1] + (en(a.t, 2) - r[2]) * eje[2]; obj[n] = [r[0] + eje[0] * s, r[1] + eje[1] * s, r[2] + eje[2] * s]; });
       /* colisiones con la posición actual */
       col = [];
-      if (gr !== 0) for (const m of mue) { let px = en(m.t, 0), py = en(m.t, 1), pz = en(m.t, 2), toca = false;
+      if (!reposo) for (const m of mue) { let px = en(m.t, 0), py = en(m.t, 1), pz = en(m.t, 2), toca = false;
         if (!PR.brazo && py > TC.y0 && py < PR.yMax) { const pp = [px, py, pz], k1 = TX.k(TC, pp); if (k1 < m.kmin) { const s = m.kmin / Math.max(k1, 1e-4); px *= s; pz = TC.zc + (pz - TC.zc) * s; toca = true; } }
         for (let b = 0; b < sdfs.length; b++) { const T = RB[b], R = T.R, dx = px - T.t[0], dy = py - T.t[1], dz = pz - T.t[2];
           const loc = [R[0] * dx + R[1] * dy + R[2] * dz, R[3] * dx + R[4] * dy + R[5] * dz, R[6] * dx + R[7] * dy + R[8] * dz], d = sdfEn(sdfs[b].S, loc, g);

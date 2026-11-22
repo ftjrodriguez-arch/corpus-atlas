@@ -40,8 +40,11 @@ Hizo Sprint 1 L2/N, Sprint 2 (músculos separados, 10 ejercicios), 59 traduccion
       pinta el canal G del propio dorsal (frontera T10 → cresta ilíaca) y `tendones_reglas.json` incluye ya la hoja posterior de la
       fascia toracolumbar. Hombre y mujer reimportados; capturas `hoja_fascia_toracolumbar.png` y `hoja_aponeurosis_dorsal.png`.
       Pendiente de revisión profesional. Si se repite `tendones.js --aplicar`, volver a ejecutar `aponeurosis_dorsal.js` después.
-- [ ] Remo al 100 % (final del tirón): músculos profundos atraviesan el dorsal ancho por detrás (`hoja_row_tiron.png`); hasta el
-      85 % sale entero. Falta hornear o ajustar el correctivo `ej:row` en ese extremo.
+- [x] Remo al 100 % (= 0 % del ciclo): el serrato y el redondo mayor atravesaban el dorsal ancho. Causa: `correctivos.js` trataba
+      el cuadro 0 de cada ejercicio como reposo (una iteración y sin colisiones). Corregido y horneado de nuevo (todos los
+      ejercicios); celdas atravesadas en el cuadro 0 del remo 451 → 30. Capturas `hoja_cuadro0.png`, `hoja_row0_cerca.png`.
+- [ ] Queda un punto pequeño del redondo mayor junto a la axila en el remo (8–13 mm): los músculos no chocan entre sí (ver abajo).
+- [ ] `correctivos.js hornear-ejercicios` añade al .bin sin quitar lo viejo (crece cada vez): compactar o hornear todo.
 - [ ] `tendones.js --restaurar` ya no funciona con los músculos separados (n1633_4… no están en la web): adaptarlo a `separar.js`.
 - [ ] El resto de su lista ya está arriba en el Sprint 2 (FR/DE de ejercicios, pruebas ortopédicas, interóseos y
       lumbricales, dedos, cinta y gráficas) y en `unreal/PLAN_SPRINTS.md`.
