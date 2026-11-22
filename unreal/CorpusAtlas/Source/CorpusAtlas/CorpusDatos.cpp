@@ -672,6 +672,34 @@ namespace
 		{TEXT("Vista izquierda (4)"), {TEXT("Left view (4)"), TEXT("Vista esquerda (4)"), TEXT("Vue de gauche (4)"), TEXT("Ansicht von links (4)")}},
 		{TEXT("Vista superior (5)"), {TEXT("Superior view (5)"), TEXT("Vista superior (5)"), TEXT("Vue supérieure (5)"), TEXT("Ansicht von oben (5)")}},
 		{TEXT("Vista inferior (6)"), {TEXT("Inferior view (6)"), TEXT("Vista inferior (6)"), TEXT("Vue inférieure (6)"), TEXT("Ansicht von unten (6)")}},
+		// ── Interfaz, fase 3: ficha en bloques, enlaces a Estudiar, examen y visión de color ──
+		// (las plantillas llevan {0} y {1} donde van las cifras: cada idioma las pone en su sitio)
+		{TEXT("Anatomía"), {TEXT("Anatomy"), TEXT("Anatomia"), TEXT("Anatomie"), TEXT("Anatomie")}},
+		{TEXT("Función"), {TEXT("Function"), TEXT("Função"), TEXT("Fonction"), TEXT("Funktion")}},
+		{TEXT("Relevancia clínica"), {TEXT("Clinical relevance"), TEXT("Relevância clínica"), TEXT("Intérêt clinique"), TEXT("Klinische Relevanz")}},
+		{TEXT("Función biomecánica (plano / eje)"), {TEXT("Biomechanical function (plane / axis)"), TEXT("Função biomecânica (plano / eixo)"), TEXT("Fonction biomécanique (plan / axe)"), TEXT("Biomechanische Funktion (Ebene / Achse)")}},
+		{TEXT("Prueba muscular manual"), {TEXT("Manual muscle testing"), TEXT("Teste muscular manual"), TEXT("Testing musculaire manuel"), TEXT("Manueller Muskeltest")}},
+		{TEXT("Articula con"), {TEXT("Articulates with"), TEXT("Articula-se com"), TEXT("S'articule avec"), TEXT("Artikuliert mit")}},
+		{TEXT("Referencias"), {TEXT("References"), TEXT("Referências"), TEXT("Références"), TEXT("Literatur")}},
+		{TEXT("Ver los {0}"), {TEXT("Show all {0}"), TEXT("Ver os {0}"), TEXT("Voir les {0}"), TEXT("Alle {0} anzeigen")}},
+		{TEXT("Ver menos"), {TEXT("Show fewer"), TEXT("Ver menos"), TEXT("Voir moins"), TEXT("Weniger anzeigen")}},
+		{TEXT("Pregunta {0} de {1}"), {TEXT("Question {0} of {1}"), TEXT("Pergunta {0} de {1}"), TEXT("Question {0} sur {1}"), TEXT("Frage {0} von {1}")}},
+		{TEXT("Ver resultado"), {TEXT("See result"), TEXT("Ver resultado"), TEXT("Voir le résultat"), TEXT("Ergebnis anzeigen")}},
+		{TEXT("Resultado"), {TEXT("Result"), TEXT("Resultado"), TEXT("Résultat"), TEXT("Ergebnis")}},
+		{TEXT("Repetir"), {TEXT("Try again"), TEXT("Repetir"), TEXT("Recommencer"), TEXT("Wiederholen")}},
+		{TEXT("Sin responder"), {TEXT("Unanswered"), TEXT("Sem resposta"), TEXT("Sans réponse"), TEXT("Unbeantwortet")}},
+		{TEXT("Faltan los datos de estudio: node tools/unreal/estudio.js"), {TEXT("Study data missing: node tools/unreal/estudio.js"), TEXT("Faltam os dados de estudo: node tools/unreal/estudio.js"), TEXT("Données d'étude manquantes : node tools/unreal/estudio.js"), TEXT("Lerndaten fehlen: node tools/unreal/estudio.js")}},
+		{TEXT("Actividad muscular: amarillo (poca) → magenta (mucha). Datos de laboratorio: Fukuchi 2018, Schreiber 2019, Lencioni 2019."), {TEXT("Muscle activity: yellow (low) → magenta (high). Laboratory data: Fukuchi 2018, Schreiber 2019, Lencioni 2019."), TEXT("Atividade muscular: amarelo (pouca) → magenta (muita). Dados de laboratório: Fukuchi 2018, Schreiber 2019, Lencioni 2019."), TEXT("Activité musculaire : jaune (faible) → magenta (forte). Données de laboratoire : Fukuchi 2018, Schreiber 2019, Lencioni 2019."), TEXT("Muskelaktivität: gelb (gering) → magenta (hoch). Labordaten: Fukuchi 2018, Schreiber 2019, Lencioni 2019.")}},
+		{TEXT("Visión de color"), {TEXT("Colour vision"), TEXT("Visão de cores"), TEXT("Vision des couleurs"), TEXT("Farbsehen")}},
+		{TEXT("Normal"), {TEXT("Normal"), TEXT("Normal"), TEXT("Normale"), TEXT("Normal")}},
+		{TEXT("Deuteranopía"), {TEXT("Deuteranopia"), TEXT("Deuteranopia"), TEXT("Deutéranopie"), TEXT("Deuteranopie")}},
+		{TEXT("Protanopía"), {TEXT("Protanopia"), TEXT("Protanopia"), TEXT("Protanopie"), TEXT("Protanopie")}},
+		{TEXT("Tritanopía"), {TEXT("Tritanopia"), TEXT("Tritanopia"), TEXT("Tritanopie"), TEXT("Tritanopie")}},
+		{TEXT("Filtro de color del motor para deuteranopía, protanopía o tritanopía. Ajusta la imagen de la ventana; no cambia los colores de las capas en los datos."),
+			{TEXT("Engine colour filter for deuteranopia, protanopia or tritanopia. It adjusts the window image; it does not change the layer colours in the data."),
+			 TEXT("Filtro de cor do motor para deuteranopia, protanopia ou tritanopia. Ajusta a imagem da janela; não altera as cores das camadas nos dados."),
+			 TEXT("Filtre de couleur du moteur pour la deutéranopie, la protanopie ou la tritanopie. Il ajuste l'image de la fenêtre ; il ne modifie pas les couleurs des couches dans les données."),
+			 TEXT("Farbfilter der Engine für Deuteranopie, Protanopie oder Tritanopie. Er passt das Fensterbild an; die Farben der Ebenen in den Daten bleiben unverändert.")}},
 	};
 
 	bool BuscarPropia(const FString& Idioma, const FString& Es, FString& Fuera)
@@ -767,6 +795,13 @@ FString UCorpusDatos::NombreLado(const FString& Lado) const
 TArray<TPair<FString, FString>> UCorpusDatos::Ficha(const FString& Id)
 {
 	TArray<TPair<FString, FString>> Fuera;
+	for (const FCorpusCampoFicha& C : FichaCampos(Id)) { Fuera.Emplace(C.Etiqueta, C.Texto); }
+	return Fuera;
+}
+
+TArray<FCorpusCampoFicha> UCorpusDatos::FichaCampos(const FString& Id)
+{
+	TArray<FCorpusCampoFicha> Fuera;
 	const FCorpusPieza* P = Piezas.Find(Id);
 	if (!P || !InfoEs.IsValid()) { return Fuera; }
 	// info.json: { mus|lig|bone|rest : { nombre inglés : { campo : texto } } }
@@ -791,7 +826,10 @@ TArray<TPair<FString, FString>> UCorpusDatos::Ficha(const FString& Id)
 		{TEXT("tipo"), TEXT("Tipo")}, {TEXT("descripcion"), TEXT("Descripción")}, {TEXT("origen"), TEXT("Origen")}, {TEXT("insercion"), TEXT("Inserción")},
 		{TEXT("inervacion"), TEXT("Inervación")}, {TEXT("irrigacion"), TEXT("Irrigación")}, {TEXT("accion"), TEXT("Acción")}, {TEXT("funcion"), TEXT("Función")},
 		{TEXT("articulacion"), TEXT("Articulación")}, {TEXT("une"), TEXT("Une")}, {TEXT("destino"), TEXT("Destino")}, {TEXT("ramas"), TEXT("Ramas")},
-		{TEXT("territorio"), TEXT("Territorio")}, {TEXT("clinica"), TEXT("Clínica")}, {TEXT("relaciones"), TEXT("Relaciones")}
+		{TEXT("territorio"), TEXT("Territorio")}, {TEXT("relaciones"), TEXT("Relaciones")},
+		// mismos rótulos que la ficha de la web (renderInfo en index.html); antes «biomecanica» salía como «BIOMECANICA», sin tilde
+		{TEXT("clinica"), TEXT("Relevancia clínica")}, {TEXT("biomecanica"), TEXT("Función biomecánica (plano / eje)")},
+		{TEXT("prueba"), TEXT("Prueba muscular manual")}, {TEXT("articula"), TEXT("Articula con")}, {TEXT("referencias"), TEXT("Referencias")}
 	};
 	for (const auto& Campo : F->Values)
 	{
@@ -799,7 +837,7 @@ TArray<TPair<FString, FString>> UCorpusDatos::Ficha(const FString& Id)
 		FString Texto;
 		if (K == TEXT("es") || K == TEXT("la") || !Campo.Value.IsValid() || !Campo.Value->TryGetString(Texto) || Texto.IsEmpty()) { continue; }
 		const FString* Et = Etiquetas.Find(K);
-		Fuera.Emplace(T(Et ? *Et : K.Left(1).ToUpper() + K.Mid(1)), Texto);
+		Fuera.Add(FCorpusCampoFicha{ K, T(Et ? *Et : K.Left(1).ToUpper() + K.Mid(1)), Texto });
 	}
 	return Fuera;
 }

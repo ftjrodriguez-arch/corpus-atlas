@@ -154,6 +154,9 @@ struct FCorpusVistaPaso
 	FVector3f Tgt = FVector3f(0.f, 0.95f, 0.f);   // glTF, m
 };
 
+/** Campo de la ficha de una pieza (info.json): clave original, rótulo en el idioma actual y texto. */
+struct FCorpusCampoFicha { FString Clave, Etiqueta, Texto; };
+
 /** Relieve óseo (data/extras.json → lm): nombre en español, inglés y portugués y su punto sobre el hueso (glTF, m). */
 struct FCorpusRelieve { FString Es, En, Pt; FVector3f Pos = FVector3f::ZeroVector; };
 
@@ -193,6 +196,8 @@ public:
 
 	/** Ficha de la pieza en el idioma actual: pares campo → texto (origen, inserción, inervación, función…). */
 	TArray<TPair<FString, FString>> Ficha(const FString& Id);
+	/** Lo mismo con la clave original de info.json (origen, inervacion, biomecanica, clinica…), para agrupar la ficha en bloques. */
+	TArray<struct FCorpusCampoFicha> FichaCampos(const FString& Id);
 
 	/** Busca por nombre (idioma actual, español, inglés o latín), sin tildes ni mayúsculas. */
 	UFUNCTION(BlueprintCallable, Category = "Corpus") TArray<FString> Buscar(const FString& Texto, int32 Maximo = 40) const;

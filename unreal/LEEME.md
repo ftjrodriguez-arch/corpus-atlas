@@ -714,6 +714,58 @@ pasan a constantes (`ANCHO_IZQ` 360 · `ANCHO_FICHA` 400 · `ANCHO_EST` 500 · `
   ratón encima de la fila (`SBorder::IsHovered`) enciende la opacidad sin parpadeo; que el menú desplegable se cierra al
   pulsar fuera; que «›» girado se ve bien con Inter; FR/DE en la barra de modos y en la barra de disección sin «…».
 
+## Interfaz · Fase 3 de `PLAN_INTERFAZ.md`: contenido y animación (2026-11-22) — SIN COMPILAR NI CAPTURAR
+Escrito en una sesión sin consola: falta compilar, capturar y revisar. Reutiliza el sistema visual de las fases 1 y 2;
+las medidas nuevas son constantes del mismo bloque (`DUR_ENCIMA` 100 ms, `DUR_FUNDIDO` 120 ms, `ANCHO_ROTULO_FICHA` 104,
+`ANCHO_FRANJA` 3, `ALTO_PROGRESO` 3, `LADO_LETRA` 28, `LADO_SIGNO` 14, `LADO_MARCADOR` 20, `ENLACES_POR_TIPO` 3).
+- **Ficha en bloques** (`RehacerFicha`, datos con `UCorpusDatos::FichaCampos`, que da la clave original de `info.json`):
+  Anatomía (descripción y rejilla rótulo / texto: origen, inserción, inervación, irrigación, articulación, une, destino,
+  ramas, territorio, relaciones…) · Función (acción, función, biomecánica) · Clínica (relevancia clínica y prueba muscular
+  manual, en tarjeta con franja ámbar de 3 px). Rayas de 1 px con 16 px de aire entre bloques. «Tipo» ya no se pinta (lo
+  dice la miga). Rótulos como en la web: «Función biomecánica (plano / eje)» (antes «BIOMECANICA», sin tilde), «Prueba
+  muscular manual», «Relevancia clínica», «Articula con». Aislar y Ocultar salen de la ficha (están en la barra de
+  disección); Encuadrar queda como acción principal. El contenido médico no cambia: solo se agrupa y se ordena.
+- **Enlaces «Estudiar (N)»** agrupados por módulo (glosario, patologías, lecciones) con un marcador de texto (la inicial del
+  módulo en una celda, sin iconos), 3 por grupo y «Ver los N» / «Ver menos».
+- **Examen de una pregunta cada vez** (`EstPregunta`; `EstResp` y la corrección no cambian): «Pregunta 2 de 5», barra de
+  progreso de 3 px en acento, opciones con su letra en una celda, ✓ / ✗ dibujados con líneas (`SCorpusSigno`, no
+  dependen del glifo) delante del texto y borde verde o rojo (`EstiloRespuesta`), Anterior / Siguiente / «Ver resultado» y
+  resumen «Aciertos x / N» con cada pregunta (pulsarla vuelve a ella) y «Repetir». En la edición Unreal no hay repaso
+  espaciado (eso es de la web): no se ha tocado nada de eso. Contraste del verde y el rojo sobre el fondo del botón ≈ 6,5:1
+  y ≈ 5:1 (cálculo con los valores lineales; comprobar en captura).
+- **Animaciones:** fondo de los botones que pasa al de «encima» en 100 ms (`SCorpusFondoBoton` debajo de cada `SButton`, que
+  queda con un estilo sin fondo normal ni encima, `SinFondo`; `FButtonStyle` cambia de pincel de golpe y no se puede
+  interpolar). Fundido cruzado de 120 ms al cambiar de pieza en la ficha y de entrada, paso o pregunta en Estudiar
+  (`NuevoContenido` / `TickFundido`: la caja anterior se queda encima fundiéndose). La ficha y Estudiar ya no se vacían
+  antes de irse: se van con su contenido.
+- **Correcciones:** una postura puesta desde fuera de la pestaña (prueba `rom`, `marcha`) fija el modo Movimiento, y
+  «Reposo» ya no devuelve la pestaña a Explorar; el Visible Human saca del modo. Panel de movimiento: la fila de modos se
+  parte (`SWrapBox`), las fases y las medidas se ajustan a varias líneas, y el tipo de contracción termina en «…» con el
+  texto entero en la ayuda. Marcha y ejercicio comparten `FilaReproduccion`, `AnadirFase` y `FilaGrupoMuscular`; las
+  cabeceras de sección, `Seccion`. Literales al sistema de traducción: «Faltan los datos de estudio…», la leyenda de la
+  actividad muscular de la marcha (salía en español en los otros idiomas) y las plantillas «Pregunta {0} de {1}» y
+  «Ver los {0}» (`Plantilla`).
+- **Visión de color** en el menú «Aa» (Normal · Deuteranopía · Protanopía · Tritanopía), guardada en
+  `GameUserSettings.ini` `[CorpusAtlas.Interfaz] VisionColor`. Usa `FSlateRenderer::SetColorVisionDeficiencyType(tipo,
+  gravedad 10, corregir, false)`. **Ojo:** el código del motor (`SlateRHIRenderingPolicy.cpp`, `SlateRHIRenderer.cpp`)
+  aplica el filtro a toda la imagen que compone Slate en la ventana, así que probablemente alcanza también al modelo 3D;
+  la ayuda lo dice así («ajusta la imagen de la ventana») y hay que comprobarlo en la captura.
+- **Textos nuevos** en `TR_PROPIA` (en, pt-BR, fr, de): bloques, rótulos, plantillas, visión de color y su ayuda.
+- **Pruebas nuevas:** `examen <n|fin>` (pregunta n desde 1, o el resumen) · `responder <pregunta> <opción>` (desde 0; ahora
+  también sin «estudio» delante, deja esa pregunta a la vista y, solo en pruebas, puede cambiar una respuesta) ·
+  `vision <0-3> [sim]` (sim: simula la deficiencia sin corregir y no se guarda) · `verlos <n|todos|off>` (despliega
+  grupos de enlaces) · `bajarficha <px|fin>`. `animlenta` también ralentiza el color de los botones.
+- **Capturas por hacer** (`ui_f3_*`; repetir con `r.SetRes 1280x720w` y `2560x1440w`):
+  ```powershell
+  .\unreal\captura.ps1 -Pasos "esperar 4; r.SetRes 1600x900w; esperar 2; sel n1394; encuadrar; esperar 1; foto ui_f3_ficha_musculo; bajarficha fin; foto ui_f3_ficha_musculo_pie; sel n268; encuadrar; esperar 1; foto ui_f3_ficha_hueso; bajarficha fin; verlos todos; esperar 1; foto ui_f3_ficha_enlaces; esc; estudio lecciones 0 0; esperar 2; examen 1; foto ui_f3_examen_p1; responder 0 2; foto ui_f3_examen_bien; responder 0 0; foto ui_f3_examen_mal; responder 1 0; responder 2 0; responder 3 0; responder 4 0; examen fin; foto ui_f3_resumen; vision 1; esperar 1; foto ui_f3_deuteranopia; vision 1 sim; esperar 1; foto ui_f3_deuteranopia_sim; vision 0; texto 150; esperar 1; examen 1; foto ui_f3_texto150; texto 100; idioma de; esperar 2; examen 1; foto ui_f3_examen_de; estudio; sel n1394; esperar 1; foto ui_f3_ficha_de; esc; modo movimiento; marcha normal 30; foto ui_f3_marcha_de; ejercicio squat - 40; foto ui_f3_ejercicio_de; ejercicio; marcha; modo explorar; idioma es; esperar 2; animlenta 0.1; sel n1394; esperar 1; sel n268; esperar 0.4; foto ui_f3_fundido; animlenta 1"
+  ```
+- **Falta / riesgos:** compilar; que el fondo animado no tape el pulsado ni el desactivado; que el borde de los botones
+  ahora sí se funde con el panel (antes los bordes redondeados no seguían la opacidad del fundido); alto de la ficha
+  durante el fundido (manda la más alta de las dos cajas); si el filtro de visión de color tiñe también el modelo;
+  rótulos de la rejilla en alemán que no quepan en 104 px (palabras largas sin corte); la respuesta correcta de la
+  primera pregunta de `lec_craneo` es la opción 2 en `estudio_es.json` (comprobar en los demás idiomas); revisión del
+  agente `director-clinico` de los rótulos nuevos de la ficha.
+
 ## Pendiente de pasar desde la web (por fases)
 1. **Atlas:** membranas y piezas semitransparentes, etiquetas y pines, relieves óseos,
    planos de corte, disección por profundidad, piezas solo masculinas por nombre (`MALE_ONLY`), contorno de selección.

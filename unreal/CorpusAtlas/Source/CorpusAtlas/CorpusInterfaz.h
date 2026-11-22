@@ -30,7 +30,8 @@ public:
 
 	/** Pruebas automáticas: escribe en el buscador como si lo hiciera el usuario. */
 	void QaBuscar(const FString& Texto);
-	/** Pruebas automáticas del panel de estudio: «<módulo> [grupo] [entrada] [paso]», «<módulo> buscar <texto>», «responder <pregunta> <opción>»; vacío = cerrar. */
+	/** Pruebas automáticas del panel de estudio: «<módulo> [grupo] [entrada] [paso]», «<módulo> buscar <texto>», «responder <pregunta> <opción>»
+	 *  (desde 0), «examen <n|fin>» (pregunta n desde 1 o el resumen), «bajar <px>»; vacío = cerrar. */
 	void QaEstudio(const FString& Args);
 	/** Pruebas automáticas de la interfaz: «panel <0|1>»… Devuelve false si el verbo no es suyo. */
 	bool Qa(const FString& Verbo, const FString& Resto);
@@ -89,6 +90,11 @@ private:
 	void RehacerResultados(const FText& Texto);
 	/** Panel de movimiento (rango articular): articulación, movimiento, lado, grados y reproducir. */
 	void RehacerMovimiento();
+	/** Marcha y ejercicio: deslizador del ciclo, reproducir o pausa, cámara lenta y reposo (una sola implementación para los dos). */
+	TSharedRef<SWidget> FilaReproduccion(TFunction<float()> Ciclo, TFunction<void(float)> AlMover, bool bEnCurso, TFunction<void()> Alternar,
+		bool bLento, TFunction<void()> Lento, TFunction<void()> Reposo) const;
+	/** Marcha y ejercicio: nombre de la fase del ciclo (con el %) y lo que ocurre en ella. */
+	void AnadirFase(TFunction<FText()> Titulo, TFunction<FText()> Texto);
 	FIntVector ClaveMov() const;
 	bool bEjTecnica = false;   // modo «Ejercicio»: textos de técnica y errores en lugar de la lista de músculos
 	void AlCambiarPostura();
@@ -121,6 +127,23 @@ private:
 	TMap<FString, TArray<FIntVector4>> Enlaces;
 	FString EnlacesIdioma;
 	TArray<FIntVector4> EnlacesFicha;           // los que muestra la ficha ahora (pruebas: «enlace <n>»)
+	TArray<int32> EnlacesGrupos;                // módulos de los grupos de enlaces, en el orden de la ficha (pruebas: «verlos <n>»)
+	TSet<int32> EnlacesAbiertos;                // módulos cuyo grupo de enlaces está desplegado («Ver los N»)
+	FString FichaPintada;                       // pieza de la ficha a la vista (al cambiar de pieza: fundido cruzado y grupos plegados)
+
+	// ── Fundido cruzado del contenido (120 ms): la caja anterior se queda encima fundiéndose mientras aparece la nueva ──
+	struct FFundido
+	{
+		TSharedPtr<class SOverlay> Capa;        // contiene la caja actual y, durante el fundido, la saliente
+		TSharedPtr<SWidget> Saliente;
+		float T = 1.f;                          // 0 → 1
+	};
+	FFundido FundFicha, FundEst;
+	TSharedPtr<class SScrollBox> RolloFicha;   // pruebas: «bajarficha <px|fin>»
+	/** Deja Caja lista para rellenarla: con bCruzar, la anterior se va fundiéndose y Caja pasa a ser una nueva; si no, se vacía. */
+	void NuevoContenido(FFundido& F, TSharedPtr<SVerticalBox>& Caja, bool bCruzar);
+	void TickFundido(FFundido& F, const TSharedPtr<SVerticalBox>& Caja, float Dt);
+	FString EstPintado;                         // módulo/grupo/entrada/paso/pregunta del estudio a la vista
 	bool bPanelPlegado = false;                 // panel izquierdo recogido en un botón
 	TSharedPtr<SVerticalBox> CajaMini;
 	TSharedPtr<SVerticalBox> CajaEst, CajaEstCab;
@@ -129,6 +152,7 @@ private:
 	int32 EstMod = 0, EstGrupo = -1, EstItem = -1, EstPaso = 0;
 	FString EstFiltro;
 	TMap<int32, int32> EstResp;                 // pregunta → opción elegida
+	int32 EstPregunta = 0;                      // pregunta a la vista (una cada vez); igual al número de preguntas = resumen final
 	TStrongObjectPtr<UTexture2D> EstTex;        // ilustración de la entrada abierta
 	TSharedPtr<FSlateBrush> EstPincel;
 	FString EstImg;
@@ -154,4 +178,9 @@ private:
 	float EscalaUI = 1.f;            // la que aplica el SDPIScaler (descontada la escala que ya pone el motor)
 	int32 TamTexto = 100;            // 90 · 100 · 125 · 150 %
 	void PonerTamTexto(int32 Por);
+
+	// ── Visión de color (menú «Aa»): 0 normal · 1 deuteranopía · 2 protanopía · 3 tritanopía (EColorVisionDeficiency) ──
+	int32 VisionColor = 0;
+	/** Pone el filtro de color de Slate. bGuardar: en la configuración del usuario. bSimular: enseña cómo se ve con esa deficiencia (pruebas). */
+	void PonerVision(int32 Tipo, bool bGuardar = true, bool bSimular = false);
 };
