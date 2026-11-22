@@ -1615,7 +1615,13 @@ void SCorpusInterfaz::ActualizarZonaLibre()
 	if (Ve(P_MOV)) { Der = FMath::Max(Der, (double)(M_PANTALLA + ANCHO_MOV)); }
 	const double Libre = FMath::Max(W - Izq - Der, 0.3 * W);
 	const double Centro = 0.5 * (Izq + (W - Der));
-	Cam->PonerZonaLibre((float)(2.0 * Centro / W - 1.0), (float)(Libre / W));
+	// en vertical: el buscador arriba y la barra de disección abajo (en Estudiar no hay barra)
+	const double H = FMath::Max(TamVista.Y, 100.0);
+	const double Arriba = M_PANTALLA + (Anim[P_BUSCA].W.IsValid() ? Anim[P_BUSCA].W->GetDesiredSize().Y : 0.0);
+	const double Abajo = Ve(P_BARRA) ? M_PANTALLA + ALTO_BARRA : 0.0;
+	const double LibreY = FMath::Max(H - Arriba - Abajo, 0.5 * H);
+	const double CentroY = 0.5 * (Arriba + (H - Abajo));
+	Cam->PonerZonaLibre((float)(2.0 * Centro / W - 1.0), (float)(Libre / W), (float)(1.0 - 2.0 * CentroY / H), (float)(LibreY / H));
 }
 
 float SCorpusInterfaz::BordeIzq() const

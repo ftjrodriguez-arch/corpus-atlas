@@ -30,14 +30,19 @@ public:
 	void OrbitaWeb(const FVector3f& Tgt, float R, float Th, float Ph);
 	/** Zona de la pantalla que dejan libre los paneles de la interfaz: centro en coordenadas normalizadas (−1 borde izquierdo,
 	 *  0 centro, 1 borde derecho) y fracción del ancho. La proyección se descentra para que el objetivo quede en el centro de
-	 *  esa zona (se desliza con suavidad) y Encuadrar ajusta la distancia a su ancho. */
-	void PonerZonaLibre(float CentroX, float FraccionAncho);
+	 *  esa zona (se desliza con suavidad) y Encuadrar ajusta la distancia a su ancho. En vertical igual: CentroY (−1 abajo,
+	 *  1 arriba) y fracción del alto que dejan el buscador y la barra de disección. */
+	void PonerZonaLibre(float CentroX, float FraccionAncho, float CentroY = 0.f, float FraccionAlto = 1.f);
 	virtual void CalcCamera(float Dt, struct FMinimalViewInfo& Vista) override;
 
 	UPROPERTY(VisibleAnywhere, Category = "Corpus") TObjectPtr<UCameraComponent> Camara;
 
 private:
 	float CentroLibre = 0.f, CentroLibreSuave = 0.f, FraccionLibre = 1.f;
+	float CentroLibreY = 0.f, CentroLibreYSuave = 0.f, FraccionLibreY = 1.f;
+	// último encuadre: si la zona libre cambia y el usuario no ha acercado ni desplazado desde entonces, se rehace
+	FBox UltimaCaja = FBox(ForceInit);
+	bool bEncuadreVivo = false;
 	FVector Objetivo = FVector(0, 0, 95), ObjetivoSuave = FVector(0, 0, 95);
 	float Distancia = 420.f, DistanciaSuave = 420.f;
 	float Yaw = -90.f, Pitch = -5.f, YawSuave = -90.f, PitchSuave = -5.f;

@@ -40,14 +40,20 @@ void ACorpusCamara::Tick(float Dt)
 	YawSuave += FMath::FindDeltaAngleDegrees(YawSuave, Yaw) * K;
 	PitchSuave = FMath::Lerp(PitchSuave, Pitch, K);
 	CentroLibreSuave = FMath::Lerp(CentroLibreSuave, CentroLibre, K);
+	CentroLibreYSuave = FMath::Lerp(CentroLibreYSuave, CentroLibreY, K);
 	const FRotator R(PitchSuave, YawSuave, 0.f);
 	SetActorLocationAndRotation(ObjetivoSuave - R.Vector() * DistanciaSuave, R);
 }
 
-void ACorpusCamara::PonerZonaLibre(float CentroX, float FraccionAncho)
+void ACorpusCamara::PonerZonaLibre(float CentroX, float FraccionAncho, float CentroY, float FraccionAlto)
 {
 	CentroLibre = FMath::Clamp(CentroX, -0.7f, 0.7f);
+	CentroLibreY = FMath::Clamp(CentroY, -0.5f, 0.5f);
+	const float FyNueva = FMath::Clamp(FraccionAlto, 0.5f, 1.f), FxAntes = FraccionLibre;
+	const bool bCambia = !FMath::IsNearlyEqual(FyNueva, FraccionLibreY, 0.01f);
+	FraccionLibreY = FyNueva;
 	FraccionLibre = FMath::Clamp(FraccionAncho, 0.3f, 1.f);
+	if (bEncuadreVivo && (bCambia || !FMath::IsNearlyEqual(FxAntes, FraccionLibre, 0.01f))) { Encuadrar(UltimaCaja); }
 }
 
 void ACorpusCamara::CalcCamera(float Dt, FMinimalViewInfo& Vista)
@@ -56,7 +62,7 @@ void ACorpusCamara::CalcCamera(float Dt, FMinimalViewInfo& Vista)
 	// proyección descentrada (FMinimalViewInfo::CalculateProjectionMatrix): con desplazamiento X el centro de la vista cae en
 	// la coordenada normalizada −X. Así el cuerpo queda en el centro de la zona libre sin mover la cámara: la órbita sigue
 	// girando alrededor del objetivo y el clic (DeprojectMousePositionToWorld usa la misma matriz) sigue acertando.
-	Vista.OffCenterProjectionOffset = FVector2D(-CentroLibreSuave, 0.0);
+	Vista.OffCenterProjectionOffset = FVector2D(-CentroLibreSuave, -CentroLibreYSuave);
 }
 
 void ACorpusCamara::Girar(float DYaw, float DPitch)
@@ -67,6 +73,7 @@ void ACorpusCamara::Girar(float DYaw, float DPitch)
 
 void ACorpusCamara::Desplazar(float DX, float DY)
 {
+	bEncuadreVivo = false;
 	const FRotator R(PitchSuave, YawSuave, 0.f);
 	const float Escala = Distancia * 0.0011f;
 	Objetivo += (FRotationMatrix(R).GetUnitAxis(EAxis::Y) * -DX + FRotationMatrix(R).GetUnitAxis(EAxis::Z) * DY) * Escala;
@@ -74,12 +81,14 @@ void ACorpusCamara::Desplazar(float DX, float DY)
 
 void ACorpusCamara::Acercar(float Factor)
 {
+	bEncuadreVivo = false;
 	Distancia = FMath::Clamp(Distancia * Factor, 6.f, 1500.f);
 }
 
 void ACorpusCamara::Encuadrar(const FBox& Caja, bool bInmediato)
 {
 	if (!Caja.IsValid) { return; }
+	UltimaCaja = Caja; bEncuadreVivo = true;
 	Objetivo = Caja.GetCenter();
 	// las piezas muy pequeñas (un músculo del ojo, un huesecillo) se encuadran con algo de contexto alrededor: 5 cm de radio mínimo
 	const float Radio = FMath::Max(Caja.GetExtent().Size(), 5.f);
@@ -92,7 +101,7 @@ void ACorpusCamara::Encuadrar(const FBox& Caja, bool bInmediato)
 	}
 	const float TanH = FMath::Tan(FMath::DegreesToRadians(Camara->FieldOfView * 0.5f));
 	// a lo ancho solo cuenta la zona que dejan libre los paneles (PonerZonaLibre)
-	const float TanMin = FMath::Min(TanH * FraccionLibre, TanH / Aspecto);
+	const float TanMin = FMath::Min(TanH * FraccionLibre, TanH / Aspecto * FraccionLibreY);
 	Distancia = FMath::Clamp(Radio / TanMin * 1.05f, 6.f, 1500.f);
 	if (bInmediato) { ObjetivoSuave = Objetivo; DistanciaSuave = Distancia; }
 }
@@ -107,8 +116,9 @@ void ACorpusCamara::Vista(int32 Cual)
 void ACorpusCamara::OrbitaWeb(const FVector3f& Tgt, float R, float Th, float Ph)
 {
 	// glTF (x, y, z) m → Unreal (x, z, y) cm. En la web la cámara está en tgt + r·(sen ph·sen th, cos ph, sen ph·cos th).
+	bEncuadreVivo = false;   // el recorrido manda la distancia
 	Objetivo = FVector(Tgt.X, Tgt.Z, Tgt.Y) * 100.0;
-	Yaw = FMath::RadiansToDegrees(FMath::Atan2(-FMath::Cos(Th), -FMath::Sin(Th)));
+	Yaw =FMath::RadiansToDegrees(FMath::Atan2(-FMath::Cos(Th), -FMath::Sin(Th)));
 	Pitch = FMath::Clamp(FMath::RadiansToDegrees(Ph) - 90.f, -89.f, 89.f);
 	// la web tiene 30° de campo vertical; aquí 30° son horizontales: para ver lo mismo de alto, la cámara se aleja por el aspecto
 	float Aspecto = 16.f / 9.f;

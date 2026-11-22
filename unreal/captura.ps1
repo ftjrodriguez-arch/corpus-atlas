@@ -6,7 +6,7 @@
 # Pasos: foto <nombre> · sel <id> · encuadrar · aislar [id] · ocultar [id] · todo · vista <0-5> · capa <clave> <0|1>
 #        cuerpo <hombre|mujer|vh> · buscar <texto> · esperar <s> · cualquier otro texto = comando de consola
 #   .\captura.ps1 -Py "ci.ajustar_luces(sol=40, relleno=3000)" -Pasos "foto luces"   (Python sobre el mapa antes de jugar)
-param([double]$Exposicion = [double]::NaN, [string]$Py = "", [string]$Pasos = "foto captura", [int]$Limite = 300)
+param([double]$Exposicion = [double]::NaN, [string]$Py = "", [string]$Pasos = "foto captura", [int]$Limite = 300, [int]$Ancho = 1600, [int]$Alto = 900)
 $raiz = Join-Path $PSScriptRoot "CorpusAtlas"
 $proy = Join-Path $raiz "CorpusAtlas.uproject"
 $ue = "C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe"
@@ -31,7 +31,7 @@ unreal.SystemLibrary.quit_editor()
 }
 $dir = Join-Path $raiz "Saved\Capturas"
 Remove-Item "$dir\*.png" -ErrorAction SilentlyContinue
-$pr = Start-Process -FilePath $ue -ArgumentList "`"$proy`"", "-game", "-windowed", "-ResX=1600", "-ResY=900", "-log=CorpusJuego.log", "-QaPasos=`"$Pasos`"" -PassThru
+$pr = Start-Process -FilePath $ue -ArgumentList "`"$proy`"", "-game", "-windowed", "-ResX=$Ancho", "-ResY=$Alto", "-log=CorpusJuego.log", "-QaPasos=`"$Pasos`"" -PassThru
 if (-not $pr.WaitForExit($Limite * 1000)) { $pr | Stop-Process -Force; "AVISO: el juego no terminó en $Limite s" }
 $sal = Join-Path $PSScriptRoot "capturas"
 New-Item -ItemType Directory -Force $sal | Out-Null
