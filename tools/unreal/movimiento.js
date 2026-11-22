@@ -232,6 +232,20 @@ const PREPARA = `(async()=>{
   window.__movSqMeta=paso=>({fases:SQ_PH.map(f=>({ini:f[0],fin:f[1],k:f[3],n:SQ_PHN[f[3]],x:SQ_PHG[f[3]]})),
     grupos:SQ_M.map((m,i)=>{const lv=[];for(let p=0;p<100;p+=paso)lv.push(Math.round(sqLevel(i,p)*1000)/1000);return {en:m[0],n:m[1],x:m[2],tipo:m[3],lv};}),
     variantes:Object.entries(SQ_DEPTH).map(([k,v])=>({id:k,n:v.n}))});
+  /* ejercicios de la fuente «ct»: la postura final de una entrada de CTESTS (pose + anchor) con la fracción k (0–1), igual
+     que ctTick() de la web pero sin reloj: misma composición, mismo orden de articulaciones y el pie fijo con el grupo
+     del cuerpo entero cuando la entrada tiene «anchor». Devuelve los giros y la raíz del cuerpo. */
+  window.__movCt=(id,k)=>{const t=CTESTS.find(x=>x.id===id);if(!t)return null;const prev=CT.test;CT.test=t;
+    try{const C=ctComps(k),act=[],trm={};for(const [n,v] of (t.tr||[]))trm[n]=v;
+      for(const n in C){const jn=n.includes('_')?n:jname(n);if(!JOINTS[jn])continue;const q=qOf(jn,C[n]);const e={k:n.split('_')[0],jn,q};if(trm[n])e.tr=new V3(...trm[n]).multiplyScalar(k);act.push(e);}
+      for(const n in trm)if(!C[n]){const jn=jname(n);if(JOINTS[jn])act.push({k:n,jn,q:new Q(),tr:new V3(...trm[n]).multiplyScalar(k)});}
+      act.sort((a,b)=>(DEPTH[b.k]||0)-(DEPTH[a.k]||0));
+      let raiz=[0,0,0,1,0,0,0];
+      if(t.anchor){const ch=t.anchor.map(kk=>act.find(e=>e.k===kk&&!e.jn.endsWith('_L'))).filter(Boolean);
+        if(ch.length){const a0=JOINTS[ch[0].jn].pivot.clone(),pp=a0.clone(),Qc=new Q();for(const e of ch){const P=JOINTS[e.jn].pivot;pp.sub(P).applyQuaternion(e.q).add(P);if(e.tr)pp.add(e.tr.clone().applyQuaternion(e.q));Qc.premultiply(e.q);}
+          const Rq=Qc.clone().invert(),pos=a0.clone().sub(pp.clone().applyQuaternion(Rq));raiz=[Rq.x,Rq.y,Rq.z,Rq.w,pos.x,pos.y,pos.z];}}
+      const r=aOps(act),f=v=>Math.round(v*1e5)/1e5;r.raiz=raiz.map(f);r.lie=!!t.lie;return r;}
+    finally{CT.test=prev;}};
   /* nombre y textos de un ejercicio: entrada de CTESTS (ex, how, pos) y EJ_TXT (errores, progresiones, precauciones) */
   window.__movEjTxt=id=>{const c=CTESTS.find(x=>x.id===id),e=(typeof EJ_TXT!=='undefined'&&EJ_TXT[id])||{};return c?{n:c.n,ex:c.ex,how:c.how,pos:c.pos,err:e.err,prog:e.prog,contra:e.contra}:null;};
   const v3=v=>[v.x,v.y,v.z].map(x=>Math.round(x*1e6)/1e6);const rodilla={};for(const S of ['R','L']){const J=JOINTS['knee_'+S];rodilla[S]={largo:v3(J.long||new V3(0,1,0)),x:v3(J.xax||new V3(1,0,0))};}
@@ -270,6 +284,19 @@ const PREPARA = `(async()=>{
       return { id: e.id, n: T.n, paso: PS, duracion: e.duracion || 4, vista: e.vista === undefined ? 2 : e.vista, inicial: Math.max(0, variantes.findIndex(v => v.id === e.inicial)),
         fases, grupos, medidas: EJ.medidas_sentadilla, variantes, textos: T.textos }; },
   };
+  /* «ct»: postura de CTESTS recorrida según e.ciclo ([[% del ciclo, fracción]…], con arranque y frenado suaves); fases y
+     grupos escritos en ejercicios.json ([es, en, pt], francés y alemán por idiomas.js o «traducciones»). El nivel de
+     cada grupo en cada instante es su «nivel» × (0,25 + 0,75 · fracción) mientras la fase del instante no es de reposo. */
+  FUENTES.ct = async e => { const PS = 2, T = await textosEj(e), ciclo = e.ciclo || [[0, 0], [35, 1], [55, 1], [90, 0], [100, 0]];
+    const suave = x => x * x * (3 - 2 * x), kDe = p => { for (let i = 1; i < ciclo.length; i++) { const [p0, k0] = ciclo[i - 1], [p1, k1] = ciclo[i]; if (p <= p1) return k0 + (k1 - k0) * suave(p1 > p0 ? (p - p0) / (p1 - p0) : 1); } return ciclo[ciclo.length - 1][1]; };
+    const fases = (e.fases || []).map(f => ({ ini: f.ini, fin: f.fin, tipo: f.tipo || '', n: c5(f.n), x: c5(f.x) }));
+    const faseDe = p => fases.findIndex(f => p >= f.ini && p < f.fin);
+    const V = { id: '-', n: T.n, frames: [], raiz: [], med: [] }, ks = [];
+    for (let p = 0; p < 100; p += PS) { const k = kDe(p), r = await E('(id,k)=>__movCt(id,k)', e.id, k); if (!r) throw new Error('ejercicio sin entrada en CTESTS: ' + e.id);
+      V.frames.push(r.R.flat()); V.raiz.push(r.raiz); ks.push(k); if (r.fuera.length) console.log('  aviso: %s fuera del rig: %s', e.id, [...new Set(r.fuera)].join(',')); }
+    const grupos = (e.grupos || []).map(g => ({ en: g.en, n: c5(g.n), x: c5(g.x), tipo: g.tipo || fases.map(f => f.tipo), lv: ks.map((k, i) => { const fi = faseDe(i * PS); return Math.round((fi < 0 || !fases[fi].tipo ? 0.08 : (g.nivel || 0.6) * (0.25 + 0.75 * k)) * 1000) / 1000; }) }));
+    console.log('  ejercicio %s: %d instantes (fuente ct)', e.id, V.frames.length);
+    return { id: e.id, n: T.n, paso: PS, duracion: e.duracion || 4, vista: e.vista === undefined ? 2 : e.vista, inicial: 0, fases, grupos, medidas: [], variantes: [V], textos: T.textos }; };
   const hornearEjercicios = async () => { const lista = [];
     for (const e of EJ.ejercicios || []) { if (!FUENTES[e.fuente]) { console.log('  aviso: ejercicio %s con fuente desconocida «%s»', e.id, e.fuente); continue; } lista.push(await FUENTES[e.fuente](e)); }
     for (const l of ['fr', 'de']) if (ID.faltan[l].size) console.log('  ejercicios: %d textos sin %s (salen en inglés):\n    %s', ID.faltan[l].size, l, [...ID.faltan[l]].map(s => JSON.stringify(s)).join('\n    '));

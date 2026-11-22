@@ -152,6 +152,1594 @@
         "FO": "iso",
         "AS": "con"
       }
+    },
+    {
+      "id": "lunge",
+      "fuente": "ct",
+      "duracion": 4,
+      "vista": 2,
+      "fases": [
+        {
+          "ini": 0,
+          "fin": 35,
+          "tipo": "exc",
+          "n": [
+            "Bajada",
+            "Lowering",
+            "Descida",
+            "Descente",
+            "Absenken"
+          ],
+          "x": [
+            "Los extensores frenan el descenso mientras se alargan (contracción excéntrica).",
+            "The extensors brake the descent while lengthening (eccentric contraction).",
+            "Os extensores freiam a descida enquanto se alongam (contração excêntrica).",
+            "Les extenseurs freinent la descente en s'allongeant (contraction excentrique).",
+            "Die Strecker bremsen das Absenken, während sie sich verlängern (exzentrische Kontraktion)."
+          ]
+        },
+        {
+          "ini": 35,
+          "fin": 55,
+          "tipo": "iso",
+          "n": [
+            "Posición baja",
+            "Bottom position",
+            "Posição baixa",
+            "Position basse",
+            "Untere Position"
+          ],
+          "x": [
+            "Sostienen la postura sin cambiar de longitud (isométrica).",
+            "They hold the position without changing length (isometric).",
+            "Sustentam a postura sem mudar de comprimento (isométrica).",
+            "Ils maintiennent la position sans changer de longueur (isométrique).",
+            "Sie halten die Position ohne Längenänderung (isometrisch)."
+          ]
+        },
+        {
+          "ini": 55,
+          "fin": 90,
+          "tipo": "con",
+          "n": [
+            "Subida",
+            "Rising",
+            "Subida",
+            "Remontée",
+            "Aufrichten"
+          ],
+          "x": [
+            "Los mismos músculos se acortan para volver a la posición inicial (concéntrica).",
+            "The same muscles shorten to return to the start (concentric).",
+            "Os mesmos músculos encurtam para voltar à posição inicial (concêntrica).",
+            "Les mêmes muscles se raccourcissent pour revenir à la position de départ (concentrique).",
+            "Dieselben Muskeln verkürzen sich, um in die Ausgangsposition zurückzukehren (konzentrisch)."
+          ]
+        },
+        {
+          "ini": 90,
+          "fin": 100,
+          "tipo": "",
+          "n": [
+            "Reposo",
+            "Rest",
+            "Repouso",
+            "Repos",
+            "Ruhe"
+          ],
+          "x": [
+            "Posición de partida.",
+            "Starting position.",
+            "Posição inicial.",
+            "Position de départ.",
+            "Ausgangsposition."
+          ]
+        }
+      ],
+      "grupos": [
+        {
+          "en": [
+            "Gluteus maximus muscle"
+          ],
+          "n": [
+            "Glúteo mayor",
+            "Gluteus maximus",
+            "Glúteo máximo",
+            "Grand fessier",
+            "M. gluteus maximus"
+          ],
+          "x": [
+            "Extensor principal de la cadera.",
+            "Main hip extensor.",
+            "Principal extensor do quadril.",
+            "Principal extenseur de la hanche.",
+            "Wichtigster Hüftstrecker."
+          ],
+          "nivel": 0.85
+        },
+        {
+          "en": [
+            "Vastus lateralis muscle",
+            "Vastus medialis muscle",
+            "Vastus intermedius muscle",
+            "Rectus femoris muscle"
+          ],
+          "n": [
+            "Cuádriceps",
+            "Quadriceps",
+            "Quadríceps",
+            "Quadriceps",
+            "M. quadriceps femoris"
+          ],
+          "x": [
+            "Extiende la rodilla.",
+            "Extends the knee.",
+            "Estende o joelho.",
+            "Étend le genou.",
+            "Streckt das Knie."
+          ],
+          "nivel": 0.8
+        },
+        {
+          "en": [
+            "Gluteus medius muscle"
+          ],
+          "n": [
+            "Glúteo medio",
+            "Gluteus medius",
+            "Glúteo médio",
+            "Moyen fessier",
+            "M. gluteus medius"
+          ],
+          "x": [
+            "Estabiliza la pelvis en el plano frontal.",
+            "Stabilizes the pelvis in the frontal plane.",
+            "Estabiliza a pelve no plano frontal.",
+            "Stabilise le bassin dans le plan frontal.",
+            "Stabilisiert das Becken in der Frontalebene."
+          ],
+          "nivel": 0.5
+        },
+        {
+          "en": [
+            "Long head of biceps femoris",
+            "Semitendinosus muscle",
+            "Semimembranosus muscle"
+          ],
+          "n": [
+            "Isquiotibiales",
+            "Hamstrings",
+            "Isquiotibiais",
+            "Ischio-jambiers",
+            "Ischiokrurale Muskulatur"
+          ],
+          "x": [
+            "Extienden la cadera junto al glúteo mayor.",
+            "Extend the hip together with gluteus maximus.",
+            "Estendem o quadril junto com o glúteo máximo.",
+            "Étendent la hanche avec le grand fessier.",
+            "Strecken die Hüfte zusammen mit dem M. gluteus maximus."
+          ],
+          "nivel": 0.4
+        }
+      ]
+    },
+    {
+      "id": "deadlift",
+      "fuente": "ct",
+      "duracion": 4,
+      "vista": 2,
+      "fases": [
+        {
+          "ini": 0,
+          "fin": 35,
+          "tipo": "exc",
+          "n": [
+            "Bajada",
+            "Lowering",
+            "Descida",
+            "Descente",
+            "Absenken"
+          ],
+          "x": [
+            "Los extensores frenan el descenso mientras se alargan (contracción excéntrica).",
+            "The extensors brake the descent while lengthening (eccentric contraction).",
+            "Os extensores freiam a descida enquanto se alongam (contração excêntrica).",
+            "Les extenseurs freinent la descente en s'allongeant (contraction excentrique).",
+            "Die Strecker bremsen das Absenken, während sie sich verlängern (exzentrische Kontraktion)."
+          ]
+        },
+        {
+          "ini": 35,
+          "fin": 55,
+          "tipo": "iso",
+          "n": [
+            "Posición baja",
+            "Bottom position",
+            "Posição baixa",
+            "Position basse",
+            "Untere Position"
+          ],
+          "x": [
+            "Sostienen la postura sin cambiar de longitud (isométrica).",
+            "They hold the position without changing length (isometric).",
+            "Sustentam a postura sem mudar de comprimento (isométrica).",
+            "Ils maintiennent la position sans changer de longueur (isométrique).",
+            "Sie halten die Position ohne Längenänderung (isometrisch)."
+          ]
+        },
+        {
+          "ini": 55,
+          "fin": 90,
+          "tipo": "con",
+          "n": [
+            "Subida",
+            "Rising",
+            "Subida",
+            "Remontée",
+            "Aufrichten"
+          ],
+          "x": [
+            "Los mismos músculos se acortan para volver a la posición inicial (concéntrica).",
+            "The same muscles shorten to return to the start (concentric).",
+            "Os mesmos músculos encurtam para voltar à posição inicial (concêntrica).",
+            "Les mêmes muscles se raccourcissent pour revenir à la position de départ (concentrique).",
+            "Dieselben Muskeln verkürzen sich, um in die Ausgangsposition zurückzukehren (konzentrisch)."
+          ]
+        },
+        {
+          "ini": 90,
+          "fin": 100,
+          "tipo": "",
+          "n": [
+            "Reposo",
+            "Rest",
+            "Repouso",
+            "Repos",
+            "Ruhe"
+          ],
+          "x": [
+            "Posición de partida.",
+            "Starting position.",
+            "Posição inicial.",
+            "Position de départ.",
+            "Ausgangsposition."
+          ]
+        }
+      ],
+      "grupos": [
+        {
+          "en": [
+            "Gluteus maximus muscle"
+          ],
+          "n": [
+            "Glúteo mayor",
+            "Gluteus maximus",
+            "Glúteo máximo",
+            "Grand fessier",
+            "M. gluteus maximus"
+          ],
+          "x": [
+            "Extensor principal de la cadera.",
+            "Main hip extensor.",
+            "Principal extensor do quadril.",
+            "Principal extenseur de la hanche.",
+            "Wichtigster Hüftstrecker."
+          ],
+          "nivel": 0.85
+        },
+        {
+          "en": [
+            "Long head of biceps femoris",
+            "Semitendinosus muscle",
+            "Semimembranosus muscle"
+          ],
+          "n": [
+            "Isquiotibiales",
+            "Hamstrings",
+            "Isquiotibiais",
+            "Ischio-jambiers",
+            "Ischiokrurale Muskulatur"
+          ],
+          "x": [
+            "Extienden la cadera junto al glúteo mayor.",
+            "Extend the hip together with gluteus maximus.",
+            "Estendem o quadril junto com o glúteo máximo.",
+            "Étendent la hanche avec le grand fessier.",
+            "Strecken die Hüfte zusammen mit dem M. gluteus maximus."
+          ],
+          "nivel": 0.75
+        },
+        {
+          "en": [
+            "Iliocostalis lumborum muscle",
+            "Longissimus thoracis muscle"
+          ],
+          "n": [
+            "Erectores de la columna",
+            "Erector spinae",
+            "Eretores da coluna",
+            "Érecteurs du rachis",
+            "M. erector spinae"
+          ],
+          "x": [
+            "Mantienen la columna neutra.",
+            "Keep the spine neutral.",
+            "Mantêm a coluna neutra.",
+            "Maintiennent le rachis neutre.",
+            "Halten die Wirbelsäule neutral."
+          ],
+          "nivel": 0.6
+        },
+        {
+          "en": [
+            "Vastus lateralis muscle",
+            "Vastus medialis muscle",
+            "Vastus intermedius muscle",
+            "Rectus femoris muscle"
+          ],
+          "n": [
+            "Cuádriceps",
+            "Quadriceps",
+            "Quadríceps",
+            "Quadriceps",
+            "M. quadriceps femoris"
+          ],
+          "x": [
+            "Extiende la rodilla.",
+            "Extends the knee.",
+            "Estende o joelho.",
+            "Étend le genou.",
+            "Streckt das Knie."
+          ],
+          "nivel": 0.45
+        }
+      ]
+    },
+    {
+      "id": "sitstand",
+      "fuente": "ct",
+      "duracion": 4,
+      "vista": 2,
+      "fases": [
+        {
+          "ini": 0,
+          "fin": 35,
+          "tipo": "exc",
+          "n": [
+            "Bajada",
+            "Lowering",
+            "Descida",
+            "Descente",
+            "Absenken"
+          ],
+          "x": [
+            "Los extensores frenan el descenso mientras se alargan (contracción excéntrica).",
+            "The extensors brake the descent while lengthening (eccentric contraction).",
+            "Os extensores freiam a descida enquanto se alongam (contração excêntrica).",
+            "Les extenseurs freinent la descente en s'allongeant (contraction excentrique).",
+            "Die Strecker bremsen das Absenken, während sie sich verlängern (exzentrische Kontraktion)."
+          ]
+        },
+        {
+          "ini": 35,
+          "fin": 55,
+          "tipo": "iso",
+          "n": [
+            "Posición baja",
+            "Bottom position",
+            "Posição baixa",
+            "Position basse",
+            "Untere Position"
+          ],
+          "x": [
+            "Sostienen la postura sin cambiar de longitud (isométrica).",
+            "They hold the position without changing length (isometric).",
+            "Sustentam a postura sem mudar de comprimento (isométrica).",
+            "Ils maintiennent la position sans changer de longueur (isométrique).",
+            "Sie halten die Position ohne Längenänderung (isometrisch)."
+          ]
+        },
+        {
+          "ini": 55,
+          "fin": 90,
+          "tipo": "con",
+          "n": [
+            "Subida",
+            "Rising",
+            "Subida",
+            "Remontée",
+            "Aufrichten"
+          ],
+          "x": [
+            "Los mismos músculos se acortan para volver a la posición inicial (concéntrica).",
+            "The same muscles shorten to return to the start (concentric).",
+            "Os mesmos músculos encurtam para voltar à posição inicial (concêntrica).",
+            "Les mêmes muscles se raccourcissent pour revenir à la position de départ (concentrique).",
+            "Dieselben Muskeln verkürzen sich, um in die Ausgangsposition zurückzukehren (konzentrisch)."
+          ]
+        },
+        {
+          "ini": 90,
+          "fin": 100,
+          "tipo": "",
+          "n": [
+            "Reposo",
+            "Rest",
+            "Repouso",
+            "Repos",
+            "Ruhe"
+          ],
+          "x": [
+            "Posición de partida.",
+            "Starting position.",
+            "Posição inicial.",
+            "Position de départ.",
+            "Ausgangsposition."
+          ]
+        }
+      ],
+      "grupos": [
+        {
+          "en": [
+            "Gluteus maximus muscle"
+          ],
+          "n": [
+            "Glúteo mayor",
+            "Gluteus maximus",
+            "Glúteo máximo",
+            "Grand fessier",
+            "M. gluteus maximus"
+          ],
+          "x": [
+            "Extensor principal de la cadera.",
+            "Main hip extensor.",
+            "Principal extensor do quadril.",
+            "Principal extenseur de la hanche.",
+            "Wichtigster Hüftstrecker."
+          ],
+          "nivel": 0.85
+        },
+        {
+          "en": [
+            "Vastus lateralis muscle",
+            "Vastus medialis muscle",
+            "Vastus intermedius muscle",
+            "Rectus femoris muscle"
+          ],
+          "n": [
+            "Cuádriceps",
+            "Quadriceps",
+            "Quadríceps",
+            "Quadriceps",
+            "M. quadriceps femoris"
+          ],
+          "x": [
+            "Extiende la rodilla.",
+            "Extends the knee.",
+            "Estende o joelho.",
+            "Étend le genou.",
+            "Streckt das Knie."
+          ],
+          "nivel": 0.8
+        },
+        {
+          "en": [
+            "Iliocostalis lumborum muscle",
+            "Longissimus thoracis muscle"
+          ],
+          "n": [
+            "Erectores de la columna",
+            "Erector spinae",
+            "Eretores da coluna",
+            "Érecteurs du rachis",
+            "M. erector spinae"
+          ],
+          "x": [
+            "Mantienen la columna neutra.",
+            "Keep the spine neutral.",
+            "Mantêm a coluna neutra.",
+            "Maintiennent le rachis neutre.",
+            "Halten die Wirbelsäule neutral."
+          ],
+          "nivel": 0.35
+        },
+        {
+          "en": [
+            "Soleus muscle"
+          ],
+          "n": [
+            "Sóleo",
+            "Soleus",
+            "Sóleo",
+            "Soléaire",
+            "M. soleus"
+          ],
+          "x": [
+            "Controla la tibia sobre el pie.",
+            "Controls the tibia over the foot.",
+            "Controla a tíbia sobre o pé.",
+            "Contrôle le tibia sur le pied.",
+            "Kontrolliert die Tibia über dem Fuß."
+          ],
+          "nivel": 0.35
+        }
+      ]
+    },
+    {
+      "id": "hipabd",
+      "fuente": "ct",
+      "duracion": 4,
+      "vista": 0,
+      "fases": [
+        {
+          "ini": 0,
+          "fin": 35,
+          "tipo": "con",
+          "n": [
+            "Subida",
+            "Lifting",
+            "Subida",
+            "Montée",
+            "Anheben"
+          ],
+          "x": [
+            "Los músculos motores se acortan venciendo la carga (contracción concéntrica).",
+            "The prime movers shorten against the load (concentric contraction).",
+            "Os músculos motores encurtam vencendo a carga (contração concêntrica).",
+            "Les muscles moteurs se raccourcissent contre la charge (contraction concentrique).",
+            "Die Hauptbeweger verkürzen sich gegen die Last (konzentrische Kontraktion)."
+          ]
+        },
+        {
+          "ini": 35,
+          "fin": 55,
+          "tipo": "iso",
+          "n": [
+            "Pausa",
+            "Hold",
+            "Pausa",
+            "Maintien",
+            "Halten"
+          ],
+          "x": [
+            "Sostienen la carga sin cambiar de longitud (isométrica).",
+            "They hold the load without changing length (isometric).",
+            "Sustentam a carga sem mudar de comprimento (isométrica).",
+            "Ils maintiennent la charge sans changer de longueur (isométrique).",
+            "Sie halten die Last ohne Längenänderung (isometrisch)."
+          ]
+        },
+        {
+          "ini": 55,
+          "fin": 90,
+          "tipo": "exc",
+          "n": [
+            "Bajada controlada",
+            "Controlled lowering",
+            "Descida controlada",
+            "Descente contrôlée",
+            "Kontrolliertes Absenken"
+          ],
+          "x": [
+            "Los mismos músculos frenan el descenso mientras se alargan (excéntrica).",
+            "The same muscles brake the return while lengthening (eccentric).",
+            "Os mesmos músculos freiam a descida enquanto se alongam (excêntrica).",
+            "Les mêmes muscles freinent le retour en s'allongeant (excentrique).",
+            "Dieselben Muskeln bremsen das Zurückführen, während sie sich verlängern (exzentrisch)."
+          ]
+        },
+        {
+          "ini": 90,
+          "fin": 100,
+          "tipo": "",
+          "n": [
+            "Reposo",
+            "Rest",
+            "Repouso",
+            "Repos",
+            "Ruhe"
+          ],
+          "x": [
+            "Posición de partida.",
+            "Starting position.",
+            "Posição inicial.",
+            "Position de départ.",
+            "Ausgangsposition."
+          ]
+        }
+      ],
+      "grupos": [
+        {
+          "en": [
+            "Gluteus medius muscle"
+          ],
+          "n": [
+            "Glúteo medio",
+            "Gluteus medius",
+            "Glúteo médio",
+            "Moyen fessier",
+            "M. gluteus medius"
+          ],
+          "x": [
+            "Estabiliza la pelvis en el plano frontal.",
+            "Stabilizes the pelvis in the frontal plane.",
+            "Estabiliza a pelve no plano frontal.",
+            "Stabilise le bassin dans le plan frontal.",
+            "Stabilisiert das Becken in der Frontalebene."
+          ],
+          "nivel": 0.85
+        },
+        {
+          "en": [
+            "Gluteus minimus muscle"
+          ],
+          "n": [
+            "Glúteo menor",
+            "Gluteus minimus",
+            "Glúteo mínimo",
+            "Petit fessier",
+            "M. gluteus minimus"
+          ],
+          "x": [
+            "Abductor profundo de la cadera.",
+            "Deep hip abductor.",
+            "Abdutor profundo do quadril.",
+            "Abducteur profond de la hanche.",
+            "Tiefer Hüftabduktor."
+          ],
+          "nivel": 0.7
+        },
+        {
+          "en": [
+            "Tensor fasciae latae"
+          ],
+          "n": [
+            "Tensor de la fascia lata",
+            "Tensor fasciae latae",
+            "Tensor da fáscia lata",
+            "Tenseur du fascia lata",
+            "M. tensor fasciae latae"
+          ],
+          "x": [
+            "Ayuda a la abducción y a la flexión.",
+            "Assists abduction and flexion.",
+            "Auxilia a abdução e a flexão.",
+            "Aide à l'abduction et à la flexion.",
+            "Unterstützt Abduktion und Flexion."
+          ],
+          "nivel": 0.55
+        }
+      ]
+    },
+    {
+      "id": "curl",
+      "fuente": "ct",
+      "duracion": 3,
+      "vista": 2,
+      "fases": [
+        {
+          "ini": 0,
+          "fin": 35,
+          "tipo": "con",
+          "n": [
+            "Subida",
+            "Lifting",
+            "Subida",
+            "Montée",
+            "Anheben"
+          ],
+          "x": [
+            "Los músculos motores se acortan venciendo la carga (contracción concéntrica).",
+            "The prime movers shorten against the load (concentric contraction).",
+            "Os músculos motores encurtam vencendo a carga (contração concêntrica).",
+            "Les muscles moteurs se raccourcissent contre la charge (contraction concentrique).",
+            "Die Hauptbeweger verkürzen sich gegen die Last (konzentrische Kontraktion)."
+          ]
+        },
+        {
+          "ini": 35,
+          "fin": 55,
+          "tipo": "iso",
+          "n": [
+            "Pausa",
+            "Hold",
+            "Pausa",
+            "Maintien",
+            "Halten"
+          ],
+          "x": [
+            "Sostienen la carga sin cambiar de longitud (isométrica).",
+            "They hold the load without changing length (isometric).",
+            "Sustentam a carga sem mudar de comprimento (isométrica).",
+            "Ils maintiennent la charge sans changer de longueur (isométrique).",
+            "Sie halten die Last ohne Längenänderung (isometrisch)."
+          ]
+        },
+        {
+          "ini": 55,
+          "fin": 90,
+          "tipo": "exc",
+          "n": [
+            "Bajada controlada",
+            "Controlled lowering",
+            "Descida controlada",
+            "Descente contrôlée",
+            "Kontrolliertes Absenken"
+          ],
+          "x": [
+            "Los mismos músculos frenan el descenso mientras se alargan (excéntrica).",
+            "The same muscles brake the return while lengthening (eccentric).",
+            "Os mesmos músculos freiam a descida enquanto se alongam (excêntrica).",
+            "Les mêmes muscles freinent le retour en s'allongeant (excentrique).",
+            "Dieselben Muskeln bremsen das Zurückführen, während sie sich verlängern (exzentrisch)."
+          ]
+        },
+        {
+          "ini": 90,
+          "fin": 100,
+          "tipo": "",
+          "n": [
+            "Reposo",
+            "Rest",
+            "Repouso",
+            "Repos",
+            "Ruhe"
+          ],
+          "x": [
+            "Posición de partida.",
+            "Starting position.",
+            "Posição inicial.",
+            "Position de départ.",
+            "Ausgangsposition."
+          ]
+        }
+      ],
+      "grupos": [
+        {
+          "en": [
+            "Biceps brachii muscle",
+            "Long head of biceps brachii",
+            "Short head of biceps brachii"
+          ],
+          "n": [
+            "Bíceps braquial",
+            "Biceps brachii",
+            "Bíceps braquial",
+            "Biceps brachial",
+            "M. biceps brachii"
+          ],
+          "x": [
+            "Flexiona el codo y supina el antebrazo.",
+            "Flexes the elbow and supinates the forearm.",
+            "Flexiona o cotovelo e supina o antebraço.",
+            "Fléchit le coude et met l'avant-bras en supination.",
+            "Beugt den Ellenbogen und supiniert den Unterarm."
+          ],
+          "nivel": 0.85
+        },
+        {
+          "en": [
+            "Brachialis muscle"
+          ],
+          "n": [
+            "Braquial",
+            "Brachialis",
+            "Braquial",
+            "Brachial",
+            "M. brachialis"
+          ],
+          "x": [
+            "Flexor puro del codo.",
+            "Pure elbow flexor.",
+            "Flexor puro do cotovelo.",
+            "Fléchisseur pur du coude.",
+            "Reiner Ellenbogenbeuger."
+          ],
+          "nivel": 0.8
+        },
+        {
+          "en": [
+            "Brachioradialis muscle"
+          ],
+          "n": [
+            "Braquiorradial",
+            "Brachioradialis",
+            "Braquiorradial",
+            "Brachioradial",
+            "M. brachioradialis"
+          ],
+          "x": [
+            "Flexiona el codo en posición neutra.",
+            "Flexes the elbow in neutral grip.",
+            "Flexiona o cotovelo em pegada neutra.",
+            "Fléchit le coude en position neutre.",
+            "Beugt den Ellenbogen in Neutralstellung."
+          ],
+          "nivel": 0.5
+        }
+      ]
+    },
+    {
+      "id": "latraise",
+      "fuente": "ct",
+      "duracion": 3,
+      "vista": 0,
+      "fases": [
+        {
+          "ini": 0,
+          "fin": 35,
+          "tipo": "con",
+          "n": [
+            "Subida",
+            "Lifting",
+            "Subida",
+            "Montée",
+            "Anheben"
+          ],
+          "x": [
+            "Los músculos motores se acortan venciendo la carga (contracción concéntrica).",
+            "The prime movers shorten against the load (concentric contraction).",
+            "Os músculos motores encurtam vencendo a carga (contração concêntrica).",
+            "Les muscles moteurs se raccourcissent contre la charge (contraction concentrique).",
+            "Die Hauptbeweger verkürzen sich gegen die Last (konzentrische Kontraktion)."
+          ]
+        },
+        {
+          "ini": 35,
+          "fin": 55,
+          "tipo": "iso",
+          "n": [
+            "Pausa",
+            "Hold",
+            "Pausa",
+            "Maintien",
+            "Halten"
+          ],
+          "x": [
+            "Sostienen la carga sin cambiar de longitud (isométrica).",
+            "They hold the load without changing length (isometric).",
+            "Sustentam a carga sem mudar de comprimento (isométrica).",
+            "Ils maintiennent la charge sans changer de longueur (isométrique).",
+            "Sie halten die Last ohne Längenänderung (isometrisch)."
+          ]
+        },
+        {
+          "ini": 55,
+          "fin": 90,
+          "tipo": "exc",
+          "n": [
+            "Bajada controlada",
+            "Controlled lowering",
+            "Descida controlada",
+            "Descente contrôlée",
+            "Kontrolliertes Absenken"
+          ],
+          "x": [
+            "Los mismos músculos frenan el descenso mientras se alargan (excéntrica).",
+            "The same muscles brake the return while lengthening (eccentric).",
+            "Os mesmos músculos freiam a descida enquanto se alongam (excêntrica).",
+            "Les mêmes muscles freinent le retour en s'allongeant (excentrique).",
+            "Dieselben Muskeln bremsen das Zurückführen, während sie sich verlängern (exzentrisch)."
+          ]
+        },
+        {
+          "ini": 90,
+          "fin": 100,
+          "tipo": "",
+          "n": [
+            "Reposo",
+            "Rest",
+            "Repouso",
+            "Repos",
+            "Ruhe"
+          ],
+          "x": [
+            "Posición de partida.",
+            "Starting position.",
+            "Posição inicial.",
+            "Position de départ.",
+            "Ausgangsposition."
+          ]
+        }
+      ],
+      "grupos": [
+        {
+          "en": [
+            "Acromial part of deltoid muscle"
+          ],
+          "n": [
+            "Deltoides medio",
+            "Middle deltoid",
+            "Deltoide médio",
+            "Deltoïde moyen",
+            "Pars acromialis des M. deltoideus"
+          ],
+          "x": [
+            "Abductor principal del hombro.",
+            "Main shoulder abductor.",
+            "Principal abdutor do ombro.",
+            "Principal abducteur de l'épaule.",
+            "Wichtigster Schulterabduktor."
+          ],
+          "nivel": 0.85
+        },
+        {
+          "en": [
+            "Supraspinatus muscle"
+          ],
+          "n": [
+            "Supraespinoso",
+            "Supraspinatus",
+            "Supraespinal",
+            "Supra-épineux",
+            "M. supraspinatus"
+          ],
+          "x": [
+            "Inicia la abducción y centra la cabeza humeral.",
+            "Initiates abduction and centres the humeral head.",
+            "Inicia a abdução e centra a cabeça do úmero.",
+            "Initie l'abduction et centre la tête humérale.",
+            "Leitet die Abduktion ein und zentriert den Humeruskopf."
+          ],
+          "nivel": 0.6
+        },
+        {
+          "en": [
+            "Descending part of trapezius muscle",
+            "Serratus anterior muscle"
+          ],
+          "n": [
+            "Trapecio superior y serrato anterior",
+            "Upper trapezius and serratus anterior",
+            "Trapézio superior e serrátil anterior",
+            "Trapèze supérieur et dentelé antérieur",
+            "Oberer Trapezius und M. serratus anterior"
+          ],
+          "x": [
+            "Rotan la escápula hacia arriba (ritmo escapulohumeral).",
+            "Rotate the scapula upward (scapulohumeral rhythm).",
+            "Rodam a escápula para cima (ritmo escapuloumeral).",
+            "Font tourner la scapula vers le haut (rythme scapulo-huméral).",
+            "Drehen die Skapula nach oben (skapulohumeraler Rhythmus)."
+          ],
+          "nivel": 0.5
+        }
+      ]
+    },
+    {
+      "id": "frontraise",
+      "fuente": "ct",
+      "duracion": 3,
+      "vista": 2,
+      "fases": [
+        {
+          "ini": 0,
+          "fin": 35,
+          "tipo": "con",
+          "n": [
+            "Subida",
+            "Lifting",
+            "Subida",
+            "Montée",
+            "Anheben"
+          ],
+          "x": [
+            "Los músculos motores se acortan venciendo la carga (contracción concéntrica).",
+            "The prime movers shorten against the load (concentric contraction).",
+            "Os músculos motores encurtam vencendo a carga (contração concêntrica).",
+            "Les muscles moteurs se raccourcissent contre la charge (contraction concentrique).",
+            "Die Hauptbeweger verkürzen sich gegen die Last (konzentrische Kontraktion)."
+          ]
+        },
+        {
+          "ini": 35,
+          "fin": 55,
+          "tipo": "iso",
+          "n": [
+            "Pausa",
+            "Hold",
+            "Pausa",
+            "Maintien",
+            "Halten"
+          ],
+          "x": [
+            "Sostienen la carga sin cambiar de longitud (isométrica).",
+            "They hold the load without changing length (isometric).",
+            "Sustentam a carga sem mudar de comprimento (isométrica).",
+            "Ils maintiennent la charge sans changer de longueur (isométrique).",
+            "Sie halten die Last ohne Längenänderung (isometrisch)."
+          ]
+        },
+        {
+          "ini": 55,
+          "fin": 90,
+          "tipo": "exc",
+          "n": [
+            "Bajada controlada",
+            "Controlled lowering",
+            "Descida controlada",
+            "Descente contrôlée",
+            "Kontrolliertes Absenken"
+          ],
+          "x": [
+            "Los mismos músculos frenan el descenso mientras se alargan (excéntrica).",
+            "The same muscles brake the return while lengthening (eccentric).",
+            "Os mesmos músculos freiam a descida enquanto se alongam (excêntrica).",
+            "Les mêmes muscles freinent le retour en s'allongeant (excentrique).",
+            "Dieselben Muskeln bremsen das Zurückführen, während sie sich verlängern (exzentrisch)."
+          ]
+        },
+        {
+          "ini": 90,
+          "fin": 100,
+          "tipo": "",
+          "n": [
+            "Reposo",
+            "Rest",
+            "Repouso",
+            "Repos",
+            "Ruhe"
+          ],
+          "x": [
+            "Posición de partida.",
+            "Starting position.",
+            "Posição inicial.",
+            "Position de départ.",
+            "Ausgangsposition."
+          ]
+        }
+      ],
+      "grupos": [
+        {
+          "en": [
+            "Clavicular part of deltoid muscle"
+          ],
+          "n": [
+            "Deltoides anterior",
+            "Anterior deltoid",
+            "Deltoide anterior",
+            "Deltoïde antérieur",
+            "Pars clavicularis des M. deltoideus"
+          ],
+          "x": [
+            "Flexor principal del hombro.",
+            "Main shoulder flexor.",
+            "Principal flexor do ombro.",
+            "Principal fléchisseur de l'épaule.",
+            "Wichtigster Schulterbeuger."
+          ],
+          "nivel": 0.85
+        },
+        {
+          "en": [
+            "Clavicular head of pectoralis major muscle"
+          ],
+          "n": [
+            "Pectoral mayor (porción clavicular)",
+            "Pectoralis major (clavicular head)",
+            "Peitoral maior (porção clavicular)",
+            "Grand pectoral (chef claviculaire)",
+            "M. pectoralis major (Pars clavicularis)"
+          ],
+          "x": [
+            "Ayuda a la flexión del hombro.",
+            "Assists shoulder flexion.",
+            "Auxilia a flexão do ombro.",
+            "Aide à la flexion de l'épaule.",
+            "Unterstützt die Schulterflexion."
+          ],
+          "nivel": 0.5
+        },
+        {
+          "en": [
+            "Serratus anterior muscle"
+          ],
+          "n": [
+            "Serrato anterior",
+            "Serratus anterior",
+            "Serrátil anterior",
+            "Dentelé antérieur",
+            "M. serratus anterior"
+          ],
+          "x": [
+            "Fija y rota la escápula.",
+            "Stabilizes and rotates the scapula.",
+            "Fixa e roda a escápula.",
+            "Fixe et fait tourner la scapula.",
+            "Fixiert und dreht die Skapula."
+          ],
+          "nivel": 0.45
+        }
+      ]
+    },
+    {
+      "id": "press",
+      "fuente": "ct",
+      "duracion": 4,
+      "vista": 0,
+      "fases": [
+        {
+          "ini": 0,
+          "fin": 35,
+          "tipo": "con",
+          "n": [
+            "Subida",
+            "Lifting",
+            "Subida",
+            "Montée",
+            "Anheben"
+          ],
+          "x": [
+            "Los músculos motores se acortan venciendo la carga (contracción concéntrica).",
+            "The prime movers shorten against the load (concentric contraction).",
+            "Os músculos motores encurtam vencendo a carga (contração concêntrica).",
+            "Les muscles moteurs se raccourcissent contre la charge (contraction concentrique).",
+            "Die Hauptbeweger verkürzen sich gegen die Last (konzentrische Kontraktion)."
+          ]
+        },
+        {
+          "ini": 35,
+          "fin": 55,
+          "tipo": "iso",
+          "n": [
+            "Pausa",
+            "Hold",
+            "Pausa",
+            "Maintien",
+            "Halten"
+          ],
+          "x": [
+            "Sostienen la carga sin cambiar de longitud (isométrica).",
+            "They hold the load without changing length (isometric).",
+            "Sustentam a carga sem mudar de comprimento (isométrica).",
+            "Ils maintiennent la charge sans changer de longueur (isométrique).",
+            "Sie halten die Last ohne Längenänderung (isometrisch)."
+          ]
+        },
+        {
+          "ini": 55,
+          "fin": 90,
+          "tipo": "exc",
+          "n": [
+            "Bajada controlada",
+            "Controlled lowering",
+            "Descida controlada",
+            "Descente contrôlée",
+            "Kontrolliertes Absenken"
+          ],
+          "x": [
+            "Los mismos músculos frenan el descenso mientras se alargan (excéntrica).",
+            "The same muscles brake the return while lengthening (eccentric).",
+            "Os mesmos músculos freiam a descida enquanto se alongam (excêntrica).",
+            "Les mêmes muscles freinent le retour en s'allongeant (excentrique).",
+            "Dieselben Muskeln bremsen das Zurückführen, während sie sich verlängern (exzentrisch)."
+          ]
+        },
+        {
+          "ini": 90,
+          "fin": 100,
+          "tipo": "",
+          "n": [
+            "Reposo",
+            "Rest",
+            "Repouso",
+            "Repos",
+            "Ruhe"
+          ],
+          "x": [
+            "Posición de partida.",
+            "Starting position.",
+            "Posição inicial.",
+            "Position de départ.",
+            "Ausgangsposition."
+          ]
+        }
+      ],
+      "grupos": [
+        {
+          "en": [
+            "Clavicular part of deltoid muscle",
+            "Acromial part of deltoid muscle"
+          ],
+          "n": [
+            "Deltoides anterior y medio",
+            "Anterior and middle deltoid",
+            "Deltoide anterior e médio",
+            "Deltoïde antérieur et moyen",
+            "Vorderer und mittlerer Deltoideus"
+          ],
+          "x": [
+            "Elevan el brazo por encima de la cabeza.",
+            "Raise the arm overhead.",
+            "Elevam o braço acima da cabeça.",
+            "Élèvent le bras au-dessus de la tête.",
+            "Heben den Arm über den Kopf."
+          ],
+          "nivel": 0.85
+        },
+        {
+          "en": [
+            "Long head of triceps brachii",
+            "Lateral head of triceps brachii",
+            "Medial head of triceps brachii"
+          ],
+          "n": [
+            "Tríceps braquial",
+            "Triceps brachii",
+            "Tríceps braquial",
+            "Triceps brachial",
+            "M. triceps brachii"
+          ],
+          "x": [
+            "Extiende el codo.",
+            "Extends the elbow.",
+            "Estende o cotovelo.",
+            "Étend le coude.",
+            "Streckt den Ellenbogen."
+          ],
+          "nivel": 0.75
+        },
+        {
+          "en": [
+            "Descending part of trapezius muscle",
+            "Serratus anterior muscle"
+          ],
+          "n": [
+            "Trapecio superior y serrato anterior",
+            "Upper trapezius and serratus anterior",
+            "Trapézio superior e serrátil anterior",
+            "Trapèze supérieur et dentelé antérieur",
+            "Oberer Trapezius und M. serratus anterior"
+          ],
+          "x": [
+            "Rotan la escápula hacia arriba.",
+            "Rotate the scapula upward.",
+            "Rodam a escápula para cima.",
+            "Font tourner la scapula vers le haut.",
+            "Drehen die Skapula nach oben."
+          ],
+          "nivel": 0.55
+        }
+      ]
+    },
+    {
+      "id": "row",
+      "fuente": "ct",
+      "duracion": 4,
+      "vista": 2,
+      "fases": [
+        {
+          "ini": 0,
+          "fin": 35,
+          "tipo": "con",
+          "n": [
+            "Subida",
+            "Lifting",
+            "Subida",
+            "Montée",
+            "Anheben"
+          ],
+          "x": [
+            "Los músculos motores se acortan venciendo la carga (contracción concéntrica).",
+            "The prime movers shorten against the load (concentric contraction).",
+            "Os músculos motores encurtam vencendo a carga (contração concêntrica).",
+            "Les muscles moteurs se raccourcissent contre la charge (contraction concentrique).",
+            "Die Hauptbeweger verkürzen sich gegen die Last (konzentrische Kontraktion)."
+          ]
+        },
+        {
+          "ini": 35,
+          "fin": 55,
+          "tipo": "iso",
+          "n": [
+            "Pausa",
+            "Hold",
+            "Pausa",
+            "Maintien",
+            "Halten"
+          ],
+          "x": [
+            "Sostienen la carga sin cambiar de longitud (isométrica).",
+            "They hold the load without changing length (isometric).",
+            "Sustentam a carga sem mudar de comprimento (isométrica).",
+            "Ils maintiennent la charge sans changer de longueur (isométrique).",
+            "Sie halten die Last ohne Längenänderung (isometrisch)."
+          ]
+        },
+        {
+          "ini": 55,
+          "fin": 90,
+          "tipo": "exc",
+          "n": [
+            "Bajada controlada",
+            "Controlled lowering",
+            "Descida controlada",
+            "Descente contrôlée",
+            "Kontrolliertes Absenken"
+          ],
+          "x": [
+            "Los mismos músculos frenan el descenso mientras se alargan (excéntrica).",
+            "The same muscles brake the return while lengthening (eccentric).",
+            "Os mesmos músculos freiam a descida enquanto se alongam (excêntrica).",
+            "Les mêmes muscles freinent le retour en s'allongeant (excentrique).",
+            "Dieselben Muskeln bremsen das Zurückführen, während sie sich verlängern (exzentrisch)."
+          ]
+        },
+        {
+          "ini": 90,
+          "fin": 100,
+          "tipo": "",
+          "n": [
+            "Reposo",
+            "Rest",
+            "Repouso",
+            "Repos",
+            "Ruhe"
+          ],
+          "x": [
+            "Posición de partida.",
+            "Starting position.",
+            "Posição inicial.",
+            "Position de départ.",
+            "Ausgangsposition."
+          ]
+        }
+      ],
+      "grupos": [
+        {
+          "en": [
+            "Latissimus dorsi muscle"
+          ],
+          "n": [
+            "Dorsal ancho",
+            "Latissimus dorsi",
+            "Grande dorsal",
+            "Grand dorsal",
+            "M. latissimus dorsi"
+          ],
+          "x": [
+            "Extiende y aduce el hombro.",
+            "Extends and adducts the shoulder.",
+            "Estende e aduz o ombro.",
+            "Étend et met en adduction l'épaule.",
+            "Streckt und adduziert die Schulter."
+          ],
+          "nivel": 0.85
+        },
+        {
+          "en": [
+            "Teres major muscle"
+          ],
+          "n": [
+            "Redondo mayor",
+            "Teres major",
+            "Redondo maior",
+            "Grand rond",
+            "M. teres major"
+          ],
+          "x": [
+            "Acompaña al dorsal ancho.",
+            "Works with latissimus dorsi.",
+            "Acompanha o grande dorsal.",
+            "Accompagne le grand dorsal.",
+            "Arbeitet mit dem M. latissimus dorsi."
+          ],
+          "nivel": 0.6
+        },
+        {
+          "en": [
+            "Rhomboid major muscle",
+            "Rhomboid minor muscle",
+            "Transverse part of trapezius muscle"
+          ],
+          "n": [
+            "Romboides y trapecio medio",
+            "Rhomboids and middle trapezius",
+            "Romboides e trapézio médio",
+            "Rhomboïdes et trapèze moyen",
+            "Mm. rhomboidei und mittlerer Trapezius"
+          ],
+          "x": [
+            "Retraen la escápula.",
+            "Retract the scapula.",
+            "Retraem a escápula.",
+            "Rétractent la scapula.",
+            "Ziehen die Skapula zurück."
+          ],
+          "nivel": 0.7
+        },
+        {
+          "en": [
+            "Biceps brachii muscle",
+            "Brachialis muscle"
+          ],
+          "n": [
+            "Flexores del codo",
+            "Elbow flexors",
+            "Flexores do cotovelo",
+            "Fléchisseurs du coude",
+            "Ellenbogenbeuger"
+          ],
+          "x": [
+            "Flexionan el codo al tirar.",
+            "Flex the elbow while pulling.",
+            "Flexionam o cotovelo ao puxar.",
+            "Fléchissent le coude en tirant.",
+            "Beugen den Ellenbogen beim Ziehen."
+          ],
+          "nivel": 0.55
+        },
+        {
+          "en": [
+            "Iliocostalis lumborum muscle",
+            "Longissimus thoracis muscle"
+          ],
+          "n": [
+            "Erectores de la columna",
+            "Erector spinae",
+            "Eretores da coluna",
+            "Érecteurs du rachis",
+            "M. erector spinae"
+          ],
+          "x": [
+            "Mantienen la columna neutra.",
+            "Keep the spine neutral.",
+            "Mantêm a coluna neutra.",
+            "Maintiennent le rachis neutre.",
+            "Halten die Wirbelsäule neutral."
+          ],
+          "nivel": 0.55
+        }
+      ]
+    },
+    {
+      "id": "kickback",
+      "fuente": "ct",
+      "duracion": 3,
+      "vista": 2,
+      "fases": [
+        {
+          "ini": 0,
+          "fin": 35,
+          "tipo": "con",
+          "n": [
+            "Subida",
+            "Lifting",
+            "Subida",
+            "Montée",
+            "Anheben"
+          ],
+          "x": [
+            "Los músculos motores se acortan venciendo la carga (contracción concéntrica).",
+            "The prime movers shorten against the load (concentric contraction).",
+            "Os músculos motores encurtam vencendo a carga (contração concêntrica).",
+            "Les muscles moteurs se raccourcissent contre la charge (contraction concentrique).",
+            "Die Hauptbeweger verkürzen sich gegen die Last (konzentrische Kontraktion)."
+          ]
+        },
+        {
+          "ini": 35,
+          "fin": 55,
+          "tipo": "iso",
+          "n": [
+            "Pausa",
+            "Hold",
+            "Pausa",
+            "Maintien",
+            "Halten"
+          ],
+          "x": [
+            "Sostienen la carga sin cambiar de longitud (isométrica).",
+            "They hold the load without changing length (isometric).",
+            "Sustentam a carga sem mudar de comprimento (isométrica).",
+            "Ils maintiennent la charge sans changer de longueur (isométrique).",
+            "Sie halten die Last ohne Längenänderung (isometrisch)."
+          ]
+        },
+        {
+          "ini": 55,
+          "fin": 90,
+          "tipo": "exc",
+          "n": [
+            "Bajada controlada",
+            "Controlled lowering",
+            "Descida controlada",
+            "Descente contrôlée",
+            "Kontrolliertes Absenken"
+          ],
+          "x": [
+            "Los mismos músculos frenan el descenso mientras se alargan (excéntrica).",
+            "The same muscles brake the return while lengthening (eccentric).",
+            "Os mesmos músculos freiam a descida enquanto se alongam (excêntrica).",
+            "Les mêmes muscles freinent le retour en s'allongeant (excentrique).",
+            "Dieselben Muskeln bremsen das Zurückführen, während sie sich verlängern (exzentrisch)."
+          ]
+        },
+        {
+          "ini": 90,
+          "fin": 100,
+          "tipo": "",
+          "n": [
+            "Reposo",
+            "Rest",
+            "Repouso",
+            "Repos",
+            "Ruhe"
+          ],
+          "x": [
+            "Posición de partida.",
+            "Starting position.",
+            "Posição inicial.",
+            "Position de départ.",
+            "Ausgangsposition."
+          ]
+        }
+      ],
+      "grupos": [
+        {
+          "en": [
+            "Gluteus maximus muscle"
+          ],
+          "n": [
+            "Glúteo mayor",
+            "Gluteus maximus",
+            "Glúteo máximo",
+            "Grand fessier",
+            "M. gluteus maximus"
+          ],
+          "x": [
+            "Extensor principal de la cadera.",
+            "Main hip extensor.",
+            "Principal extensor do quadril.",
+            "Principal extenseur de la hanche.",
+            "Wichtigster Hüftstrecker."
+          ],
+          "nivel": 0.85
+        },
+        {
+          "en": [
+            "Long head of biceps femoris",
+            "Semitendinosus muscle",
+            "Semimembranosus muscle"
+          ],
+          "n": [
+            "Isquiotibiales",
+            "Hamstrings",
+            "Isquiotibiais",
+            "Ischio-jambiers",
+            "Ischiokrurale Muskulatur"
+          ],
+          "x": [
+            "Extienden la cadera junto al glúteo mayor.",
+            "Extend the hip together with gluteus maximus.",
+            "Estendem o quadril junto com o glúteo máximo.",
+            "Étendent la hanche avec le grand fessier.",
+            "Strecken die Hüfte zusammen mit dem M. gluteus maximus."
+          ],
+          "nivel": 0.55
+        },
+        {
+          "en": [
+            "Gluteus medius muscle"
+          ],
+          "n": [
+            "Glúteo medio",
+            "Gluteus medius",
+            "Glúteo médio",
+            "Moyen fessier",
+            "M. gluteus medius"
+          ],
+          "x": [
+            "Estabiliza la pelvis en el plano frontal.",
+            "Stabilizes the pelvis in the frontal plane.",
+            "Estabiliza a pelve no plano frontal.",
+            "Stabilise le bassin dans le plan frontal.",
+            "Stabilisiert das Becken in der Frontalebene."
+          ],
+          "nivel": 0.4
+        }
+      ]
     }
   ],
   "traducciones": {

@@ -1,6 +1,15 @@
-# Rotatores separados por vértebra (tools/unreal/separar.js) (2026-11-22)
+# Sprint 2: ejercicios con postura (fuente «ct» de movimiento.js) (2026-11-22)
+Set-Location (Split-Path $PSScriptRoot -Parent)
+"node: " + (Get-Command node -ErrorAction SilentlyContinue).Source
+"NODE_PATH: $env:NODE_PATH"
+$srv = Start-Process -FilePath "py" -ArgumentList "-m", "http.server", "8765" -PassThru -WindowStyle Hidden
+Start-Sleep -Seconds 3
+"== HORNEAR =="
+node tools/unreal/movimiento.js --solo-ejercicios 2>&1 | ForEach-Object { "$_" }
+$srv | Stop-Process -Force -ErrorAction SilentlyContinue
 Set-Location $PSScriptRoot
-"== REIMPORTAR =="
-.\py.ps1 "ci.copiar_datos(); ci.importar_mallas(['hombre/muscular', 'mujer/muscular'])" -Limite 3000
-"== CAPTURAS =="
-.\captura.ps1 -Pasos "esperar 8; vista 1; sel n1590_14; encuadrar; aislar; foto sep_rotadores_T7; todo; buscar rotadores; foto sep_rotadores_buscador; sel; vista 0; foto sep2_reposo; cuerpo mujer; vista 2; sel n1630_5; encuadrar; foto sep_mujer_intercostal"
+if (Select-String -Path "$PSScriptRoot\claude_tarea_log.txt" -Pattern "Ejercicios: datos/movimiento.json" -Quiet) {
+  "== COPIAR Y CAPTURAS =="
+  .\py.ps1 "ci.copiar_datos()" -Limite 600
+  .\captura.ps1 -Pasos "esperar 8; ejercicio lunge - 45; vista 2; foto ej_lunge; ejercicio deadlift - 45; foto ej_deadlift; ejercicio sitstand - 45; foto ej_sitstand; ejercicio curl - 45; foto ej_curl; ejercicio latraise - 45; vista 0; foto ej_latraise; ejercicio press - 45; foto ej_press; ejercicio row - 45; vista 2; foto ej_row; ejercicio hipabd - 45; vista 0; foto ej_hipabd; ejercicio frontraise - 45; vista 2; foto ej_frontraise; ejercicio kickback - 45; foto ej_kickback; ejercicio"
+}
