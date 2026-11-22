@@ -431,6 +431,10 @@ void UCorpusDatos::CargarExtras()
 	{
 		for (const auto& Par : (*O)->Values) { FString S; if (Par.Value.IsValid() && Par.Value->TryGetString(S)) { Prof.Add(FString(Par.Key), S); } }
 	}
+	if (J->TryGetObjectField(TEXT("reg"), O))
+	{
+		for (const auto& Par : (*O)->Values) { FString S; if (Par.Value.IsValid() && Par.Value->TryGetString(S)) { Region.Add(FString(Par.Key), S); } }
+	}
 	if (J->TryGetObjectField(TEXT("lm"), O))
 	{
 		for (const auto& Par : (*O)->Values)
@@ -611,7 +615,7 @@ namespace
 		{TEXT("Destino"), {TEXT("Destination"), TEXT("Destino"), TEXT("Destination"), TEXT("Ziel")}},
 		{TEXT("Ramas"), {TEXT("Branches"), TEXT("Ramos"), TEXT("Branches"), TEXT("Äste")}},
 		{TEXT("Territorio"), {TEXT("Territory"), TEXT("Território"), TEXT("Territoire"), TEXT("Versorgungsgebiet")}},
-		{TEXT("Clínica"), {TEXT("Clinical notes"), TEXT("Clínica"), TEXT("Clinique"), TEXT("Klinik")}},
+		{TEXT("Clínica"), {TEXT("Clinical"), TEXT("Clínica"), TEXT("Clinique"), TEXT("Klinik")}},   // «Clinical notes» repetía el campo «Clinical relevance»
 		{TEXT("Excéntrica"), {TEXT("Eccentric"), TEXT("Excêntrica"), TEXT("Excentrique"), TEXT("Exzentrisch")}},
 		{TEXT("Concéntrica"), {TEXT("Concentric"), TEXT("Concêntrica"), TEXT("Concentrique"), TEXT("Konzentrisch")}},
 		{TEXT("Isométrica"), {TEXT("Isometric"), TEXT("Isométrica"), TEXT("Isométrique"), TEXT("Isometrisch")}},
@@ -681,6 +685,30 @@ namespace
 		{TEXT("Función biomecánica (plano / eje)"), {TEXT("Biomechanical function (plane / axis)"), TEXT("Função biomecânica (plano / eixo)"), TEXT("Fonction biomécanique (plan / axe)"), TEXT("Biomechanische Funktion (Ebene / Achse)")}},
 		{TEXT("Prueba muscular manual"), {TEXT("Manual muscle testing"), TEXT("Teste muscular manual"), TEXT("Testing musculaire manuel"), TEXT("Manueller Muskeltest")}},
 		{TEXT("Articula con"), {TEXT("Articulates with"), TEXT("Articula-se com"), TEXT("S'articule avec"), TEXT("Artikuliert mit")}},
+		// revisión del director clínico (2026-11-22): tipo y función de los ligamentos, región y plano muscular, y el bloque
+		// «Función» en alemán («Funktion» ya es el rótulo de la acción muscular)
+		{TEXT("Función estabilizadora"), {TEXT("Stabilising function"), TEXT("Função estabilizadora"), TEXT("Rôle stabilisateur"), TEXT("Stabilisierende Funktion")}},
+		{TEXT("Función (bloque)"), {TEXT("Function"), TEXT("Função"), TEXT("Fonction"), TEXT("Funktion und Biomechanik")}},
+		{TEXT("Tipo"), {TEXT("Type"), TEXT("Tipo"), TEXT("Type"), TEXT("Typ")}},
+		{TEXT("Región"), {TEXT("Region"), TEXT("Região"), TEXT("Région"), TEXT("Region")}},
+		{TEXT("Plano muscular"), {TEXT("Muscle layer"), TEXT("Plano muscular"), TEXT("Plan musculaire"), TEXT("Muskelschicht")}},
+		{TEXT("Superficial"), {TEXT("Superficial"), TEXT("Superficial"), TEXT("Superficiel"), TEXT("Oberflächlich")}},
+		{TEXT("Intermedio"), {TEXT("Intermediate"), TEXT("Intermediário"), TEXT("Intermédiaire"), TEXT("Mittlere Schicht")}},
+		{TEXT("Profundo"), {TEXT("Deep"), TEXT("Profundo"), TEXT("Profond"), TEXT("Tief")}},
+		// las 13 regiones de extras.json → reg (la web las enseña solo en español)
+		{TEXT("Cabeza"), {TEXT("Head"), TEXT("Cabeça"), TEXT("Tête"), TEXT("Kopf")}},
+		{TEXT("Cuello"), {TEXT("Neck"), TEXT("Pescoço"), TEXT("Cou"), TEXT("Hals")}},
+		{TEXT("Tórax"), {TEXT("Thorax"), TEXT("Tórax"), TEXT("Thorax"), TEXT("Thorax")}},
+		{TEXT("Abdomen"), {TEXT("Abdomen"), TEXT("Abdome"), TEXT("Abdomen"), TEXT("Abdomen")}},
+		{TEXT("Pelvis y región lumbar"), {TEXT("Pelvis and lumbar region"), TEXT("Pelve e região lombar"), TEXT("Bassin et région lombaire"), TEXT("Becken und Lendenregion")}},
+		{TEXT("Hombro y cintura escapular"), {TEXT("Shoulder and shoulder girdle"), TEXT("Ombro e cintura escapular"), TEXT("Épaule et ceinture scapulaire"), TEXT("Schulter und Schultergürtel")}},
+		{TEXT("Brazo"), {TEXT("Arm"), TEXT("Braço"), TEXT("Bras"), TEXT("Oberarm")}},
+		{TEXT("Antebrazo"), {TEXT("Forearm"), TEXT("Antebraço"), TEXT("Avant-bras"), TEXT("Unterarm")}},
+		{TEXT("Mano"), {TEXT("Hand"), TEXT("Mão"), TEXT("Main"), TEXT("Hand")}},
+		{TEXT("Cadera y región glútea"), {TEXT("Hip and gluteal region"), TEXT("Quadril e região glútea"), TEXT("Hanche et région glutéale"), TEXT("Hüfte und Gesäßregion")}},
+		{TEXT("Muslo"), {TEXT("Thigh"), TEXT("Coxa"), TEXT("Cuisse"), TEXT("Oberschenkel")}},
+		{TEXT("Pierna"), {TEXT("Leg"), TEXT("Perna"), TEXT("Jambe"), TEXT("Unterschenkel")}},
+		{TEXT("Pie"), {TEXT("Foot"), TEXT("Pé"), TEXT("Pied"), TEXT("Fuß")}},
 		// el rótulo largo («Puntos de referencia (palpación e imagen)») no cabía en la columna de rótulos de la ficha
 		{TEXT("Palpación e imagen"), {TEXT("Palpation and imaging"), TEXT("Palpação e imagem"), TEXT("Palpation et imagerie"), TEXT("Palpation und Bildgebung")}},
 		// rótulos por tipo de la ficha de vasos y nervios: en la web, en y pt van en TL() dentro de renderInfo; fr y de, en i18n_fr/de.json
@@ -823,7 +851,17 @@ TArray<FCorpusCampoFicha> UCorpusDatos::FichaCampos(const FString& Id)
 		const TSharedPtr<FJsonObject>* E = nullptr;
 		if (Grupo.Value.IsValid() && Grupo.Value->TryGetObject(G) && (*G)->TryGetObjectField(P->En, E)) { Tipo = FString(Grupo.Key); F = *E; break; }
 	}
-	if (!F.IsValid()) { return Fuera; }
+	// «Región» y «Plano muscular» (extras.json), al final de Anatomía como en la web (renderInfo); revisión del director clínico
+	const auto Extras = [this, &Id, &Fuera]()
+	{
+		if (const FString* R = Region.Find(Id)) { if (!R->IsEmpty()) { Fuera.Add(FCorpusCampoFicha{ TEXT("region"), T(TEXT("Región")), T(*R) }); } }
+		if (const FString* Pr = Prof.Find(Id))
+		{
+			const TCHAR* N = *Pr == TEXT("s") ? TEXT("Superficial") : *Pr == TEXT("i") ? TEXT("Intermedio") : *Pr == TEXT("p") ? TEXT("Profundo") : nullptr;
+			if (N) { Fuera.Add(FCorpusCampoFicha{ TEXT("plano"), T(TEXT("Plano muscular")), T(N) }); }
+		}
+	};
+	if (!F.IsValid()) { Extras(); return Fuera; }
 	// el tipo en español (antes de cambiar de idioma) decide los rótulos de vasos, nervios y vías, como renderInfo en la web
 	FString TipoEs;
 	F->TryGetStringField(TEXT("tipo"), TipoEs);
@@ -874,8 +912,14 @@ TArray<FCorpusCampoFicha> UCorpusDatos::FichaCampos(const FString& Id)
 		if (K == TEXT("es") || K == TEXT("la") || !Campo.Value.IsValid() || !Campo.Value->TryGetString(Texto) || Texto.IsEmpty()) { continue; }
 		const FString* Et = PorTipo.Find(K);
 		if (!Et) { Et = Etiquetas.Find(K); }
+		// ligamentos: el tipo (intracapsular, capsular…) sí se enseña («clase»: la interfaz omite «tipo», que ya dice la miga)
+		// y su función es estabilizadora (no repetir «Función» dentro del bloque «Función»)
+		if (Tipo == TEXT("lig") && K == TEXT("tipo")) { Fuera.Add(FCorpusCampoFicha{ TEXT("clase"), T(TEXT("Tipo")), Texto }); continue; }
+		static const FString FuncLig(TEXT("Función estabilizadora"));
+		if (Tipo == TEXT("lig") && K == TEXT("funcion")) { Et = &FuncLig; }
 		Fuera.Add(FCorpusCampoFicha{ K, T(Et ? *Et : K.Left(1).ToUpper() + K.Mid(1)), Texto });
 	}
+	Extras();
 	return Fuera;
 }
 

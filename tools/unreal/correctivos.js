@@ -365,7 +365,14 @@ if (require.main === module) {
       for (const PR of PRs) M.piezas[PR.clave] = cuadros(PR, M.rom, v.id, gs);
       movs.push(M); console.log('  ejercicio %s/%s: %d cuadros, los dos lados · %d s', e.id, v.id, gs.length, Math.round((Date.now() - t0) / 1000)); });
     const dir = path.join(PO.IMP, 'datos');
-    fs.writeFileSync(path.join(dir, 'correctivos.bin'), Buffer.concat(partes));
+    let BIN = Buffer.concat(partes);
+    if (SOLO_EJ) { /* compactar: el .bin viejo seguía entero al principio y crecía en cada horneado; se copian solo los tramos
+                      a los que apunta el JSON (lista de nodos de cada pieza y cuadros de cada movimiento) */
+      const nuevos = [], mover = (o, n) => { const p = nuevos.reduce((s, b) => s + b.length, 0); nuevos.push(BIN.subarray(o, o + n)); const pad = (4 - n % 4) % 4; if (pad) nuevos.push(Buffer.alloc(pad)); return p; };
+      for (const k in piezas) piezas[k].ai = mover(piezas[k].ai, piezas[k].act * 4);
+      for (const m of movs) for (const k in m.piezas) m.piezas[k] = mover(m.piezas[k], m.cuadros * piezas[k].act * 7 * 2);
+      const antes = BIN.length; BIN = Buffer.concat(nuevos); pos = BIN.length; console.log('compactado: %s → %s MB', (antes / 1048576).toFixed(1), (pos / 1048576).toFixed(1)); }
+    fs.writeFileSync(path.join(dir, 'correctivos.bin'), BIN);
     fs.writeFileSync(path.join(dir, 'correctivos.json'), JSON.stringify({ version: 1, paso: PASO, ancho: 512, texeles: base, escala: 20000, piezas, movs }));
     console.log('correctivos.json + correctivos.bin (%s MB) en %s', (pos / 1048576).toFixed(1), dir); }
   else if (orden === 'prueba') { const [id, rom, mi, S, gr] = a, t0 = Date.now(), PR = preparar('hombre', id, S), t1 = Date.now();

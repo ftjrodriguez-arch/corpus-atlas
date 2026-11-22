@@ -276,6 +276,7 @@ private:
 	void CargarInserciones();
 	TMap<FString, FString> HuesoDeArea;   // «cuerpo/id del área» → id del hueso (inserciones.json)
 	TMap<FString, FString> Prof;
+	TMap<FString, FString> Region;     // extras.json → reg: región anatómica de cada pieza (en español), como la ficha de la web
 	TMap<FString, TArray<FCorpusRelieve>> RelievesPorHueso;
 	TMap<FString, FCorpusRejilla> Rejillas;
 	TMap<FString, FCorpusCorrMov> CorrMovs;

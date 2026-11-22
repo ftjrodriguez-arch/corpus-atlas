@@ -21,7 +21,8 @@
 - [x] Músculos agrupados separados uno a uno (`tools/unreal/separar.js`): intercostales, subcostales, interóseos dorsales de mano y pie, lumbricales de la mano, interóseos plantares y rotadores (C3–L5)
 - [ ] Interóseos palmares y lumbricales del pie: modelarlos en Blender (la malla de la web no trae sus formas)
 - [x] 10 ejercicios nuevos con postura (zancada, peso muerto, sentarse y levantarse, abducción de cadera, curl, elevación lateral y frontal, press, remo, patada de glúteo), horneados el 2026-11-22 (capturas `ej_*`)
-- [ ] Francés y alemán de 30 textos de técnica, progresiones y precauciones de esos ejercicios (salen en inglés): añadirlos a `ejercicios.json → traducciones` y volver a hornear
+- [x] Francés y alemán de los 30 textos de técnica, progresiones y precauciones de los ejercicios (`ejercicios.json → traducciones`;
+      también aplicados al `movimiento.json` horneado). Pendientes de revisión de un nativo.
 - [ ] Pruebas ortopédicas con postura (las de paciente tumbado necesitan la raíz del cuerpo acostado)
 - [ ] Dedos de mano y pie con movimiento (el rig solo tiene 27 articulaciones y 5 bits por hueco)
 - [ ] Cinta de suelo y gráficas de la marcha
@@ -44,7 +45,8 @@ Hizo Sprint 1 L2/N, Sprint 2 (músculos separados, 10 ejercicios), 59 traduccion
       el cuadro 0 de cada ejercicio como reposo (una iteración y sin colisiones). Corregido y horneado de nuevo (todos los
       ejercicios); celdas atravesadas en el cuadro 0 del remo 451 → 30. Capturas `hoja_cuadro0.png`, `hoja_row0_cerca.png`.
 - [ ] Queda un punto pequeño del redondo mayor junto a la axila en el remo (8–13 mm): los músculos no chocan entre sí (ver abajo).
-- [ ] `correctivos.js hornear-ejercicios` añade al .bin sin quitar lo viejo (crece cada vez): compactar o hornear todo.
+- [x] `correctivos.js hornear-ejercicios` ya compacta el .bin (antes crecía en cada horneado); comprobado byte a byte.
+- [ ] Graphify no se actualiza: falta el paquete `graphify` en Python 3.12 (instalarlo desde `_graphify\wheels` con permiso).
 - [ ] `tendones.js --restaurar` ya no funciona con los músculos separados (n1633_4… no están en la web): adaptarlo a `separar.js`.
 - [ ] El resto de su lista ya está arriba en el Sprint 2 (FR/DE de ejercicios, pruebas ortopédicas, interóseos y
       lumbricales, dedos, cinta y gráficas) y en `unreal/PLAN_SPRINTS.md`.
@@ -53,7 +55,8 @@ Hizo Sprint 1 L2/N, Sprint 2 (músculos separados, 10 ejercicios), 59 traduccion
 - [ ] Al elevar la escápula 40° se abre un hueco bajo la clavícula.
 - [ ] El dorsal hace un pliegue junto al ángulo inferior de la escápula en abducción de 150°.
 - [ ] Los músculos no chocan entre sí, solo con los huesos.
-- [ ] Correctivos de la mujer horneados pero sin capturas en Unreal; su brazo levantado salía pálido.
+- [x] Correctivos de la mujer comprobados en capturas (abducción y flexión de 150°, `hoja_mujer_hombro.png`): hombro continuo
+      y color normal.
 - [ ] Llevar los correctivos a la cadera (glúteo mayor en flexión > 90°; ver también el punto K del LEEME).
 - [ ] Piel del Visible Human algo anaranjada.
 - [ ] Post-procesos de la web sin pasar: `musPost`, `latHug`, `kneePush`.
@@ -61,8 +64,9 @@ Hizo Sprint 1 L2/N, Sprint 2 (músculos separados, 10 ejercicios), 59 traduccion
 **Este chat (interfaz Slate, 21–22 nov., commits ced53f1…bdd71b0)** (fases 1–3 hechas y subidas)
 - [ ] Probar en el PC con el ratón real: clic y doble clic con la cámara descentrada, menús que se cierran al pulsar fuera, Tab entre botones.
 - [ ] Comprobar si el filtro de visión de color tiñe también el modelo 3D (no sale en las capturas).
-- [ ] Detalles menores del director clínico en la ficha: «Función» repetido en ligamentos (y «Funktion» en alemán),
-      mostrar el `tipo` en ligamentos, añadir «Región» y «Plano muscular», matices de traducción («Clinical notes»).
+- [x] Detalles menores del director clínico en la ficha: tipo y «Función estabilizadora» en ligamentos, bloque «Funktion und
+      Biomechanik» en alemán, «Región» (13 regiones en 5 idiomas) y «Plano muscular», «Clinical» en inglés y columna de
+      rótulos más ancha («Blutversorgung» se cortaba). Capturas `hoja_ficha_director.png`, `hoja_ficha_mujer.png`.
 - [ ] La web tiene el mismo rótulo erróneo «Referencias» en los huesos (Unreal ya dice «Palpación e imagen»): corregirlo en rama aparte.
 - [ ] `data/hoja_rotulos.png` es una copia suelta creada por error (la buena está en `unreal/capturas/`): borrarla con permiso del usuario.
 

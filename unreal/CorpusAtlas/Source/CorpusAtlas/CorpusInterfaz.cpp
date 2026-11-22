@@ -90,7 +90,7 @@ namespace
 	// ── Fase 3: ficha en bloques, enlaces, examen y animaciones ──
 	constexpr float DUR_ENCIMA = 0.10f;   // color de un botón al pasar el ratón
 	constexpr float DUR_FUNDIDO = 0.12f;  // fundido cruzado al cambiar de ficha o de entrada de estudio
-	constexpr float ANCHO_ROTULO_FICHA = 104.f;   // columna de rótulos de la rejilla Anatomía
+	constexpr float ANCHO_ROTULO_FICHA = 120.f;   // 104 cortaba «BLUTVERSORGUNG» en alemán   // columna de rótulos de la rejilla Anatomía
 	constexpr float ANCHO_FRANJA = 3.f;   // borde izquierdo ámbar de la tarjeta Clínica
 	constexpr float ALTO_PROGRESO = 3.f;  // barra de progreso del examen
 	constexpr float LADO_LETRA = 28.f;    // celda A/B/C/D de una opción
@@ -2296,8 +2296,9 @@ void SCorpusInterfaz::RehacerFicha()
 	bool bAlgo = true;    // hay algo encima (de entrada, las acciones): separador antes del bloque siguiente
 	const auto Separar = [this, &bAlgo]() { if (bAlgo) { CajaFicha->AddSlot().AutoHeight().Padding(0, E_4)[ SeparadorH() ]; } bAlgo = true; };
 	{
-		static const TArray<FString> ORDEN_ANATOMIA = { TEXT("origen"), TEXT("insercion"), TEXT("inervacion"), TEXT("irrigacion"), TEXT("articulacion"),
-			TEXT("articula"), TEXT("une"), TEXT("destino"), TEXT("ramas"), TEXT("territorio"), TEXT("relaciones"), TEXT("referencias") };
+		// «clase» = tipo de los ligamentos (intracapsular, capsular…); «region» y «plano» salen de extras.json, como en la web
+		static const TArray<FString> ORDEN_ANATOMIA = { TEXT("clase"), TEXT("origen"), TEXT("insercion"), TEXT("inervacion"), TEXT("irrigacion"), TEXT("articulacion"),
+			TEXT("articula"), TEXT("une"), TEXT("destino"), TEXT("ramas"), TEXT("territorio"), TEXT("relaciones"), TEXT("referencias"), TEXT("region"), TEXT("plano") };
 		static const TArray<FString> ORDEN_FUNCION = { TEXT("accion"), TEXT("funcion"), TEXT("biomecanica") };
 		static const TArray<FString> ORDEN_CLINICA = { TEXT("clinica"), TEXT("prueba") };
 		const TArray<FCorpusCampoFicha> Campos = D->FichaCampos(Id);
@@ -2344,7 +2345,9 @@ void SCorpusInterfaz::RehacerFicha()
 		if (Func.Num() > 0)
 		{
 			Separar();
-			Titulo(D->T(TEXT("Función")));
+			// título propio del bloque: en alemán «Funktion» es el rótulo de la acción muscular (revisión del director clínico)
+			const FString Fb = D->T(TEXT("Función (bloque)"));
+			Titulo(Fb == TEXT("Función (bloque)") ? D->T(TEXT("Función")) : Fb);
 			TSharedRef<SVerticalBox> Caja = SNew(SVerticalBox);
 			for (int32 i = 0; i < Func.Num(); ++i) { Apilado(Caja, *Func[i], i == 0); }
 			CajaFicha->AddSlot().AutoHeight()[ Caja ];
