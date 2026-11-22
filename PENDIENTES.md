@@ -14,8 +14,8 @@
 - [x] Trapecio inferior por encima del dorsal ancho; nombres de sus porciones corregidos en el catálogo
 - [ ] Glúteo mayor sin hincharse ni colgar en flexión de cadera y sentadilla
 - [ ] Muslo continuo (sin tiras) en flexión de rodilla
-- [ ] Validador de datos (`tools/unreal/validar.js`)
-- [ ] Nombres de articulaciones en francés y alemán (claves que solo difieren en mayúsculas)
+- [x] Validador de datos (`tools/unreal/validar.js`): 0 errores
+- [x] Nombres en francés y alemán: 59 traducciones erróneas de claves en minúscula corregidas (p. ej. «rodilla» → «cadera» en alemán); avisos de mayúsculas 104 → 53, los que quedan son significados distintos
 
 ## Contenido clínico pendiente de revisión profesional
 - Reglas de tendones (`tools/unreal/tendones_reglas.json`), notas de rodilla (`rangos_extra.json`), sentadilla y sus
@@ -25,7 +25,9 @@
 Ver `unreal/PLAN_SPRINTS.md`: resto del aparato locomotor, talleres de fisiología, examen práctico, empaquetado y
 llevar las correcciones a la web en rama aparte.
 
-## Decisiones del usuario pendientes
-- Criterio de recuento de músculos (separar intercostales, interóseos y lumbricales).
-- Color del músculo. Activar Niagara para los talleres. Quién revisa el contenido.
-- Piezas de Z-Anatomy con licencia no comercial (oído interno, riñón): sustituir o dejar declaradas.
+## Decisiones del usuario (2026-11-22)
+- Músculos agrupados (intercostales, interóseos, lumbricales, rotadores): **separarlos uno a uno**.
+- Talleres de fisiología: **activar Niagara**.
+- Oído interno y riñón de Z-Anatomy (no comercial): **sustituir por modelos con licencia libre**.
+- Color del músculo: **rojo más natural, tipo disección** (granate algo apagado).
+- Pendiente: quién hace la revisión profesional del contenido.

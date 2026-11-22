@@ -1,17 +1,17 @@
 {
- "fecha": "2026-11-22T00:28:17.694Z",
+ "fecha": "2026-11-22T17:15:41.552Z",
  "resumen": {
   "errores": 0,
-  "avisos": 146,
+  "avisos": 95,
   "nombres_comprobados": 20985,
   "errores_por_tipo": {},
   "avisos_por_tipo": {
    "pares": 37,
    "sin_traducir": 4,
    "otro_idioma": 1,
-   "mayusculas": 104
+   "mayusculas": 53
   },
-  "mayusculas_mismo_valor": 182
+  "mayusculas_mismo_valor": 233
  },
  "omitido": [],
  "errores": [],
@@ -296,31 +296,7 @@
    "tipo": "mayusculas",
    "archivo": "data/i18n_de.json",
    "clave": "ui: «Articular» / «articular»",
-   "msg": "«Articular» → \"Gelenke\" · «articular» → \"articular\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «Cadera» / «cadera»",
-   "msg": "«Cadera» → \"Hüfte\" · «cadera» → \"cadera\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «Planos» / «planos»",
-   "msg": "«Planos» → \"Ebenen\" · «planos» → \"sistemas\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «Rodilla» / «rodilla»",
-   "msg": "«Rodilla» → \"Knie\" · «rodilla» → \"cadera\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «Sagital» / «sagital»",
-   "msg": "«Sagital» → \"Sagittal\" · «sagital» → \"Pfeilnaht\""
+   "msg": "«Articular» → \"Gelenke\" · «articular» → \"Gelenk\""
   },
   {
    "tipo": "mayusculas",
@@ -337,104 +313,14 @@
   {
    "tipo": "mayusculas",
    "archivo": "data/i18n_de.json",
-   "clave": "ui: «Hombro» / «hombro»",
-   "msg": "«Hombro» → \"Schulter\" · «hombro» → \"hombro\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «Codo» / «codo»",
-   "msg": "«Codo» → \"Ellenbogen\" · «codo» → \"hombro\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «Nervio» / «nervio»",
-   "msg": "«Nervio» → \"Nerv\" · «nervio» → \"cabeza\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «elbow» / «Elbow»",
-   "msg": "«elbow» → \"elbow\" · «Elbow» → \"Ellenbogen\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «knee» / «Knee»",
-   "msg": "«knee» → \"hip\" · «Knee» → \"Knie\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
    "clave": "ui: «Humerus» / «humerus»",
    "msg": "«Humerus» → \"Humerus\" · «humerus» → \"Oberarmknochen\""
   },
   {
    "tipo": "mayusculas",
    "archivo": "data/i18n_de.json",
-   "clave": "ui: «Scapula» / «scapula»",
-   "msg": "«Scapula» → \"Humerus\" · «scapula» → \"Schulterblatt\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «shoulder» / «Shoulder»",
-   "msg": "«shoulder» → \"shoulder\" · «Shoulder» → \"Schulter\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «wrist» / «Wrist»",
-   "msg": "«wrist» → \"wrist\" · «Wrist» → \"Handgelenk\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
    "clave": "ui: «pivot» / «Pivot»",
-   "msg": "«pivot» → \"lachman\" · «Pivot» → \"Zapfengelenk\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «heart» / «Heart»",
-   "msg": "«heart» → \"heart\" · «Heart» → \"Herz\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «lungs» / «Lungs»",
-   "msg": "«lungs» → \"lungs\" · «Lungs» → \"Lunge\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «brain» / «Brain»",
-   "msg": "«brain» → \"brain\" · «Brain» → \"Gehirn\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «pain» / «Pain»",
-   "msg": "«pain» → \"pain\" · «Pain» → \"Den Schmerz\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «spine» / «Spine»",
-   "msg": "«spine» → \"spine\" · «Spine» → \"Wirbelsäule\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «actin» / «Actin»",
-   "msg": "«actin» → \"Aktin\" · «Actin» → \"Das Aktin\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «None» / «none»",
-   "msg": "«None» → \"Keine\" · «none» → \"gar nicht\""
+   "msg": "«pivot» → \"Pivot\" · «Pivot» → \"Zapfengelenk\""
   },
   {
    "tipo": "mayusculas",
@@ -493,38 +379,8 @@
   {
    "tipo": "mayusculas",
    "archivo": "data/i18n_de.json",
-   "clave": "ui: «skull» / «Skull»",
-   "msg": "«skull» → \"encef\" · «Skull» → \"Schädel\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «Se dilatan» / «se dilatan»",
-   "msg": "«Se dilatan» → \"Weiter\" · «se dilatan» → \"weiten sich\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «Dilate» / «dilate»",
-   "msg": "«Dilate» → \"Weiter\" · «dilate» → \"weiten sich\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
    "clave": "ui: «card» / «Card»",
    "msg": "«card» → \"Karte\" · «Card» → \"Steckbrief\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «Right hand» / «right hand»",
-   "msg": "«Right hand» → \"Die rechte Hand\" · «right hand» → \"rechte Hand\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «Heart rate» / «heart rate»",
-   "msg": "«Heart rate» → \"Herzfrequenz\" · «heart rate» → \"Frequenz\""
   },
   {
    "tipo": "mayusculas",
@@ -578,13 +434,13 @@
    "tipo": "mayusculas",
    "archivo": "data/i18n_de.json",
    "clave": "ui: «hip flexion» / «Hip flexion»",
-   "msg": "«hip flexion» → \"Hüftflexion\" · «Hip flexion» → \"Die Hüftbeugung\""
+   "msg": "«hip flexion» → \"Hüftflexion\" · «Hip flexion» → \"Hüftbeugung\""
   },
   {
    "tipo": "mayusculas",
    "archivo": "data/i18n_de.json",
    "clave": "ui: «Upper motor neuron» / «upper motor neuron»",
-   "msg": "«Upper motor neuron» → \"Erstem Motoneuron\" · «upper motor neuron» → \"1. Motoneuron\""
+   "msg": "«Upper motor neuron» → \"Erstes Motoneuron\" · «upper motor neuron» → \"1. Motoneuron\""
   },
   {
    "tipo": "mayusculas",
@@ -597,12 +453,6 @@
    "archivo": "data/i18n_de.json",
    "clave": "ui: «dolor» / «Dolor»",
    "msg": "«dolor» → \"Schmerz\" · «Dolor» → \"Schmerz (Pain)\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_de.json",
-   "clave": "ui: «sagittal» / «Sagittal»",
-   "msg": "«sagittal» → \"Pfeilnaht\" · «Sagittal» → \"Sagittal\""
   },
   {
    "tipo": "mayusculas",
@@ -620,25 +470,7 @@
    "tipo": "mayusculas",
    "archivo": "data/i18n_fr.json",
    "clave": "ui: «Articular» / «articular»",
-   "msg": "«Articular» → \"Articulations\" · «articular» → \"articular\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «Cadera» / «cadera»",
-   "msg": "«Cadera» → \"Hanche\" · «cadera» → \"cadera\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «Planos» / «planos»",
-   "msg": "«Planos» → \"Plans\" · «planos» → \"sistemas\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «Rodilla» / «rodilla»",
-   "msg": "«Rodilla» → \"Genou\" · «rodilla» → \"cadera\""
+   "msg": "«Articular» → \"Articulations\" · «articular» → \"articulaire\""
   },
   {
    "tipo": "mayusculas",
@@ -649,56 +481,8 @@
   {
    "tipo": "mayusculas",
    "archivo": "data/i18n_fr.json",
-   "clave": "ui: «Hombro» / «hombro»",
-   "msg": "«Hombro» → \"Épaule\" · «hombro» → \"hombro\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «Codo» / «codo»",
-   "msg": "«Codo» → \"Coude\" · «codo» → \"hombro\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «Nervio» / «nervio»",
-   "msg": "«Nervio» → \"Nerf\" · «nervio» → \"cabeza\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «elbow» / «Elbow»",
-   "msg": "«elbow» → \"elbow\" · «Elbow» → \"Coude\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «knee» / «Knee»",
-   "msg": "«knee» → \"hip\" · «Knee» → \"Genou\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
    "clave": "ui: «Humerus» / «humerus»",
    "msg": "«Humerus» → \"Humerus\" · «humerus» → \"humérus\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «Scapula» / «scapula»",
-   "msg": "«Scapula» → \"Humerus\" · «scapula» → \"scapula\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «shoulder» / «Shoulder»",
-   "msg": "«shoulder» → \"shoulder\" · «Shoulder» → \"Épaule\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «wrist» / «Wrist»",
-   "msg": "«wrist» → \"wrist\" · «Wrist» → \"Poignet\""
   },
   {
    "tipo": "mayusculas",
@@ -716,7 +500,7 @@
    "tipo": "mayusculas",
    "archivo": "data/i18n_fr.json",
    "clave": "ui: «pivot» / «Pivot»",
-   "msg": "«pivot» → \"lachman\" · «Pivot» → \"En pivot\""
+   "msg": "«pivot» → \"pivot\" · «Pivot» → \"En pivot\""
   },
   {
    "tipo": "mayusculas",
@@ -745,42 +529,6 @@
   {
    "tipo": "mayusculas",
    "archivo": "data/i18n_fr.json",
-   "clave": "ui: «heart» / «Heart»",
-   "msg": "«heart» → \"heart\" · «Heart» → \"Cœur\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «lungs» / «Lungs»",
-   "msg": "«lungs» → \"lungs\" · «Lungs» → \"Poumons\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «brain» / «Brain»",
-   "msg": "«brain» → \"brain\" · «Brain» → \"Encéphale\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «pain» / «Pain»",
-   "msg": "«pain» → \"pain\" · «Pain» → \"La douleur\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «spine» / «Spine»",
-   "msg": "«spine» → \"spine\" · «Spine» → \"Colonne\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «actin» / «Actin»",
-   "msg": "«actin» → \"actine\" · «Actin» → \"L'actine\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
    "clave": "ui: «None» / «none»",
    "msg": "«None» → \"Aucune\" · «none» → \"rien\""
   },
@@ -805,42 +553,6 @@
   {
    "tipo": "mayusculas",
    "archivo": "data/i18n_fr.json",
-   "clave": "ui: «skull» / «Skull»",
-   "msg": "«skull» → \"encef\" · «Skull» → \"Crâne\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «horas» / «Horas»",
-   "msg": "«horas» → \"heures\" · «Horas» → \"Des heures\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «hours» / «Hours»",
-   "msg": "«hours» → \"heures\" · «Hours» → \"Des heures\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «Right hand» / «right hand»",
-   "msg": "«Right hand» → \"La main droite\" · «right hand» → \"main droite\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «Heart rate» / «heart rate»",
-   "msg": "«Heart rate» → \"Fréquence cardiaque\" · «heart rate» → \"fréquence\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «médula» / «Médula»",
-   "msg": "«médula» → \"moelle\" · «Médula» → \"Médullaire\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
    "clave": "ui: «biceps» / «Biceps»",
    "msg": "«biceps» → \"bicipital\" · «Biceps» → \"Biceps\""
   },
@@ -859,26 +571,8 @@
   {
    "tipo": "mayusculas",
    "archivo": "data/i18n_fr.json",
-   "clave": "ui: «hip flexion» / «Hip flexion»",
-   "msg": "«hip flexion» → \"flexion de la hanche\" · «Hip flexion» → \"La flexion de hanche\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
    "clave": "ui: «Upper motor neuron» / «upper motor neuron»",
    "msg": "«Upper motor neuron» → \"Premier motoneurone\" · «upper motor neuron» → \"1er motoneurone\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «semanas» / «Semanas»",
-   "msg": "«semanas» → \"semaines\" · «Semanas» → \"Des semaines\""
-  },
-  {
-   "tipo": "mayusculas",
-   "archivo": "data/i18n_fr.json",
-   "clave": "ui: «weeks» / «Weeks»",
-   "msg": "«weeks» → \"semaines\" · «Weeks» → \"Des semaines\""
   },
   {
    "tipo": "mayusculas",
