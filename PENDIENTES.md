@@ -32,10 +32,10 @@ y pruebas». Todo está en la misma rama; esto es lo que cada uno dejó a medias
 
 **Chat del teléfono (claude.ai, sesión `session_01DmC7U1BKkg61unuu5pmdvd`, 22 nov., commits f916243…929d614)**
 Hizo Sprint 1 L2/N, Sprint 2 (músculos separados, 10 ejercicios), 59 traducciones FR/DE y dejó `TRASPASO_CLAUDE_CODE.md`.
-- [ ] Dorsal ancho deformado en elevación lateral y press: correctivos del hombro también en el modo Ejercicio.
-      El código está compilado (DLL de las 14:09) y hay capturas `unreal/capturas/dor_*` (14:16) **sin revisar ni subir**.
-      Falta mirarlas por delante y por detrás, comprobar que `dor_rom_abd150` sigue igual y hacer el commit.
-- [ ] Capturas `unreal/capturas/col_*` (12:22, color del músculo antes/después) sin subir.
+- [x] Dorsal ancho deformado en elevación lateral y press: correctivos del hombro también en el modo Ejercicio.
+      Revisado el 2026-11-22 en `hoja_dorsal.png` y `hoja_dorsal_cerca.png`: continuo y sin abultarse en elevación
+      lateral, press y remo. En abducción de 150° sigue el pliegue junto al ángulo inferior (anotado abajo).
+- [x] Capturas `unreal/capturas/col_*` (color del músculo antes/después) subidas.
 - [ ] El resto de su lista ya está arriba en el Sprint 2 (FR/DE de ejercicios, pruebas ortopédicas, interóseos y
       lumbricales, dedos, cinta y gráficas) y en `unreal/PLAN_SPRINTS.md`.
 
