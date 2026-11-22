@@ -681,7 +681,15 @@ namespace
 		{TEXT("Función biomecánica (plano / eje)"), {TEXT("Biomechanical function (plane / axis)"), TEXT("Função biomecânica (plano / eixo)"), TEXT("Fonction biomécanique (plan / axe)"), TEXT("Biomechanische Funktion (Ebene / Achse)")}},
 		{TEXT("Prueba muscular manual"), {TEXT("Manual muscle testing"), TEXT("Teste muscular manual"), TEXT("Testing musculaire manuel"), TEXT("Manueller Muskeltest")}},
 		{TEXT("Articula con"), {TEXT("Articulates with"), TEXT("Articula-se com"), TEXT("S'articule avec"), TEXT("Artikuliert mit")}},
-		{TEXT("Referencias"), {TEXT("References"), TEXT("Referências"), TEXT("Références"), TEXT("Literatur")}},
+		// el rótulo largo («Puntos de referencia (palpación e imagen)») no cabía en la columna de rótulos de la ficha
+		{TEXT("Palpación e imagen"), {TEXT("Palpation and imaging"), TEXT("Palpação e imagem"), TEXT("Palpation et imagerie"), TEXT("Palpation und Bildgebung")}},
+		// rótulos por tipo de la ficha de vasos y nervios: en la web, en y pt van en TL() dentro de renderInfo; fr y de, en i18n_fr/de.json
+		{TEXT("Se forma"), {TEXT("Formed by"), TEXT("Forma-se"), TEXT("Formé par"), TEXT("Gebildet durch")}},
+		{TEXT("Tributarias"), {TEXT("Tributaries"), TEXT("Tributárias"), TEXT("Affluents"), TEXT("Zuflüsse")}},
+		{TEXT("Drena"), {TEXT("Drains"), TEXT("Drena"), TEXT("Draine"), TEXT("Drainiert")}},
+		{TEXT("Irriga"), {TEXT("Supplies"), TEXT("Irriga"), TEXT("Irrigue"), TEXT("Versorgt")}},
+		{TEXT("Termina"), {TEXT("Ends"), TEXT("Termina"), TEXT("Se termine"), TEXT("Endet")}},
+		{TEXT("Inerva"), {TEXT("Supplies"), TEXT("Inerva"), TEXT("Innerve"), TEXT("Innerviert")}},
 		{TEXT("Ver los {0}"), {TEXT("Show all {0}"), TEXT("Ver os {0}"), TEXT("Voir les {0}"), TEXT("Alle {0} anzeigen")}},
 		{TEXT("Ver menos"), {TEXT("Show fewer"), TEXT("Ver menos"), TEXT("Voir moins"), TEXT("Weniger anzeigen")}},
 		{TEXT("Pregunta {0} de {1}"), {TEXT("Question {0} of {1}"), TEXT("Pergunta {0} de {1}"), TEXT("Question {0} sur {1}"), TEXT("Frage {0} von {1}")}},
@@ -816,6 +824,9 @@ TArray<FCorpusCampoFicha> UCorpusDatos::FichaCampos(const FString& Id)
 		if (Grupo.Value.IsValid() && Grupo.Value->TryGetObject(G) && (*G)->TryGetObjectField(P->En, E)) { Tipo = FString(Grupo.Key); F = *E; break; }
 	}
 	if (!F.IsValid()) { return Fuera; }
+	// el tipo en español (antes de cambiar de idioma) decide los rótulos de vasos, nervios y vías, como renderInfo en la web
+	FString TipoEs;
+	F->TryGetStringField(TEXT("tipo"), TipoEs);
 	if (IdiomaActual != TEXT("es"))
 	{
 		const FString Clave = Tipo + TEXT("|") + P->En;
@@ -831,14 +842,38 @@ TArray<FCorpusCampoFicha> UCorpusDatos::FichaCampos(const FString& Id)
 		{TEXT("territorio"), TEXT("Territorio")}, {TEXT("relaciones"), TEXT("Relaciones")},
 		// mismos rótulos que la ficha de la web (renderInfo en index.html); antes «biomecanica» salía como «BIOMECANICA», sin tilde
 		{TEXT("clinica"), TEXT("Relevancia clínica")}, {TEXT("biomecanica"), TEXT("Función biomecánica (plano / eje)")},
-		{TEXT("prueba"), TEXT("Prueba muscular manual")}, {TEXT("articula"), TEXT("Articula con")}, {TEXT("referencias"), TEXT("Referencias")}
+		{TEXT("prueba"), TEXT("Prueba muscular manual")}, {TEXT("articula"), TEXT("Articula con")},
+		// en los huesos no es bibliografía: son puntos de palpación y de imagen (revisión del director clínico, 2026-11-22)
+		{TEXT("referencias"), TEXT("Palpación e imagen")}
 	};
+	// estructuras del grupo «rest» (vasos, nervios, linfáticos, vías): rótulos de origen, destino, ramas y territorio según
+	// el tipo, igual que index.html (renderInfo). Una vena recibe tributarias y drena; una arteria da ramas e irriga.
+	TMap<FString, FString> PorTipo;
+	if (Tipo == TEXT("rest"))
+	{
+		FString t = TipoEs.ToLower();
+		static const TCHAR* Con[] = { TEXT("á"), TEXT("é"), TEXT("í"), TEXT("ó"), TEXT("ú") };
+		static const TCHAR* Sin[] = { TEXT("a"), TEXT("e"), TEXT("i"), TEXT("o"), TEXT("u") };
+		for (int32 i = 0; i < 5; ++i) { t.ReplaceInline(Con[i], Sin[i]); }
+		const auto Hay = [&t](std::initializer_list<const TCHAR*> L) { for (const TCHAR* S : L) { if (t.Contains(S)) { return true; } } return false; };
+		const TCHAR* L[4];
+		const auto Poner = [&L](const TCHAR* A, const TCHAR* B, const TCHAR* C, const TCHAR* D) { L[0] = A; L[1] = B; L[2] = C; L[3] = D; };
+		if (Hay({ TEXT("vena"), TEXT("seno"), TEXT("venos") })) { Poner(TEXT("Se forma"), TEXT("Desemboca en"), TEXT("Tributarias"), TEXT("Drena")); }
+		else if (Hay({ TEXT("arteria"), TEXT("arterial") })) { Poner(TEXT("Nace de"), TEXT("Continúa como"), TEXT("Ramas"), TEXT("Irriga")); }
+		else if (Hay({ TEXT("nervio"), TEXT("ramo"), TEXT("plexo"), TEXT("tronco"), TEXT("division"), TEXT("fasciculo") })
+			|| (t.Contains(TEXT("ganglio")) && !t.Contains(TEXT("ganglio linf")))) { Poner(TEXT("Origen"), TEXT("Termina"), TEXT("Ramas"), TEXT("Inerva")); }
+		else if (t.Contains(TEXT("linf"))) { Poner(TEXT("Origen"), TEXT("Drenaje eferente"), TEXT("Ramas"), TEXT("Región que drena")); }
+		else if (Hay({ TEXT("tracto"), TEXT("via"), TEXT("fascicul") })) { Poner(TEXT("Origen"), TEXT("Destino"), TEXT("Ramas"), TEXT("Irrigación")); }
+		else { Poner(TEXT("Inserción proximal"), TEXT("Inserción distal"), TEXT("Ramas"), TEXT("Relación / irrigación")); }
+		PorTipo.Add(TEXT("origen"), L[0]); PorTipo.Add(TEXT("destino"), L[1]); PorTipo.Add(TEXT("ramas"), L[2]); PorTipo.Add(TEXT("territorio"), L[3]);
+	}
 	for (const auto& Campo : F->Values)
 	{
 		const FString K(Campo.Key);
 		FString Texto;
 		if (K == TEXT("es") || K == TEXT("la") || !Campo.Value.IsValid() || !Campo.Value->TryGetString(Texto) || Texto.IsEmpty()) { continue; }
-		const FString* Et = Etiquetas.Find(K);
+		const FString* Et = PorTipo.Find(K);
+		if (!Et) { Et = Etiquetas.Find(K); }
 		Fuera.Add(FCorpusCampoFicha{ K, T(Et ? *Et : K.Left(1).ToUpper() + K.Mid(1)), Texto });
 	}
 	return Fuera;
