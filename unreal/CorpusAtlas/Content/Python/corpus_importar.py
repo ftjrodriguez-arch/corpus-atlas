@@ -806,7 +806,9 @@ def importar_mallas(solo=None):
 # Intensidades del estudio: sol en lux, rectangulares en candelas, cielo multiplicador. Con sol=6 el sol no aportaba
 # nada y las dos rectangulares (9000 / 14000) quemaban solas el hueso, sin sombreado (capturas de prueba 2026-11-20).
 # Ahora el sol es la luz principal y da el relieve; relleno y contraluz quedan suaves.
-LUCES = dict(sol=200.0, relleno=2000.0, contra=6000.0, cielo=1.0)
+# 2026-11-21: la auditoría visual propuso que la luz principal marque el relieve (más sol, menos relleno y contraluz).
+# Probadas tres variantes en capturas: sol 500 aclaraba el cielo a azul vivo y oscurecía la espalda; esta es la intermedia.
+LUCES = dict(sol=300.0, relleno=1400.0, contra=3000.0, cielo=0.7)
 EXPOSICION = 2.0   # comprobado en capturas: 1 queda oscuro, 4 quema los tendones, 2.5 aún satura el hueso
 
 
