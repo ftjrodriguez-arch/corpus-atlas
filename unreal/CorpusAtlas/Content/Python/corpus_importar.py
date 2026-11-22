@@ -69,8 +69,8 @@ TEJIDOS = {
 }
 # Multiplicador del color base tras el tinte del órgano: el hueso (tinte 242,236,220) quemaba la imagen con la exposición
 # del estudio. Comprobado en capturas (unreal/capturas).
-ALBEDO = {"oseo": 0.40, "articular": 0.55, "bolsas": 0.80, "fascia": 0.80}
-DESATURAR = {"muscular": 0.24}     # la web se ve salmón, no rojo puro (capturas 2026-11-20)
+ALBEDO = {"oseo": 0.40, "articular": 0.55, "bolsas": 0.80, "fascia": 0.80, "muscular": 0.62}   # músculo: granate de disección (usuario, 2026-11-22)
+DESATURAR = {"muscular": 0.36}     # granate de disección, no rojo de atlas ilustrado (usuario, 2026-11-22; capturas colA-C)
 EMPUJE = {"insercion": 0.06}       # cm hacia fuera: las áreas de origen e inserción no parpadean con el hueso
 FIBRA = ("muscular", "articular", "fascia", "arterial", "venoso", "nervioso_periferico", "linfatico")
 

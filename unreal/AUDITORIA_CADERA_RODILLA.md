@@ -12,6 +12,17 @@ Neumann, Kapandji, AAOS, Terminologia Anatomica. **Pendiente de validación por 
 - Sin traducir al español: «Labio lateral / medial de la línea áspera» (además «apera» → «aspera» en inglés),
   «Tercer trocánter (inconstante)» y «Tubérculo obturador posterior».
 
+## Corregido el 2026-11-22 (fichas y glosario, en los cinco idiomas)
+- Gemelo inferior: inserción en la cara medial del trocánter mayor (sin «fosa trocantérica»).
+- Psoas mayor: origen T12–L5 (Gray, Moore). Glúteo medio: fibras anteriores rotan medialmente y posteriores lateralmente.
+- Sartorio: añadida la rotación medial de la rodilla flexionada. Aductor mínimo: medial a la tuberosidad glútea, en lo
+  alto de la línea áspera. Ligamento pubofemoral: se funde con la cápsula y el iliofemoral hacia el cuello, cerca del
+  trocánter menor. Gemelo superior: raíces L5–S2, como el obturador interno.
+- Glosario: Isquiotibiales (cabeza larga del bíceps femoral; la corta nace en la línea áspera y solo actúa en la rodilla);
+  Rotadores de la cadera con el obturador externo y sinónimo «Rotadores laterales de la cadera»; condromalacia rotuliana y
+  síndrome femororrotuliano pasan a términos relacionados; cintilla iliotibial «fricción o compresión»; «Hernia del
+  deportista» deja de ser sinónimo de pubalgia (término relacionado). `estudio.js` regenerado.
+
 ## Pendiente (no corregido todavía)
 **Faltan datos**
 - La rótula no tiene relieves (base, vértice, cara anterior, cara articular con sus facetas, bordes).

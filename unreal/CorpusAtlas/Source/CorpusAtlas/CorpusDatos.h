@@ -31,6 +31,9 @@ struct FCorpusPieza
 	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Lado;
 	/** Áreas de la capa «insercion»: «origen» o «inserción» (séptimo campo del catálogo). */
 	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Rol;
+	/** Nombre propio en inglés de una pieza separada de su grupo (octavo campo del catálogo, tools/unreal/separar.js);
+	 *  En sigue siendo el del grupo para que valgan su ficha y su profundidad de disección. */
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString EnPropio;
 	/** Clave = cuerpo («hombre», «mujer», «vh»). */
 	UPROPERTY(BlueprintReadOnly, Category = "Corpus") TMap<FString, FCorpusMalla> Mallas;
 };

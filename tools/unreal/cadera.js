@@ -87,6 +87,52 @@ function campo(cuerpo, S) {
   return _F[kk] = F;
 }
 
+/* ───────── campo de peso de una rodilla (Sprint 1 L, 2026-11-22) ─────────
+   Mismo principio que la cadera: un solo campo armónico para todos los músculos que cruzan la rodilla, en vez del peso
+   propio de cada uno que traía la web (cada músculo con su reparto y su mezcla lineal: a 135° el recto femoral y los
+   vastos se separaban junto a la rótula y el muslo se abría en tiras). Vale 0 sobre el fémur y en todo lo que queda a más
+   de ROD_ARRIBA por encima de la interlínea (a lo largo de la tibia), y 1 sobre tibia, peroné y rótula y en todo lo que
+   queda a más de ROD_ABAJO por debajo. Dos músculos vecinos reciben el mismo peso y se doblan juntos. */
+const ROD_CERO = /^Femur$/, ROD_UNO = new RegExp(process.env.CORPUS_ROD_UNO || "^(Tibia|Fibula)$"), ROD_ARRIBA = +(process.env.CORPUS_ROD_ARRIBA || 0.08), ROD_ABAJO = +(process.env.CORPUS_ROD_ABAJO || 0.06);
+const _FR = {};
+function campoRodilla(cuerpo, S) {
+  const kk = cuerpo + S; if (_FR[kk]) return _FR[kk];
+  const K = PO.M.articulaciones[PO.arts.indexOf('knee_' + S)].pivote, T = PO.M.articulaciones[PO.arts.indexOf('ankle_tc_' + S)].pivote;
+  let a = T.map((v, i) => v - K[i]); const la = Math.hypot(...a); a = a.map(v => v / la);
+  const b0 = [K[0] - 0.11, K[1] - 0.16, K[2] - 0.13], b1 = [K[0] + 0.11, K[1] + 0.20, K[2] + 0.13];
+  const L = []; for (const c of cuerpo === 'hombre' ? ['hombre'] : [cuerpo, 'hombre']) { let C; try { C = PO.capa(c + '/oseo'); } catch (e) { continue; }
+    for (const nd of C.g.nodes) { if (nd.mesh === undefined) continue; const en = (nd.extras || {}).en || '', lado = (nd.extras || {}).lado || ''; if (lado !== LD(S) || (!ROD_CERO.test(en) && !ROD_UNO.test(en))) continue;
+      if (L.some(x => x.en === en)) continue; L.push(PO.pieza(c + '/oseo', nd.name)); } }
+  const nivel = (h, prev, its, om) => {
+    const n = b0.map((v, k) => Math.ceil((b1[k] - v) / h) + 1), nn = n[0] * n[1] * n[2], val = new Float32Array(nn), fijo = new Uint8Array(nn), sy = n[0], sz = n[0] * n[1];
+    const en = p => { const fx = Math.min(n[0] - 1.0001, Math.max(0, (p[0] - b0[0]) / h)), fy = Math.min(n[1] - 1.0001, Math.max(0, (p[1] - b0[1]) / h)), fz = Math.min(n[2] - 1.0001, Math.max(0, (p[2] - b0[2]) / h));
+      const ix = Math.floor(fx), iy = Math.floor(fy), iz = Math.floor(fz), tx = fx - ix, ty = fy - iy, tz = fz - iz, q = ix + sy * iy + sz * iz;
+      const x00 = val[q] + (val[q + 1] - val[q]) * tx, x10 = val[q + sy] + (val[q + sy + 1] - val[q + sy]) * tx, x01 = val[q + sz] + (val[q + sz + 1] - val[q + sz]) * tx, x11 = val[q + sz + sy] + (val[q + sz + sy + 1] - val[q + sz + sy]) * tx;
+      const y0 = x00 + (x10 - x00) * ty, y1 = x01 + (x11 - x01) * ty; return y0 + (y1 - y0) * tz; };
+    for (let iz = 0; iz < n[2]; iz++) for (let iy = 0; iy < n[1]; iy++) for (let ix = 0; ix < n[0]; ix++) { const q = ix + sy * iy + sz * iz, p = [b0[0] + ix * h, b0[1] + iy * h, b0[2] + iz * h];
+      const s = (p[0] - K[0]) * a[0] + (p[1] - K[1]) * a[1] + (p[2] - K[2]) * a[2];
+      if (s > ROD_ABAJO) { fijo[q] = 1; val[q] = 1; } else if (s < -ROD_ARRIBA) { fijo[q] = 1; val[q] = 0; } else val[q] = prev ? prev(p) : sat((s + ROD_ARRIBA) / (ROD_ARRIBA + ROD_ABAJO)); }
+    for (const pasada of [0, 1]) for (const pz of L) { const uno = ROD_UNO.test(pz.en); if (uno !== !!pasada) continue; const P = pz.P, I = pz.I;
+      for (let t = 0; t < I.length; t += 3) { const i0 = I[t] * 3, i1 = I[t + 1] * 3, i2 = I[t + 2] * 3;
+        const l = Math.max(Math.hypot(P[i0] - P[i1], P[i0 + 1] - P[i1 + 1], P[i0 + 2] - P[i1 + 2]), Math.hypot(P[i0] - P[i2], P[i0 + 1] - P[i2 + 1], P[i0 + 2] - P[i2 + 2])), m = Math.max(1, Math.ceil(l / (h * 0.6)));
+        for (let u = 0; u <= m; u++) for (let v = 0; v <= m - u; v++) { const fu = u / m, fv = v / m, fw = 1 - fu - fv;
+          const ix = Math.round((P[i0] * fw + P[i1] * fu + P[i2] * fv - b0[0]) / h), iy = Math.round((P[i0 + 1] * fw + P[i1 + 1] * fu + P[i2 + 1] * fv - b0[1]) / h), iz = Math.round((P[i0 + 2] * fw + P[i1 + 2] * fu + P[i2 + 2] * fv - b0[2]) / h);
+          if (ix < 0 || iy < 0 || iz < 0 || ix >= n[0] || iy >= n[1] || iz >= n[2]) continue; const q = ix + sy * iy + sz * iz; fijo[q] = 1; val[q] = pasada; } } }
+    let it = 0, dmax = 1;
+    for (; it < its && dmax > 2e-5; it++) { dmax = 0;
+      for (let iz = 0; iz < n[2]; iz++) for (let iy = 0; iy < n[1]; iy++) { let q = sy * iy + sz * iz;
+        for (let ix = 0; ix < n[0]; ix++, q++) { if (fijo[q]) continue; let s = 0, c = 0;
+          if (ix > 0) { s += val[q - 1]; c++; } if (ix < n[0] - 1) { s += val[q + 1]; c++; } if (iy > 0) { s += val[q - sy]; c++; } if (iy < n[1] - 1) { s += val[q + sy]; c++; } if (iz > 0) { s += val[q - sz]; c++; } if (iz < n[2] - 1) { s += val[q + sz]; c++; }
+          const d = (s / c - val[q]) * om; val[q] += d; if (d > dmax) dmax = d; else if (-d > dmax) dmax = -d; } } }
+    return { en, n, its: it, dmax };
+  };
+  const t0 = Date.now(), g1 = nivel(H * 2, null, 1500, 1.9), g2 = nivel(H, g1.en, 600, 1.9);
+  const F = { en: p => { const s = (p[0] - K[0]) * a[0] + (p[1] - K[1]) * a[1] + (p[2] - K[2]) * a[2]; if (s > ROD_ABAJO) return 1; if (s < -ROD_ARRIBA) return 0;
+      if (p.some((v, k) => v < b0[k] || v > b1[k])) return null; return sat(g2.en(p)); },
+    info: `campo rodilla ${cuerpo} ${S}: ${g2.n.join('×')} nodos, ${g1.its}+${g2.its} pasadas (resto ${g2.dmax.toExponential(1)}), ${Date.now() - t0} ms` };
+  return _FR[kk] = F;
+}
+
 /* ───────── fracción de fibra (glúteo mayor) ─────────
    El glúteo mayor es superficial y resbala sobre lo que tiene debajo: con el campo común su parte baja y medial (fibras
    que nacen del cóccix) se iba entera con el fémur y colgaba bajo el muslo. Su peso es la posición a lo largo de la
@@ -157,6 +203,11 @@ function pesosPieza(cuerpo, pz) {
     const hh = 0.004, GR = [new Float32Array(nv), new Float32Array(nv), new Float32Array(nv)];
     for (let i = 0; i < nv; i++) { const p = [pz.P[i * 3], pz.P[i * 3 + 1], pz.P[i * 3 + 2]]; for (let c = 0; c < 3; c++) { let g; if (Wf) g = Wf.grad(i)[c]; else { const a = p.slice(), b = p.slice(); a[c] += hh; b[c] -= hh; g = (F.en(a) - F.en(b)) / (2 * hh); } GR[c][i] = sat(0.5 + g * PO.GRAD_K); } }
     e.grad = GR; }
+  /* rodilla: campo común (desactivar con CORPUS_RODILLA=0 para comparar con los pesos de la web) */
+  if (process.env.CORPUS_RODILLA !== '0') for (const S of ['R', 'L']) { const ji = PO.arts.indexOf('knee_' + S) + 1, e = slots.find(s => s.j === ji); if (!e || pz.lado !== LD(S)) continue;
+    const F = campoRodilla(cuerpo, S), Wn = new Float32Array(nv); let mx = 0, fuera = 0;
+    for (let i = 0; i < nv; i++) { let w = F.en([pz.P[i * 3], pz.P[i * 3 + 1], pz.P[i * 3 + 2]]); if (w === null) { w = e.W[i]; fuera++; } w = w < 0.002 ? 0 : w > 0.998 ? 1 : w; Wn[i] = w; if (w > mx) mx = w; }
+    e.W = Wn; e.lin = false; e.mx = mx; toca = true; }
   if (!toca) return null;
   const igual = (A, B) => { for (let v = 0; v < nv; v++) if (Math.abs(A[v] - B[v]) >= 0.01) return false; return true; };
   const G = []; for (const s of slots) { if (s.mx !== undefined && s.mx < 0.002) continue; const g = G[G.length - 1]; if (g && !g.fijo && g.js.length < 3 && g.lin === s.lin && igual(g.W, s.W)) g.js.push(s.j); else G.push({ js: [s.j], W: s.W, lin: s.lin, grad: s.grad }); }
@@ -198,6 +249,10 @@ function pliegues(pz, D) { const P = pz.P, I = pz.I;
   return n; }
 function medir(cuerpo, S) {
   const C = PO.capa(cuerpo + '/muscular'), pzs = C.g.nodes.filter(n => n.mesh !== undefined && MUSLO.test((n.extras || {}).en || '') && n.extras.lado === LD(S)).map(n => PO.pieza(cuerpo + '/muscular', n.name));
+  /* CORPUS_SIMULAR=1: mide con los pesos que pondría «aplicar» (sin escribir el GLB) */
+  if (process.env.CORPUS_SIMULAR === '1') for (const pz of pzs) { const r = pesosPieza(cuerpo, pz); if (!r || r.sobra) continue;
+    pz.U = [0, 1, 2, 3].map(c => { const u = new Float32Array(pz.nv * 2), A = r.W[c * 2], B = r.W[c * 2 + 1]; for (let i = 0; i < pz.nv; i++) { u[i * 2] = A ? A[i] : 0; u[i * 2 + 1] = B ? B[i] : 0; } return u; });
+    pz.js = r.huecos.concat([0, 0, 0, 0, 0, 0, 0, 0, 0]).slice(0, 9); }
   const hip = PO.M.articulaciones[PO.arts.indexOf('hip_' + S)].pivote;
   /* parejas de contacto: vértices de dos músculos distintos a menos de 3 mm en reposo. Si en una postura se separan, hay hueco. */
   const cs = 0.003, G = new Map(); pzs.forEach((pz, pi) => { for (let i = 0; i < pz.nv; i += 2) { const k = Math.floor(pz.P[i * 3] / cs) + ',' + Math.floor(pz.P[i * 3 + 1] / cs) + ',' + Math.floor(pz.P[i * 3 + 2] / cs); let l = G.get(k); if (!l) G.set(k, l = []); l.push(pi, i); } });
@@ -222,6 +277,9 @@ function medir(cuerpo, S) {
     const gro = grosor(D[pzs.indexOf(gm)], J), vol = gl.map((p, k) => volumen(D[pzs.indexOf(p)], p.I) / v0[k]), Dm = D[pzs.indexOf(gm)], e = ext(Dm), pl = gl.map(p => pliegues(p, D[pzs.indexOf(p)]));
     const sep = pares.map(([a, i, b, j, d0]) => Math.hypot(D[a][i * 3] - D[b][j * 3], D[a][i * 3 + 1] - D[b][j * 3 + 1], D[a][i * 3 + 2] - D[b][j * 3 + 2]) - d0).sort((x, y) => x - y);
     let plm = 0; pzs.forEach((p, k) => { if (!GLUTEOS.test(p.en)) plm += pliegues(p, D[k]); });
+    if (process.env.CORPUS_DIAG && nm === process.env.CORPUS_DIAG) { const t = pares.map(([a, i, b, j, d0]) => [Math.hypot(D[a][i * 3] - D[b][j * 3], D[a][i * 3 + 1] - D[b][j * 3 + 1], D[a][i * 3 + 2] - D[b][j * 3 + 2]) - d0, pzs[a].en, pzs[b].en, pzs[a].P[i * 3 + 1].toFixed(3), pzs[a].P[i * 3 + 2].toFixed(3)]).sort((x, y) => y[0] - x[0]);
+      const cuenta = {}; for (const x of t) { if (x[0] <= 0.005) break; const k = x[1] + ' | ' + x[2]; cuenta[k] = (cuenta[k] || 0) + 1; }
+      console.log('  huecos > 5 mm por pareja (' + nm + '):', JSON.stringify(cuenta)); console.log('  mayores:', t.slice(0, 6).map(x => (x[0] * 1000).toFixed(0) + ' mm ' + x[1] + '/' + x[2] + ' y=' + x[3] + ' z=' + x[4]).join(' · ')); }
     const f = { postura: nm, 'vol. mayor %': Math.round(vol[gl.indexOf(gm)] * 100), 'vol. medio/menor %': gl.filter(p => p !== gm).map(p => Math.round(vol[gl.indexOf(p)] * 100)).join('/'),
       'grosor med/p95/máx cm': gro.map(v => (v * 100).toFixed(1)).join(' / '), 'radio máx cm': +(e[2] * 100).toFixed(1), 'detrás cm': +((e0[0] - e[0]) * 100).toFixed(1), 'debajo cm': +((e0[1] - e[1]) * 100).toFixed(1), 'pliegues glúteos': pl.join('/'), 'pliegues muslo': plm,
       'huecos >5 mm': sep.filter(x => x > 0.005).length, 'hueco p95 mm': +(sep[Math.floor(sep.length * 0.95)] * 1000).toFixed(1), 'hueco máx mm': +(sep[sep.length - 1] * 1000).toFixed(0) };
@@ -231,7 +289,7 @@ function medir(cuerpo, S) {
   return filas;
 }
 
-module.exports = { campo, pesosPieza, aplicar, medir, PLIEGUE, H };
+module.exports = { campo, campoRodilla, pesosPieza, aplicar, medir, PLIEGUE, H };
 if (require.main === module) {
   const [orden, a1, a2] = process.argv.slice(2);
   if (orden === 'aplicar') aplicar((a1 || 'hombre,mujer').split(','));

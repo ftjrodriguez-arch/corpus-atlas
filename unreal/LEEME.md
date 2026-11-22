@@ -628,6 +628,44 @@ defecto era solo de la deformación.
 - Capturas `antes_l_*` y `s1_l_*`: flexión de rodilla 0–135° de lado, por detrás y de frente (`s1_l_rod_hoja.png`) y
   `s1_l_mosaico.png`.
 
+### L2 · Rodilla: un solo campo de peso para todos los músculos (2026-11-22)
+- **Causa de las tiras que quedaban:** cada músculo que cruza la rodilla traía su propio peso de rodilla de la web; a
+  135° el recto femoral y los vastos se separaban junto a la rótula.
+- **`tools/unreal/cadera.js` → `campoRodilla`** (lo aplica `aplicar` junto con el de cadera): campo armónico en una
+  rejilla de 5 mm alrededor de la rodilla: 0 sobre el fémur y en todo lo que queda a más de 8 cm por encima de la
+  interlínea (a lo largo de la tibia), 1 sobre tibia y peroné y a más de 6 cm por debajo. **La rótula no se fija:**
+  fijarla a 1 junto al fémur (0) hacía un salto de peso dentro del cuádriceps (huecos de hasta 35 mm entre el vasto
+  intermedio y el medial). Variables para comparar: `CORPUS_RODILLA=0` (pesos de la web), `CORPUS_ROD_ARRIBA`,
+  `CORPUS_ROD_ABAJO`, `CORPUS_ROD_UNO`. `medir` acepta `CORPUS_SIMULAR=1` (mide los pesos nuevos sin escribir el GLB) y
+  `CORPUS_DIAG=<postura>` (huecos por pareja de músculos).
+- **Medido (parejas de contacto que se separan > 5 mm; antes → después):** hombre derecho rodilla 135° 62 → 33,
+  sentadilla 71 → 43, cadera 120° 56 → 35; hombre izquierdo 60 → 34 y 68 → 43; mujer derecha 35 → 14 y 37 → 16.
+  Pliegues del muslo a 135° 1.318 → 1.132. Lo que queda: glúteo mayor con bíceps femoral y glúteo medio (resbala a
+  propósito, punto K) y unos 20 pares de 5–8 mm en el cuádriceps junto a la rótula.
+- Copia anterior: `Importar/antes_rodilla/` (no se sube). Capturas `antes_rod_*` y `s1_rod_*` (rodilla 101 y 135° de
+  lado, por detrás y de frente; sentadilla de lado y por detrás; reposo sin cambios).
+
+### Color del músculo: granate de disección (decisión del usuario, 2026-11-22)
+- El tono lo dan las tablas de tinte de cada músculo (`k` del manifiesto, peso 255): por eso cambiar `TEJIDOS → color` no
+  se notaba. Se baja el brillo y la saturación del tejido: `ALBEDO["muscular"] = 0.62`, `DESATURAR["muscular"] = 0.36`.
+  Probadas tres variantes (capturas `colA_*` = antes, `colB_*`, `colC_*` = elegida). Basta `ci.crear_materiales()`.
+
+### N · Músculos agrupados separados uno a uno (decisión del usuario, 2026-11-22)
+- **`tools/unreal/separar.js`** (`medir` / `aplicar [hombre,mujer]`): los grupos de la web ya traen cada músculo como un
+  componente suelto dentro de su malla; cada componente pasa a pieza propia `<id del grupo>_<n>`. El número anatómico
+  lo da el voto de los huesos más cercanos (costillas → espacio intercostal; metacarpianos y metatarsianos → interóseos y
+  lumbricales), con reparto conjunto si dos salen con el mismo número. Solo toca `Importar/` (GLB, manifiesto,
+  `movimiento.json` con los pesos del grupo y `catalog.json` con el nombre propio en la 8.ª columna); la web no cambia.
+  Copia anterior en `Importar/antes_separar/`.
+- **Separados (hombre 16 grupos → 96 piezas, mujer 6 → 60):** intercostales externos (11 espacios), internos (10) e
+  íntimos (9), subcostales (9.º–11.º espacio), interóseos dorsales de la mano (4) y del pie (4), lumbricales de la mano
+  (4) e interóseos plantares (3).
+- **Sin separar (una sola pieza en la malla de la web):** interóseos palmares de la mano, lumbricales del pie y
+  rotadores. Haría falta cortarlos por geometría (por dedo o por vértebra) o modelarlos en Blender.
+- C++: `FCorpusPieza::EnPropio` (8.º campo del catálogo). `En` sigue siendo el del grupo para que valgan su ficha, el
+  buscador en inglés y la profundidad de disección; `NombrePieza` enseña el nombre propio en inglés (y en francés y
+  alemán mientras no haya traducción).
+
 ## Interfaz · Fase 1 de `PLAN_INTERFAZ.md`: legibilidad y sistema visual (2026-11-22) — SIN COMPILAR NI CAPTURAR
 Código escrito en una sesión sin consola (no se pudo compilar, ejecutar `captura.ps1` ni descargar Inter). Hay que
 compilar, capturar y revisar antes de darlo por bueno.

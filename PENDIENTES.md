@@ -13,7 +13,7 @@
 - [x] Tendones: origen carnoso frente a inserción tendinosa
 - [x] Trapecio inferior por encima del dorsal ancho; nombres de sus porciones corregidos en el catálogo
 - [ ] Glúteo mayor sin hincharse ni colgar en flexión de cadera y sentadilla
-- [ ] Muslo continuo (sin tiras) en flexión de rodilla
+- [x] Muslo continuo en flexión de rodilla: campo común de peso de rodilla (huecos > 5 mm a 135°: 62 → 33; sentadilla 71 → 43). Pendiente de revisión visual del usuario
 - [x] Validador de datos (`tools/unreal/validar.js`): 0 errores
 - [x] Nombres en francés y alemán: 59 traducciones erróneas de claves en minúscula corregidas (p. ej. «rodilla» → «cadera» en alemán); avisos de mayúsculas 104 → 53, los que quedan son significados distintos
 
@@ -31,3 +31,7 @@ llevar las correcciones a la web en rama aparte.
 - Oído interno y riñón de Z-Anatomy (no comercial): **sustituir por modelos con licencia libre**.
 - Color del músculo: **rojo más natural, tipo disección** (granate algo apagado).
 - Pendiente: quién hace la revisión profesional del contenido.
+- Candidatos para sustituir las piezas no comerciales (buscado el 2026-11-22, falta descargar y comprobar):
+  riñón de **BodyParts3D 4.0** (DBCLS, licencia actual **CC BY 4.0**, https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html);
+  oído interno «Cochlea and vestibular system from MRI data» de NIH 3D (3DPX-002432, **CC BY**) o el laberinto de BodyParts3D.
+  Los de Z-Anatomy son el «Anatomy of the Inner Ear» de Dundee (CC BY-NC-SA) y el «Kidney» de Lissie Cowley (CC BY-NC).

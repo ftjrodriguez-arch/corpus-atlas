@@ -100,6 +100,7 @@ void UCorpusDatos::CargarCatalogo(const FString& Archivo, const FString& Campo)
 		P.Id = Cad(*Fila, 0);
 		if (P.Id.IsEmpty() || Piezas.Contains(P.Id)) { continue; }
 		P.En = Cad(*Fila, 1); P.Es = Cad(*Fila, 2); P.La = Cad(*Fila, 3); P.Sistema = Cad(*Fila, 4); P.Lado = Cad(*Fila, 5); P.Rol = Cad(*Fila, 6);
+		if (Fila->Num() > 7) { P.EnPropio = Cad(*Fila, 7); }
 		Piezas.Add(P.Id, MoveTemp(P));
 	}
 }
@@ -776,9 +777,10 @@ FString UCorpusDatos::NombrePieza(const FString& Id) const
 	const FCorpusPieza* P = Piezas.Find(Id);
 	if (!P) { return Id; }
 	if (IdiomaActual == TEXT("es")) { return P->Es; }
-	if (IdiomaActual == TEXT("en")) { return P->En; }
+	const FString& En = P->EnPropio.IsEmpty() ? P->En : P->EnPropio;
+	if (IdiomaActual == TEXT("en")) { return En; }
 	if (const FTablaTr* N = NombresTr.Find(IdiomaActual)) { if (const FString* S = N->Find(P->Es)) { return *S; } }
-	return IdiomaActual == TEXT("pt") ? P->Es : P->En;
+	return IdiomaActual == TEXT("pt") ? P->Es : En;
 }
 
 FString UCorpusDatos::NombreCapa(const FString& Clave) const
