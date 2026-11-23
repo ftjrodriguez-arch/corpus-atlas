@@ -1,15 +1,16 @@
 {
- "fecha": "2026-11-23T00:37:18.567Z",
+ "fecha": "2026-11-23T00:53:44.845Z",
  "resumen": {
   "errores": 0,
-  "avisos": 95,
+  "avisos": 96,
   "nombres_comprobados": 21050,
   "errores_por_tipo": {},
   "avisos_por_tipo": {
    "pares": 37,
    "sin_traducir": 4,
    "otro_idioma": 1,
-   "mayusculas": 53
+   "mayusculas": 53,
+   "copias": 1
   },
   "mayusculas_mismo_valor": 233
  },
@@ -585,6 +586,12 @@
    "archivo": "data/i18n_fr.json",
    "clave": "ui: «sagittal» / «Sagittal»",
    "msg": "«sagittal» → \"sagittale\" · «Sagittal» → \"Sagittal\""
+  },
+  {
+   "tipo": "copias",
+   "archivo": "unreal/CorpusAtlas/Content/Datos/correctivos.json",
+   "clave": "correctivos.json",
+   "msg": "distinto de Importar/datos/correctivos.json (falta copiar: ci.copiar_datos())"
   }
  ]
 }

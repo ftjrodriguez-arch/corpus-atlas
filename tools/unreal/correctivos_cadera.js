@@ -98,7 +98,7 @@ function anclajesCadera(cuerpo, mus, S) {
     /* «pieza»: puntos de otra pieza blanda (tracto iliotibial) que van con un hueso */
     const hi = H.pzs.findIndex(pz => reH.test(pz.en) && lado(pz)); if (hi < 0) { console.log('  aviso: sin hueso %s para la regla %s', r.hueso, r.pieza); return null; }
     const reP = new RegExp(r.pieza); let n = 0;
-    for (const T of piezasDe(cuerpo, 'muscular')) { if (!reP.test(T.en) || !lado(T)) continue; for (let i = 0; i < T.nv; i++) { mete(g, T.P[i * 3], T.P[i * 3 + 1], T.P[i * 3 + 2], hi * 4194304); n++; } }
+    for (const T of piezasDe(cuerpo, r.capa || 'muscular')) { if (!reP.test(T.en) || !lado(T)) continue;   /* «capa»: el ligamento sacrotuberoso está en la articular */ for (let i = 0; i < T.nv; i++) { mete(g, T.P[i * 3], T.P[i * 3 + 1], T.P[i * 3 + 2], hi * 4194304); n++; } }
     if (!n) console.log('  aviso: ninguna pieza %s en %s', r.pieza, cuerpo);
     return { r, g, nombre: r.pieza.replace(/[\^$]/g, '') + ' → ' + H.pzs[hi].en };
   }).filter(Boolean);

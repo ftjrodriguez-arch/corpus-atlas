@@ -5,7 +5,7 @@
   "musculos": [
     {
       "en": "Gluteus maximus muscle",
-      "nota": "Origen: ilion por detrás de la línea glútea posterior, cara posterior del sacro y del cóccix, aponeurosis del erector de la columna y ligamento sacrotuberoso. Inserción: tracto iliotibial (fibras superficiales, unos tres cuartos) y tuberosidad glútea del fémur (fibras profundas de la parte inferior). Resbala sobre la tuberosidad isquiática (bolsa isquiática) y el trocánter mayor (bolsa trocantérea).",
+      "nota": "Origen: ilion por detrás de la línea glútea posterior, cara posterior del sacro y del cóccix, aponeurosis del erector de la columna y ligamento sacrotuberoso. Inserción: tracto iliotibial (la mayor parte de las fibras, ≈3/4, cifra aproximada) y tuberosidad glútea del fémur (fibras profundas de la parte inferior). Resbala sobre la tuberosidad isquiática (bolsa isquiática) y el trocánter mayor (bolsa trocantérea).",
       "fuente": "Gray's Anatomy, 42.ª ed.; Moore, 8.ª ed.",
       "estado": "pendiente_revision"
     }
@@ -39,6 +39,11 @@
       "tipo": "hueso", "hueso": "^Femur$", "distancia_m": 0.006, "bajo_cadera_m": 0.06,
       "nota": "tuberosidad glútea (por si el área n566 no se encuentra). Por encima no: el músculo resbala sobre el trocánter mayor",
       "fuente": "Gray's Anatomy, 42.ª ed.", "estado": "pendiente_revision"
+    },
+    {
+      "tipo": "pieza", "pieza": "^Sacrotuberous ligament", "capa": "articular", "hueso": "^Sacrum$", "distancia_m": 0.015, "sobre_cadera_m": -0.03,
+      "nota": "origen de las fibras inferomediales en el ligamento sacrotuberoso (las que colgaban en flexión). Solo la parte sacrococcígea y media: por debajo de 3 cm bajo el centro de la cabeza femoral queda libre, junto a la tuberosidad isquiática, donde el músculo resbala (director clínico, 2026-11-23)",
+      "fuente": "Gray's Anatomy, 42.ª ed.; Moore, 8.ª ed.; Netter, 7.ª ed.", "estado": "pendiente_revision"
     },
     {
       "tipo": "pieza", "pieza": "^Iliotibial tract", "hueso": "^Femur$", "distancia_m": 0.008, "bajo_cadera_m": 0.06,

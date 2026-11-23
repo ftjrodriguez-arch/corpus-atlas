@@ -18,25 +18,28 @@
  "capas": [
   {
    "superficial": "^Latissimus dorsi muscle$",
-   "profundos": "^(Serratus anterior|Teres major|Serratus posterior inferior|Iliocostalis thoracis|Iliocostalis lumborum|Longissimus thoracis|Spinalis thoracis|Rhomboid major|Infraspinatus) muscle$",
+   "profundos": "^(Serratus anterior|Serratus posterior inferior|Iliocostalis thoracis|Iliocostalis lumborum|Longissimus thoracis|Spinalis thoracis|Rhomboid major|Infraspinatus|Internal abdominal oblique|External abdominal oblique) muscle$",
    "forma": "tronco",
    "huesoRadial": "^Scapula$",
    "fuente": "Gray's Anatomy 42.ª ed., dorso y pared torácica: el dorsal ancho cubre el ángulo inferior de la escápula, el redondo mayor, la parte inferior del romboides mayor y del infraespinoso, el serrato anterior en la pared lateral y el serrato posterior inferior y los erectores a través de la fascia toracolumbar",
-   "estado": "pendiente_revision"
+   "estado": "pendiente_revision",
+   "revision": "2026-11-23 director clínico: sin redondo mayor (junto al húmero el tendón del dorsal rodea su borde inferior y queda por delante: la regla lo empujaría al revés); con los oblicuos (triángulo lumbar superior; digitaciones costales entrecruzadas con el oblicuo externo, se respeta la holgura de reposo)."
   },
   {
    "superficial": "^(Clavicular head|Sternocostal head|Abdominal part) of pectoralis major muscle$",
-   "profundos": "^(Pectoralis minor|Subclavius|Serratus anterior) muscle$",
+   "profundos": "^(Pectoralis minor|Subclavius|Serratus anterior|Rectus abdominis|External abdominal oblique) muscle$",
    "forma": "tronco",
    "fuente": "Gray's Anatomy 42.ª ed., pared torácica anterior: el pectoral mayor cubre el pectoral menor, el subclavio (fascia clavipectoral) y las digitaciones superiores del serrato anterior",
-   "estado": "pendiente_revision"
+   "estado": "pendiente_revision",
+   "revision": "2026-11-23 director clínico: añadidos el recto (cartílagos 5–7) y el oblicuo externo (digitaciones de las costillas 5–6 y aponeurosis de la porción abdominal). Pendiente: tendón bilaminar (clavicular por delante cerca de la inserción)."
   },
   {
    "superficial": "^(Acromial|Clavicular|Scapular spinal) part of deltoid muscle$",
-   "profundos": "^(Supraspinatus|Infraspinatus|Teres minor|Subscapularis|Coracobrachialis) muscle$|^(Long|Short) head of biceps brachii$",
+   "profundos": "^(Supraspinatus|Infraspinatus|Teres minor|Teres major|Subscapularis|Coracobrachialis) muscle$|^(Long|Short) head of biceps brachii$|^Long head of triceps",
    "forma": "hombro",
    "fuente": "Gray's Anatomy 42.ª ed., hombro: el deltoides cubre la articulación glenohumeral, los tendones del manguito de los rotadores, la apófisis coracoides con el coracobraquial y la cabeza corta del bíceps, y la cabeza larga del bíceps en el surco intertubercular",
-   "estado": "pendiente_revision"
+   "estado": "pendiente_revision",
+   "revision": "2026-11-23 director clínico: añadidos la cabeza larga del tríceps y el redondo mayor (espacio cuadrangular bajo la porción espinal)."
   }
  ],
  "extremos": [

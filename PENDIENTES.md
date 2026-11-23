@@ -28,7 +28,16 @@ Cada bloque se cierra con: compilar · hornear lo que toque · capturas revisada
 - [x] Choques entre músculos en los correctivos (A, S): `correctivos_capas.json` (vecinos profundos del dorsal, pectoral y
       deltoides). Remo: celdas en que asoma un músculo profundo 170 → 16 (> 5 mm: 69 → 0). Capturas `hoja_v3.png`.
       El trapecio queda fuera (`_capas_pendientes`): con el empuje radial se plegaba (10 → 82 pliegues a 40° de elevación).
-- [ ] Contacto del trapecio con otra dirección de empuje (cuello y escápula) y pliegues del dorsal en el remo (348 → 399)
+- [x] Revisión del director clínico aplicada: glúteo anclado también al ligamento sacrotuberoso (22 anclajes, libre junto a
+      la tuberosidad isquiática); dorsal sin el redondo mayor como vecino profundo (junto al húmero la relación se invierte)
+      y con los oblicuos; pectoral con recto y oblicuo externo; deltoides con cabeza larga del tríceps y redondo mayor.
+      Primeros planos `hoja_cerca.png`.
+- [ ] Contacto del trapecio con otra dirección de empuje (cuello y escápula), con el dorsal, el supraespinoso y la parte
+      medial del infraespinoso como vecinos; pliegues del dorsal en el remo (348 → 374)
+- [ ] Tendón bilaminar del pectoral mayor (porción clavicular por delante cerca de la inserción) y relación dorsal–redondo
+      mayor junto al húmero (necesita reglas por zona en `correctivos_capas.json`)
+- [ ] Glúteo a 120°: el director espera un contorno más ancho y aplanado, con el borde inferior subido (hoy redondeado);
+      choque del glúteo con isquiotibiales, aductor mayor, piriforme, gemelos y vasto lateral (capas en la cadera)
 - [x] Hueco bajo la clavícula al elevar la escápula 40° (A, S): la porción clavicular del pectoral no tenía área de
       inserción en el atlas; ahora va anclada a la clavícula (`extremos`). Captura `v_elev40.png`.
 - [x] Glúteo mayor en flexión de cadera y sentadilla (A, S): correctivo elástico propio (`correctivos_cadera.js/.json`,
