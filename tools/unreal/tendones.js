@@ -45,9 +45,10 @@ function leer(archivo, guardar) {
     for (let k = 0; k < a.count; k++) for (let c = 0; c < nc; c++) { const p = k * paso + c * T.BYTES_PER_ELEMENT;
       out[k * nc + c] = T === Float32Array ? dv.getFloat32(p, true) : T === Uint8Array ? dv.getUint8(p) : T === Uint16Array ? dv.getUint16(p, true) : dv.getUint32(p, true); }
     return { arr: out, nc, norm: a.normalized, T }; };
-  const piezas = {}, orden = [], grupo = {};
+  const piezas = {}, orden = [], grupo = {}, modelado = {};
   for (const n of js.nodes) { if (n.mesh == null) continue; const m = js.meshes[n.mesh], id = n.name || m.name;
     if (n.extras && n.extras.grupo) grupo[id] = n.extras.grupo;   // pieza separada por separar.js: id de su pieza madre
+    if (n.extras && n.extras.modelado) modelado[id] = n.extras.modelado;   // malla propia (p. ej. aponeurosis_palmar.js): no es la de la web
     for (const pr of m.primitives) { const P = acc(pr.attributes.POSITION).arr; let G = null;
       if (pr.attributes.COLOR_0 != null) { const c = acc(pr.attributes.COLOR_0), k = c.T === Float32Array ? 255 : c.T === Uint16Array ? 255 / 65535 : 1; G = new Uint8Array(P.length / 3); for (let i = 0; i < G.length; i++) G[i] = Math.round(c.arr[i * c.nc + 1] * k); }
       let gOff = -1, gPaso = 0, cNc = 0;
@@ -57,7 +58,7 @@ function leer(archivo, guardar) {
   /* normales e índices solo cuando hacen falta (emparejar piezas separadas con su madre) */
   const normales = p => p.pr.attributes.NORMAL != null ? acc(p.pr.attributes.NORMAL).arr : null;
   const indices = p => p.pr.indices != null ? acc(p.pr.indices).arr : Uint32Array.from({ length: p.P.length / 3 }, (_, i) => i);
-  return { piezas, orden, grupo, normales, indices, buf: guardar ? buf : null };
+  return { piezas, orden, grupo, modelado, normales, indices, buf: guardar ? buf : null };
 }
 
 /* Piezas separadas por separar.js (<madre>_<n>): cada vértice de la hija es una copia exacta (mismos bytes de todos los
@@ -108,6 +109,7 @@ if (RESTAURAR) {
     const mal = [], W = {}, hijas = [];
     for (const p of P) W[p.id] = p;
     for (const id of M.orden) { const w = W[id], g = M.piezas[id];
+      if (M.modelado[id]) continue;   // malla propia: su canal G es el que trae (no hay vértices de la web con los que comparar)
       if (!w && M.grupo[id]) {   // pieza separada: se comprueba después, contra su madre
         if (g.length !== 1) mal.push(id + ': ' + g.length + ' primitivas en el GLB');
         else if (g[0].gOff < 0) mal.push(id + ': color que no es de 8 bits');
@@ -122,6 +124,7 @@ if (RESTAURAR) {
       let d = 0; for (let i = 0; i < a.length; i++) { const e = Math.abs(a[i] - b[i]); if (e > d) d = e; }
       if (d > 2e-6) mal.push(id + ': posiciones distintas (hasta ' + (d * 1000).toFixed(3) + ' mm)'); }
     for (const p of P) if (!M.piezas[p.id]) mal.push(p.id + ': está en la web y no en el GLB');
+    const nMod = Object.keys(M.modelado).length; if (nMod) console.log(`piezas modeladas (canal G propio, sin comparar con la web): ${Object.keys(M.modelado).join(', ')}`);
     // piezas separadas (separar.js): cada vértice toma el G de la web del vértice de la madre del que es copia
     const MAPA = {}, porMadre = {}; let nDudas = 0;
     const malos = new Set(mal.map(s => s.split(':')[0]));
@@ -146,6 +149,7 @@ if (RESTAURAR) {
     fs.mkdirSync(CANAL, { recursive: true });
     const actual = canalDe(M, (p, i) => p.G ? p.G[i] : 0);
     const origen = new Uint8Array(actual.length); { let o = 0; for (const id of M.orden) {
+      if (M.modelado[id]) { const p = M.piezas[id][0], n = p.P.length / 3; for (let i = 0; i < n; i++) origen[o + i] = p.G ? p.G[i] : 0; o += n; continue; }
       if (MAPA[id]) { const c = W[M.grupo[id]].col, m = MAPA[id]; for (let i = 0; i < m.length; i++) origen[o + i] = c[m[i] * 3 + 1]; o += m.length; continue; }
       const c = W[id].col, n = c.length / 3; for (let i = 0; i < n; i++) origen[o + i] = c[i * 3 + 1]; o += n; } }
     // lo que había antes de restaurar se guarda una sola vez por disposición del GLB (no se pisa en las repeticiones); si la

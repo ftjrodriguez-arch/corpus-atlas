@@ -11,10 +11,14 @@ Cada bloque se cierra con: compilar · hornear lo que toque · capturas revisada
 `arquitecto-ue5` (código y generadores), **D** = agente `director-clinico` (rigor, solo lectura).
 
 **Bloque 1 · Tejidos de la mano y el pie**
-- [ ] Aponeurosis palmar más fisiológica (S, D). Especificación del director lista (triángulo central del palmar largo a las
-      cabezas del 2.º–5.º metacarpiano, 4 bandas hasta el 30 % de la falange proximal, fascículos transversos, 3 aberturas
-      comisurales, ligamento natatorio, sin lengüeta al pulgar, tenar e hipotenar finas). Probado recortar la malla de
-      Z-Anatomy (`aponeurosis_palmar.js`): bordes dentados y ranura original → deshecho. **Hay que modelarla en Blender.**
+- [x] Aponeurosis palmar modelada de nuevo (`aponeurosis_palmar.js`, hombre y mujer): triángulo central desde la muñeca a las
+      cabezas del 2.º–5.º metacarpiano, estrías longitudinales en abanico y transversas en el cuarto distal, 4 bandas con
+      sus lengüetas hasta el 30 % de la falange proximal, ligamento natatorio, sin lengüeta al pulgar ni fascia tenar e
+      hipotenar, sin la ranura. Proyectada sobre la palma original; pesos de movimiento del vértice más cercano.
+      **En blanco** (usuario): el material ya no tiñe tendones y aponeurosis con la dispersión roja ni el albedo del
+      músculo (también se aclaran el rombo lumbar y los demás tendones). Capturas `hoja_palma_nueva.png`, `hoja_palma_blanca.png`.
+      Pendiente de revisión profesional; falta comprobarla con los dedos en movimiento.
+- [ ] `M_CorpusTranslucido` no compila en SM6 (aviso desde el 20 nov.; Unreal usa el material por defecto en la capa translúcida)
 - [ ] Aponeurosis plantar con el mismo criterio (S, D): falta captura desde abajo; especificación del director anotada
       (5 bandas, el dedo gordo sí tiene; banda lateral calcaneometatarsiana)
 - [x] Reglas de tendones de mano, pie y antebrazo revisadas (D) y añadidas a `tendones_reglas.json` (20 patrones nuevos:

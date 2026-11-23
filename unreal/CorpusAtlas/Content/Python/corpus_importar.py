@@ -559,7 +559,9 @@ def _maestro(nombre, translucido):
     # el músculo salía rojo puro: se le quita parte de la saturación (parámetro por tejido, DESATURAR)
     des = g.n(unreal.MaterialExpressionDesaturation, -350)
     g.une(col, des, ""); g.une(g.esc("Desaturar", 0.0), des, "Fraction")
-    col = g.mul(des, g.esc("Albedo", 1.0))                       # los tejidos casi blancos (hueso, cartílago) saturaban la imagen
+    # los tejidos casi blancos (hueso, cartílago) saturaban la imagen; el tendón y la aponeurosis (G) no llevan el albedo
+    # bajo del músculo (0,62 daba un beis rosado): blanco nacarado como en los atlas (usuario, 2026-11-23)
+    col = g.mul(des, g.lerp(g.esc("Albedo", 1.0), g.cte(0.85), mG))
     surco = g.add(g.cte(1.0), g.mul(g.mul(onda, fuerza), g.cte(0.10)))
     col = g.mul(col, surco)
     col = g.mul(col, g.add(g.cte(1.0), g.mul(grano, g.cte(0.25))))
@@ -611,9 +613,11 @@ def _maestro(nombre, translucido):
         g.sal(corte, MP.MP_OPACITY_MASK)
         # En el modelo Subsurface la opacidad es lo contrario de la dispersión: con opacidad 0,10 el hueso era casi cera
         # translúcida y la luz de frente lo dejaba como una silueta plana, sin relieve. Dispersión 0,10 → opacidad 0,90.
-        inv = g.n(unreal.MaterialExpressionOneMinus, -300); g.une(sss, inv, "")
+        # Donde hay tendón o aponeurosis (G) la dispersión es poca y clara: la roja del músculo teñía de rosa la lámina
+        # blanca (aponeurosis palmar, rombo lumbar del dorsal). El músculo (G = 0) no cambia.
+        inv = g.n(unreal.MaterialExpressionOneMinus, -300); g.une(g.lerp(sss, g.cte(0.12), mG), inv, "")
         g.sal(inv, MP.MP_OPACITY)
-        g.sal(sss_c, MP.MP_SUBSURFACE_COLOR)
+        g.sal(g.lerp(sss_c, g.vec("ColorDispersionTendon", _hex("e9e2d6")), mG), MP.MP_SUBSURFACE_COLOR)
 
     mel.layout_material_expressions(mat)
     mel.recompile_material(mat)
