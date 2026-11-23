@@ -12,6 +12,9 @@
        se reparten por todo el vientre.
      · No atraviesa los huesos: contorno de la parrilla costal (torax.js) y distancia con signo a húmero, escápula y
        clavícula; cada punto conserva, como mínimo, la holgura que tenía en reposo (hasta 2,5 mm).
+     · No atraviesa los músculos de debajo: cada superficial (dorsal, pectoral mayor, trapecio, deltoides) conserva su
+       holgura de reposo con sus profundos vecinos (correctivos_capas.json), medida hacia fuera del tórax o desde la cabeza
+       del húmero. Los profundos se resuelven antes y se toman con su correctivo (o con sus pesos si no lo tienen).
    Salida (node tools/unreal/correctivos.js hornear): Importar/datos/correctivos.json + correctivos.bin, que Unreal
    reproduce en el material (la rejilla de cada músculo en una textura; ACorpusCuerpo interpola entre posturas).
 
@@ -29,6 +32,14 @@ const MUSCULOS = /^((Ascending|Descending|Transverse) part of trapezius muscle|L
 const ROMS = ['hombro', 'escapula'];
 const HUESOS_SDF = /^(Humerus|Scapula|Clavicle)$/;
 const MARGEN = 0.0025;
+/* capas entre músculos y extremos sin área de inserción en el atlas: datos en correctivos_capas.json */
+const CAPAS = JSON.parse(fs.readFileSync(path.join(__dirname, 'correctivos_capas.json'), 'utf8')), CT = CAPAS.contacto;
+const EXTREMOS = CAPAS.extremos.map(e => [new RegExp(e.musculo), new RegExp(e.hueso), e.distancia, e.soloAbajo || 0]);
+const GRUPOS = CAPAS.capas.map(c => ({ sup: new RegExp(c.superficial), prof: new RegExp(c.profundos), forma: c.forma, hr: c.huesoRadial ? new RegExp(c.huesoRadial) : null }));
+const esProfundo = en => GRUPOS.some(g => g.prof.test(en));
+/* CORPUS_CAPAS=0 apaga el contacto entre músculos (para medir antes y después); CORPUS_CAPAS_PESOS=1 toma los profundos
+   solo con sus pesos aunque tengan correctivo resuelto */
+const OPC = { capas: process.env.CORPUS_CAPAS !== '0', pesos: process.env.CORPUS_CAPAS_PESOS === '1' };
 
 /* ───────── utilidades ───────── */
 const clave = (x, y, z, c) => Math.floor(x / c) + ',' + Math.floor(y / c) + ',' + Math.floor(z / c);
@@ -105,8 +116,8 @@ function anclajes(cuerpo, mus, S) {
   for (const pa of parches(cuerpo, S)) { const np = nucleo(pa.en); if (np !== nm && !(nm.endsWith(' ' + np) || nm.includes(' of ' + np))) continue;
     for (let i = 0; i < pa.nv; i++) { const hb = cerca(H.G, pa.P[i * 3], pa.P[i * 3 + 1], pa.P[i * 3 + 2], 0.012); if (hb) mete(G, pa.P[i * 3], pa.P[i * 3 + 1], pa.P[i * 3 + 2], hb[0]); } }
   const ins = ((PO.M.insercion || {})[cuerpo] || {})[mus.id] || null, LAT = /^Latissimus/.test(mus.en), linea = /trapezius|Rhomboid|Latissimus|pectoralis major/.test(mus.en);
-  /* extremos sin área dibujada en el atlas: [músculo, hueso, distancia al hueso, solo los últimos cm por abajo] */
-  const EXTRA = [[/^Teres major/, /^Humerus$/, 0.008, 0], [/^Coracobrachialis/, /^Humerus$/, 0.006, 0], [/^Short head of biceps/, /^Scapula$/, 0.008, 0], [/^Short head of biceps/, /^Radius$/, 0.06, 0.03]].filter(e => e[0].test(mus.en));
+  /* extremos sin área dibujada en el atlas (correctivos_capas.json → extremos): [músculo, hueso, distancia al hueso, solo los últimos cm por abajo] */
+  const EXTRA = EXTREMOS.filter(e => e[0].test(mus.en));
   let ymin = 1e9; for (let i = 0; i < mus.nv; i++) if (mus.P[i * 3 + 1] < ymin) ymin = mus.P[i * 3 + 1];
   const HX = EXTRA.map(e => { const g = rejillaPuntos(Math.max(0.015, e[2])); H.pzs.forEach((pz, pi) => { if (!e[1].test(pz.en) || (pz.lado && pz.lado !== LD(S))) return; const vs = new Set();
     for (let i = 0; i < pz.nv; i++) { const k = clave(pz.P[i * 3], pz.P[i * 3 + 1], pz.P[i * 3 + 2], 0.003); if (vs.has(k)) continue; vs.add(k); mete(g, pz.P[i * 3], pz.P[i * 3 + 1], pz.P[i * 3 + 2], pi * 4194304 + i); } }); return g; });
@@ -124,6 +135,78 @@ function anclajes(cuerpo, mus, S) {
     if (LAT && nb === 'Scapula') continue;      /* el dorsal resbala sobre el ángulo inferior de la escápula: no va cosido a él */
     porHueso[nb] = (porHueso[nb] || 0) + 1; A.push({ v: i, pi, vi }); }
   return { A, porHueso };
+}
+
+/* ───────── contacto entre músculos ─────────
+   Cada músculo superficial (correctivos_capas.json → capas) no puede quedar por dentro de sus profundos vecinos más de lo
+   que estaba en reposo. Se mide en una dirección «hacia fuera» fija por cuadro: radio alrededor del eje del tórax (forma
+   «tronco») o desde la cabeza del húmero («hombro»). Los profundos se toman como se ven en Unreal: con su correctivo si
+   ya está resuelto en este movimiento (se resuelven antes) o solo con sus pesos (postura.js). */
+/* celda de un punto y su radio (en F.r) */
+function celdaCapa(F, x, y, z) {
+  if (F.forma === 'tronco') { const h = Math.floor((y - F.y0) / CT.alto); F.r = 0; if (h < 0 || h >= F.nh) return -1; const dz = z - TC.zc; F.r = Math.hypot(x, dz);
+    return h * CT.sectores + Math.floor(((Math.atan2(dz, x) + Math.PI) / (2 * Math.PI)) * CT.sectores) % CT.sectores; }
+  const dx = x - F.c[0], dy = y - F.c[1], dz = z - F.c[2], ax = Math.abs(dx), ay = Math.abs(dy), az = Math.abs(dz), G = CT.cubo; F.r = Math.hypot(dx, dy, dz); if (F.r < 1e-6) return -1;
+  let cara, u, v, m;
+  if (ax >= ay && ax >= az) { cara = dx > 0 ? 0 : 1; u = dy; v = dz; m = ax; } else if (ay >= az) { cara = dy > 0 ? 2 : 3; u = dx; v = dz; m = ay; } else { cara = dz > 0 ? 4 : 5; u = dx; v = dy; m = az; }
+  const a = Math.min(G - 1, Math.floor((u / m + 1) / 2 * G)), b = Math.min(G - 1, Math.floor((v / m + 1) / 2 * G));
+  return (cara * G + a) * G + b;
+}
+/* mapa de celdas → radios de los puntos (pts: x, y, z seguidos) */
+function mapaCapa(forma, c, pts) {
+  const F = forma === 'tronco' ? { forma, y0: CT.y[0], nh: Math.ceil((CT.y[1] - CT.y[0]) / CT.alto) } : { forma, c };
+  const n = forma === 'tronco' ? F.nh * CT.sectores : 6 * CT.cubo * CT.cubo, np = pts.length / 3, cel = new Int32Array(np), rr = new Float32Array(np), ini = new Int32Array(n + 1);
+  for (let i = 0; i < np; i++) { const k = celdaCapa(F, pts[i * 3], pts[i * 3 + 1], pts[i * 3 + 2]); cel[i] = k; rr[i] = F.r; if (k >= 0) ini[k + 1]++; }
+  for (let k = 0; k < n; k++) ini[k + 1] += ini[k];
+  const val = new Float32Array(ini[n]), pos = ini.slice(0, n);
+  for (let i = 0; i < np; i++) if (cel[i] >= 0) val[pos[cel[i]]++] = rr[i];
+  F.ini = ini; F.val = val; return F;
+}
+/* radio máximo de los profundos en la celda k sin pasar de r + ven (-1 si no hay ninguno) */
+function techo(F, k, r, ven) { let m = -1; for (let q = F.ini[k], e = F.ini[k + 1]; q < e; q++) { const v = F.val[q]; if (v <= r + ven && v > m) m = v; } return m; }
+/* centro de la cabeza del húmero en una postura */
+function centroHombro(cap, J) { const T = rigido(cap.hz, J), A = cap.c0, R = T.R; return [0, 1, 2].map(i => R[i] * A[0] + R[3 + i] * A[1] + R[6 + i] * A[2] + T.t[i]); }
+/* piezas musculares que son profundas de algún grupo (la mujer: las suyas y, si no las tiene, las del hombre) */
+const _MUS = {};
+function profundosDe(cuerpo) {
+  if (_MUS[cuerpo]) return _MUS[cuerpo]; const L = [], propias = new Set();
+  for (const c of cuerpo === 'hombre' ? ['hombre'] : [cuerpo, 'hombre']) { let C; try { C = PO.capa(c + '/muscular'); } catch (e) { continue; }
+    for (const nd of C.g.nodes) { if (nd.mesh === undefined || propias.has(nd.name) || !esProfundo((nd.extras || {}).en || '')) continue; const pz = PO.pieza(c + '/muscular', nd.name); if (!pz) continue;
+      pz.capa = c + '/muscular'; if (c === cuerpo) propias.add(nd.name); L.push(pz); } }
+  return _MUS[cuerpo] = L;
+}
+/* puntos de un profundo: un vértice cada CT.muestra */
+const _PROF = {};
+function muestrasProf(pz) {
+  const kk = pz.capa.split('/')[0] + '/' + pz.id; if (_PROF[kk]) return _PROF[kk]; const L = [], vs = new Set();
+  for (let i = 0; i < pz.nv; i++) { const k = clave(pz.P[i * 3], pz.P[i * 3 + 1], pz.P[i * 3 + 2], CT.muestra); if (vs.has(k)) continue; vs.add(k); L.push(i); }
+  const P0 = new Float32Array(L.length * 3); L.forEach((i, n) => { P0[n * 3] = pz.P[i * 3]; P0[n * 3 + 1] = pz.P[i * 3 + 1]; P0[n * 3 + 2] = pz.P[i * 3 + 2]; });
+  return _PROF[kk] = { pz, clave: kk, idx: Int32Array.from(L), P0 };
+}
+/* ¿ninguna de las articulaciones de la pieza se mueve en esta postura? (entonces está en reposo) */
+function quieto(pz, J) {
+  for (let k = 0; k < 9; k++) { const jv = pz.js[k]; if (jv === 0) break; let code = Math.round(Math.abs(jv)); if (code === 31) continue;
+    for (let t = 0; t < 3; t++) { const j = (code & 31) - 1; code >>= 5; if (j < 0) break; const o = J[j]; if (o.a || o.t[0] || o.t[1] || o.t[2]) return false; } }
+  return true;
+}
+/* correctivos ya resueltos en el movimiento en curso («cuerpo/id» → {rom, mi, S, grs, X por cuadro, PR}) */
+const RES = new Map();
+const _POS = new Map(); let _POSk = '';
+function posProf(D, rom, mi, S, gr, J) {
+  const km = rom + '|' + mi + '|' + S; if (km !== _POSk) { _POS.clear(); _POSk = km; }
+  const k = D.clave + '|' + gr, R = OPC.pesos ? null : RES.get(D.clave) || null, hit = _POS.get(k); if (hit && hit.R === R) return hit.P; let P = null;
+  if (R && R.rom === rom && R.mi === mi && R.S === S) { const f = R.grs.indexOf(gr);
+    if (f >= 0) { const X = R.X[f], RJ = R.PR.RJ, pz = D.pz; if (D.triDe !== R.PR) { D.tri = Array.from(D.idx, i => RJ.tri(pz.P[i * 3], pz.P[i * 3 + 1], pz.P[i * 3 + 2])); D.triDe = R.PR; }
+      P = new Float32Array(D.idx.length * 3);
+      D.tri.forEach((t, n) => { let a = 0, b = 0, c = 0; for (let q = 0; q < 8; q++) { const w = t.W[q], o = t.I[q] * 3; a += w * X[o]; b += w * X[o + 1]; c += w * X[o + 2]; } P[n * 3] = a; P[n * 3 + 1] = b; P[n * 3 + 2] = c; }); } }
+  if (!P) { if (quieto(D.pz, J)) P = D.P0;
+    else { P = new Float32Array(D.idx.length * 3); D.idx.forEach((i, n) => P.set(PO.vertice(D.pz, J, [D.pz.P[i * 3], D.pz.P[i * 3 + 1], D.pz.P[i * 3 + 2]], pesosDe(D.pz, i)), n * 3)); } }
+  _POS.set(k, { P, R }); return P;
+}
+/* mapa de los profundos de un músculo en una postura */
+function mapaProf(cap, rom, mi, S, gr, J) {
+  const Ps = cap.prof.map(D => posProf(D, rom, mi, S, gr, J)), pts = new Float32Array(Ps.reduce((s, p) => s + p.length, 0)); let o = 0; for (const p of Ps) { pts.set(p, o); o += p.length; }
+  return mapaCapa(cap.forma, cap.forma === 'hombro' ? centroHombro(cap, J) : null, pts);
 }
 
 /* ───────── rejilla ───────── */
@@ -191,11 +274,20 @@ function preparar(cuerpo, id, S) {
   /* muestras para las colisiones: un vértice por cada 5 mm */
   const mue = [], visto = new Set(), sdfs = H.pzs.map((pz, pi) => ({ pz, pi })).filter(o => HUESOS_SDF.test(o.pz.en) && o.pz.lado === LD(S)).map(o => Object.assign(o, { S: sdf(cuerpo, o.pz) }));
   const yMax = TC.y0 + TC.dy * (TC.nh - 1);
+  /* capas: profundos vecinos (mismo lado) y su mapa en reposo */
+  const grp = GRUPOS.find(q => q.sup.test(mus.en)); let capa = null, F0 = null;
+  if (grp) { const prof = profundosDe(cuerpo).filter(pz => pz.id !== id && grp.prof.test(pz.en) && (!pz.lado || pz.lado === LD(S))).map(muestrasProf);
+    capa = { forma: grp.forma, hr: grp.hr, prof, hz: H.pzs.find(p => p.en === 'Humerus' && p.lado === LD(S)), c0: PO.rig['shoulder_' + S] };
+    if (prof.length) { const pts = new Float32Array(prof.reduce((s, D) => s + D.P0.length, 0)); let o = 0; for (const D of prof) { pts.set(D.P0, o); o += D.P0.length; } F0 = mapaCapa(capa.forma, capa.c0, pts); } }
   for (let i = 0; i < mus.nv; i++) { const p = [mus.P[i * 3], mus.P[i * 3 + 1], mus.P[i * 3 + 2]], k = clave(p[0], p[1], p[2], 0.005); if (visto.has(k)) continue; visto.add(k);
     if (cerca(GA, p[0], p[1], p[2], 0.008)) continue;      /* lo anclado va con su hueso, choque o no */
     const k0 = TX.k(TC, p), d0 = sdfs.map(o => Math.min(MARGEN, sdfEn(o.S, p)));
-    mue.push({ p, t: RJ.tri(p[0], p[1], p[2]), kmin: k0 < 1 ? k0 - 0.004 : 1 + (k0 - 1) * 0.6, d0 }); }
-  return { cuerpo, id, S, mus, H, an, anc, RJ, filas, KA, mue, sdfs, yMax, fib: T ? fib : null, brazo: /biceps brachii|triceps brachii|Coracobrachialis/.test(mus.en) };
+    /* holgura con los profundos en reposo (como d0 con los huesos): si allí un profundo ya queda por fuera, este punto no es
+       superficial en esa zona (borde que se mete por debajo, tendón que pasa bajo otro) y no se restringe (hc = null) */
+    let hc = null; if (F0) { const kc = celdaCapa(F0, p[0], p[1], p[2]), r0 = F0.r; if (kc >= 0) { const t = techo(F0, kc, r0, CT.busca); hc = t > r0 + CT.encima ? null : t >= 0 ? Math.min(MARGEN, r0 - t) : MARGEN; } }
+    mue.push({ p, t: RJ.tri(p[0], p[1], p[2]), kmin: k0 < 1 ? k0 - 0.004 : 1 + (k0 - 1) * 0.6, d0, hc }); }
+  return { cuerpo, id, S, mus, H, an, anc, RJ, filas, KA, mue, sdfs, yMax, fib: T ? fib : null, brazo: /biceps brachii|triceps brachii|Coracobrachialis/.test(mus.en),
+    capa, profundo: esProfundo(mus.en), claveRes: cuerpo + '/' + id };
 }
 /* resuelve los cuadros de un movimiento; devuelve por cuadro posiciones de los nodos (Float32Array N·3) y cuaterniones (N·4) */
 function resolver(PR, rom, mi, grados) {
@@ -224,6 +316,8 @@ function resolver(PR, rom, mi, grados) {
        de reposo, atravesado por el serrato y el redondo mayor. Ese primer cuadro parte del reposo: más iteraciones. */
     const reposo = gr === 0 && !String(rom).startsWith('ej:'), primero = gr === grados[0];
     const ITS = reposo ? 1 : primero ? 40 : 14;
+    /* capas: dónde están los profundos en este cuadro (fijos durante las iteraciones) */
+    const cap = OPC.capas && !reposo ? PR.capa : null, FC = cap && cap.prof.length ? mapaProf(cap, rom, mi, S, gr, J) : null, HR = cap && cap.hr ? sdfs.map(o => cap.hr.test(o.pz.en)) : null;
     /* anclajes deslizantes (vientres del brazo): sujetos al húmero de lado, libres a lo largo de él: así el vientre puede
        acortarse cuando se flexiona el codo o se acerca el origen */
     const rig0 = anc.some(a => a.desl) ? obj.map(o => o.slice()) : null; let eje = null;
@@ -237,7 +331,18 @@ function resolver(PR, rom, mi, grados) {
         if (!PR.brazo && py > TC.y0 && py < PR.yMax) { const pp = [px, py, pz], k1 = TX.k(TC, pp); if (k1 < m.kmin) { const s = m.kmin / Math.max(k1, 1e-4); px *= s; pz = TC.zc + (pz - TC.zc) * s; toca = true; } }
         for (let b = 0; b < sdfs.length; b++) { const T = RB[b], R = T.R, dx = px - T.t[0], dy = py - T.t[1], dz = pz - T.t[2];
           const loc = [R[0] * dx + R[1] * dy + R[2] * dz, R[3] * dx + R[4] * dy + R[5] * dz, R[6] * dx + R[7] * dy + R[8] * dz], d = sdfEn(sdfs[b].S, loc, g);
-          if (d < m.d0[b] - 1e-5) { const e = m.d0[b] - d, gx = R[0] * g[0] + R[3] * g[1] + R[6] * g[2], gy = R[1] * g[0] + R[4] * g[1] + R[7] * g[2], gz = R[2] * g[0] + R[5] * g[1] + R[8] * g[2]; px += gx * e; py += gy * e; pz += gz * e; toca = true; } }
+          if (d < m.d0[b] - 1e-5) { const e = m.d0[b] - d, gx = R[0] * g[0] + R[3] * g[1] + R[6] * g[2], gy = R[1] * g[0] + R[4] * g[1] + R[7] * g[2], gz = R[2] * g[0] + R[5] * g[1] + R[8] * g[2]; toca = true;
+            /* huesoRadial (dorsal sobre la escápula): salir hacia fuera del tórax, no por el gradiente, que junto a la punta del
+               ángulo inferior abre en abanico y arruga la lámina */
+            const rh = HR && HR[b] ? Math.hypot(px, pz - TC.zc) : 0, ux = rh ? px / rh : 0, uz = rh ? (pz - TC.zc) / rh : 0, gu = gx * ux + gz * uz;
+            if (rh > 1e-4 && gu > 0.3) { const s = Math.min(e / gu, 2 * e); px += ux * s; pz += uz * s; }
+            else { px += gx * e; py += gy * e; pz += gz * e; } } }
+        /* capas: no quedar por dentro de los profundos más que en reposo */
+        if (FC && m.hc !== null) { const kc = celdaCapa(FC, px, py, pz);
+          if (kc >= 0) { const r = FC.r, t = techo(FC, kc, r, CT.ventana);
+            if (t >= 0 && r < t + m.hc - 1e-5) { const s = (t + m.hc) / Math.max(r, 1e-6);
+              if (FC.forma === 'tronco') { px *= s; pz = TC.zc + (pz - TC.zc) * s; } else { px = FC.c[0] + (px - FC.c[0]) * s; py = FC.c[1] + (py - FC.c[1]) * s; pz = FC.c[2] + (pz - FC.c[2]) * s; }
+              toca = true; } } }
         if (toca) col.push({ t: m.t, o: [px, py, pz] }); }
       /* local: giro de cada celda */
       for (let c = 0; c < NC; c++) { const c8 = RJ.celdas[c], Sm = [0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -269,6 +374,8 @@ function resolver(PR, rom, mi, grados) {
     for (let i = 0; i < N; i++) { const l = Math.hypot(Q[i * 4], Q[i * 4 + 1], Q[i * 4 + 2], Q[i * 4 + 3]) || 1; for (let q = 0; q < 4; q++) Q[i * 4 + q] /= l; }
     cuadros.push({ gr, X: Float32Array.from(X), Q, col: col.length });
   }
+  /* los profundos de algún grupo se guardan para que los superficiales del mismo movimiento los vean como en Unreal */
+  if (PR.profundo) RES.set(PR.claveRes, { rom, mi, S, grs: grados.slice(), X: cuadros.map(c => c.X), PR });
   return cuadros;
 }
 /* posiciones de todos los vértices del músculo con la rejilla X */
@@ -304,7 +411,8 @@ function medir(PR, D, J) {
 }
 const POSTURAS = [['flex90', 'hombro', 0, 90], ['flex150', 'hombro', 0, 150], ['ext60', 'hombro', 1, 60], ['abd90', 'hombro', 2, 90], ['abd150', 'hombro', 2, 150], ['adu30', 'hombro', 3, 30], ['rotint70', 'hombro', 4, 70], ['rotext90', 'hombro', 5, 90],
   ['abdhor45', 'hombro', 6, 45], ['aduhor120', 'hombro', 7, 120], ['elev40', 'escapula', 0, 40], ['depr10', 'escapula', 1, 10], ['protr15', 'escapula', 2, 15], ['retr15', 'escapula', 3, 15]];
-module.exports = { MUSCULOS, ROMS, medir, POSTURAS, ids, preparar, resolver, aplicar, deformar, anclajes, rejilla, huesos };
+module.exports = { MUSCULOS, ROMS, medir, POSTURAS, ids, preparar, resolver, aplicar, deformar, anclajes, rejilla, huesos,
+  OPC, GRUPOS, celdaCapa, mapaCapa, mapaProf, centroHombro, posProf, profundosDe, muestrasProf };
 
 if (require.main === module) {
   const [orden, ...a] = process.argv.slice(2);
@@ -312,7 +420,7 @@ if (require.main === module) {
     for (const id of ids(cuerpo, S)) { const mus = PO.pieza(cuerpo + '/muscular', id), an = anclajes(cuerpo, mus, S), RJ = rejilla(mus);
       console.log('%s %s · %d vértices · rejilla %s (%d nodos, %s mm) · anclajes %d: %s', id, mus.en, mus.nv, RJ.n.join('×'), RJ.N, (RJ.h * 1000).toFixed(0), an.A.length, Object.entries(an.porHueso).map(([k, v]) => k + ' ' + v).join(', ')); } }
   else if (orden === 'medir') { /* material de hoy frente a correctivo, en las 14 posturas: pliegues / vértices dentro de hueso (mm de hondo) / estiramiento p99 */
-    const cuerpo = 'hombre', S = a[0] || 'R', solo = a[1] ? a[1].split(',') : null, L = ids(cuerpo, S), PRs = L.map(id => preparar(cuerpo, id, S)), tot = {};
+    const cuerpo = 'hombre', S = a[0] || 'R', solo = a[1] ? a[1].split(',') : null, L = ids(cuerpo, S), PRs = L.map(id => preparar(cuerpo, id, S)).sort((x, y) => (y.profundo ? 1 : 0) - (x.profundo ? 1 : 0)), tot = {};
     for (const [nm, rom, mi, gr] of POSTURAS) { if (solo && !solo.includes(nm)) continue; const J = PO.articulaciones(rom, mi, S, gr), gs = []; for (let g = 0; g < gr; g += 10) gs.push(g); gs.push(gr); const T = [0, 0, 0, 0], peor = [];
       for (const PR of PRs) { const C = resolver(PR, rom, mi, gs), m0 = medir(PR, PO.deformar(PR.mus, J), J), m1 = medir(PR, aplicar(PR, C[C.length - 1].X), J); T[0] += m0.plieg; T[1] += m1.plieg; T[2] += m0.dentro; T[3] += m1.dentro;
         peor.push([m1.plieg + m1.dentro, `${PR.mus.en.replace(/ muscle| part of| head of/g, '').slice(0, 22)} ${m0.plieg}→${m1.plieg} / ${m0.dentro}(${(m0.hondo * 1000).toFixed(0)})→${m1.dentro}(${(m1.hondo * 1000).toFixed(0)}) / ${m0.est.toFixed(2)}→${m1.est.toFixed(2)}`]); }
@@ -341,6 +449,8 @@ if (require.main === module) {
       piezas[PR.clave] = SOLO_EJ ? VIEJO.piezas[PR.clave] : { base, n, o: RJ.o.map(v => Math.round(v * 1e6) / 1e6), h: Math.round(RJ.h * 1e6) / 1e6, act: lista.length, ai: pon(Buffer.from(lista.buffer)), lado: S };
       if (SOLO_EJ && (!piezas[PR.clave] || piezas[PR.clave].act !== lista.length)) throw new Error('la rejilla de ' + PR.clave + ' no coincide con correctivos.json: hay que hornear todo'); base += nn; }
     console.log('%d piezas, %d texeles por mapa', PRs.length, base);
+    /* los profundos de las capas se resuelven antes que los superficiales en cada movimiento (no cambia el orden del .bin) */
+    const ORDEN = PRs.slice().sort((x, y) => (y.profundo ? 1 : 0) - (x.profundo ? 1 : 0));
     const cuadros = (PR, rom, mi, gs) => { const C = resolver(PR, rom, mi, gs), N = PR.RJ.N, NA = N + PR.anillo.length, buf = new Int16Array(gs.length * NA * 7), prev = new Float32Array(NA * 4); for (let i = 0; i < NA; i++) prev[i * 4 + 3] = 1;
       C.forEach((c, k) => { const x0 = PR.RJ.x0, D = new Float32Array(NA * 3), Q = new Float32Array(NA * 4);
         for (let i = 0; i < N; i++) { D[i * 3] = c.X[i * 3] - x0[i * 3]; D[i * 3 + 1] = c.X[i * 3 + 1] - x0[i * 3 + 1]; D[i * 3 + 2] = c.X[i * 3 + 2] - x0[i * 3 + 2]; for (let q = 0; q < 4; q++) Q[i * 4 + q] = c.Q[i * 4 + q]; }
@@ -353,7 +463,7 @@ if (require.main === module) {
     for (const rom of SOLO_EJ ? [] : ROMS) { const R = PO.M.rom.find(r => r.id === rom); R.movs.forEach((mv, mi) => { for (const S of ['R', 'L']) { if (!mv[S]) continue;
       const gs = []; for (let g = 0; g <= mv.max + 1e-6; g += PASO) gs.push(Math.min(g, mv.max)); if (mv.max % PASO) gs.push(mv.max);
       const M = { rom, mov: mi, lado: S, cuadros: gs.length, piezas: {} }; let pl = 0, de = 0;
-      for (const PR of PRs) { if (PR.S !== S) continue; M.piezas[PR.clave] = cuadros(PR, rom, mi, gs); }
+      for (const PR of ORDEN) { if (PR.S !== S) continue; M.piezas[PR.clave] = cuadros(PR, rom, mi, gs); }
       movs.push(M); console.log('  %s %d %s (%s): %d cuadros · %d s', rom, mi, S, mv.n, gs.length, Math.round((Date.now() - t0) / 1000)); } }); }
     /* ejercicios que mueven el hombro o la cintura escapular (movimiento.json → ejercicios): un correctivo por instante, con
        los músculos de los DOS lados a la vez (rom «ej:<id>», mov = índice de la variante, lado R). Sin esto el dorsal
@@ -362,7 +472,7 @@ if (require.main === module) {
     const usaHombro = v => v.frames.some(fr => { for (let k = 0; k < fr.length; k += 8) if (HOMBRO.has(fr[k]) && Math.abs(fr[k + 4]) > 0.05) return true; return false; });
     for (const e of ((PO.M.ejercicios || {}).lista || [])) (e.variantes || []).forEach((v, vi) => { if (!usaHombro(v) || (LISTA_EJ && !LISTA_EJ.includes(e.id))) return;
       const gs = v.frames.map((_, k) => k * e.paso), M = { rom: 'ej:' + e.id, mov: vi, lado: 'R', cuadros: gs.length, piezas: {} };
-      for (const PR of PRs) M.piezas[PR.clave] = cuadros(PR, M.rom, v.id, gs);
+      for (const PR of ORDEN) M.piezas[PR.clave] = cuadros(PR, M.rom, v.id, gs);
       movs.push(M); console.log('  ejercicio %s/%s: %d cuadros, los dos lados · %d s', e.id, v.id, gs.length, Math.round((Date.now() - t0) / 1000)); });
     const dir = path.join(PO.IMP, 'datos');
     let BIN = Buffer.concat(partes);

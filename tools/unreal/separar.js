@@ -12,7 +12,9 @@
    Escribe: Importar/<cuerpo>/muscular.glb (piezas nuevas, el grupo sale de la escena), Importar/manifiesto.json,
    Importar/datos/movimiento.json (pesos copiados) e Importar/datos/catalog.json (filas nuevas: el nombre en inglés
    del grupo en la columna 2, para que la ficha y la profundidad de disección del grupo sigan valiendo, y el nombre
-   propio en la columna 8). Copia de lo anterior en Importar/antes_separar/. Después: reimportar la capa muscular. */
+   propio en la columna 8). Copia de lo anterior en Importar/antes_separar/. Después: tendones.js <cuerpo> --restaurar y
+   --aplicar (empareja cada pieza con su madre: por eso la madre se deja en el GLB, fuera de la escena, y cada vértice y
+   triángulo nuevo es copia exacta del de la madre) y reimportar la capa muscular. */
 'use strict';
 const fs = require('fs'), path = require('path');
 const PO = require('./postura.js');
@@ -128,6 +130,14 @@ function medir(cuerpo) {
 }
 
 /* ───────── escritura del GLB ───────── */
+const TA = { 5120: Int8Array, 5121: Uint8Array, 5122: Int16Array, 5123: Uint16Array, 5125: Uint32Array, 5126: Float32Array };
+/* datos de un accessor tal como están en el binario (copia), con su tipo de componente */
+function crudo(g, bin, ai) {
+  const a = g.accessors[ai], v = g.bufferViews[a.bufferView], nc = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4, MAT4: 16 }[a.type], T = TA[a.componentType], tam = nc * T.BYTES_PER_ELEMENT;
+  if (v.byteStride && v.byteStride !== tam) throw new Error('accessor ' + ai + ' intercalado (byteStride ' + v.byteStride + '): separar.js no lo admite');
+  const o = bin.byteOffset + (v.byteOffset || 0) + (a.byteOffset || 0);
+  return new T(bin.buffer.slice(o, o + a.count * tam));
+}
 function aplicar(cuerpos) {
   const bk = path.join(IMP, 'antes_separar'); fs.mkdirSync(path.join(bk, 'datos'), { recursive: true });
   const fMan = path.join(IMP, 'manifiesto.json'), fMov = path.join(IMP, 'datos', 'movimiento.json'), fCat = path.join(IMP, 'datos', 'catalog.json');
@@ -145,7 +155,9 @@ function aplicar(cuerpos) {
     let nPz = 0;
     for (const r of R) {
       const nd = r.nd, ndi = g.nodes.findIndex(x => x.name === nd.name && x.mesh === nd.mesh), pr = g.meshes[nd.mesh].primitives[0], man = MAN.piezas[nd.name] && MAN.piezas[nd.name][cuerpo];
-      const atr = Object.entries(pr.attributes).map(([k, ai]) => { const a = g.accessors[ai], nc = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4 }[a.type]; return { k, a, nc, d: C.acc(ai) }; });
+      /* atributos en su tipo real: PO.acc solo distingue Float32 y Uint32 y lee lo demás como Uint16, lo que desordenaba
+         COLOR_0 (UNSIGNED_BYTE VEC4: oclusión, tendón, cartílago). Las pasadas anteriores las repara tendones.js --restaurar. */
+      const atr = Object.entries(pr.attributes).map(([k, ai]) => { const a = g.accessors[ai], nc = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4 }[a.type]; return { k, a, nc, d: crudo(g, bin0, ai) }; });
       const padre = g.nodes.find(x => (x.children || []).includes(ndi));
       for (const c of r.comps.sort((x, y) => x.n - y.n)) {
         const id = nd.name + '_' + c.n, mapa = new Map(), I = r.pz.I, idx = new Uint32Array(c.ts.length * 3);

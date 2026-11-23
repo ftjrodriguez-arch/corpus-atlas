@@ -150,9 +150,10 @@ if (mov) {
   (ma.grupos || []).forEach((g, i) => lista(movF, `marcha grupo ${i + 1} (${g.n}) en`, g.en));
   for (const p of ma.patrones || []) { lista(movF, `marcha ${p.id} debiles`, p.debiles); lista(movF, `marcha ${p.id} espasticos`, p.espasticos); }
   for (const e of (mov.ejercicios || {}).lista || []) (e.grupos || []).forEach((g, i) => lista(movF, `ejercicio ${e.id} grupo ${i + 1} en`, g.en));
-  // ids de piezas citados por id
-  for (const cuerpo in mov.piezas || {}) for (const id in mov.piezas[cuerpo]) if (!IDS.has(id)) err('referencia', movF, `piezas.${cuerpo}.${id}`, 'id que no está en el catálogo');
-  for (const cuerpo in mov.abrazo || {}) for (const id of mov.abrazo[cuerpo]) if (!IDS.has(id)) err('referencia', movF, `abrazo.${cuerpo}.${id}`, 'id que no está en el catálogo');
+  // ids de piezas citados por id (las piezas separadas por separar.js son «<madre>_<n>»: valen si la madre está en el catálogo)
+  const ID_OK = id => IDS.has(id) || (/^(.+)_\d+$/.test(id) && IDS.has(id.replace(/_\d+$/, '')));
+  for (const cuerpo in mov.piezas || {}) for (const id in mov.piezas[cuerpo]) if (!ID_OK(id)) err('referencia', movF, `piezas.${cuerpo}.${id}`, 'id que no está en el catálogo');
+  for (const cuerpo in mov.abrazo || {}) for (const id of mov.abrazo[cuerpo]) if (!ID_OK(id)) err('referencia', movF, `abrazo.${cuerpo}.${id}`, 'id que no está en el catálogo');
   for (const cuerpo in mov.insercion || {}) for (const id in mov.insercion[cuerpo]) if (!IDS.has(id)) err('referencia', movF, `insercion.${cuerpo}.${id}`, 'id que no está en el catálogo');
 }
 
@@ -165,6 +166,19 @@ if (rx) (rx.rangos || []).forEach((r, i) => lista(rel(RX_P), `rangos[${i}] ${r.r
 const TR_P = R('tools', 'unreal', 'tendones_reglas.json');
 const tr = leer(TR_P, false);
 if (tr) for (const m in tr.musculos || {}) nombre(rel(TR_P), `musculos.${m}`, m);
+if (tr) (tr.laminas || []).forEach((l, i) => nombre(rel(TR_P), `laminas[${i}]`, l.en));
+
+// correctivos_cadera.json (correctivos_cadera.js): músculos del catálogo, rangos que existen, holgura dentro del campo de distancia
+const CC_P = R('tools', 'unreal', 'correctivos_cadera.json');
+const cc = leer(CC_P, false);
+if (cc) {
+  const f = rel(CC_P);
+  (cc.musculos || []).forEach((m, i) => { nombre(f, `musculos[${i}]`, m.en); if (!m.fuente || !m.estado) err('rigor', f, `musculos[${i}]`, 'falta fuente o estado'); });
+  (cc.anclajes_extra || []).forEach((a, i) => { if (!a.fuente || !a.estado) err('rigor', f, `anclajes_extra[${i}]`, 'falta fuente o estado'); try { new RegExp(a.hueso); if (a.pieza) new RegExp(a.pieza); } catch (e) { err('formato', f, `anclajes_extra[${i}]`, 'expresión no válida: ' + e.message); } });
+  if (!(cc.holgura && cc.holgura.maxima_m < 0.024)) err('rango', f, 'holgura.maxima_m', 'debe ser menor que 0,024 m (alcance del campo de distancia de correctivos_cadera.js)');
+  if (mov) (cc.rangos || []).forEach((r, i) => { const R0 = (mov.rom || []).find(x => x.id === r.rom); if (!R0) err('referencia', f, `rangos[${i}]`, `rango «${r.rom}» no está en movimiento.json`); else for (const m of r.movs || []) if (!R0.movs[m]) err('referencia', f, `rangos[${i}]`, `movimiento ${m} no existe en «${r.rom}»`); });
+  if (mov) for (const [nm, rom] of (cc.sonda || {}).posturas || []) if (String(rom).startsWith('ej:') && !((mov.ejercicios || {}).lista || []).some(e => e.id === rom.slice(3))) err('referencia', f, `sonda ${nm}`, `ejercicio «${rom.slice(3)}» no está en movimiento.json`);
+}
 
 // extras.json: claves lm, dep, reg = ids existentes; relieves cerca de su hueso (cajas del manifiesto)
 for (const k of ['lm', 'dep', 'reg']) {

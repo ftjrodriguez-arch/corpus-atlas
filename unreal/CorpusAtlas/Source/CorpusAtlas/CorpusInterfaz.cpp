@@ -2609,8 +2609,12 @@ void SCorpusInterfaz::EnsenarEstudio()
 	UCorpusDatos* D = Datos();
 	ACorpusCuerpo* C = Cuerpo();
 	const FCorpusItemEstudio* It = ItemEstudio();
-	if (!D || !C || !It || !bVerEst) { return; }
+	if (!D || !C || !bVerEst) { return; }
 	ACorpusCamara* Cam = Jugador.IsValid() ? Jugador->CamaraOrbital() : nullptr;
+	// sin nada que enseñar (lista, o una pregunta de kinesiología sin estructuras): el cuerpo ya está restaurado, así que la
+	// cámara vuelve al cuerpo entero. Antes se quedaba en el primer plano anterior y acababa dentro del cuerpo.
+	const auto CuerpoEntero = [C, Cam]() { if (Cam) { Cam->Vista(0); Cam->Encuadrar(C->Caja(FString())); } };
+	if (!It) { CuerpoEntero(); return; }
 	const auto Encuadrar = [C, Cam](const TArray<FString>& Ids, int32 Vista)
 	{
 		if (!Cam) { return; }
@@ -2645,7 +2649,9 @@ void SCorpusInterfaz::EnsenarEstudio()
 	{
 		const TArray<FString> Ids = C->IdsDeNombres(It->Show, It->Lado);
 		if (Ids.Num() > 0 || It->Show.Num() == 0) { C->Ensenar(Ids, It->Capas); Encuadrar(Ids, It->Vista); }
+		else { CuerpoEntero(); }
 	}
+	else { CuerpoEntero(); }
 }
 
 void SCorpusInterfaz::RehacerEstudio()

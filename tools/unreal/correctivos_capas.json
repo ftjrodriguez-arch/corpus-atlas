@@ -1,0 +1,94 @@
+{
+ "_nota": "Datos de los correctivos elásticos del hombro (tools/unreal/correctivos.js). «capas»: qué músculos profundos tiene debajo cada músculo superficial; el solver impide que el superficial quede por dentro de ellos más de lo que estaba en reposo (holgura de reposo, como mucho MARGEN = 2,5 mm). «extremos»: extremos de músculo que se anclan a un hueso aunque el atlas no tenga dibujada su área en la capa «insercion». Criterio anatómico de Gray (42.ª ed.) y Moore, escrito sin disección: PENDIENTE DE REVISIÓN PROFESIONAL.",
+ "_como": "Expresiones regulares sobre el nombre en inglés del catálogo (extras.en de la malla). «forma»: «tronco» = radio alrededor del eje vertical del tórax (x = 0, z = torax.zc), en celdas de «alto» m × «sectores»; «hombro» = radio desde el centro de la cabeza del húmero (rig shoulder_<lado> movido con el húmero), en un cubo de «cubo» × «cubo» celdas por cara. «huesoRadial»: los choques con esos huesos empujan hacia fuera del tórax en vez de por el gradiente de la distancia (evita que el dorsal se arrugue alrededor del ángulo inferior de la escápula).",
+ "contacto": {
+  "ventana": 0.02,
+  "busca": 0.04,
+  "encima": 0.003,
+  "alto": 0.01,
+  "sectores": 96,
+  "cubo": 16,
+  "muestra": 0.005,
+  "y": [
+   0.6,
+   1.9
+  ],
+  "_nota": "ventana: un profundo cuenta si está como mucho a esa distancia por fuera del punto (los cruces medidos llegan a 13 mm); busca/encima: en reposo, si hay un profundo más de «encima» por fuera del punto (hasta «busca»), ese punto no es superficial allí y no se restringe; muestra: un punto de los profundos cada tantos metros"
+ },
+ "capas": [
+  {
+   "superficial": "^Latissimus dorsi muscle$",
+   "profundos": "^(Serratus anterior|Teres major|Serratus posterior inferior|Iliocostalis thoracis|Iliocostalis lumborum|Longissimus thoracis|Spinalis thoracis|Rhomboid major|Infraspinatus) muscle$",
+   "forma": "tronco",
+   "huesoRadial": "^Scapula$",
+   "fuente": "Gray's Anatomy 42.ª ed., dorso y pared torácica: el dorsal ancho cubre el ángulo inferior de la escápula, el redondo mayor, la parte inferior del romboides mayor y del infraespinoso, el serrato anterior en la pared lateral y el serrato posterior inferior y los erectores a través de la fascia toracolumbar",
+   "estado": "pendiente_revision"
+  },
+  {
+   "superficial": "^(Clavicular head|Sternocostal head|Abdominal part) of pectoralis major muscle$",
+   "profundos": "^(Pectoralis minor|Subclavius|Serratus anterior) muscle$",
+   "forma": "tronco",
+   "fuente": "Gray's Anatomy 42.ª ed., pared torácica anterior: el pectoral mayor cubre el pectoral menor, el subclavio (fascia clavipectoral) y las digitaciones superiores del serrato anterior",
+   "estado": "pendiente_revision"
+  },
+  {
+   "superficial": "^(Acromial|Clavicular|Scapular spinal) part of deltoid muscle$",
+   "profundos": "^(Supraspinatus|Infraspinatus|Teres minor|Subscapularis|Coracobrachialis) muscle$|^(Long|Short) head of biceps brachii$",
+   "forma": "hombro",
+   "fuente": "Gray's Anatomy 42.ª ed., hombro: el deltoides cubre la articulación glenohumeral, los tendones del manguito de los rotadores, la apófisis coracoides con el coracobraquial y la cabeza corta del bíceps, y la cabeza larga del bíceps en el surco intertubercular",
+   "estado": "pendiente_revision"
+  }
+ ],
+ "extremos": [
+  {
+   "musculo": "^Teres major",
+   "hueso": "^Humerus$",
+   "distancia": 0.008,
+   "soloAbajo": 0,
+   "fuente": "Gray 42.ª ed.: inserción en el labio medial del surco intertubercular del húmero",
+   "estado": "pendiente_revision"
+  },
+  {
+   "musculo": "^Coracobrachialis",
+   "hueso": "^Humerus$",
+   "distancia": 0.006,
+   "soloAbajo": 0,
+   "fuente": "Gray 42.ª ed.: inserción en la cara medial del húmero, mitad de la diáfisis",
+   "estado": "pendiente_revision"
+  },
+  {
+   "musculo": "^Short head of biceps",
+   "hueso": "^Scapula$",
+   "distancia": 0.008,
+   "soloAbajo": 0,
+   "fuente": "Gray 42.ª ed.: origen en la punta de la apófisis coracoides",
+   "estado": "pendiente_revision"
+  },
+  {
+   "musculo": "^Short head of biceps",
+   "hueso": "^Radius$",
+   "distancia": 0.06,
+   "soloAbajo": 0.03,
+   "fuente": "Gray 42.ª ed.: tendón común del bíceps a la tuberosidad del radio (solo los últimos 3 cm de la pieza)",
+   "estado": "pendiente_revision"
+  },
+  {
+   "musculo": "^Clavicular head of pectoralis major",
+   "hueso": "^Clavicle$",
+   "distancia": 0.008,
+   "soloAbajo": 0,
+   "fuente": "Gray 42.ª ed.: origen en la cara anterior de la mitad medial de la clavícula. La capa «insercion» del atlas no trae esta área: sin anclaje, la porción clavicular se quedaba abajo al elevar la escápula y se abría un hueco bajo la clavícula",
+   "estado": "pendiente_revision"
+  }
+ ],
+ "_capas_pendientes": [
+  {
+   "superficial": "^(Descending|Transverse|Ascending) part of trapezius muscle$",
+   "profundos": "^(Rhomboid major|Rhomboid minor|Serratus posterior superior|Spinalis thoracis|Semispinalis thoracis|Longissimus thoracis|Iliocostalis thoracis|Splenius capitis|Splenius colli|Semispinalis capitis) muscle$|^Levator scapulae$",
+   "forma": "tronco",
+   "fuente": "Gray's Anatomy 42.ª ed., dorso: el trapecio cubre los romboides, el elevador de la escápula, el serrato posterior superior, los esplenios y la parte alta de los erectores",
+   "estado": "pendiente_revision",
+   "motivo": "2026-11-23: con el empuje radial desde el eje del tórax la porción ascendente pasaba de 10 a 82 pliegues y se movía hasta 58 mm al elevar la escápula 40°. Fuera hasta ajustar la dirección del empuje en el cuello y la escápula."
+  }
+ ]
+}

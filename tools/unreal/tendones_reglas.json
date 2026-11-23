@@ -29,6 +29,18 @@
   "_nota": "regla geométrica para lo que no tiene entrada: si la zona del área cubre ≥ 25 % de los vértices de la pieza, el área es un origen ancho y carnoso; entre 15 y 25 %, mixta; menos, tendón",
   "sin_extremos": "orbicular|sphincter|constrictor|arytenoid|tarsus|platysma|trochlea|galea|diaphragm"
  },
+ "laminas": [
+  {
+   "en": "Latissimus dorsi muscle",
+   "frontera": [[0.17, 0.46], [0.65, 0.07], [0.82, 0.07]],
+   "fundido": 0.015,
+   "_como": "Lo pinta tools/unreal/aponeurosis_dorsal.js (y tendones.js --aplicar al final). frontera = [alto, ancho] en fracciones de la caja de la pieza: alto desde abajo, ancho desde la línea media; por debajo de cada alto, la franja de ese ancho junto a la línea media es aponeurosis (interpolado entre puntos; por encima del último, nada). fundido en metros hacia fuera. G = máx(G anterior, aponeurosis).",
+   "nota": "Origen aponeurótico del dorsal ancho: apófisis espinosas T7–L5 y sacro por la hoja posterior de la fascia toracolumbar, y cresta ilíaca: el rombo blanco lumbar de los atlas. Alto 0,17 ≈ cresta ilíaca / L4, 0,65 ≈ T10, 0,82 ≈ T7.",
+   "fuente": "Gray's Anatomy 42.ª ed.; Moore, Anatomía con orientación clínica; referencias del usuario (2026-11-22)",
+   "estado": "pendiente_revision",
+   "revisado": false
+  }
+ ],
  "musculos": {
   "Gluteus maximus muscle": {
    "origen": "mixto",
@@ -396,10 +408,145 @@
    "re": "^(Flexor pollicis longus|Flexor digitorum profundus|Extensor indicis|Extensor pollicis (longus|brevis)|Abductor pollicis longus)",
    "hueso": {
     "Radius|Ulna|Humerus": "carnoso",
-    "phalanx|metacarpal": "tendon"
+    "phalanx|metacarpal|Trapezium": "tendon"
    },
    "insercion": "tendon",
-   "nota": "músculos profundos del antebrazo: origen carnoso en la diáfisis y la membrana interósea; tendón largo"
+   "nota": "músculos profundos del antebrazo: origen carnoso en la diáfisis y la membrana interósea; tendón largo (el abductor largo del pulgar puede mandar una lengüeta al trapecio)"
+  },
+  {
+   "re": "^Lumbrical muscles of hand",
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "insercion_hacia": "abajo",
+   "nota": "nacen carnosos de los tendones del flexor profundo (sin hueso); tendón a la banda lateral del aparato extensor. Director clínico 2026-11-23, pendiente de revisión"
+  },
+  {
+   "re": "^Lumbrical muscles of foot",
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "insercion_hacia": "delante",
+   "nota": "nacen carnosos de los tendones del flexor largo de los dedos; tendón al aparato extensor de los dedos. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^(Dorsal interossei muscles of (hand|foot)|Palmar interossei muscles|Plantar interossei muscles)",
+   "hueso": { "metacarpal|metatarsal": "carnoso", "phalanx": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen carnoso en las diáfisis de los metacarpianos/metatarsianos; tendón en la base de la falange proximal y el aparato extensor. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^(Abductor pollicis brevis|(Superficial|Deep) head of flexor pollicis brevis|Abductor digiti minimi of hand|Flexor digiti minimi of hand)",
+   "origen": "mixto",
+   "insercion": "tendon",
+   "hueso": { "phalanx|Sesamoid": "tendon" },
+   "nota": "eminencias tenar e hipotenar: origen mixto en el retináculo flexor, escafoides, trapecio, pisiforme y gancho del ganchoso; tendón en la base de la falange proximal o los sesamoideos. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Opponens (pollicis|digiti minimi)",
+   "insercion": "carnoso",
+   "hueso": { "metacarpal|metatarsal": "carnoso" },
+   "nota": "los oponentes se insertan carnosos a lo largo de la diáfisis del 1.er/5.º metacarpiano (el del pie, inconstante, en el 5.º metatarsiano), sin tendón. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Adductor pollicis",
+   "hueso": { "Capitate|metacarpal": "carnoso", "phalanx|Sesamoid": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen carnoso en el grande y en la base y diáfisis del 2.º–3.er metacarpiano; tendón en el sesamoideo medial y la base de la falange proximal del pulgar. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Flexor digitorum brevis",
+   "hueso": { "Calcaneus": "mixto", "phalanx": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen mixto en la apófisis medial del calcáneo y la aponeurosis plantar; cuatro tendones perforados a las falanges medias. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Quadratus plantae",
+   "origen": "mixto",
+   "insercion": "carnoso",
+   "sin_extremos": true,
+   "nota": "cabeza medial carnosa y lateral tendinosa en el calcáneo; se inserta carnoso en el tendón del flexor largo de los dedos: no se pinta tendón en ese extremo. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^(Abductor hallucis|Abductor digiti minimi of foot)",
+   "hueso": { "Calcaneus": "mixto", "phalanx|Sesamoid": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen mixto en la tuberosidad del calcáneo, el retináculo flexor y la aponeurosis plantar; tendón en la base de la falange proximal. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^(Medial|Lateral) head of flexor hallucis brevis",
+   "origen": "tendon",
+   "insercion": "tendon",
+   "nota": "origen tendinoso en el cuboides, el cuneiforme lateral y la expansión del tibial posterior; tendón con los sesamoideos. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^(Extensor digitorum brevis|Extensor hallucis brevis)",
+   "hueso": { "Calcaneus": "carnoso", "phalanx": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen carnoso en la cara dorsal del calcáneo; tendones a la falange proximal del dedo gordo y a los extensores largos del 2.º–4.º. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Flexor digiti minimi of foot",
+   "hueso": { "metatarsal": "carnoso", "phalanx": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen carnoso en la base del 5.º metatarsiano; tendón en la base de la falange proximal. Director clínico 2026-11-23"
+  },
+  {
+   "re": "flexor carpi ulnaris$",
+   "hueso": { "Humerus": "tendon", "Ulna": "aponeurosis", "Pisiform|Hamate|metacarpal": "tendon" },
+   "insercion": "tendon",
+   "nota": "cabeza humeral por el tendón común flexor; cabeza cubital por una aponeurosis a lo largo del borde posterior del cúbito; tendón al pisiforme, ganchoso y 5.º metacarpiano. Director clínico 2026-11-23"
+  },
+  {
+   "re": "extensor carpi ulnaris$",
+   "hueso": { "Humerus": "tendon", "Ulna": "aponeurosis", "metacarpal": "tendon" },
+   "insercion": "tendon",
+   "nota": "tendón común extensor en el epicóndilo lateral y aponeurosis en el borde posterior del cúbito; tendón a la base del 5.º metacarpiano. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Pronator teres",
+   "hueso": { "Humerus|Ulna": "mixto", "Radius": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen mixto (tendón común flexor y apófisis coronoides); tendón plano en la mitad de la cara lateral del radio. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Brachioradialis",
+   "hueso": { "Humerus": "carnoso", "Radius": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen carnoso en los dos tercios proximales de la cresta supracondílea lateral; tendón en la apófisis estiloides del radio. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Extensor carpi radialis longus",
+   "hueso": { "Humerus": "mixto", "metacarpal": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen mixto en la cresta supracondílea lateral; tendón en la base del 2.º metacarpiano. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Extensor carpi radialis brevis",
+   "hueso": { "Humerus": "tendon", "metacarpal": "tendon" },
+   "insercion": "tendon",
+   "nota": "tendón común extensor en el epicóndilo lateral; tendón en la base del 3.er metacarpiano. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Humero-ulnar head of flexor digitorum superficialis",
+   "hueso": { "Humerus|Ulna": "tendon", "phalanx": "tendon" },
+   "insercion": "tendon",
+   "nota": "tendón común flexor; tendones a las falanges medias. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Radial head of flexor digitorum superficialis",
+   "hueso": { "Radius": "mixto", "phalanx": "tendon" },
+   "insercion": "tendon",
+   "nota": "lámina aponeurótica fina en la línea oblicua del radio; tendones a las falanges medias. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^(Flexor carpi radialis|Palmaris longus)",
+   "hueso": { "Humerus": "tendon", "metacarpal": "tendon" },
+   "insercion": "tendon",
+   "nota": "tendón común flexor; tendón a la base del 2.º–3.er metacarpiano (palmar largo: a la aponeurosis palmar). Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Anconeus",
+   "hueso": { "Humerus": "tendon", "Ulna": "carnoso" },
+   "nota": "origen tendinoso en el epicóndilo lateral; inserción carnosa en el olécranon y la cara posterior del cúbito. Director clínico 2026-11-23"
   },
   {
    "re": "^Supinator",

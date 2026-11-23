@@ -237,7 +237,7 @@ public:
 	/** Texto de interfaz del modo «Ejercicio» (tabla ui de ejercicios.json). */
 	FString TEj(const FString& Clave) const { const FCorpusTexto* M = UiEjercicios.Find(Clave); return M ? Tx(*M) : Clave; }
 
-	/** Correctivos elásticos de los músculos del hombro (correctivos.json + correctivos.bin). */
+	/** Correctivos elásticos de los músculos del hombro y del glúteo mayor (correctivos.json/.bin + correctivos_cadera.json/.bin). */
 	const FCorpusRejilla* Rejilla(const FString& Carpeta, const FString& Id) const { return Rejillas.Find(Carpeta + TEXT("/") + Id); }
 	const FCorpusRejilla* RejillaDe(const FString& Clave) const { return Rejillas.Find(Clave); }
 	const FCorpusCorrMov* Correctivo(const FString& Rom, int32 Mov, bool bIzq) const { return CorrMovs.Find(FString::Printf(TEXT("%s/%d/%s"), *Rom, Mov, bIzq ? TEXT("L") : TEXT("R"))); }
@@ -272,6 +272,8 @@ private:
 	bool bVistasLeidas = false;
 	void CargarMovimiento();
 	void CargarCorrectivos();
+	/** Lee <Nombre>.json + <Nombre>.bin y lo coloca detrás de lo ya leído (texeles, .bin y movimientos). */
+	bool CargarArchivoCorrectivos(const FString& Nombre);
 	void CargarExtras();
 	void CargarInserciones();
 	TMap<FString, FString> HuesoDeArea;   // «cuerpo/id del área» → id del hueso (inserciones.json)

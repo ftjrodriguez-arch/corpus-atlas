@@ -12,7 +12,19 @@
 //   unión es tendinosa o aponeurótica. Lo decide tools/unreal/tendones_reglas.json: entrada explícita por músculo (cadera,
 //   muslo y rodilla, y las excepciones evidentes del resto) y, para los demás, una regla geométrica: si la zona del área
 //   cubre una fracción grande de la pieza, el origen es carnoso y no se pinta. No toca los pesos de movimiento (TEXCOORD).
-//   Después hay que reimportar la capa muscular en Unreal. Orden: exportar.js → movimiento.js → tendones.js.
+//   Al final aplica las láminas aponeuróticas de tendones_reglas.json → «laminas» (hoy el dorsal ancho, con la función de
+//   aponeurosis_dorsal.js) sobre el canal recién pintado y reescribe su copia: ya no hay que ejecutar aponeurosis_dorsal.js
+//   después. Después hay que reimportar la capa muscular en Unreal.
+//
+// Piezas separadas (separar.js, ids <madre>_<n>: intercostales, subcostales, interóseos, lumbricales, rotadores): no están en
+//   la web, pero cada vértice suyo es copia exacta de un vértice de la madre, que sigue en el GLB fuera de la escena.
+//   --restaurar las empareja con la madre (posición y normal idénticas, desempate por triángulos: `emparejar`) y les da el G
+//   de la web de ese vértice; el índice de canal_g incluye «grupos» (pieza → madre). --aplicar les pinta el plan de la madre.
+//
+// Orden completo (por cuerpo, hombre y mujer):
+//   exportar.js → movimiento.js → [cadera.js aplicar] → separar.js aplicar → tendones.js <cuerpo> --restaurar → --aplicar
+//   → reimportar la capa muscular. --restaurar hay que repetirlo siempre que cambie la disposición del GLB (reexportar o
+//   separar); si no, --aplicar lo avisa («el canal guardado no corresponde a este GLB»).
 'use strict';
 const fs = require('fs'), path = require('path');
 const RAIZ = path.join(__dirname, '..', '..');
@@ -33,15 +45,49 @@ function leer(archivo, guardar) {
     for (let k = 0; k < a.count; k++) for (let c = 0; c < nc; c++) { const p = k * paso + c * T.BYTES_PER_ELEMENT;
       out[k * nc + c] = T === Float32Array ? dv.getFloat32(p, true) : T === Uint8Array ? dv.getUint8(p) : T === Uint16Array ? dv.getUint16(p, true) : dv.getUint32(p, true); }
     return { arr: out, nc, norm: a.normalized, T }; };
-  const piezas = {}, orden = [];
+  const piezas = {}, orden = [], grupo = {};
   for (const n of js.nodes) { if (n.mesh == null) continue; const m = js.meshes[n.mesh], id = n.name || m.name;
+    if (n.extras && n.extras.grupo) grupo[id] = n.extras.grupo;   // pieza separada por separar.js: id de su pieza madre
     for (const pr of m.primitives) { const P = acc(pr.attributes.POSITION).arr; let G = null;
       if (pr.attributes.COLOR_0 != null) { const c = acc(pr.attributes.COLOR_0), k = c.T === Float32Array ? 255 : c.T === Uint16Array ? 255 / 65535 : 1; G = new Uint8Array(P.length / 3); for (let i = 0; i < G.length; i++) G[i] = Math.round(c.arr[i * c.nc + 1] * k); }
-      let gOff = -1, gPaso = 0;
-      if (pr.attributes.COLOR_0 != null) { const a = js.accessors[pr.attributes.COLOR_0], v = js.bufferViews[a.bufferView]; if (a.componentType === 5121) { gOff = 20 + lj + 8 + (v.byteOffset || 0) + (a.byteOffset || 0) + 1; gPaso = v.byteStride || NC[a.type]; } }
+      let gOff = -1, gPaso = 0, cNc = 0;
+      if (pr.attributes.COLOR_0 != null) { const a = js.accessors[pr.attributes.COLOR_0], v = js.bufferViews[a.bufferView]; cNc = NC[a.type]; if (a.componentType === 5121) { gOff = 20 + lj + 8 + (v.byteOffset || 0) + (a.byteOffset || 0) + 1; gPaso = v.byteStride || NC[a.type]; } }
       if (!piezas[id]) orden.push(id);
-      (piezas[id] = piezas[id] || []).push({ P, G, gOff, gPaso }); } }
-  return { piezas, orden, buf: guardar ? buf : null };
+      (piezas[id] = piezas[id] || []).push({ P, G, gOff, gPaso, cNc, pr }); } }
+  /* normales e índices solo cuando hacen falta (emparejar piezas separadas con su madre) */
+  const normales = p => p.pr.attributes.NORMAL != null ? acc(p.pr.attributes.NORMAL).arr : null;
+  const indices = p => p.pr.indices != null ? acc(p.pr.indices).arr : Uint32Array.from({ length: p.P.length / 3 }, (_, i) => i);
+  return { piezas, orden, grupo, normales, indices, buf: guardar ? buf : null };
+}
+
+/* Piezas separadas por separar.js (<madre>_<n>): cada vértice de la hija es una copia exacta (mismos bytes de todos los
+   atributos) de un vértice de la madre, y cada triángulo de la hija es un triángulo de la madre con sus vértices en el
+   mismo orden. Se empareja por posición y normal idénticas (igualdad exacta de Float32, sin tolerancia) y, donde la madre
+   tiene vértices repetidos con la misma posición y normal, se decide por los triángulos: solo vale el candidato que forma
+   con sus vecinos un triángulo de la madre. Devuelve { mapa (vértice de la hija → vértice de la madre), dudas, tris } o
+   { error }. `fuente` = { P, N, I } de la madre; `h` = { P, N, I } de la hija. */
+function emparejar(fuente, h) {
+  const usaN = !!(fuente.N && h.N);
+  const clave = (P, N, i) => P[i * 3] + ',' + P[i * 3 + 1] + ',' + P[i * 3 + 2] + (usaN ? '|' + N[i * 3] + ',' + N[i * 3 + 1] + ',' + N[i * 3 + 2] : '');
+  const porClave = new Map(), nm = fuente.P.length / 3, nh = h.P.length / 3;
+  for (let i = 0; i < nm; i++) { const k = clave(fuente.P, fuente.N, i), l = porClave.get(k); if (l) l.push(i); else porClave.set(k, [i]); }
+  const cand = new Array(nh);
+  for (let j = 0; j < nh; j++) { const l = porClave.get(clave(h.P, h.N, j)); if (!l) return { error: `vértice ${j} sin pareja exacta (posición${usaN ? ' y normal' : ''}) en la madre` }; cand[j] = l; }
+  const tri = new Map(), Im = fuente.I, Ih = h.I; for (let t = 0; t < Im.length; t += 3) tri.set(Im[t] + ',' + Im[t + 1] + ',' + Im[t + 2], t / 3);
+  const ok = new Array(nh).fill(null), tris = new Set();
+  for (let t = 0; t < Ih.length; t += 3) {
+    const v = [Ih[t], Ih[t + 1], Ih[t + 2]], S = [new Set(), new Set(), new Set()]; let hallado = -1;
+    for (const x of cand[v[0]]) for (const y of cand[v[1]]) for (const z of cand[v[2]]) { const q = tri.get(x + ',' + y + ',' + z);
+      if (q !== undefined) { S[0].add(x); S[1].add(y); S[2].add(z); hallado = q; } }
+    if (hallado < 0) return { error: `triángulo ${t / 3} sin triángulo igual en la madre` };
+    tris.add(hallado);
+    for (let e = 0; e < 3; e++) ok[v[e]] = ok[v[e]] ? new Set([...ok[v[e]]].filter(x => S[e].has(x))) : S[e];
+  }
+  const mapa = new Int32Array(nh), dudas = [];
+  for (let j = 0; j < nh; j++) { const l = ok[j] ? [...ok[j]] : cand[j];
+    if (!l.length) return { error: `vértice ${j}: sus triángulos no coinciden con un mismo vértice de la madre` };
+    mapa[j] = l[0]; if (l.length > 1) dudas.push([j, l]); }
+  return { mapa, dudas, tris };
 }
 const fBin = n => path.join(CANAL, CUERPO + '_muscular_' + n + '.bin'), fIdx = path.join(CANAL, CUERPO + '_muscular.json');
 /* canal G de todas las piezas, una detrás de otra en el orden del GLB */
@@ -59,9 +105,15 @@ if (RESTAURAR) {
     const P = CUERPO === 'hombre' ? (EX.capaBase(dm, EX.fuentes(dm), 'muscular') || {}).P : EX.capaMujer(dm, 'muscular');
     if (!P || !P.length) throw new Error('exportar.js no da piezas de la capa muscular para ' + CUERPO);
     // comprobación: mismas piezas, mismo número de vértices y mismas posiciones (mismo orden)
-    const mal = [], W = {};
+    const mal = [], W = {}, hijas = [];
     for (const p of P) W[p.id] = p;
     for (const id of M.orden) { const w = W[id], g = M.piezas[id];
+      if (!w && M.grupo[id]) {   // pieza separada: se comprueba después, contra su madre
+        if (g.length !== 1) mal.push(id + ': ' + g.length + ' primitivas en el GLB');
+        else if (g[0].gOff < 0) mal.push(id + ': color que no es de 8 bits');
+        else if (!W[M.grupo[id]]) mal.push(id + ': su pieza madre ' + M.grupo[id] + ' no está en la web');
+        else hijas.push(id);
+        continue; }
       if (!w) { mal.push(id + ': no está en la web'); continue; }
       if (g.length !== 1) { mal.push(id + ': ' + g.length + ' primitivas en el GLB'); continue; }
       const a = g[0].P, b = w.pos;
@@ -70,15 +122,49 @@ if (RESTAURAR) {
       let d = 0; for (let i = 0; i < a.length; i++) { const e = Math.abs(a[i] - b[i]); if (e > d) d = e; }
       if (d > 2e-6) mal.push(id + ': posiciones distintas (hasta ' + (d * 1000).toFixed(3) + ' mm)'); }
     for (const p of P) if (!M.piezas[p.id]) mal.push(p.id + ': está en la web y no en el GLB');
+    // piezas separadas (separar.js): cada vértice toma el G de la web del vértice de la madre del que es copia
+    const MAPA = {}, porMadre = {}; let nDudas = 0;
+    const malos = new Set(mal.map(s => s.split(':')[0]));
+    for (const id of hijas) { const madre = M.grupo[id], w = W[madre];
+      if (malos.has(madre)) { mal.push(id + ': su pieza madre ' + madre + ' no coincide con la web'); continue; }
+      // fuente: la madre tal como sigue en el GLB (fuera de la escena; mismas posiciones y orden que la web, ya comprobado), con
+      // sus normales; si separar.js la hubiera quitado del GLB, la malla de la web (posiciones en Float32, sin normales)
+      const gm = M.piezas[madre] && M.piezas[madre][0];
+      const fuente = gm ? { P: gm.P, N: M.normales(gm), I: M.indices(gm) } : { P: Float32Array.from(w.pos), N: null, I: w.idx };
+      const h = M.piezas[id][0], r = emparejar(fuente, { P: h.P, N: fuente.N ? M.normales(h) : null, I: M.indices(h) });
+      if (r.error) { mal.push(id + ' (madre ' + madre + '): ' + r.error); continue; }
+      // vértices repetidos en la madre que ni los triángulos separan: valen si la web les da el mismo G
+      for (const [j, l] of r.dudas) { const gs = new Set(l.map(i => w.col[i * 3 + 1])); if (gs.size > 1) { mal.push(id + ': vértice ' + j + ' ambiguo (' + l.length + ' vértices de la madre con G distinto)'); break; } nDudas++; }
+      MAPA[id] = r.mapa;
+      const pm = porMadre[madre] = porMadre[madre] || { hijas: 0, v: new Set(), t: new Set(), nv: fuente.P.length / 3, nt: fuente.I.length / 3, repes: 0 };
+      pm.hijas++; for (const i of r.mapa) { if (pm.v.has(i)) pm.repes++; pm.v.add(i); } for (const t of r.tris) pm.t.add(t); }
     if (mal.length) { console.log('NO se restaura: el GLB y la web no coinciden en ' + mal.length + ' piezas:\n  ' + mal.slice(0, 30).join('\n  ') +
-      '\nHay que reexportar la capa (exportar.js) y rehacer sus pesos (movimiento.js --solo=muscular).'); process.exit(2); }
+      '\nHay que reexportar la capa (exportar.js) y rehacer sus pesos (movimiento.js --solo=muscular); si son piezas separadas, repetir separar.js.'); process.exit(2); }
+    for (const [madre, pm] of Object.entries(porMadre))
+      console.log(`  ${madre} → ${pm.hijas} piezas separadas: ${pm.v.size} de ${pm.nv} vértices y ${pm.t.size} de ${pm.nt} triángulos de la madre` + (pm.repes ? ` · ${pm.repes} vértices compartidos entre piezas` : ''));
+    if (hijas.length) console.log(`piezas separadas emparejadas con su madre: ${hijas.length} (vértices repetidos resueltos por igualdad de G: ${nDudas})`);
     fs.mkdirSync(CANAL, { recursive: true });
     const actual = canalDe(M, (p, i) => p.G ? p.G[i] : 0);
-    const origen = new Uint8Array(actual.length); { let o = 0; for (const id of M.orden) { const c = W[id].col, n = c.length / 3; for (let i = 0; i < n; i++) origen[o + i] = c[i * 3 + 1]; o += n; } }
-    // lo que había antes de restaurar se guarda una sola vez (no se pisa en las repeticiones)
-    if (!fs.existsSync(fBin('g_pintado_antes'))) fs.writeFileSync(fBin('g_pintado_antes'), actual);
+    const origen = new Uint8Array(actual.length); { let o = 0; for (const id of M.orden) {
+      if (MAPA[id]) { const c = W[M.grupo[id]].col, m = MAPA[id]; for (let i = 0; i < m.length; i++) origen[o + i] = c[m[i] * 3 + 1]; o += m.length; continue; }
+      const c = W[id].col, n = c.length / 3; for (let i = 0; i < n; i++) origen[o + i] = c[i * 3 + 1]; o += n; } }
+    // lo que había antes de restaurar se guarda una sola vez por disposición del GLB (no se pisa en las repeticiones); si la
+    // copia es de otra disposición (antes de separar.js), se aparta con su número de vértices en el nombre en vez de pisarla
+    const fAntes = fBin('g_pintado_antes'), nAntes = fs.existsSync(fAntes) ? fs.statSync(fAntes).size : -1;
+    if (nAntes >= 0 && nAntes !== actual.length) { const otro = fBin('g_pintado_antes_' + nAntes + 'v');
+      if (!fs.existsSync(otro)) fs.renameSync(fAntes, otro); console.log(`copia g_pintado_antes de otra disposición (${nAntes} vértices) → ${path.basename(otro)}`); }
+    if (nAntes !== actual.length) fs.writeFileSync(fAntes, actual);
     fs.writeFileSync(fBin('g_original'), origen);
-    fs.writeFileSync(fIdx, JSON.stringify({ cuerpo: CUERPO, capa: 'muscular', nota: 'canal G (tendón) por vértice, piezas en el orden del GLB: [id, vértices]. g_original = web; g_pintado_antes = lo que había en el GLB la primera vez que se restauró.', fecha: new Date().toISOString(), vertices: actual.length, piezas: indice(M) }));
+    fs.writeFileSync(fIdx, JSON.stringify({ cuerpo: CUERPO, capa: 'muscular', nota: 'canal G (tendón) por vértice, piezas en el orden del GLB: [id, vértices]. g_original = web (las piezas separadas por separar.js toman el G del vértice de su madre del que son copia: «grupos» = pieza → madre); g_pintado_antes = lo que había en el GLB la primera vez que se restauró con esta disposición.', fecha: new Date().toISOString(), vertices: actual.length, piezas: indice(M), grupos: M.grupo }));
+    // R (oclusión), B (cartílago) y A de las piezas separadas: copia exacta del vértice de la madre en el GLB. separar.js copiaba
+    // COLOR_0 (8 bits) como si fuera de 16 y lo dejaba desordenado; G lo pone después el bucle de abajo (web)
+    let rbaCambian = 0, rbaPiezas = 0;
+    for (const id of Object.keys(MAPA)) { const h = M.piezas[id][0], gm = M.piezas[M.grupo[id]] && M.piezas[M.grupo[id]][0], m = MAPA[id];
+      if (!gm || gm.gOff < 0 || gm.cNc !== h.cNc) { console.log('aviso: ' + id + ' sin color de la madre en el GLB: R, B y A no se reponen'); continue; }
+      rbaPiezas++;
+      for (let i = 0; i < m.length; i++) for (let k = 0; k < h.cNc; k++) { if (k === 1) continue;
+        const a = h.gOff - 1 + i * h.gPaso + k, b = M.buf[gm.gOff - 1 + m[i] * gm.gPaso + k]; if (M.buf[a] !== b) { rbaCambian++; M.buf[a] = b; } } }
+    if (rbaPiezas) console.log(`R, B y A de ${rbaPiezas} piezas separadas copiados de su madre: ${rbaCambian} bytes corregidos`);
     let cambian = 0, o = 0; for (const id of M.orden) { const p = M.piezas[id][0], n = p.P.length / 3; for (let i = 0; i < n; i++) { if (M.buf[p.gOff + i * p.gPaso] !== origen[o + i]) cambian++; M.buf[p.gOff + i * p.gPaso] = origen[o + i]; } o += n; }
     fs.writeFileSync(path.join(IMP, 'muscular.glb'), M.buf);
     let conT = 0; for (let i = 0; i < origen.length; i++) if (origen[i] >= UMBRAL) conT++;
@@ -203,7 +289,9 @@ if (APLICAR) {
   const ORI = fs.readFileSync(fBin('g_original')), IDX = JSON.parse(fs.readFileSync(fIdx, 'utf8')).piezas, ahora = indice(MG);
   if (IDX.length !== ahora.length || IDX.some((x, i) => x[0] !== ahora[i][0] || x[1] !== ahora[i][1])) { console.log('El canal guardado no corresponde a este GLB (piezas o vértices distintos): repetir --restaurar.'); process.exit(2); }
   const TIPOS = REGLAS.tipos; let o = 0, subidos = 0, total = 0, blancos = 0;
-  for (const id of MG.orden) { const plan = planes[id];
+  // las piezas separadas (separar.js) usan el plan de su madre: mismas posiciones, así que cada vértice recibe lo mismo que
+  // recibía dentro del grupo (la madre sigue en el GLB, fuera de la escena, y se mide como antes de separar)
+  for (const id of MG.orden) { const plan = planes[id] || planes[MG.grupo[id]];
     for (const p of MUS[id]) { const n = p.P.length / 3;
       for (let i = 0; i < n; i++) { let g = ORI[o + i];
         if (plan && plan.todo) { const v = Math.round(255 * (TIPOS[plan.todo] || TIPOS.tendon).intensidad); if (v > g) g = v; }
@@ -214,9 +302,15 @@ if (APLICAR) {
         if (g !== ORI[o + i]) subidos++; if (g >= UMBRAL) blancos++; total++;
         if (p.gOff >= 0) BUF[p.gOff + i * p.gPaso] = g; }
       o += n; } }
+  console.log(`aplicado sobre el canal original: ${subidos} vértices subidos; tendón en el ${(100 * blancos / total).toFixed(1)} % de los vértices de la capa`);
+  // láminas aponeuróticas (tendones_reglas.json → «laminas», hoy el dorsal ancho) sobre lo recién pintado, antes de escribir:
+  // así aponeurosis_dorsal.js no hace falta a mano y su copia (canal_g/<cuerpo>_dorsal_g_antes.json) queda igual a este canal
+  const separadas = MG.orden.filter(id => MG.grupo[id]).length;
+  if (separadas) console.log(`piezas separadas con el plan de su madre: ${separadas} (${MG.orden.filter(id => MG.grupo[id] && planes[MG.grupo[id]]).length} con plan)`);
+  const LAM = require('./aponeurosis_dorsal.js').aplicarLaminas(BUF, CUERPO, { log: s => console.log('  ' + s) });
+  console.log(`láminas aponeuróticas: ${LAM.pintados} vértices (G > 128) en ${LAM.piezas} piezas`);
   fs.writeFileSync(path.join(IMP, 'muscular.glb'), BUF);
   fs.writeFileSync(fBin('g_aplicado'), canalDe({ orden: MG.orden, piezas: MUS }, (p, i) => BUF[p.gOff + i * p.gPaso]));
-  console.log(`aplicado sobre el canal original: ${subidos} vértices subidos; tendón en el ${(100 * blancos / total).toFixed(1)} % de los vértices de la capa`);
 }
 // cuántos músculos llegan en tendón a sus uniones tendinosas (con el GLB tal como estaba al leerlo)
 { const tend = U.filter(u => (u.tipo === 'tendon' || u.tipo === 'aponeurosis') && u.junto > 0), ok = tend.filter(u => u.juntoTendon >= 0.5).length;

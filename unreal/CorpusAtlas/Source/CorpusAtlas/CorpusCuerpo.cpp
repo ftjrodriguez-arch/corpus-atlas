@@ -184,6 +184,10 @@ void ACorpusCuerpo::PonerCorrectivo(const FString& Rom, int32 Mov, bool bIzq, in
 		for (int32 i = 1; i < Mitad; ++i) { Correctivo[i] = FVector4f(0, 0, 0, 0); }
 		for (int32 i = Mitad; i < Correctivo.Num(); ++i) { Correctivo[i] = FVector4f(0, 0, 0, 1); }
 		ClaveCorr = Clave;
+		ClavesCorrActivas.Reset();
+		for (const auto& Par : CM->Piezas) { ClavesCorrActivas.Add(Par.Key); }
+		bCorrActivo = true;
+		ElegirRejillas();
 	}
 	I0 = FMath::Clamp(I0, 0, CM->Cuadros - 1); I1 = FMath::Clamp(I1, 0, CM->Cuadros - 1);
 	const uint8* Bin = D->BinCorrectivos().GetData();
@@ -208,6 +212,21 @@ void ACorpusCuerpo::PonerCorrectivo(const FString& Rom, int32 Mov, bool bIzq, in
 	Correctivo[0] = FVector4f(1.f, (float)FilasCorr, 0.f, 0.f);
 	bCorrActivo = true;
 	SubirCorrectivo();
+}
+
+void ACorpusCuerpo::ElegirRejillas()
+{
+	// base de la rejilla (dato primitivo 24) solo en las piezas del movimiento puesto; 0 = el material usa los pesos
+	const UCorpusDatos* D = Datos();
+	if (!D) { return; }
+	for (const auto& Par : ClaveRejilla)
+	{
+		const TObjectPtr<UStaticMeshComponent>* C = Piezas.Find(Par.Key);
+		const FCorpusRejilla* Rj = D->RejillaDe(Par.Value);
+		if (!C || !*C || !Rj) { continue; }
+		const bool bUsa = !bCorrActivo || ClavesCorrActivas.Contains(Par.Value);
+		(*C)->SetCustomPrimitiveDataFloat(24, bUsa ? (float)Rj->Base : 0.f);
+	}
 }
 
 bool ACorpusCuerpo::MovimientoDisponible() const
@@ -809,7 +828,11 @@ void ACorpusCuerpo::CargarCapa(const FString& Clave)
 		// correctivo elástico: dónde está la rejilla de esta pieza en la textura y cómo se mide (datos primitivos 24–31)
 		if (const FCorpusRejilla* Rj = D->Rejilla(Carpeta, P.Id))
 		{
-			C->SetCustomPrimitiveDataVector4(24, FVector4((float)Rj->Base, (float)Rj->N.X, (float)Rj->N.Y, (float)Rj->N.Z));
+			const FString ClaveR = Carpeta + TEXT("/") + P.Id;
+			ClaveRejilla.Add(P.Id, ClaveR);
+			// si se carga con un correctivo puesto en el que no está, va con sus pesos (base 0) hasta el siguiente cambio
+			const bool bUsa = !bCorrActivo || ClavesCorrActivas.Contains(ClaveR);
+			C->SetCustomPrimitiveDataVector4(24, FVector4(bUsa ? (float)Rj->Base : 0.f, (float)Rj->N.X, (float)Rj->N.Y, (float)Rj->N.Z));
 			C->SetCustomPrimitiveDataVector4(28, FVector4(Rj->O.X, Rj->O.Y, Rj->O.Z, Rj->H));
 		}
 		if (HayPostura()) { AjustarLimites(C); }
@@ -1074,6 +1097,7 @@ void ACorpusCuerpo::DescargarTodo()
 {
 	for (auto& Par : Piezas) { if (Par.Value) { Par.Value->DestroyComponent(); } }
 	Piezas.Reset(); IdsPorCapa.Reset(); CapasCargadas.Reset(); Ocultas.Reset(); IdAislada.Reset(); IdSeleccionada.Reset();
+	ClaveRejilla.Reset();
 	IdsMapa.Reset(); bMapa = false;
 }
 

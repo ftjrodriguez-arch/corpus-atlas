@@ -209,8 +209,23 @@ y Unreal solo reproduce el resultado. Solo en los rangos `hombro` y `escapula`; 
   ejecuta el bucle de pesos. Tras cambiar el HLSL: `.\unreal\py.ps1 "ci.copiar_datos(); ci.crear_materiales()"`.
 - Visor: `.\unreal\hojas_hombro.ps1 -Corr` (14 posturas en Blender, 75 s) y sin `-Corr` para comparar con el material.
   Capturas de Unreal: `unreal/capturas/cz_*`.
-- Pendiente: capas entre músculos (el pectoral mayor no «sabe» que debajo está el menor), hueco bajo la clavícula al
-  elevar 40°, pliegue del dorsal junto al ángulo inferior de la escápula en abducción de 150°, y llevar lo mismo a la cadera.
+- **Capas entre músculos (2026-11-22, escrito, falta hornear y capturar):** `tools/unreal/correctivos_capas.json` dice
+  qué profundos tiene debajo cada superficial (dorsal ancho, pectoral mayor, trapecio, deltoides; fuente y estado
+  `pendiente_revision` por registro). En `resolver`, cada muestra del superficial conserva su holgura de reposo con
+  ellos (como `d0` con los huesos, como mucho `MARGEN`): radio alrededor del eje del tórax (celdas de 10 mm × 96 sectores)
+  o, en el deltoides, desde la cabeza del húmero (cubo de 16 × 16 por cara). Los puntos que en reposo ya tienen un
+  profundo por fuera (bordes que se meten por debajo) no se restringen. Los profundos con correctivo se resuelven
+  antes en cada movimiento (`ORDEN`; el .bin no cambia de orden) y se usan tal como se verán en Unreal; los demás, con
+  sus pesos (y sin calcular si sus articulaciones no se mueven). `CORPUS_CAPAS=0` lo apaga y `CORPUS_CAPAS_PESOS=1` toma
+  los profundos solo con sus pesos.
+  - Dorsal sobre la escápula (`huesoRadial`): el choque empuja hacia fuera del tórax en vez de por el gradiente de la
+    distancia, que en la punta del ángulo inferior abre en abanico (pliegue en abducción de 150°).
+  - Hueco bajo la clavícula al elevar 40°: la capa `insercion` no tiene área para la porción clavicular del pectoral
+    mayor, así que esa porción no iba anclada a la clavícula. Los extremos sin área (`EXTRA`, antes en el código) están
+    ahora en `extremos` del JSON, con la porción clavicular → clavícula a 8 mm.
+  - Medir: `node tools/unreal/sonda_capas.js ej:row - 0,25,49` (dorsal y demás superficiales, sin y con capas, con
+    pliegues y cuánto se mueve el superficial), `… hombro 2 150 hombre Latissimus` y `… escapula 0 40`.
+- Pendiente: llevar lo mismo a la cadera.
 
 ## Fase 2 · Marcha de laboratorio (2026-11-20)
 - `movimiento.js` hornea la marcha de la web cada 2 % del ciclo para sus 8 patrones (normal, Trendelenburg, steppage,
@@ -501,9 +516,28 @@ Resuelve el «defecto conocido» del apartado de tendones (orígenes anchos pint
 - Resultado en el hombre: 632 uniones → 346 tendón, 12 aponeurosis, 94 mixtas y 180 carnosas; de las tendinosas con área
   llegan en tendón 284 de 288. El tendón pasa del 12,9 % de los vértices (web) al 28 % (antes del arreglo era bastante más:
   infraespinoso 67 % → 23 %, vasto medial 74 % → 10 %, vasto intermedio 100 % → 25 %, ilíaco 65 % → 25 %).
-- Orden: `tendones.js <cuerpo> --restaurar` (una vez, o tras reexportar) → `--aplicar` → reimportar la capa muscular
+- Orden: `tendones.js <cuerpo> --restaurar` (una vez, o tras reexportar o separar) → `--aplicar` → reimportar la capa muscular
   (`.\unreal\py.ps1 'ci.importar_mallas(["hombre/muscular", "mujer/muscular"])' -Limite 3000`: 626 s y 546 s las dos veces).
   `--lista` enseña la decisión de cada unión; el informe queda en `unreal/tendones_informe.json`.
+- **Con las piezas separadas (punto N, 2026-11-22).** Tras `separar.js`, `--restaurar` fallaba («n1633_4: no está en la
+  web») y `--aplicar` también («el canal guardado no corresponde a este GLB»). Ahora `--restaurar` empareja cada pieza
+  `<madre>_<n>` con su madre (que sigue en el GLB fuera de la escena): posición y normal idénticas en Float32, desempate
+  por triángulos (cada triángulo de la hija tiene que ser un triángulo de la madre con los vértices en el mismo orden,
+  como los escribe `separar.js`), y le da el G de la web de ese vértice. Si un vértice no tiene pareja exacta, si un
+  triángulo no existe en la madre o si queda un vértice ambiguo con G distinto, no escribe y lo dice. Informa, por madre,
+  cuántos vértices y triángulos de la madre cubren sus piezas. El índice `canal_g/<cuerpo>_muscular.json` guarda
+  `grupos` (pieza → madre); la copia `g_pintado_antes` de la disposición anterior se aparta como
+  `…_g_pintado_antes_<n>v.bin`. `--aplicar` pinta en cada pieza separada el plan de su madre (mismas posiciones: el
+  mismo resultado que antes de separar). No cambia el número ni el orden de vértices del GLB.
+- **Láminas aponeuróticas dentro de `--aplicar`.** Al final, `--aplicar` llama a `aplicarLaminas` de
+  `aponeurosis_dorsal.js` sobre el canal recién pintado (hoy solo el dorsal ancho; frontera, fundido, fuente y estado en
+  `tendones_reglas.json → laminas`, ya no en el código) y reescribe `canal_g/<cuerpo>_dorsal_g_antes.json` con ese canal.
+  Ya no hay que ejecutar `aponeurosis_dorsal.js` después. Ejecutado solo, parte de su copia únicamente si el GLB todavía
+  tiene ese canal o el que sale de pintarlo; si el GLB cambió por otro lado, parte del GLB y rehace la copia (así las dos
+  copias no se contradicen).
+- **Orden completo, por cuerpo:** `exportar.js` → `movimiento.js` → (`cadera.js aplicar`) → `separar.js aplicar` →
+  `node --max-old-space-size=12000 tools/unreal/tendones.js <cuerpo> --restaurar` → `… --aplicar` →
+  `.\unreal\py.ps1 'ci.copiar_datos(); ci.importar_mallas(["hombre/muscular", "mujer/muscular"])' -Limite 3000`.
 - Capturas `s1_i_*`, `s1_i_hoja.png` y `mosaico_tendones.png` (el mismo juego): frente, espalda, hombro y escápula,
   deltoides de lado, glúteos, muslo anterior y posterior, rodilla y pierna (frente, detrás, lado), las mismas zonas sin
   los músculos superficiales, mujer y abducción del hombro a 120° (los correctivos siguen bien: la geometría no cambió).
@@ -605,6 +639,32 @@ defecto era solo de la deformación.
   sentadilla); el glúteo medio baja al 66–75 % a 120° y en la sentadilla; los pliegues de los músculos del muslo suben (a
   90°, 823 → 1.074, isquiosurales y grácil a media altura, por la combinación con el peso de rodilla de la web) aunque no
   se ven en las capturas. Pendiente de revisión profesional y del `director-clinico`.
+
+### K2 · Correctivo elástico del glúteo mayor (2026-11-22; código escrito, SIN hornear ni comprobar)
+- **Por qué no bastan los pesos:** con cualquier reparto, cada vértice es su punto de reposo girado una fracción del ángulo
+  alrededor de la cabeza femoral (más cuerda y adelgazamiento). La sección del músculo no cambia de forma: gira y se
+  encoge hacia la articulación, así que a 90–120° conserva el contorno redondeado de la nalga en reposo (las «bolsas»).
+  El barrido de K ya recorrió el espacio de parámetros (o se hincha, o se encoge al 56–77 %). Hace falta que el vientre se
+  alargue a lo largo de la fibra, adelgace de través y no atraviese el hueso: el correctivo del hombro.
+- **`tools/unreal/correctivos_cadera.js`** + **`correctivos_cadera.json`** (parámetros, fuente y estado): reutiliza
+  `anclajes`, `rejilla`, `huesos`, `resolver`, `aplicar` y `medir` de `correctivos.js` (no lo modifica). Anclajes = áreas de la
+  capa `insercion` (para el glúteo mayor solo ilion n517 y tuberosidad glútea n566) + sacro y cóccix + ilion por encima de
+  la cabeza femoral + fémur y tracto iliotibial por debajo del trocánter; la tuberosidad isquiática y el trocánter mayor
+  no se anclan (resbala sobre ellos). Choque con coxal, sacro, cóccix y fémur, sin contorno costal; cada punto conserva el
+  85 % de su holgura de reposo hasta 18 mm (entre él y el hueso están el glúteo medio y los rotadores, que van con pesos).
+  Rangos: flexión de cadera; ejercicios en los que una cadera gira más de 50° (los dos lados a la vez).
+- Salida `Importar/datos/correctivos_cadera.json` + `.bin`, mismo formato que `correctivos.json`. **C++:**
+  `UCorpusDatos::CargarArchivoCorrectivos` junta los dos archivos en una textura (texeles y .bin desplazados; un ejercicio
+  que está en los dos junta sus piezas si tienen los mismos cuadros) y `ACorpusCuerpo::ElegirRejillas` pone base 0 (dato
+  primitivo 24) en las piezas con rejilla que no están en el movimiento puesto: van con sus pesos. Antes toda pieza con
+  rejilla se quedaba en reposo si su movimiento no la incluía (inofensivo con solo el hombro; con la cadera, el glúteo se
+  habría quedado quieto en el remo y el hombro en la sentadilla). El material no cambia.
+- Orden: `node tools/unreal/correctivos_cadera.js anclas hombre R` (comprobar que salen anclajes de áreas, sacro, cóccix,
+  ilion, fémur y tracto) → `medir hombre R` (sonda: pesos frente a correctivo a 90°, 120° y fondo de la sentadilla) →
+  `hornear hombre,mujer` → `.\unreal\py.ps1 'ci.copiar_datos()'` y compilar. Se rehace después de `movimiento.js` o
+  `cadera.js aplicar`, en cualquier orden respecto a `correctivos.js`.
+- Falta: hornear, medir y capturar; `blender/posar.js` (CORR=1) y `simular.js` no lo enseñan; sin choque con el glúteo
+  medio ni los rotadores (solo la holgura); revisión del `director-clinico` de los anclajes (pendiente de revisión profesional).
 
 ### L · Muslo: la masa sigue continua al flexionar la cadera
 - Mismo cambio que K (un solo campo de peso de cadera para todos los músculos de la región): antes cada músculo del muslo

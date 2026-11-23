@@ -5,6 +5,53 @@
 `ccr-2f1bf474-vuby5r`. La carpeta `C:\Users\Admin\Documents\Proyectos Claude\corpus-atlas` es una copia de `main`
 (web v168) y no tiene la edición Unreal: Graphify se construye desde ella.
 
+## Esquema de trabajo y orden (2026-11-23)
+Cada bloque se cierra con: compilar · hornear lo que toque · capturas revisadas (frente, lado, detalle, tira de movimiento)
+· informe del `director-clinico` · commit. Quién: **S** = esta sesión (compila, hornea, captura, integra), **A** = agente
+`arquitecto-ue5` (código y generadores), **D** = agente `director-clinico` (rigor, solo lectura).
+
+**Bloque 1 · Tejidos de la mano y el pie**
+- [ ] Aponeurosis palmar más fisiológica (S, D). Especificación del director lista (triángulo central del palmar largo a las
+      cabezas del 2.º–5.º metacarpiano, 4 bandas hasta el 30 % de la falange proximal, fascículos transversos, 3 aberturas
+      comisurales, ligamento natatorio, sin lengüeta al pulgar, tenar e hipotenar finas). Probado recortar la malla de
+      Z-Anatomy (`aponeurosis_palmar.js`): bordes dentados y ranura original → deshecho. **Hay que modelarla en Blender.**
+- [ ] Aponeurosis plantar con el mismo criterio (S, D): falta captura desde abajo; especificación del director anotada
+      (5 bandas, el dedo gordo sí tiene; banda lateral calcaneometatarsiana)
+- [x] Reglas de tendones de mano, pie y antebrazo revisadas (D) y añadidas a `tendones_reglas.json` (20 patrones nuevos:
+      lumbricales, interóseos, tenar, hipotenar, oponentes, aductor del pulgar, flexor corto de los dedos, cuadrado plantar,
+      abductores del pie, pedio, flexor cubital y extensor cubital del carpo, pronador redondo, braquiorradial, radiales,
+      flexor superficial, palmar largo, ancóneo). Pendiente de revisión profesional.
+- [x] `tendones.js` funciona con los músculos separados (A); además arregló `separar.js`, que había desordenado el color por
+      vértice (oclusión, tendón, cartílago) de las 140 piezas separadas del hombre y las 104 de la mujer.
+
+**Bloque 2 · Músculos en movimiento**
+- [x] Choques entre músculos en los correctivos (A, S): `correctivos_capas.json` (vecinos profundos del dorsal, pectoral y
+      deltoides). Remo: celdas en que asoma un músculo profundo 170 → 16 (> 5 mm: 69 → 0). Capturas `hoja_v3.png`.
+      El trapecio queda fuera (`_capas_pendientes`): con el empuje radial se plegaba (10 → 82 pliegues a 40° de elevación).
+- [ ] Contacto del trapecio con otra dirección de empuje (cuello y escápula) y pliegues del dorsal en el remo (348 → 399)
+- [x] Hueco bajo la clavícula al elevar la escápula 40° (A, S): la porción clavicular del pectoral no tenía área de
+      inserción en el atlas; ahora va anclada a la clavícula (`extremos`). Captura `v_elev40.png`.
+- [x] Glúteo mayor en flexión de cadera y sentadilla (A, S): correctivo elástico propio (`correctivos_cadera.js/.json`,
+      C++ une los dos archivos). Volumen a 90° / 120° / fondo de sentadilla: 89 / 77 / 75 % → 104 / 102 / 103 %, 0 vértices
+      dentro del hueso. Unreal carga 60 músculos en 37 movimientos. Capturas `hoja_v4.png`. Pendiente de revisión clínica.
+- [x] `tendones.js` funcionando con los músculos separados (`--restaurar` / `--aplicar`, que ya incluye el dorsal) (A)
+
+**Bloque 3 · Módulos de aprendizaje**
+- [x] Revisión clínica de los textos de ejercicios en FR/DE (D): 32 correcciones aplicadas (Landmine, Trap-Bar, Hüft-TEP,
+      lombo-radiculalgie…).
+- [ ] El texto español de la web dice «restricciones de abducción tras artroplastia de cadera»: lo clásico es la aducción
+      (vía posterior). Corregirlo en la web en rama aparte (con permiso) y luego sus traducciones.
+- [x] Panel Estudiar revisado en capturas (S): la cámara se quedaba dentro del cuerpo en las entradas sin estructuras
+      (kinesiología, lista del glosario); ahora vuelve al cuerpo entero (`hoja_estudiar2.png`).
+
+**Bloque 4 · Grandes (siguientes sesiones)**
+- [ ] Pruebas ortopédicas con postura y cuerpo acostado · dedos con movimiento · cinta y gráficas de la marcha
+- [ ] Interóseos palmares y lumbricales del pie en Blender · post-procesos `musPost`, `latHug`, `kneePush` · piel del VH
+- [ ] Sprint 3 (fisiología con Niagara) · Sprint 4 (examen 3D, ECOE, ASIA) · Sprint 5 (empaquetado, instalador)
+
+**Con permiso del usuario:** instalar `graphify` (ruedas locales) · borrar `data/hoja_rotulos.png`, `X:\tmp\corr_ref.*`
+y `Importar/antes_correctivos_cuadro0/` · descargar riñón (BodyParts3D) y oído interno (NIH 3D).
+
 ## Sprint 1 (fémur, cadera y rodilla) — en curso
 - [x] Plano de corte, fantasma, pelar capas, panel plegable
 - [x] Relieves óseos del fémur y mapa de origen e inserción
@@ -40,14 +87,14 @@ Hizo Sprint 1 L2/N, Sprint 2 (músculos separados, 10 ejercicios), 59 traduccion
 - [x] Aponeurosis del dorsal ancho (rombo blanco lumbar, como en los atlas que envió el usuario): `tools/unreal/aponeurosis_dorsal.js`
       pinta el canal G del propio dorsal (frontera T10 → cresta ilíaca) y `tendones_reglas.json` incluye ya la hoja posterior de la
       fascia toracolumbar. Hombre y mujer reimportados; capturas `hoja_fascia_toracolumbar.png` y `hoja_aponeurosis_dorsal.png`.
-      Pendiente de revisión profesional. Si se repite `tendones.js --aplicar`, volver a ejecutar `aponeurosis_dorsal.js` después.
+      Pendiente de revisión profesional. `tendones.js --aplicar` ya la vuelve a pintar (frontera en `tendones_reglas.json → laminas`).
 - [x] Remo al 100 % (= 0 % del ciclo): el serrato y el redondo mayor atravesaban el dorsal ancho. Causa: `correctivos.js` trataba
       el cuadro 0 de cada ejercicio como reposo (una iteración y sin colisiones). Corregido y horneado de nuevo (todos los
       ejercicios); celdas atravesadas en el cuadro 0 del remo 451 → 30. Capturas `hoja_cuadro0.png`, `hoja_row0_cerca.png`.
 - [ ] Queda un punto pequeño del redondo mayor junto a la axila en el remo (8–13 mm): los músculos no chocan entre sí (ver abajo).
 - [x] `correctivos.js hornear-ejercicios` ya compacta el .bin (antes crecía en cada horneado); comprobado byte a byte.
 - [ ] Graphify no se actualiza: falta el paquete `graphify` en Python 3.12 (instalarlo desde `_graphify\wheels` con permiso).
-- [ ] `tendones.js --restaurar` ya no funciona con los músculos separados (n1633_4… no están en la web): adaptarlo a `separar.js`.
+- [x] `tendones.js --restaurar` ya funciona con los músculos separados (2026-11-23).
 - [ ] El resto de su lista ya está arriba en el Sprint 2 (FR/DE de ejercicios, pruebas ortopédicas, interóseos y
       lumbricales, dedos, cinta y gráficas) y en `unreal/PLAN_SPRINTS.md`.
 
