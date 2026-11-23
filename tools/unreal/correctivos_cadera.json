@@ -1,0 +1,60 @@
+{
+  "_doc": "Parámetros de tools/unreal/correctivos_cadera.js (correctivo elástico del glúteo mayor en la flexión de cadera y en los ejercicios que la flexionan). Distancias en metros, en el espacio glTF del atlas (Y arriba). Los anclajes extra completan las áreas de origen e inserción de la capa «insercion», que para el glúteo mayor solo tiene dos (ilion y tuberosidad glútea).",
+  "fuente": "Gray's Anatomy, 42.ª ed., cap. «Pelvic girdle, gluteal region and thigh» (glúteo mayor); Moore, Dalley y Agur, Anatomía con orientación clínica, 8.ª ed. (región glútea)",
+  "estado": "pendiente_revision",
+  "musculos": [
+    {
+      "en": "Gluteus maximus muscle",
+      "nota": "Origen: ilion por detrás de la línea glútea posterior, cara posterior del sacro y del cóccix, aponeurosis del erector de la columna y ligamento sacrotuberoso. Inserción: tracto iliotibial (la mayor parte de las fibras, ≈3/4, cifra aproximada) y tuberosidad glútea del fémur (fibras profundas de la parte inferior). Resbala sobre la tuberosidad isquiática (bolsa isquiática) y el trocánter mayor (bolsa trocantérea).",
+      "fuente": "Gray's Anatomy, 42.ª ed.; Moore, 8.ª ed.",
+      "estado": "pendiente_revision"
+    }
+  ],
+  "rangos": [
+    { "rom": "cadera", "movs": [0], "nota": "solo la flexión (0–120°): es donde el glúteo mayor se hinchaba y colgaba; extensión y abducción ya salían bien con los pesos (punto K del LEEME)" }
+  ],
+  "ejercicios": {
+    "umbral_giro_cadera_grados": 50,
+    "nota": "un ejercicio lleva correctivo de cadera si en algún instante una cadera gira más que esto (giro total de la articulación: sentadilla, zancada, peso muerto, sentarse y levantarse…). Por encima de la abducción de pie para no aplicarlo donde los pesos ya van bien"
+  },
+  "huesos_colision": "^(Hip bone|Sacrum|Coccyx|Femur)$",
+  "holgura": {
+    "fraccion": 0.85,
+    "maxima_m": 0.018,
+    "nota": "cada punto del músculo conserva, como mínimo, esta fracción de su distancia al hueso en reposo (hasta maxima_m; debe ser menor que los 24 mm del campo de distancia). Entre el glúteo mayor y el hueso están el glúteo medio, el piriforme, los gémelos, el obturador interno y el cuadrado femoral, que van con sus pesos: si el glúteo mayor se pegara al hueso los atravesaría. En el hombro es 2,5 mm porque sus músculos tocan el hueso."
+  },
+  "rigidez_anclaje": 30,
+  "anclajes_extra": [
+    {
+      "tipo": "hueso", "hueso": "^(Sacrum|Coccyx)$", "distancia_m": 0.008,
+      "nota": "origen en la cara posterior del sacro y en el borde del cóccix: el atlas no tiene área dibujada",
+      "fuente": "Gray's Anatomy, 42.ª ed.", "estado": "pendiente_revision"
+    },
+    {
+      "tipo": "hueso", "hueso": "^Hip bone$", "distancia_m": 0.006, "sobre_cadera_m": 0.03,
+      "nota": "ilion por detrás de la línea glútea posterior. Por debajo de la cabeza femoral no se ancla: el músculo resbala sobre la tuberosidad isquiática y la cubre en bipedestación; al flexionar la cadera la destapa",
+      "fuente": "Gray's Anatomy, 42.ª ed.; Moore, 8.ª ed.", "estado": "pendiente_revision"
+    },
+    {
+      "tipo": "hueso", "hueso": "^Femur$", "distancia_m": 0.006, "bajo_cadera_m": 0.06,
+      "nota": "tuberosidad glútea (por si el área n566 no se encuentra). Por encima no: el músculo resbala sobre el trocánter mayor",
+      "fuente": "Gray's Anatomy, 42.ª ed.", "estado": "pendiente_revision"
+    },
+    {
+      "tipo": "pieza", "pieza": "^Sacrotuberous ligament", "capa": "articular", "hueso": "^Sacrum$", "distancia_m": 0.015, "sobre_cadera_m": -0.03,
+      "nota": "origen de las fibras inferomediales en el ligamento sacrotuberoso (las que colgaban en flexión). Solo la parte sacrococcígea y media: por debajo de 3 cm bajo el centro de la cabeza femoral queda libre, junto a la tuberosidad isquiática, donde el músculo resbala (director clínico, 2026-11-23)",
+      "fuente": "Gray's Anatomy, 42.ª ed.; Moore, 8.ª ed.; Netter, 7.ª ed.", "estado": "pendiente_revision"
+    },
+    {
+      "tipo": "pieza", "pieza": "^Iliotibial tract", "hueso": "^Femur$", "distancia_m": 0.008, "bajo_cadera_m": 0.06,
+      "nota": "inserción de las fibras superficiales en el tracto iliotibial, que va con el muslo (mismo criterio que la fracción de fibra de cadera.js)",
+      "fuente": "Gray's Anatomy, 42.ª ed.", "estado": "pendiente_revision"
+    }
+  ],
+  "sonda": {
+    "posturas": [["cad90", "cadera", 0, 90], ["cad120", "cadera", 0, 120], ["sent_fondo", "ej:squat", "prof", 50]],
+    "despegue_m": 0.015,
+    "radio_crece": 0.10,
+    "nota": "medir: «dentro» = vértices más de 3 mm por dentro de un hueso que en reposo; «despegados» = vértices que se alejan del hueso más cercano más de despegue_m respecto al reposo; «bolsa» = vértices cuya distancia al centro de la cabeza femoral crece más de radio_crece (10 %)"
+  }
+}

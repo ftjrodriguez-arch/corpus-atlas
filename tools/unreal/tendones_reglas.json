@@ -1,0 +1,608 @@
+{
+ "_nota": "Tendones de la edición Unreal (canal G del color por vértice de la capa muscular). Lo lee tools/unreal/tendones.js --aplicar. Dice, para la unión de cada músculo con cada una de sus áreas de origen e inserción (capa «insercion»), si es tendinosa o carnosa. Criterio anatómico de Gray (42.ª ed.) y Moore, escrito sin disección ni revisión: TODO PENDIENTE DE REVISIÓN PROFESIONAL (revisado: false).",
+ "_como": "Orden de decisión: 1) musculos[nombre en inglés del catálogo]: «hueso» (expresión regular sobre el nombre en inglés del hueso donde está el área; manda sobre el papel) y después «origen» / «insercion» (papel del área según el séptimo campo de data/catalog.json). 2) patrones (expresión regular sobre el nombre del músculo; el primero que acierta), con las mismas claves. 3) geometría: fracción de los vértices de la pieza que queda en la zona del área. Si una regla da un extremo tendinoso y el atlas no tiene área para ese papel, se pinta el extremo de la pieza opuesto a las áreas que sí tiene (sin ninguna área: hacia «insercion_hacia»). «todo»: la pieza entera es tendón o aponeurosis. «sin_extremos»: no se pinta nada donde no hay área.",
+ "tipos": {
+  "tendon": {
+   "zona": 1,
+   "intensidad": 1,
+   "_nota": "tendón redondo o plano: zona = 5 % de la longitud de la pieza (3–20 mm), fundido hasta 2,2 veces"
+  },
+  "aponeurosis": {
+   "zona": 0.7,
+   "intensidad": 1,
+   "_nota": "lámina tendinosa corta"
+  },
+  "mixto": {
+   "zona": 0.4,
+   "intensidad": 0.55,
+   "_nota": "fibras carnosas con un borde tendinoso fino"
+  },
+  "carnoso": {
+   "zona": 0,
+   "intensidad": 0,
+   "_nota": "las fibras musculares llegan al hueso: no se pinta"
+  }
+ },
+ "defecto": {
+  "fraccion_carnosa": 0.25,
+  "fraccion_mixta": 0.15,
+  "_nota": "regla geométrica para lo que no tiene entrada: si la zona del área cubre ≥ 25 % de los vértices de la pieza, el área es un origen ancho y carnoso; entre 15 y 25 %, mixta; menos, tendón",
+  "sin_extremos": "orbicular|sphincter|constrictor|arytenoid|tarsus|platysma|trochlea|galea|diaphragm"
+ },
+ "laminas": [
+  {
+   "en": "Latissimus dorsi muscle",
+   "frontera": [[0.17, 0.46], [0.65, 0.07], [0.82, 0.07]],
+   "fundido": 0.015,
+   "_como": "Lo pinta tools/unreal/aponeurosis_dorsal.js (y tendones.js --aplicar al final). frontera = [alto, ancho] en fracciones de la caja de la pieza: alto desde abajo, ancho desde la línea media; por debajo de cada alto, la franja de ese ancho junto a la línea media es aponeurosis (interpolado entre puntos; por encima del último, nada). fundido en metros hacia fuera. G = máx(G anterior, aponeurosis).",
+   "nota": "Origen aponeurótico del dorsal ancho: apófisis espinosas T7–L5 y sacro por la hoja posterior de la fascia toracolumbar, y cresta ilíaca: el rombo blanco lumbar de los atlas. Alto 0,17 ≈ cresta ilíaca / L4, 0,65 ≈ T10, 0,82 ≈ T7.",
+   "fuente": "Gray's Anatomy 42.ª ed.; Moore, Anatomía con orientación clínica; referencias del usuario (2026-11-22)",
+   "estado": "pendiente_revision",
+   "revisado": false
+  }
+ ],
+ "musculos": {
+  "Gluteus maximus muscle": {
+   "origen": "mixto",
+   "insercion": "aponeurosis",
+   "revisado": false,
+   "nota": "Origen carnoso en ilion, sacro y cóccix, en parte por aponeurosis (del erector de la columna, glútea) y el ligamento sacrotuberoso; termina en lámina tendinosa: tracto iliotibial y tuberosidad glútea."
+  },
+  "Gluteus medius muscle": {
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Origen carnoso en la fosa glútea; tendón ancho en la cara lateral del trocánter mayor."
+  },
+  "Gluteus minimus muscle": {
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Origen carnoso entre las líneas glúteas anterior e inferior; tendón en el borde anterior del trocánter mayor."
+  },
+  "Tensor fasciae latae": {
+   "origen": "mixto",
+   "insercion": "aponeurosis",
+   "revisado": false,
+   "nota": "Fibras cortas tendinosas en la EIAS y la cresta; se continúa con el tracto iliotibial."
+  },
+  "Piriformis muscle": {
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "revisado": false,
+   "insercion_hacia": "lateral",
+   "nota": "Tres digitaciones carnosas en la cara anterior del sacro; tendón redondo en el vértice del trocánter mayor. Sin áreas en el atlas."
+  },
+  "Obturator internus": {
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Origen carnoso en la membrana obturatriz y su contorno; tendón que gira en la escotadura ciática menor hasta la cara medial del trocánter mayor."
+  },
+  "Obturator externus": {
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Origen carnoso en la cara externa de la membrana obturatriz; tendón en la fosa trocantérica."
+  },
+  "Superior gemellus muscle": {
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Carnoso en la espina ciática; se funde con el tendón del obturador interno."
+  },
+  "Inferior gemellus muscle": {
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Carnoso en la tuberosidad isquiática; se funde con el tendón del obturador interno."
+  },
+  "Quadratus femoris muscle": {
+   "origen": "carnoso",
+   "insercion": "mixto",
+   "revisado": false,
+   "nota": "Músculo cuadrilátero de fibras casi directas: borde lateral de la tuberosidad isquiática → tubérculo cuadrado."
+  },
+  "Iliacus muscle": {
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Origen carnoso en la fosa ilíaca; termina en el tendón del psoas (trocánter menor)."
+  },
+  "Psoas major": {
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "revisado": false,
+   "insercion_hacia": "abajo",
+   "nota": "Fascículos carnosos en cuerpos vertebrales y discos de T12 a L5 y en las apófisis costales de L1 a L5; tendón al trocánter menor. Sin áreas en el atlas."
+  },
+  "Psoas minor muscle": {
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "revisado": false,
+   "insercion_hacia": "abajo",
+   "nota": "Vientre corto y tendón largo y plano a la eminencia iliopúbica. Sin áreas en el atlas."
+  },
+  "Sartorius muscle": {
+   "origen": "mixto",
+   "insercion": "aponeurosis",
+   "revisado": false,
+   "nota": "Fibras tendinosas cortas en la EIAS; expansión aponeurótica en la pata de ganso."
+  },
+  "Rectus femoris muscle": {
+   "origen": "tendon",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Tendón directo (EIAI) y reflejo (surco supraacetabular); tendón del cuádriceps."
+  },
+  "Vastus lateralis muscle": {
+   "origen": "mixto",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Nace por una aponeurosis ancha (línea intertrocantérica, trocánter mayor, labio lateral de la línea áspera) que queda en la cara profunda y superficial alta; se deja como borde fino para no blanquear todo el origen. Tendón del cuádriceps."
+  },
+  "Vastus medialis muscle": {
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Origen en la línea intertrocantérica, línea espiral y labio medial de la línea áspera, con fibras carnosas hasta muy abajo; tendón del cuádriceps y retináculo medial."
+  },
+  "Vastus intermedius muscle": {
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Origen carnoso en las caras anterior y lateral de la diáfisis femoral; lámina profunda del tendón del cuádriceps."
+  },
+  "Articularis genus muscle": {
+   "origen": "carnoso",
+   "insercion": "carnoso",
+   "revisado": false,
+   "sin_extremos": true,
+   "nota": "Fascículos carnosos del fémur distal a la bolsa suprarrotuliana; sin tendón."
+  },
+  "Pectineus muscle": {
+   "origen": "carnoso",
+   "insercion": "mixto",
+   "revisado": false,
+   "nota": "Origen carnoso en el pecten del pubis; inserción corta en la línea pectínea."
+  },
+  "Adductor longus": {
+   "origen": "tendon",
+   "insercion": "aponeurosis",
+   "revisado": false,
+   "nota": "Tendón estrecho y fuerte en el cuerpo del pubis; aponeurosis en el tercio medio de la línea áspera."
+  },
+  "Adductor brevis": {
+   "origen": "mixto",
+   "insercion": "aponeurosis",
+   "revisado": false,
+   "insercion_hacia": "abajo",
+   "nota": "Origen estrecho en el cuerpo y la rama inferior del pubis; aponeurosis en la línea pectínea y la línea áspera. Sin áreas en el atlas."
+  },
+  "Adductor magnus": {
+   "origen": "mixto",
+   "insercion": "mixto",
+   "revisado": false,
+   "nota": "Carnoso en la rama isquiopúbica y tendinoso en la tuberosidad isquiática; aponeurosis a lo largo de la línea áspera y tendón redondo al tubérculo del aductor. El área de inserción del atlas recorre media pieza: se deja como borde fino (el tendón del tubérculo no se distingue). Dudoso."
+  },
+  "Adductor minimus": {
+   "origen": "carnoso",
+   "insercion": "mixto",
+   "revisado": false,
+   "insercion_hacia": "abajo",
+   "nota": "Porción superior del aductor mayor, casi toda carnosa. Sin áreas en el atlas."
+  },
+  "Gracilis muscle": {
+   "origen": "aponeurosis",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Aponeurosis delgada en el cuerpo y la rama inferior del pubis; tendón largo en la pata de ganso."
+  },
+  "Long head of biceps femoris": {
+   "origen": "tendon",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Tendón común con el semitendinoso en la tuberosidad isquiática; tendón en la cabeza del peroné."
+  },
+  "Short head of biceps femoris": {
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "revisado": false,
+   "insercion_hacia": "abajo",
+   "hueso": {
+    "Femur": "carnoso",
+    "Fibula": "tendon"
+   },
+   "nota": "Origen carnoso en el labio lateral de la línea áspera; se une al tendón de la cabeza larga. Sin áreas en el atlas."
+  },
+  "Semitendinosus muscle": {
+   "origen": "tendon",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Tendón común con el bíceps en la tuberosidad isquiática; tendón largo y redondo en la pata de ganso."
+  },
+  "Semimembranosus muscle": {
+   "origen": "tendon",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Tendón ancho y plano en la tuberosidad isquiática; tendón en el cóndilo medial de la tibia."
+  },
+  "Popliteus muscle": {
+   "origen": "tendon",
+   "insercion": "carnoso",
+   "revisado": false,
+   "nota": "Tendón redondo en el cóndilo lateral del fémur (dentro de la cápsula); inserción carnosa en la cara posterior de la tibia, sobre la línea del sóleo."
+  },
+  "Medial head of gastrocnemius": {
+   "origen": "tendon",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Tendón fuerte y plano sobre el cóndilo medial; tendón calcáneo."
+  },
+  "Lateral head of gastrocnemius": {
+   "origen": "tendon",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Tendón sobre el cóndilo lateral; tendón calcáneo."
+  },
+  "Plantaris muscle": {
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Vientre pequeño carnoso en la línea supracondílea lateral; tendón muy largo y fino."
+  },
+  "Soleus muscle": {
+   "origen": "mixto",
+   "insercion": "tendon",
+   "revisado": false,
+   "nota": "Origen en la cabeza y el tercio superior del peroné, la línea del sóleo y el arco tendinoso: fibras carnosas con láminas aponeuróticas; tendón calcáneo."
+  }
+ },
+ "patrones": [
+  {
+   "re": "^Pronator quadratus",
+   "origen": "carnoso",
+   "insercion": "carnoso",
+   "hueso": {
+    "Radius|Ulna": "carnoso"
+   },
+   "nota": "sin tendón: origen e inserción carnosos en el cuarto distal del cúbito y del radio"
+  },
+  {
+   "re": "tract$|aponeurosis|retinacul|\\btendon\\b|linea alba|rectus sheath|layer of thoracolumbar fascia",
+   "todo": "tendon",
+   "nota": "piezas que son enteras tendón, aponeurosis o retináculo (tracto iliotibial…). La hoja posterior de la fascia toracolumbar va en la capa muscular y es el rombo blanco lumbar donde nace el dorsal ancho (antes salía granate como el músculo; referencias del usuario, 2026-11-22)"
+  },
+  {
+   "re": "^Latissimus dorsi",
+   "hueso": {
+    "Scapula": "carnoso",
+    "rib": "carnoso",
+    "Hip bone": "aponeurosis"
+   },
+   "extremo": "tendon",
+   "nota": "origen por la aponeurosis toracolumbar y la cresta ilíaca; fascículos carnosos de las costillas 9.ª–12.ª y, a veces, del ángulo inferior de la escápula (el catálogo lo marca como inserción y dejaba una mancha blanca sobre la escápula); tendón plano en el surco intertubercular"
+  },
+  {
+   "re": "^(Supraspinatus|Infraspinatus|Subscapularis|Teres minor)",
+   "hueso": {
+    "Scapula": "carnoso",
+    "Humerus": "tendon"
+   },
+   "insercion": "tendon",
+   "nota": "manguito rotador: origen carnoso en su fosa; tendón en los tubérculos del húmero"
+  },
+  {
+   "re": "^Teres major",
+   "hueso": {
+    "Scapula": "carnoso"
+   },
+   "insercion": "tendon",
+   "nota": "origen carnoso en el ángulo inferior; tendón plano en la cresta del tubérculo menor"
+  },
+  {
+   "re": "part of deltoid",
+   "hueso": {
+    "Clavicle": "carnoso",
+    "Scapula": "mixto",
+    "Humerus": "tendon"
+   },
+   "insercion": "tendon",
+   "nota": "clavicular carnoso; acromial con tabiques tendinosos; espinal por lámina aponeurótica; tendón en la tuberosidad deltoidea"
+  },
+  {
+   "re": "part of trapezius",
+   "hueso": {
+    "Clavicle": "carnoso",
+    "Scapula": "aponeurosis",
+    "Occipital": "mixto"
+   },
+   "nota": "inserción en la clavícula carnosa; en el acromion y la espina de la escápula, lámina tendinosa (la porción ascendente acaba en un tendón aplanado sobre el tubérculo de la espina, con bolsa subtendinosa)"
+  },
+  {
+   "re": "^Rhomboid",
+   "hueso": {
+    "Scapula": "mixto"
+   },
+   "nota": "fibras tendinosas cortas en los dos extremos"
+  },
+  {
+   "re": "^Levator scapulae",
+   "hueso": {
+    "Scapula": "mixto",
+    "Atlas|Axis|Vertebra": "tendon"
+   },
+   "nota": "lengüetas tendinosas en C1–C4"
+  },
+  {
+   "re": "pectoralis major",
+   "extremo": "tendon",
+   "insercion_hacia": "lateral",
+   "hueso": {
+    "sternum|Costal|rib|Clavicle|Xiphoid": "carnoso",
+    "Humerus": "tendon"
+   },
+   "insercion": "tendon",
+   "origen": "carnoso",
+   "nota": "origen carnoso ancho; tendón bilaminar en la cresta del tubérculo mayor (el catálogo lo marca al revés)"
+  },
+  {
+   "re": "^Pectoralis minor",
+   "hueso": {
+    "rib": "mixto",
+    "Scapula": "tendon"
+   },
+   "nota": "digitaciones con lámina aponeurótica; tendón en la coracoides"
+  },
+  {
+   "re": "^Serratus anterior",
+   "hueso": {
+    "rib": "carnoso",
+    "Scapula": "carnoso"
+   },
+   "sin_extremos": true,
+   "nota": "digitaciones carnosas; inserción carnosa en el borde medial de la escápula"
+  },
+  {
+   "re": "^Subclavius",
+   "hueso": {
+    "Clavicle": "carnoso"
+   },
+   "insercion": "carnoso",
+   "origen": "tendon",
+   "nota": "tendón corto en la primera costilla; inserción carnosa en el surco de la clavícula"
+  },
+  {
+   "re": "^Brachialis",
+   "hueso": {
+    "Humerus": "carnoso",
+    "Ulna": "tendon"
+   },
+   "nota": "origen carnoso en la mitad distal del húmero"
+  },
+  {
+   "re": "^Medial head of triceps",
+   "hueso": {
+    "Humerus": "carnoso"
+   },
+   "insercion": "tendon",
+   "nota": "origen carnoso bajo el surco radial; tendón del tríceps"
+  },
+  {
+   "re": "^Lateral head of triceps",
+   "hueso": {
+    "Humerus": "mixto"
+   },
+   "insercion": "tendon",
+   "nota": "origen lineal aponeurótico; tendón del tríceps"
+  },
+  {
+   "re": "^Temporalis",
+   "hueso": {
+    "Parietal|Frontal|Sphenoid|Temporal": "carnoso",
+    "Mandible": "tendon"
+   },
+   "nota": "origen carnoso en la fosa temporal; tendón en la apófisis coronoides"
+  },
+  {
+   "re": "^(Flexor pollicis longus|Flexor digitorum profundus|Extensor indicis|Extensor pollicis (longus|brevis)|Abductor pollicis longus)",
+   "hueso": {
+    "Radius|Ulna|Humerus": "carnoso",
+    "phalanx|metacarpal|Trapezium": "tendon"
+   },
+   "insercion": "tendon",
+   "nota": "músculos profundos del antebrazo: origen carnoso en la diáfisis y la membrana interósea; tendón largo (el abductor largo del pulgar puede mandar una lengüeta al trapecio)"
+  },
+  {
+   "re": "^Lumbrical muscles of hand",
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "insercion_hacia": "abajo",
+   "nota": "nacen carnosos de los tendones del flexor profundo (sin hueso); tendón a la banda lateral del aparato extensor. Director clínico 2026-11-23, pendiente de revisión"
+  },
+  {
+   "re": "^Lumbrical muscles of foot",
+   "origen": "carnoso",
+   "insercion": "tendon",
+   "insercion_hacia": "delante",
+   "nota": "nacen carnosos de los tendones del flexor largo de los dedos; tendón al aparato extensor de los dedos. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^(Dorsal interossei muscles of (hand|foot)|Palmar interossei muscles|Plantar interossei muscles)",
+   "hueso": { "metacarpal|metatarsal": "carnoso", "phalanx": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen carnoso en las diáfisis de los metacarpianos/metatarsianos; tendón en la base de la falange proximal y el aparato extensor. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^(Abductor pollicis brevis|(Superficial|Deep) head of flexor pollicis brevis|Abductor digiti minimi of hand|Flexor digiti minimi of hand)",
+   "origen": "mixto",
+   "insercion": "tendon",
+   "hueso": { "phalanx|Sesamoid": "tendon" },
+   "nota": "eminencias tenar e hipotenar: origen mixto en el retináculo flexor, escafoides, trapecio, pisiforme y gancho del ganchoso; tendón en la base de la falange proximal o los sesamoideos. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Opponens (pollicis|digiti minimi)",
+   "insercion": "carnoso",
+   "hueso": { "metacarpal|metatarsal": "carnoso" },
+   "nota": "los oponentes se insertan carnosos a lo largo de la diáfisis del 1.er/5.º metacarpiano (el del pie, inconstante, en el 5.º metatarsiano), sin tendón. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Adductor pollicis",
+   "hueso": { "Capitate|metacarpal": "carnoso", "phalanx|Sesamoid": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen carnoso en el grande y en la base y diáfisis del 2.º–3.er metacarpiano; tendón en el sesamoideo medial y la base de la falange proximal del pulgar. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Flexor digitorum brevis",
+   "hueso": { "Calcaneus": "mixto", "phalanx": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen mixto en la apófisis medial del calcáneo y la aponeurosis plantar; cuatro tendones perforados a las falanges medias. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Quadratus plantae",
+   "origen": "mixto",
+   "insercion": "carnoso",
+   "sin_extremos": true,
+   "nota": "cabeza medial carnosa y lateral tendinosa en el calcáneo; se inserta carnoso en el tendón del flexor largo de los dedos: no se pinta tendón en ese extremo. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^(Abductor hallucis|Abductor digiti minimi of foot)",
+   "hueso": { "Calcaneus": "mixto", "phalanx|Sesamoid": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen mixto en la tuberosidad del calcáneo, el retináculo flexor y la aponeurosis plantar; tendón en la base de la falange proximal. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^(Medial|Lateral) head of flexor hallucis brevis",
+   "origen": "tendon",
+   "insercion": "tendon",
+   "nota": "origen tendinoso en el cuboides, el cuneiforme lateral y la expansión del tibial posterior; tendón con los sesamoideos. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^(Extensor digitorum brevis|Extensor hallucis brevis)",
+   "hueso": { "Calcaneus": "carnoso", "phalanx": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen carnoso en la cara dorsal del calcáneo; tendones a la falange proximal del dedo gordo y a los extensores largos del 2.º–4.º. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Flexor digiti minimi of foot",
+   "hueso": { "metatarsal": "carnoso", "phalanx": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen carnoso en la base del 5.º metatarsiano; tendón en la base de la falange proximal. Director clínico 2026-11-23"
+  },
+  {
+   "re": "flexor carpi ulnaris$",
+   "hueso": { "Humerus": "tendon", "Ulna": "aponeurosis", "Pisiform|Hamate|metacarpal": "tendon" },
+   "insercion": "tendon",
+   "nota": "cabeza humeral por el tendón común flexor; cabeza cubital por una aponeurosis a lo largo del borde posterior del cúbito; tendón al pisiforme, ganchoso y 5.º metacarpiano. Director clínico 2026-11-23"
+  },
+  {
+   "re": "extensor carpi ulnaris$",
+   "hueso": { "Humerus": "tendon", "Ulna": "aponeurosis", "metacarpal": "tendon" },
+   "insercion": "tendon",
+   "nota": "tendón común extensor en el epicóndilo lateral y aponeurosis en el borde posterior del cúbito; tendón a la base del 5.º metacarpiano. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Pronator teres",
+   "hueso": { "Humerus|Ulna": "mixto", "Radius": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen mixto (tendón común flexor y apófisis coronoides); tendón plano en la mitad de la cara lateral del radio. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Brachioradialis",
+   "hueso": { "Humerus": "carnoso", "Radius": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen carnoso en los dos tercios proximales de la cresta supracondílea lateral; tendón en la apófisis estiloides del radio. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Extensor carpi radialis longus",
+   "hueso": { "Humerus": "mixto", "metacarpal": "tendon" },
+   "insercion": "tendon",
+   "nota": "origen mixto en la cresta supracondílea lateral; tendón en la base del 2.º metacarpiano. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Extensor carpi radialis brevis",
+   "hueso": { "Humerus": "tendon", "metacarpal": "tendon" },
+   "insercion": "tendon",
+   "nota": "tendón común extensor en el epicóndilo lateral; tendón en la base del 3.er metacarpiano. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Humero-ulnar head of flexor digitorum superficialis",
+   "hueso": { "Humerus|Ulna": "tendon", "phalanx": "tendon" },
+   "insercion": "tendon",
+   "nota": "tendón común flexor; tendones a las falanges medias. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Radial head of flexor digitorum superficialis",
+   "hueso": { "Radius": "mixto", "phalanx": "tendon" },
+   "insercion": "tendon",
+   "nota": "lámina aponeurótica fina en la línea oblicua del radio; tendones a las falanges medias. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^(Flexor carpi radialis|Palmaris longus)",
+   "hueso": { "Humerus": "tendon", "metacarpal": "tendon" },
+   "insercion": "tendon",
+   "nota": "tendón común flexor; tendón a la base del 2.º–3.er metacarpiano (palmar largo: a la aponeurosis palmar). Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Anconeus",
+   "hueso": { "Humerus": "tendon", "Ulna": "carnoso" },
+   "nota": "origen tendinoso en el epicóndilo lateral; inserción carnosa en el olécranon y la cara posterior del cúbito. Director clínico 2026-11-23"
+  },
+  {
+   "re": "^Supinator",
+   "hueso": {
+    "Radius": "carnoso",
+    "Ulna|Humerus": "mixto"
+   },
+   "sin_extremos": true,
+   "nota": "envuelve carnoso el tercio proximal del radio"
+  },
+  {
+   "re": "^(Tibialis (anterior|posterior)|Extensor digitorum longus|Extensor hallucis longus|Fibularis (longus|brevis|tertius)|Flexor digitorum longus|Flexor hallucis longus)",
+   "hueso": {
+    "Tibia|Fibula": "carnoso",
+    "metatarsal|cuneiform|phalanx|Navicular|Cuboid|Calcaneus|Talus": "tendon"
+   },
+   "insercion": "tendon",
+   "nota": "músculos de la pierna: origen carnoso en la diáfisis y la membrana interósea; tendón largo al pie"
+  },
+  {
+   "re": "^Rectus abdominis",
+   "hueso": {
+    "Hip bone": "mixto",
+    "Costal|rib|Xiphoid": "carnoso"
+   },
+   "sin_extremos": true,
+   "nota": "tendón corto en la cresta del pubis; inserción carnosa en los cartílagos 5.º–7.º"
+  },
+  {
+   "re": "^External abdominal oblique",
+   "hueso": {
+    "rib": "carnoso",
+    "Hip bone": "mixto"
+   },
+   "sin_extremos": true,
+   "nota": "digitaciones carnosas en las costillas 5.ª–12.ª; el resto es aponeurosis (pieza aparte)"
+  },
+  {
+   "re": "^(Internal abdominal oblique|Transversus abdominis)",
+   "hueso": {
+    "rib|Costal": "carnoso",
+    "Hip bone": "carnoso"
+   },
+   "sin_extremos": true,
+   "nota": "origen carnoso en la cresta ilíaca y la fascia toracolumbar"
+  },
+  {
+   "re": "^Sternocleidomastoid",
+   "hueso": {
+    "sternum": "tendon",
+    "Clavicle": "mixto",
+    "Temporal": "tendon",
+    "Occipital": "aponeurosis"
+   },
+   "nota": "cabeza esternal tendinosa, clavicular carnosa y aponeurótica; tendón en la mastoides y aponeurosis delgada en la línea nucal superior"
+  }
+ ],
+ "revision_clinica": "2026-11-21: correcciones del agente director-clinico aplicadas (psoas, glúteo mayor, trapecio, subclavio, esternocleidomastoideo, pronador cuadrado). Pendiente: tendón del aductor mayor al tubérculo del aductor."
+}

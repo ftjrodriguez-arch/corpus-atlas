@@ -1,0 +1,597 @@
+{
+ "fecha": "2026-11-23T00:53:44.845Z",
+ "resumen": {
+  "errores": 0,
+  "avisos": 96,
+  "nombres_comprobados": 21050,
+  "errores_por_tipo": {},
+  "avisos_por_tipo": {
+   "pares": 37,
+   "sin_traducir": 4,
+   "otro_idioma": 1,
+   "mayusculas": 53,
+   "copias": 1
+  },
+  "mayusculas_mismo_valor": 233
+ },
+ "omitido": [],
+ "errores": [],
+ "avisos": [
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n316,n367,n368,n369",
+   "msg": "«Serratus posterior inferior muscle» (insercion, inserción) solo tiene lado derecho"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n317,n406,n407,n408",
+   "msg": "«Serratus posterior superior muscle» (insercion, inserción) solo tiene lado derecho"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n409",
+   "msg": "«Procerus muscle» (insercion, inserción) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n418,n419,n422,n423,n425,n426,n948,n420,n421,n424,n766,n946,n947,n949,n950,n951",
+   "msg": "«Serratus anterior muscle» (insercion, inserción): 7 derecho(s) frente a 9 izquierdo(s)"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n433",
+   "msg": "«Short head of biceps brachii» (insercion, origen) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n492,n494,n497",
+   "msg": "«Plantar interossei muscles» (insercion, origen) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n562",
+   "msg": "«Pectineus muscle» (insercion, inserción) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n564",
+   "msg": "«Short head of biceps femoris» (insercion, inserción) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n568",
+   "msg": "«Piriformis muscle» (insercion, inserción) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n587,n602,n637",
+   "msg": "«Plantar interossei muscles» (insercion, inserción) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n621",
+   "msg": "«Pronator quadratus» (insercion, inserción) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n630",
+   "msg": "«Pronator quadratus» (insercion, origen) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n1065",
+   "msg": "«Intra-articular ligament of head of rib» (articular) solo tiene lado derecho"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n1207",
+   "msg": "«Ulnopisiform ligament» (articular) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n2173",
+   "msg": "«Right testicular artery» (arterial) solo tiene lado derecho"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n2282",
+   "msg": "«Insular branches of middle cerebral artery (M2)» (arterial) solo tiene lado derecho"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n2283",
+   "msg": "«Insular branches of middle cerebral artery (M2-segment)» (arterial) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n2308",
+   "msg": "«Middle cerebral artery (M3-segment)» (arterial) solo tiene lado derecho"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n2310",
+   "msg": "«Middle cerebral artery (M3 segment)» (arterial) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n2425",
+   "msg": "«Descending branch of lateral circumflex femoral artery» (arterial) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n3085",
+   "msg": "«Cochlear nerve» (nervioso_periferico) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n3262",
+   "msg": "«Common plantar digital branches of medial plantar nerve» (nervioso_periferico) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n3587",
+   "msg": "«Middle lobar bronchus» (respiratorio) solo tiene lado derecho"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/catalog.json",
+   "clave": "n3588",
+   "msg": "«Intermediate bronchus» (respiratorio) solo tiene lado derecho"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/fem.json → cat",
+   "clave": "f532,f533,f534,f535,f536,f537,f538,f539,f540,f541,f504,f505,f506,f507,f508,f509,f510,f511,f512,f513,f514",
+   "msg": "«Renal papilla» (f_visceras): 10 derecho(s) frente a 11 izquierdo(s)"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/fem.json → cat",
+   "clave": "f542,f543,f544,f545,f546,f547,f548,f549,f550,f551,f515,f516,f517,f518,f519,f520,f521,f522,f523,f524,f525",
+   "msg": "«Renal pyramid» (f_visceras): 10 derecho(s) frente a 11 izquierdo(s)"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/fem.json → cat",
+   "clave": "f562,f563,f564,f577,f578,f579,f580",
+   "msg": "«Major renal calyx» (f_visceras): 3 derecho(s) frente a 4 izquierdo(s)"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/fem.json → cat",
+   "clave": "f731",
+   "msg": "«Medial bronchopulmonary segment» (f_visceras) solo tiene lado derecho"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/fem.json → cat",
+   "clave": "f732",
+   "msg": "«Lateral bronchopulmonary segment» (f_visceras) solo tiene lado derecho"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/fem.json → cat",
+   "clave": "f733",
+   "msg": "«Hilum of lung, middle lobe part» (f_visceras) solo tiene lado derecho"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/fem.json → cat",
+   "clave": "f751",
+   "msg": "«Superior lingular bronchus» (f_visceras) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/fem.json → cat",
+   "clave": "f759",
+   "msg": "«Inferior lingular bronchus» (f_visceras) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/fem.json → cat",
+   "clave": "f761",
+   "msg": "«Middle lobar bronchus» (f_visceras) solo tiene lado derecho"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/fem.json → cat",
+   "clave": "f768",
+   "msg": "«Medial segmental bronchus» (f_visceras) solo tiene lado derecho"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/fem.json → cat",
+   "clave": "f769",
+   "msg": "«Lateral segmental bronchus» (f_visceras) solo tiene lado derecho"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/fem.json → cat",
+   "clave": "f705,f706",
+   "msg": "«Common carotid artery» (f_vasos) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "pares",
+   "archivo": "data/fem.json → cat",
+   "clave": "f707,f708",
+   "msg": "«Subclavian artery» (f_vasos) solo tiene lado izquierdo"
+  },
+  {
+   "tipo": "sin_traducir",
+   "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_fr.json",
+   "clave": "en inglés",
+   "msg": "126 frases iguales al inglés (más 298 términos cortos): casos 101, patologias 1, glosario 24 (p. ej. casos.grupos[1].items[0].secs[3][0] «Test · Slump» | casos.grupos[1].items[1].secs[1][0] «Test · FADIR» | casos.grupos[1].items[1].secs[3][0] «Test · FABER (Patrick)»)"
+  },
+  {
+   "tipo": "sin_traducir",
+   "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_de.json",
+   "clave": "en inglés",
+   "msg": "124 frases iguales al inglés (más 1943 términos cortos): lecciones 1, casos 103, patologias 1, glosario 19 (p. ej. lecciones.grupos[4].items[4].q[2].o[3] «Chorda tympani (VII)» | casos.grupos[1].items[0].secs[3][0] «Test · Slump» | casos.grupos[1].items[1].secs[1][0] «Test · FADIR»)"
+  },
+  {
+   "tipo": "otro_idioma",
+   "archivo": "unreal/CorpusAtlas/Importar/datos/estudio_es.json",
+   "clave": "textos",
+   "msg": "2 frases que parecen escritas en otra lengua (en 2; glosario 2); p. ej. glosario.grupos[8].items[22].secs[4][1] [en] «• Anterior region of forearm\n• Posterior regi…» | glosario.grupos[8].items[23].secs[4][1] [en] «• Anterior region of wrist\n• Posterior region…»"
+  },
+  {
+   "tipo": "sin_traducir",
+   "archivo": "unreal/CorpusAtlas/Importar/datos/movimiento.json",
+   "clave": "fr en inglés",
+   "msg": "5 textos en fr iguales al inglés (p. ej. rom[6].movs[1].tr | ejercicios.lista[0].n | ejercicios.lista[1].grupos[1].n)"
+  },
+  {
+   "tipo": "sin_traducir",
+   "archivo": "unreal/CorpusAtlas/Importar/datos/movimiento.json",
+   "clave": "de en inglés",
+   "msg": "4 textos en de iguales al inglés (p. ej. rom[6].movs[1].tr | ejercicios.lista[0].grupos[1].n | ejercicios.lista[0].grupos[3].n)"
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/content_de.json",
+   "clave": "raíz: «der.» / «Der.»",
+   "msg": "«der.» → \"re.\" · «Der.» → \"Rechts\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/content_de.json",
+   "clave": "raíz: «izq.» / «Izq.»",
+   "msg": "«izq.» → \"li.\" · «Izq.» → \"Links\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/content_fr.json",
+   "clave": "raíz: «der.» / «Der.»",
+   "msg": "«der.» → \"d.\" · «Der.» → \"Droite\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/content_fr.json",
+   "clave": "raíz: «izq.» / «Izq.»",
+   "msg": "«izq.» → \"g.\" · «Izq.» → \"Gauche\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «Articular» / «articular»",
+   "msg": "«Articular» → \"Gelenke\" · «articular» → \"Gelenk\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «Lesión» / «lesión»",
+   "msg": "«Lesión» → \"Verletzung\" · «lesión» → \"Läsion\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «Duro» / «duro»",
+   "msg": "«Duro» → \"Hart\" · «duro» → \"anstrengend\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «Humerus» / «humerus»",
+   "msg": "«Humerus» → \"Humerus\" · «humerus» → \"Oberarmknochen\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «pivot» / «Pivot»",
+   "msg": "«pivot» → \"Pivot\" · «Pivot» → \"Zapfengelenk\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «Rotuliano» / «rotuliano»",
+   "msg": "«Rotuliano» → \"Patellarsehne\" · «rotuliano» → \"Patellarsehnenreflex\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «Patellar» / «patellar»",
+   "msg": "«Patellar» → \"Patellarsehne\" · «patellar» → \"Patellarsehnenreflex\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «pierna» / «Pierna»",
+   "msg": "«pierna» → \"Bein\" · «Pierna» → \"Unterschenkel\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «leg» / «Leg»",
+   "msg": "«leg» → \"Bein\" · «Leg» → \"Unterschenkel\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «brazo» / «Brazo»",
+   "msg": "«brazo» → \"Arm\" · «Brazo» → \"Oberarm\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «arm» / «Arm»",
+   "msg": "«arm» → \"Arm\" · «Arm» → \"Oberarm\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «Brachioradialis» / «brachioradialis»",
+   "msg": "«Brachioradialis» → \"M. brachioradialis\" · «brachioradialis» → \"Brachioradialisreflex\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «Transverso» / «transverso»",
+   "msg": "«Transverso» → \"M. transversus\" · «transverso» → \"Transversus\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «Transversus» / «transversus»",
+   "msg": "«Transversus» → \"M. transversus\" · «transversus» → \"Transversus\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «card» / «Card»",
+   "msg": "«card» → \"Karte\" · «Card» → \"Steckbrief\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «médula» / «Médula»",
+   "msg": "«médula» → \"Rückenmark\" · «Médula» → \"Mark\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «biceps» / «Biceps»",
+   "msg": "«biceps» → \"Bizepssehnenreflex\" · «Biceps» → \"Bizeps\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «extensión del codo» / «Extensión del codo»",
+   "msg": "«extensión del codo» → \"Ellenbogenextension\" · «Extensión del codo» → \"Ellbogenstreckung\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «elbow extension» / «Elbow extension»",
+   "msg": "«elbow extension» → \"Ellenbogenextension\" · «Elbow extension» → \"Ellbogenstreckung\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «triceps» / «Triceps»",
+   "msg": "«triceps» → \"Trizepssehnenreflex\" · «Triceps» → \"Trizeps\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «flexión de los dedos» / «Flexión de los dedos»",
+   "msg": "«flexión de los dedos» → \"Fingerflexion\" · «Flexión de los dedos» → \"Fingerbeugung\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «finger flexion» / «Finger flexion»",
+   "msg": "«finger flexion» → \"Fingerflexion\" · «Finger flexion» → \"Fingerbeugung\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «finger abduction» / «Finger abduction»",
+   "msg": "«finger abduction» → \"Fingerabduktion\" · «Finger abduction» → \"Finger spreizen\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «hip flexion» / «Hip flexion»",
+   "msg": "«hip flexion» → \"Hüftflexion\" · «Hip flexion» → \"Hüftbeugung\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «Upper motor neuron» / «upper motor neuron»",
+   "msg": "«Upper motor neuron» → \"Erstes Motoneuron\" · «upper motor neuron» → \"1. Motoneuron\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «light» / «Light»",
+   "msg": "«light» → \"leicht\" · «Light» → \"Licht\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «dolor» / «Dolor»",
+   "msg": "«dolor» → \"Schmerz\" · «Dolor» → \"Schmerz (Pain)\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «espinotalámico» / «Espinotalámico»",
+   "msg": "«espinotalámico» → \"spinothalamisch\" · «Espinotalámico» → \"Tractus spinothalamicus\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_de.json",
+   "clave": "ui: «spinothalamic» / «Spinothalamic»",
+   "msg": "«spinothalamic» → \"spinothalamisch\" · «Spinothalamic» → \"Tractus spinothalamicus\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «Articular» / «articular»",
+   "msg": "«Articular» → \"Articulations\" · «articular» → \"articulaire\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «Sagital» / «sagital»",
+   "msg": "«Sagital» → \"Sagittal\" · «sagital» → \"sagittale\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «Humerus» / «humerus»",
+   "msg": "«Humerus» → \"Humerus\" · «humerus» → \"humérus\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «right» / «Right»",
+   "msg": "«right» → \"droit\" · «Right» → \"Droite\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «correct» / «Correct»",
+   "msg": "«correct» → \"correctes\" · «Correct» → \"Correct\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «pivot» / «Pivot»",
+   "msg": "«pivot» → \"pivot\" · «Pivot» → \"En pivot\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «paso» / «Paso»",
+   "msg": "«paso» → \"étape\" · «Paso» → \"Pas\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «Dorsal columns» / «dorsal columns»",
+   "msg": "«Dorsal columns» → \"Cordons postérieurs\" · «dorsal columns» → \"colonnes dorsales\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «closed» / «Closed»",
+   "msg": "«closed» → \"fermées\" · «Closed» → \"Fermée\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «open» / «Open»",
+   "msg": "«open» → \"ouvertes\" · «Open» → \"Ouverte\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «None» / «none»",
+   "msg": "«None» → \"Aucune\" · «none» → \"rien\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «Rotuliano» / «rotuliano»",
+   "msg": "«Rotuliano» → \"Patellaire\" · «rotuliano» → \"rotulien\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «Patellar» / «patellar»",
+   "msg": "«Patellar» → \"Patellaire\" · «patellar» → \"rotulien\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «Brachioradialis» / «brachioradialis»",
+   "msg": "«Brachioradialis» → \"Brachioradial\" · «brachioradialis» → \"stylo-radial\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «biceps» / «Biceps»",
+   "msg": "«biceps» → \"bicipital\" · «Biceps» → \"Biceps\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «triceps» / «Triceps»",
+   "msg": "«triceps» → \"tricipital\" · «Triceps» → \"Triceps\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «finger abduction» / «Finger abduction»",
+   "msg": "«finger abduction» → \"abduction des doigts\" · «Finger abduction» → \"Écarter les doigts\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «Upper motor neuron» / «upper motor neuron»",
+   "msg": "«Upper motor neuron» → \"Premier motoneurone\" · «upper motor neuron» → \"1er motoneurone\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «light» / «Light»",
+   "msg": "«light» → \"léger\" · «Light» → \"Lumière\""
+  },
+  {
+   "tipo": "mayusculas",
+   "archivo": "data/i18n_fr.json",
+   "clave": "ui: «sagittal» / «Sagittal»",
+   "msg": "«sagittal» → \"sagittale\" · «Sagittal» → \"Sagittal\""
+  },
+  {
+   "tipo": "copias",
+   "archivo": "unreal/CorpusAtlas/Content/Datos/correctivos.json",
+   "clave": "correctivos.json",
+   "msg": "distinto de Importar/datos/correctivos.json (falta copiar: ci.copiar_datos())"
+  }
+ ]
+}

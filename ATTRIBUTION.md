@@ -3,6 +3,7 @@
 ## Modelo masculino · Male model
 - **Z-Anatomy** — *Models of human anatomy*, CC BY-SA 4.0. https://github.com/Z-Anatomy/Models-of-human-anatomy
 - Derivado de **BodyParts3D**, © The Database Center for Life Science (DBCLS), licenciado por CC Atribución-CompartirIgual 2.1 Japón (versiones posteriores de BodyParts3D: CC BY 4.0). https://dbarchive.biosciencedbc.jp/en/bodyparts3d/
+- Z-Anatomy declara además estos modelos «usados como referencia / incluidos y adaptados» (texto de su Readme, consultado el 2026-11-20): «Brainder» y «White matter» (University of Washington); «Cranial Nerves and Foramina», University of Dundee, CAHID, CC BY 4.0; «Anatomy of the Inner Ear», University of Dundee School of Medicine, **CC BY-NC-SA 4.0**; «Kidney», Lissie Cowley, **CC BY-NC 4.0**. Z-Anatomy no indica qué mallas concretas proceden de cada uno. Corpus es gratuito y sin publicidad; quien reutilice las piezas del oído interno o del riñón con fines comerciales debe comprobar antes su origen.
 - Nombres en español y latín: Terminologia Anatomica (FIPAT), vía la tabla TA2 incluida en Z-Anatomy.
 
 ## Modelo femenino · Female model
@@ -11,6 +12,11 @@
   https://github.com/hubmapconsortium/ccf-3d-reference-object-library · https://humanatlas.io
   Basado en el conjunto de datos *Visible Human Project®* de la U.S. National Library of Medicine.
   Placenta y modelo de ganglio linfático de Yao excluidos.
+- **HuBMAP Human Reference Atlas — 3D Reference Object Library**, *Visible Human Male v1.4*: 3D Reference Organs for Eye (left, right), Trachea and Palatine Tonsil (left, right), CC BY 4.0. Usados desde v169 para el ojo, los cartílagos traqueales y las tonsilas palatinas (`data/hra14.glb`).
+
+## Embriones · Embryos
+- **NIH 3D**, *Carnegie Human Embryo Stage 12, 14, 16, 18, 20 y 23* (entradas 3DPX-016955, 016954, 016953, 016952, 016951 y 016950), Kristen Browne, a partir de la segmentación de los embriones del *Virtual Human Embryo Project*; licencia CC BY. https://3d.nih.gov
+  Cambios: reducción de triángulos, orientación común de perfil, tamaño normalizado (la app los escala a la longitud vértex-cóccix media de cada estadio) y compresión Draco (`micro/embrion.glb`).
 
 ## Adaptaciones realizadas por Corpus · Adaptations
 - Extracción de las mallas del archivo `Startup.blend` de Z-Anatomy con un lector propio (sin Blender), aplicación de modificadores espejo y gancho.
@@ -19,6 +25,7 @@
 - Atributos por vértice calculados para Corpus: oclusión ambiental, tendón/aponeurosis y cartílago articular.
 - Compresión Draco (KHR_draco_mesh_compression) y codificación base64.
 - Modelo femenino: realineado al sistema de coordenadas del atlas masculino (traslación), reducido y comprimido; pelvis ósea masculina deformada (thin-plate spline) con las medidas de la pelvis del Visible Human Female.
+- Piezas de HRA v1.4 (v169): reducidas, y ajustadas al cuerpo de Corpus con una semejanza por ojo (esclera sobre esclera), una deformación de tubo sobre la tráquea para los cartílagos y una semejanza centrada para las tonsilas; detalle por pieza en `tools/hra14/registro.json`.
 - Músculos modelados en Blender para Corpus (v140, v141 y v143: músculos de la lengua y del paladar, del oído medio, del periné, auriculares, subcostales, escaleno mínimo y otros), CC BY-SA 4.0.
 
 ## Contenido redactado para Corpus · Original content (CC BY-SA 4.0)
@@ -33,6 +40,7 @@
 
 ## Software y tipografías · Software and fonts
 - three.js r147 (MIT), decodificador Draco de Google (Apache 2.0) y tipografías Spectral, Public Sans y JetBrains Mono (SIL OFL 1.1), incluidos en la app: ver `THIRD_PARTY_LICENSES.md`.
+- Edición Unreal: tipografía **Inter** de Rasmus Andersson (https://github.com/rsms/inter, SIL Open Font License 1.1), pesos Regular, SemiBold y Bold sin modificar, en `unreal/CorpusAtlas/Content/Slate/Fuentes/` junto con su archivo de licencia. Si faltan los TTF, la interfaz usa la fuente por defecto de Unreal.
 
 ## Privacidad · Privacy
 - Sin cuentas ni servidor propio: el progreso se guarda solo en el dispositivo de cada persona.

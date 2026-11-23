@@ -1,0 +1,317 @@
+// Corpus Atlas (edición Unreal) — datos del atlas: catálogo, capas, fichas e idiomas.
+// Lee los mismos JSON que la web (Content/Datos, copiados por tools/unreal/exportar.js + corpus_importar.py).
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Subsystems/GameInstanceSubsystem.h"
+#include "Dom/JsonObject.h"
+#include "CorpusDatos.generated.h"
+
+/** Dónde está la malla de una pieza en un cuerpo (hombre, mujer o vh). */
+USTRUCT(BlueprintType)
+struct FCorpusMalla
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Sistema;
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") int32 Triangulos = 0;
+	/** Color propio del órgano (lineal) y peso de mezcla con el color de la capa en A; A = 0 si usa el de la capa. */
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FLinearColor Tinte = FLinearColor(0, 0, 0, 0);
+};
+
+/** Una estructura anatómica del catálogo (data/catalog.json y fem.json). */
+USTRUCT(BlueprintType)
+struct FCorpusPieza
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Id;
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString En;
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Es;
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString La;
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Sistema;
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Lado;
+	/** Áreas de la capa «insercion»: «origen» o «inserción» (séptimo campo del catálogo). */
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Rol;
+	/** Nombre propio en inglés de una pieza separada de su grupo (octavo campo del catálogo, tools/unreal/separar.js);
+	 *  En sigue siendo el del grupo para que valgan su ficha y su profundidad de disección. */
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString EnPropio;
+	/** Clave = cuerpo («hombre», «mujer», «vh»). */
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") TMap<FString, FCorpusMalla> Mallas;
+};
+
+/** Una capa (sistema) del atlas; misma tabla que SYS en la web. */
+USTRUCT(BlueprintType)
+struct FCorpusCapa
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Clave;
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Nombre;
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Grupo;
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FLinearColor Color = FLinearColor::White;
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") bool bActivaAlInicio = false;
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") float Opacidad = 1.f;
+	/** "" = ambos sexos, «m», «f» o «vh». */
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Sexo;
+	/** Capa de la que toma el material (p. ej. piel_f → piel). */
+	UPROPERTY(BlueprintReadOnly, Category = "Corpus") FString Base;
+};
+
+/** Un movimiento de la tabla ROM de la web (flexión del hombro…): la postura ya calculada cada Paso grados. */
+struct FCorpusMovimiento
+{
+	FString Nombre;
+	float Max = 0.f, Paso = 5.f;
+	TArray<FString> Agonistas;                 // nombres en inglés del catálogo (se pintan de naranja, como en la web)
+	TMap<FString, FString> Nombres, Notas;     // por idioma (rangos_extra.json): nombre propio y nota bajo el goniómetro
+	TArray<TArray<float>> Derecho, Izquierdo;  // por fotograma: [índice, eje xyz, ángulo (rad), traslación xyz] × articulaciones
+};
+
+/** Una articulación o región de la tabla ROM (hombro, codo, tronco…). */
+struct FCorpusRango
+{
+	FString Id, Nombre;
+	bool bLados = false;
+	TArray<FCorpusMovimiento> Movs;
+};
+
+/** Correctivo elástico de un músculo (correctivos.json, tools/unreal/correctivos.js): rejilla de nodos alrededor de la pieza.
+    El material mueve cada vértice con los 8 nodos de su celda (interpolación trilineal de la posición de reposo). */
+struct FCorpusRejilla
+{
+	int32 Base = 0;                       // primer texel de la rejilla en la textura de correctivos
+	FIntVector N = FIntVector::ZeroValue; // nodos por eje
+	FVector3f O = FVector3f::ZeroVector;  // esquina de la rejilla (glTF, m)
+	float H = 0.f;                        // tamaño de celda (m)
+	int32 Act = 0;                        // nodos guardados (los que tocan al músculo y sus vecinos)
+	int64 Lista = 0;                      // posición en el .bin de la lista de nodos (uint32: índice en la rejilla completa)
+};
+/** Un movimiento con correctivos: por pieza, dónde empiezan sus cuadros en el .bin (7 enteros de 16 bits por nodo y cuadro). */
+struct FCorpusCorrMov { int32 Cuadros = 0; TMap<FString, int64> Piezas; };
+
+/** Marcha (movimiento.json → marcha): fases del ciclo, grupos musculares con su intensidad y patrones (normal y patológicos). */
+struct FCorpusFaseMarcha { float Ini = 0, Fin = 0; FString Nombre, Abrev, Texto; };
+struct FCorpusGrupoMarcha
+{
+	TArray<FString> En; FString Nombre, Texto;
+	TArray<FVector2f> Nivel;                 // (porcentaje del ciclo, intensidad 0–1)
+	TArray<FVector2f> Tramos;                // tramos del ciclo en los que trabaja (inicio, fin)
+	TArray<TPair<float, FString>> Tipo;      // desde qué porcentaje: «exc» excéntrica, «con» concéntrica, «iso» isométrica
+};
+struct FCorpusPatronMarcha
+{
+	FString Id, Nombre, Texto;
+	TArray<FString> Debiles, Espasticos;
+	float Velocidad = 1.f;
+	TArray<TArray<float>> Frames, Raiz;   // por instante: giros (como los rangos) y raíz del cuerpo [cuaternión xyzw, posición xyz] en glTF
+};
+
+/** Ejercicios (movimiento.json → ejercicios, de tools/unreal/ejercicios.json): fotogramas del ciclo con la raíz del cuerpo,
+    fases, grupos musculares con su intensidad y textos, todo en cinco idiomas. Un ejercicio nuevo es una entrada más. */
+using FCorpusTexto = TMap<FString, FString>;   // idioma → texto
+struct FCorpusFaseEj { float Ini = 0, Fin = 0; FString Tipo; FCorpusTexto Nombre, Texto; };   // Tipo: «exc», «iso», «con» o vacío
+struct FCorpusGrupoEj
+{
+	TArray<FString> En; FCorpusTexto Nombre, Texto;
+	TArray<FString> Tipo;      // tipo de contracción en cada fase
+	TArray<float> Nivel;       // intensidad 0–1 en cada fotograma
+};
+struct FCorpusVarianteEj
+{
+	FString Id; FCorpusTexto Nombre;
+	TArray<TArray<float>> Frames, Raiz, Medidas;   // por instante: giros, raíz [cuaternión xyzw, posición xyz] en glTF y ángulos que se enseñan
+};
+struct FCorpusEjercicio
+{
+	FString Id; FCorpusTexto Nombre;
+	float Paso = 2.f, Duracion = 4.f;   // % del ciclo entre fotogramas y segundos por ciclo
+	int32 Vista = 2, Inicial = 0;
+	TArray<FCorpusFaseEj> Fases;
+	TArray<FCorpusGrupoEj> Grupos;
+	TArray<FCorpusTexto> Medidas;       // rótulos de los ángulos (cadera, rodilla…)
+	TArray<FCorpusVarianteEj> Variantes;
+	TArray<TPair<FCorpusTexto, FCorpusTexto>> Textos;   // título → texto (qué trabaja, cómo se hace, errores…)
+};
+
+/** Módulos de estudio (estudio_<idioma>.json, tools/unreal/estudio.js): lecciones, recorridos, kinesiología, pruebas,
+    casos, protocolos, variantes, patologías y glosario, todos con la misma forma. */
+struct FCorpusPregunta { FString P, X; TArray<FString> O; int32 A = 0; };
+struct FCorpusPasoEstudio { FString T, X, Ver; TArray<FString> Show; int32 Vista = -1; };
+struct FCorpusItemEstudio
+{
+	FString Id, T, Sub, Img, Cred, Lado;
+	TArray<TPair<FString, FString>> Secs;     // título de sección → texto
+	TArray<FCorpusPasoEstudio> Pasos;
+	TArray<FCorpusPregunta> Q;
+	TArray<FString> Show, Capas;              // nombres en inglés del catálogo y capas que se encienden
+	int32 Vista = -1;
+};
+struct FCorpusGrupoEstudio { FString N; TArray<FCorpusItemEstudio> Items; };
+struct FCorpusModuloEstudio { FString Id, N; TArray<FCorpusGrupoEstudio> Grupos; };
+struct FCorpusEstudio { TArray<FCorpusModuloEstudio> Modulos; TMap<FString, FString> Ui; FString Aviso; };
+/** Lo que la web enseña en un paso de un recorrido: capas con su opacidad, piezas aisladas u ocultas, cuerpo y cámara (órbita). */
+struct FCorpusVistaPaso
+{
+	TMap<FString, float> Capas;
+	TArray<FString> Iso, Ocultas;
+	bool bIso = false, bMujer = false;
+	float Th = 0.f, Ph = 1.45f, R = 3.f;
+	FVector3f Tgt = FVector3f(0.f, 0.95f, 0.f);   // glTF, m
+};
+
+/** Campo de la ficha de una pieza (info.json): clave original, rótulo en el idioma actual y texto. */
+struct FCorpusCampoFicha { FString Clave, Etiqueta, Texto; };
+
+/** Relieve óseo (data/extras.json → lm): nombre en español, inglés y portugués y su punto sobre el hueso (glTF, m). */
+struct FCorpusRelieve { FString Es, En, Pt; FVector3f Pos = FVector3f::ZeroVector; };
+
+/** Claves que distinguen mayúsculas (como los objetos de JavaScript): en i18n_de, «urinario» y «Urinario» son textos distintos. */
+struct FClaveExacta : TDefaultMapKeyFuncs<FString, FString, false>
+{
+	static FORCEINLINE bool Matches(const FString& A, const FString& B) { return A.Equals(B, ESearchCase::CaseSensitive); }
+	static FORCEINLINE uint32 GetKeyHash(const FString& K) { return GetTypeHash(K); }
+};
+using FTablaTr = TMap<FString, FString, FDefaultSetAllocator, FClaveExacta>;
+
+UCLASS()
+class CORPUSATLAS_API UCorpusDatos : public UGameInstanceSubsystem
+{
+	GENERATED_BODY()
+public:
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
+	/** Carpeta con los JSON (Content/Datos). */
+	static FString CarpetaDatos();
+
+	UFUNCTION(BlueprintCallable, Category = "Corpus") const TArray<FCorpusCapa>& Capas() const { return ListaCapas; }
+	const FCorpusCapa* Capa(const FString& Clave) const;
+	const FCorpusPieza* Pieza(const FString& Id) const { return Piezas.Find(Id); }
+	const TMap<FString, FCorpusPieza>& TodasLasPiezas() const { return Piezas; }
+	bool EsSoloHombre(const FString& Id) const { return SoloHombre.Contains(Id); }
+	bool EsOcultaPorCorazon(const FString& Id) const { return CorazonOculto.Contains(Id); }
+
+	/** es, en, pt, fr o de. */
+	UFUNCTION(BlueprintCallable, Category = "Corpus") void PonerIdioma(const FString& Codigo);
+	UFUNCTION(BlueprintCallable, Category = "Corpus") const FString& Idioma() const { return IdiomaActual; }
+	/** Texto de interfaz: se busca por el texto español, como TL() en la web. */
+	UFUNCTION(BlueprintCallable, Category = "Corpus") FString T(const FString& Es) const;
+	UFUNCTION(BlueprintCallable, Category = "Corpus") FString NombrePieza(const FString& Id) const;
+	UFUNCTION(BlueprintCallable, Category = "Corpus") FString NombreCapa(const FString& Clave) const;
+	FString NombreLado(const FString& Lado) const;
+
+	/** Ficha de la pieza en el idioma actual: pares campo → texto (origen, inserción, inervación, función…). */
+	TArray<TPair<FString, FString>> Ficha(const FString& Id);
+	/** Lo mismo con la clave original de info.json (origen, inervacion, biomecanica, clinica…), para agrupar la ficha en bloques. */
+	TArray<struct FCorpusCampoFicha> FichaCampos(const FString& Id);
+
+	/** Busca por nombre (idioma actual, español, inglés o latín), sin tildes ni mayúsculas. */
+	UFUNCTION(BlueprintCallable, Category = "Corpus") TArray<FString> Buscar(const FString& Texto, int32 Maximo = 40) const;
+
+	DECLARE_MULTICAST_DELEGATE(FAlCambiarIdioma);
+	FAlCambiarIdioma AlCambiarIdioma;
+
+	/** Movimiento (movimiento.json): pivotes en glTF (m), índice del grupo «tronco entero» y rangos articulares. */
+	const TArray<FVector3f>& PivotesArticulaciones() const { return Pivotes; }
+	const TArray<FCorpusRango>& Rangos() const { return ListaRangos; }
+	int32 IndiceGrupoTronco() const { return IndiceTronco; }
+	/** Nombre del movimiento en el idioma actual: el propio de rangos_extra.json si lo trae; si no, como la interfaz de la web. */
+	FString NombreMov(const FCorpusMovimiento& M) const { const FString* S = M.Nombres.Find(IdiomaActual); return S && !S->IsEmpty() ? *S : T(M.Nombre); }
+	/** Nota del movimiento (rotación automática de la rodilla, posición de medida…) en el idioma actual, o vacío. */
+	FString NotaMov(const FCorpusMovimiento& M) const { const FString* S = M.Notas.Find(IdiomaActual); if (!S) { S = M.Notas.Find(TEXT("es")); } return S ? *S : FString(); }
+	/** Articulaciones que mueven la pieza en ese cuerpo (carpeta «hombre» o «mujer»): códigos para los datos primitivos 12–19. */
+	const TArray<float>* HuecosMovimiento(const FString& Carpeta, const FString& Id) const { return Huecos.Find(Carpeta + TEXT("/") + Id); }
+
+	/** Contorno de la parrilla costal: por cada altura, el radio de las costillas en cada sector angular (glTF, m). */
+	const TArray<TArray<float>>& ContornoTorax() const { return Torax; }
+	/** Punto de inserción (glTF) de una pieza de fibra tensa, o nullptr. */
+	const FVector3f* InsercionFibra(const FString& Carpeta, const FString& Id) const { return Insercion.Find(Carpeta + TEXT("/") + Id); }
+	/** ¿La pieza se mantiene pegada a la pared torácica al mover el brazo? (dorsal ancho, redondo mayor) */
+	bool SePegaAlTorax(const FString& Carpeta, const FString& Id) const { return Abrazo.Contains(Carpeta + TEXT("/") + Id); }
+
+	const TArray<FCorpusFaseMarcha>& FasesMarcha() const { return Fases; }
+	const TArray<FCorpusGrupoMarcha>& GruposMarcha() const { return Grupos; }
+	const TArray<FCorpusPatronMarcha>& PatronesMarcha() const { return Patrones; }
+	float PasoMarcha() const { return PasoCiclo; }
+
+	const TArray<FCorpusEjercicio>& Ejercicios() const { return ListaEjercicios; }
+	/** Texto por idiomas en el idioma actual (si falta: inglés, español). */
+	FString Tx(const FCorpusTexto& M) const { for (const FString& L : { IdiomaActual, FString(TEXT("en")), FString(TEXT("es")) }) { if (const FString* S = M.Find(L)) { if (!S->IsEmpty()) { return *S; } } } return FString(); }
+	/** Texto de interfaz del modo «Ejercicio» (tabla ui de ejercicios.json). */
+	FString TEj(const FString& Clave) const { const FCorpusTexto* M = UiEjercicios.Find(Clave); return M ? Tx(*M) : Clave; }
+
+	/** Correctivos elásticos de los músculos del hombro y del glúteo mayor (correctivos.json/.bin + correctivos_cadera.json/.bin). */
+	const FCorpusRejilla* Rejilla(const FString& Carpeta, const FString& Id) const { return Rejillas.Find(Carpeta + TEXT("/") + Id); }
+	const FCorpusRejilla* RejillaDe(const FString& Clave) const { return Rejillas.Find(Clave); }
+	const FCorpusCorrMov* Correctivo(const FString& Rom, int32 Mov, bool bIzq) const { return CorrMovs.Find(FString::Printf(TEXT("%s/%d/%s"), *Rom, Mov, bIzq ? TEXT("L") : TEXT("R"))); }
+	const TArray<uint8>& BinCorrectivos() const { return CorrBin; }
+	int32 TexelesCorrectivo() const { return CorrTexeles; }
+	int32 AnchoCorrectivo() const { return CorrAncho; }
+	float EscalaCorrectivo() const { return CorrEscala; }
+
+	// ── data/extras.json (compartido con la web): profundidad de disección y relieves óseos ──
+	/** Profundidad del músculo: «s» superficial, «i» intermedio, «p» profundo; vacío si no está clasificado. */
+	const FString& Profundidad(const FString& Id) const { static const FString Nada; const FString* P = Prof.Find(Id); return P ? *P : Nada; }
+	/** Relieves del hueso (vacío si no tiene). */
+	const TArray<FCorpusRelieve>& Relieves(const FString& Id) const { static const TArray<FCorpusRelieve> Nada; const TArray<FCorpusRelieve>* R = RelievesPorHueso.Find(Id); return R ? *R : Nada; }
+	/** Nombre del relieve en el idioma actual (fr y de: por el nombre español en sus tablas; si falta, inglés). */
+	FString NombreRelieve(const FCorpusRelieve& R) const;
+
+	/** Hueso sobre el que está dibujada un área de origen o inserción (tools/unreal/inserciones.js), o vacío. */
+	const FString& HuesoDeInsercion(const FString& Carpeta, const FString& Id) const { static const FString Nada; const FString* H = HuesoDeArea.Find(Carpeta + TEXT("/") + Id); return H ? *H : Nada; }
+	static bool EsOrigen(const FCorpusPieza& P) { return P.Rol.StartsWith(TEXT("or")); }
+
+	/** Módulos de estudio en el idioma actual (se leen la primera vez que se piden). */
+	const FCorpusEstudio& Estudio();
+	/** Texto de interfaz del panel de estudio (clave de la tabla TXT de estudio.js). */
+	FString TE(const FString& Clave);
+	const FCorpusVistaPaso* VistaDePaso(const FString& Clave);
+	/** Sin tildes ni mayúsculas (para buscar). */
+	static FString Plano(const FString& S);
+
+private:
+	TMap<FString, FCorpusEstudio> EstudioPorIdioma;
+	TMap<FString, FCorpusVistaPaso> VistasPaso;
+	bool bVistasLeidas = false;
+	void CargarMovimiento();
+	void CargarCorrectivos();
+	/** Lee <Nombre>.json + <Nombre>.bin y lo coloca detrás de lo ya leído (texeles, .bin y movimientos). */
+	bool CargarArchivoCorrectivos(const FString& Nombre);
+	void CargarExtras();
+	void CargarInserciones();
+	TMap<FString, FString> HuesoDeArea;   // «cuerpo/id del área» → id del hueso (inserciones.json)
+	TMap<FString, FString> Prof;
+	TMap<FString, FString> Region;     // extras.json → reg: región anatómica de cada pieza (en español), como la ficha de la web
+	TMap<FString, TArray<FCorpusRelieve>> RelievesPorHueso;
+	TMap<FString, FCorpusRejilla> Rejillas;
+	TMap<FString, FCorpusCorrMov> CorrMovs;
+	TArray<uint8> CorrBin;
+	int32 CorrTexeles = 0, CorrAncho = 512;
+	float CorrEscala = 20000.f;
+	TArray<FCorpusFaseMarcha> Fases;
+	TArray<FCorpusGrupoMarcha> Grupos;
+	TArray<FCorpusPatronMarcha> Patrones;
+	TArray<FCorpusEjercicio> ListaEjercicios;
+	TMap<FString, FCorpusTexto> UiEjercicios;
+	float PasoCiclo = 2.f;
+	TArray<TArray<float>> Torax;
+	TMap<FString, FVector3f> Insercion;
+	TSet<FString> Abrazo;
+	TMap<FString, TArray<float>> Huecos;
+	TArray<FVector3f> Pivotes;
+	TArray<FString> NombresArt;
+	TArray<FCorpusRango> ListaRangos;
+	int32 IndiceTronco = 0;
+
+	static TSharedPtr<FJsonObject> LeerObjeto(const FString& Archivo);
+	static bool LeerLista(const FString& Archivo, TArray<TSharedPtr<FJsonValue>>& Fuera);
+	void CargarCatalogo(const FString& Archivo, const FString& Campo);
+	void CargarIdioma(const FString& Codigo);
+
+	TMap<FString, FCorpusPieza> Piezas;
+	TArray<FCorpusCapa> ListaCapas;
+	TSet<FString> SoloHombre, CorazonOculto;
+	FString IdiomaActual = TEXT("es");
+
+	TSharedPtr<FJsonObject> InfoEs;                       // info.json: tipo → nombre inglés → ficha
+	TMap<FString, TSharedPtr<FJsonObject>> InfoTr;       // info_en/pt/fr/de: «tipo|nombre» → ficha
+	TMap<FString, FTablaTr> UiTr, NombresTr;              // por idioma: texto español → traducción
+	TMap<FString, TSharedPtr<FJsonObject>> UiAprox;       // el «ui» tal cual lo lee Unreal (sin distinguir mayúsculas): último recurso
+};

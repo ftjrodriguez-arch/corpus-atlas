@@ -1,0 +1,222 @@
+{
+ "fuente": "HuBMAP Human Reference Atlas, 3D Reference Object Library, VH_Male v1.4 (CC BY 4.0)",
+ "piezas": {
+  "n3393": {
+   "hra": "eye-l/sclera",
+   "tris": 5000,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "n3391": {
+   "hra": "eye-l/retina",
+   "tris": 5000,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "n3401": {
+   "hra": "eye-l/cornea",
+   "tris": 5000,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "n3399": {
+   "hra": "eye-l/iris",
+   "tris": 5000,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "n3397": {
+   "hra": "eye-l/lens",
+   "tris": 1684,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "n3389": {
+   "hra": "eye-l/vitreous_humor",
+   "tris": 5000,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "n3405": {
+   "hra": "eye-l/aqueous_humor",
+   "tris": 4999,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "h1": {
+   "hra": "eye-l/fovea",
+   "tris": 226,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "h3": {
+   "hra": "eye-l/macula_lutea",
+   "tris": 1500,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "h5": {
+   "hra": "eye-l/optic_disc",
+   "tris": 2000,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "h7": {
+   "hra": "eye-l/optic_choroid",
+   "tris": 3999,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "h9": {
+   "hra": "eye-l/ora_serrata_of_retina",
+   "tris": 2999,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "h11": {
+   "hra": "eye-l/ciliary_body",
+   "tris": 4000,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "h13": {
+   "hra": "eye-l/ciliary_processes",
+   "tris": 6000,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "h15": {
+   "hra": "eye-l/ciliary_muscle",
+   "tris": 5000,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "h17": {
+   "hra": "eye-l/suspensory_ligament_of_lens",
+   "tris": 5456,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "h19": {
+   "hra": "eye-l/trabecular_meshwork",
+   "tris": 4000,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "h21": {
+   "hra": "eye-l/schlemms_canal",
+   "tris": 3000,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "h23": {
+   "hra": "eye-l/corneo_scleral_junction",
+   "tris": 2500,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "h25": {
+   "hra": "eye-l/bulbar_conjunctiva",
+   "tris": 4000,
+   "ajuste": "semejanza s=1.0880 t=[-0.00914, 0.70913, -0.02645]"
+  },
+  "n3392": {
+   "hra": "eye-r/sclera",
+   "tris": 5000,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "n3390": {
+   "hra": "eye-r/retina",
+   "tris": 5000,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "n3400": {
+   "hra": "eye-r/cornea",
+   "tris": 5000,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "n3398": {
+   "hra": "eye-r/iris",
+   "tris": 5000,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "n3396": {
+   "hra": "eye-r/lens",
+   "tris": 1684,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "n3388": {
+   "hra": "eye-r/vitreous_humor",
+   "tris": 5000,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "n3404": {
+   "hra": "eye-r/aqueous_humor",
+   "tris": 4999,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "h2": {
+   "hra": "eye-r/fovea",
+   "tris": 226,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "h4": {
+   "hra": "eye-r/macula_lutea",
+   "tris": 1500,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "h6": {
+   "hra": "eye-r/optic_disc",
+   "tris": 2000,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "h8": {
+   "hra": "eye-r/optic_choroid",
+   "tris": 4000,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "h10": {
+   "hra": "eye-r/ora_serrata_of_retina",
+   "tris": 3000,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "h12": {
+   "hra": "eye-r/ciliary_body",
+   "tris": 4000,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "h14": {
+   "hra": "eye-r/ciliary_processes",
+   "tris": 6000,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "h16": {
+   "hra": "eye-r/ciliary_muscle",
+   "tris": 5000,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "h18": {
+   "hra": "eye-r/suspensory_ligament_of_lens",
+   "tris": 5484,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "h20": {
+   "hra": "eye-r/trabecular_meshwork",
+   "tris": 4000,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "h22": {
+   "hra": "eye-r/schlemms_canal",
+   "tris": 3000,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "h24": {
+   "hra": "eye-r/corneo_scleral_junction",
+   "tris": 2500,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "h26": {
+   "hra": "eye-r/bulbar_conjunctiva",
+   "tris": 3999,
+   "ajuste": "semejanza s=1.0880 t=[0.00717, 0.70848, -0.02658]"
+  },
+  "h27": {
+   "hra": "trachea/tracheal_cartilage",
+   "tris": 9000,
+   "ajuste": "tubo sobre la tráquea de Corpus (eje y radios por rebanadas)"
+  },
+  "n2762": {
+   "hra": "palatine-tonsil-l",
+   "tris": 3000,
+   "ajuste": "semejanza s=0.6528 centrada en la tonsila de Corpus"
+  },
+  "n2874": {
+   "hra": "palatine-tonsil-r",
+   "tris": 3000,
+   "ajuste": "semejanza s=0.6528 centrada en la tonsila de Corpus"
+  }
+ },
+ "escala_cabeza": 1.088011128128486,
+ "triangulos": 167755
+}

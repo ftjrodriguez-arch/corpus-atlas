@@ -1,0 +1,96 @@
+// Corpus Atlas (edición Unreal) — cámara orbital y control con ratón (girar, desplazar, acercar, seleccionar).
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/GameModeBase.h"
+#include "GameFramework/HUD.h"
+#include "CorpusJugador.generated.h"
+
+class UCameraComponent;
+class ACorpusCuerpo;
+
+UCLASS()
+class CORPUSATLAS_API ACorpusCamara : public APawn
+{
+	GENERATED_BODY()
+public:
+	ACorpusCamara();
+	virtual void Tick(float Dt) override;
+
+	void Girar(float DYaw, float DPitch);
+	void Desplazar(float DX, float DY);
+	void Acercar(float Factor);
+	/** Encuadra una caja del mundo (una pieza o el cuerpo entero). */
+	void Encuadrar(const FBox& Caja, bool bInmediato = false);
+	/** Vistas fijas: 0 anterior, 1 posterior, 2 derecha, 3 izquierda, 4 superior, 5 inferior. */
+	void Vista(int32 Cual);
+	/** Órbita de la web (recorridos): objetivo en glTF (m), radio (m), azimut th y ángulo polar ph (rad). */
+	void OrbitaWeb(const FVector3f& Tgt, float R, float Th, float Ph);
+	/** Zona de la pantalla que dejan libre los paneles de la interfaz: centro en coordenadas normalizadas (−1 borde izquierdo,
+	 *  0 centro, 1 borde derecho) y fracción del ancho. La proyección se descentra para que el objetivo quede en el centro de
+	 *  esa zona (se desliza con suavidad) y Encuadrar ajusta la distancia a su ancho. En vertical igual: CentroY (−1 abajo,
+	 *  1 arriba) y fracción del alto que dejan el buscador y la barra de disección. */
+	void PonerZonaLibre(float CentroX, float FraccionAncho, float CentroY = 0.f, float FraccionAlto = 1.f);
+	virtual void CalcCamera(float Dt, struct FMinimalViewInfo& Vista) override;
+
+	UPROPERTY(VisibleAnywhere, Category = "Corpus") TObjectPtr<UCameraComponent> Camara;
+
+private:
+	float CentroLibre = 0.f, CentroLibreSuave = 0.f, FraccionLibre = 1.f;
+	float CentroLibreY = 0.f, CentroLibreYSuave = 0.f, FraccionLibreY = 1.f;
+	// último encuadre: si la zona libre cambia y el usuario no ha acercado ni desplazado desde entonces, se rehace
+	FBox UltimaCaja = FBox(ForceInit);
+	bool bEncuadreVivo = false;
+	FVector Objetivo = FVector(0, 0, 95), ObjetivoSuave = FVector(0, 0, 95);
+	float Distancia = 420.f, DistanciaSuave = 420.f;
+	float Yaw = -90.f, Pitch = -5.f, YawSuave = -90.f, PitchSuave = -5.f;
+};
+
+UCLASS()
+class CORPUSATLAS_API ACorpusJugador : public APlayerController
+{
+	GENERATED_BODY()
+public:
+	ACorpusJugador();
+	virtual void BeginPlay() override;
+	virtual void PlayerTick(float Dt) override;
+
+	ACorpusCuerpo* Cuerpo() const { return CuerpoRef.Get(); }
+	ACorpusCamara* CamaraOrbital() const { return Cast<ACorpusCamara>(GetPawn()); }
+	void EncuadrarSeleccion();
+
+private:
+	// Pruebas automáticas (como ?qa en la web): -QaPasos="sel n1394; foto ficha; buscar biceps; foto buscador"
+	void TickQa();
+	TArray<FString> QaPasos;
+	int32 QaIndice = -1;
+	double QaHasta = 0;
+
+	TWeakObjectPtr<ACorpusCuerpo> CuerpoRef;
+	FVector2D RatonAntes = FVector2D::ZeroVector, RatonAlPulsar = FVector2D::ZeroVector;
+	bool bRatonValido = false;
+	uint8 CuerpoAntes = 0;      // para reencuadrar al cambiar de cuerpo
+	double TiempoUltimoClic = 0;
+};
+
+UCLASS()
+class CORPUSATLAS_API ACorpusHUD : public AHUD
+{
+	GENERATED_BODY()
+public:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type Motivo) override;
+	TSharedPtr<class SWidget> InterfazWidget() const { return Interfaz; }
+private:
+	TSharedPtr<class SWidget> Interfaz;
+};
+
+UCLASS()
+class CORPUSATLAS_API ACorpusModoJuego : public AGameModeBase
+{
+	GENERATED_BODY()
+public:
+	ACorpusModoJuego();
+};
